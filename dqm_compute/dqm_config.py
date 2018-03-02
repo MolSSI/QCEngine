@@ -15,10 +15,11 @@ _globals = {}
 
 _globals["hostname"] = socket.gethostname()
 _globals["default_compute"] = {
-    "psi_path": None,
-    "jobs_per_node": 1,
-    "cores_per_job": 1,
-    "memory_per_job": 2
+    "psi_path": None,  # Path for the Psi4 API
+    "jobs_per_node": 1,  # Number of jobs per node
+    "cores_per_job": 1,  # Number of cores per job
+    "memory_per_job": 2,  # Amount of memory in Gb per node
+    "scratch_directory": None, # What location to use as scratch
 }
 _globals["other_compute"] = {}
 
@@ -30,7 +31,7 @@ def _load_locals():
     test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".dqm")]
 
     if "FW_CONFIG_FILE" in os.environ:
-        test_paths.insert(0, "FW_CONFIG_FILE")
+        test_paths.insert(0, os.environ["FW_CONFIG_FILE"])
 
     for path in test_paths:
         path = os.path.join(path, "dqm_config.yaml")
@@ -39,8 +40,7 @@ def _load_locals():
             break
 
     if load_path is None:
-        raise OSError("Could not find 'dqm_config.yaml'. Search the following paths: %s" %
-                      ", ".join(test_paths))
+        raise OSError("Could not find 'dqm_config.yaml'. Search the following paths: %s" % ", ".join(test_paths))
 
     # Load the library
     with open(load_path) as stream:
@@ -68,29 +68,36 @@ def _load_locals():
                     raise KeyError("Key %s not accepted for default_compute" % k)
                 _globals["other_compute"][host][k] = v
 
+
 # Pull in the local variables
 _load_locals()
 
+def get_hostname():
+    """
+    Returns the global current hostname
+    """
+
+    return _globals["hostname"]
 
 def get_config(key=None, hostname=None):
     """
     Returns the configuration key for dqm_compute.
     """
     config = None
+    hostname_match = None
     if hostname is None:
+        hostname = _globals["hostname"]
+
+    # Find a match
+    for host, config in _globals["other_compute"].items():
+        if fnmatch.fnmatch(hostname, config["hostname"]):
+            hostname_match = host
+            config = config
+            break
+
+    # Use default
+    if hostname_match is None:
         config = _globals["default_compute"]
-    else:
-
-        # Find a match
-        for host, config in _globals["other_compute"].items():
-            if fnmatch.fnmatch(hostname, config["hostname"]):
-                hostname = host
-                config = config
-                break
-
-        # Use default
-        if hostname is None:
-            config = _globals["default_compute"]
 
     if key is None:
         return config.copy()

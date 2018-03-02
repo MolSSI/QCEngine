@@ -3,10 +3,10 @@ Tests the DQM compute module configuration
 """
 
 import os
-import dqm_compute as dc
 
 os.environ["FW_CONFIG_FILE"] = os.path.dirname(os.path.abspath(__file__))
-
+print(os.environ["FW_CONFIG_FILE"])
+import dqm_compute as dc
 
 def test_get_default():
     assert dc.get_config()["memory_per_job"] == 4
