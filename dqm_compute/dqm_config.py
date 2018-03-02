@@ -8,12 +8,6 @@ import fnmatch
 import yaml
 import json
 
-__author__ = 'Daniel G. A. Smith'
-__copyright__ = 'Copyright 2018, The Molecular Sciences Software Institute'
-__version__ = '0.1'
-__maintainer__ = 'Daniel. G. A. Smith'
-__email__ = 'dgasmith@vt.edu'
-__date__ = 'Dec 12, 2012'
 __all__ = ["get_config"]
 
 # Start a globals dictionary with small starting values
