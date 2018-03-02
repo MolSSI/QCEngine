@@ -11,7 +11,7 @@ if __name__ == "__main__":
         license='BSD-3C',
         packages=setuptools.find_packages(),
         install_requires=[
-#            'numpy>=1.7',
+            'pyyaml',
         ],
         extras_require={
             'docs': [
