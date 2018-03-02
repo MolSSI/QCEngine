@@ -28,6 +28,10 @@ def _load_locals():
     # Find the dqm_config
     load_path = None
     test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".dqm")]
+
+    if "FW_CONFIG_FILE" in os.environ:
+        test_paths.insert(0, "FW_CONFIG_FILE")
+
     for path in test_paths:
         path = os.path.join(path, "dqm_config.yaml")
         if os.path.exists(path):
@@ -78,8 +82,8 @@ def get_config(key=None, hostname=None):
     else:
 
         # Find a match
-        for host, config in _globals["other_compute"]:
-            if fnmatch.fnmatch(hostname, v["hostname"]):
+        for host, config in _globals["other_compute"].items():
+            if fnmatch.fnmatch(hostname, config["hostname"]):
                 hostname = host
                 config = config
                 break

@@ -1,0 +1,19 @@
+default_compute:
+    psi_path: /home/user/psi4
+    jobs_per_node: 1
+    cores_per_job: 2
+    memory_per_job: 4
+other_compute:
+    dragonsooth:
+       psi_path: /home/user/dt/psi4
+       hostname: "dt*"
+       jobs_per_node: 2
+       cores_per_job: 6
+       memory_per_job: 60
+    new_river:
+       hostname: "nr*"
+       jobs_per_node: 2
+       cores_per_job: 12
+       memory_per_job: 120
+    
+
