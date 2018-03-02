@@ -23,6 +23,18 @@ _globals["default_compute"] = {
 }
 _globals["other_compute"] = {}
 
+def _process_variables(var):
+    # Environmental var
+    if isinstance(var, str) and var.startswith("$"):
+        var = var.lstrip("$")
+        if var in os.environ:
+            return os.environ[var]
+        else:
+            return None
+
+    # Normal var
+    else:
+        return var
 
 def _load_locals():
 
@@ -53,7 +65,7 @@ def _load_locals():
         for k, v in user_config["default_compute"].items():
             if k not in default_keys:
                 raise KeyError("Key %s not accepted for default_compute" % k)
-            _globals["default_compute"][k] = v
+            _globals["default_compute"][k] = _process_variables(v)
 
     default_keys.append("hostname")
 
@@ -66,7 +78,7 @@ def _load_locals():
             for k, v in config.items():
                 if k not in default_keys:
                     raise KeyError("Key %s not accepted for default_compute" % k)
-                _globals["other_compute"][host][k] = v
+                _globals["other_compute"][host][k] = _process_variables(v)
 
 
 # Pull in the local variables
