@@ -4,7 +4,7 @@ Tests the DQM compute module configuration
 
 import os
 
-os.environ["FW_CONFIG_FILE"] = os.path.dirname(os.path.abspath(__file__))
+os.environ["DQM_CONFIG_PATH"] = os.path.dirname(os.path.abspath(__file__))
 os.environ["TMPDIR"] = "something_scratch"
 import dqm_compute as dc
 

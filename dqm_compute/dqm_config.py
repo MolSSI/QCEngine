@@ -42,8 +42,8 @@ def _load_locals():
     load_path = None
     test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".dqm")]
 
-    if "FW_CONFIG_FILE" in os.environ:
-        test_paths.insert(0, os.environ["FW_CONFIG_FILE"])
+    if "DQM_CONFIG_PATH" in os.environ:
+        test_paths.insert(0, os.environ["DQM_CONFIG_PATH"])
 
     for path in test_paths:
         path = os.path.join(path, "dqm_config.yaml")
