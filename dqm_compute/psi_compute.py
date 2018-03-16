@@ -39,7 +39,7 @@ def run_psi4(json):
     psi4.set_num_threads(dqm_config.get_config("cores_per_job"))
     json["memory"] = int(dqm_config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
 
-    scratch = dgqm_config.get_config("scratch_directory")
+    scratch = dqm_config.get_config("scratch_directory")
     if scratch is not None:
         json["scratch_location"] = scratch
 
@@ -47,7 +47,6 @@ def run_psi4(json):
     json = psi4.json_wrapper.run_json(json)
 
     # Fill out data
-    json["hostname"] = dqm_config.get_hostname() 
     json["provenance"] = dqm_config.get_provenance()
     json["wall_time"] = time.time() - t
     return json

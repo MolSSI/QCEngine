@@ -2,6 +2,28 @@
 A set of scripts to setup testing
 """
 
+import pytest
 import os
+
+def _plugin_import(plug):
+    """
+    Tests to see if a module is available
+    """
+    import sys
+    if sys.version_info >= (3, 4):
+        from importlib import util
+        plug_spec = util.find_spec(plug)
+    else:
+        import pkgutil
+        plug_spec = pkgutil.find_loader(plug)
+    if plug_spec is None:
+        return False
+    else:
+        return True
+
+# Modify paths for testing
 os.environ["DQM_CONFIG_PATH"] = os.path.dirname(os.path.abspath(__file__))
-os.environ["TMPDIR"] = "something_scratch"
+os.environ["TMPDIR"] = "/tmp/"
+
+# Add flags
+using_psi4 = pytest.mark.skipif(_plugin_import("psi4") is False, reason="Could not find Psi4. Please install the package to enable tests") 
