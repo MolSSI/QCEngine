@@ -47,6 +47,9 @@ def run_psi4(json):
     json = psi4.json_wrapper.run_json(json)
 
     # Fill out data
-    json["provenance"] = dqm_config.get_provenance()
+    if "provenance" in json:
+        json["provenance"].update(dqm_config.get_provenance())
+    else:
+        json["provenance"] = dqm_config.get_provenance()
     json["wall_time"] = time.time() - t
     return json
