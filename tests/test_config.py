@@ -34,5 +34,5 @@ def test_default_matches():
 
 def test_environmental_vars():
 
-    assert dc.get_config("scratch_directory") == "something_scratch"
+    assert dc.get_config("scratch_directory") == "/tmp/"
     assert dc.get_config("scratch_directory", hostname="dt5") is None
