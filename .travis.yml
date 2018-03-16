@@ -21,6 +21,7 @@ before_install:
   - pip install --upgrade pip setuptools
   - pip install pytest pytest-cov
   - pip install codecov
+  - pip install py-cpuinfo
   - pip install -e .
 
 script:

@@ -7,8 +7,11 @@ import socket
 import fnmatch
 import yaml
 import json
+import cpuinfo
+import getpass
+import copy
 
-__all__ = ["get_config"]
+__all__ = ["get_global", "get_config", "get_provenance"]
 
 # Start a globals dictionary with small starting values
 _globals = {}
@@ -58,6 +61,8 @@ def _load_locals():
     with open(load_path) as stream:
         user_config = yaml.load(stream)
 
+    _globals["config_path"] = load_path 
+
     # Override default keys
     default_keys = list(_globals["default_compute"].keys())
 
@@ -91,6 +96,9 @@ def get_hostname():
 
     return _globals["hostname"]
 
+def get_global(name):
+    return copy.deepcopy(_globals[name])
+
 def get_config(key=None, hostname=None):
     """
     Returns the configuration key for dqm_compute.
@@ -117,3 +125,11 @@ def get_config(key=None, hostname=None):
         if key not in config:
             raise Exception("Key %s asked for, but not in local data")
         return config[key]
+
+def get_provenance():
+    ret = {}
+    ret["cpu"] = cpuinfo.get_cpu_info()["brand"]
+    ret["hostname"] = get_hostname()
+    ret["username"] = getpass.getuser()
+    return ret
+

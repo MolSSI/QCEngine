@@ -12,6 +12,7 @@ if __name__ == "__main__":
         packages=setuptools.find_packages(),
         install_requires=[
             'pyyaml',
+            'py-cpuinfo',
         ],
         extras_require={
             'docs': [
