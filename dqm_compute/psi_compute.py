@@ -2,9 +2,10 @@
 Calls the Psi4 executable.
 """
 
-from .dqm_config import get_config
 import time
 import sys
+
+from . import dqm_config
 
 
 def test_psi4():
@@ -28,22 +29,25 @@ def run_psi4(json):
     """
     t = time.time()
 
-    psiapi = get_config("psi_path")
+    psiapi = dqm_config.get_config("psi_path")
     if psiapi is not None:
         sys.path.insert(1, psiapi)
 
     import psi4
 
     # Setup the job
-    psi4.set_num_threads(get_config("cores_per_job"))
-    json["memory"] = int(get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
+    psi4.set_num_threads(dqm_config.get_config("cores_per_job"))
+    json["memory"] = int(dqm_config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
 
-    scratch = get_config("scratch_directory")
+    scratch = dgqm_config.get_config("scratch_directory")
     if scratch is not None:
         json["scratch_location"] = scratch
 
     # Compute!
     json = psi4.json_wrapper.run_json(json)
 
+    # Fill out data
+    json["hostname"] = dqm_config.get_hostname() 
+    json["provenance"] = dqm_config.get_provenance()
     json["wall_time"] = time.time() - t
     return json

@@ -2,12 +2,16 @@
 Tests the DQM compute module configuration
 """
 
-import os
+# Important this is first
+import addons
 
-os.environ["DQM_CONFIG_PATH"] = os.path.dirname(os.path.abspath(__file__))
-os.environ["TMPDIR"] = "something_scratch"
+import os
 import dqm_compute as dc
 
+def test_config_path():
+    cpath = dc.dqm_config.get_global("config_path")
+    test_path = os.path.join("dqm_compute", "test")
+    assert test_path in cpath
 
 def test_get_default():
     assert dc.get_config()["memory_per_job"] == 4
