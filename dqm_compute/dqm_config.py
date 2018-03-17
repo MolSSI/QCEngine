@@ -61,7 +61,7 @@ def _load_locals():
     with open(load_path) as stream:
         user_config = yaml.load(stream)
 
-    _globals["config_path"] = load_path 
+    _globals["config_path"] = load_path
 
     # Override default keys
     default_keys = list(_globals["default_compute"].keys())

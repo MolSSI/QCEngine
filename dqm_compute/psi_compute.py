@@ -51,6 +51,13 @@ def run_psi4(json):
 
     # Compute!
     json = psi4.json_wrapper.run_json(json)
+    psi4.core.clean()
+
+    if json["success"] is False:
+
+        # Dispatch errors, PSIO Errors are not recoverable for future runs
+        if "PSIO Error" in json["error"]:
+            raise ValueError(json["error"])
 
     # Fill out data
     if "provenance" in json:
