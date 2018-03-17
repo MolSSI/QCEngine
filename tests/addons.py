@@ -26,4 +26,4 @@ os.environ["DQM_CONFIG_PATH"] = os.path.dirname(os.path.abspath(__file__))
 os.environ["TMPDIR"] = "/tmp/"
 
 # Add flags
-using_psi4 = pytest.mark.skipif(_plugin_import("psi4") is False, reason="Could not find Psi4. Please install the package to enable tests") 
+using_psi4 = pytest.mark.skipif(_plugin_import("psi4") is False, reason="Could not find Psi4. Please install the package to enable tests")
