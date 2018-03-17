@@ -43,6 +43,12 @@ def run_psi4(json):
     if scratch is not None:
         json["scratch_location"] = scratch
 
+    # Check if RHF/UHF
+    mol = psi4.geometry(json["molecule"])
+    wfn = psi4.core.Wavefunction.build(mol, "def2-SVP")
+    if wfn.molecule().multiplicity() != 1:
+        json["options"]["reference"] = "uks"
+
     # Compute!
     json = psi4.json_wrapper.run_json(json)
 
