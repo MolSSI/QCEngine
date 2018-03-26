@@ -1,13 +1,9 @@
 import setuptools
 import versioneer
-setup(version=versioneer.get_version(),
-      cmdclass=versioneer.get_cmdclass(), ...)
-
 
 if __name__ == "__main__":
     setuptools.setup(
         name='dqm_compute',
-        version="0.1",
         description='Compute module for the DQM project',
         author='Daniel G. A. Smith',
         author_email='dgasmith@vt.edu',
