@@ -1,4 +1,8 @@
 import setuptools
+import versioneer
+setup(version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass(), ...)
+
 
 if __name__ == "__main__":
     setuptools.setup(
@@ -9,6 +13,8 @@ if __name__ == "__main__":
         author_email='dgasmith@vt.edu',
         url="https://github.com/psi4/dqm_compute",
         license='BSD-3C',
+        version=versioneer.get_version(),
+        cmdclass=versioneer.get_cmdclass(),
         packages=setuptools.find_packages(),
         install_requires=[
             'pyyaml',
