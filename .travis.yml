@@ -5,30 +5,33 @@ language: python
 # Run jobs on container-based infrastructure, can be overridden per job
 sudo: false
 
-matrix:
-  include:
-    - python: 2.7
-    - python: 3.4
-    - python: 3.5
-    - python: 3.6
+python:
+    - 2.7
+    - 3.4
+    - 3.5
+    - 3.6
 
 before_install:
+    # Additional info about the build
   - uname -a
   - free -m
   - df -h
   - ulimit -a
-  - python -V
+
+    # Setup python environment
   - pip install --upgrade pip setuptools
-  - pip install pytest pytest-cov
-  - pip install codecov
+  - python -V
+
+install:
+    # Install depends
   - pip install py-cpuinfo
+
+    # Install module and coverage
+  - pip install codecov pytest pytest-cov
   - pip install -e .
 
 script:
-  - py.test -v --cov=./
-
-# after_success:
-#   - ./tools/travis-upload-wheel.sh
+  - py.test -v --cov=dqm_compute
 
 notifications:
     email: false
