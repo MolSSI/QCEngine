@@ -5,6 +5,7 @@ A set of scripts to setup testing
 import pytest
 import os
 
+
 def _plugin_import(plug):
     """
     Tests to see if a module is available
@@ -21,9 +22,23 @@ def _plugin_import(plug):
     else:
         return True
 
+
 # Modify paths for testing
 os.environ["DQM_CONFIG_PATH"] = os.path.dirname(os.path.abspath(__file__))
 os.environ["TMPDIR"] = "/tmp/"
 
 # Add flags
-using_psi4 = pytest.mark.skipif(_plugin_import("psi4") is False, reason="Could not find Psi4. Please install the package to enable tests")
+using_psi4 = pytest.mark.skipif(
+    _plugin_import("psi4") is False, reason="could not find psi4. please install the package to enable tests")
+using_rdkit = pytest.mark.skipif(
+    _plugin_import("rdkit") is False, reason="could not find rdkit. please install the package to enable tests")
+
+test_mols = {
+    "water": {
+        "geometry": [
+            0.0, 0.0, -0.1294769411935893, 0.0, -1.494187339479985, 1.0274465079245698, 0.0, 1.494187339479985,
+            1.0274465079245698
+        ],
+        "symbols": ["O", "H", "H"]
+    }
+}
