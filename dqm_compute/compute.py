@@ -2,15 +2,30 @@
 Integrates the computes together
 """
 
+import time
+
 from .pass_compute import run_pass
 from .psi_compute import run_psi4
+from . import dqm_config
 
 
 def compute(json, program):
 
+    # Run the program
+
+    comp_time = time.time()
     if program == "pass":
-        return run_pass(json)
+        json = run_pass(json)
     elif program == "psi4":
-        return run_psi4(json)
+        json = run_psi4(json)
     else:
         raise KeyError("Program %s not understood" % program)
+    json["wall_time"] = time.time() - comp_time
+
+    # Fill out data
+    if "provenance" in json:
+        json["provenance"].update(dqm_config.get_provenance())
+    else:
+        json["provenance"] = dqm_config.get_provenance()
+
+    return json

@@ -27,7 +27,6 @@ def run_psi4(json):
     """
     Runs Psi4 in API mode
     """
-    t = time.time()
 
     # Insert API path if needed
     psiapi = dqm_config.get_config("psi_path")
@@ -60,10 +59,4 @@ def run_psi4(json):
         if "PSIO Error" in json["error"]:
             raise ValueError(json["error"])
 
-    # Fill out data
-    if "provenance" in json:
-        json["provenance"].update(dqm_config.get_provenance())
-    else:
-        json["provenance"] = dqm_config.get_provenance()
-    json["wall_time"] = time.time() - t
     return json
