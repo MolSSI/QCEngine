@@ -32,13 +32,3 @@ using_psi4 = pytest.mark.skipif(
     _plugin_import("psi4") is False, reason="could not find psi4. please install the package to enable tests")
 using_rdkit = pytest.mark.skipif(
     _plugin_import("rdkit") is False, reason="could not find rdkit. please install the package to enable tests")
-
-test_mols = {
-    "water": {
-        "geometry": [
-            0.0, 0.0, -0.1294769411935893, 0.0, -1.494187339479985, 1.0274465079245698, 0.0, 1.494187339479985,
-            1.0274465079245698
-        ],
-        "symbols": ["O", "H", "H"]
-    }
-}
