@@ -41,15 +41,6 @@ def test_psi4_switch():
 
     assert ret["success"] == True
 
-def test_dispatch():
-
-    data = {"something": "whatever"}
-    results = dc.compute(data, "pass")
-
-    assert results["success"] == True
-    assert results["something"] == "whatever"
-
-
 @addons.using_rdkit
 def test_rdkit():
     json_data = {}

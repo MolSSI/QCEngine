@@ -4,20 +4,15 @@ Integrates the computes together
 
 import time
 
-from .pass_compute import run_pass
 from .psi_compute import run_psi4
 from .rdkit_compute import run_rdkit
 from . import dqm_config
 
-
 def compute(json, program):
 
     # Run the program
-
     comp_time = time.time()
-    if program == "pass":
-        json = run_pass(json)
-    elif program == "psi4":
+    if program == "psi4":
         json = run_psi4(json)
     elif program == "rdkit":
         json = run_rdkit(json)
