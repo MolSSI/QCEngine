@@ -18,7 +18,11 @@ _globals = {}
 
 _globals["hostname"] = socket.gethostname()
 _globals["default_compute"] = {
+
+    # Program paths
     "psi_path": None,  # Path for the Psi4 API
+
+    # Specifications
     "jobs_per_node": 1,  # Number of jobs per node
     "cores_per_job": 1,  # Number of cores per job
     "memory_per_job": 2,  # Amount of memory in Gb per node

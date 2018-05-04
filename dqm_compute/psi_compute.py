@@ -29,8 +29,9 @@ def run_psi4(json):
     """
     t = time.time()
 
+    # Insert API path if needed
     psiapi = dqm_config.get_config("psi_path")
-    if psiapi is not None:
+    if (psiapi is not None) and (psiapi != sys.path[1]):
         sys.path.insert(1, psiapi)
 
     import psi4
