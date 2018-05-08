@@ -5,14 +5,9 @@ dist: trusty
 
 matrix:
   include:
-    # Extra includes for OSX since python language is not available by default on OSX
-    - os: osx
-      language: generic
-      env: PYTHON_VER=3.5
-    - os: osx
-      language: generic
-      env: PYTHON_VER=3.6
-
+    - os: linux
+      python: 2.7
+      env: PYTHON_VER=2.7
     - os: linux
       python: 3.5
       env: PYTHON_VER=3.5
@@ -33,7 +28,7 @@ before_install:
 install:
 
     # Create test environment for package
-  - conda create -n test python=$PYTHON_VER pip pytest pyyaml pytest-cov py-cpuinfo psi4 -c psi4 rdkit -c rdkit
+  - conda create -n test python=$PYTHON_VER pip pytest pyyaml pytest-cov py-cpuinfo psi4 rdkit -c psi4 -c rdkit
   - source activate test
 
     # Install pip only modules
