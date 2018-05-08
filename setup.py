@@ -3,11 +3,11 @@ import versioneer
 
 if __name__ == "__main__":
     setuptools.setup(
-        name='dqm_compute',
-        description='Compute module for the DQM project',
+        name='qcengine',
+        description='Compute wrapper for Quantum Chemistry Schema input/output for a variety of programs.',
         author='Daniel G. A. Smith',
         author_email='dgasmith@vt.edu',
-        url="https://github.com/psi4/dqm_compute",
+        url="https://github.com/MolSSI/QCEngine",
         license='BSD-3C',
         version=versioneer.get_version(),
         cmdclass=versioneer.get_cmdclass(),

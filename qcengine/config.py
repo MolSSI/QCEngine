@@ -1,5 +1,5 @@
 """
-Creates globals for the dqm_compute module
+Creates globals for the qcengine module
 """
 
 import os
@@ -45,21 +45,21 @@ def _process_variables(var):
 
 def _load_locals():
 
-    # Find the dqm_config
+    # Find the config
     load_path = None
-    test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".dqm")]
+    test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".qc")]
 
     if "DQM_CONFIG_PATH" in os.environ:
         test_paths.insert(0, os.environ["DQM_CONFIG_PATH"])
 
     for path in test_paths:
-        path = os.path.join(path, "dqm_config.yaml")
+        path = os.path.join(path, "qcengine_config.yaml")
         if os.path.exists(path):
             load_path = path
             break
 
     if load_path is None:
-        raise OSError("Could not find 'dqm_config.yaml'. Search the following paths: %s" % ", ".join(test_paths))
+        raise OSError("Could not find 'config.yaml'. Search the following paths: %s" % ", ".join(test_paths))
 
     # Load the library
     with open(load_path) as stream:
@@ -105,7 +105,7 @@ def get_global(name):
 
 def get_config(key=None, hostname=None):
     """
-    Returns the configuration key for dqm_compute.
+    Returns the configuration key for qcengine.
     """
     config = None
     hostname_match = None

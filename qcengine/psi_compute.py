@@ -5,7 +5,7 @@ Calls the Psi4 executable.
 import time
 import sys
 
-from . import dqm_config
+from . import config
 
 
 def test_psi4():
@@ -29,17 +29,17 @@ def run_psi4(json):
     """
 
     # Insert API path if needed
-    psiapi = dqm_config.get_config("psi_path")
+    psiapi = config.get_config("psi_path")
     if (psiapi is not None) and (psiapi != sys.path[1]):
         sys.path.insert(1, psiapi)
 
     import psi4
 
     # Setup the job
-    psi4.set_num_threads(dqm_config.get_config("cores_per_job"))
-    json["memory"] = int(dqm_config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
+    psi4.set_num_threads(config.get_config("cores_per_job"))
+    json["memory"] = int(config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
 
-    scratch = dqm_config.get_config("scratch_directory")
+    scratch = config.get_config("scratch_directory")
     if scratch is not None:
         json["scratch_location"] = scratch
 

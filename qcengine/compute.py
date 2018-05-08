@@ -6,7 +6,7 @@ import time
 
 from .psi_compute import run_psi4
 from .rdkit_compute import run_rdkit
-from . import dqm_config
+from . import config
 
 def compute(json, program):
 
@@ -22,8 +22,8 @@ def compute(json, program):
 
     # Fill out data
     if "provenance" in json:
-        json["provenance"].update(dqm_config.get_provenance())
+        json["provenance"].update(config.get_provenance())
     else:
-        json["provenance"] = dqm_config.get_provenance()
+        json["provenance"] = config.get_provenance()
 
     return json

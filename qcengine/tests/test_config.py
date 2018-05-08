@@ -6,11 +6,11 @@ Tests the DQM compute module configuration
 import addons
 
 import os
-import dqm_compute as dc
+import qcengine as dc
 
 def test_config_path():
-    cpath = dc.dqm_config.get_global("config_path")
-    test_path = os.path.join("dqm_compute", "test")
+    cpath = dc.config.get_global("config_path")
+    test_path = os.path.join("qcengine", "test")
     assert test_path in cpath
 
 def test_get_default():

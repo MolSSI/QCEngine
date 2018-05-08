@@ -6,7 +6,7 @@ Tests the DQM compute dispatch module
 import addons
 
 import os
-import dqm_compute as dc
+import qcengine as dc
 
 @addons.using_psi4
 def test_psi4():
@@ -44,7 +44,7 @@ def test_psi4_switch():
 @addons.using_rdkit
 def test_rdkit():
     json_data = {}
-    json_data["molecule"] = addons.test_mols["water"]
+    json_data["molecule"] = dc.get_molecule("water")
     json_data["molecule"]["connectivity"] = [[0, 1, 1], [0, 2, 1]]
     json_data["driver"] = "gradient"
     json_data["model"] = {"method": "UFF", "basis": ""}

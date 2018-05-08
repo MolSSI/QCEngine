@@ -5,7 +5,7 @@ Calls the Psi4 executable.
 import time
 import sys
 
-from . import dqm_config
+from . import config
 from . import units
 
 
