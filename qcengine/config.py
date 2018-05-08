@@ -17,6 +17,8 @@ __all__ = ["get_global", "get_config", "get_provenance"]
 _globals = {}
 
 _globals["hostname"] = socket.gethostname()
+_globals["cpu"] = cpuinfo.get_cpu_info()["brand"]
+_globals["username"] = getpass.getuser()
 _globals["default_compute"] = {
 
     # Program paths
@@ -90,6 +92,7 @@ def _load_locals():
                 _globals["other_compute"][host][k] = _process_variables(v)
 
 
+
 # Pull in the local variables
 _load_locals()
 
@@ -132,8 +135,8 @@ def get_config(key=None, hostname=None):
 
 def get_provenance():
     ret = {}
-    ret["cpu"] = cpuinfo.get_cpu_info()["brand"]
-    ret["hostname"] = get_hostname()
-    ret["username"] = getpass.getuser()
+    ret["cpu"] = get_global("cpu")
+    ret["hostname"] = get_global("hostname")
+    ret["username"] = get_global("username")
     return ret
 
