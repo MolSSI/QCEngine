@@ -28,7 +28,7 @@ before_install:
 install:
 
     # Create test environment for package
-  - conda create -n test python=$PYTHON_VER pip pytest pyyaml pytest-cov py-cpuinfo psi4 rdkit -c psi4 -c rdkit
+  - conda create -n test python=$PYTHON_VER pip pytest pyyaml pytest-cov py-cpuinfo rdkit -c rdkit
   - source activate test
 
     # Install pip only modules
@@ -36,11 +36,11 @@ install:
 
     # Build and install package
   - conda build --python=$PYTHON_VER devtools/conda-recipe
-  - conda install --use-local QCEngine
+  - conda install --use-local qcengine
 
 
 script:
-  - pytest -v --cov=QCEngine QCEngine/tests/
+  - pytest -v --cov=qcengine qcengine/tests/
 
 notifications:
     email: false

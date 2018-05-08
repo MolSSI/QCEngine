@@ -61,7 +61,9 @@ def _load_locals():
             break
 
     if load_path is None:
-        raise OSError("Could not find 'config.yaml'. Search the following paths: %s" % ", ".join(test_paths))
+        print("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
+        print("Using default options...")
+        return
 
     # Load the library
     with open(load_path) as stream:
