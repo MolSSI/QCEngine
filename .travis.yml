@@ -28,7 +28,7 @@ before_install:
 install:
 
     # Create test environment for package
-  - conda create -n test python=$PYTHON_VER pip pytest pyyaml pytest-cov py-cpuinfo rdkit -c rdkit
+  - conda create -n test python=$PYTHON_VER nomkl pip pytest pyyaml pytest-cov py-cpuinfo rdkit -c rdkit
   - source activate test
 
     # Install pip only modules
