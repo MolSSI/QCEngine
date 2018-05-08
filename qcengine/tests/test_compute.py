@@ -3,7 +3,7 @@ Tests the DQM compute dispatch module
 """
 
 # Important this is first
-import addons
+from . import addons
 
 import os
 import qcengine as dc

@@ -3,7 +3,7 @@ Tests the DQM compute module configuration
 """
 
 # Important this is first
-import addons
+from . import addons
 
 import os
 import qcengine as dc

@@ -35,8 +35,7 @@ install:
   - pip install codecov
 
     # Build and install package
-  - conda build --python=$PYTHON_VER devtools/conda-recipe
-  - conda install --use-local qcengine
+  - python setup.py develop
 
 
 script:
