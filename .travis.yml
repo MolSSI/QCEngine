@@ -1,37 +1,51 @@
-# After changing this file, check it on:
-#   http://lint.travis-ci.org/
 language: python
 
 # Run jobs on container-based infrastructure, can be overridden per job
-sudo: false
+dist: trusty
 
-python:
-    - 2.7
-    - 3.4
-    - 3.5
-    - 3.6
+matrix:
+  include:
+    # Extra includes for OSX since python language is not available by default on OSX
+    - os: osx
+      language: generic
+      env: PYTHON_VER=3.5
+    - os: osx
+      language: generic
+      env: PYTHON_VER=3.6
+
+    - os: linux
+      python: 3.5
+      env: PYTHON_VER=3.5
+    - os: linux
+      python: 3.6
+      env: PYTHON_VER=3.6
 
 before_install:
     # Additional info about the build
   - uname -a
-  - free -m
   - df -h
   - ulimit -a
 
-    # Setup python environment
-  - pip install --upgrade pip setuptools
+    # Install the Python environemt
+  - source devtools/travis-ci/before_install.sh
   - python -V
 
 install:
-    # Install depends
-  - pip install py-cpuinfo
 
-    # Install module and coverage
-  - pip install codecov pytest pytest-cov
-  - pip install -e .
+    # Create test environment for package
+  - conda create -n test python=$PYTHON_VER pip pytest pyyaml pytest-cov py-cpuinfo psi4 -c psi4 rdkit -c rdkit
+  - source activate test
+
+    # Install pip only modules
+  - pip install codecov
+
+    # Build and install package
+  - conda build --python=$PYTHON_VER devtools/conda-recipe
+  - conda install --use-local QCEngine
+
 
 script:
-  - py.test -v --cov=qcengine
+  - pytest -v --cov=QCEngine QCEngine/tests/
 
 notifications:
     email: false

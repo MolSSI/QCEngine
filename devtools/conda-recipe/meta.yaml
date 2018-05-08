@@ -15,13 +15,15 @@ requirements:
 
   run:
     - python
+    - py-cpuinfo
+    - pyyaml
 
 test:
   requires:
     - pytest
   imports:
-    - something
+    - qcengine
 
 about:
-  home: add_url_here
-  license: MIT License
+  home: https://github.com/MolSSI/QCEngine
+  license: BSD-3-Clause License
