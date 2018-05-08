@@ -40,7 +40,7 @@ install:
 
 
 script:
-  - pytest -v --cov=qcengine qcengine/tests/
+  - pytest -v --cov=qcengine/ qcengine/tests/
 
 notifications:
     email: false
