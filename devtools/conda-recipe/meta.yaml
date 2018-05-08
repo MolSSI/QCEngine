@@ -1,5 +1,5 @@
 package:
-  name: QCEngine
+  name: qcengine
   version: "0.0.0"
 
 source:
