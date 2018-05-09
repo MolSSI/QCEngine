@@ -83,7 +83,10 @@ def run_psi4(json):
     if (psiapi is not None) and (psiapi not in sys.path):
         sys.path.insert(1, psiapi)
 
-    import psi4
+    try:
+        import psi4
+    except ImportError:
+        raise ImportError("Could not find Psi4 in the Python path.")
 
     # Setup the job
     psi4.set_num_threads(config.get_config("cores_per_job"))
@@ -101,13 +104,16 @@ def run_psi4(json):
         json_mol = json["molecule"]
         mol_str = _build_v11_mol(json_mol)
 
+        json["options"] = json["keywords"]
+        json["options"]["BASIS"] = json["model"]["basis"]
+
         # Check if RHF/UHF
         mol = psi4.geometry(mol_str)
         wfn = psi4.core.Wavefunction.build(mol, "def2-SVP")
         if wfn.molecule().multiplicity() != 1:
             json["options"]["reference"] = "uks"
 
-        json["args"] = (json["method"], )
+        json["args"] = (json["model"]["method"], )
 
         # v1.1 wanted an actual string
         json["molecule"] = mol_str

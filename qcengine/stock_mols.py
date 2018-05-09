@@ -12,6 +12,12 @@ _test_mols = {
         ],
         "symbols": ["O", "H", "H"],
         "connectivity": [[0, 1, 1], [1, 2, 1]]
+    },
+    "lithium": {
+        "symbols": ["Li"],
+        "geometry": [0, 0, 0],
+        "molecular_multiplicity": 2,
+        "connectivity": []
     }
 }
 
