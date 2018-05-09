@@ -15,11 +15,10 @@ matrix:
       env:
         - PYTHON_VER=3.5
         - PROG=RDKIT
-  allow_failures:
     - os: linux
       python: 3.6
       env:
-        - PYTHON_VER=3.5
+        - PYTHON_VER=3.6
         - PROG=PSI4
 
 before_install:
