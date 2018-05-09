@@ -11,7 +11,8 @@ import qcengine as dc
 @addons.using_psi4
 def test_psi4():
     json_data = {}
-    json_data["molecule"] = """He 0 0 0\n--\nHe 0 0 1"""
+    # json_data["molecule"] = """He 0 0 0\n--\nHe 0 0 1"""
+    json_data["molecule"] = dc.get_molecule("water")
     json_data["driver"] = "energy"
     json_data["method"] = "SCF"
     json_data["options"] = {"BASIS": "STO-3G"}
@@ -29,9 +30,9 @@ def test_psi4():
     assert ret["success"] == True
 
 @addons.using_psi4
-def test_psi4_switch():
+def test_psi4_ref_switch():
     json_data = {}
-    json_data["molecule"] = """Li"""
+    json_data["molecule"] = {"symbols": ["Li"], "geometry": [0, 0, 0], "molecular_multiplicity": 2}
     json_data["driver"] = "energy"
     json_data["method"] = "SCF"
     json_data["options"] = {"BASIS": "STO-3G"}
