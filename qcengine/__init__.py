@@ -5,9 +5,8 @@ Base file for the dqm_compute module.
 from . import config
 
 from .config import get_config, load_options
-from .psi_compute import run_psi4
 from .compute import compute
-from .stock_mols import get_molecule 
+from .stock_mols import get_molecule
 
 # Handle versioneer
 from ._version import get_versions

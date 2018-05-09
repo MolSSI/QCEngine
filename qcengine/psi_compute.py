@@ -8,21 +8,6 @@ import sys
 from . import config
 
 
-def test_psi4():
-    """
-    Runs a quick Psi4 test
-    """
-
-    json_data = {}
-    json_data["molecule"] = """He 0 0 0\n--\nHe 0 0 1"""
-    json_data["driver"] = "energy"
-    json_data["method"] = 'SCF'
-    json_data["options"] = {"BASIS": "STO-3G"}
-    json_data["return_output"] = False
-
-    return run_psi4(json_data)
-
-
 def _build_v11_mol(jm):
     """
     Converts a QC JSON molecule to the Psi4 expected string for Psi4 version 1.1.
@@ -39,7 +24,7 @@ def _build_v11_mol(jm):
 
     # Charge and multiplicity, skip otherwise
     psimol = ""
-    if ("molecular_charge" in jm) or ("molecular_multiplicity" in jm) :
+    if ("molecular_charge" in jm) or ("molecular_multiplicity" in jm):
         psimol += "\n    "
         if "molecular_charge" in jm:
             psimol += "%d  " % jm["molecular_charge"]
@@ -61,7 +46,7 @@ def _build_v11_mol(jm):
             psimol += "Gh(%-5s)" % jm["symbols"][x]
 
         psimol += "    % 14.10f % 14.10f % 14.10f\n" % (jm["geometry"][shift], jm["geometry"][shift + 1],
-                                                             jm["geometry"][shift + 2])
+                                                        jm["geometry"][shift + 2])
 
     psimol += "   units bohr"
     if "fix_com" in jm and jm["fix_com"]:
