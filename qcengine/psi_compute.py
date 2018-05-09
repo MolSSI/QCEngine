@@ -30,7 +30,7 @@ def run_psi4(json):
 
     # Insert API path if needed
     psiapi = config.get_config("psi_path")
-    if (psiapi is not None) and (psiapi != sys.path[1]):
+    if (psiapi is not None) and (psiapi not in sys.path):
         sys.path.insert(1, psiapi)
 
     import psi4
@@ -43,15 +43,27 @@ def run_psi4(json):
     if scratch is not None:
         json["scratch_location"] = scratch
 
-    # Check if RHF/UHF
-    mol = psi4.geometry(json["molecule"])
-    wfn = psi4.core.Wavefunction.build(mol, "def2-SVP")
-    if wfn.molecule().multiplicity() != 1:
-        json["options"]["reference"] = "uks"
+    pversion = psi4.__version__ 
 
-    # Compute!
-    json = psi4.json_wrapper.run_json(json)
-    psi4.core.clean()
+    if pversion == "1.1":
+        # Check if RHF/UHF
+        mol = psi4.geometry(json["molecule"])
+        wfn = psi4.core.Wavefunction.build(mol, "def2-SVP")
+        if wfn.molecule().multiplicity() != 1:
+            json["options"]["reference"] = "uks"
+
+        json["args"] = (json["method"], )
+
+        # Compute!
+        rjson = psi4.json_wrapper.run_json(json)
+        psi4.core.clean()
+        if rjson is False:
+            json["success"] = False
+            if "error" not in json:
+                json["error"] = "Unspecified error occured"
+
+    else:
+        raise TypeError("Psi4 version '{}' not understood".format(pversion))
 
     if json["success"] is False:
 
