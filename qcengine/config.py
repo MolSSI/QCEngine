@@ -45,25 +45,10 @@ def _process_variables(var):
     else:
         return var
 
-def _load_locals():
-
-    # Find the config
-    load_path = None
-    test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".qc")]
-
-    if "DQM_CONFIG_PATH" in os.environ:
-        test_paths.insert(0, os.environ["DQM_CONFIG_PATH"])
-
-    for path in test_paths:
-        path = os.path.join(path, "qcengine_config.yaml")
-        if os.path.exists(path):
-            load_path = path
-            break
-
-    if load_path is None:
-        print("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
-        print("Using default options...")
-        return
+def load_options(load_path):
+    """
+    Options can be loaded from a specific path
+    """
 
     # Load the library
     with open(load_path) as stream:
@@ -93,10 +78,33 @@ def _load_locals():
                     raise KeyError("Key %s not accepted for default_compute" % k)
                 _globals["other_compute"][host][k] = _process_variables(v)
 
+def _load_locals():
+
+    # Find the config
+    load_path = None
+    test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".qc")]
+
+    if "DQM_CONFIG_PATH" in os.environ:
+        test_paths.insert(0, os.environ["DQM_CONFIG_PATH"])
+
+    for path in test_paths:
+        path = os.path.join(path, "qcengine_config.yaml")
+        if os.path.exists(path):
+            load_path = path
+            break
+
+    if load_path is None:
+        print("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
+        print("Using default options...")
+    else:
+        load_options(load_path)
+
+
 
 
 # Pull in the local variables
 _load_locals()
+
 
 def get_hostname():
     """

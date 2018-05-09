@@ -2,28 +2,44 @@
 Tests the DQM compute module configuration
 """
 
-# Important this is first
+
+import pytest
+import copy
+import os
+
+import qcengine as dc
 from . import addons
 
-import os
-import qcengine as dc
+@pytest.fixture
+def opt_state():
+    """
+    Capture the options state and temporarily override.
+    """
+    tmp = copy.deepcopy(dc.config._globals)
 
-def test_config_path():
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    dc.load_options(os.path.join(base_path, "conf_test.yaml")) 
+
+    yield
+
+    dc.config._globals = tmp
+
+def test_config_path(opt_state):
     cpath = dc.config.get_global("config_path")
     test_path = os.path.join("qcengine", "test")
     assert test_path in cpath
 
-def test_get_default():
+def test_get_default(opt_state):
     assert dc.get_config()["memory_per_job"] == 4
     assert dc.get_config(key="memory_per_job") == 4
 
 
-def test_hostname_matches():
+def test_hostname_matches(opt_state):
     assert dc.get_config(hostname="dt5")["memory_per_job"] == 60
     assert dc.get_config(key="memory_per_job", hostname="dt5") == 60
 
 
-def test_default_matches():
+def test_default_matches(opt_state):
     """
     Tests that defaults properly come through on different compute
     """
@@ -32,7 +48,7 @@ def test_default_matches():
     assert dc.get_config(key="psi_path", hostname="nr5") == bench
 
 
-def test_environmental_vars():
+def test_environmental_vars(opt_state):
 
     assert dc.get_config("scratch_directory") == "/tmp/"
     assert dc.get_config("scratch_directory", hostname="dt5") is None
