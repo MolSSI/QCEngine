@@ -74,10 +74,10 @@ def run_rdkit(json):
 
     ff.Initialize()
 
-    json["properties"] = {"scf_total_energy": ff.CalcEnergy()}
+    json["properties"] = {"return_energy": ff.CalcEnergy()}
 
     if json["driver"] == "energy":
-        json["return_value"] = json["properties"]["scf_total_energy"]
+        json["return_value"] = json["properties"]["return_energy"]
     elif json["driver"] == "gradient":
         json["return_value"] = [x / units.bohr_to_angstrom for x in ff.CalcGrad()]
     else:
