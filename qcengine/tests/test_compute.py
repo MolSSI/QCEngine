@@ -6,12 +6,17 @@ Tests the DQM compute dispatch module
 from . import addons
 
 import os
+import copy
 import qcengine as dc
+
+_base_json = {
+    "schema_name": "QC_JSON",
+    "schema_version": 0
+}
 
 @addons.using_psi4
 def test_psi4():
-    json_data = {}
-    # json_data["molecule"] = """He 0 0 0\n--\nHe 0 0 1"""
+    json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = dc.get_molecule("water")
     json_data["driver"] = "energy"
     json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
@@ -31,7 +36,7 @@ def test_psi4():
 
 @addons.using_psi4
 def test_psi4_ref_switch():
-    json_data = {}
+    json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = dc.get_molecule("lithium")
     json_data["driver"] = "energy"
     json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
@@ -44,7 +49,7 @@ def test_psi4_ref_switch():
 
 @addons.using_rdkit
 def test_rdkit():
-    json_data = {}
+    json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = dc.get_molecule("water")
     json_data["molecule"]["connectivity"] = [[0, 1, 1], [0, 2, 1]]
     json_data["driver"] = "gradient"
