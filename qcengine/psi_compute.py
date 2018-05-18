@@ -4,6 +4,7 @@ Calls the Psi4 executable.
 
 import time
 import sys
+from pkg_resources import parse_version
 
 from . import config
 
@@ -61,27 +62,8 @@ def _parse_psi_version(version):
     if "undef" in version:
         raise TypeError("Using custom build Psi4 without tags. Please `git pull origin master --tags` and recompile Psi4.")
 
-    major, minor, rc, dev = 0, 0, 0, 0
-    if ".dev" in version:
-        version, dev = version.split(".dev")
-        dev = int(dev)
-    else:
-        dev = 1000
+    return parse_version(version)
 
-    if "rc" in version:
-        version, rc = version.split("rc")
-        rc = int(rc)
-    else:
-        rc = 1000
-
-    if "." in version:
-        major, minor = version.split(".")
-        major = int(major)
-        minor = int(minor)
-    else:
-        raise TypeError("Version string not understood.")
-
-    return (major, minor, rc, dev)
 
 
 def run_psi4(json):
@@ -110,7 +92,7 @@ def run_psi4(json):
 
     psi_version = _parse_psi_version(psi4.__version__)
 
-    if psi4.__version__ == "1.1":
+    if psi_version == parse_version("1.1"):
 
         json_mol = json["molecule"]
         mol_str = _build_v11_mol(json_mol)
@@ -139,7 +121,7 @@ def run_psi4(json):
 
         json["molecule"] = json_mol
 
-    elif psi_version > (1, 2, 3, 0):
+    elif psi_version > parse_version("1.2rc2.dev500"):
         mol = psi4.core.Molecule.from_schema(json)
         if mol.multiplicity() != 1:
             json["keywords"]["reference"] = "uks"
@@ -148,7 +130,7 @@ def run_psi4(json):
 
 
     else:
-        raise TypeError("Psi4 version '{}' not understood".format(pversion))
+        raise TypeError("Psi4 version '{}' not understood".format(psi_version))
 
     # Dispatch errors, PSIO Errors are not recoverable for future runs
     if json["success"] is False:
