@@ -115,11 +115,11 @@ def run_psi4(json):
         rjson = psi4.json_wrapper.run_json(json)
         psi4.core.clean()
         if rjson is False:
-            json["success"] = False
-            if "error" not in json:
-                json["error"] = "Unspecified error occured."
+            rjson["success"] = False
+            if "error" not in rjson:
+                rjson["error"] = "Unspecified error occured."
 
-        json["molecule"] = json_mol
+        rjson["molecule"] = json_mol
 
     elif psi_version > parse_version("1.2rc2.dev500"):
         mol = psi4.core.Molecule.from_schema(json)
@@ -133,9 +133,9 @@ def run_psi4(json):
         raise TypeError("Psi4 version '{}' not understood".format(psi_version))
 
     # Dispatch errors, PSIO Errors are not recoverable for future runs
-    if json["success"] is False:
+    if rjson["success"] is False:
 
-        if "PSIO Error" in json["error"]:
-            raise ValueError(json["error"])
+        if "PSIO Error" in rjson["error"]:
+            raise ValueError(rjson["error"])
 
-    return json
+    return rjson
