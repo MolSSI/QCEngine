@@ -38,7 +38,7 @@ install:
     if [ $PROG == "RDKIT" ]; then
       conda create -n test python=$PYTHON_VER pytest pyyaml pytest-cov py-cpuinfo rdkit -c rdkit
     else
-      conda create -n test python=$PYTHON_VER pytest pyyaml pytest-cov py-cpuinfo psi4 -c psi4
+      conda create -n test python=$PYTHON_VER pytest pyyaml pytest-cov py-cpuinfo psi4=1.2rc2 -c psi4/label/dev
     fi
   - source activate test
 
