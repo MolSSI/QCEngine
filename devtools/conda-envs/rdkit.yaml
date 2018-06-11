@@ -1,0 +1,12 @@
+name: test
+channels:
+  - conda-forge
+  - rdkit
+dependencies:
+  - rdkit
+  - pytest
+  - pyyaml
+  - pytest-cov
+  - py-cpuinfo
+  - pip:
+    - codecov

@@ -36,17 +36,14 @@ install:
     # Create test environment for package
   - |
     if [ $PROG == "RDKIT" ]; then
-      conda create -n test python=$PYTHON_VER pytest pyyaml pytest-cov py-cpuinfo rdkit -c rdkit
+      conda create -n test python=$PYTHON_VER -f devtools/conda-envs/rdkit.yaml
     else
-      conda create -n test python=$PYTHON_VER pytest pyyaml pytest-cov py-cpuinfo psi4=1.2rc2 -c psi4/label/dev
+      conda create -n test python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
     fi
   - source activate test
 
-    # Install pip only modules
-  - pip install codecov
-
     # Build and install package
-  - python setup.py develop
+  - python setup.py develop --no-deps
 
 
 script:

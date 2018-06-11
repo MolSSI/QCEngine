@@ -29,8 +29,7 @@ export PATH=$MINICONDA_HOME/bin:$PATH
 conda config --add channels conda-forge
     
 conda config --set always_yes yes
-conda install conda conda-build jinja2 anaconda-client
-conda update --quiet --all
+conda update -q conda
 
 # Restore original directory
 popd
