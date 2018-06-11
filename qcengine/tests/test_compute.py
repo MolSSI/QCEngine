@@ -10,8 +10,8 @@ import copy
 import qcengine as dc
 
 _base_json = {
-    "schema_name": "QC_JSON",
-    "schema_version": 0
+    "schema_name": "qc_schema_input",
+    "schema_version": 1
 }
 
 @addons.using_psi4

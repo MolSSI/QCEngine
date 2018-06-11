@@ -82,7 +82,7 @@ def run_psi4(json):
         raise ImportError("Could not find Psi4 in the Python path.")
 
     # Setup the job
-    psi4.set_num_threads(config.get_config("cores_per_job"))
+    psi4.set_num_threads(config.get_config("cores_per_job"), quiet=True)
     json["memory"] = int(config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
     json["success"] = False
 
@@ -122,11 +122,22 @@ def run_psi4(json):
         rjson["molecule"] = json_mol
 
     elif psi_version > parse_version("1.2rc2.dev500"):
+
+        # Handle slight RC2 weirdness
+        if psi_version == parse_version("1.2rc2"):
+            json["schema_name"] = "QC_JSON"
+            json["schema_version"] = 0
+
         mol = psi4.core.Molecule.from_schema(json)
         if mol.multiplicity() != 1:
             json["keywords"]["reference"] = "uks"
 
         rjson = psi4.json_wrapper.run_json(json)
+
+        # Handle slight RC2 weirdness once more
+        if psi_version == parse_version("1.2rc2"):
+            json["schema_name"] = "qc_schema_output"
+            json["schema_version"] = 1
 
 
     else:

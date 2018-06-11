@@ -25,6 +25,7 @@ def run_rdkit(json):
     # Build the Molecule
     jmol = json["molecule"]
 
+    # Handle errors
     if ("molecular_charge" in jmol) and (abs(jmol["molecular_charge"]) < 1.e-6):
         json["error"] = "run_rdkit does not currently support charged molecules"
         return json
@@ -77,9 +78,9 @@ def run_rdkit(json):
     json["properties"] = {"return_energy": ff.CalcEnergy()}
 
     if json["driver"] == "energy":
-        json["return_value"] = json["properties"]["return_energy"]
+        json["return_result"] = json["properties"]["return_energy"]
     elif json["driver"] == "gradient":
-        json["return_value"] = [x / units.bohr_to_angstrom for x in ff.CalcGrad()]
+        json["return_result"] = [x / units.bohr_to_angstrom for x in ff.CalcGrad()]
     else:
         json["error"] = "run_rdkit did not understand driver method '{}'.".format(json["driver"])
         return json
@@ -91,6 +92,7 @@ def run_rdkit(json):
         "routine": "rdkit.Chem.AllChem.UFFGetMoleculeForceField"
         }
 
+    json["schema_name"] = "qc_json_output"
     json["success"] = True
     
 
