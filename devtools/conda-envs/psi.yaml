@@ -8,5 +8,4 @@ dependencies:
   - pyyaml
   - pytest-cov
   - py-cpuinfo
-  - pip:
-    - codecov
+  - codecov
