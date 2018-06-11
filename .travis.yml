@@ -36,9 +36,9 @@ install:
     # Create test environment for package
   - |
     if [ $PROG == "RDKIT" ]; then
-      conda create -n test python=$PYTHON_VER -f devtools/conda-envs/rdkit.yaml
+      conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/rdkit.yaml
     else
-      conda create -n test python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
+      conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
     fi
   - source activate test
 
