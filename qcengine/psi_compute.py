@@ -114,29 +114,31 @@ def run_psi4(input_data):
         input_data["molecule"] = mol_str
 
         # Compute!
-        ret_data = psi4.json_wrapper.run_json(input_data)
+        output_data = psi4.json_wrapper.run_json(input_data)
         psi4.core.clean()
-        if ret_data is False:
-            ret_data["success"] = False
+        if output_data is False:
+            output_data["success"] = False
             if "error" not in rjson:
-                ret_data["error"] = "Unspecified error occured."
+                output_data["error"] = "Unspecified error occured."
 
-        ret_data["molecule"] = json_mol
+        output_data["molecule"] = json_mol
 
-        # Manuall add in some fields
-        ret_data["properties"] = {"return_energy": ret_data["variables"]["CURRENT ENERGY"]}
-        del ret_data["variables"]
+        # Manually add in lacking fields to match roughly schema_output v1
+        output_data["properties"] = {"return_energy": output_data["variables"]["CURRENT ENERGY"]}
+        del output_data["variables"]
 
-        if isinstance(ret_data["return_value"], float):
-            ret_data["return_result"]
+        # Handle returns as Psi used to use numpy bit format.
+        if isinstance(output_data["return_value"], float):
+            output_data["return_result"]
         else:
             import numpy as np  # Will have this if using Psi4
-            arr = np.fromstring(ret_data["return_value"]["data"][0], dtype=np.double)
-            ret_data["return_result"] = arr.ravel().tolist()
+            arr = np.fromstring(output_data["return_value"]["data"][0], dtype=np.double)
+            output_data["return_result"] = arr.ravel().tolist()
 
-        del ret_data["return_value"]
+        del output_data["return_value"]
 
-        ret_data["provenance"] = {
+        # Add in missing prov data
+        output_data["provenance"] = {
             "version": "1.1",
             "routine": "psi4.json.run_json",
             "creator": "Psi4",
@@ -151,32 +153,32 @@ def run_psi4(input_data):
         if psi_12rc2_tweak:
             input_data["schema_name"] = "QC_JSON"
             input_data["schema_version"] = 0
-            psi4.set_num_threads(data["nthreads"], quiet=True)
+            psi4.set_num_threads(input_data["nthreads"], quiet=True)
 
         mol = psi4.core.Molecule.from_schema(input_data)
         if mol.multiplicity() != 1:
             input_data["keywords"]["reference"] = "uks"
 
-        ret_data = psi4.json_wrapper.run_json(input_data)
+        output_data = psi4.json_wrapper.run_json(input_data)
 
         # Handle slight RC2 weirdness once more
         if psi_12rc2_tweak:
-            ret_data["schema_name"] = "qc_schema_output"
-            ret_data["schema_version"] = 1
+            output_data["schema_name"] = "qc_schema_output"
+            output_data["schema_version"] = 1
 
     else:
         raise TypeError("Psi4 version '{}' not understood".format(psi_version))
 
     # Dispatch errors, PSIO Errors are not recoverable for future runs
-    if ret_data["success"] is False:
+    if output_data["success"] is False:
 
-        if "PSIO Error" in ret_data["error"]:
-            raise ValueError(ret_data["error"])
+        if "PSIO Error" in output_data["error"]:
+            raise ValueError(output_data["error"])
 
     # Move several pieces up a level
-    if ret_data["success"]:
-        ret_data["provenance"]["memory"] = input_data["memory"]
-        ret_data["provenance"]["nthreads"] = input_data["nthreads"]
-        del ret_data["memory"], input_data["nthreads"]
+    if output_data["success"]:
+        output_data["provenance"]["memory"] = input_data["memory"]
+        output_data["provenance"]["nthreads"] = input_data["nthreads"]
+        del output_data["memory"], input_data["nthreads"]
 
-    return ret_data
+    return output_data
