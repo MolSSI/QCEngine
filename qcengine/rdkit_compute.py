@@ -6,7 +6,7 @@ from . import units
 
 
 
-def run_rdkit(json):
+def run_rdkit(input_data):
     """
     Runs RDKit in FF typing
     """
@@ -16,19 +16,19 @@ def run_rdkit(json):
     from rdkit.Chem import AllChem
 
     # Failure flag
-    json["success"] = False
+    input_data["success"] = False
 
     # Build the Molecule
-    jmol = json["molecule"]
+    jmol = input_data["molecule"]
 
     # Handle errors
     if ("molecular_charge" in jmol) and (abs(jmol["molecular_charge"]) < 1.e-6):
-        json["error"] = "run_rdkit does not currently support charged molecules"
-        return json
+        input_data["error"] = "run_rdkit does not currently support charged molecules"
+        return input_data
 
     if "connectivity" not in jmol:
-        json["error"] = "run_rdkit molecule must have a connectivity graph"
-        return json
+        input_data["error"] = "run_rdkit molecule must have a connectivity graph"
+        return input_data
 
     # Build out the base molecule
     base_mol = Chem.Mol()
@@ -58,38 +58,38 @@ def run_rdkit(json):
     mol.AddConformer(conf)
     Chem.rdmolops.SanitizeMol(mol)
 
-    if json["model"]["method"] == "UFF":
+    if input_data["model"]["method"] == "UFF":
         ff = AllChem.UFFGetMoleculeForceField(mol)
         all_params = AllChem.UFFHasAllMoleculeParams(mol)
     else:
-        json["error"] = "run_rdkit can only accepts UFF methods"
-        return json
+        input_data["error"] = "run_rdkit can only accepts UFF methods"
+        return input_data
 
     if all_params is False:
-        json["error"] = "run_rdkit did not match all parameters to molecule"
-        return json
+        input_data["error"] = "run_rdkit did not match all parameters to molecule"
+        return input_data
 
     ff.Initialize()
 
-    json["properties"] = {"return_energy": ff.CalcEnergy()}
+    input_data["properties"] = {"return_energy": ff.CalcEnergy()}
 
-    if json["driver"] == "energy":
-        json["return_result"] = json["properties"]["return_energy"]
-    elif json["driver"] == "gradient":
-        json["return_result"] = [x / units.bohr_to_angstrom for x in ff.CalcGrad()]
+    if input_data["driver"] == "energy":
+        input_data["return_result"] = input_data["properties"]["return_energy"]
+    elif input_data["driver"] == "gradient":
+        input_data["return_result"] = [x / units.bohr_to_angstrom for x in ff.CalcGrad()]
     else:
-        json["error"] = "run_rdkit did not understand driver method '{}'.".format(json["driver"])
-        return json
+        input_data["error"] = "run_rdkit did not understand driver method '{}'.".format(input_data["driver"])
+        return input_data
 
 
-    json["provenance"] = {
+    input_data["provenance"] = {
         "creator": "rdkit",
         "version": rdkit.__version__,
         "routine": "rdkit.Chem.AllChem.UFFGetMoleculeForceField"
         }
 
-    json["schema_name"] = "qc_json_output"
-    json["success"] = True
+    input_data["schema_name"] = "qc_input_data_output"
+    input_data["success"] = True
 
 
-    return json
+    return input_data
