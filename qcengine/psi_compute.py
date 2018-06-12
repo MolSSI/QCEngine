@@ -129,7 +129,7 @@ def run_psi4(input_data):
 
         # Handle returns as Psi used to use numpy bit format.
         if isinstance(output_data["return_value"], float):
-            output_data["return_result"]
+            output_data["return_result"] = output_data["return_value"]
         else:
             import numpy as np  # Will have this if using Psi4
             arr = np.fromstring(output_data["return_value"]["data"][0], dtype=np.double)
@@ -177,7 +177,7 @@ def run_psi4(input_data):
 
     # Move several pieces up a level
     if output_data["success"]:
-        output_data["provenance"]["memory"] = input_data["memory"]
+        output_data["provenance"]["memory"] = round(input_data["memory"] / (1024 ** 3), 3)
         output_data["provenance"]["nthreads"] = input_data["nthreads"]
         del output_data["memory"], input_data["nthreads"]
 
