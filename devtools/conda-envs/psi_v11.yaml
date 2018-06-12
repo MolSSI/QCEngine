@@ -1,0 +1,16 @@
+name: test
+channels:
+  - conda-forge
+  - psi4
+dependencies:
+  - psi4=1.1
+
+    # Core
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov

@@ -9,7 +9,7 @@ matrix:
       python: 2.7
       env: 
         - PYTHON_VER=2.7
-        - PROG=RDKIT
+        - PROG=PSI4_V11
     - os: linux
       python: 3.5
       env:
@@ -37,6 +37,8 @@ install:
   - |
     if [ $PROG == "RDKIT" ]; then
       conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/rdkit.yaml
+    elif [ $PROG == "PSI_V11" ]; then
+      conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/psi_v11.yaml
     else
       conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
     fi
