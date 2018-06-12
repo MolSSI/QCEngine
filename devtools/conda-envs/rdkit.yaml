@@ -4,8 +4,13 @@ channels:
   - rdkit
 dependencies:
   - rdkit
-  - pytest
+
+    # Core
   - pyyaml
-  - pytest-cov
   - py-cpuinfo
+  - psutil
+
+    # Testing
+  - pytest
+  - pytest-cov
   - codecov
