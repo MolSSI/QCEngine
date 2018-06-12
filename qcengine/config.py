@@ -2,15 +2,15 @@
 Creates globals for the qcengine module
 """
 
+import copy
+import fnmatch
+import getpass
 import os
 import socket
-import fnmatch
-import yaml
-import json
+
 import cpuinfo
-import getpass
-import copy
 import psutil
+import yaml
 
 __all__ = ["get_global", "get_config", "get_provenance", "global_repr"]
 
@@ -97,11 +97,6 @@ def load_options(load_path):
                     raise KeyError("Key %s not accepted for default_compute" % k)
                 _globals["other_compute"][host][k] = _process_variables(v)
 
-    # Process autos
-    _process_autos(_globals["default_compute"])
-    for k, v in _globals["other_compute"].items():
-        _process_autos(v)
-
 
 def _load_locals():
 
@@ -123,6 +118,11 @@ def _load_locals():
         print("Using default options...")
     else:
         load_options(load_path)
+
+    # Process autos
+    _process_autos(_globals["default_compute"])
+    for k, v in _globals["other_compute"].items():
+        _process_autos(v)
 
 
 # Pull in the local variables
@@ -191,8 +191,6 @@ def get_config(key=None, hostname=None):
 
 
 def get_provenance():
-    ret = {}
-    ret["cpu"] = get_global("cpu")
-    ret["hostname"] = get_global("hostname")
-    ret["username"] = get_global("username")
+    ret = {"cpu": get_global("cpu"), "hostname": get_global("hostname"), "username": get_global("username")}
+
     return ret
