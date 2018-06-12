@@ -126,8 +126,8 @@ def run_psi4(json):
 
         # Handle slight RC2 weirdness
         if psi_version == parse_version("1.2rc2"):
-            #json["schema_name"] = "QC_JSON"
-            #json["schema_version"] = 0
+            json["schema_name"] = "QC_JSON"
+            json["schema_version"] = 0
             psi4.set_num_threads(json["ncores"], quiet=True)
 
         mol = psi4.core.Molecule.from_schema(json)
