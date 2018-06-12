@@ -19,6 +19,7 @@ requirements:
     - python
     - py-cpuinfo
     - pyyaml
+    - psutil
 
 test:
   requires:

@@ -12,7 +12,7 @@ import getpass
 import copy
 import psutil
 
-__all__ = ["get_global", "get_config", "get_provenance"]
+__all__ = ["get_global", "get_config", "get_provenance", "global_repr"]
 
 # Start a globals dictionary with small starting values
 _globals = {}
@@ -61,7 +61,7 @@ def _process_autos(data):
             raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
     if data.get("memory_per_job", False) == "auto":
-        data["memory_per_job"] = int(psutil.virtual_memory().available / data["jobs_per_node"])
+        data["memory_per_job"] = round(psutil.virtual_memory().available * 0.9 / data["jobs_per_node"] / (1024**3), 3)
 
 
 def load_options(load_path):
@@ -135,6 +135,27 @@ def get_hostname():
     """
 
     return _globals["hostname"]
+
+
+def global_repr():
+
+    ret = ""
+    ret += "Host information:\n"
+    ret += '-' * 80 + "\n"
+    for k in ["username", "hostname", "cpu"]:
+        ret += "{:<30} {:30}\n".format(k, get_global(k))
+
+    ret += "\nJob information:\n"
+    ret += '-' * 80 + "\n"
+    for k, v in get_config().items():
+        if (v is None) or isinstance(v, (str, int, float)):
+            ret += "  {:<28} {}\n".format(k, v)
+        else:
+            raise TypeError("Global printing error, type '{}' not understood for key '{}'.".format(type(v), v))
+
+    ret += '-' * 80 + "\n"
+
+    return ret
 
 
 def get_global(name):

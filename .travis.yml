@@ -47,6 +47,10 @@ install:
 
 
 script:
+    # Get a bit of info first
+  - python -c "import qcengine; print(qcengine.config.global_repr())"
+
+    # Run canonical tests
   - pytest -v --cov=qcengine/ qcengine/tests/
 
 notifications:

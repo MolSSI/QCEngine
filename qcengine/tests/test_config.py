@@ -78,5 +78,10 @@ def test_auto_threads(opt_state_auto):
     assert dc.get_config("nthreads_per_job") > 0
     assert dc.get_config("nthreads_per_job") < 100
 
-    assert isinstance(dc.get_config("memory_per_job"), int)
-    assert (dc.get_config("memory_per_job") / (1024**2)) > 100  # Always more than 1MB free?
+    assert isinstance(dc.get_config("memory_per_job"), (int, float))
+    assert dc.get_config("memory_per_job") > 0.01  # Always more than 1OMB free?
+
+
+def test_global_repr(opt_state_auto):
+
+    dc.config.global_repr()
