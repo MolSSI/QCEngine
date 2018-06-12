@@ -97,6 +97,11 @@ def load_options(load_path):
                     raise KeyError("Key %s not accepted for default_compute" % k)
                 _globals["other_compute"][host][k] = _process_variables(v)
 
+    # Process autos
+    _process_autos(_globals["default_compute"])
+    for k, v in _globals["other_compute"].items():
+        _process_autos(v)
+
 
 def _load_locals():
 
@@ -116,13 +121,14 @@ def _load_locals():
     if load_path is None:
         print("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
         print("Using default options...")
+
+        # Process autos
+        _process_autos(_globals["default_compute"])
+        for k, v in _globals["other_compute"].items():
+            _process_autos(v)
     else:
         load_options(load_path)
 
-    # Process autos
-    _process_autos(_globals["default_compute"])
-    for k, v in _globals["other_compute"].items():
-        _process_autos(v)
 
 
 # Pull in the local variables
