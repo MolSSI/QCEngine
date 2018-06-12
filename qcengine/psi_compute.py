@@ -58,12 +58,13 @@ def _build_v11_mol(jm):
 
     return psimol
 
+
 def _parse_psi_version(version):
     if "undef" in version:
-        raise TypeError("Using custom build Psi4 without tags. Please `git pull origin master --tags` and recompile Psi4.")
+        raise TypeError(
+            "Using custom build Psi4 without tags. Please `git pull origin master --tags` and recompile Psi4.")
 
     return parse_version(version)
-
 
 
 def run_psi4(json):
@@ -82,7 +83,7 @@ def run_psi4(json):
         raise ImportError("Could not find Psi4 in the Python path.")
 
     # Setup the job
-    json["nthreads"] = config.get_config("cores_per_job")
+    json["nthreads"] = config.get_config("nthreads_per_job")
     json["memory"] = int(config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
     json["success"] = False
 
@@ -125,7 +126,10 @@ def run_psi4(json):
     elif psi_version > parse_version("1.2rc2.dev500"):
 
         # Handle slight RC2 weirdness
-        if psi_version == parse_version("1.2rc2"):
+        psi_12rc2_tweak = (psi_version == parse_version("1.2rc2"))
+        psi_12rc2_tweak &= psi4.metadata.version_formatter("") != '(inplace)'
+
+        if psi_12rc2_tweak:
             json["schema_name"] = "QC_JSON"
             json["schema_version"] = 0
             psi4.set_num_threads(json["nthreads"], quiet=True)
@@ -137,14 +141,12 @@ def run_psi4(json):
         rjson = psi4.json_wrapper.run_json(json)
 
         # Handle slight RC2 weirdness once more
-        if psi_version == parse_version("1.2rc2"):
+        if psi_12rc2_tweak:
             rjson["schema_name"] = "qc_schema_output"
             rjson["schema_version"] = 1
 
-
     else:
         raise TypeError("Psi4 version '{}' not understood".format(psi_version))
-
 
     # Dispatch errors, PSIO Errors are not recoverable for future runs
     if rjson["success"] is False:
