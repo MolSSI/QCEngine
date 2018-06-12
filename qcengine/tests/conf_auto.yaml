@@ -1,0 +1,6 @@
+default_compute:
+    psi_path: /home/user/psi4
+    jobs_per_node: 1
+    nthreads_per_job: "auto"
+    memory_per_job: "auto"
+    scratch_directory: $TMPDIR

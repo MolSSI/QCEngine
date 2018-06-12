@@ -10,14 +10,16 @@ import json
 import cpuinfo
 import getpass
 import copy
+import psutil
 
 __all__ = ["get_global", "get_config", "get_provenance"]
 
 # Start a globals dictionary with small starting values
 _globals = {}
+_cpuinfo = cpuinfo.get_cpu_info()
 
 _globals["hostname"] = socket.gethostname()
-_globals["cpu"] = cpuinfo.get_cpu_info()["brand"]
+_globals["cpu"] = _cpuinfo["brand"]
 _globals["username"] = getpass.getuser()
 _globals["default_compute"] = {
 
@@ -25,12 +27,13 @@ _globals["default_compute"] = {
     "psi_path": None,  # Path for the Psi4 API
 
     # Specifications
-    "jobs_per_node": 1,  # Number of jobs per node
-    "cores_per_job": 1,  # Number of cores per job
-    "memory_per_job": 2,  # Amount of memory in Gb per node
-    "scratch_directory": None, # What location to use as scratch
+    "jobs_per_node": 2,  # Number of jobs per node
+    "nthreads_per_job": 'auto',  # Number of nthreads per job
+    "memory_per_job": 'auto',  # Amount of memory in Gb per node
+    "scratch_directory": None,  # What location to use as scratch
 }
 _globals["other_compute"] = {}
+
 
 def _process_variables(var):
     # Environmental var
@@ -44,6 +47,22 @@ def _process_variables(var):
     # Normal var
     else:
         return var
+
+
+def _process_autos(data):
+    if data.get("nthreads_per_job", False) == "auto":
+        nthreads = _cpuinfo["count"]
+
+        # Watch hyperthreading
+        if "Intel" in _cpuinfo["vendor_id"]:
+            nthreads = nthreads // 2
+        data["nthreads_per_job"] = int(nthreads / data["jobs_per_node"])
+        if data["nthreads_per_job"] < 1:
+            raise KeyError("Number of jobs per node exceeds the number of available cores.")
+
+    if data.get("memory_per_job", False) == "auto":
+        data["memory_per_job"] = int(psutil.virtual_memory().available / data["jobs_per_node"])
+
 
 def load_options(load_path):
     """
@@ -78,6 +97,12 @@ def load_options(load_path):
                     raise KeyError("Key %s not accepted for default_compute" % k)
                 _globals["other_compute"][host][k] = _process_variables(v)
 
+    # Process autos
+    _process_autos(_globals["default_compute"])
+    for k, v in _globals["other_compute"].items():
+        _process_autos(v)
+
+
 def _load_locals():
 
     # Find the config
@@ -100,8 +125,6 @@ def _load_locals():
         load_options(load_path)
 
 
-
-
 # Pull in the local variables
 _load_locals()
 
@@ -113,8 +136,10 @@ def get_hostname():
 
     return _globals["hostname"]
 
+
 def get_global(name):
     return copy.deepcopy(_globals[name])
+
 
 def get_config(key=None, hostname=None):
     """
@@ -140,8 +165,9 @@ def get_config(key=None, hostname=None):
         return config.copy()
     else:
         if key not in config:
-            raise Exception("Key %s asked for, but not in local data")
+            raise Exception("Key '{}' asked for, but not in local data".format(key))
         return config[key]
+
 
 def get_provenance():
     ret = {}
@@ -149,4 +175,3 @@ def get_provenance():
     ret["hostname"] = get_global("hostname")
     ret["username"] = get_global("username")
     return ret
-
