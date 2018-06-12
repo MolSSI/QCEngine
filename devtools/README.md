@@ -44,6 +44,9 @@ This directory contains the files to build and deploy on [Conda](https://conda.i
    *  `git tag -a X.Y.Z [latest pushed commit] && git push --follow-tags`
 - [ ] Get the PR merged in
 
+## Conda build comments
+- conda-build build devtools/conda-recipe --user USER -c conda-forge
+
 ## Versioneer Auto-version
 [Versioneer](https://github.com/warner/python-versioneer) will automatically infer what version 
 is installed by looking at the `git` tags and how many commits ahead this version is. The format follows 
