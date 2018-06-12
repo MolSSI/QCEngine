@@ -126,8 +126,8 @@ def run_psi4(json):
 
         # Handle slight RC2 weirdness
         if psi_version == parse_version("1.2rc2"):
-            json["schema_name"] = "QC_JSON"
-            json["schema_version"] = 0
+            #json["schema_name"] = "QC_JSON"
+            #json["schema_version"] = 0
             psi4.set_num_threads(json["ncores"], quiet=True)
 
         mol = psi4.core.Molecule.from_schema(json)
@@ -138,22 +138,24 @@ def run_psi4(json):
 
         # Handle slight RC2 weirdness once more
         if psi_version == parse_version("1.2rc2"):
-            json["schema_name"] = "qc_schema_output"
-            json["schema_version"] = 1
+            rjson["schema_name"] = "qc_schema_output"
+            rjson["schema_version"] = 1
 
 
     else:
         raise TypeError("Psi4 version '{}' not understood".format(psi_version))
 
-    # Move several pieces up a level
-    json["provenance"]["memory"] = json["memory"]
-    json["provenance"]["ncores"] = json["ncores"]
-    del json["memory"], json["ncores"]
 
     # Dispatch errors, PSIO Errors are not recoverable for future runs
     if rjson["success"] is False:
 
         if "PSIO Error" in rjson["error"]:
             raise ValueError(rjson["error"])
+
+    # Move several pieces up a level
+    if rjson["success"]:
+        rjson["provenance"]["memory"] = json["memory"]
+        rjson["provenance"]["ncores"] = json["ncores"]
+        del rjson["memory"], json["ncores"]
 
     return rjson
