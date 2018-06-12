@@ -82,7 +82,7 @@ def run_psi4(json):
         raise ImportError("Could not find Psi4 in the Python path.")
 
     # Setup the job
-    json["ncores"] = config.get_config("cores_per_job")
+    json["nthreads"] = config.get_config("cores_per_job")
     json["memory"] = int(config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
     json["success"] = False
 
@@ -99,7 +99,7 @@ def run_psi4(json):
 
         json["options"] = json["keywords"]
         json["options"]["BASIS"] = json["model"]["basis"]
-        psi4.set_num_threads(json["ncores"], quiet=True)
+        psi4.set_num_threads(json["nthreads"], quiet=True)
 
         # Check if RHF/UHF
         mol = psi4.geometry(mol_str)
@@ -128,7 +128,7 @@ def run_psi4(json):
         if psi_version == parse_version("1.2rc2"):
             json["schema_name"] = "QC_JSON"
             json["schema_version"] = 0
-            psi4.set_num_threads(json["ncores"], quiet=True)
+            psi4.set_num_threads(json["nthreads"], quiet=True)
 
         mol = psi4.core.Molecule.from_schema(json)
         if mol.multiplicity() != 1:
@@ -155,7 +155,7 @@ def run_psi4(json):
     # Move several pieces up a level
     if rjson["success"]:
         rjson["provenance"]["memory"] = json["memory"]
-        rjson["provenance"]["ncores"] = json["ncores"]
-        del rjson["memory"], json["ncores"]
+        rjson["provenance"]["nthreads"] = json["nthreads"]
+        del rjson["memory"], json["nthreads"]
 
     return rjson
