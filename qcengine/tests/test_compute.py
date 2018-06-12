@@ -2,12 +2,11 @@
 Tests the DQM compute dispatch module
 """
 
+import copy
+
+import qcengine as dc
 # Important this is first
 from . import addons
-
-import os
-import copy
-import qcengine as dc
 
 _base_json = {
     "schema_name": "qc_schema_input",

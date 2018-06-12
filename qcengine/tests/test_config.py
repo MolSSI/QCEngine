@@ -2,12 +2,12 @@
 Tests the DQM compute module configuration
 """
 
-import pytest
 import copy
 import os
 
+import pytest
+
 import qcengine as dc
-from . import addons
 
 
 @pytest.fixture

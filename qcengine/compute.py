@@ -4,9 +4,10 @@ Integrates the computes together
 
 import time
 
+from . import config
 from .psi_compute import run_psi4
 from .rdkit_compute import run_rdkit
-from . import config
+
 
 def compute(json, program):
 

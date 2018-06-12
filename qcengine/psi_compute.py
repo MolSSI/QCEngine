@@ -2,8 +2,8 @@
 Calls the Psi4 executable.
 """
 
-import time
 import sys
+
 from pkg_resources import parse_version
 
 from . import config
@@ -16,7 +16,7 @@ def _build_v11_mol(jm):
 
     # Cannot handle fragments
     if "fragments" in jm:
-        return (False, "Psi4 v1.1 cannot support fragments")
+        return False, "Psi4 v1.1 cannot support fragments"
 
     if "real" in jm:
         real = jm["real"]

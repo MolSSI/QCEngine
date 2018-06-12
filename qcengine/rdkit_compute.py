@@ -2,10 +2,6 @@
 Calls the Psi4 executable.
 """
 
-import time
-import sys
-
-from . import config
 from . import units
 
 
@@ -17,7 +13,7 @@ def run_rdkit(json):
 
     import rdkit
     from rdkit import Chem
-    from rdkit.Chem import AllChem 
+    from rdkit.Chem import AllChem
 
     # Failure flag
     json["success"] = False
@@ -30,15 +26,15 @@ def run_rdkit(json):
         json["error"] = "run_rdkit does not currently support charged molecules"
         return json
 
-    if ("connectivity" not in jmol):
+    if "connectivity" not in jmol:
         json["error"] = "run_rdkit molecule must have a connectivity graph"
         return json
 
     # Build out the base molecule
     base_mol = Chem.Mol()
-    rwMol = Chem.RWMol(base_mol)
+    rw_mol = Chem.RWMol(base_mol)
     for sym in jmol["symbols"]:
-        rwMol.AddAtom(Chem.Atom(sym))
+        rw_mol.AddAtom(Chem.Atom(sym))
 
     # Add in connectivity
     bond_types = {
@@ -47,9 +43,9 @@ def run_rdkit(json):
         3: Chem.BondType.TRIPLE
     }
     for atom1, atom2, bo in jmol["connectivity"]:
-        rwMol.AddBond(atom1, atom2, bond_types[bo])
-        
-    mol = rwMol.GetMol()
+        rw_mol.AddBond(atom1, atom2, bond_types[bo])
+
+    mol = rw_mol.GetMol()
 
     # Write out the conformer
     natom = len(jmol["symbols"])
@@ -94,6 +90,6 @@ def run_rdkit(json):
 
     json["schema_name"] = "qc_json_output"
     json["success"] = True
-    
+
 
     return json
