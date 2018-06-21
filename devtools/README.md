@@ -45,7 +45,12 @@ This directory contains the files to build and deploy on [Conda](https://conda.i
 - [ ] Get the PR merged in
 
 ## Conda build comments
-- conda-build build devtools/conda-recipe --user USER -c conda-forge
+- `conda-build build devtools/conda-recipe --user molssi -c conda-forge --no-force-upload`
+
+## PyPI upload comments
+Asumming your `.pypirc` file is setup [correctly](https://packaging.python.org/guides/migrating-to-pypi-org/#uploading).
+- `python setup.py sdist upload`
+
 
 ## Versioneer Auto-version
 [Versioneer](https://github.com/warner/python-versioneer) will automatically infer what version 
