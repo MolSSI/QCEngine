@@ -18,6 +18,9 @@ __all__ = ["get_global", "get_config", "get_provenance", "global_repr"]
 _globals = {}
 _cpuinfo = cpuinfo.get_cpu_info()
 
+# We want physical cores
+_cpuinfo["count"] = psutil.cpu_count(logical=False)
+
 _globals["hostname"] = socket.gethostname()
 _globals["cpu"] = _cpuinfo["brand"]
 _globals["username"] = getpass.getuser()
@@ -53,9 +56,7 @@ def _process_autos(data):
     if data.get("nthreads_per_job", False) == "auto":
         nthreads = _cpuinfo["count"]
 
-        # Watch hyperthreading
-        if "Intel" in _cpuinfo["vendor_id"]:
-            nthreads = nthreads // 2
+        # Figure out number of threads per job 
         data["nthreads_per_job"] = int(nthreads / data["jobs_per_node"])
         if data["nthreads_per_job"] < 1:
             raise KeyError("Number of jobs per node exceeds the number of available cores.")
