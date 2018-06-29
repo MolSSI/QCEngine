@@ -5,7 +5,6 @@ Tests the DQM compute dispatch module
 import copy
 
 import qcengine as dc
-# Important this is first
 from . import addons
 
 _base_json = {
@@ -31,7 +30,7 @@ def test_psi4():
     for key in ["cpu", "hostname", "username"]:
         assert key in ret["provenance"]
 
-    assert ret["success"] == True
+    assert ret["success"] is True
 
 @addons.using_psi4
 def test_psi4_ref_switch():
@@ -44,7 +43,7 @@ def test_psi4_ref_switch():
 
     ret = dc.compute(json_data, "psi4")
 
-    assert ret["success"] == True
+    assert ret["success"] is True
 
 @addons.using_rdkit
 def test_rdkit():
@@ -58,4 +57,4 @@ def test_rdkit():
 
     ret = dc.compute(json_data, "rdkit")
 
-    assert ret["success"] == True
+    assert ret["success"] is True
