@@ -183,10 +183,10 @@ def get_config(key=None, hostname=None):
         hostname = _globals["hostname"]
 
     # Find a match
-    for host, config in _globals["other_compute"].items():
-        if fnmatch.fnmatch(hostname, config["hostname"]):
+    for host, host_config in _globals["other_compute"].items():
+        if fnmatch.fnmatch(hostname, host_config["hostname"]):
             hostname_match = host
-            config = config
+            config = host_config
             break
 
     # Use default
