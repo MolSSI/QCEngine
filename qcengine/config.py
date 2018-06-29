@@ -7,6 +7,7 @@ import fnmatch
 import getpass
 import os
 import socket
+import logging
 
 import cpuinfo
 import psutil
@@ -37,6 +38,9 @@ _globals["default_compute"] = {
 }
 _globals["other_compute"] = {}
 
+# Handle logger
+_globals["logger"] = logging.getLogger("QCEngine")
+_globals["logger"].setLevel(logging.CRITICAL)
 
 def _process_variables(var):
     # Environmental var
@@ -56,7 +60,7 @@ def _process_autos(data):
     if data.get("nthreads_per_job", False) == "auto":
         nthreads = _cpuinfo["count"]
 
-        # Figure out number of threads per job 
+        # Figure out number of threads per job
         data["nthreads_per_job"] = int(nthreads / data["jobs_per_node"])
         if data["nthreads_per_job"] < 1:
             raise KeyError("Number of jobs per node exceeds the number of available cores.")
@@ -120,8 +124,8 @@ def _load_locals():
             break
 
     if load_path is None:
-        print("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
-        print("Using default options...")
+        _globals["logger"].info("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
+        _globals["logger"].info("Using default options...")
 
         # Process autos
         _process_autos(_globals["default_compute"])
