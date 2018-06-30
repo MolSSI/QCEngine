@@ -39,8 +39,8 @@ _globals["default_compute"] = {
 _globals["other_compute"] = {}
 
 # Handle logger
-_globals["logger"] = logging.getLogger("QCEngine")
-_globals["logger"].setLevel(logging.CRITICAL)
+_logger = logging.getLogger("QCEngine")
+_logger.setLevel(logging.CRITICAL)
 
 def _process_variables(var):
     # Environmental var
@@ -124,8 +124,8 @@ def _load_locals():
             break
 
     if load_path is None:
-        _globals["logger"].info("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
-        _globals["logger"].info("Using default options...")
+        _logger.info("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
+        _logger.info("Using default options...")
 
         # Process autos
         _process_autos(_globals["default_compute"])
@@ -205,3 +205,6 @@ def get_provenance():
     ret = {"cpu": get_global("cpu"), "hostname": get_global("hostname"), "username": get_global("username")}
 
     return ret
+
+def get_logger():
+    return _logger 

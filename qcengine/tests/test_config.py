@@ -15,19 +15,14 @@ def opt_state_basic():
     """
     Capture the options state and temporarily override.
     """
-    tmp = {}
-    for k, v in dc.config._globals.items():
-        if not isinstance(v, (dict, str, list, tuple)):
-            continue
-        tmp[k] = copy.deepcopy(v)
+    tmp = copy.deepcopy(dc.config._globals)
 
     base_path = os.path.dirname(os.path.abspath(__file__))
     dc.load_options(os.path.join(base_path, "conf_basic.yaml"))
 
     yield
 
-    for k, v in tmp.items():
-        dc.config._globals[k] = v
+    dc.config._globals = tmp
 
 
 def test_config_path(opt_state_basic):
