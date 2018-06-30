@@ -20,7 +20,13 @@ _globals = {}
 _cpuinfo = cpuinfo.get_cpu_info()
 
 # We want physical cores
-_cpuinfo["count"] = psutil.cpu_count(logical=False)
+if hasattr(psutil.Process(), "cpu_affinity"):
+    cpu_cnt = len(psutil.Process().cpu_affinity())
+else:
+    cpu_cnt = psutil.cpu_count(logical=False)
+    if cpu_cnt is None:
+        cpu_cnt = psutil.cpu_count(logical=True)
+_cpuinfo["count"] = cpu_cnt
 
 _globals["hostname"] = socket.gethostname()
 _globals["cpu"] = _cpuinfo["brand"]
@@ -41,11 +47,6 @@ _globals["other_compute"] = {}
 # Handle logger
 _logger = logging.getLogger("QCEngine")
 _logger.setLevel(logging.CRITICAL)
-
-# Handle CI special case
-if "travisci" in _globals["hostname"]:
-    _globals["count"] = 1
-    _globals["default_compute"]["jobs_per_node"] = 1
 
 def _process_variables(var):
     # Environmental var
@@ -159,7 +160,9 @@ def global_repr():
     ret += "Host information:\n"
     ret += '-' * 80 + "\n"
     for k in ["username", "hostname", "cpu"]:
-        ret += "{:<30} {:30}\n".format(k, get_global(k))
+        ret += "{:<30} {:<30}\n".format(k, get_global(k))
+    ret += "{:<30} {:<30}\n".format("cores", _cpuinfo["count"])
+
 
     ret += "\nJob information:\n"
     ret += '-' * 80 + "\n"
