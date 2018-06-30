@@ -42,6 +42,11 @@ _globals["other_compute"] = {}
 _logger = logging.getLogger("QCEngine")
 _logger.setLevel(logging.CRITICAL)
 
+# Handle CI special case
+if "travisci" in _globals["hostname"]:
+    _globals["count"] = 1
+    _globals["default_compute"]["jobs_per_node"] = 1
+
 def _process_variables(var):
     # Environmental var
     if isinstance(var, str) and var.startswith("$"):
