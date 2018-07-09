@@ -11,7 +11,24 @@ from .rdkit_compute import run_rdkit
 
 
 def compute(input_data, program):
+    """Executes a single quantum chemistry program given a QC Schema input.
 
+    The full specification can be found at:
+        http://molssi-qc-schema.readthedocs.io/en/latest/index.html#
+
+    Parameters
+    ----------
+    input_data : dict
+        A QC Schema input specification
+    program : str, {"psi4", "rdkit"}
+        The program to run the input under
+
+    Returns
+    -------
+    ret : dict
+        A QC Schema output
+
+    """
     input_data = copy.deepcopy(input_data)
 
     # Run the program
