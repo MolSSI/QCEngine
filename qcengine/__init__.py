@@ -5,7 +5,7 @@ Base file for the dqm_compute module.
 from . import config
 
 from .config import get_config, load_options
-from .compute import compute
+from .compute import compute, compute_procedure
 from .stock_mols import get_molecule
 
 # Handle versioneer
