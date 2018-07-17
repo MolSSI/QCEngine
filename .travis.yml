@@ -20,11 +20,6 @@ matrix:
       env:
         - PYTHON_VER=3.6
         - PROG=PSI4
-    - os: linux
-      python: 3.6
-      env:
-        - PYTHON_VER=3.6
-        - PROG=GEOMETRIC
 
 before_install:
     # Additional info about the build
@@ -46,8 +41,6 @@ install:
       conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/psi_v11.yaml
     elif [ $PROG == "PSI4" ]; then
       conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
-    elif [ $PROG == "GEOMETRIC" ]; then
-      conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/geometric.yaml
     else
       echo "ERROR: No match for PROG ($PROG)."
       exit 1

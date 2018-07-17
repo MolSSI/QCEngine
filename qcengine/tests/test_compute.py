@@ -25,10 +25,9 @@ def test_psi4():
     ret = dc.compute(json_data, "psi4")
 
     assert ret["driver"] == "energy"
-    for key in ["provenance", "wall_time"]:
-        assert key in ret
+    assert "provenance" in ret
 
-    for key in ["cpu", "hostname", "username"]:
+    for key in ["cpu", "hostname", "username", "wall_time"]:
         assert key in ret["provenance"]
 
     assert ret["success"] is True
