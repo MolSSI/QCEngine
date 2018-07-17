@@ -3,6 +3,7 @@ Tests the DQM compute dispatch module
 """
 
 import copy
+import pytest
 
 import qcengine as dc
 from . import addons
@@ -58,3 +59,42 @@ def test_rdkit():
     ret = dc.compute(json_data, "rdkit")
 
     assert ret["success"] is True
+
+@addons.using_psi4
+@addons.using_geometric
+def test_geometric():
+    qc_schema_input = {
+        "schema_name": "qc_schema_input",
+        "schema_version": 1,
+        "molecule": {
+            "geometry": [
+                0.0,  0.0, -0.6,
+                0.0,  0.0,  0.6,
+            ],
+            "symbols": ["H", "H"],
+            "connectivity": [[0, 1, 1]]
+        },
+        "driver": "gradient",
+        "model": {
+            "method": "HF",
+            "basis": "sto-3g"
+        },
+        "keywords": {},
+    }
+
+    json_data = {
+        "schema_name": "qc_schema_optimization_input",
+        "schema_version": 1,
+        "keywords": {
+            "coordsys": "tric",
+            "maxiter": 100,
+            "program": "psi4"
+        },
+        "input_specification": qc_schema_input
+    }
+
+    ret = dc.compute_procedure(json_data, "geometric")
+    assert 10 > len(ret["trajectory"]) > 1
+
+    geom = ret["final_molecule"]["molecule"]["geometry"]
+    assert pytest.approx(abs(geom[2] - geom[5]), 3) == -1.3459150737

@@ -32,3 +32,5 @@ using_psi4 = pytest.mark.skipif(
     _plugin_import("psi4") is False, reason="could not find psi4. please install the package to enable tests")
 using_rdkit = pytest.mark.skipif(
     _plugin_import("rdkit") is False, reason="could not find rdkit. please install the package to enable tests")
+using_geometric = pytest.mark.skipif(
+    _plugin_import("geometric") is False, reason="could not find geomeTRIC. please install the package to enable tests")
