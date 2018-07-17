@@ -84,7 +84,7 @@ def run_psi4(input_data):
 
     # Setup the job
     input_data["nthreads"] = config.get_config("nthreads_per_job")
-    input_data["memory"] = int(config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.9)
+    input_data["memory"] = int(config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.95)
     input_data["success"] = False
 
     scratch = config.get_config("scratch_directory")

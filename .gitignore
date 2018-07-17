@@ -63,3 +63,6 @@ target/
 # Random files in base
 timer.dat
 tmp.py
+
+# geometric junk
+energy.txt
