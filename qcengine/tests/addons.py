@@ -22,11 +22,6 @@ def _plugin_import(plug):
     else:
         return True
 
-
-# Modify paths for testing
-os.environ["DQM_CONFIG_PATH"] = os.path.dirname(os.path.abspath(__file__))
-os.environ["TMPDIR"] = "/tmp/"
-
 # Add flags
 using_psi4 = pytest.mark.skipif(
     _plugin_import("psi4") is False, reason="could not find psi4. please install the package to enable tests")

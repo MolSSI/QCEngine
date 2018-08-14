@@ -89,7 +89,7 @@ def load_options(load_path):
     else:
         raise TypeError("Unknown options load")
 
-    _globals["config_path"] = load_path
+    _globals["config_path"] = None
 
     # Override default keys
     default_keys = list(_globals["default_compute"].keys())

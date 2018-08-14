@@ -15,20 +15,51 @@ def opt_state_basic():
     """
     Capture the options state and temporarily override.
     """
-    tmp = copy.deepcopy(dc.config._globals)
 
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    dc.load_options(os.path.join(base_path, "conf_basic.yaml"))
+    # Snapshot env
+    old_globals = copy.deepcopy(dc.config._globals)
+    old_environ = dict(os.environ)
+
+    os.environ["TMPDIR"] = "/tmp/"
+
+    config = {
+      "default_compute": {
+        "psi_path": "/home/user/psi4",
+        "jobs_per_node": 1,
+        "nthreads_per_job": 2,
+        "memory_per_job": 4,
+        "scratch_directory": "$TMPDIR"
+      },
+      "other_compute": {
+        "dragonsooth": {
+          "psi_path": "/home/user/dt/psi4",
+          "hostname": "dt*",
+          "jobs_per_node": 2,
+          "nthreads_per_job": 6,
+          "memory_per_job": 60,
+          "scratch_directory": "$NOVAR_RANDOM_ABC123"
+        },
+        "new_river": {
+          "hostname": "nr*",
+          "jobs_per_node": 2,
+          "nthreads_per_job": 12,
+          "memory_per_job": 120
+        }
+      }
+    }
+
+    dc.load_options(config)
 
     yield
 
-    dc.config._globals = tmp
+    # Reset env
+    os.environ.update(old_environ)
+    dc.config._globals = old_globals
 
 
 def test_config_path(opt_state_basic):
     cpath = dc.config.get_global("config_path")
-    test_path = os.path.join("qcengine", "test")
-    assert test_path in cpath
+    assert cpath is None
 
 
 def test_get_default(opt_state_basic):
@@ -52,6 +83,7 @@ def test_default_matches(opt_state_basic):
 
 def test_environmental_vars(opt_state_basic):
 
+    print(dc.get_config("scratch_directory"))
     assert dc.get_config("scratch_directory") == "/tmp/"
     assert dc.get_config("scratch_directory", hostname="dt5") is None
 
