@@ -61,14 +61,30 @@ def opt_state_auto():
     """
     Capture the options state and temporarily override.
     """
-    tmp = copy.deepcopy(dc.config._globals)
 
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    dc.load_options(os.path.join(base_path, "conf_auto.yaml"))
+    # Snapshot env
+    old_globals = copy.deepcopy(dc.config._globals)
+    old_environ = dict(os.environ)
+
+    config = {
+        "default_compute": {
+            "psi_path": "/home/user/psi4",
+            "jobs_per_node": 1,
+            "nthreads_per_job": "auto",
+            "memory_per_job": "auto",
+            "scratch_directory": "$TMPDIR"
+        }
+    }
+    
+
+    os.environ["TMPDIR"] = "/tmp/"
+    dc.load_options(config)
 
     yield
 
-    dc.config._globals = tmp
+    # Reset env
+    os.environ.update(old_environ)
+    dc.config._globals = old_globals
 
 
 def test_auto_threads(opt_state_auto):
