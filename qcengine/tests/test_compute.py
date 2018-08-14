@@ -65,14 +65,6 @@ def test_geometric():
     qc_schema_input = {
         "schema_name": "qc_schema_input",
         "schema_version": 1,
-        "molecule": {
-            "geometry": [
-                0.0,  0.0, -0.6,
-                0.0,  0.0,  0.6,
-            ],
-            "symbols": ["H", "H"],
-            "connectivity": [[0, 1, 1]]
-        },
         "driver": "gradient",
         "model": {
             "method": "HF",
@@ -89,11 +81,19 @@ def test_geometric():
             "maxiter": 100,
             "program": "psi4"
         },
-        "input_specification": qc_schema_input
+        "input_specification": qc_schema_input,
+        "initial_molecule": {
+            "geometry": [
+                0.0,  0.0, -0.6,
+                0.0,  0.0,  0.6,
+            ],
+            "symbols": ["H", "H"],
+            "connectivity": [[0, 1, 1]]
+        },
     }
 
     ret = dc.compute_procedure(json_data, "geometric")
     assert 10 > len(ret["trajectory"]) > 1
 
-    geom = ret["final_molecule"]["molecule"]["geometry"]
+    geom = ret["final_molecule"]["geometry"]
     assert pytest.approx(abs(geom[2] - geom[5]), 3) == -1.3459150737
