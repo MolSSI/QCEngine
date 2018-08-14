@@ -81,8 +81,13 @@ def load_options(load_path):
     """
 
     # Load the library
-    with open(load_path) as stream:
-        user_config = yaml.load(stream)
+    if isinstance(load_path, str):
+        with open(load_path, "r") as stream:
+            user_config = yaml.load(stream)
+    elif isinstance(load_path, dict):
+        user_config = load_path
+    else:
+        raise TypeError("Unknown options load")
 
     _globals["config_path"] = load_path
 
