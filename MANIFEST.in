@@ -1,0 +1,9 @@
+recursive-include qcengine *.py
+
+include setup.py
+include README.md
+include LICENSE
+include MANIFEST.in
+
+include versioneer.py
+include qcengine/_version.py
