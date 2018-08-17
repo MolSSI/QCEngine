@@ -4,7 +4,13 @@
 #
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
-# http://www.sphinx-doc.org/en/stable/config
+# http://www.sphinx-doc.org/en/master/config
+
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath('../..'))
+import qcengine
 
 # -- Path setup --------------------------------------------------------------
 
@@ -19,14 +25,14 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Compute wrapper for Quantum Chemistry Schema input/output for a variety of programs.'
-copyright = "2018, MolSSI"
+project = 'QCEngine'
+copyright = '2018, Daniel G. A. Smith'
 author = 'Daniel G. A. Smith'
 
 # The short X.Y version
-version = ''
+version = qcengine.__version__
 # The full version, including alpha/beta/rc tags
-release = ''
+release = qcengine.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,8 +46,19 @@ release = ''
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.intersphinx',
 ]
+
+napoleon_google_docstring = False
+napoleon_use_param = False
+napoleon_use_ivar = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -65,10 +82,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'default'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -131,7 +148,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'QCEngine.tex', 'QCEngine Documentation',
-     'QCEngine', 'manual'),
+     'Daniel G. A. Smith', 'manual'),
 ]
 
 
@@ -140,7 +157,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'QCEngine', 'QCEngine Documentation',
+    (master_doc, 'qcengine', 'QCEngine Documentation',
      [author], 1)
 ]
 
@@ -152,9 +169,19 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'QCEngine', 'QCEngine Documentation',
-     author, 'QCEngine', project,
+     author, 'QCEngine', 'One line description of project.',
      'Miscellaneous'),
 ]
 
 
 # -- Extension configuration -------------------------------------------------
+
+# -- Options for intersphinx extension ---------------------------------------
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'https://docs.python.org/': None}
+
+# -- Options for todo extension ----------------------------------------------
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = True
