@@ -1,0 +1,16 @@
+coverage:
+  ignore:
+    - qcengine/test/.*
+    - setup.py
+  status:
+    patch: false
+    project:
+      default:
+        threshold: 80%
+comment:
+  layout: "header"
+  require_changes: false
+  branches: null
+  behavior: default
+  flags: null
+  paths: null
