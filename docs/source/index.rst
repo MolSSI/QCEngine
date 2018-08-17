@@ -7,7 +7,7 @@
 QCEngine
 =========
 
-*QCEngine is a distributed compute and database platform for quantum chemistry.*
+*Quantum chemistry program executor and IO standardizer (`QCSchema <https://github.com/MolSSI/QC_JSON_Schema>`_) for quantum chemistry.*
 
 
 .. toctree::

@@ -1,5 +1,5 @@
-Instal QCEngine
-================
+Installing QCEngine
+===================
 
 You can install qcengine with ``conda``, with ``pip``, or by installing from source.
 
