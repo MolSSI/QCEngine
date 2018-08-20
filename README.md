@@ -7,7 +7,7 @@ QCEngine
 [![Anaconda-Server Badge](https://anaconda.org/molssi/qcengine/badges/version.svg)](https://anaconda.org/molssi/qcengine)
 
 
-Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QC_JSON_Schema)) for quantum chemistry. See the [documentation](qcengine.readthedocs.io) for more information.
+Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QC_JSON_Schema)) for quantum chemistry. See the [documentation](https://qcengine.readthedocs.io/en/latest/) for more information.
 
 # License
 
