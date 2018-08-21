@@ -1,7 +1,6 @@
 name: test
 channels:
-  - conda-forge
-  - psi4/label/dev
+  - psi4
 dependencies:
   - psi4=1.2
 
@@ -13,8 +12,8 @@ dependencies:
     # Testing
   - pytest
   - pytest-cov
-  - codecov
 
     # Pip depends
   - pip:
+    - codecov
     - git+https://github.com/leeping/geomeTRIC#egg=geometric
