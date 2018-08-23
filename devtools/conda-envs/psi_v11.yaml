@@ -1,6 +1,5 @@
 name: test
 channels:
-  - conda-forge
   - psi4
 dependencies:
   - psi4=1.1
@@ -13,4 +12,6 @@ dependencies:
     # Testing
   - pytest
   - pytest-cov
-  - codecov
+
+  - pip:
+    - codecov
