@@ -16,7 +16,7 @@ A simple example of QCEngine's capabilities is as follows:
 
 .. code:: python
 
-    >>> import qcengine as qce
+    >>> import qcengine
 
     >>> job = {
       "schema_name": "qc_schema_input",
@@ -39,7 +39,7 @@ A simple example of QCEngine's capabilities is as follows:
       }
     }
 
-    >>> qce.compute(json_data, "psi4")
+    >>> qcengine.compute(job, "psi4")
     {
       ...,
       "provenance": {
@@ -75,9 +75,9 @@ The QCEngine middleware can automatically determine:
 
 - The number of physical cores on the system and to use.
 - The amount of physical memory on the system and the amount to use.
-- The provenance of a computation (hardware, software versions, and compute resources)
-- Locations of scratch disk space
-- Locations of quantum chemistry programs 
+- The provenance of a computation (hardware, software versions, and compute resources).
+- Locations of scratch disk space.
+- Locations of quantum chemistry programs.
 
 
 QCArchive
