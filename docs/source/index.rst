@@ -26,6 +26,7 @@ Table of Contents
    :caption: Getting Started
 
    install
+   community
 
 .. toctree::
    :maxdepth: 2
