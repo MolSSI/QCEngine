@@ -123,7 +123,7 @@ def _load_locals():
 
     # Find the config
     load_path = None
-    test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".qc")]
+    test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".qca")]
 
     if "DQM_CONFIG_PATH" in os.environ:
         test_paths.insert(0, os.environ["DQM_CONFIG_PATH"])
@@ -220,4 +220,4 @@ def get_provenance():
     return ret
 
 def get_logger():
-    return _logger 
+    return _logger
