@@ -12,7 +12,7 @@ _base_json = {"schema_name": "qc_schema_input", "schema_version": 1}
 
 
 @addons.using_psi4
-def test_psi4():
+def test_psi4_task():
     json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = dc.get_molecule("water")
     json_data["driver"] = "energy"
@@ -46,10 +46,9 @@ def test_psi4_ref_switch():
 
 
 @addons.using_rdkit
-def test_rdkit():
+def test_rdkit_task():
     json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = dc.get_molecule("water")
-    json_data["molecule"]["connectivity"] = [[0, 1, 1], [0, 2, 1]]
     json_data["driver"] = "gradient"
     json_data["model"] = {"method": "UFF", "basis": ""}
     json_data["keywords"] = {}
@@ -58,3 +57,21 @@ def test_rdkit():
     ret = dc.compute(json_data, "rdkit")
 
     assert ret["success"] is True
+
+
+@addons.using_rdkit
+def test_rdkit_connectivity_error():
+    json_data = copy.deepcopy(_base_json)
+    json_data["molecule"] = dc.get_molecule("water")
+    json_data["driver"] = "gradient"
+    json_data["model"] = {"method": "UFF", "basis": ""}
+    json_data["keywords"] = {}
+    json_data["return_output"] = False
+    del json_data["molecule"]["connectivity"]
+
+    ret = dc.compute(json_data, "rdkit")
+    assert ret["success"] is False
+    assert "conn" in ret["error"]
+
+    with pytest.raises(ValueError):
+        ret = dc.compute(json_data, "rdkit", raise_error=True)

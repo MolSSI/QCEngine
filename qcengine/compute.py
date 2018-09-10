@@ -13,7 +13,7 @@ from . import psi_compute
 from . import rdkit_compute
 
 
-def compute(input_data, program):
+def compute(input_data, program, raise_error=False):
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -23,8 +23,10 @@ def compute(input_data, program):
     ----------
     input_data : dict
         A QC Schema input specification
-    program : str, {"psi4", "rdkit"}
+    program : {"psi4", "rdkit"}
         The program to run the input under
+    raise_error : bool, option
+        Determines if compute should raise an error or not.
 
     Returns
     -------
@@ -41,9 +43,12 @@ def compute(input_data, program):
     elif program == "rdkit":
         output_data = rdkit_compute.run_rdkit(input_data)
     else:
-        raise KeyError("Program %s not understood" % program)
+        output_data["error"] = "QCEngine: Program {} not understood".format(program)
     comp_time = time.time() - comp_time
 
+    # Raise an error if one exists and a user requested a raise
+    if raise_error and ("error" in output_data) and (output_data["error"] is not False):
+        raise ValueError(output_data["error"])
 
     # Fill out provenance datadata
     if "provenance" in output_data:
@@ -55,20 +60,22 @@ def compute(input_data, program):
 
     return output_data
 
-def compute_procedure(input_data, procedure):
-    """Runs a procedure
+def compute_procedure(input_data, procedure, raise_error=False):
+    """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters
     ----------
     input_data : dict
         A JSON input specific to the procedure executed
-    procedure : str, {"geometric"}
+    procedure : {"geometric"}
         The name of the procedure to run
+    raise_error : bool, option
+        Determines if compute should raise an error or not.
 
-    Raises
+    Returns
     ------
-    KeyError
-        Description
+    dict
+        A QC Schema representation of the requested output.
     """
 
     input_data = copy.deepcopy(input_data)
@@ -78,8 +85,12 @@ def compute_procedure(input_data, procedure):
     if procedure == "geometric":
         output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
     else:
-        raise KeyError("Procedure %s not understood" % procedure)
+        output_data["error"] = "QCEngine: Procedure {} not understood".format(procedure)
     comp_time = time.time() - comp_time
+
+    # Raise an error if one exists and a user requested a raise
+    if raise_error and ("error" in output_data) and (output_data["error"] is not False):
+        raise ValueError(output_data["error"])
 
     # Fill out provenance datadata
     if "provenance" in output_data:

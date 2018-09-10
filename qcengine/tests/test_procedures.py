@@ -59,16 +59,17 @@ def test_geometric_psi4():
 
 @addons.using_rdkit
 @addons.using_geometric
-def test_geometric_rdkit():
+def test_geometric_rdkit_error():
     inp = copy.deepcopy(_base_json)
 
     inp["initial_molecule"] = dc.get_molecule("water")
+    del inp["initial_molecule"]["connectivity"]
     inp["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     inp["keywords"]["program"] = "rdkit"
 
     ret = dc.compute_procedure(inp, "geometric")
-    assert 10 > len(ret["trajectory"]) > 1
+    assert ret["success"] is False
+    assert "conn" in ret["error"]
 
-    geom = ret["final_molecule"]["geometry"]
-    assert pytest.approx(_bond_dist(geom, 0, 1), 1.e-4) == 1.87130910331573
-    assert pytest.approx(_bond_dist(geom, 0, 2), 1.e-4) == 1.87130910331573
+    with pytest.raises(ValueError):
+        ret = dc.compute_procedure(inp, "rdkit", raise_error=True)
