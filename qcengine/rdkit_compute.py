@@ -33,7 +33,7 @@ def run_rdkit(ret_data):
     base_mol = Chem.Mol()
     rw_mol = Chem.RWMol(base_mol)
     for sym in jmol["symbols"]:
-        rw_mol.AddAtom(Chem.Atom(sym))
+        rw_mol.AddAtom(Chem.Atom(sym.title()))
 
     # Add in connectivity
     bond_types = {1: Chem.BondType.SINGLE, 2: Chem.BondType.DOUBLE, 3: Chem.BondType.TRIPLE}
