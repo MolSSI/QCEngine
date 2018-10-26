@@ -69,7 +69,7 @@ def test_geometric_rdkit_error():
 
     ret = dc.compute_procedure(inp, "geometric")
     assert ret["success"] is False
-    assert "conn" in ret["error"]
+    assert isinstance(ret["error_message"], str)
 
     with pytest.raises(ValueError):
         ret = dc.compute_procedure(inp, "rdkit", raise_error=True)

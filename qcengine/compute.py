@@ -4,6 +4,7 @@ Integrates the computes together
 
 import copy
 import time
+import traceback
 
 from . import config
 from . import util
@@ -43,12 +44,12 @@ def compute(input_data, program, raise_error=False):
     elif program == "rdkit":
         output_data = rdkit_compute.run_rdkit(input_data)
     else:
-        output_data["error"] = "QCEngine: Program {} not understood".format(program)
+        output_data["error_message"] = "QCEngine: Program {} not understood".format(program)
     comp_time = time.time() - comp_time
 
     # Raise an error if one exists and a user requested a raise
-    if raise_error and ("error" in output_data) and (output_data["error"] is not False):
-        raise ValueError(output_data["error"])
+    if raise_error and ("error_message" in output_data) and (output_data["error_message"] is not False):
+        raise ValueError(output_data["error_message"])
 
     # Fill out provenance datadata
     if "provenance" in output_data:
@@ -82,15 +83,21 @@ def compute_procedure(input_data, procedure, raise_error=False):
 
     # Run the procedure
     comp_time = time.time()
-    if procedure == "geometric":
-        output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
-    else:
-        output_data["error"] = "QCEngine: Procedure {} not understood".format(procedure)
+    try:
+        if procedure == "geometric":
+            output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
+        else:
+            output_data["error_message"] = "QCEngine: Procedure {} not understood".format(procedure)
+    except Exception as e:
+        output_data = input_data
+        output_data["success"] = False
+        output_data["error_message"] = "QCEngine compute_procedure error:\n" + traceback.format_exc()
+
     comp_time = time.time() - comp_time
 
     # Raise an error if one exists and a user requested a raise
-    if raise_error and ("error" in output_data) and (output_data["error"] is not False):
-        raise ValueError(output_data["error"])
+    if raise_error and ("error_message" in output_data) and (output_data["error_message"] is not False):
+        raise ValueError(output_data["error_message"])
 
     # Fill out provenance datadata
     if "provenance" in output_data:

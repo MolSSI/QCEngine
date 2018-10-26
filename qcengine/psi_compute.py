@@ -119,7 +119,7 @@ def run_psi4(input_data):
         if output_data is False:
             output_data["success"] = False
             if "error" not in rjson:
-                output_data["error"] = "Unspecified error occured."
+                output_data["error_message"] = "Unspecified error occured."
 
         output_data["molecule"] = json_mol
 
