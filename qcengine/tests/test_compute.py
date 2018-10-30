@@ -71,7 +71,7 @@ def test_rdkit_connectivity_error():
 
     ret = dc.compute(json_data, "rdkit")
     assert ret["success"] is False
-    assert "conn" in ret["error_message"]
+    assert "connectivity" in ret["error_message"]
 
     with pytest.raises(ValueError):
         ret = dc.compute(json_data, "rdkit", raise_error=True)
