@@ -22,11 +22,11 @@ def run_rdkit(ret_data):
 
     # Handle errors
     if ("molecular_charge" in jmol) and (abs(jmol["molecular_charge"]) < 1.e-6):
-        ret_data["error"] = "run_rdkit does not currently support charged molecules"
+        ret_data["error_message"] = "run_rdkit does not currently support charged molecules"
         return ret_data
 
     if "connectivity" not in jmol:
-        ret_data["error"] = "run_rdkit molecule must have a connectivity graph"
+        ret_data["error_message"] = "run_rdkit molecule must have a connectivity graph"
         return ret_data
 
     # Build out the base molecule
@@ -57,11 +57,11 @@ def run_rdkit(ret_data):
         ff = AllChem.UFFGetMoleculeForceField(mol)
         all_params = AllChem.UFFHasAllMoleculeParams(mol)
     else:
-        ret_data["error"] = "run_rdkit can only accepts UFF methods"
+        ret_data["error_message"] = "run_rdkit can only accepts UFF methods"
         return ret_data
 
     if all_params is False:
-        ret_data["error"] = "run_rdkit did not match all parameters to molecule"
+        ret_data["error_message"] = "run_rdkit did not match all parameters to molecule"
         return ret_data
 
     ff.Initialize()
@@ -74,7 +74,7 @@ def run_rdkit(ret_data):
         coef = 1 / (units.bohr_to_angstrom * units.hartree_to_kj_mol)
         ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
     else:
-        ret_data["error"] = "run_rdkit did not understand driver method '{}'.".format(ret_data["driver"])
+        ret_data["error_message"] = "run_rdkit did not understand driver method '{}'.".format(ret_data["driver"])
         return ret_data
 
     ret_data["provenance"] = {

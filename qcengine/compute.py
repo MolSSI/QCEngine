@@ -5,7 +5,6 @@ Integrates the computes together
 import copy
 import time
 
-from . import config
 from . import util
 
 # Single computes
@@ -13,7 +12,7 @@ from . import psi_compute
 from . import rdkit_compute
 
 
-def compute(input_data, program, raise_error=False):
+def compute(input_data, program, raise_error=False, capture_output=True):
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -25,8 +24,10 @@ def compute(input_data, program, raise_error=False):
         A QC Schema input specification
     program : {"psi4", "rdkit"}
         The program to run the input under
-    raise_error : bool, option
+    raise_error : bool, optional
         Determines if compute should raise an error or not.
+    capture_output : bool, optional
+        Determines if stdout/stderr should be captured.
 
     Returns
     -------
@@ -37,30 +38,20 @@ def compute(input_data, program, raise_error=False):
     input_data = copy.deepcopy(input_data)
 
     # Run the program
-    comp_time = time.time()
-    if program == "psi4":
-        output_data = psi_compute.run_psi4(input_data)
-    elif program == "rdkit":
-        output_data = rdkit_compute.run_rdkit(input_data)
-    else:
-        output_data["error"] = "QCEngine: Program {} not understood".format(program)
-    comp_time = time.time() - comp_time
+    with util.compute_wrapper(capture_output=capture_output) as metadata:
+        if program == "psi4":
+            output_data = psi_compute.run_psi4(input_data)
+        elif program == "rdkit":
+            output_data = rdkit_compute.run_rdkit(input_data)
+        else:
+            output_data = input_data
+            output_data["success"] = False
+            output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood".format(program)
 
-    # Raise an error if one exists and a user requested a raise
-    if raise_error and ("error" in output_data) and (output_data["error"] is not False):
-        raise ValueError(output_data["error"])
+    return util.handle_output_metadata(output_data, metadata, raise_error=raise_error)
 
-    # Fill out provenance datadata
-    if "provenance" in output_data:
-        output_data["provenance"].update(config.get_provenance())
-    else:
-        output_data["provenance"] = config.get_provenance()
 
-    output_data["provenance"]["wall_time"] = comp_time
-
-    return output_data
-
-def compute_procedure(input_data, procedure, raise_error=False):
+def compute_procedure(input_data, procedure, raise_error=False, capture_output=True):
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters
@@ -71,6 +62,8 @@ def compute_procedure(input_data, procedure, raise_error=False):
         The name of the procedure to run
     raise_error : bool, option
         Determines if compute should raise an error or not.
+    capture_output : bool, optional
+        Determines if stdout/stderr should be captured.
 
     Returns
     ------
@@ -81,24 +74,12 @@ def compute_procedure(input_data, procedure, raise_error=False):
     input_data = copy.deepcopy(input_data)
 
     # Run the procedure
-    comp_time = time.time()
-    if procedure == "geometric":
-        output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
-    else:
-        output_data["error"] = "QCEngine: Procedure {} not understood".format(procedure)
-    comp_time = time.time() - comp_time
+    with util.compute_wrapper(capture_output=capture_output) as metadata:
+        if procedure == "geometric":
+            output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
+        else:
+            output_data = input_data
+            output_data["success"] = False
+            output_data["error_message"] = "QCEngine Call Error:\nProcedure {} not understood".format(program)
 
-    # Raise an error if one exists and a user requested a raise
-    if raise_error and ("error" in output_data) and (output_data["error"] is not False):
-        raise ValueError(output_data["error"])
-
-    # Fill out provenance datadata
-    if "provenance" in output_data:
-        output_data["provenance"].update(config.get_provenance())
-    else:
-        output_data["provenance"] = config.get_provenance()
-
-    output_data["provenance"]["wall_time"] = comp_time
-
-
-    return output_data
+    return util.handle_output_metadata(output_data, metadata, raise_error=raise_error)

@@ -11,6 +11,12 @@ from . import addons
 _base_json = {"schema_name": "qc_schema_input", "schema_version": 1}
 
 
+def test_missing_key():
+    ret = dc.compute({"hello": "hi"}, "bleh")
+    assert ret["success"] is False
+    assert "hello" in ret
+
+
 @addons.using_psi4
 def test_psi4_task():
     json_data = copy.deepcopy(_base_json)
@@ -71,7 +77,7 @@ def test_rdkit_connectivity_error():
 
     ret = dc.compute(json_data, "rdkit")
     assert ret["success"] is False
-    assert "conn" in ret["error"]
+    assert "connectivity" in ret["error_message"]
 
     with pytest.raises(ValueError):
         ret = dc.compute(json_data, "rdkit", raise_error=True)

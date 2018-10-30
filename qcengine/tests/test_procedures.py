@@ -56,6 +56,22 @@ def test_geometric_psi4():
     geom = ret["final_molecule"]["geometry"]
     assert pytest.approx(_bond_dist(geom, 0, 1), 1.e-4) == 1.3459150737
 
+@addons.using_rdkit
+@addons.using_geometric
+def test_geometric_stdout():
+    inp = copy.deepcopy(_base_json)
+
+    inp["initial_molecule"] = dc.get_molecule("water")
+    inp["input_specification"]["model"] = {"method": "UFF", "basis": ""}
+    inp["keywords"]["program"] = "rdkit"
+
+    ret = dc.compute_procedure(inp, "geometric")
+    assert ret["success"] is True
+    assert "Converged!" in ret["stdout"]
+    assert ret["stderr"] == "No stderr recieved."
+
+    with pytest.raises(ValueError):
+        ret = dc.compute_procedure(inp, "rdkit", raise_error=True)
 
 @addons.using_rdkit
 @addons.using_geometric
@@ -69,7 +85,7 @@ def test_geometric_rdkit_error():
 
     ret = dc.compute_procedure(inp, "geometric")
     assert ret["success"] is False
-    assert "conn" in ret["error"]
+    assert isinstance(ret["error_message"], str)
 
     with pytest.raises(ValueError):
         ret = dc.compute_procedure(inp, "rdkit", raise_error=True)
