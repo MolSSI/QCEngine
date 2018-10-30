@@ -49,27 +49,10 @@ def compute(input_data, program, raise_error=False, capture_output=True):
             output_data["success"] = False
             output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood".format(program)
 
-    output_data["stdout"] = metadata["stdout"]
-    output_data["stderr"] = metadata["stderr"]
-    if metadata["success"] is not True:
-        output_data["success"] = False
-        output_data["error_message"] = metadata["error_message"]
+    return util.handle_output_metadata(output_data, metadata, raise_error=raise_error)
 
-    # Raise an error if one exists and a user requested a raise
-    if raise_error and (output_data["success"] is not True):
-        raise ValueError(output_data["error_message"])
 
-    # Fill out provenance datadata
-    if "provenance" in output_data:
-        output_data["provenance"].update(config.get_provenance())
-    else:
-        output_data["provenance"] = config.get_provenance()
-
-    output_data["provenance"]["wall_time"] = metadata["wall_time"]
-
-    return output_data
-
-def compute_procedure(input_data, procedure, raise_error=False):
+def compute_procedure(input_data, procedure, raise_error=False, capture_output=True):
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters
@@ -80,6 +63,8 @@ def compute_procedure(input_data, procedure, raise_error=False):
         The name of the procedure to run
     raise_error : bool, option
         Determines if compute should raise an error or not.
+    capture_output : bool, optional
+        Determines if stdout/stderr should be captured.
 
     Returns
     ------
@@ -91,29 +76,11 @@ def compute_procedure(input_data, procedure, raise_error=False):
 
     # Run the procedure
     comp_time = time.time()
-    try:
+    with util.compute_wrapper(capture_output=capture_output) as metadata:
         if procedure == "geometric":
             output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
         else:
-            output_data["error_message"] = "QCEngine: Procedure {} not understood".format(procedure)
-    except Exception as e:
-        output_data = input_data
-        output_data["success"] = False
-        output_data["error_message"] = "QCEngine compute_procedure error:\n" + traceback.format_exc()
+            output_data["success"] = False
+            output_data["error_message"] = "QCEngine Call Error:\nProcedure {} not understood".format(program)
 
-    comp_time = time.time() - comp_time
-
-    # Raise an error if one exists and a user requested a raise
-    if raise_error and ("error_message" in output_data) and (output_data["error_message"] is not False):
-        raise ValueError(output_data["error_message"])
-
-    # Fill out provenance datadata
-    if "provenance" in output_data:
-        output_data["provenance"].update(config.get_provenance())
-    else:
-        output_data["provenance"] = config.get_provenance()
-
-    output_data["provenance"]["wall_time"] = comp_time
-
-
-    return output_data
+    return util.handle_output_metadata(output_data, metadata, raise_error=raise_error)
