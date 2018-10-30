@@ -11,6 +11,12 @@ from . import addons
 _base_json = {"schema_name": "qc_schema_input", "schema_version": 1}
 
 
+def test_missing_key():
+    ret = dc.compute({"hello": "hi"}, "bleh")
+    assert ret["success"] is False
+    assert "hello" in ret
+
+
 @addons.using_psi4
 def test_psi4_task():
     json_data = copy.deepcopy(_base_json)

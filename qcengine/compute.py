@@ -4,9 +4,7 @@ Integrates the computes together
 
 import copy
 import time
-import traceback
 
-from . import config
 from . import util
 
 # Single computes
@@ -46,6 +44,7 @@ def compute(input_data, program, raise_error=False, capture_output=True):
         elif program == "rdkit":
             output_data = rdkit_compute.run_rdkit(input_data)
         else:
+            output_data = input_data
             output_data["success"] = False
             output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood".format(program)
 
@@ -75,12 +74,11 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
     input_data = copy.deepcopy(input_data)
 
     # Run the procedure
-    comp_time = time.time()
     with util.compute_wrapper(capture_output=capture_output) as metadata:
-        output_data = {}
         if procedure == "geometric":
             output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
         else:
+            output_data = input_data
             output_data["success"] = False
             output_data["error_message"] = "QCEngine Call Error:\nProcedure {} not understood".format(program)
 
