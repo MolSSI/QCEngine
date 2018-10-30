@@ -66,10 +66,9 @@ def test_geometric_stdout():
     inp["keywords"]["program"] = "rdkit"
 
     ret = dc.compute_procedure(inp, "geometric")
-    assert ret["success"] is False
-    assert isinstance(ret["error_message"], str)
-    print(ret["stdout"])
-    print(ret["stderr"])
+    assert ret["success"] is True
+    assert "Converged!" in ret["stdout"]
+    assert ret["stderr"] == "No stderr recieved."
 
     with pytest.raises(ValueError):
         ret = dc.compute_procedure(inp, "rdkit", raise_error=True)

@@ -77,6 +77,7 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
     # Run the procedure
     comp_time = time.time()
     with util.compute_wrapper(capture_output=capture_output) as metadata:
+        output_data = {}
         if procedure == "geometric":
             output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
         else:

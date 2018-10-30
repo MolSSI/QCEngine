@@ -27,11 +27,11 @@ def compute_wrapper(capture_output=True):
 
     # Capture stdout/err
     if capture_output:
-        new_stdout = io.StringIO("Captured stdout:\n\n")
-        new_stderr = io.StringIO("Captured stderr:\n\n")
+        new_stdout = io.StringIO("No stdout recieved.")
+        new_stderr = io.StringIO("No stderr recieved.")
 
         old_stdout, sys.stdout = sys.stdout, new_stdout
-        old_stderr, sys.stdout = sys.stdout, new_stderr
+        old_stderr, sys.stderr = sys.stderr, new_stderr
 
     try:
         yield ret
