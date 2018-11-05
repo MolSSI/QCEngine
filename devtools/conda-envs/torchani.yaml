@@ -1,0 +1,17 @@
+name: test
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - pytorch-nightly
+  - ignite
+
+    # Core
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
