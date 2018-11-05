@@ -35,12 +35,14 @@ def compute(input_data, program, raise_error=False, capture_output=True):
 
     # Run the program
     with util.compute_wrapper(capture_output=capture_output) as metadata:
+        output_data = input_data
         if program == "psi4":
             output_data = programs.run_psi4(input_data)
         elif program == "rdkit":
             output_data = programs.run_rdkit(input_data)
+        elif program == "torchani":
+            output_data = programs.run_torchani(input_data)
         else:
-            output_data = input_data
             output_data["success"] = False
             output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood".format(program)
 
@@ -71,10 +73,10 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
 
     # Run the procedure
     with util.compute_wrapper(capture_output=capture_output) as metadata:
+        output_data = input_data
         if procedure == "geometric":
             output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
         else:
-            output_data = input_data
             output_data["success"] = False
             output_data["error_message"] = "QCEngine Call Error:\nProcedure {} not understood".format(program)
 
