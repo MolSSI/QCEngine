@@ -6,7 +6,7 @@ import sys
 
 from pkg_resources import parse_version
 
-from . import config
+from qcengine import config
 
 
 def _build_v11_mol(jm):

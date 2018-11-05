@@ -2,7 +2,7 @@
 Calls the Psi4 executable.
 """
 
-from . import units
+from qcengine import units
 
 
 def run_rdkit(ret_data):
