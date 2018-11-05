@@ -83,7 +83,7 @@ def run_rdkit(ret_data):
         "routine": "rdkit.Chem.AllChem.UFFGetMoleculeForceField"
     }
 
-    ret_data["schema_name"] = "qc_ret_data_output"
+    ret_data["schema_name"] = "qc_schema_output"
     ret_data["success"] = True
 
     return ret_data

@@ -80,6 +80,9 @@ def get_module_function(module, func_name, subpackage=None):
     return operator.attrgetter(func_name)(pkg)
 
 def handle_output_metadata(output_data, metadata, raise_error=False):
+    """
+    Fuses general metadata and output together.
+    """
 
     output_data["stdout"] = metadata["stdout"]
     output_data["stderr"] = metadata["stderr"]

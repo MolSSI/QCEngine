@@ -82,3 +82,20 @@ def test_rdkit_connectivity_error():
 
     with pytest.raises(ValueError):
         ret = dc.compute(json_data, "rdkit", raise_error=True)
+
+@addons.using_torchani
+def test_torchani_task():
+    json_data = copy.deepcopy(_base_json)
+    json_data["molecule"] = dc.get_molecule("water")
+    json_data["driver"] = "gradient"
+    json_data["model"] = {"method": "ANI1", "basis": None}
+    json_data["keywords"] = {}
+    json_data["return_output"] = False
+
+    ret = dc.compute(json_data, "torchani")
+    print(ret["error_message"])
+
+    assert ret["success"] is True
+    assert ret["driver"] == "gradient"
+    assert "provenance" in ret
+
