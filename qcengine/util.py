@@ -2,14 +2,13 @@
 Several import utilities
 """
 
-from contextlib import contextmanager
-
-import traceback
-import time
 import importlib
 import io
-import sys
 import operator
+import sys
+import time
+import traceback
+from contextlib import contextmanager
 
 from . import config
 

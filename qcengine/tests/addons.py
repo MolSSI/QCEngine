@@ -3,7 +3,6 @@ A set of scripts to setup testing
 """
 
 import pytest
-import os
 
 
 def _plugin_import(plug):

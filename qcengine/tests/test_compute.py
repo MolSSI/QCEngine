@@ -3,6 +3,7 @@ Tests the DQM compute dispatch module
 """
 
 import copy
+
 import pytest
 
 import qcengine as dc

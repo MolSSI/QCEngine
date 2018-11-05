@@ -3,7 +3,6 @@ Integrates the computes together
 """
 
 import copy
-import time
 
 from . import programs
 from . import util
