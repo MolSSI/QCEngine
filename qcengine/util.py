@@ -26,8 +26,8 @@ def compute_wrapper(capture_output=True):
 
     # Capture stdout/err
     if capture_output:
-        new_stdout = io.StringIO("No stdout recieved.")
-        new_stderr = io.StringIO("No stderr recieved.")
+        new_stdout = io.StringIO()
+        new_stderr = io.StringIO()
 
         old_stdout, sys.stdout = sys.stdout, new_stdout
         old_stderr, sys.stderr = sys.stderr, new_stderr
@@ -43,6 +43,12 @@ def compute_wrapper(capture_output=True):
     ret["wall_time"] = time.time() - comp_time
     ret["stdout"] = new_stdout.getvalue()
     ret["stderr"] = new_stderr.getvalue()
+
+    if ret["stdout"] == "":
+        ret["stdout"] = "No stdout recieved."
+
+    if ret["stderr"] == "":
+        ret["stderr"] = "No stderr recieved."
 
     # Replace stdout/err
     if capture_output:
