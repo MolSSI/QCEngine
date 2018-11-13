@@ -5,9 +5,9 @@ Creates globals for the qcengine module
 import copy
 import fnmatch
 import getpass
+import logging
 import os
 import socket
-import logging
 
 import cpuinfo
 import psutil

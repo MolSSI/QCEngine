@@ -3,7 +3,6 @@ A set of scripts to setup testing
 """
 
 import pytest
-import os
 
 
 def _plugin_import(plug):
@@ -24,8 +23,10 @@ def _plugin_import(plug):
 
 # Add flags
 using_psi4 = pytest.mark.skipif(
-    _plugin_import("psi4") is False, reason="could not find psi4. please install the package to enable tests")
+    _plugin_import("psi4") is False, reason="Could not find psi4. Please install the package to enable tests")
 using_rdkit = pytest.mark.skipif(
-    _plugin_import("rdkit") is False, reason="could not find rdkit. please install the package to enable tests")
+    _plugin_import("rdkit") is False, reason="Could not find rdkit. Please install the package to enable tests")
 using_geometric = pytest.mark.skipif(
-    _plugin_import("geometric") is False, reason="could not find geomeTRIC. please install the package to enable tests")
+    _plugin_import("geometric") is False, reason="could not find geomeTRIC. Please install the package to enable tests")
+using_torchani = pytest.mark.skipif(
+    _plugin_import("torchani") is False, reason="Could not find TorchAni. Please install the package to enable tests")

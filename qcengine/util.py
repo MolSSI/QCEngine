@@ -2,14 +2,13 @@
 Several import utilities
 """
 
-from contextlib import contextmanager
-
-import traceback
-import time
 import importlib
 import io
-import sys
 import operator
+import sys
+import time
+import traceback
+from contextlib import contextmanager
 
 from . import config
 
@@ -27,8 +26,8 @@ def compute_wrapper(capture_output=True):
 
     # Capture stdout/err
     if capture_output:
-        new_stdout = io.StringIO("No stdout recieved.")
-        new_stderr = io.StringIO("No stderr recieved.")
+        new_stdout = io.StringIO()
+        new_stderr = io.StringIO()
 
         old_stdout, sys.stdout = sys.stdout, new_stdout
         old_stderr, sys.stderr = sys.stderr, new_stderr
@@ -44,6 +43,12 @@ def compute_wrapper(capture_output=True):
     ret["wall_time"] = time.time() - comp_time
     ret["stdout"] = new_stdout.getvalue()
     ret["stderr"] = new_stderr.getvalue()
+
+    if ret["stdout"] == "":
+        ret["stdout"] = "No stdout recieved."
+
+    if ret["stderr"] == "":
+        ret["stderr"] = "No stderr recieved."
 
     # Replace stdout/err
     if capture_output:
@@ -81,6 +86,9 @@ def get_module_function(module, func_name, subpackage=None):
     return operator.attrgetter(func_name)(pkg)
 
 def handle_output_metadata(output_data, metadata, raise_error=False):
+    """
+    Fuses general metadata and output together.
+    """
 
     output_data["stdout"] = metadata["stdout"]
     output_data["stderr"] = metadata["stderr"]

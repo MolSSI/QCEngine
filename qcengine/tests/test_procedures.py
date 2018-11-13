@@ -3,6 +3,7 @@ Tests the DQM compute dispatch module
 """
 
 import copy
+
 import pytest
 
 import qcengine as dc
@@ -89,3 +90,17 @@ def test_geometric_rdkit_error():
 
     with pytest.raises(ValueError):
         ret = dc.compute_procedure(inp, "rdkit", raise_error=True)
+
+@addons.using_torchani
+@addons.using_geometric
+def test_geometric_torchani():
+    inp = copy.deepcopy(_base_json)
+
+    inp["initial_molecule"] = dc.get_molecule("water")
+    inp["input_specification"]["model"] = {"method": "ANI1", "basis": None}
+    inp["keywords"]["program"] = "torchani"
+
+    ret = dc.compute_procedure(inp, "geometric")
+    assert ret["success"] is True
+    assert "Converged!" in ret["stdout"]
+    assert ret["stderr"] == "No stderr recieved."

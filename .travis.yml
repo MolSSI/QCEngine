@@ -20,6 +20,11 @@ matrix:
       env:
         - PYTHON_VER=3.6
         - PROG=PSI4
+    - os: linux
+      python: 3.6
+      env:
+        - PYTHON_VER=3.6
+        - PROG=ANI
 
 before_install:
     # Additional info about the build
@@ -37,10 +42,10 @@ install:
   - |
     if [ $PROG == "RDKIT" ]; then
       conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/rdkit.yaml
-    elif [ $PROG == "PSI4_V11" ]; then
-      conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/psi_v11.yaml
     elif [ $PROG == "PSI4" ]; then
       conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
+    elif [ $PROG == "ANI" ]; then
+      conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/torchani.yaml
     else
       echo "ERROR: No match for PROG ($PROG)."
       exit 1
