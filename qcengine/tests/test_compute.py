@@ -93,9 +93,7 @@ def test_torchani_task():
     json_data["return_output"] = False
 
     ret = dc.compute(json_data, "torchani")
-    print(ret["error_message"])
 
     assert ret["success"] is True
     assert ret["driver"] == "gradient"
     assert "provenance" in ret
-
