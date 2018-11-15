@@ -38,9 +38,10 @@ def compute(input_data, program, raise_error=False, capture_output=True):
         output_data = input_data
         try:
             output_data = programs.get_program(program)(input_data)
-        except RuntimeError as e:
+        except Exception as e:
             output_data["success"] = False
-            output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood".format(program)
+            output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood.\nError Message: {}".format(
+                program, str(e))
 
     return util.handle_output_metadata(output_data, metadata, raise_error=raise_error)
 

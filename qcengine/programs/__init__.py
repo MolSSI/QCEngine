@@ -46,7 +46,7 @@ def get_module(name):
     fn_name = _get_python_name(name)
     if not hasattr(module, fn_name):
         raise RuntimeError(
-            "Program module %s (%s) must define function '%s'." % (module.__name__, module.__file__, fn_name))
+            "Program module {} ({}) must define function '{}'.".format(module.__name__, module.__file__, fn_name))
 
     return module
 
