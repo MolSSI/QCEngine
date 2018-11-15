@@ -5,7 +5,7 @@ Calls the Psi4 executable.
 from qcengine import units
 
 
-def run_rdkit(ret_data):
+def rdkit(ret_data):
     """
     Runs RDKit in FF typing
     """
