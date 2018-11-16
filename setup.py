@@ -17,6 +17,9 @@ if __name__ == "__main__":
             'py-cpuinfo',
             'psutil',
         ],
+        entry_points={"console_scripts": [
+            "qcengine=qcengine.cli:main",
+        ]},
         extras_require={
             'docs': [
                 'sphinx==1.2.3',  # autodoc was broken in 1.3.1
