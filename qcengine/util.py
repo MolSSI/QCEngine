@@ -25,9 +25,9 @@ def compute_wrapper(capture_output=True):
     comp_time = time.time()
 
     # Capture stdout/err
+    new_stdout = io.StringIO()
+    new_stderr = io.StringIO()
     if capture_output:
-        new_stdout = io.StringIO()
-        new_stderr = io.StringIO()
 
         old_stdout, sys.stdout = sys.stdout, new_stdout
         old_stderr, sys.stderr = sys.stderr, new_stderr
@@ -41,19 +41,23 @@ def compute_wrapper(capture_output=True):
 
     # Place data
     ret["wall_time"] = time.time() - comp_time
-    ret["stdout"] = new_stdout.getvalue()
-    ret["stderr"] = new_stderr.getvalue()
-
-    if ret["stdout"] == "":
-        ret["stdout"] = "No stdout recieved."
-
-    if ret["stderr"] == "":
-        ret["stderr"] = "No stderr recieved."
-
-    # Replace stdout/err
     if capture_output:
-        sys.stdout = old_stdout
-        sys.stderr = old_stderr
+        ret["stdout"] = new_stdout.getvalue()
+        ret["stderr"] = new_stderr.getvalue()
+
+        if ret["stdout"] == "":
+            ret["stdout"] = "No stdout recieved."
+
+        if ret["stderr"] == "":
+            ret["stderr"] = "No stderr recieved."
+
+        # Replace stdout/err
+        if capture_output:
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+    else:
+        ret["stdout"] = "stdout not captured"
+        ret["stderr"] = "stderr not captured"
 
 def get_module_function(module, func_name, subpackage=None):
     """Obtains a function from a given string

@@ -8,18 +8,19 @@ _CACHE = {}
 
 
 def get_model(name):
+    name = name.lower()
+
     if name in _CACHE:
-        print()
-        print("CACHE")
         return _CACHE[name]
 
     import torch
     import torchani
 
-    if name.lower() == "ani1":
+    if name == "ani1":
         # Build model
         builtin = torchani.neurochem.Builtins()
         model = torch.nn.Sequential(builtin.aev_computer, builtin.models, builtin.energy_shifter)
+        _CACHE[name] = model
 
         return model
 
