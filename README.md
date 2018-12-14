@@ -8,7 +8,18 @@ QCEngine
 [![Chat on Slack](https://img.shields.io/badge/chat-on_slack-green.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcdb/shared_invite/enQtNDIzNTQ2OTExODk0LWM3OTgxN2ExYTlkMTlkZjA0OTExZDlmNGRlY2M4NWJlNDlkZGQyYWUxOTJmMzc3M2VlYzZjMjgxMDRkYzFmOTE)
 
 
-Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QC_JSON_Schema)) for quantum chemistry. See the [documentation](https://qcengine.readthedocs.io/en/latest/) for more information.
+Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QCSchema)) for quantum chemistry.
+
+Available Compute Programs:
+ - [Psi4](http://www.psicode.org)
+ - [PRDKit](http://rdkit.org)
+ - [PTorchANI](https://github.com/aiqm/torchani)
+
+Available Procedures:
+ - [Geometric](https://github.com/leeping/geomeTRIC)
+
+
+See the [documentation](https://qcengine.readthedocs.io/en/latest/) for more information.
 
 # License
 

@@ -66,3 +66,4 @@ tmp.py
 
 # geometric junk
 energy.txt
+*.ipynb_checkpoints
