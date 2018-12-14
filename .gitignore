@@ -66,3 +66,10 @@ tmp.py
 
 # geometric junk
 energy.txt
+*.ipynb_checkpoints
+
+# Psi4 quantities
+timer.dat
+*.out
+iter.dat
+psi*clean

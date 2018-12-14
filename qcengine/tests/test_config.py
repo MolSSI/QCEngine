@@ -23,29 +23,29 @@ def opt_state_basic():
     os.environ["TMPDIR"] = "/tmp/"
 
     config = {
-      "default_compute": {
-        "psi_path": "/home/user/psi4",
-        "jobs_per_node": 1,
-        "nthreads_per_job": 2,
-        "memory_per_job": 4,
-        "scratch_directory": "$TMPDIR"
-      },
-      "other_compute": {
-        "dragonsooth": {
-          "psi_path": "/home/user/dt/psi4",
-          "hostname": "dt*",
-          "jobs_per_node": 2,
-          "nthreads_per_job": 6,
-          "memory_per_job": 60,
-          "scratch_directory": "$NOVAR_RANDOM_ABC123"
+        "default_compute": {
+            "psi_path": "/home/user/psi4",
+            "jobs_per_node": 1,
+            "nthreads_per_job": 2,
+            "memory_per_job": 4,
+            "scratch_directory": "$TMPDIR"
         },
-        "new_river": {
-          "hostname": "nr*",
-          "jobs_per_node": 2,
-          "nthreads_per_job": 12,
-          "memory_per_job": 120
+        "other_compute": {
+            "dragonsooth": {
+                "psi_path": "/home/user/dt/psi4",
+                "hostname": "dt*",
+                "jobs_per_node": 2,
+                "nthreads_per_job": 6,
+                "memory_per_job": 60,
+                "scratch_directory": "$NOVAR_RANDOM_ABC123"
+            },
+            "new_river": {
+                "hostname": "nr*",
+                "jobs_per_node": 2,
+                "nthreads_per_job": 12,
+                "memory_per_job": 120
+            }
         }
-      }
     }
 
     dc.load_options(config)
@@ -83,7 +83,6 @@ def test_default_matches(opt_state_basic):
 
 def test_environmental_vars(opt_state_basic):
 
-    print(dc.get_config("scratch_directory"))
     assert dc.get_config("scratch_directory") == "/tmp/"
     assert dc.get_config("scratch_directory", hostname="dt5") is None
 
@@ -107,7 +106,6 @@ def opt_state_auto():
             "scratch_directory": "$TMPDIR"
         }
     }
-    
 
     os.environ["TMPDIR"] = "/tmp/"
     dc.load_options(config)
