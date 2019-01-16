@@ -9,12 +9,16 @@ import pytest
 
 import qcengine
 
+from qcengine.testing import environ_context
+
+
 def test_node_blank():
     node = qcengine.config.NodeDescriptor(name="something", hostname_pattern="*")
 
     assert node.nthreads_per_job > 1
     assert node.available_memory > 0.1
     assert node.memory_per_job > 0.1
+
 
 def test_node_auto():
 
@@ -38,20 +42,31 @@ def test_node_auto():
     assert node2.nthreads_per_job == 2
     assert pytest.approx(node2.memory_per_job) == 5
 
+
 def test_node_environ():
 
+    scratch_name = "myscratch1234"
+    with environ_context({"QCA_SCRATCH_DIR": scratch_name}):
+        description = {
+            "name": "something",
+            "hostname_pattern": "*",
+            "scratch_directory": "$QCA_SCRATCH_DIR",
+        }
+
+        node = qcengine.config.NodeDescriptor(**description)
+        assert node.scratch_directory == scratch_name
+
+
+def test_node_skip_environ():
     description = {
         "name": "something",
         "hostname_pattern": "*",
-        "jobs_per_node": 1,
-        "nthreads_per_job": 'auto',
-        "memory_per_job": 'auto',
-        "scratch_directory": "$TMPDIR"
+        "scratch_directory": "$RANDOM_ENVIRON",
     }
 
     node = qcengine.config.NodeDescriptor(**description)
-    assert node.nthreads_per_job > 1
-    assert node.memory_per_job > 1
+    assert node.scratch_directory is None
+
 
 @pytest.fixture
 def opt_state_basic():
@@ -61,43 +76,40 @@ def opt_state_basic():
 
     # Snapshot env
     old_node = copy.deepcopy(dc.config.NODE_DESCRIPTORS)
-    dc.config.NODE_DESCRIPTORS
-    old_environ = dict(os.environ)
 
-    os.environ["TMPDIR"] = "/tmp/"
+    scratch_name = "myscratch1234"
+    with environ_context({"QCA_SCRATCH_DIR": scratch_name}):
 
-    config = {
-        "default": {
-            "psi_path": "/home/user/psi4",
-            "jobs_per_node": 1,
-            "nthreads_per_job": 2,
-            "memory_per_job": 4,
-            "scratch_directory": "$TMPDIR"
-        },
-        "dragonsooth": {
-            "psi_path": "/home/user/dt/psi4",
-            "hostname_pattern": "dt*",
-            "jobs_per_node": 2,
-            "nthreads_per_job": 6,
-            "memory_per_job": 60,
-            "scratch_directory": "$NOVAR_RANDOM_ABC123"
-        },
-        "newriver": {
-            "hostname_pattern": "nr*",
-            "jobs_per_node": 2,
-            "nthreads_per_job": 12,
-            "memory_per_job": 120
-        }
-    }
+        configs = [{
+                "name": "default",
+                "hostname_pattern": "*",
+                "jobs_per_node": 1,
+                "nthreads_per_job": 2,
+                "memory_per_job": 4,
+                "scratch_directory": "$QCA_SCRATCH_DIR"
+            },{
+                "name": "dragonsooth":,
+                "hostname_pattern": "dt*",
+                "jobs_per_node": 2,
+                "nthreads_per_job": 6,
+                "memory_per_job": 60,
+                "scratch_directory": "$NOVAR_RANDOM_ABC123"
+            },{
+                "name": "newriver",
+                "hostname_pattern": "nr*",
+                "jobs_per_node": 2,
+                "nthreads_per_job": 12,
+                "memory_per_job": 120
+            }
+        ]
+        for desc in configs:
+            node = qcengine.config.NodeDescriptor(**descc)
+            dc.config.NODE_DESCRIPTORS[desc["name"]] = node
 
-    dc.load_options(config)
-    yield qcengine.get_config
+        yield
 
-    yield
-
-    # Reset env
-    os.environ.update(old_environ)
-    dc.config._globals = old_globals
+        # Reset env
+        dc.config.NODE_DESCRIPTORS = old_node
 
 
 def test_config_path(opt_state_basic):
@@ -158,8 +170,6 @@ def opt_state_auto():
     # Reset env
     os.environ.update(old_environ)
     dc.config._globals = old_globals
-
-
 
 
 def test_global_repr(opt_state_auto):

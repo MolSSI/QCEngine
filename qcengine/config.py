@@ -57,7 +57,7 @@ class NodeDescriptor(pydantic.BaseModel):
 
     # Specifications
     jobs_per_node: int = 2
-    memory_safety_factor: int = 10 # Percentage of memory as a safety factor
+    memory_safety_factor: int = 10  # Percentage of memory as a safety factor
     memory_per_job: Union[int, str] = "auto"  # Amount of memory in Gb per node
     nthreads_per_job: Union[int, str] = "auto"  # Number of nthreads per job
     scratch_directory: str = None  # What location to use as scratch
@@ -94,7 +94,7 @@ class NodeDescriptor(pydantic.BaseModel):
 
         if self.memory_per_job == "auto":
             memory_coeff = (1 - self.memory_safety_factor / 100)
-            self.memory_per_job = round(self.available_memory * memory_coeff / self.jobs_per_node , 3)
+            self.memory_per_job = round(self.available_memory * memory_coeff / self.jobs_per_node, 3)
 
 
 class JobConfig(pydantic.BaseModel):
