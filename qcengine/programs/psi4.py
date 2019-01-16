@@ -43,16 +43,7 @@ def psi4(input_data):
 
     psi_version = _parse_psi_version(psi4.__version__)
 
-    if psi_version > parse_version("1.2rc2.dev500"):
-
-        # Handle slight RC2 weirdness
-        psi_12rc2_tweak = (psi_version == parse_version("1.2rc2"))
-        psi_12rc2_tweak &= psi4.metadata.version_formatter("") != '(inplace)'
-
-        if psi_12rc2_tweak:
-            input_data["schema_name"] = "QC_JSON"
-            input_data["schema_version"] = 0
-            psi4.set_num_threads(input_data["nthreads"], quiet=True)
+    if psi_version > parse_version("1.2"):
 
         mol = psi4.core.Molecule.from_schema(input_data)
         if mol.multiplicity() != 1:
@@ -60,13 +51,8 @@ def psi4(input_data):
 
         output_data = psi4.json_wrapper.run_json(input_data)
 
-        # Handle slight RC2 weirdness once more
-        if psi_12rc2_tweak:
-            output_data["schema_name"] = "qc_schema_output"
-            output_data["schema_version"] = 1
-
     else:
-        raise TypeError("Psi4 version '{}' not understood".format(psi_version))
+        raise TypeError("Psi4 version '{}' not understood.".format(psi_version))
 
     # Dispatch errors, PSIO Errors are not recoverable for future runs
     if output_data["success"] is False:

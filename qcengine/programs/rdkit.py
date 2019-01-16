@@ -49,7 +49,7 @@ def rdkit(ret_data):
     for line in range(natom):
         conf.SetAtomPosition(line, (bohr2ang * jmol["geometry"][line * 3],
                                     bohr2ang * jmol["geometry"][line * 3 + 1],
-                                    bohr2ang * jmol["geometry"][line * 3 + 2]))
+                                    bohr2ang * jmol["geometry"][line * 3 + 2])) # yapf: disable
 
     mol.AddConformer(conf)
     Chem.rdmolops.SanitizeMol(mol)
