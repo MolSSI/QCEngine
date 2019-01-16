@@ -62,6 +62,9 @@ class NodeDescriptor(pydantic.BaseModel):
     nthreads_per_job: Union[int, str] = "auto"  # Number of nthreads per job
     scratch_directory: Optional[str] = None  # What location to use as scratch
 
+    class Config:
+        ignore_extra = False
+
     def __init__(self, **kwargs):
         """
         Initalize the pydantic class after processing options
@@ -101,8 +104,11 @@ class JobConfig(pydantic.BaseModel):
 
     # Specifications
     nthreads: int  # Number of nthreads per job
-    memory: str  # Amount of memory in Gb per node
+    memory: int  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
+
+    class Config:
+        ignore_extra = False
 
 
 def _load_defaults():

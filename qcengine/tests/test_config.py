@@ -6,6 +6,7 @@ import copy
 import os
 
 import pytest
+import pydantic
 
 import qcengine
 
@@ -81,27 +82,26 @@ def opt_state_basic():
     with environ_context({"QCA_SCRATCH_DIR": scratch_name}):
 
         configs = [{
-                "name": "default",
-                "hostname_pattern": "*",
-                "jobs_per_node": 1,
-                "nthreads_per_job": 2,
-                "memory_per_job": 4,
-                "scratch_directory": "$QCA_SCRATCH_DIR"
-            },{
-                "name": "dragonstooth",
-                "hostname_pattern": "dt*",
-                "jobs_per_node": 2,
-                "nthreads_per_job": 6,
-                "memory_per_job": 60,
-                "scratch_directory": "$NOVAR_RANDOM_ABC123"
-            },{
-                "name": "newriver",
-                "hostname_pattern": "nr*",
-                "jobs_per_node": 2,
-                "nthreads_per_job": 12,
-                "memory_per_job": 120
-            }
-        ]
+            "name": "default",
+            "hostname_pattern": "*",
+            "jobs_per_node": 1,
+            "nthreads_per_job": 2,
+            "memory_per_job": 4,
+            "scratch_directory": "$QCA_SCRATCH_DIR"
+        }, {
+            "name": "dragonstooth",
+            "hostname_pattern": "dt*",
+            "jobs_per_node": 2,
+            "nthreads_per_job": 6,
+            "memory_per_job": 60,
+            "scratch_directory": "$NOVAR_RANDOM_ABC123"
+        }, {
+            "name": "newriver",
+            "hostname_pattern": "nr*",
+            "jobs_per_node": 2,
+            "nthreads_per_job": 12,
+            "memory_per_job": 120
+        }]
         for desc in configs:
             node = qcengine.config.NodeDescriptor(**desc)
             qcengine.config.NODE_DESCRIPTORS[desc["name"]] = node
@@ -133,6 +133,25 @@ def test_node_env(opt_state_basic):
     assert node.scratch_directory == "myscratch1234"
 
 
+def test_config_default(opt_state_basic):
+    config = qcengine.config.get_config("something")
+    assert config.nthreads == 2
+    assert config.memory == 4
+
+    config = qcengine.config.get_config("dt149")
+    assert config.nthreads == 6
+    assert config.memory == 60
+
+
+def test_config_local(opt_state_basic):
+    config = qcengine.config.get_config("something", {"nthreads": 10})
+    assert config.nthreads == 10
+    assert config.memory == 4
+
+
+def test_config_validation(opt_state_basic):
+    with pytest.raises(pydantic.ValidationError):
+        config = qcengine.config.get_config(hostname="something", local_options={"bad": 10})
 
 
 def test_global_repr():
