@@ -38,7 +38,7 @@ def compute(input_data, program, raise_error=False, capture_output=True):
         output_data = input_data
         try:
             output_data = programs.get_program(program)(input_data)
-        except Exception as e:
+        except KeyError as e:
             output_data["success"] = False
             output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood.\nError Message: {}".format(
                 program, str(e))
