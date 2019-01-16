@@ -75,7 +75,7 @@ def opt_state_basic():
     """
 
     # Snapshot env
-    old_node = copy.deepcopy(dc.config.NODE_DESCRIPTORS)
+    old_node = copy.deepcopy(qcengine.config.NODE_DESCRIPTORS)
 
     scratch_name = "myscratch1234"
     with environ_context({"QCA_SCRATCH_DIR": scratch_name}):
@@ -88,7 +88,7 @@ def opt_state_basic():
                 "memory_per_job": 4,
                 "scratch_directory": "$QCA_SCRATCH_DIR"
             },{
-                "name": "dragonsooth":,
+                "name": "dragonstooth",
                 "hostname_pattern": "dt*",
                 "jobs_per_node": 2,
                 "nthreads_per_job": 6,
@@ -103,75 +103,38 @@ def opt_state_basic():
             }
         ]
         for desc in configs:
-            node = qcengine.config.NodeDescriptor(**descc)
-            dc.config.NODE_DESCRIPTORS[desc["name"]] = node
+            node = qcengine.config.NodeDescriptor(**desc)
+            qcengine.config.NODE_DESCRIPTORS[desc["name"]] = node
 
         yield
 
         # Reset env
-        dc.config.NODE_DESCRIPTORS = old_node
+        qcengine.config.NODE_DESCRIPTORS = old_node
 
 
-def test_config_path(opt_state_basic):
-    cpath = dc.config.get_global("config_path")
-    assert cpath is None
+def test_node_matching(opt_state_basic):
+    node = qcengine.config.get_node_descriptor("nomatching")
+    assert node.name == "default"
+
+    node = qcengine.config.get_node_descriptor("dt149")
+    assert node.name == "dragonstooth"
+
+    node = qcengine.config.get_node_descriptor("nr149")
+    assert node.name == "newriver"
 
 
-def test_get_default(opt_state_basic):
-    assert dc.get_config()["memory_per_job"] == 4
-    assert dc.get_config(key="memory_per_job") == 4
+def test_node_env(opt_state_basic):
+    node = qcengine.config.get_node_descriptor("dt")
+    assert node.name == "dragonstooth"
+    assert node.scratch_directory is None
+
+    node = qcengine.config.get_node_descriptor("nomatching")
+    assert node.name == "default"
+    assert node.scratch_directory == "myscratch1234"
 
 
-def test_hostname_matches(opt_state_basic):
-    assert dc.get_config(hostname="dt5")["memory_per_job"] == 60
-    assert dc.get_config(key="memory_per_job", hostname="dt5") == 60
 
 
-def test_default_matches(opt_state_basic):
-    """
-    Tests that defaults properly come through on different compute
-    """
-    bench = "/home/user/psi4"
-    assert dc.get_config(hostname="nr5")["psi_path"] == bench
-    assert dc.get_config(key="psi_path", hostname="nr5") == bench
+def test_global_repr():
 
-
-def test_environmental_vars(opt_state_basic):
-
-    assert dc.get_config("scratch_directory") == "/tmp/"
-    assert dc.get_config("scratch_directory", hostname="dt5") is None
-
-
-@pytest.fixture
-def opt_state_auto():
-    """
-    Capture the options state and temporarily override.
-    """
-
-    # Snapshot env
-    old_globals = copy.deepcopy(dc.config._globals)
-    old_environ = dict(os.environ)
-
-    config = {
-        "default_compute": {
-            "psi_path": "/home/user/psi4",
-            "jobs_per_node": 1,
-            "nthreads_per_job": "auto",
-            "memory_per_job": "auto",
-            "scratch_directory": "$TMPDIR"
-        }
-    }
-
-    os.environ["TMPDIR"] = "/tmp/"
-    dc.load_options(config)
-
-    yield
-
-    # Reset env
-    os.environ.update(old_environ)
-    dc.config._globals = old_globals
-
-
-def test_global_repr(opt_state_auto):
-
-    assert isinstance(dc.config.global_repr(), str)
+    assert isinstance(qcengine.config.global_repr(), str)

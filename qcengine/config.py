@@ -9,7 +9,7 @@ import logging
 import os
 import socket
 
-from typing import Dict, Union
+from typing import Optional, Dict, Union
 
 import cpuinfo
 import psutil
@@ -60,7 +60,7 @@ class NodeDescriptor(pydantic.BaseModel):
     memory_safety_factor: int = 10  # Percentage of memory as a safety factor
     memory_per_job: Union[int, str] = "auto"  # Amount of memory in Gb per node
     nthreads_per_job: Union[int, str] = "auto"  # Number of nthreads per job
-    scratch_directory: str = None  # What location to use as scratch
+    scratch_directory: Optional[str] = None  # What location to use as scratch
 
     def __init__(self, **kwargs):
         """
@@ -102,7 +102,7 @@ class JobConfig(pydantic.BaseModel):
     # Specifications
     nthreads: int  # Number of nthreads per job
     memory: str  # Amount of memory in Gb per node
-    scratch_directory: str  # What location to use as scratch
+    scratch_directory: Optional[str]  # What location to use as scratch
 
 
 def _load_defaults():
@@ -155,12 +155,12 @@ def global_repr():
     ret += '-' * 80 + "\n"
     prov = get_provenance()
     for k in ["username", "hostname", "cpu"]:
-        ret += "{:<30} {:<30}\n".format(k, prov)
+        ret += "{:<30} {:<30}\n".format(k, prov[k])
     ret += "{:<30} {:<30}\n".format("cores", CPUINFO["count"])
 
     ret += "\nJob information:\n"
     ret += '-' * 80 + "\n"
-    for k, v in get_config().items():
+    for k, v in get_config():
         if (v is None) or isinstance(v, (str, int, float)):
             ret += "  {:<28} {}\n".format(k, v)
         else:
@@ -183,7 +183,7 @@ def get_node_descriptor(hostname=None):
         if name == "default": continue
 
         if fnmatch.fnmatch(hostname, node.hostname_pattern):
-            config = host_config
+            config = node
             break
     else:
         config = NODE_DESCRIPTORS["default"]
@@ -211,9 +211,9 @@ def get_config(hostname=None, local_options=None):
 def get_provenance():
     from qcengine import __version__
     ret = {
-        "cpu": GLOBAL["cpu"],
-        "hostname": GLOBAL["hostname"],
-        "username": GLOBAL["username"],
+        "cpu": GLOBALS["cpu"],
+        "hostname": GLOBALS["hostname"],
+        "username": GLOBALS["username"],
         "qcengine_version": __version__
     }
 
