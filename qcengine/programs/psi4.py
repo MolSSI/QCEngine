@@ -17,7 +17,7 @@ def _parse_psi_version(version):
     return parse_version(version)
 
 
-def run_psi4(input_data):
+def psi4(input_data):
     """
     Runs Psi4 in API mode
     """

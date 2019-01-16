@@ -28,7 +28,7 @@ def get_model(name):
         return False
 
 
-def run_torchani(ret_data):
+def torchani(ret_data):
     """
     Runs TorchANI in FF typing
     """

@@ -36,15 +36,12 @@ def compute(input_data, program, raise_error=False, capture_output=True):
     # Run the program
     with util.compute_wrapper(capture_output=capture_output) as metadata:
         output_data = input_data
-        if program == "psi4":
-            output_data = programs.run_psi4(input_data)
-        elif program == "rdkit":
-            output_data = programs.run_rdkit(input_data)
-        elif program == "torchani":
-            output_data = programs.run_torchani(input_data)
-        else:
+        try:
+            output_data = programs.get_program(program)(input_data)
+        except KeyError as e:
             output_data["success"] = False
-            output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood".format(program)
+            output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood.\nError Message: {}".format(
+                program, str(e))
 
     return util.handle_output_metadata(output_data, metadata, raise_error=raise_error)
 
