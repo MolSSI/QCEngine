@@ -27,7 +27,7 @@ def test_psi4_task():
     json_data["keywords"] = {"scf_type": "df"}
     json_data["return_output"] = False
 
-    ret = dc.compute(json_data, "psi4")
+    ret = dc.compute(json_data, "psi4", raise_error=True)
 
     assert ret["driver"] == "energy"
     assert "provenance" in ret
@@ -47,7 +47,7 @@ def test_psi4_ref_switch():
     json_data["keywords"] = {"scf_type": "df"}
     json_data["return_output"] = False
 
-    ret = dc.compute(json_data, "psi4")
+    ret = dc.compute(json_data, "psi4", raise_error=True)
 
     assert ret["success"] is True
 
@@ -61,7 +61,7 @@ def test_rdkit_task():
     json_data["keywords"] = {}
     json_data["return_output"] = False
 
-    ret = dc.compute(json_data, "rdkit")
+    ret = dc.compute(json_data, "rdkit", raise_error=True)
 
     assert ret["success"] is True
 
@@ -92,7 +92,7 @@ def test_torchani_task():
     json_data["keywords"] = {}
     json_data["return_output"] = False
 
-    ret = dc.compute(json_data, "torchani")
+    ret = dc.compute(json_data, "torchani", raise_error=True)
 
     assert ret["success"] is True
     assert ret["driver"] == "gradient"
