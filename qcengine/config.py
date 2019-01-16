@@ -9,15 +9,17 @@ import logging
 import os
 import socket
 
+from typing import Dict
+
 import cpuinfo
 import psutil
+import pydantic
 import yaml
 
 __all__ = ["get_global", "get_config", "get_provenance", "global_repr"]
 
 # Start a globals dictionary with small starting values
-_globals = {}
-_cpuinfo = cpuinfo.get_cpu_info()
+CPUINFO = cpuinfo.get_cpu_info()
 
 # We want physical cores
 if hasattr(psutil.Process(), "cpu_affinity"):
@@ -26,100 +28,78 @@ else:
     cpu_cnt = psutil.cpu_count(logical=False)
     if cpu_cnt is None:
         cpu_cnt = psutil.cpu_count(logical=True)
-_cpuinfo["count"] = cpu_cnt
+CPUINFO["count"] = cpu_cnt
 
-_globals["hostname"] = socket.gethostname()
-_globals["cpu"] = _cpuinfo["brand"]
-_globals["username"] = getpass.getuser()
-_globals["default_compute"] = {
+# Generic globals
+GLOBALS = {}
+GLOBALS["hostname"] = socket.gethostname()
+GLOBALS["available_memory"] = psutil.virtual_memory().available
+GLOBALS["cpu"] = CPUINFO["brand"]
+GLOBALS["username"] = getpass.getuser()
 
-    # Program paths
-    "psi_path": None,  # Path for the Psi4 API
-
-    # Specifications
-    "jobs_per_node": 2,  # Number of jobs per node
-    "nthreads_per_job": 'auto',  # Number of nthreads per job
-    "memory_per_job": 'auto',  # Amount of memory in Gb per node
-    "scratch_directory": None,  # What location to use as scratch
-}
-_globals["other_compute"] = {}
+# User file configuration
+USER_CONFIG = {}
 
 # Handle logger
-_logger = logging.getLogger("QCEngine")
-_logger.setLevel(logging.CRITICAL)
-
-def _process_variables(var):
-    # Environmental var
-    if isinstance(var, str) and var.startswith("$"):
-        var = var.lstrip("$")
-        if var in os.environ:
-            return os.environ[var]
-        else:
-            return None
-
-    # Normal var
-    else:
-        return var
+LOGGER = logging.getLogger("QCEngine")
+LOGGER.setLevel(logging.CRITICAL)
 
 
-def _process_autos(data):
+def _process_options(data):
+    """
+    Expands environmental variables and sets automatic keywords
+    """
+    for k, var in data.items():
+        if isinstance(var, str) and var.startswith("$"):
+            var = var.lstrip("$")
+            if var in os.environ:
+                var = os.environ[var]
+            else:
+                var = None
+            data[k] = var
+
     if data.get("nthreads_per_job", False) == "auto":
-        nthreads = _cpuinfo["count"]
-
         # Figure out number of threads per job
-        data["nthreads_per_job"] = int(nthreads / data["jobs_per_node"])
-        if data["nthreads_per_job"] < 1:
+        data["nthreads"] = int(CPUINFO["count"] / data["jobs_per_node"])
+        if data["nthreads"] < 1:
             raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
-    if data.get("memory_per_job", False) == "auto":
-        data["memory_per_job"] = round(psutil.virtual_memory().available * 0.9 / data["jobs_per_node"] / (1024**3), 3)
+    if data.get("memory", False) == "auto":
+        data["memory"] = round(data["available_memory"] * 0.9 / data["jobs_per_node"] / (1024**3), 3)
 
 
-def load_options(load_path):
+class Options(pydantic.BaseModel):
+
+    # Host data
+    hostname: str
+    available_memory: str
+    cpu: str
+    username: str
+
+    # Program paths
+    psi_path: None
+    rdkit_path: None
+
+    # Specifications
+    nthreads: int = None  # Number of nthreads per job
+    memory: str = None  # Amount of memory in Gb per node
+    scratch_directory: None  # What location to use as scratch
+
+    def __init__(self, **kwargs):
+        """
+        Initalize the pydantic class after processing options
+        """
+
+        _process_options(kwargs)
+        kwargs.update(GLOBALS)
+
+        super().__init__(**kwargs)
+
+
+def _load_defaults():
     """
-    Options can be loaded from a specific path
+    Pulls the defaults from the QCA folder
     """
-
-    # Load the library
-    if isinstance(load_path, str):
-        with open(load_path, "r") as stream:
-            user_config = yaml.load(stream)
-    elif isinstance(load_path, dict):
-        user_config = load_path
-    else:
-        raise TypeError("Unknown options load")
-
-    _globals["config_path"] = None
-
-    # Override default keys
-    default_keys = list(_globals["default_compute"].keys())
-
-    if "default_compute" in user_config:
-        for k, v in user_config["default_compute"].items():
-            if k not in default_keys:
-                raise KeyError("Key %s not accepted for default_compute" % k)
-            _globals["default_compute"][k] = _process_variables(v)
-
-    default_keys.append("hostname")
-
-    if "other_compute" in user_config:
-        for host, config in user_config["other_compute"].items():
-            _globals["other_compute"][host] = _globals["default_compute"].copy()
-
-            if "hostname" not in config:
-                raise KeyError("Other_compute must have a hostname to help identify the server")
-            for k, v in config.items():
-                if k not in default_keys:
-                    raise KeyError("Key %s not accepted for default_compute" % k)
-                _globals["other_compute"][host][k] = _process_variables(v)
-
-    # Process autos
-    _process_autos(_globals["default_compute"])
-    for k, v in _globals["other_compute"].items():
-        _process_autos(v)
-
-
-def _load_locals():
 
     # Find the config
     load_path = None
@@ -135,20 +115,21 @@ def _load_locals():
             break
 
     if load_path is None:
-        _logger.info("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
-        _logger.info("Using default options...")
+        LOGGER.info("Could not find 'qcengine_config.yaml'. Searched the following paths: %s" % ", ".join(test_paths))
+        LOGGER.info("Using default options...")
 
-        # Process autos
-        _process_autos(_globals["default_compute"])
-        for k, v in _globals["other_compute"].items():
-            _process_autos(v)
     else:
-        load_options(load_path)
-
+        if isinstance(load_path, str):
+            with open(load_path, "r") as stream:
+                USER_CONFIG = yaml.load(stream)
+        elif isinstance(load_path, dict):
+            USER_CONFIG = load_path
+        else:
+            raise TypeError("Unknown options load")
 
 
 # Pull in the local variables
-_load_locals()
+_load_defaults()
 
 
 def get_hostname():
@@ -156,7 +137,7 @@ def get_hostname():
     Returns the global current hostname
     """
 
-    return _globals["hostname"]
+    return GLOBALS["hostname"]
 
 
 def global_repr():
@@ -164,10 +145,10 @@ def global_repr():
     ret = ""
     ret += "Host information:\n"
     ret += '-' * 80 + "\n"
+    prov = get_provenance()
     for k in ["username", "hostname", "cpu"]:
-        ret += "{:<30} {:<30}\n".format(k, get_global(k))
-    ret += "{:<30} {:<30}\n".format("cores", _cpuinfo["count"])
-
+        ret += "{:<30} {:<30}\n".format(k, prov)
+    ret += "{:<30} {:<30}\n".format("cores", CPUINFO["count"])
 
     ret += "\nJob information:\n"
     ret += '-' * 80 + "\n"
@@ -182,42 +163,35 @@ def global_repr():
     return ret
 
 
-def get_global(name):
-    return copy.deepcopy(_globals[name])
-
-
-def get_config(key=None, hostname=None):
+def get_config(hostname=None, local_options=None):
     """
     Returns the configuration key for qcengine.
     """
     config = None
     hostname_match = None
     if hostname is None:
-        hostname = _globals["hostname"]
+        hostname = GLOBALS["hostname"]
 
     # Find a match
-    for host, host_config in _globals["other_compute"].items():
+    for host, host_config in GLOBALS["other_compute"].items():
         if fnmatch.fnmatch(hostname, host_config["hostname"]):
             hostname_match = host
             config = host_config
             break
 
+    local_config = {}
+
     # Use default
     if hostname_match is None:
-        config = _globals["default_compute"]
+        config = GLOBALS["default_compute"]
 
-    if key is None:
-        return config.copy()
-    else:
-        if key not in config:
-            raise Exception("Key '{}' asked for, but not in local data".format(key))
-        return config[key]
-
+    return Options(**config)
 
 def get_provenance():
-    ret = {"cpu": get_global("cpu"), "hostname": get_global("hostname"), "username": get_global("username")}
+    ret = {"cpu": GLOBAL["cpu"], "hostname": GLOBAL["hostname"], "username": GLOBAL["username"]}
 
     return ret
 
+
 def get_logger():
-    return _logger
+    return LOGGER

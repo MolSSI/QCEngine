@@ -12,8 +12,8 @@ Quantum chemistry program executor and IO standardizer ([QCSchema](https://githu
 
 Available Compute Programs:
  - [Psi4](http://www.psicode.org)
- - [PRDKit](http://rdkit.org)
- - [PTorchANI](https://github.com/aiqm/torchani)
+ - [RDKit](http://rdkit.org)
+ - [TorchANI](https://github.com/aiqm/torchani)
 
 Available Procedures:
  - [Geometric](https://github.com/leeping/geomeTRIC)
