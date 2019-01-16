@@ -1,4 +1,4 @@
-language: python
+language: generic
 
 # Run jobs on container-based infrastructure, can be overridden per job
 dist: xenial
@@ -6,22 +6,18 @@ dist: xenial
 matrix:
   include:
     - os: linux
-      python: 2.7
-      env: 
-        - PYTHON_VER=2.7
-        - PROG=PSI4
-    - os: linux
-      python: 3.5
       env:
-        - PYTHON_VER=3.5
+        - PYTHON_VER=3.6
         - PROG=RDKIT
     - os: linux
-      python: 3.6
       env:
         - PYTHON_VER=3.6
         - PROG=PSI4
     - os: linux
-      python: 3.6
+      env:
+        - PYTHON_VER=3.7
+        - PROG=PSI4
+    - os: linux
       env:
         - PYTHON_VER=3.6
         - PROG=ANI
