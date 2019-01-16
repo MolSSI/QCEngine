@@ -6,7 +6,7 @@ from . import config
 # Handle versioneer
 from ._version import get_versions
 from .compute import compute, compute_procedure
-from .config import get_config, load_options
+from .config import get_config
 from .stock_mols import get_molecule
 
 versions = get_versions()

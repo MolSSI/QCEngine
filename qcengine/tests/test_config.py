@@ -7,8 +7,51 @@ import os
 
 import pytest
 
-import qcengine as dc
+import qcengine
 
+def test_node_blank():
+    node = qcengine.config.NodeDescriptor(name="something", hostname_pattern="*")
+
+    assert node.nthreads_per_job > 1
+    assert node.available_memory > 0.1
+    assert node.memory_per_job > 0.1
+
+def test_node_auto():
+
+    description = {
+        "name": "something",
+        "hostname_pattern": "*",
+        "jobs_per_node": 1,
+        "nthreads_per_job": "auto",
+        "memory_per_job": "auto",
+        "total_cores": 4,
+        "available_memory": 10,
+        "memory_safety_factor": 0,
+    }
+
+    node1 = qcengine.config.NodeDescriptor(**description)
+    assert node1.nthreads_per_job == 4
+    assert pytest.approx(node1.memory_per_job) == 10.0
+
+    description["jobs_per_node"] = 2
+    node2 = qcengine.config.NodeDescriptor(**description)
+    assert node2.nthreads_per_job == 2
+    assert pytest.approx(node2.memory_per_job) == 5
+
+def test_node_environ():
+
+    description = {
+        "name": "something",
+        "hostname_pattern": "*",
+        "jobs_per_node": 1,
+        "nthreads_per_job": 'auto',
+        "memory_per_job": 'auto',
+        "scratch_directory": "$TMPDIR"
+    }
+
+    node = qcengine.config.NodeDescriptor(**description)
+    assert node.nthreads_per_job > 1
+    assert node.memory_per_job > 1
 
 @pytest.fixture
 def opt_state_basic():
@@ -17,38 +60,38 @@ def opt_state_basic():
     """
 
     # Snapshot env
-    old_globals = copy.deepcopy(dc.config._globals)
+    old_node = copy.deepcopy(dc.config.NODE_DESCRIPTORS)
+    dc.config.NODE_DESCRIPTORS
     old_environ = dict(os.environ)
 
     os.environ["TMPDIR"] = "/tmp/"
 
     config = {
-        "default_compute": {
+        "default": {
             "psi_path": "/home/user/psi4",
             "jobs_per_node": 1,
             "nthreads_per_job": 2,
             "memory_per_job": 4,
             "scratch_directory": "$TMPDIR"
         },
-        "other_compute": {
-            "dragonsooth": {
-                "psi_path": "/home/user/dt/psi4",
-                "hostname": "dt*",
-                "jobs_per_node": 2,
-                "nthreads_per_job": 6,
-                "memory_per_job": 60,
-                "scratch_directory": "$NOVAR_RANDOM_ABC123"
-            },
-            "new_river": {
-                "hostname": "nr*",
-                "jobs_per_node": 2,
-                "nthreads_per_job": 12,
-                "memory_per_job": 120
-            }
+        "dragonsooth": {
+            "psi_path": "/home/user/dt/psi4",
+            "hostname_pattern": "dt*",
+            "jobs_per_node": 2,
+            "nthreads_per_job": 6,
+            "memory_per_job": 60,
+            "scratch_directory": "$NOVAR_RANDOM_ABC123"
+        },
+        "newriver": {
+            "hostname_pattern": "nr*",
+            "jobs_per_node": 2,
+            "nthreads_per_job": 12,
+            "memory_per_job": 120
         }
     }
 
     dc.load_options(config)
+    yield qcengine.get_config
 
     yield
 
@@ -117,17 +160,8 @@ def opt_state_auto():
     dc.config._globals = old_globals
 
 
-def test_auto_threads(opt_state_auto):
-
-    assert dc.get_config("jobs_per_node") == 1
-    assert isinstance(dc.get_config("nthreads_per_job"), int)
-    assert dc.get_config("nthreads_per_job") > 0
-    assert dc.get_config("nthreads_per_job") < 100
-
-    assert isinstance(dc.get_config("memory_per_job"), (int, float))
-    assert dc.get_config("memory_per_job") > 0.01  # Always more than 1OMB free?
 
 
 def test_global_repr(opt_state_auto):
 
-    dc.config.global_repr()
+    assert isinstance(dc.config.global_repr(), str)
