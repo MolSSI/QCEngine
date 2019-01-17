@@ -57,6 +57,24 @@ def test_geometric_psi4():
     geom = ret["final_molecule"]["geometry"]
     assert pytest.approx(_bond_dist(geom, 0, 1), 1.e-4) == 1.3459150737
 
+
+@addons.using_psi4
+@addons.using_geometric
+def test_geometric_local_options():
+    inp = copy.deepcopy(_base_json)
+
+    inp["initial_molecule"] = dc.get_molecule("hydrogen")
+    inp["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
+    inp["keywords"]["program"] = "psi4"
+
+    # Set some extremely large number to test
+    ret = dc.compute_procedure(inp, "geometric", raise_error=True, local_options={"memory": "5000"})
+    assert pytest.approx(ret["trajectory"][0]["provenance"]["memory"], 1) == 4900
+
+    # Make sure we cleaned up
+    assert "_qcengine_local_config" not in ret["input_specification"]
+    assert "_qcengine_local_config" not in ret["trajectory"][0]
+
 @addons.using_rdkit
 @addons.using_geometric
 def test_geometric_stdout():
@@ -74,6 +92,7 @@ def test_geometric_stdout():
     with pytest.raises(ValueError):
         ret = dc.compute_procedure(inp, "rdkit", raise_error=True)
 
+
 @addons.using_rdkit
 @addons.using_geometric
 def test_geometric_rdkit_error():
@@ -90,6 +109,7 @@ def test_geometric_rdkit_error():
 
     with pytest.raises(ValueError):
         ret = dc.compute_procedure(inp, "rdkit", raise_error=True)
+
 
 @addons.using_torchani
 @addons.using_geometric

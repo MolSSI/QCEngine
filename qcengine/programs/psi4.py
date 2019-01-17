@@ -22,7 +22,6 @@ def psi4(input_data, config):
     Runs Psi4 in API mode
     """
 
-
     try:
         import psi4
     except ImportError:
@@ -30,7 +29,7 @@ def psi4(input_data, config):
 
     # Setup the job
     input_data["nthreads"] = config.nthreads
-    input_data["memory"] = int(config.memory *1024 * 1024 * 1024 * 0.95) # Memory in bytes
+    input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
     input_data["success"] = False
 
     scratch = config.scratch_directory

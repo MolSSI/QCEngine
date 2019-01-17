@@ -35,6 +35,11 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
 
     """
     input_data = copy.deepcopy(input_data)
+
+    if local_options is None:
+        local_options = {}
+
+    local_options = {**local_options, **input_data.pop("_qcengine_local_config", {})}
     config = get_config(local_options=local_options)
 
     # Run the program
@@ -80,7 +85,9 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
     with compute_wrapper(capture_output=capture_output) as metadata:
         output_data = input_data
         if procedure == "geometric":
+            input_data["input_specification"]["_qcengine_local_config"] = config.dict()
             output_data = get_module_function("geometric", "run_json.geometric_run_json")(input_data)
+            del input_data["input_specification"]["_qcengine_local_config"]
         else:
             output_data["success"] = False
             output_data["error_message"] = "QCEngine Call Error:\nProcedure {} not understood".format(program)
