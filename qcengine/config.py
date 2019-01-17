@@ -52,15 +52,16 @@ class NodeDescriptor(pydantic.BaseModel):
     # Host data
     hostname_pattern: str
     name: str
-    available_memory: int = None
-    total_cores: int = None
+    scratch_directory: Optional[str] = None  # What location to use as scratch
 
-    # Specifications
-    jobs_per_node: int = 2
+    available_memory: int = None
     memory_safety_factor: int = 10  # Percentage of memory as a safety factor
     memory_per_job: Union[int, str] = "auto"  # Amount of memory in Gb per node
+
+    # Specifications
+    total_cores: int = None
+    jobs_per_node: int = 2
     nthreads_per_job: Union[int, str] = "auto"  # Number of nthreads per job
-    scratch_directory: Optional[str] = None  # What location to use as scratch
 
     class Config:
         ignore_extra = False
@@ -104,7 +105,7 @@ class JobConfig(pydantic.BaseModel):
 
     # Specifications
     nthreads: int  # Number of nthreads per job
-    memory: int  # Amount of memory in GiB per node
+    memory: float  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
 
     class Config:
@@ -158,21 +159,26 @@ def global_repr():
 
     ret = ""
     ret += "Host information:\n"
-    ret += '-' * 80 + "\n"
+    ret += "-" * 80 + "\n"
+
     prov = get_provenance()
     for k in ["username", "hostname", "cpu"]:
         ret += "{:<30} {:<30}\n".format(k, prov[k])
-    ret += "{:<30} {:<30}\n".format("cores", CPUINFO["count"])
+
+    ret += "\nNode information:\n"
+    ret += "-" * 80 + "\n"
+    for k, v in get_node_descriptor():
+        ret += "  {:<28} {}\n".format(k, v)
+
+        if k in ["scratch_directory", "memory_per_job"]:
+            ret += "\n"
 
     ret += "\nJob information:\n"
-    ret += '-' * 80 + "\n"
+    ret += "-" * 80 + "\n"
     for k, v in get_config():
-        if (v is None) or isinstance(v, (str, int, float)):
-            ret += "  {:<28} {}\n".format(k, v)
-        else:
-            raise TypeError("Global printing error, type '{}' not understood for key '{}'.".format(type(v), v))
+        ret += "  {:<28} {}\n".format(k, v)
 
-    ret += '-' * 80 + "\n"
+    ret += "-" * 80 + "\n"
 
     return ret
 

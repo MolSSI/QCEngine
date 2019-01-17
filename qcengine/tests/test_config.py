@@ -16,7 +16,7 @@ from qcengine.testing import environ_context
 def test_node_blank():
     node = qcengine.config.NodeDescriptor(name="something", hostname_pattern="*")
 
-    assert node.nthreads_per_job > 1
+    assert node.nthreads_per_job > 0
     assert node.available_memory > 0.1
     assert node.memory_per_job > 0.1
 
