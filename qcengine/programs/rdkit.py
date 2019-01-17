@@ -2,17 +2,20 @@
 Calls the Psi4 executable.
 """
 
-from qcengine import units
+from qcengine.units import ureg
 
 
-def rdkit(ret_data):
+def rdkit(ret_data, config):
     """
     Runs RDKit in FF typing
     """
 
-    import rdkit
-    from rdkit import Chem
-    from rdkit.Chem import AllChem
+    try:
+        import rdkit
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+    except ImportError:
+        raise ImportError("Could not find RDKit in the Python path.")
 
     # Failure flag
     ret_data["success"] = False
@@ -45,10 +48,11 @@ def rdkit(ret_data):
     # Write out the conformer
     natom = len(jmol["symbols"])
     conf = Chem.Conformer(natom)
+    bohr2ang = ureg.conversion_factor("bohr", "angstrom")
     for line in range(natom):
-        conf.SetAtomPosition(line, (units.bohr_to_angstrom * jmol["geometry"][line * 3],
-                                    units.bohr_to_angstrom * jmol["geometry"][line * 3 + 1],
-                                    units.bohr_to_angstrom * jmol["geometry"][line * 3 + 2]))
+        conf.SetAtomPosition(line, (bohr2ang * jmol["geometry"][line * 3],
+                                    bohr2ang * jmol["geometry"][line * 3 + 1],
+                                    bohr2ang * jmol["geometry"][line * 3 + 2])) # yapf: disable
 
     mol.AddConformer(conf)
     Chem.rdmolops.SanitizeMol(mol)
@@ -66,12 +70,12 @@ def rdkit(ret_data):
 
     ff.Initialize()
 
-    ret_data["properties"] = {"return_energy": ff.CalcEnergy() / units.hartree_to_kj_mol}
+    ret_data["properties"] = {"return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")}
 
     if ret_data["driver"] == "energy":
         ret_data["return_result"] = ret_data["properties"]["return_energy"]
     elif ret_data["driver"] == "gradient":
-        coef = 1 / (units.bohr_to_angstrom * units.hartree_to_kj_mol)
+        coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
         ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
     else:
         ret_data["error_message"] = "run_rdkit did not understand driver method '{}'.".format(ret_data["driver"])

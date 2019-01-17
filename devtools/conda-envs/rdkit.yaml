@@ -9,8 +9,11 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
+  - qcelemental
 
     # Testing
   - pytest
   - pytest-cov
   - codecov
+  - pip:
+    - pydantic

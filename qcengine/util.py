@@ -102,6 +102,9 @@ def handle_output_metadata(output_data, metadata, raise_error=False):
 
     # Raise an error if one exists and a user requested a raise
     if raise_error and (output_data["success"] is not True):
+        msg = "stdout:\n" + output_data["stdout"]
+        msg += "\nstderr:\n" + output_data["stderr"]
+        print(msg)
         raise ValueError(output_data["error_message"])
 
     # Fill out provenance datadata

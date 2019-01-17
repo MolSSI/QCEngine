@@ -1,6 +1,7 @@
 """
-Not another units package
+Pinning point for QCElemental units
 """
 
-bohr_to_angstrom = 0.52917724900001
-hartree_to_kj_mol = 2625.499638
+# Pin Codata
+import qcelemental as qcel
+ureg = qcel.PhysicalConstantsContext("CODATA2014")

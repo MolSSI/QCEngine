@@ -4,11 +4,12 @@ Integrates the computes together
 
 import copy
 
-from . import programs
-from . import util
+from .programs import get_program
+from .util import compute_wrapper, handle_output_metadata, get_module_function
+from .config import get_config
 
 
-def compute(input_data, program, raise_error=False, capture_output=True):
+def compute(input_data, program, raise_error=False, capture_output=True, local_options=None):
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -24,6 +25,8 @@ def compute(input_data, program, raise_error=False, capture_output=True):
         Determines if compute should raise an error or not.
     capture_output : bool, optional
         Determines if stdout/stderr should be captured.
+    local_options : dict, optional
+        A dictionary of local configuration options
 
     Returns
     -------
@@ -33,20 +36,27 @@ def compute(input_data, program, raise_error=False, capture_output=True):
     """
     input_data = copy.deepcopy(input_data)
 
+    if local_options is None:
+        local_options = {}
+
+    local_options = {**local_options, **input_data.pop("_qcengine_local_config", {})}
+    config = get_config(local_options=local_options)
+
     # Run the program
-    with util.compute_wrapper(capture_output=capture_output) as metadata:
+    with compute_wrapper(capture_output=capture_output) as metadata:
         output_data = input_data
         try:
-            output_data = programs.get_program(program)(input_data)
+            output_data = get_program(program)(input_data, config)
         except KeyError as e:
             output_data["success"] = False
-            output_data["error_message"] = "QCEngine Call Error:\nProgram {} not understood.\nError Message: {}".format(
-                program, str(e))
+            output_data[
+                "error_message"] = "QCEngine Call Error:\nProgram {} not understood.\nError Message: {}".format(
+                    program, str(e))
 
-    return util.handle_output_metadata(output_data, metadata, raise_error=raise_error)
+    return handle_output_metadata(output_data, metadata, raise_error=raise_error)
 
 
-def compute_procedure(input_data, procedure, raise_error=False, capture_output=True):
+def compute_procedure(input_data, procedure, raise_error=False, capture_output=True, local_options=None):
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters
@@ -59,6 +69,8 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
         Determines if compute should raise an error or not.
     capture_output : bool, optional
         Determines if stdout/stderr should be captured.
+    local_options : dict, optional
+        A dictionary of local configuration options
 
     Returns
     ------
@@ -67,14 +79,17 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
     """
 
     input_data = copy.deepcopy(input_data)
+    config = get_config(local_options=local_options)
 
     # Run the procedure
-    with util.compute_wrapper(capture_output=capture_output) as metadata:
+    with compute_wrapper(capture_output=capture_output) as metadata:
         output_data = input_data
         if procedure == "geometric":
-            output_data = util.get_module_function("geometric", "run_json.geometric_run_json")(input_data)
+            input_data["input_specification"]["_qcengine_local_config"] = config.dict()
+            output_data = get_module_function("geometric", "run_json.geometric_run_json")(input_data)
+            del input_data["input_specification"]["_qcengine_local_config"]
         else:
             output_data["success"] = False
             output_data["error_message"] = "QCEngine Call Error:\nProcedure {} not understood".format(program)
 
-    return util.handle_output_metadata(output_data, metadata, raise_error=raise_error)
+    return handle_output_metadata(output_data, metadata, raise_error=raise_error)

@@ -2,7 +2,7 @@
 Calls the Psi4 executable.
 """
 
-from qcengine import units
+from qcengine.units import ureg
 
 _CACHE = {}
 
@@ -28,14 +28,20 @@ def get_model(name):
         return False
 
 
-def torchani(ret_data):
+def torchani(ret_data, config):
     """
     Runs TorchANI in FF typing
     """
 
     import numpy as np
-    import torch
-    import torchani
+    try:
+        import torch
+    except ImportError:
+        raise ImportError("Could not find PyTorch in the Python path.")
+    try:
+        import torchani
+    except ImportError:
+        raise ImportError("Could not find TorchANI in the Python path.")
 
     device = torch.device('cpu')
     builtin = torchani.neurochem.Builtins()
@@ -60,7 +66,7 @@ def torchani(ret_data):
     species = builtin.consts.species_to_tensor(species).to(device).unsqueeze(0)
 
     # Build coord array
-    geom_array = np.array(ret_data["molecule"]["geometry"]).reshape(1, -1, 3) * units.bohr_to_angstrom
+    geom_array = np.array(ret_data["molecule"]["geometry"]).reshape(1, -1, 3) * ureg.conversion_factor("bohr", "angstrom")
     coordinates = torch.tensor(geom_array.tolist(), requires_grad=True, device=device)
 
     _, energy = model((species, coordinates))
@@ -70,7 +76,7 @@ def torchani(ret_data):
         ret_data["return_result"] = ret_data["properties"]["return_energy"]
     elif ret_data["driver"] == "gradient":
         derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
-        ret_data["return_result"] = np.asarray(derivative / units.bohr_to_angstrom).ravel().tolist()
+        ret_data["return_result"] = np.asarray(derivative * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
     else:
         ret_data["error_message"] = "run_torchani did not understand driver method '{}'.".format(ret_data["driver"])
         return ret_data
