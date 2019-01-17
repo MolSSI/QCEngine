@@ -51,7 +51,7 @@ def test_geometric_psi4():
     inp["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
     inp["keywords"]["program"] = "psi4"
 
-    ret = dc.compute_procedure(inp, "geometric")
+    ret = dc.compute_procedure(inp, "geometric", raise_error=True)
     assert 10 > len(ret["trajectory"]) > 1
 
     geom = ret["final_molecule"]["geometry"]
@@ -66,7 +66,7 @@ def test_geometric_stdout():
     inp["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     inp["keywords"]["program"] = "rdkit"
 
-    ret = dc.compute_procedure(inp, "geometric")
+    ret = dc.compute_procedure(inp, "geometric", raise_error=True)
     assert ret["success"] is True
     assert "Converged!" in ret["stdout"]
     assert ret["stderr"] == "No stderr recieved."
@@ -100,7 +100,7 @@ def test_geometric_torchani():
     inp["input_specification"]["model"] = {"method": "ANI1", "basis": None}
     inp["keywords"]["program"] = "torchani"
 
-    ret = dc.compute_procedure(inp, "geometric")
+    ret = dc.compute_procedure(inp, "geometric", raise_error=True)
     assert ret["success"] is True
     assert "Converged!" in ret["stdout"]
     assert ret["stderr"] == "No stderr recieved."

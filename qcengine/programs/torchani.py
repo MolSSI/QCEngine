@@ -28,14 +28,20 @@ def get_model(name):
         return False
 
 
-def torchani(ret_data):
+def torchani(ret_data, config):
     """
     Runs TorchANI in FF typing
     """
 
     import numpy as np
-    import torch
-    import torchani
+    try:
+        import torch
+    except ImportError:
+        raise ImportError("Could not find PyTorch in the Python path.")
+    try:
+        import torchani
+    except ImportError:
+        raise ImportError("Could not find TorchANI in the Python path.")
 
     device = torch.device('cpu')
     builtin = torchani.neurochem.Builtins()

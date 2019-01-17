@@ -5,14 +5,17 @@ Calls the Psi4 executable.
 from qcengine.units import ureg
 
 
-def rdkit(ret_data):
+def rdkit(ret_data, config):
     """
     Runs RDKit in FF typing
     """
 
-    import rdkit
-    from rdkit import Chem
-    from rdkit.Chem import AllChem
+    try:
+        import rdkit
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+    except ImportError:
+        raise ImportError("Could not find RDKit in the Python path.")
 
     # Failure flag
     ret_data["success"] = False

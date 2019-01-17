@@ -17,15 +17,11 @@ def _parse_psi_version(version):
     return parse_version(version)
 
 
-def psi4(input_data):
+def psi4(input_data, config):
     """
     Runs Psi4 in API mode
     """
 
-    # Insert API path if needed
-    psiapi = config.get_config("psi_path")
-    if (psiapi is not None) and (psiapi not in sys.path):
-        sys.path.insert(1, psiapi)
 
     try:
         import psi4
@@ -33,11 +29,11 @@ def psi4(input_data):
         raise ImportError("Could not find Psi4 in the Python path.")
 
     # Setup the job
-    input_data["nthreads"] = config.get_config("nthreads_per_job")
-    input_data["memory"] = int(config.get_config("memory_per_job") * 1024 * 1024 * 1024 * 0.95)
+    input_data["nthreads"] = config.nthreads
+    input_data["memory"] = int(config.memory *1024 * 1024 * 1024 * 0.95) # Memory in bytes
     input_data["success"] = False
 
-    scratch = config.get_config("scratch_directory")
+    scratch = config.scratch_directory
     if scratch is not None:
         input_data["scratch_location"] = scratch
 
