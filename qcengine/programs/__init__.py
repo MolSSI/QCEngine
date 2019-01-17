@@ -2,6 +2,8 @@
 Imports the various compute backends
 """
 
+__all__ = ["register_program", "get_program", "get_programs"]
+
 programs = {}
 
 def register_program(name, entry_point):

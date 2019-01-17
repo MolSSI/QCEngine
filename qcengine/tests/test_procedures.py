@@ -75,6 +75,7 @@ def test_geometric_local_options():
     assert "_qcengine_local_config" not in ret["input_specification"]
     assert "_qcengine_local_config" not in ret["trajectory"][0]
 
+
 @addons.using_rdkit
 @addons.using_geometric
 def test_geometric_stdout():
