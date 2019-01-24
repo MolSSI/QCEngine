@@ -9,7 +9,7 @@ import pytest
 import qcengine as dc
 from . import addons
 
-_base_json = {"schema_name": "qc_schema_input", "schema_version": 1}
+_base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 
 
 def test_missing_key():
@@ -69,7 +69,7 @@ def test_rdkit_task():
 @addons.using_rdkit
 def test_rdkit_connectivity_error():
     json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = dc.get_molecule("water")
+    json_data["molecule"] = dc.get_molecule("water").dict()
     json_data["driver"] = "gradient"
     json_data["model"] = {"method": "UFF", "basis": ""}
     json_data["keywords"] = {}
@@ -78,10 +78,12 @@ def test_rdkit_connectivity_error():
 
     ret = dc.compute(json_data, "rdkit")
     assert ret["success"] is False
-    assert "connectivity" in ret["error_message"]
+    assert "error" in ret
+    assert "connectivity" in ret["error"]["error_message"]
 
     with pytest.raises(ValueError):
-        ret = dc.compute(json_data, "rdkit", raise_error=True)
+        _ = dc.compute(json_data, "rdkit", raise_error=True)
+
 
 @addons.using_torchani
 def test_torchani_task():

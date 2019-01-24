@@ -2,14 +2,14 @@
 Creates globals for the qcengine module
 """
 
-import copy
 import fnmatch
 import getpass
 import logging
 import os
 import socket
 
-from typing import Optional, Dict, Union
+from typing import Optional, Union
+from qcelemental.models import Provenance
 
 import cpuinfo
 import psutil
@@ -126,7 +126,7 @@ def global_repr():
     ret += "Host information:\n"
     ret += "-" * 80 + "\n"
 
-    prov = get_provenance()
+    prov = get_provenance().dict()
     for k in ["username", "hostname", "cpu"]:
         ret += "{:<30} {:<30}\n".format(k, prov[k])
 
@@ -228,12 +228,13 @@ def get_config(*, hostname=None, local_options=None):
 
 def get_provenance():
     from qcengine import __version__
-    ret = {
-        "cpu": GLOBALS["cpu"],
-        "hostname": GLOBALS["hostname"],
-        "username": GLOBALS["username"],
-        "qcengine_version": __version__
-    }
+    ret = Provenance(
+        cpu=GLOBALS["cpu"],
+        hostname=GLOBALS["hostname"],
+        username=GLOBALS["username"],
+        version=__version__,
+        creator="QCEngine"
+    )
 
     return ret
 

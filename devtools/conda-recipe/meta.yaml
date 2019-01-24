@@ -20,6 +20,7 @@ requirements:
     - py-cpuinfo
     - pyyaml
     - psutil
+    - qcelemental
 
 test:
   requires:

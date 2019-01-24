@@ -3,6 +3,8 @@ A small list of molecules used to validate and tests computation.
 """
 
 import copy
+from qcelemental.models import Molecule
+
 
 _test_mols = {
     "hydrogen": {
@@ -35,4 +37,4 @@ def get_molecule(name):
     if name not in _test_mols:
         raise KeyError("Molecule name '{}' not found".format(name))
 
-    return copy.deepcopy(_test_mols[name])
+    return copy.deepcopy(Molecule(**_test_mols[name]))

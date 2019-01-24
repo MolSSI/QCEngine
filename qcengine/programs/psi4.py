@@ -2,11 +2,8 @@
 Calls the Psi4 executable.
 """
 
-import sys
-
 from pkg_resources import parse_version
-
-from qcengine import config
+from qcelemental.models import Result, FailedResult
 
 
 def _parse_psi_version(version):
@@ -17,7 +14,7 @@ def _parse_psi_version(version):
     return parse_version(version)
 
 
-def psi4(input_data, config):
+def psi4(input_model, config):
     """
     Runs Psi4 in API mode
     """
@@ -28,9 +25,14 @@ def psi4(input_data, config):
         raise ImportError("Could not find Psi4 in the Python path.")
 
     # Setup the job
+    input_data = input_model.copy().dict()
     input_data["nthreads"] = config.ncores
     input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
     input_data["success"] = False
+    reset_schema = False
+    if input_data["schema_name"] == "qcschema_input":
+        input_data["schema_name"] = "qc_schema_input"
+        reset_schema = True
 
     scratch = config.scratch_directory
     if scratch is not None:
@@ -49,6 +51,8 @@ def psi4(input_data, config):
     else:
         raise TypeError("Psi4 version '{}' not understood.".format(psi_version))
 
+    if reset_schema:
+        output_data["schema_name"] = "qcschema_input"
     # Dispatch errors, PSIO Errors are not recoverable for future runs
     if output_data["success"] is False:
 
@@ -60,5 +64,5 @@ def psi4(input_data, config):
         output_data["provenance"]["memory"] = round(input_data["memory"] / (1024**3), 3)
         output_data["provenance"]["nthreads"] = input_data["nthreads"]
         del output_data["memory"], input_data["nthreads"]
-
-    return output_data
+        return Result(**output_data)
+    return FailedResult(**output_data)
