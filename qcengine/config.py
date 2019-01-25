@@ -16,7 +16,7 @@ import psutil
 import pydantic
 import yaml
 
-__all__ = ["get_config", "get_provenance", "global_repr", "list_compute", "NodeDescriptor"]
+__all__ = ["get_config", "get_provenance", "global_repr", "NodeDescriptor"]
 
 # Start a globals dictionary with small starting values
 CPUINFO = cpuinfo.get_cpu_info()
@@ -189,7 +189,7 @@ def parse_environment(data):
     return ret
 
 
-def get_config(hostname=None, local_options=None):
+def get_config(*, hostname=None, local_options=None):
     """
     Returns the configuration key for qcengine.
     """
@@ -201,24 +201,25 @@ def get_config(hostname=None, local_options=None):
 
     # Node data
     node = get_node_descriptor(hostname)
-    memory = node.memory or GLOBALS["memory"]
     ncores = node.ncores or CPUINFO["count"]
     scratch_directory = local_options.get("scratch_directory", None) or node.scratch_directory
 
     # Jobs per node
     jobs_per_node = local_options.pop("jobs_per_node", None) or node.jobs_per_node
 
+    # Handle memory
     memory = local_options.pop("memory", None)
     if memory is None:
+        memory = node.memory or GLOBALS["memory"]
         memory_coeff = (1 - node.memory_safety_factor / 100)
-        memory = round(node.memory * memory_coeff / jobs_per_node, 3)
+        memory = round(memory * memory_coeff / jobs_per_node, 3)
 
     # Handle ncores
     ncores = local_options.pop("ncores", None) or int(ncores / jobs_per_node)
     if ncores < 1:
         raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
-    config = {"ncores": ncores, "memory": memory, "scratch_directory": node.scratch_directory}
+    config = {"ncores": ncores, "memory": memory, "scratch_directory": scratch_directory}
     if local_options is not None:
         config.update(local_options)
 
