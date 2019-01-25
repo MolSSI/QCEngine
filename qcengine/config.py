@@ -16,7 +16,7 @@ import psutil
 import pydantic
 import yaml
 
-__all__ = ["get_config", "get_provenance", "global_repr", "NodeDescriptor"]
+__all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
 
 # Start a globals dictionary with small starting values
 CPUINFO = cpuinfo.get_cpu_info()
@@ -126,7 +126,7 @@ def global_repr():
     ret += "Host information:\n"
     ret += "-" * 80 + "\n"
 
-    prov = get_provenance().dict()
+    prov = get_provenance_augments()
     for k in ["username", "hostname", "cpu"]:
         ret += "{:<30} {:<30}\n".format(k, prov[k])
 
@@ -226,17 +226,14 @@ def get_config(*, hostname=None, local_options=None):
     return JobConfig(**config)
 
 
-def get_provenance():
+def get_provenance_augments():
     from qcengine import __version__
-    ret = Provenance(
+    return dict(
         cpu=GLOBALS["cpu"],
         hostname=GLOBALS["hostname"],
         username=GLOBALS["username"],
         qcengine_version=__version__,
-        creator="QCEngine"
     )
-
-    return ret
 
 
 def get_logger():

@@ -11,9 +11,28 @@ import traceback
 from contextlib import contextmanager
 
 from . import config
-from qcelemental.models import FailedOperation
+from qcelemental.models import FailedOperation, ComputeError
 
-__all__ = ["compute_wrapper", "get_module_function"]
+__all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
+
+
+def model_wrapper(input_data, model):
+    """
+    Wrap input data in the given model, or return a controlled error
+    """
+    try:
+        if isinstance(input_data, dict):
+            input_data = model(**input_data)
+    except Exception:
+        failure = FailedOperation(input_data=input_data,
+                                  success=False,
+                                  error=ComputeError(
+                                      error_type="input_error",
+                                      error_message=("Input data could not be processed correctly:\n" +
+                                                     traceback.format_exc())
+                                  ))
+        return failure
+    return input_data
 
 
 @contextmanager
@@ -103,7 +122,10 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
         Output type depends on return_dict or a dict if an error was generated in model construction
     """
 
-    output_fusion = output_data.dict()
+    if isinstance(output_data, dict):
+        output_fusion = output_data  # Error handling
+    else:
+        output_fusion = output_data.dict()
 
     output_fusion["stdout"] = metadata["stdout"]
     output_fusion["stderr"] = metadata["stderr"]
@@ -121,19 +143,22 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
 
     # Fill out provenance datadata
     wall_time = metadata["wall_time"]
-    base_provenance_dict = config.get_provenance().dict()
-    base_provenance_dict["wall_time"] = wall_time
+    provenance_augments = config.get_provenance_augments()
+    provenance_augments["wall_time"] = wall_time
     if "provenance" in output_fusion:
-        output_fusion["provenance"].update(base_provenance_dict)
+        output_fusion["provenance"].update(provenance_augments)
     else:
-        output_fusion["provenance"] = base_provenance_dict
+        # Add onto the augments with some missing info
+        provenance_augments["creator"] = "QCEngine"
+        provenance_augments["version"] = provenance_augments["qcengine_version"]
+        output_fusion["provenance"] = provenance_augments
 
     if return_dict:
         return output_fusion
     # We need to return the correct objects; e.g. Results, Procedures; if return_dict it False
     # This is currently not tested
     if output_fusion["success"]:
-        return output_data.__class__(**output_fusion)
+        return output_data.__class__(**output_fusion)  # This will only execute if everything went well
     # Should only be reachable on failures
     return FailedOperation(success=output_fusion.pop("success", False),
                            error=output_fusion.pop("error"),
