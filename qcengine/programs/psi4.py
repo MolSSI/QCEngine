@@ -3,7 +3,7 @@ Calls the Psi4 executable.
 """
 
 from pkg_resources import parse_version
-from qcelemental.models import Result, FailedResult
+from qcelemental.models import Result, FailedOperation
 
 
 def _parse_psi_version(version):
@@ -65,4 +65,6 @@ def psi4(input_model, config):
         output_data["provenance"]["nthreads"] = input_data["nthreads"]
         del output_data["memory"], input_data["nthreads"]
         return Result(**output_data)
-    return FailedResult(**output_data)
+    return FailedOperation(success=output_data.pop("success", False),
+                           error=output_data.pop("error"),
+                           input_data=output_data)

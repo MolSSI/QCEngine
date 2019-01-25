@@ -11,7 +11,7 @@ import traceback
 from contextlib import contextmanager
 
 from . import config
-from qcelemental.models import Result
+from qcelemental.models import FailedOperation
 
 __all__ = ["compute_wrapper", "get_module_function"]
 
@@ -131,4 +131,10 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
     if return_dict:
         return output_fusion
     # We need to return the correct objects; e.g. Results, Procedures; if return_dict it False
-    return Result(**output_fusion)
+    # This is currently not tested
+    if output_fusion["success"]:
+        return output_data.__class__(**output_fusion)
+    # Should only be reachable on failures
+    return FailedOperation(success=output_fusion.pop("success", False),
+                           error=output_fusion.pop("error"),
+                           input_data=output_fusion)

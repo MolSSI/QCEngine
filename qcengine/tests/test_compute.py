@@ -15,7 +15,7 @@ _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 def test_missing_key():
     ret = dc.compute({"hello": "hi"}, "bleh")
     assert ret["success"] is False
-    assert "hello" in ret
+    assert "hello" in ret or ("input_data" in ret and "hello" in ret["input_data"])
 
 
 @addons.using_psi4

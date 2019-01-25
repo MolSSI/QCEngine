@@ -232,7 +232,7 @@ def get_provenance():
         cpu=GLOBALS["cpu"],
         hostname=GLOBALS["hostname"],
         username=GLOBALS["username"],
-        version=__version__,
+        qcengine_version=__version__,
         creator="QCEngine"
     )
 

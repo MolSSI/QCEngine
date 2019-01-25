@@ -3,7 +3,7 @@ Calls the Psi4 executable.
 """
 
 from qcengine.units import ureg
-from qcelemental.models import Result, QCEngineError, Provenance, FailedResult
+from qcelemental.models import Result, ComputeError, Provenance, FailedOperation
 
 
 def rdkit(input_data, config):
@@ -25,15 +25,15 @@ def rdkit(input_data, config):
     jmol = input_data.molecule
 
     # Handle errors
-    if abs(jmol.molecular_charge > 1.e-6):
-        ret_data["error"] = QCEngineError(error_type="input_error",
-                                          error_message="run_rdkit does not currently support charged molecules")
-        return FailedResult(**input_data.dict(), **ret_data)
+    if abs(jmol.molecular_charge) > 1.e-6:
+        ret_data["error"] = ComputeError(error_type="input_error",
+                                         error_message="run_rdkit does not currently support charged molecules")
+        return FailedOperation(input_data=input_data.dict(), **ret_data)
 
     if not jmol.connectivity:  # Check for empty list
-        ret_data["error"] = QCEngineError(error_type="input_error",
-                                          error_message="run_rdkit molecule must have a connectivity graph")
-        return FailedResult(**input_data.dict(), **ret_data)
+        ret_data["error"] = ComputeError(error_type="input_error",
+                                         error_message="run_rdkit molecule must have a connectivity graph")
+        return FailedOperation(input_data=input_data.dict(), **ret_data)
 
     # Build out the base molecule
     base_mol = Chem.Mol()
@@ -64,14 +64,14 @@ def rdkit(input_data, config):
         ff = AllChem.UFFGetMoleculeForceField(mol)
         all_params = AllChem.UFFHasAllMoleculeParams(mol)
     else:
-        ret_data["error"] = QCEngineError(error_type="input_error",
-                                          error_message="run_rdkit can only accepts UFF methods")
-        return FailedResult(**input_data.dict(), **ret_data)
+        ret_data["error"] = ComputeError(error_type="input_error",
+                                         error_message="run_rdkit can only accepts UFF methods")
+        return FailedOperation(input_data=input_data.dict(), **ret_data)
 
     if all_params is False:
-        ret_data["error"] = QCEngineError(error_type="input_error",
-                                          error_message="run_rdkit did not match all parameters to molecule")
-        return FailedResult(**{**input_data.dict(), **ret_data})
+        ret_data["error"] = ComputeError(error_type="input_error",
+                                         error_message="run_rdkit did not match all parameters to molecule")
+        return FailedOperation(input_data=input_data.dict(), **ret_data)
 
     ff.Initialize()
 
@@ -83,10 +83,10 @@ def rdkit(input_data, config):
         coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
         ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
     else:
-        ret_data["error"] = QCEngineError(error_type="input_error",
-                                          error_message="run_rdkit did not understand driver method "
-                                                      "'{}'.".format(ret_data["driver"]))
-        return FailedResult(**{**input_data.dict(), **ret_data})
+        ret_data["error"] = ComputeError(error_type="input_error",
+                                         error_message="run_rdkit did not understand driver method "
+                                                       "'{}'.".format(ret_data["driver"]))
+        return FailedOperation(input_data=input_data.dict(), **ret_data)
 
     ret_data["provenance"] = Provenance(
         creator="rdkit",

@@ -2,8 +2,7 @@
 Integrates the computes together
 """
 
-from qcelemental.models import ResultInput, QCEngineError, Result, FailedResult
-from qcelemental.models import OptimizationInput, FailedOptimization, Optimization
+from qcelemental.models import ResultInput, ComputeError, OptimizationInput, Optimization, FailedOperation
 from pydantic import ValidationError
 
 from .programs import get_program
@@ -35,33 +34,32 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
 
     Returns
     -------
-    ret : dict or qcelemental.models.ResultInput
+    ret : dict, Result, FailedOperation
         A QC Schema output, type depends on return_dict key
+        A FailedOperation returns
 
     """
     try:
         if isinstance(input_data, dict):
             input_data = ResultInput(**input_data)
     except ValidationError as val_error:
-        failure = FailedResult(**{**input_data,
-                               **{"success": False,
-                                  "error": QCEngineError(error_type="input_validation_error",
-                                                         error_message="Input could not be validated for the following "
-                                                                       "reasons:\n{}".format(val_error.json()))
-                                  }
-                                  })
+        failure = FailedOperation(input_data=input_data,
+                                  success=False,
+                                  error=ComputeError(error_type="input_validation_error",
+                                                     error_message="Input could not be validated for the following "
+                                                                   "reasons:\n{}".format(val_error.json())))
         if return_dict:
             return failure.dict()
 
         return failure
 
     except Exception as unk_err:
-        failure = FailedResult(**{**input_data,
-                               **{"success": False,
-                                  "error": QCEngineError(
+        failure = FailedOperation(input_data=input_data,
+                                  success=False,
+                                  error=ComputeError(
                                       error_type="unknown_input_error",
                                       error_message="Input could not be validated for unknown reasons, "
-                                                    "likely due to invalid input data types:\n{}".format(unk_err))}})
+                                                    "likely due to invalid input data types:\n{}".format(unk_err)))
         if return_dict:
             return failure.dict()
 
@@ -85,19 +83,27 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
             output_data = get_program(program)(input_data, config)
 
         except KeyError as e:
-            output_data = {"success": False,
-                           "error": QCEngineError(error_type='program_error',
-                                                  error_message="QCEngine Call Error:\nProgram {} not understood."
-                                                                "\nError Message: {}".format(program, str(e)))}
-            output_data = FailedResult(**input_data.dict(), **output_data)
+            output_data = FailedOperation(input_data=input_data.dict(),
+                                          success=False,
+                                          error=ComputeError(
+                                              error_type='program_error',
+                                              error_message="QCEngine Call Error:\nProgram {} not understood."
+                                                            "\nError Message: {}".format(program, str(e))))
 
         except ValidationError as e:
-            output_data = FailedResult(**input_data.dict(),
-                                       success=False,
-                                       error=QCEngineError(
-                                           error_type="validation_error",
-                                           error_message=e.json()
-                                       ))
+            output_data = FailedOperation(input_data=input_data.dict(),
+                                          success=False,
+                                          error=ComputeError(
+                                             error_type="validation_error",
+                                             error_message=e.json()))
+
+        except Exception as e:
+            output_data = FailedOperation(input_data=input_data.dict(),
+                                          success=False,
+                                          error=ComputeError(
+                                              error_type="runtime_error",
+                                              error_message="QCEngine Error:\nError Message: {}".format(str(e))
+                                          ))
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
@@ -123,7 +129,7 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
 
     Returns
     ------
-    dict or qcelemental.models.Result
+    dict, Optimization, FailedOperation
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
 
@@ -133,16 +139,26 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
 
     except ValidationError as val_error:
         # Fix this more procedure-centric
-        failure = FailedOptimization(**{**input_data,
-                                     **{"success": False,
-                                        "error": QCEngineError(
-                                            error_type="input_validation_error",
-                                            error_message="Input could not be validated for the following "
-                                                          "reasons:\n{}".format(val_error.json()))
-                                        }
-                                        })
+        failure = FailedOperation(input_data=input_data,
+                                  success=False,
+                                  error=ComputeError(
+                                      error_type="input_validation_error",
+                                      error_message="Input could not be validated for the following "
+                                                    "reasons:\n{}".format(val_error.json())))
         if return_dict:
             return failure.dict()
+        return failure
+
+    except Exception as unk_err:
+        failure = FailedOperation(input_data=input_data,
+                                  success=False,
+                                  error=ComputeError(
+                                      error_type="unknown_input_error",
+                                      error_message="Input could not be validated for unknown reasons, "
+                                                    "likely due to invalid input data types:\n{}".format(unk_err)))
+        if return_dict:
+            return failure.dict()
+
         return failure
 
     config = get_config(local_options=local_options)
@@ -161,38 +177,38 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
                 output_data = Optimization(**output_data)
 
             except ModuleNotFoundError:
-                output_data = FailedOptimization(**input_data.dict(),
+                output_data = FailedOperation(input_data=input_data.dict(),
                                                  success=False,
-                                                 error=QCEngineError(
+                                                 error=ComputeError(
                                                      error_type="import_error",
                                                      error_message="Could not import {}".format(procedure)
                                                  ))
 
             except ValidationError as e:
-                output_data = FailedOptimization(**input_data.dict(),
-                                                 success=False,
-                                                 error=QCEngineError(
-                                                     error_type="validation_error",
-                                                     error_message=e.json()
-                                                 ))
+                output_data = FailedOperation(input_data=input_data.dict(),
+                                              success=False,
+                                              error=ComputeError(
+                                                  error_type="validation_error",
+                                                  error_message="Could not form output into Optimization, could be "
+                                                                "bad program outputs, or some other error\n"
+                                                                "Error Message: {}".format(e.json())))
 
             except Exception as e:
-                output_data = FailedOptimization(**input_data.dict(),
-                                                 success=False,
-                                                 error=QCEngineError(
-                                                     error_type="runtime_error",
-                                                     error_message="QCEngine RuntimeError:\n"
-                                                                   "Something went wrong in procedure execution, see "
-                                                                   "message for details:\n{}".format(str(e))
-                                                 ))
+                output_data = FailedOperation(input_data=input_data.dict(),
+                                              success=False,
+                                              error=ComputeError(
+                                                  error_type="runtime_error",
+                                                  error_message="QCEngine RuntimeError:\n"
+                                                                "Something went wrong in procedure execution, see "
+                                                                "message for details:\n{}".format(str(e))))
 
         else:
-            output_data = FailedOptimization(**input_data.dict(),
-                                             success=False,
-                                             error=QCEngineError(
-                                                 error_type="program_error",
-                                                 error_message="QCEngine Call Error:"
-                                                               "\nProcedure {} not understood".format(procedure))
-                                             )
+            output_data = FailedOperation(input_data=input_data.dict(),
+                                          success=False,
+                                          error=ComputeError(
+                                              error_type="program_error",
+                                              error_message="QCEngine Call Error:"
+                                                            "\nProcedure {} not understood".format(procedure))
+)
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
