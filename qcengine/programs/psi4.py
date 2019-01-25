@@ -28,7 +28,7 @@ def psi4(input_data, config):
         raise ImportError("Could not find Psi4 in the Python path.")
 
     # Setup the job
-    input_data["nthreads"] = config.nthreads
+    input_data["nthreads"] = config.ncores
     input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
     input_data["success"] = False
 
