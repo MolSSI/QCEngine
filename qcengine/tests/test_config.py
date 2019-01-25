@@ -16,32 +16,27 @@ from qcengine.testing import environ_context
 def test_node_blank():
     node = qcengine.config.NodeDescriptor(name="something", hostname_pattern="*")
 
-    assert node.nthreads_per_job > 0
-    assert node.available_memory > 0.1
-    assert node.memory_per_job > 0.1
-
 
 def test_node_auto():
 
-    description = {
+    desc = {
         "name": "something",
         "hostname_pattern": "*",
         "jobs_per_node": 1,
-        "nthreads_per_job": "auto",
-        "memory_per_job": "auto",
-        "total_cores": 4,
-        "available_memory": 10,
+        "ncores": 4,
+        "memory": 10,
         "memory_safety_factor": 0,
     }
+    node1 = qcengine.config.NodeDescriptor(**desc)
+    job1 = qcengine.get_config(hostname=node1)
+    assert job1.ncores == 4
+    assert pytest.approx(job1.memory) == 10.0
 
-    node1 = qcengine.config.NodeDescriptor(**description)
-    assert node1.nthreads_per_job == 4
-    assert pytest.approx(node1.memory_per_job) == 10.0
-
-    description["jobs_per_node"] = 2
-    node2 = qcengine.config.NodeDescriptor(**description)
-    assert node2.nthreads_per_job == 2
-    assert pytest.approx(node2.memory_per_job) == 5
+    desc["jobs_per_node"] = 2
+    node2 = qcengine.config.NodeDescriptor(**desc)
+    job2 = qcengine.get_config(hostname=node2)
+    assert job2.ncores == 2
+    assert pytest.approx(job2.memory) == 5.0
 
 
 def test_node_environ():
@@ -82,25 +77,26 @@ def opt_state_basic():
     with environ_context({"QCA_SCRATCH_DIR": scratch_name}):
 
         configs = [{
-            "name": "default",
-            "hostname_pattern": "*",
-            "jobs_per_node": 1,
-            "nthreads_per_job": 2,
-            "memory_per_job": 4,
-            "scratch_directory": "$QCA_SCRATCH_DIR"
-        }, {
             "name": "dragonstooth",
             "hostname_pattern": "dt*",
             "jobs_per_node": 2,
-            "nthreads_per_job": 6,
-            "memory_per_job": 60,
+            "ncores": 12,
+            "memory": 120,
             "scratch_directory": "$NOVAR_RANDOM_ABC123"
         }, {
             "name": "newriver",
             "hostname_pattern": "nr*",
             "jobs_per_node": 2,
-            "nthreads_per_job": 12,
-            "memory_per_job": 120
+            "ncores": 24,
+            "memory": 240
+        }, {
+            "name": "default",
+            "hostname_pattern": "*",
+            "jobs_per_node": 1,
+            "memory": 4,
+            "memory_safety_factor": 0,
+            "ncores": 2,
+            "scratch_directory": "$QCA_SCRATCH_DIR"
         }]
         for desc in configs:
             node = qcengine.config.NodeDescriptor(**desc)
@@ -135,17 +131,17 @@ def test_node_env(opt_state_basic):
 
 def test_config_default(opt_state_basic):
     config = qcengine.config.get_config("something")
-    assert config.nthreads == 2
+    assert config.ncores == 2
     assert config.memory == 4
 
     config = qcengine.config.get_config("dt149")
-    assert config.nthreads == 6
-    assert config.memory == 60
+    assert config.ncores == 6
+    assert pytest.approx(config.memory, 0.1) == 54
 
 
 def test_config_local(opt_state_basic):
-    config = qcengine.config.get_config("something", {"nthreads": 10})
-    assert config.nthreads == 10
+    config = qcengine.config.get_config("something", {"ncores": 10})
+    assert config.ncores == 10
     assert config.memory == 4
 
 
