@@ -16,7 +16,7 @@ import psutil
 import pydantic
 import yaml
 
-__all__ = ["get_config", "get_provenance", "global_repr", "NodeDescriptor"]
+__all__ = ["get_config", "get_provenance", "global_repr", "list_compute", "NodeDescriptor"]
 
 # Start a globals dictionary with small starting values
 CPUINFO = cpuinfo.get_cpu_info()
@@ -33,7 +33,7 @@ CPUINFO["count"] = cpu_cnt
 # Generic globals
 GLOBALS = {}
 GLOBALS["hostname"] = socket.gethostname()
-GLOBALS["available_memory"] = round(psutil.virtual_memory().available / (1024**3), 3)
+GLOBALS["memory"] = round(psutil.virtual_memory().available / (1024**3), 3)
 GLOBALS["cpu"] = CPUINFO["brand"]
 GLOBALS["username"] = getpass.getuser()
 
@@ -54,57 +54,26 @@ class NodeDescriptor(pydantic.BaseModel):
     name: str
     scratch_directory: Optional[str] = None  # What location to use as scratch
 
-    available_memory: int = None
+    memory: Optional[float] = None
     memory_safety_factor: int = 10  # Percentage of memory as a safety factor
-    memory_per_job: Union[int, str] = "auto"  # Amount of memory in Gb per node
 
     # Specifications
-    total_cores: int = None
+    ncores: Optional[int] = None
     jobs_per_node: int = 2
-    nthreads_per_job: Union[int, str] = "auto"  # Number of nthreads per job
+
+    def __init__(self, **data):
+
+        data = parse_environment(data)
+        super().__init__(**data)
 
     class Config:
         ignore_extra = False
-
-    def __init__(self, **kwargs):
-        """
-        Initalize the pydantic class after processing options
-        """
-
-        super().__init__(**kwargs)
-
-        for k, var in self.__values__.items():
-            if isinstance(var, str) and var.startswith("$"):
-                var = var.lstrip("$")
-                if var in os.environ:
-                    var = os.environ[var]
-                else:
-                    var = None
-                self.__values__[k] = var
-
-        # Pull from defaults
-        if self.available_memory is None:
-            self.available_memory = GLOBALS["available_memory"]
-
-        if self.total_cores is None:
-            self.total_cores = CPUINFO["count"]
-
-        # Handle any auto keywords
-        if self.nthreads_per_job == "auto":
-            # Figure out number of threads per job
-            self.nthreads_per_job = int(self.total_cores / self.jobs_per_node)
-            if self.nthreads_per_job < 1:
-                raise KeyError("Number of jobs per node exceeds the number of available cores.")
-
-        if self.memory_per_job == "auto":
-            memory_coeff = (1 - self.memory_safety_factor / 100)
-            self.memory_per_job = round(self.available_memory * memory_coeff / self.jobs_per_node, 3)
 
 
 class JobConfig(pydantic.BaseModel):
 
     # Specifications
-    nthreads: int  # Number of nthreads per job
+    ncores: int  # Number of ncores per job
     memory: float  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
 
@@ -142,10 +111,6 @@ def _load_defaults():
 
         for k, v in user_config.items():
             NODE_DESCRIPTORS[k] = NodeDescriptor(name=k, **v)
-
-    # Make sure we have a default
-    if "default" not in NODE_DESCRIPTORS:
-        NODE_DESCRIPTORS["default"] = NodeDescriptor(hostname_pattern="*", name="default")
 
 
 # Pull in the local variables
@@ -187,20 +152,41 @@ def get_node_descriptor(hostname=None):
     """
     Find the correct NodeDescriptor based off current hostname
     """
+    if isinstance(hostname, NodeDescriptor):
+        return hostname
+
     if hostname is None:
         hostname = GLOBALS["hostname"]
 
     # Find a match
     for name, node in NODE_DESCRIPTORS.items():
-        if name == "default": continue
 
         if fnmatch.fnmatch(hostname, node.hostname_pattern):
             config = node
             break
     else:
-        config = NODE_DESCRIPTORS["default"]
+        config = NodeDescriptor(
+            name="default", hostname_pattern="*", memory=GLOBALS["memory"], ncores=CPUINFO["count"])
 
     return config
+
+
+def parse_environment(data):
+    """
+    Parses a dictionary looking for environmental variables
+    """
+    ret = {}
+    for k, var in data.items():
+        if isinstance(var, str) and var.startswith("$"):
+            var = var.replace("$", "", 1)
+            if var in os.environ:
+                var = os.environ[var]
+            else:
+                var = None
+
+        ret[k] = var
+
+    return ret
 
 
 def get_config(hostname=None, local_options=None):
@@ -208,12 +194,31 @@ def get_config(hostname=None, local_options=None):
     Returns the configuration key for qcengine.
     """
 
+    if local_options is None:
+        local_options = {}
+
+    local_options = parse_environment(local_options)
+
+    # Node data
     node = get_node_descriptor(hostname)
-    config = {
-        "nthreads": node.nthreads_per_job,
-        "memory": node.memory_per_job,
-        "scratch_directory": node.scratch_directory
-    }
+    memory = node.memory or GLOBALS["memory"]
+    ncores = node.ncores or CPUINFO["count"]
+    scratch_directory = local_options.get("scratch_directory", None) or node.scratch_directory
+
+    # Jobs per node
+    jobs_per_node = local_options.pop("jobs_per_node", None) or node.jobs_per_node
+
+    memory = local_options.pop("memory", None)
+    if memory is None:
+        memory_coeff = (1 - node.memory_safety_factor / 100)
+        memory = round(node.memory * memory_coeff / jobs_per_node, 3)
+
+    # Handle ncores
+    ncores = local_options.pop("ncores", None) or int(ncores / jobs_per_node)
+    if ncores < 1:
+        raise KeyError("Number of jobs per node exceeds the number of available cores.")
+
+    config = {"ncores": ncores, "memory": memory, "scratch_directory": node.scratch_directory}
     if local_options is not None:
         config.update(local_options)
 
