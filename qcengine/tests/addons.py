@@ -51,7 +51,7 @@ def is_dftd3_new_enough(version_feature_introduced):
         return False
     # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
     command = [_which('dftd3'), '-version']
-    proc = subprocess.run(command, capture_output=True)
+    proc = subprocess.run(command, stdout=subprocess.PIPE)
     candidate_version = proc.stdout.decode('utf-8').strip()
 
     from pkg_resources import parse_version
