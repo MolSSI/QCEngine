@@ -114,9 +114,11 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
             # Augment the input
             geometric_input = input_data.dict()
             geometric_input["input_specification"]["_qcengine_local_config"] = config.dict()
+
+            # Run the program
             output_data = get_module_function(procedure, "run_json.geometric_run_json")(geometric_input)
-            if output_data["schema_name"] == "qc_schema_optimization_output":
-                output_data["schema_name"] = "qcschema_optimization_output"
+
+            output_data["schema_name"] = "qcschema_optimization_output"
             output_data["input_specification"].pop("_qcengine_local_config", None)
             output_data = Optimization(**output_data)
         else:

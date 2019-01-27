@@ -153,13 +153,17 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
         provenance_augments["version"] = provenance_augments["qcengine_version"]
         output_fusion["provenance"] = provenance_augments
 
-    if return_dict:
-        return output_fusion
-    # We need to return the correct objects; e.g. Results, Procedures; if return_dict it False
-    # This is currently not tested
+
+    # We need to return the correct objects; e.g. Results, Procedures
     if output_fusion["success"]:
-        return output_data.__class__(**output_fusion)  # This will only execute if everything went well
-    # Should only be reachable on failures
-    return FailedOperation(success=output_fusion.pop("success", False),
-                           error=output_fusion.pop("error"),
+        # This will only execute if everything went well
+        ret = output_data.__class__(**output_fusion)
+    else:
+        # Should only be reachable on failures
+        ret = FailedOperation(success=output_fusion.pop("success", False),
+                               error=output_fusion.pop("error"),
                            input_data=output_fusion)
+    if return_dict:
+        return ret.dict()
+    else:
+        return ret
