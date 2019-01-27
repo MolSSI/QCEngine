@@ -53,31 +53,38 @@ def run_dftd3(name, molecule, options, **kwargs):
     opts = {}
 
     jobrec = {}
-    jobrec['error'] = ''
-    jobrec['success'] = None
-    jobrec['raw_output'] = None
+    jobrec['schema_name'] = 'qc_schema_input'  # --> qcschema_input
+    jobrec['schema_version'] = 1  # --> 2
     jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
 
     # strip engine hint
     if name.startswith('d3-'):
         name = name[3:]
 
-    jobrec['molecule'] = molecule.to_dict(np_out=False)
-    jobrec['method'] = name
+    jobrec.update(molecule.to_schema(dtype=1))  # --> jobrec['molecule'] =
+    jobrec['model'] = {
+        'method': name,
+        'basis': '(auto)',
+    }
     _, jobrec['driver'] = parse_dertype(kwargs['ptype'], max_derivative=1)
     jobrec['options'] = opts
     #jobrec['options'] = copy.deepcopy(options)
 
     try:
         dftd3_driver(jobrec)
-    except Exception as err:
+    except Exception as exc:
+        import traceback
         jobrec['success'] = False
-        jobrec['error'] += repr(err)
-    else:
-        jobrec['success'] = True
-        jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
-        if jobrec['driver'] == 'gradient':
-            jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec['error'] = {
+            'error_type': type(exc).__name__,
+            'error_message': ''.join(traceback.format_exception(*sys.exc_info())),
+        }
+        raise exc
+
+    jobrec['success'] = True
+    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
+    if jobrec['driver'] == 'gradient':
+        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
 
     return jobrec
 
@@ -95,9 +102,8 @@ def run_dftd3_from_arrays(molrec,
 
     """
     jobrec = {}
-    jobrec['error'] = ''
-    jobrec['success'] = None
-    jobrec['return_output'] = True
+    jobrec['schema_name'] = 'qc_schema_input'  # --> qcschema_input
+    jobrec['schema_version'] = 1  # --> 2
     jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
 
     # strip engine hint
@@ -109,23 +115,30 @@ def run_dftd3_from_arrays(molrec,
     opts['params_tweaks'] = param_tweaks
     opts['dashcoeff_supplement'] = dashcoeff_supplement
 
-    jobrec['molecule'] = molrec
-    jobrec['method'] = name_hint
+    jobrec.update(qcel.molparse.to_schema(molrec, dtype=1))  # --> jobrec['molecule'] =
+    jobrec['model'] = {
+        'method': name_hint,
+        'basis': '(auto)',
+    }
     _, jobrec['driver'] = parse_dertype(ptype, max_derivative=1)
     jobrec['options'] = opts
     #jobrec['options'] = copy.deepcopy(options)
 
     try:
         dftd3_driver(jobrec)
-    except Exception as err:
+    except Exception as exc:
+        import traceback
         jobrec['success'] = False
-        jobrec['error'] += repr(err)
-        raise RuntimeError(err) from err
-    else:
-        jobrec['success'] = True
-        jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
-        if jobrec['driver'] == 'gradient':
-            jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec['error'] = {
+            'error_type': type(exc).__name__,
+            'error_message': ''.join(traceback.format_exception(*sys.exc_info())),
+        }
+        raise exc
+
+    jobrec['success'] = True
+    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
+    if jobrec['driver'] == 'gradient':
+        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
 
     return jobrec
 
@@ -210,15 +223,15 @@ def dftd3_plant(jobrec):
     """
     try:
         jobrec['driver']
-        jobrec['method']
+        jobrec['model']['method']
         jobrec['options']
         jobrec['molecule']
-    except KeyError as err:
-        raise KeyError('Required field ({}) missing from ({})'.format(str(err), list(jobrec.keys()))) from err
+    except KeyError as exc:
+        raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(jobrec.keys()))) from exc
 
     # temp until actual options object
     dftd3rec = dashparam.from_arrays(
-        name_hint=jobrec['method'],
+        name_hint=jobrec['model']['method'],
         level_hint=jobrec['options'].get('level_hint', None),
         param_tweaks=jobrec['options'].get('params_tweaks', None),
         dashcoeff_supplement=jobrec['options'].get('dashcoeff_supplement', None))
@@ -232,8 +245,12 @@ def dftd3_plant(jobrec):
 
     dftd3rec['dftd3par'] = dftd3_coeff_formatter(dftd3rec['dashlevel'], dftd3rec['dashparams'])
 
-    dftd3rec['dftd3_geometry'] = qcel.molparse.to_string(
-        jobrec['molecule'], dtype='xyz', units='Angstrom', ghost_format='')
+    # Have to pass outer level, not jobrec['molecule'] b/c qc_schema is in outer
+    # Need 'real' field later and that's only guaranteed for molrec
+    molrec = qcel.molparse.from_schema(jobrec)
+    dftd3rec['dftd3_geometry'] = qcel.molparse.to_string(molrec,
+        dtype='xyz', units='Angstrom', ghost_format='')
+    jobrec['molecule']['real'] = molrec['real']
 
     command = ['dftd3', 'dftd3_geometry.xyz']
     if jobrec['driver'] == 'gradient':
@@ -278,13 +295,13 @@ def dftd3_harvest(jobrec, dftd3rec):
         jobrec['driver']
         jobrec['provenance']
         jobrec['options']['fctldash']
-    except KeyError as err:
-        raise KeyError('Required field ({}) missing from ({})'.format(str(err), list(jobrec.keys()))) from err
+    except KeyError as exc:
+        raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(jobrec.keys()))) from exc
 
     try:
         dftd3rec['stdout']
-    except KeyError as err:
-        raise KeyError('Required field ({}) missing from ({})'.format(str(err), list(dftd3rec.keys()))) from err
+    except KeyError as exc:
+        raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(dftd3rec.keys()))) from exc
 
     # amalgamate output
     text = dftd3rec['stdout']
@@ -336,8 +353,8 @@ def dftd3_harvest(jobrec, dftd3rec):
         rg = realgradabc if (dftd3rec['dashlevel'] == 'atmgr') else realgrad
         try:
             fullgrad[ireal, :] = rg
-        except NameError as err:
-            raise Dftd3Error('Unsuccessful gradient collection.') from err
+        except NameError as exc:
+            raise Dftd3Error('Unsuccessful gradient collection.') from exc
 
     qcvkey = jobrec['options']['fctldash'].upper()
 
@@ -381,7 +398,7 @@ def dftd3_harvest(jobrec, dftd3rec):
     #calcinfo = qcvars.certify(module_vars)
     #text += print_variables(calcinfo)
 
-    jobrec['raw_output'] = text
+    jobrec['stdout'] = text
     jobrec['qcvars'] = calcinfo
 
     prov = {}
