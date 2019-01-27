@@ -7,9 +7,7 @@ import getpass
 import logging
 import os
 import socket
-
-from typing import Optional, Union
-from qcelemental.models import Provenance
+from typing import Optional
 
 import cpuinfo
 import psutil
@@ -99,7 +97,6 @@ def _load_defaults():
             load_path = path
             break
 
-    found_default = False
     if load_path is None:
         LOGGER.info("Could not find 'qcengine.yaml'. Searched the following paths: {}".format(", ".join(test_paths)))
         LOGGER.info("Using default options...")

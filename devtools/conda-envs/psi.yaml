@@ -1,6 +1,7 @@
 name: test
 channels:
   - psi4
+  - conda-forge
 dependencies:
   - psi4=1.2
 

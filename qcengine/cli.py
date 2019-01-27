@@ -26,6 +26,7 @@ def main(args=None):
         args = parse_args()
 
     ret = compute(json.loads(args["data"]), args["program"])
+    print(json.dumps(ret))
 
 
 if __name__ == '__main__':

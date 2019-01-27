@@ -3,15 +3,13 @@ Integrates the computes together
 """
 
 from qcelemental.models import ResultInput, ComputeError, OptimizationInput, Optimization, FailedOperation
-from pydantic import ValidationError
 
+from .config import get_config
 from .programs import get_program
 from .util import compute_wrapper, handle_output_metadata, get_module_function, model_wrapper
-from .config import get_config
 
 
-def compute(input_data, program, raise_error=False, capture_output=True, local_options=None,
-            return_dict=True):
+def compute(input_data, program, raise_error=False, capture_output=True, local_options=None, return_dict=True):
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -63,17 +61,22 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
         try:
             output_data = get_program(program)(input_data, config)
         except KeyError as e:
-            output_data = FailedOperation(input_data=output_data.dict(),
-                                          success=False,
-                                          error=ComputeError(
-                                              error_type='program_error',
-                                              error_message="QCEngine Call Error:\nProgram {} not understood."
-                                                            "\nError Message: {}".format(program, str(e))))
+            output_data = FailedOperation(
+                input_data=output_data.dict(),
+                success=False,
+                error=ComputeError(
+                    error_type='program_error',
+                    error_message="QCEngine Call Error:\nProgram {} not understood."
+                    "\nError Message: {}".format(program, str(e))))
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
 
-def compute_procedure(input_data, procedure, raise_error=False, capture_output=True, local_options=None,
+def compute_procedure(input_data,
+                      procedure,
+                      raise_error=False,
+                      capture_output=True,
+                      local_options=None,
                       return_dict=True):
     """Runs a procedure (a collection of the quantum chemistry executions)
 
@@ -109,7 +112,6 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
     # Run the procedure
     with compute_wrapper(capture_output=capture_output) as metadata:
         # Create a base output data in case of errors
-        output_data = input_data.copy()
         if procedure == "geometric":
             # Augment the input
             geometric_input = input_data.dict()
@@ -122,11 +124,12 @@ def compute_procedure(input_data, procedure, raise_error=False, capture_output=T
             output_data["input_specification"].pop("_qcengine_local_config", None)
             output_data = Optimization(**output_data)
         else:
-            output_data = FailedOperation(input_data=input_data.dict(),
-                                          success=False,
-                                          error=ComputeError(
-                                              error_type="program_error",
-                                              error_message="QCEngine Call Error:"
-                                                            "\nProcedure {} not understood".format(procedure)))
+            output_data = FailedOperation(
+                input_data=input_data.dict(),
+                success=False,
+                error=ComputeError(
+                    error_type="program_error",
+                    error_message="QCEngine Call Error:"
+                    "\nProcedure {} not understood".format(procedure)))
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)

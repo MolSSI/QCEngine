@@ -10,8 +10,9 @@ import time
 import traceback
 from contextlib import contextmanager
 
-from . import config
 from qcelemental.models import FailedOperation, ComputeError
+
+from . import config
 
 __all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
 
@@ -24,13 +25,12 @@ def model_wrapper(input_data, model):
         if isinstance(input_data, dict):
             input_data = model(**input_data)
     except Exception:
-        failure = FailedOperation(input_data=input_data,
-                                  success=False,
-                                  error=ComputeError(
-                                      error_type="input_error",
-                                      error_message=("Input data could not be processed correctly:\n" +
-                                                     traceback.format_exc())
-                                  ))
+        failure = FailedOperation(
+            input_data=input_data,
+            success=False,
+            error=ComputeError(
+                error_type="input_error",
+                error_message=("Input data could not be processed correctly:\n" + traceback.format_exc())))
         return failure
     return input_data
 
@@ -131,8 +131,7 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
     output_fusion["stderr"] = metadata["stderr"]
     if metadata["success"] is not True:
         output_fusion["success"] = False
-        output_fusion["error"] = {"error_type": "meta_error",
-                                  "error_message": metadata["error_message"]}
+        output_fusion["error"] = {"error_type": "meta_error", "error_message": metadata["error_message"]}
 
     # Raise an error if one exists and a user requested a raise
     if raise_error and (output_fusion["success"] is not True):
@@ -153,16 +152,14 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
         provenance_augments["version"] = provenance_augments["qcengine_version"]
         output_fusion["provenance"] = provenance_augments
 
-
     # We need to return the correct objects; e.g. Results, Procedures
     if output_fusion["success"]:
         # This will only execute if everything went well
         ret = output_data.__class__(**output_fusion)
     else:
         # Should only be reachable on failures
-        ret = FailedOperation(success=output_fusion.pop("success", False),
-                               error=output_fusion.pop("error"),
-                           input_data=output_fusion)
+        ret = FailedOperation(
+            success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion)
     if return_dict:
         return ret.dict()
     else:

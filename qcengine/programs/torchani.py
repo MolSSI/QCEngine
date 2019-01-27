@@ -2,8 +2,8 @@
 Calls the Psi4 executable.
 """
 
-from qcengine.units import ureg
 from qcelemental.models import Result, ComputeError, Provenance, FailedOperation
+from qcengine.units import ureg
 
 _CACHE = {}
 
@@ -53,17 +53,17 @@ def torchani(input_data, config):
     # Build model
     model = get_model(input_data.model.method)
     if model is False:
-        ret_data["error"] = ComputeError(error_type="input_error",
-                                         error_message="run_torchani only accepts the ANI1 method.")
+        ret_data["error"] = ComputeError(
+            error_type="input_error", error_message="run_torchani only accepts the ANI1 method.")
         return FailedOperation(input_data=input_data.dict(), **ret_data)
 
     # Build species
     species = "".join(input_data.molecule.symbols)
     unknown_sym = set(species) - {"H", "C", "N", "O"}
     if unknown_sym:
-        ret_data["error"] = ComputeError(error_type="input_error",
-                                         error_message="The '{}' model does not support symbols: {}.".format(
-                                            input_data.model.method, unknown_sym))
+        ret_data["error"] = ComputeError(
+            error_type="input_error",
+            error_message="The '{}' model does not support symbols: {}.".format(input_data.model.method, unknown_sym))
         return FailedOperation(input_data=input_data.dict(), **ret_data)
 
     species = builtin.consts.species_to_tensor(species).to(device).unsqueeze(0)
@@ -79,18 +79,15 @@ def torchani(input_data, config):
         ret_data["return_result"] = ret_data["properties"]["return_energy"]
     elif input_data.driver == "gradient":
         derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
-        ret_data["return_result"] = np.asarray(derivative * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
+        ret_data["return_result"] = np.asarray(
+            derivative * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
     else:
-        ret_data["error"] = ComputeError(error_type="input_error",
-                                         error_message="run_torchani did not understand driver method '{}'.".format(
-                                            input_data.driver))
+        ret_data["error"] = ComputeError(
+            error_type="input_error",
+            error_message="run_torchani did not understand driver method '{}'.".format(input_data.driver))
         return FailedOperation(input_data=input_data.dict(), **ret_data)
 
-    ret_data["provenance"] = Provenance(
-        creator="torchani",
-        version="unknown",
-        routine='torchani.builtin.aev_computer'
-    )
+    ret_data["provenance"] = Provenance(creator="torchani", version="unknown", routine='torchani.builtin.aev_computer')
 
     ret_data["schema_name"] = "qcschema_output"
     ret_data["success"] = True

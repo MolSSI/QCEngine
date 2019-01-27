@@ -3,8 +3,8 @@ A small list of molecules used to validate and tests computation.
 """
 
 import copy
-from qcelemental.models import Molecule
 
+from qcelemental.models import Molecule
 
 _test_mols = {
     "hydrogen": {

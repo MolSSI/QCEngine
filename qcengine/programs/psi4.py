@@ -65,6 +65,5 @@ def psi4(input_model, config):
         output_data["provenance"]["nthreads"] = input_data["nthreads"]
         del output_data["memory"], input_data["nthreads"]
         return Result(**output_data)
-    return FailedOperation(success=output_data.pop("success", False),
-                           error=output_data.pop("error"),
-                           input_data=output_data)
+    return FailedOperation(
+        success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
