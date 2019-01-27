@@ -34,7 +34,6 @@ before_install:
 
 install:
 
-  - echo $PYTHON_VER
     # Create test environment for package
   - |
     if [ $PROG == "RDKIT" ]; then
@@ -48,7 +47,6 @@ install:
       exit 1
     fi
   - source activate test
-  - python -V
 
     # Build and install package
   - python setup.py develop --no-deps

@@ -541,6 +541,7 @@ def test_intf_dftd3__from_arrays__supplement():
     assert compare_dicts(ans, res, 4, tnm() + ' idempotent')
 
 
+@using_dftd3
 def test_3():
     sys = qcel.molparse.from_string(seneyne)['qm']
 

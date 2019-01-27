@@ -16,8 +16,6 @@ with open(args.conda_file[0], "r") as handle:
 
 tmp_file = "tmp_env.yaml"
 script = script.replace("- python", "- python {}*".format(args.python[0]))
-print(script)
-print(args)
 
 with open(tmp_file, "w") as handle:
     handle.write(script)
