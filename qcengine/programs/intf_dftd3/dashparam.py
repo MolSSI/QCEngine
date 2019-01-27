@@ -76,7 +76,6 @@ dashcoeff = {
             # 'b2plyp'      : {'s6': 0.5,  's8': 1.000, 'sr6': 1.332, 'alpha6': 14.0}, # superseded by a value below.
             'pw6b95'      : {'params': {'s6': 1.0,  's8': 0.862,  'sr6': 1.532,  'alpha6': 14.0, 'sr8': 1.000}},
             'b97'         : {'params': {'s6': 1.0,  's8': 0.909,  'sr6': 0.892,  'alpha6': 14.0, 'sr8': 1.000}},  # formerly b97-d
-            'revpbe'      : {'params': {'s6': 1.0,  's8': 1.010,  'sr6': 0.923,  'alpha6': 14.0, 'sr8': 1.000}},
             'b3lyp'       : {'params': {'s6': 1.0,  's8': 1.703,  'sr6': 1.261,  'alpha6': 14.0, 'sr8': 1.000}},
             'blyp'        : {'params': {'s6': 1.0,  's8': 1.682,  'sr6': 1.094,  'alpha6': 14.0, 'sr8': 1.000}},
             'tpss0'       : {'params': {'s6': 1.0,  's8': 1.242,  'sr6': 1.252,  'alpha6': 14.0, 'sr8': 1.000}},
@@ -566,12 +565,11 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
 
     if dashlevel_candidate_1 is None and dashlevel_candidate_2 is None:
         raise ValueError(
-            """Can't guess -D correction level from name_hint ({}) and level_hint ({})""".format(level_hint))
+            f"""Can't guess -D correction level from name_hint ({name_hint}) and level_hint ({level_hint})""")
     elif dashlevel_candidate_1 is not None and dashlevel_candidate_2 is not None:
         if dashlevel_candidate_1 != dashlevel_candidate_2:
             raise ValueError(
-                """Inconsistent -D correction level from name_hint ({}) and level_hint ({})""".format(
-                    dashlevel_candidate_2, dashlevel_candidate_1))
+                f"""Inconsistent -D correction level ({dashlevel_candidate_2} != {dashlevel_candidate_1}) from name_hint ({name_hint}) and level_hint ({level_hint})""")
     dashleveleff = dashlevel_candidate_1 or dashlevel_candidate_2
 
     allowed_params = dashcoeff[dashleveleff]['default'].keys()
