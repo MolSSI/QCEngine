@@ -8,7 +8,8 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental
+  - qcelemental >=0.2.1
+  - pydantic >=0.18.1
 
     # Testing
   - pytest
@@ -17,5 +18,4 @@ dependencies:
     # Pip depends
   - pip:
     - codecov
-    - pydantic
     - git+https://github.com/leeping/geomeTRIC#egg=geometric
