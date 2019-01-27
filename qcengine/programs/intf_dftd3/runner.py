@@ -38,12 +38,10 @@ from decimal import Decimal
 import numpy as np
 import qcelemental as qcel
 
-from .. import __version__
-from ..util import parse_dertype
-from ..pdict import PreservingDict
-from ..exceptions import *
+#from ..pdict import PreservingDict
 from . import dashparam
 from .worker import dftd3_subprocess
+from .util import provenance_stamp, parse_dertype
 
 
 def run_dftd3(name, molecule, options, **kwargs):
@@ -58,11 +56,7 @@ def run_dftd3(name, molecule, options, **kwargs):
     jobrec['error'] = ''
     jobrec['success'] = None
     jobrec['raw_output'] = None
-    prov = {}
-    prov['creator'] = 'QCDB'
-    prov['version'] = __version__
-    prov['routine'] = sys._getframe().f_code.co_name
-    jobrec['provenance'] = prov
+    jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
 
     # strip engine hint
     if name.startswith('d3-'):
@@ -104,11 +98,7 @@ def run_dftd3_from_arrays(molrec,
     jobrec['error'] = ''
     jobrec['success'] = None
     jobrec['return_output'] = True
-    prov = {}
-    prov['creator'] = 'QCDB'
-    prov['version'] = __version__
-    prov['routine'] = sys._getframe().f_code.co_name
-    jobrec['provenance'] = prov
+    jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
 
     # strip engine hint
     if name_hint.startswith('d3-'):
@@ -317,7 +307,7 @@ def dftd3_harvest(jobrec, dftd3rec):
         elif re.match(' Edisp /kcal,au', ln):
             ene = Decimal(ln.split()[3])
         elif re.match(r" E6\(ABC\) \"   :", ln):  # c. v3.2.0
-            raise ValidationError("Cannot process ATM results from DFTD3 prior to v3.2.1.")
+            raise ValueError("Cannot process ATM results from DFTD3 prior to v3.2.1.")
         elif re.match(r""" E6\(ABC\) /kcal,au:""", ln):
             atm = Decimal(ln.split()[-1])
         elif re.match(' normal termination of dftd3', ln):
@@ -452,7 +442,7 @@ def dftd3_coeff_formatter(dashlvl, dashcoeff):
         # need to set first four parameters to something other than None, otherwise DFTD3 gets mad or a bit wrong
         return dashformatter.format(1.0, 0.0, 0.0, 0.0, dashcoeff['alpha6'], 3)
     else:
-        raise ValidationError(f"""-D correction level {dashlvl} is not available. Choose among {dashcoeff.keys()}.""")
+        raise ValueError(f"""-D correction level {dashlvl} is not available. Choose among {dashcoeff.keys()}.""")
 
 
 """

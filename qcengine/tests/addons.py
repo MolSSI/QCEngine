@@ -73,6 +73,9 @@ using_geometric = pytest.mark.skipif(
 using_torchani = pytest.mark.skipif(
     _plugin_import("torchani") is False, reason="Could not find TorchAni. Please install the package to enable tests")
 
+using_qcdb = pytest.mark.skipif(
+    _plugin_import("qcdb") is False, reason='Not detecting common driver. Install package if necessary and add to envvar PYTHONPATH')
+
 using_dftd3 = pytest.mark.skipif(
     _which('dftd3', return_bool=True) is False,
     reason='Not detecting executable dftd3. Install package if necessary and add to envvar PATH')

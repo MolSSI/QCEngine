@@ -1,5 +1,5 @@
-from utils import *
-from addons import *
+from .utils import *
+from .addons import using_dftd3, using_dftd3_321, using_psi4, using_qcdb
 
 import copy
 
@@ -7,9 +7,8 @@ import pytest
 import numpy as np
 import qcelemental as qcel
 
-import psi4
-from psi4.driver import qcdb
-from psi4.driver.qcdb import intf_dftd3
+from qcengine.programs import intf_dftd3
+
 
 ## Resources
 
@@ -387,6 +386,8 @@ Ne 0 0 0
 
 
 def eneyne_ne_qmolecules():
+    from psi4.driver import qcdb
+
     eneyne = qcdb.Molecule(seneyne)
     ne = qcdb.Molecule(sne)
     mols = {
@@ -405,6 +406,8 @@ def eneyne_ne_qmolecules():
 
 
 def eneyne_ne_pmolecules():
+    import psi4
+
     eneyne = psi4.core.Molecule.from_string(seneyne)
     ne = psi4.core.Molecule.from_string(sne)
     mols = {
@@ -509,7 +512,7 @@ def test_intf_dftd3__from_arrays(inp, expected):
     ({'name_hint': 'atm(gr)', 'level_hint': 'chg'}),
 ])  # yapf:disable
 def test_intf_dftd3__from_arrays__error(inp):
-    with pytest.raises(qcdb.ValidationError):
+    with pytest.raises(ValueError):
         intf_dftd3.from_arrays(**inp)
 
 
@@ -527,8 +530,9 @@ def test_intf_dftd3__from_arrays__supplement():
     res = intf_dftd3.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
     print(res)
     assert compare_dicts(ans, res, 4, tnm())
-    with pytest.raises(qcdb.ValidationError):
+    with pytest.raises(ValueError) as e:
         intf_dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
+    assert "Can't guess -D correction level" in str(e)
     res = intf_dftd3.from_arrays(
         name_hint=res['fctldash'],
         level_hint=res['dashlevel'],
@@ -549,7 +553,7 @@ def test_3():
 @pytest.mark.parametrize(
     "subjects", [
         pytest.param(eneyne_ne_pmolecules, marks=using_psi4),
-        pytest.param(eneyne_ne_qmolecules),
+        pytest.param(eneyne_ne_qmolecules, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
     ],
     ids=['qmol', 'pmol'])
 @pytest.mark.parametrize(
@@ -603,7 +607,7 @@ def test_qcdb__energy_d3():
 @pytest.mark.parametrize(
     "subjects", [
         pytest.param(eneyne_ne_pmolecules, marks=using_psi4),
-        pytest.param(eneyne_ne_qmolecules),
+        pytest.param(eneyne_ne_qmolecules, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
     ],
     ids=['qmol', 'pmol'])
 @pytest.mark.parametrize("inp", [
@@ -619,7 +623,7 @@ def test_intf_dftd3__run_dftd3__2body(inp, subjects):
     expected = ref[inp['parent']][inp['lbl']][inp['subject']]
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']]
 
-    jrec = qcdb.intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+    jrec = intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
     assert len(jrec['qcvars']) == 8
 
     assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, 7, tnm())
@@ -637,7 +641,7 @@ def test_intf_dftd3__run_dftd3__2body(inp, subjects):
 @pytest.mark.parametrize(
     "subjects", [
         pytest.param(eneyne_ne_pmolecules, marks=using_psi4),
-        pytest.param(eneyne_ne_qmolecules),
+        pytest.param(eneyne_ne_qmolecules, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
     ],
     ids=['qmol', 'pmol'])
 @pytest.mark.parametrize("inp", [
@@ -653,7 +657,7 @@ def test_intf_dftd3__run_dftd3__3body(inp, subjects):
     expected = ref[inp['parent']][inp['lbl']][inp['subject']]
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']]
 
-    jrec = qcdb.intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+    jrec = intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
     assert len(jrec['qcvars']) == 8
 
     assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, 7, tnm())
