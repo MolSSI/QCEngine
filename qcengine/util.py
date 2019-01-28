@@ -10,9 +10,30 @@ import time
 import traceback
 from contextlib import contextmanager
 
+from qcelemental.models import FailedOperation, ComputeError
+
 from . import config
 
-__all__ = ["compute_wrapper", "get_module_function"]
+__all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
+
+
+def model_wrapper(input_data, model):
+    """
+    Wrap input data in the given model, or return a controlled error
+    """
+    try:
+        if isinstance(input_data, dict):
+            input_data = model(**input_data)
+    except Exception:
+        failure = FailedOperation(
+            input_data=input_data,
+            success=False,
+            error=ComputeError(
+                error_type="input_error",
+                error_message=("Input data could not be processed correctly:\n" + traceback.format_exc())))
+        return failure
+    return input_data
+
 
 @contextmanager
 def compute_wrapper(capture_output=True):
@@ -59,6 +80,7 @@ def compute_wrapper(capture_output=True):
         ret["stdout"] = "stdout not captured"
         ret["stderr"] = "stderr not captured"
 
+
 def get_module_function(module, func_name, subpackage=None):
     """Obtains a function from a given string
 
@@ -89,30 +111,56 @@ def get_module_function(module, func_name, subpackage=None):
 
     return operator.attrgetter(func_name)(pkg)
 
-def handle_output_metadata(output_data, metadata, raise_error=False):
+
+def handle_output_metadata(output_data, metadata, raise_error=False, return_dict=True):
     """
     Fuses general metadata and output together.
+
+    Returns
+    -------
+    result : dict or pydantic.models.Result
+        Output type depends on return_dict or a dict if an error was generated in model construction
     """
 
-    output_data["stdout"] = metadata["stdout"]
-    output_data["stderr"] = metadata["stderr"]
+    if isinstance(output_data, dict):
+        output_fusion = output_data  # Error handling
+    else:
+        output_fusion = output_data.dict()
+
+    output_fusion["stdout"] = metadata["stdout"]
+    output_fusion["stderr"] = metadata["stderr"]
     if metadata["success"] is not True:
-        output_data["success"] = False
-        output_data["error_message"] = metadata["error_message"]
+        output_fusion["success"] = False
+        output_fusion["error"] = {"error_type": "meta_error", "error_message": metadata["error_message"]}
 
     # Raise an error if one exists and a user requested a raise
-    if raise_error and (output_data["success"] is not True):
-        msg = "stdout:\n" + output_data["stdout"]
-        msg += "\nstderr:\n" + output_data["stderr"]
+    if raise_error and (output_fusion["success"] is not True):
+        msg = "stdout:\n" + output_fusion["stdout"]
+        msg += "\nstderr:\n" + output_fusion["stderr"]
         print(msg)
-        raise ValueError(output_data["error_message"])
+        raise ValueError(output_fusion["error"]["error_message"])
 
     # Fill out provenance datadata
-    if "provenance" in output_data:
-        output_data["provenance"].update(config.get_provenance())
+    wall_time = metadata["wall_time"]
+    provenance_augments = config.get_provenance_augments()
+    provenance_augments["wall_time"] = wall_time
+    if "provenance" in output_fusion:
+        output_fusion["provenance"].update(provenance_augments)
     else:
-        output_data["provenance"] = config.get_provenance()
+        # Add onto the augments with some missing info
+        provenance_augments["creator"] = "QCEngine"
+        provenance_augments["version"] = provenance_augments["qcengine_version"]
+        output_fusion["provenance"] = provenance_augments
 
-    output_data["provenance"]["wall_time"] = metadata["wall_time"]
-
-    return output_data
+    # We need to return the correct objects; e.g. Results, Procedures
+    if output_fusion["success"]:
+        # This will only execute if everything went well
+        ret = output_data.__class__(**output_fusion)
+    else:
+        # Should only be reachable on failures
+        ret = FailedOperation(
+            success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion)
+    if return_dict:
+        return ret.dict()
+    else:
+        return ret

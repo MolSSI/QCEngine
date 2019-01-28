@@ -2,21 +2,19 @@
 Creates globals for the qcengine module
 """
 
-import copy
 import fnmatch
 import getpass
 import logging
 import os
 import socket
-
-from typing import Optional, Dict, Union
+from typing import Optional
 
 import cpuinfo
 import psutil
 import pydantic
 import yaml
 
-__all__ = ["get_config", "get_provenance", "global_repr", "NodeDescriptor"]
+__all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
 
 # Start a globals dictionary with small starting values
 CPUINFO = cpuinfo.get_cpu_info()
@@ -99,7 +97,6 @@ def _load_defaults():
             load_path = path
             break
 
-    found_default = False
     if load_path is None:
         LOGGER.info("Could not find 'qcengine.yaml'. Searched the following paths: {}".format(", ".join(test_paths)))
         LOGGER.info("Using default options...")
@@ -126,7 +123,7 @@ def global_repr():
     ret += "Host information:\n"
     ret += "-" * 80 + "\n"
 
-    prov = get_provenance()
+    prov = get_provenance_augments()
     for k in ["username", "hostname", "cpu"]:
         ret += "{:<30} {:<30}\n".format(k, prov[k])
 
@@ -226,16 +223,14 @@ def get_config(*, hostname=None, local_options=None):
     return JobConfig(**config)
 
 
-def get_provenance():
+def get_provenance_augments():
     from qcengine import __version__
-    ret = {
-        "cpu": GLOBALS["cpu"],
-        "hostname": GLOBALS["hostname"],
-        "username": GLOBALS["username"],
-        "qcengine_version": __version__
-    }
-
-    return ret
+    return dict(
+        cpu=GLOBALS["cpu"],
+        hostname=GLOBALS["hostname"],
+        username=GLOBALS["username"],
+        qcengine_version=__version__,
+    )
 
 
 def get_logger():

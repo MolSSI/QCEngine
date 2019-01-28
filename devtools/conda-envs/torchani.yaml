@@ -10,12 +10,12 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental
+  - qcelemental >=0.2.1
+  - pydantic >=0.18.1
 
     # Testing
   - pytest
   - pytest-cov
   - codecov
   - pip:
-    - pydantic
     - git+git://github.com/aiqm/torchani.git@cf192be#egg=torchani

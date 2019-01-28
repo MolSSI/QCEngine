@@ -6,16 +6,18 @@ import copy
 
 import pytest
 
+from qcelemental.models import Molecule, ResultInput
+
 import qcengine as dc
 from . import addons
 
-_base_json = {"schema_name": "qc_schema_input", "schema_version": 1}
+_base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 
 
 def test_missing_key():
     ret = dc.compute({"hello": "hi"}, "bleh")
     assert ret["success"] is False
-    assert "hello" in ret
+    assert "hello" in ret or ("input_data" in ret and "hello" in ret["input_data"])
 
 
 @addons.using_psi4
@@ -40,16 +42,27 @@ def test_psi4_task():
 
 @addons.using_psi4
 def test_psi4_ref_switch():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = dc.get_molecule("lithium")
-    json_data["driver"] = "energy"
-    json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
-    json_data["keywords"] = {"scf_type": "df"}
-    json_data["return_output"] = False
+    inp = ResultInput(**{
+        "molecule": {
+            "symbols": ["Li"],
+            "geometry": [0, 0, 0],
+            "molecular_multiplicity": 2
+        },
+        "driver": "energy",
+        "model": {
+            "method": "SCF",
+            "basis": "sto-3g"
+        },
+        "keywords": {
+            "scf_type": "df"
+        }
+    })
 
-    ret = dc.compute(json_data, "psi4", raise_error=True)
+    ret = dc.compute(inp, "psi4", raise_error=True, return_dict=False)
 
-    assert ret["success"] is True
+    assert ret.success is True
+    assert ret.properties.calcinfo_nalpha == 2
+    assert ret.properties.calcinfo_nbeta == 1
 
 
 @addons.using_rdkit
@@ -69,7 +82,7 @@ def test_rdkit_task():
 @addons.using_rdkit
 def test_rdkit_connectivity_error():
     json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = dc.get_molecule("water")
+    json_data["molecule"] = dc.get_molecule("water").dict()
     json_data["driver"] = "gradient"
     json_data["model"] = {"method": "UFF", "basis": ""}
     json_data["keywords"] = {}
@@ -78,10 +91,12 @@ def test_rdkit_connectivity_error():
 
     ret = dc.compute(json_data, "rdkit")
     assert ret["success"] is False
-    assert "connectivity" in ret["error_message"]
+    assert "error" in ret
+    assert "connectivity" in ret["error"]["error_message"]
 
     with pytest.raises(ValueError):
-        ret = dc.compute(json_data, "rdkit", raise_error=True)
+        dc.compute(json_data, "rdkit", raise_error=True)
+
 
 @addons.using_torchani
 def test_torchani_task():
