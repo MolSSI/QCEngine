@@ -2,7 +2,6 @@ import re
 
 from ..._version import get_versions
 
-
 yes = re.compile(r'^(yes|true|on|1)', re.IGNORECASE)
 no = re.compile(r'^(no|false|off|0)', re.IGNORECASE)
 der0th = re.compile(r'^(0|none|energy)', re.IGNORECASE)

@@ -43,17 +43,17 @@ def run_json(jobrec):
     if mtd.startswith('d3-'):
         jobrec['model']['method'] = mtd[3:]
 
-#    jobrec['model'] = {
-#        'method': name,
-#        'basis': '(auto)',
-#    }
-#    _, jobrec['driver'] = parse_dertype(kwargs['ptype'], max_derivative=1)
+    # jobrec['model'] = {
+    #     'method': name,
+    #     'basis': '(auto)',
+    # }
+    # _, jobrec['driver'] = parse_dertype(kwargs['ptype'], max_derivative=1)
 
-#    jobrec['options'] = opts
-    #jobrec['options'] = copy.deepcopy(options)
-#    # Set options
-#    for k, v in json_data["keywords"].items():
-#        core.set_global_option(k, v)
+    # jobrec['options'] = opts
+    # jobrec['options'] = copy.deepcopy(options)
+    # # Set options
+    # for k, v in json_data["keywords"].items():
+    #     core.set_global_option(k, v)
 
     try:
         dftd3_driver(jobrec)
@@ -278,8 +278,7 @@ def dftd3_plant(jobrec):
     # Have to pass outer level, not jobrec['molecule'] b/c qc_schema is in outer
     # Need 'real' field later and that's only guaranteed for molrec
     molrec = qcel.molparse.from_schema(jobrec)
-    dftd3rec['dftd3_geometry'] = qcel.molparse.to_string(molrec,
-        dtype='xyz', units='Angstrom', ghost_format='')
+    dftd3rec['dftd3_geometry'] = qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format='')
     jobrec['molecule']['real'] = molrec['real']
 
     command = ['dftd3', 'dftd3_geometry.xyz']

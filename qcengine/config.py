@@ -11,7 +11,10 @@ from typing import Optional
 
 import pydantic
 
+from ._version import get_versions
+
 __all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
+
 
 # Start a globals dictionary with small starting values
 _global_values = None

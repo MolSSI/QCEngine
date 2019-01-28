@@ -3,7 +3,6 @@
 import copy
 import collections
 
-
 ## ==> Dispersion Aliases and Parameters <== ##
 
 # The dashcoeff dict below defines the -D parameters for most of the DFT methods. Some 'd2' are
@@ -542,7 +541,8 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     elif dashlevel_candidate_1 is not None and dashlevel_candidate_2 is not None:
         if dashlevel_candidate_1 != dashlevel_candidate_2:
             raise ValueError(
-                f"""Inconsistent -D correction level ({dashlevel_candidate_2} != {dashlevel_candidate_1}) from name_hint ({name_hint}) and level_hint ({level_hint})""")
+                f"""Inconsistent -D correction level ({dashlevel_candidate_2} != {dashlevel_candidate_1}) from name_hint ({name_hint}) and level_hint ({level_hint})"""
+            )
     dashleveleff = dashlevel_candidate_1 or dashlevel_candidate_2
 
     allowed_params = dashcoeff[dashleveleff]['default'].keys()
