@@ -4,6 +4,7 @@ Several import utilities
 
 import importlib
 import io
+import json
 import operator
 import sys
 import time
@@ -161,6 +162,6 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
         ret = FailedOperation(
             success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion)
     if return_dict:
-        return ret.dict()
+        return json.loads(ret.json())  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
     else:
         return ret
