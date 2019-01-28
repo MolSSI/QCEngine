@@ -17,6 +17,63 @@ from .worker import dftd3_subprocess
 from .util import provenance_stamp, parse_dertype
 
 
+def run_json(jobrec):
+    """
+    An implementation of the QC JSON Schema (molssi-qc-schema.readthedocs.io/en/latest/index.html#) implementation in Psi4.
+
+    Parameters
+    ----------
+    jobrec : JSON
+        Please see molssi-qc-schema.readthedocs.io/en/latest/spec_components.html for further details.
+
+    """
+    pp.pprint(jobrec)
+
+    # This is currently a forced override
+    if jobrec["schema_name"] != "qc_schema_input":
+        raise KeyError(f"""Schema name of '{jobrec["schema_name"]}' not understood.""")
+
+    if jobrec["schema_version"] != 1:
+        raise KeyError(f"""Schema version of '{jobrec["schema_version"]}' not understood.""")
+
+    jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
+
+    # strip engine hint
+    mtd = jobrec['model']['method']
+    if mtd.startswith('d3-'):
+        jobrec['model']['method'] = mtd[3:]
+
+#    jobrec['model'] = {
+#        'method': name,
+#        'basis': '(auto)',
+#    }
+#    _, jobrec['driver'] = parse_dertype(kwargs['ptype'], max_derivative=1)
+
+#    jobrec['options'] = opts
+    #jobrec['options'] = copy.deepcopy(options)
+#    # Set options
+#    for k, v in json_data["keywords"].items():
+#        core.set_global_option(k, v)
+
+    try:
+        dftd3_driver(jobrec)
+    except Exception as exc:
+        import traceback
+        jobrec['success'] = False
+        jobrec['error'] = {
+            'error_type': type(exc).__name__,
+            'error_message': ''.join(traceback.format_exception(*sys.exc_info())),
+        }
+        raise exc
+
+    jobrec['success'] = True
+    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
+    if jobrec['driver'] == 'gradient':
+        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+
+    return jobrec
+
+
 def run_dftd3(name, molecule, options, **kwargs):
     """QCDriver signature for computing `name` on `molecule` with `options` with engine `DFTD3`."""
 
@@ -40,7 +97,7 @@ def run_dftd3(name, molecule, options, **kwargs):
         'basis': '(auto)',
     }
     _, jobrec['driver'] = parse_dertype(kwargs['ptype'], max_derivative=1)
-    jobrec['options'] = opts
+    jobrec['keywords'] = opts
     #jobrec['options'] = copy.deepcopy(options)
 
     try:
@@ -94,7 +151,7 @@ def run_dftd3_from_arrays(molrec,
         'basis': '(auto)',
     }
     _, jobrec['driver'] = parse_dertype(ptype, max_derivative=1)
-    jobrec['options'] = opts
+    jobrec['keywords'] = opts
     #jobrec['options'] = copy.deepcopy(options)
 
     try:
@@ -197,7 +254,7 @@ def dftd3_plant(jobrec):
     try:
         jobrec['driver']
         jobrec['model']['method']
-        jobrec['options']
+        jobrec['keywords']
         jobrec['molecule']
     except KeyError as exc:
         raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(jobrec.keys()))) from exc
@@ -205,11 +262,11 @@ def dftd3_plant(jobrec):
     # temp until actual options object
     dftd3rec = dashparam.from_arrays(
         name_hint=jobrec['model']['method'],
-        level_hint=jobrec['options'].get('level_hint', None),
-        param_tweaks=jobrec['options'].get('params_tweaks', None),
-        dashcoeff_supplement=jobrec['options'].get('dashcoeff_supplement', None))
+        level_hint=jobrec['keywords'].get('level_hint', None),
+        param_tweaks=jobrec['keywords'].get('params_tweaks', None),
+        dashcoeff_supplement=jobrec['keywords'].get('dashcoeff_supplement', None))
     # sketchy: adding to options during planting season
-    jobrec['options'].update(dftd3rec)
+    jobrec['keywords'].update(dftd3rec)
 
     # this is what the dftd3 program needs, not what the job needs
     # * form dftd3_parameters string that governs dispersion calc
@@ -267,7 +324,7 @@ def dftd3_harvest(jobrec, dftd3rec):
         jobrec['molecule']['real']
         jobrec['driver']
         jobrec['provenance']
-        jobrec['options']['fctldash']
+        jobrec['keywords']['fctldash']
     except KeyError as exc:
         raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(jobrec.keys()))) from exc
 
@@ -329,7 +386,7 @@ def dftd3_harvest(jobrec, dftd3rec):
         except NameError as exc:
             raise Dftd3Error('Unsuccessful gradient collection.') from exc
 
-    qcvkey = jobrec['options']['fctldash'].upper()
+    qcvkey = jobrec['keywords']['fctldash'].upper()
 
     # OLD WAY
     calcinfo = []

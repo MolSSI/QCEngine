@@ -385,7 +385,7 @@ Ne 0 0 0
 """
 
 
-def eneyne_ne_qmolecules():
+def eneyne_ne_qcdbmols():
     from psi4.driver import qcdb
 
     eneyne = qcdb.Molecule(seneyne)
@@ -405,7 +405,7 @@ def eneyne_ne_qmolecules():
     return mols
 
 
-def eneyne_ne_pmolecules():
+def eneyne_ne_psi4mols():
     import psi4
 
     eneyne = psi4.core.Molecule.from_string(seneyne)
@@ -417,6 +417,36 @@ def eneyne_ne_pmolecules():
             'mB': eneyne.extract_subsets(2),
             'mAgB': eneyne.extract_subsets(1, 2),
             'gAmB': eneyne.extract_subsets(2, 1),
+        },
+        'ne': {
+            'atom': ne,
+        }
+    }
+    return mols
+
+
+def eneyne_ne_qcschemamols():
+
+    eneyne = qcel.molparse.to_schema(qcel.molparse.from_string(seneyne)['qm'], dtype=1)
+    mA = qcel.molparse.to_schema(qcel.molparse.from_string('\n'.join(seneyne.splitlines()[:7]))['qm'], dtype=1)
+    mB = qcel.molparse.to_schema(qcel.molparse.from_string('\n'.join(seneyne.splitlines()[-4:]))['qm'], dtype=1)
+    ne = qcel.molparse.to_schema(qcel.molparse.from_string(sne)['qm'], dtype=1)
+
+    mAgB = qcel.molparse.from_string(seneyne)['qm']
+    mAgB['real'] = [(iat < mAgB['fragment_separators'][0]) for iat in range(len(mAgB['elem']))]  # works b/c chgmult doesn't need refiguring
+    mAgB = qcel.molparse.to_schema(mAgB, dtype=1)
+
+    gAmB = qcel.molparse.from_string(seneyne)['qm']
+    gAmB['real'] = [(iat >= gAmB['fragment_separators'][0]) for iat in range(len(gAmB['elem']))]
+    gAmB = qcel.molparse.to_schema(gAmB, dtype=1)
+
+    mols = {
+        'eneyne': {
+            'dimer': eneyne,
+            'mA': mA,
+            'mB': mB,
+            'mAgB': mAgB,
+            'gAmB': gAmB,
         },
         'ne': {
             'atom': ne,
@@ -547,14 +577,14 @@ def test_3():
 
     res = intf_dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
     print(res)
-    assert compare_strings('B3LYP-D3(BJ)', _compute_key(res['options']), 'key')
+    assert compare_strings('B3LYP-D3(BJ)', _compute_key(res['keywords']), 'key')
 
 
 @using_dftd3
 @pytest.mark.parametrize(
     "subjects", [
-        pytest.param(eneyne_ne_pmolecules, marks=using_psi4),
-        pytest.param(eneyne_ne_qmolecules, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
+        pytest.param(eneyne_ne_qcdbmols, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
     ],
     ids=['qmol', 'pmol'])
 @pytest.mark.parametrize(
@@ -607,10 +637,11 @@ def test_qcdb__energy_d3():
 @using_dftd3
 @pytest.mark.parametrize(
     "subjects", [
-        pytest.param(eneyne_ne_pmolecules, marks=using_psi4),
-        pytest.param(eneyne_ne_qmolecules, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
+        pytest.param(eneyne_ne_qcdbmols, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=['qmol', 'pmol'])
+    ids=['qmol', 'pmol', 'qcmol'])
 @pytest.mark.parametrize("inp", [
     ({'parent': 'eneyne', 'name': 'd3-b3lyp-d', 'subject': 'dimer', 'lbl': 'B3LYP-D2'}),
     ({'parent': 'eneyne', 'name': 'd3-b3lyp-d3bj', 'subject': 'mA', 'lbl': 'B3LYP-D3(BJ)'}),
@@ -619,12 +650,17 @@ def test_qcdb__energy_d3():
     ({'parent': 'eneyne', 'name': 'd3-PBE-D2', 'subject': 'mAgB', 'lbl': 'PBE-D2'}),
     ({'parent': 'ne', 'name': 'd3-b3lyp-d3bj', 'subject': 'atom', 'lbl': 'B3LYP-D3(BJ)'}),
 ])  # yapf: disable
-def test_intf_dftd3__run_dftd3__2body(inp, subjects):
+def test_intf_dftd3__run_dftd3__2body(inp, subjects, request):
     subject = subjects()[inp['parent']][inp['subject']]
     expected = ref[inp['parent']][inp['lbl']][inp['subject']]
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']]
 
-    jrec = intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+    if 'qcmol' in request.node.name:
+        subject.update({'model': {'method': inp['name']}, 'driver': 'gradient', 'keywords': {}})
+        jrec = intf_dftd3.run_json(subject)
+    else:
+        jrec = intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+
     assert len(jrec['qcvars']) == 8
 
     assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, 7, tnm())
@@ -641,10 +677,11 @@ def test_intf_dftd3__run_dftd3__2body(inp, subjects):
 @using_dftd3_321
 @pytest.mark.parametrize(
     "subjects", [
-        pytest.param(eneyne_ne_pmolecules, marks=using_psi4),
-        pytest.param(eneyne_ne_qmolecules, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
+        pytest.param(eneyne_ne_qcdbmols, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=['qmol', 'pmol'])
+    ids=['qmol', 'pmol', 'qcmol'])
 @pytest.mark.parametrize("inp", [
     ({'parent': 'eneyne', 'name': 'd3-atmgr', 'subject': 'dimer', 'lbl': 'ATM'}),
     ({'parent': 'eneyne', 'name': 'd3-b3lyp-atmgr', 'subject': 'mA', 'lbl': 'ATM'}),
@@ -653,12 +690,17 @@ def test_intf_dftd3__run_dftd3__2body(inp, subjects):
     ({'parent': 'eneyne', 'name': 'd3-atmgr', 'subject': 'gAmB', 'lbl': 'ATM'}),
     ({'parent': 'ne', 'name': 'd3-atmgr', 'subject': 'atom', 'lbl': 'ATM'}),
 ])  # yapf: disable
-def test_intf_dftd3__run_dftd3__3body(inp, subjects):
+def test_intf_dftd3__run_dftd3__3body(inp, subjects, request):
     subject = subjects()[inp['parent']][inp['subject']]
     expected = ref[inp['parent']][inp['lbl']][inp['subject']]
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']]
 
-    jrec = intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+    if 'qcmol' in request.node.name:
+        subject.update({'model': {'method': inp['name']}, 'driver': 'gradient', 'keywords': {}})
+        jrec = intf_dftd3.run_json(subject)
+    else:
+        jrec = intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+
     assert len(jrec['qcvars']) == 8
 
     assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, 7, tnm())
