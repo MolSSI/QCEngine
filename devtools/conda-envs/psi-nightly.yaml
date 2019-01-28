@@ -1,0 +1,24 @@
+name: test
+channels:
+  - psi4/label/dev
+  - conda-forge
+dependencies:
+  - psi4
+  - dftd3
+
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental >=0.2.1
+  - pydantic >=0.18.1
+
+    # Testing
+  - pytest
+  - pytest-cov
+
+    # Pip depends
+  - pip:
+    - codecov
+    - git+https://github.com/leeping/geomeTRIC#egg=geometric
