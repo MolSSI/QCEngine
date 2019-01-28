@@ -54,6 +54,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.extlinks',
 ]
 
 napoleon_google_docstring = False
@@ -175,6 +176,11 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
+
+extlinks = {
+    'issue': ('https://github.com/MolSSI/QCEngine/issues/%s', 'GH#'),
+    'pr': ('https://github.com/MolSSI/QCEngine/pull/%s', 'GH#')
+}
 
 # -- Options for intersphinx extension ---------------------------------------
 
