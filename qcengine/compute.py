@@ -112,7 +112,7 @@ def compute_procedure(input_data,
     # Run the procedure
     with compute_wrapper(capture_output=capture_output) as metadata:
         # Create a base output data in case of errors
-        output_data = input_data.copy()  # lgtm[py/multiple-definition]
+        output_data = input_data.copy()  # lgtm [py/multiple-definition]
         if procedure == "geometric":
             # Augment the input
             geometric_input = input_data.dict()
