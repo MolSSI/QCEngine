@@ -1,8 +1,13 @@
 name: qcengine-docs
 channels:
     - defaults
+    - conda-forge
 dependencies:
     - python=3
-    - numpy
     - sphinx
     - sphinx_rtd_theme
+    
+      # QCEngine depends
+    - numpy
+    - pydantic >=0.18.0
+    - qcelemental >=0.2.1
