@@ -16,7 +16,7 @@ if __name__ == "__main__":
             'pyyaml',
             'py-cpuinfo',
             'psutil',
-            'qcelemental>=0.2.1',
+            'qcelemental>=0.2.2',
             'pydantic>=0.18.0'
         ],
         entry_points={"console_scripts": [
@@ -43,8 +43,10 @@ if __name__ == "__main__":
         classifiers=[
             'Development Status :: 4 - Beta',
             'Intended Audience :: Science/Research',
-            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3 :: Only',
             'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
         ],
         zip_safe=False,
         long_description="""

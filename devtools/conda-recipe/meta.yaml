@@ -1,6 +1,6 @@
 package:
   name: qcengine
-  version: "0.2.2"
+  version: "0.5.1"
 
 source:
   path: ../..
@@ -20,7 +20,7 @@ requirements:
     - py-cpuinfo
     - pyyaml
     - psutil
-    - qcelemental
+    - qcelemental >=0.2.2
 
 test:
   requires:
