@@ -1,17 +1,27 @@
 Changelog
 =========
 
-vX.Y.0 / 2019-MM-DD
--------------------
+.. vX.Y.0 / 2019-MM-DD
+.. -------------------
+..
+.. New Features
+.. ++++++++++++
+..
+.. Enhancements
+.. ++++++++++++
+..
+.. Bug Fixes
+.. +++++++++
 
-New Features
-++++++++++++
+v0.5.1 / 2019-01-29
+-------------------
 
 Enhancements
 ++++++++++++
 
-Bug Fixes
-+++++++++
+- (:pr:`22`) Compute results are now returned as a dict of Python Primals which have
+  been serialized-deserialized through Pydantic instead of returning un-processed Python objects
+  or json-compatible string.
 
 v0.5.0 / 2019-01-28
 -------------------
