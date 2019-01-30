@@ -1,10 +1,18 @@
 import setuptools
 import versioneer
 
+short_description = "QCEngine provides a wrapper to ingest and produce QCSchema for a variety of quantum chemistry programs."
+
+try:
+    with open("README.md", "r") as handle:
+        long_description = handle.read()
+except FileNotFoundError:
+    long_description = short_description
+
 if __name__ == "__main__":
     setuptools.setup(
         name='qcengine',
-        description='Compute wrapper for Quantum Chemistry Schema input/output for a variety of programs.',
+        description='A compute wrapper for Quantum Chemistry.',
         author='Daniel G. A. Smith',
         author_email='dgasmith@vt.edu',
         url="https://github.com/MolSSI/QCEngine",
@@ -34,12 +42,10 @@ if __name__ == "__main__":
                 'pytest-cov',
             ],
         },
-
         tests_require=[
             'pytest',
             'pytest-cov',
         ],
-
         classifiers=[
             'Development Status :: 4 - Beta',
             'Intended Audience :: Science/Research',
@@ -49,6 +55,6 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 3.7',
         ],
         zip_safe=False,
-        long_description="""
-"""
+        long_description=long_description,
+        long_description_content_type="text/markdown"
     )
