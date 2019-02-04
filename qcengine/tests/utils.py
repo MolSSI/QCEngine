@@ -2,6 +2,7 @@ import sys
 
 from . import utils_compare
 
+__all__ = ['compare_dicts', 'compare_arrays', 'compare_values', 'compare_molrecs', 'compare_strings', 'compare_integers', 'tnm']
 
 def _true_false_decorator(compare_fn, *args, **kwargs):
     """Turns `compare_fn` that returns `None` on success and raises
