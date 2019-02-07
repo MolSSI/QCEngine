@@ -9,10 +9,7 @@ import os
 import socket
 from typing import Optional
 
-import cpuinfo
-import psutil
 import pydantic
-import yaml
 
 __all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
 
@@ -25,6 +22,8 @@ LOGGER.setLevel(logging.CRITICAL)
 
 # Generic globals
 def get_global(key=None):
+    import cpuinfo
+    import psutil
     global _global_values
     if _global_values is None:
         _global_values = {}
@@ -111,6 +110,7 @@ def _load_defaults():
         LOGGER.info("Using default options...")
 
     else:
+        import yaml
         LOGGER.info("Found 'qcengine.yaml' at path: {}".format(load_path))
         with open(load_path, "r") as stream:
             user_config = yaml.load(stream)
