@@ -2,22 +2,22 @@
 Calls the Psi4 executable.
 """
 
-from pkg_resources import parse_version
 from qcelemental.models import Result, FailedOperation
-
-
-def _parse_psi_version(version):
-    if "undef" in version:
-        raise TypeError(
-            "Using custom build Psi4 without tags. Please `git pull origin master --tags` and recompile Psi4.")
-
-    return parse_version(version)
 
 
 def psi4(input_model, config):
     """
     Runs Psi4 in API mode
     """
+
+    from pkg_resources import parse_version
+
+    def _parse_psi_version(version):
+        if "undef" in version:
+            raise TypeError(
+                "Using custom build Psi4 without tags. Please `git pull origin master --tags` and recompile Psi4.")
+
+        return parse_version(version)
 
     try:
         import psi4
