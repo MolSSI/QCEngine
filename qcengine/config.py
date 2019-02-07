@@ -17,29 +17,38 @@ import yaml
 __all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
 
 # Start a globals dictionary with small starting values
-CPUINFO = cpuinfo.get_cpu_info()
-
-# We want physical cores
-if hasattr(psutil.Process(), "cpu_affinity"):
-    cpu_cnt = len(psutil.Process().cpu_affinity())
-else:
-    cpu_cnt = psutil.cpu_count(logical=False)
-    if cpu_cnt is None:
-        cpu_cnt = psutil.cpu_count(logical=True)
-CPUINFO["count"] = cpu_cnt
-
-# Generic globals
-GLOBALS = {}
-GLOBALS["hostname"] = socket.gethostname()
-GLOBALS["memory"] = round(psutil.virtual_memory().available / (1024**3), 3)
-GLOBALS["cpu"] = CPUINFO["brand"]
-GLOBALS["username"] = getpass.getuser()
-
-# Handle logger
+_global_values = None
+NODE_DESCRIPTORS = {}
 LOGGER = logging.getLogger("QCEngine")
 LOGGER.setLevel(logging.CRITICAL)
 
-NODE_DESCRIPTORS = {}
+
+# Generic globals
+def get_global(key=None):
+    global _global_values
+    if _global_values is None:
+        _global_values = {}
+        _global_values["hostname"] = socket.gethostname()
+        _global_values["memory"] = round(psutil.virtual_memory().available / (1024**3), 3)
+        _global_values["username"] = getpass.getuser()
+
+        # Work through VMs and logical cores.
+        if hasattr(psutil.Process(), "cpu_affinity"):
+            cpu_cnt = len(psutil.Process().cpu_affinity())
+        else:
+            cpu_cnt = psutil.cpu_count(logical=False)
+            if cpu_cnt is None:
+                cpu_cnt = psutil.cpu_count(logical=True)
+
+        _global_values["ncores"] = cpu_cnt
+
+        _global_values["cpuinfo"] = cpuinfo.get_cpu_info()
+        _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand"]
+
+    if key is None:
+        return _global_values.copy()
+    else:
+        return _global_values[key]
 
 
 class NodeDescriptor(pydantic.BaseModel):
@@ -153,7 +162,7 @@ def get_node_descriptor(hostname=None):
         return hostname
 
     if hostname is None:
-        hostname = GLOBALS["hostname"]
+        hostname = get_global("hostname")
 
     # Find a match
     for name, node in NODE_DESCRIPTORS.items():
@@ -163,7 +172,7 @@ def get_node_descriptor(hostname=None):
             break
     else:
         config = NodeDescriptor(
-            name="default", hostname_pattern="*", memory=GLOBALS["memory"], ncores=CPUINFO["count"])
+            name="default", hostname_pattern="*", memory=get_global("memory"), ncores=get_global("ncores"))
 
     return config
 
@@ -198,7 +207,7 @@ def get_config(*, hostname=None, local_options=None):
 
     # Node data
     node = get_node_descriptor(hostname)
-    ncores = node.ncores or CPUINFO["count"]
+    ncores = node.ncores or get_global("ncores")
     scratch_directory = local_options.get("scratch_directory", None) or node.scratch_directory
 
     # Jobs per node
@@ -207,7 +216,7 @@ def get_config(*, hostname=None, local_options=None):
     # Handle memory
     memory = local_options.pop("memory", None)
     if memory is None:
-        memory = node.memory or GLOBALS["memory"]
+        memory = node.memory or get_global("memory")
         memory_coeff = (1 - node.memory_safety_factor / 100)
         memory = round(memory * memory_coeff / jobs_per_node, 3)
 
@@ -225,12 +234,12 @@ def get_config(*, hostname=None, local_options=None):
 
 def get_provenance_augments():
     from qcengine import __version__
-    return dict(
-        cpu=GLOBALS["cpu"],
-        hostname=GLOBALS["hostname"],
-        username=GLOBALS["username"],
-        qcengine_version=__version__,
-    )
+    return {
+        "cpu": get_global("cpu_brand"),
+        "hostname": get_global("hostname"),
+        "username": get_global("username"),
+        "qcengine_version": __version__
+    }
 
 
 def get_logger():
