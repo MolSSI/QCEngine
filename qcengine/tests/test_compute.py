@@ -113,3 +113,22 @@ def test_torchani_task():
     assert ret["success"] is True
     assert ret["driver"] == "gradient"
     assert "provenance" in ret
+
+def test_terachem_task():
+    json_data = copy.deepcopy(_base_json)
+    json_data["molecule"] = dc.get_molecule("water")
+    json_data["driver"] = "gradient"
+    json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
+    json_data["keywords"] = {"levelshift":"yes", "levelshiftvalb":"0.1", "levelshiftvala":"1.0", "gpus":"1", "maxit":"500", "scf":"diis+a", "method":"ub3lyp"}
+    json_data["return_output"] = False
+
+    ret = dc.compute(json_data, "terachem", raise_error=True, capture_output=False)
+
+    assert ret["driver"] == "energy"
+    assert "provenance" in ret
+
+    for key in ["cpu", "hostname", "username", "wall_time"]:
+        assert key in ret["provenance"]
+
+    assert ret["success"] is True
+

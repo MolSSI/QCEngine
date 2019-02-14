@@ -5,6 +5,7 @@ Imports the various compute backends
 from . import psi4
 from . import rdkit
 from . import torchani
+from . import terachem
 
 __all__ = ["register_program", "get_program", "get_programs"]
 
@@ -29,3 +30,4 @@ def get_programs():
 register_program('psi4', psi4.psi4)
 register_program('rdkit', rdkit.rdkit)
 register_program('torchani', torchani.torchani)
+register_program('terachem', terachem.terachem)
