@@ -13,6 +13,15 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.5.2 / 2019-02-13
+-------------------
+
+Enhancements
+++++++++++++
+
+- (:pr:`24`) Improves load times dramatically by delaying imports and cpuutils.
+- (:pr:`25`) Code base linting.
+
 v0.5.1 / 2019-01-29
 -------------------
 
