@@ -118,7 +118,7 @@ def test_torchani_task():
 def test_molpro_task():
     json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = dc.get_molecule("water")
-    json_data["driver"] = "energy"
+    json_data["driver"] = "gradient"
     json_data["model"] = {"method": "mp2", "basis": "sto-3g"}
     json_data["keywords"] = {}
     json_data["return_output"] = False

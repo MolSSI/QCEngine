@@ -7,12 +7,14 @@ from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 from qcengine.units import ureg
 
 
-def def_format_input(input_model, config):
+def _format_input(input_model, config):
     input_file = []
 
     # Write header info
     input_file.append("!Title")
-    input_file.append("memory,{},M".format(config.memory/8))
+    memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
+
+    input_file.append("memory,{},M".format(memory_mw_core))
 
     input_file.append('')
 
@@ -43,9 +45,15 @@ def def_format_input(input_model, config):
         input_file.append('{hf}')
     input_file.append('{{{:s}}}'.format(input_model.model.method))
 
+    input_file.append('')
+
+    # Write gradient call if asked for
+    if input_model.driver == 'gradient':
+        input_file.append('{force}')
+
     input_file = "\n".join(input_file)
     print(input_file)
 
 
 def molpro(input_model, config):
-    return def_format_input(input_model, config)
+    return _format_input(input_model, config)
