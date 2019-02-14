@@ -5,10 +5,10 @@ Tests the DQM compute dispatch module
 import copy
 
 import pytest
-
 from qcelemental.models import Molecule, ResultInput
 
 import qcengine as dc
+
 from . import addons
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}

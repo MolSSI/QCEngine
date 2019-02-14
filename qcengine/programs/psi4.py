@@ -2,7 +2,7 @@
 Calls the Psi4 executable.
 """
 
-from qcelemental.models import Result, FailedOperation
+from qcelemental.models import FailedOperation, Result
 
 
 def psi4(input_model, config):

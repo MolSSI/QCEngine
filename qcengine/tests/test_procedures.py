@@ -4,12 +4,12 @@ Tests the DQM compute dispatch module
 
 import copy
 
-import pytest
-
 import numpy as np
+import pytest
+from qcelemental.models import OptimizationInput
 
 import qcengine as dc
-from qcelemental.models import OptimizationInput
+
 from . import addons
 
 _base_json = {

@@ -11,7 +11,7 @@ import time
 import traceback
 from contextlib import contextmanager
 
-from qcelemental.models import FailedOperation, ComputeError
+from qcelemental.models import ComputeError, FailedOperation
 
 from . import config
 

@@ -2,7 +2,8 @@
 Calls the Psi4 executable.
 """
 
-from qcelemental.models import Result, ComputeError, Provenance, FailedOperation
+from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+
 from qcengine.units import ureg
 
 

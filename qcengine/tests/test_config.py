@@ -5,11 +5,10 @@ Tests the DQM compute module configuration
 import copy
 import os
 
-import pytest
 import pydantic
+import pytest
 
 import qcengine
-
 from qcengine.testing import environ_context
 
 
