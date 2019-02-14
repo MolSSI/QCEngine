@@ -2,11 +2,11 @@
 Integrates the computes together
 """
 
-from qcelemental.models import ResultInput, ComputeError, OptimizationInput, Optimization, FailedOperation
+from qcelemental.models import ComputeError, FailedOperation, Optimization, OptimizationInput, ResultInput
 
 from .config import get_config
 from .programs import get_program
-from .util import compute_wrapper, handle_output_metadata, get_module_function, model_wrapper
+from .util import compute_wrapper, get_module_function, handle_output_metadata, model_wrapper
 
 
 def compute(input_data, program, raise_error=False, capture_output=True, local_options=None, return_dict=True):

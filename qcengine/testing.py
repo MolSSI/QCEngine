@@ -3,7 +3,6 @@ Utilities for the testing suite.
 """
 
 import os
-
 from contextlib import contextmanager
 
 
