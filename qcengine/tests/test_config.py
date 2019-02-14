@@ -89,15 +89,16 @@ def opt_state_basic():
             "jobs_per_node": 2,
             "ncores": 24,
             "memory": 240
-        }, {
-            "name": "default",
-            "hostname_pattern": "*",
-            "jobs_per_node": 1,
-            "memory": 4,
-            "memory_safety_factor": 0,
-            "ncores": 5,
-            "scratch_directory": "$QCA_SCRATCH_DIR"
-        }]
+        },
+                   {
+                       "name": "default",
+                       "hostname_pattern": "*",
+                       "jobs_per_node": 1,
+                       "memory": 4,
+                       "memory_safety_factor": 0,
+                       "ncores": 5,
+                       "scratch_directory": "$QCA_SCRATCH_DIR"
+                   }]
         for desc in configs:
             node = qcengine.config.NodeDescriptor(**desc)
             qcengine.config.NODE_DESCRIPTORS[desc["name"]] = node
@@ -159,9 +160,11 @@ def test_config_local_njob_ncore(opt_state_basic):
 
 def test_config_local_njob_ncore(opt_state_basic):
     config = qcengine.config.get_config(
-        hostname="something", local_options={"jobs_per_node": 3,
-                                             "ncores": 1,
-                                             "memory": 6})
+        hostname="something", local_options={
+            "jobs_per_node": 3,
+            "ncores": 1,
+            "memory": 6
+        })
     assert config.ncores == 1
     assert pytest.approx(config.memory, 0.1) == 6
 

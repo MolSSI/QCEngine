@@ -42,21 +42,22 @@ def test_psi4_task():
 
 @addons.using_psi4
 def test_psi4_ref_switch():
-    inp = ResultInput(**{
-        "molecule": {
-            "symbols": ["Li"],
-            "geometry": [0, 0, 0],
-            "molecular_multiplicity": 2
-        },
-        "driver": "energy",
-        "model": {
-            "method": "SCF",
-            "basis": "sto-3g"
-        },
-        "keywords": {
-            "scf_type": "df"
-        }
-    })
+    inp = ResultInput(
+        **{
+            "molecule": {
+                "symbols": ["Li"],
+                "geometry": [0, 0, 0],
+                "molecular_multiplicity": 2
+            },
+            "driver": "energy",
+            "model": {
+                "method": "SCF",
+                "basis": "sto-3g"
+            },
+            "keywords": {
+                "scf_type": "df"
+            }
+        })
 
     ret = dc.compute(inp, "psi4", raise_error=True, return_dict=False)
 
