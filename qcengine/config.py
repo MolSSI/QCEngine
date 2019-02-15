@@ -9,7 +9,7 @@ import os
 import socket
 from typing import Optional
 
-import pydantic
+from pydantic import BaseModel, Extra
 
 __all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
 
@@ -50,7 +50,7 @@ def get_global(key=None):
         return _global_values[key]
 
 
-class NodeDescriptor(pydantic.BaseModel):
+class NodeDescriptor(BaseModel):
     """
     Description of an individual node
     """
@@ -73,10 +73,10 @@ class NodeDescriptor(pydantic.BaseModel):
         super().__init__(**data)
 
     class Config:
-        ignore_extra = False
+        extra = Extra.forbid
 
 
-class JobConfig(pydantic.BaseModel):
+class JobConfig(BaseModel):
 
     # Specifications
     ncores: int  # Number of ncores per job
@@ -84,7 +84,7 @@ class JobConfig(pydantic.BaseModel):
     scratch_directory: Optional[str]  # What location to use as scratch
 
     class Config:
-        ignore_extra = False
+        extra = Extra.forbid
 
 
 def _load_defaults():
