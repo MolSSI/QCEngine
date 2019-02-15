@@ -8,12 +8,13 @@ from qcengine.units import ureg
 
 import xml.etree.ElementTree as ET
 
+
 def _format_input(input_model, config):
     input_file = []
 
     # Write header info
     input_file.append("!Title")
-    memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
+    memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
 
     input_file.append("memory,{},M".format(memory_mw_core))
 
@@ -40,7 +41,7 @@ def _format_input(input_model, config):
     input_file.append('')
 
     # Write Molpro commands
-    posthf_methods = ['mp2','ccsd','ccsd(t)']
+    posthf_methods = ['mp2', 'ccsd', 'ccsd(t)']
     write_hf = input_model.model.method.lower() in posthf_methods
     if write_hf:
         input_file.append('{hf}')
@@ -68,34 +69,35 @@ def _parse_output(xml_file):
     output_data = {}
 
     # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
-    for jobstep in root.findall('{http://www.molpro.net/schema/molpro-output}job/{http://www.molpro.net/schema/molpro-output}jobstep'):
-        print("jobstep.tag: ")
+    for jobstep in root.findall(
+            '{http://www.molpro.net/schema/molpro-output}job/{http://www.molpro.net/schema/molpro-output}jobstep'):
+        #print("jobstep.tag: ")
 
-        if ('SCF' in jobstep.attrib['command']):
+        if 'SCF' in jobstep.attrib['command']:
             # Grab properties (e.g. Energy and Dipole moment)
             for child in jobstep.findall('{http://www.molpro.net/schema/molpro-output}property'):
-                if (child.attrib['name'] == 'Energy'):
+                if child.attrib['name'] == 'Energy':
                     output_data['scf_method'] = child.attrib['method']
                     output_data['scf_total_energy'] = float(child.attrib['value'])
 
-                elif (child.attrib['name'] == 'Dipole moment'):
+                elif child.attrib['name'] == 'Dipole moment':
                     output_data['scf_dipole_moment'] = [float(x) for x in child.attrib['value'].split()]
 
-        elif ('MP2' in jobstep.attrib['command']):
+        elif 'MP2' in jobstep.attrib['command']:
             # Grab properties (e.g. Energy and Dipole moment)
             for child in jobstep.findall('{http://www.molpro.net/schema/molpro-output}property'):
-                if (child.attrib['name'] == 'total energy'):
+                if child.attrib['name'] == 'total energy':
                     output_data['mp2_method'] = child.attrib['method']
                     output_data['mp2_total_energy'] = float(child.attrib['value'])
 
-                elif (child.attrib['name'] == 'correlation energy'):
+                elif child.attrib['name'] == 'correlation energy':
                     output_data['mp2_total_correlation_energy'] = float(child.attrib['value'])
 
-                elif (child.attrib['name'] == 'Dipole moment'):
+                elif child.attrib['name'] == 'Dipole moment':
                     output_data['mp2_dipole_moment'] = [float(x) for x in child.attrib['value'].split()]
 
         # Grab gradient
-        elif ('FORCES' in jobstep.attrib['command']):
+        elif 'FORCE' in jobstep.attrib['command']:
             # Grab properties (e.g. Energy and Dipole moment)
             for child in jobstep.findall('{http://www.molpro.net/schema/molpro-output}gradient'):
                 print("gradient.attrib: ")
