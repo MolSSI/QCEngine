@@ -2,15 +2,19 @@
 Several import utilities
 """
 
+import abc
 import importlib
 import io
 import json
 import operator
+import subprocess
 import sys
 import time
 import traceback
 from contextlib import contextmanager
+from typing import Any, Dict
 
+from pydantic import BaseModel
 from qcelemental.models import ComputeError, FailedOperation
 
 from . import config
@@ -166,3 +170,69 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
         return json.loads(ret.json())  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
     else:
         return ret
+
+def terminate_process(proc, timeout: int =15):
+    if proc.poll() is None:
+
+        # Sigint (keyboard interupt)
+        if sys.platform.startswith('win'):
+            proc.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            proc.send_signal(signal.SIGINT)
+
+        try:
+            start = time.time()
+            while (proc.poll() is None) and (time.time() < (start + timeout)):
+                time.sleep(0.02)
+
+        # Flat kill
+        finally:
+            proc.kill()
+
+@contextmanager
+def popen(args, **kwargs):
+    """
+    Opens a background task
+
+    Code and idea from dask.distributed's testing suite
+    https://github.com/dask/distributed
+    """
+    args = list(args)
+
+    # Bin prefix
+    if sys.platform.startswith('win'):
+        bin_prefix = os.path.join(sys.prefix, 'Scripts')
+    else:
+        bin_prefix = os.path.join(sys.prefix, 'bin')
+
+    # Do we prefix with Python?
+    if kwargs.pop("append_prefix", False):
+        args[0] = os.path.join(bin_prefix, args[0])
+
+    if sys.platform.startswith('win'):
+        # Allow using CTRL_C_EVENT / CTRL_BREAK_EVENT
+        kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+    kwargs['stdout'] = subprocess.PIPE
+    kwargs['stderr'] = subprocess.PIPE
+    proc = subprocess.Popen(args, **kwargs)
+    try:
+        yield proc
+    except Exception:
+        dump_stdout = True
+        raise
+
+    finally:
+        try:
+            terminate_process(proc)
+        finally:
+            output, error = proc.communicate()
+            if dump_stdout:
+                print('\n' + '-' * 30)
+                print("\n|| Process command: {}".format(" ".join(args)))
+                print('\n|| Process stderr: \n{}'.format(error.decode()))
+                print('-' * 30)
+                print('\n|| Process stdout: \n{}'.format(output.decode()))
+                print('-' * 30)
+
+#
