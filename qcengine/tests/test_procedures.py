@@ -110,7 +110,7 @@ def test_geometric_stdout():
 def test_geometric_rdkit_error():
     inp = copy.deepcopy(_base_json)
 
-    inp["initial_molecule"] = dc.get_molecule("water").copy(exclude="connectivity")
+    inp["initial_molecule"] = dc.get_molecule("water").copy(exclude={"connectivity"})
     inp["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     inp["keywords"]["program"] = "rdkit"
 
