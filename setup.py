@@ -24,7 +24,7 @@ if __name__ == "__main__":
             'pyyaml',
             'py-cpuinfo',
             'psutil',
-            'qcelemental>=0.2.2',
+            'qcelemental>=0.2.6',
             'pydantic>=0.18.0'
         ],
         entry_points={"console_scripts": [
