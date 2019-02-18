@@ -29,10 +29,11 @@ def test_psi4_task():
     json_data["keywords"] = {"scf_type": "df"}
     json_data["return_output"] = False
 
-    ret = dc.compute(json_data, "psi4", raise_error=True)
+    ret = dc.compute(json_data, "psi4", raise_error=True, capture_output=False)
 
     assert ret["driver"] == "energy"
     assert "provenance" in ret
+    assert "Final Energy" in ret["stdout"]
 
     for key in ["cpu", "hostname", "username", "wall_time"]:
         assert key in ret["provenance"]
@@ -42,22 +43,21 @@ def test_psi4_task():
 
 @addons.using_psi4
 def test_psi4_ref_switch():
-    inp = ResultInput(
-        **{
-            "molecule": {
-                "symbols": ["Li"],
-                "geometry": [0, 0, 0],
-                "molecular_multiplicity": 2
-            },
-            "driver": "energy",
-            "model": {
-                "method": "SCF",
-                "basis": "sto-3g"
-            },
-            "keywords": {
-                "scf_type": "df"
-            }
-        })
+    inp = ResultInput(**{
+        "molecule": {
+            "symbols": ["Li"],
+            "geometry": [0, 0, 0],
+            "molecular_multiplicity": 2
+        },
+        "driver": "energy",
+        "model": {
+            "method": "SCF",
+            "basis": "sto-3g"
+        },
+        "keywords": {
+            "scf_type": "df"
+        }
+    })
 
     ret = dc.compute(inp, "psi4", raise_error=True, return_dict=False)
 

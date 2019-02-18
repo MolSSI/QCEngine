@@ -128,8 +128,10 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
     else:
         output_fusion = output_data.dict()
 
-    output_fusion["stdout"] = metadata["stdout"]
-    output_fusion["stderr"] = metadata["stderr"]
+    # Do not override if computer generates
+    output_fusion["stdout"] = output_fusion.pop("stdout", metadata["stdout"])
+    output_fusion["stderr"] = output_fusion.pop("stderr", metadata["stderr"])
+
     if metadata["success"] is not True:
         output_fusion["success"] = False
         output_fusion["error"] = {"error_type": "meta_error", "error_message": metadata["error_message"]}
@@ -142,9 +144,8 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
         raise ValueError(output_fusion["error"]["error_message"])
 
     # Fill out provenance datadata
-    wall_time = metadata["wall_time"]
     provenance_augments = config.get_provenance_augments()
-    provenance_augments["wall_time"] = wall_time
+    provenance_augments["wall_time"] = metadata["wall_time"]
     if "provenance" in output_fusion:
         output_fusion["provenance"].update(provenance_augments)
     else:
