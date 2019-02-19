@@ -18,6 +18,5 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
-  - deepdiff
   - pip:
     - git+git://github.com/aiqm/torchani.git@cf192be#egg=torchani
