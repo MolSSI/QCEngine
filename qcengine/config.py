@@ -11,7 +11,7 @@ from typing import Optional
 
 import pydantic
 
-from ._version import get_versions
+from .extras import get_information
 
 __all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
 
@@ -236,12 +236,11 @@ def get_config(*, hostname=None, local_options=None):
 
 
 def get_provenance_augments():
-    from qcengine import __version__
     return {
         "cpu": get_global("cpu_brand"),
         "hostname": get_global("hostname"),
         "username": get_global("username"),
-        "qcengine_version": __version__
+        "qcengine_version": get_information("version")
     }
 
 

@@ -1,4 +1,3 @@
-from .utils import *
 from .addons import using_dftd3, using_dftd3_321, using_psi4, using_qcdb
 
 import copy
@@ -6,6 +5,7 @@ import copy
 import pytest
 import numpy as np
 import qcelemental as qcel
+from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 from qcengine.programs import intf_dftd3
 
@@ -526,11 +526,11 @@ def _compute_key(pjrec):
 ])  # yapf: disable
 def test_intf_dftd3__from_arrays(inp, expected):
     res = intf_dftd3.from_arrays(**inp[0])
-    assert compare_dicts(expected, res, 4, tnm())
-    assert compare_strings(inp[1], _compute_key(res), 'key')
+    assert compare_recursive(expected, res, atol=1.e-4)
+    assert compare(inp[1], _compute_key(res), 'key')
     res = intf_dftd3.from_arrays(
         name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
-    assert compare_dicts(expected, res, 4, tnm() + ' idempotent')
+    assert compare_recursive(expected, res, tnm() + ' idempotent', atol=1.e-4)
 
 
 @pytest.mark.parametrize("inp", [
@@ -559,7 +559,7 @@ def test_intf_dftd3__from_arrays__supplement():
 
     res = intf_dftd3.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
     print(res)
-    assert compare_dicts(ans, res, 4, tnm())
+    assert compare_recursive(ans, res, atol=1.e-4)
     with pytest.raises(ValueError) as e:
         intf_dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert "Can't guess -D correction level" in str(e)
@@ -568,7 +568,7 @@ def test_intf_dftd3__from_arrays__supplement():
         level_hint=res['dashlevel'],
         param_tweaks=res['dashparams'],
         dashcoeff_supplement=supp)
-    assert compare_dicts(ans, res, 4, tnm() + ' idempotent')
+    assert compare_recursive(ans, res, tnm() + ' idempotent', atol=1.e-4)
 
 
 @using_dftd3
@@ -577,7 +577,7 @@ def test_3():
 
     res = intf_dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
     print(res)
-    assert compare_strings('B3LYP-D3(BJ)', _compute_key(res['keywords']), 'key')
+    assert compare('B3LYP-D3(BJ)', _compute_key(res['keywords']), 'key')
 
 
 @using_dftd3
@@ -608,8 +608,8 @@ def test_molecule__run_dftd3__23body(inp, subjects):
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']]
 
     E, G = subject.run_dftd3(inp['first'], inp['second'])
-    assert compare_values(expected, E, 7, tnm())
-    assert compare_arrays(gexpected, G, 7, tnm())
+    assert compare_values(expected, E, atol=1.e-7)
+    assert compare_values(gexpected, G, atol=1.e-7)
 
 
 @using_qcdb
@@ -663,15 +663,15 @@ def test_intf_dftd3__run_dftd3__2body(inp, subjects, request):
 
     assert len(jrec['qcvars']) == 8
 
-    assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, 7, tnm())
-    assert compare_values(expected, jrec['qcvars']['DISPERSION CORRECTION ENERGY'].data, 7, tnm())
-    assert compare_values(expected, jrec['qcvars']['2-BODY DISPERSION CORRECTION ENERGY'].data, 7, tnm())
-    assert compare_values(expected, jrec['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION ENERGY'].data, 7, tnm())
+    assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, atol=1.e-7)
+    assert compare_values(expected, jrec['qcvars']['DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
+    assert compare_values(expected, jrec['qcvars']['2-BODY DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
+    assert compare_values(expected, jrec['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
 
-    assert compare_arrays(gexpected, jrec['qcvars']['CURRENT GRADIENT'].data, 7, tnm())
-    assert compare_arrays(gexpected, jrec['qcvars']['DISPERSION CORRECTION GRADIENT'].data, 7, tnm())
-    assert compare_arrays(gexpected, jrec['qcvars']['2-BODY DISPERSION CORRECTION GRADIENT'].data, 7, tnm())
-    assert compare_arrays(gexpected, jrec['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION GRADIENT'].data, 7, tnm())
+    assert compare_values(gexpected, jrec['qcvars']['CURRENT GRADIENT'].data, atol=1.e-7)
+    assert compare_values(gexpected, jrec['qcvars']['DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
+    assert compare_values(gexpected, jrec['qcvars']['2-BODY DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
+    assert compare_values(gexpected, jrec['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
 
 
 @using_dftd3_321
@@ -703,14 +703,12 @@ def test_intf_dftd3__run_dftd3__3body(inp, subjects, request):
 
     assert len(jrec['qcvars']) == 8
 
-    assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, 7, tnm())
-    assert compare_values(expected, jrec['qcvars']['DISPERSION CORRECTION ENERGY'].data, 7, tnm())
-    assert compare_values(expected, jrec['qcvars']['3-BODY DISPERSION CORRECTION ENERGY'].data, 7, tnm())
-    assert compare_values(expected, jrec['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY'].data, 7,
-                          tnm())
+    assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, atol=1.e-7)
+    assert compare_values(expected, jrec['qcvars']['DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
+    assert compare_values(expected, jrec['qcvars']['3-BODY DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
+    assert compare_values(expected, jrec['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
 
-    assert compare_arrays(gexpected, jrec['qcvars']['CURRENT GRADIENT'].data, 7, tnm())
-    assert compare_arrays(gexpected, jrec['qcvars']['DISPERSION CORRECTION GRADIENT'].data, 7, tnm())
-    assert compare_arrays(gexpected, jrec['qcvars']['3-BODY DISPERSION CORRECTION GRADIENT'].data, 7, tnm())
-    assert compare_arrays(gexpected, jrec['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION GRADIENT'].data,
-                          7, tnm())
+    assert compare_values(gexpected, jrec['qcvars']['CURRENT GRADIENT'].data, atol=1.e-7)
+    assert compare_values(gexpected, jrec['qcvars']['DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
+    assert compare_values(gexpected, jrec['qcvars']['3-BODY DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
+    assert compare_values(gexpected, jrec['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)

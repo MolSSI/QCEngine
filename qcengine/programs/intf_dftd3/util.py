@@ -1,6 +1,6 @@
 import re
 
-from ..._version import get_versions
+from ...extras import get_information
 
 yes = re.compile(r'^(yes|true|on|1)', re.IGNORECASE)
 no = re.compile(r'^(no|false|off|0)', re.IGNORECASE)
@@ -58,4 +58,4 @@ def provenance_stamp(routine):
     generating routine's name is passed in through `routine`.
 
     """
-    return {'creator': 'QCEngine', 'version': get_versions()['version'], 'routine': routine}
+    return {'creator': 'QCEngine', 'version': get_information('version'), 'routine': routine}
