@@ -171,7 +171,8 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
     else:
         return ret
 
-def terminate_process(proc, timeout: int =15):
+
+def terminate_process(proc, timeout: int=15):
     if proc.poll() is None:
 
         # Sigint (keyboard interupt)
@@ -188,6 +189,7 @@ def terminate_process(proc, timeout: int =15):
         # Flat kill
         finally:
             proc.kill()
+
 
 @contextmanager
 def popen(args, **kwargs):
@@ -235,4 +237,39 @@ def popen(args, **kwargs):
                 print('\n|| Process stdout: \n{}'.format(output.decode()))
                 print('-' * 30)
 
-#
+
+class ProgramExecutor(BaseModel, abc.ABC):
+
+    requires_folder: bool
+    requires_scratch: bool
+    single_node: bool
+    max_cores: Optional[int]
+    max_memory: Optional[float]
+
+    @abc.abstractmethod
+    def build_input(self):
+        pass
+
+    @abc.abstractmethod
+    def parse_output(self):
+        pass
+
+    def execute(args, **kwargs):
+        """
+        Runs a process in the background until complete.
+
+        Returns True if exit code zero
+        """
+
+        timeout = kwargs.pop("timeout", 30)
+        terminate_after = kwargs.pop("interupt_after", None)
+        with popen(args, **kwargs) as proc:
+            if terminate_after is None:
+                proc.wait(timeout=timeout)
+            else:
+                time.sleep(terminate_after)
+                terminate_process(proc)
+
+            retcode = proc.poll()
+
+        return retcode == 0
