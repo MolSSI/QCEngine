@@ -29,10 +29,10 @@ def psi4(input_model, config):
     input_data["nthreads"] = config.ncores
     input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
     input_data["success"] = False
-    reset_schema = False
+    input_data["return_output"] = True
+
     if input_data["schema_name"] == "qcschema_input":
         input_data["schema_name"] = "qc_schema_input"
-        reset_schema = True
 
     scratch = config.scratch_directory
     if scratch is not None:
@@ -51,8 +51,9 @@ def psi4(input_model, config):
     else:
         raise TypeError("Psi4 version '{}' not understood.".format(psi_version))
 
-    if reset_schema:
-        output_data["schema_name"] = "qcschema_input"
+    # Reset the schema if required
+    output_data["schema_name"] = "qcschema_output"
+
     # Dispatch errors, PSIO Errors are not recoverable for future runs
     if output_data["success"] is False:
 
@@ -61,9 +62,13 @@ def psi4(input_model, config):
 
     # Move several pieces up a level
     if output_data["success"]:
-        output_data["provenance"]["memory"] = round(input_data["memory"] / (1024**3), 3)
-        output_data["provenance"]["nthreads"] = input_data["nthreads"]
-        del output_data["memory"], input_data["nthreads"]
+        output_data["provenance"]["memory"] = round(output_data.pop("memory") / (1024**3), 3)  # Move back to GB
+        output_data["provenance"]["nthreads"] = output_data.pop("nthreads")
+        output_data["stdout"] = output_data.pop("raw_output", None)
+
+        # Delete keys
+        output_data.pop("return_ouput", None)
+
         return Result(**output_data)
     return FailedOperation(
         success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
