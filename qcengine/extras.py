@@ -19,3 +19,5 @@ def get_information(key):
     key = key.lower()
     if key not in __info:
         raise KeyError("Information key '{}' not understood.".format(key))
+
+    return __info[key]

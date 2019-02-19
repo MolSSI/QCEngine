@@ -12,3 +12,4 @@ from .stock_mols import get_molecule
 from .extras import get_information
 __version__ = get_information('version')
 __git_revision__ = get_information('git_revision')
+del get_information
