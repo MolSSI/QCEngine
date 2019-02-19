@@ -21,6 +21,7 @@ Enhancements
 
 - (:pr:`24`) Improves load times dramatically by delaying imports and cpuutils.
 - (:pr:`25`) Code base linting.
+- (:pr:`30`) Ensures Psi4 output is already returned and Pydantic v0.20+ changes.
 
 v0.5.1 / 2019-01-29
 -------------------
