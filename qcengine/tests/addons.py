@@ -1,8 +1,24 @@
 """
 A set of scripts to setup testing
 """
+import os
+import shutil
+import subprocess
 
 import pytest
+
+
+def _which(command, return_bool=False):
+    # environment is $PATH, less any None values
+    lenv = {'PATH': ':' + os.environ.get('PATH')}
+    lenv = {k: v for k, v in lenv.items() if v is not None}
+
+    ans = shutil.which(command, mode=os.F_OK | os.X_OK, path=lenv['PATH'])
+
+    if return_bool:
+        return bool(ans)
+    else:
+        return ans
 
 
 def _plugin_import(plug):
@@ -22,13 +38,48 @@ def _plugin_import(plug):
         return True
 
 
+def is_psi4_new_enough(version_feature_introduced):
+    if not _plugin_import('psi4'):
+        return False
+    import psi4
+    from pkg_resources import parse_version
+    return parse_version(psi4.__version__) >= parse_version(version_feature_introduced)
+
+
+def is_dftd3_new_enough(version_feature_introduced):
+    if not _which('dftd3', return_bool=True):
+        return False
+    # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
+    command = [_which('dftd3'), '-version']
+    proc = subprocess.run(command, stdout=subprocess.PIPE)
+    candidate_version = proc.stdout.decode('utf-8').strip()
+
+    from pkg_resources import parse_version
+    return parse_version(candidate_version) >= parse_version(version_feature_introduced)
+
+
 # Add flags
 using_psi4 = pytest.mark.skipif(
-    _plugin_import("psi4") is False, reason="Could not find psi4. Please install the package to enable tests")
+    is_psi4_new_enough("1.2") is False,
+    reason="Could not find psi4 or version too old. Please install the package to enable tests")
+
 using_rdkit = pytest.mark.skipif(
     _plugin_import("rdkit") is False, reason="Could not find rdkit. Please install the package to enable tests")
+
 using_geometric = pytest.mark.skipif(
     _plugin_import("geometric") is False,
     reason="could not find geomeTRIC. Please install the package to enable tests")
+
 using_torchani = pytest.mark.skipif(
     _plugin_import("torchani") is False, reason="Could not find TorchAni. Please install the package to enable tests")
+
+using_qcdb = pytest.mark.skipif(
+    _plugin_import("qcdb") is False, reason='Not detecting common driver. Install package if necessary and add to envvar PYTHONPATH')
+
+using_dftd3 = pytest.mark.skipif(
+    _which('dftd3', return_bool=True) is False,
+    reason='Not detecting executable dftd3. Install package if necessary and add to envvar PATH')
+
+using_dftd3_321 = pytest.mark.skipif(
+    is_dftd3_new_enough("3.2.1") is False,
+    reason='DFTD3 does not include 3.2.1 features. Update package and add to PATH')

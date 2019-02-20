@@ -4,8 +4,10 @@ channels:
   - conda-forge
 dependencies:
   - psi4=1.2
+  - dftd3
 
     # Core
+  - python
   - pyyaml
   - py-cpuinfo
   - psutil

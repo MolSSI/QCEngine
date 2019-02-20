@@ -1,22 +1,24 @@
 name: test
 channels:
+  - psi4/label/dev
   - conda-forge
-  - pytorch
 dependencies:
-  - pytorch-nightly
-  - ignite
+  - psi4
+  - dftd3 3.2.0
 
     # Core
   - python
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.2.6
+  - qcelemental >=0.2.1
   - pydantic >=0.18.1
 
     # Testing
   - pytest
   - pytest-cov
-  - codecov
+
+    # Pip depends
   - pip:
-    - git+git://github.com/aiqm/torchani.git@cf192be#egg=torchani
+    - codecov
+    - git+https://github.com/leeping/geomeTRIC#egg=geometric

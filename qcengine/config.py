@@ -11,7 +11,10 @@ from typing import Optional
 
 import pydantic
 
+from .extras import get_information
+
 __all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
+
 
 # Start a globals dictionary with small starting values
 _global_values = None
@@ -233,12 +236,11 @@ def get_config(*, hostname=None, local_options=None):
 
 
 def get_provenance_augments():
-    from qcengine import __version__
     return {
         "cpu": get_global("cpu_brand"),
         "hostname": get_global("hostname"),
         "username": get_global("username"),
-        "qcengine_version": __version__
+        "qcengine_version": get_information("version")
     }
 
 

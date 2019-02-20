@@ -6,6 +6,7 @@ dependencies:
   - rdkit
 
     # Core
+  - python
   - pyyaml
   - py-cpuinfo
   - psutil
