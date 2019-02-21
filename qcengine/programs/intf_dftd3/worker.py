@@ -7,6 +7,7 @@ import socket
 import pathlib
 import subprocess
 
+from ...util import execute
 
 def dftd3_subprocess(dftd3rec):  # dftd3rec@i -> dftd3rec@io
     """Minimal localized DFTD3 call and harvest from and into `dftd3rec`.
@@ -86,15 +87,19 @@ def dftd3_subprocess(dftd3rec):  # dftd3rec@i -> dftd3rec@io
         handle.write(dftd3rec['dftd3_geometry'])
 
     # call `dftd3` program
-    try:
-        spcall = subprocess.Popen(dftd3rec['command'], stdout=subprocess.PIPE, env=lenv)
-    except OSError as err:
-        raise OSError('Command (`{}`) failed with PATH ({})'.format(' '.join(dftd3rec['command']),
-                                                                    lenv['PATH'])) from err
+#    try:
+#        spcall = subprocess.Popen(dftd3rec['command'], stdout=subprocess.PIPE, env=lenv)
+#    except OSError as err:
+#        raise OSError('Command (`{}`) failed with PATH ({})'.format(' '.join(dftd3rec['command']),
+#                                                                    lenv['PATH'])) from err
+    #ans, dans = execute(dftd3rec['command'], **{'stdout': subprocess.PIPE, 'env': lenv})
+    ans, dans = execute(dftd3rec['command']) #, **{'env': lenv})
 
     # recover output data
-    out, err = spcall.communicate()
-    dftd3rec['stdout'] = out.decode('utf-8')
+    out = dans['stdout']
+    err = dans['stderr']
+    dftd3rec['stdout'] = out
+    print(dftd3rec)
 
     try:
         with open('dftd3_gradient', 'r') as handle:

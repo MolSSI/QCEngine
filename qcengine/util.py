@@ -7,12 +7,14 @@ import importlib
 import io
 import json
 import operator
+import os
+import signal
 import subprocess
 import sys
 import time
 import traceback
 from contextlib import contextmanager
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 from qcelemental.models import ComputeError, FailedOperation
@@ -94,7 +96,7 @@ def get_module_function(module, func_name, subpackage=None):
     module : str
         The module to pull the function from
     func_name : str
-        The name of the function to aquire, can be in a subpackage
+        The name of the function to acquire, can be in a subpackage
     subpackage : None, optional
         Explicitly import a subpackage if required
 
@@ -217,25 +219,19 @@ def popen(args, **kwargs):
 
     kwargs['stdout'] = subprocess.PIPE
     kwargs['stderr'] = subprocess.PIPE
-    proc = subprocess.Popen(args, **kwargs)
+    ret = {"proc": subprocess.Popen(args, **kwargs)}
     try:
-        yield proc
+        yield ret
     except Exception:
-        dump_stdout = True
         raise
 
     finally:
         try:
-            terminate_process(proc)
+            terminate_process(ret["proc"])
         finally:
-            output, error = proc.communicate()
-            if dump_stdout:
-                print('\n' + '-' * 30)
-                print("\n|| Process command: {}".format(" ".join(args)))
-                print('\n|| Process stderr: \n{}'.format(error.decode()))
-                print('-' * 30)
-                print('\n|| Process stdout: \n{}'.format(output.decode()))
-                print('-' * 30)
+            output, error = ret["proc"].communicate()
+            ret["stdout"] = output.decode()
+            ret["stderr"] = error.decode()
 
 
 class ProgramExecutor(BaseModel, abc.ABC):
@@ -254,6 +250,7 @@ class ProgramExecutor(BaseModel, abc.ABC):
     def parse_output(self):
         pass
 
+if True:
     def execute(args, **kwargs):
         """
         Runs a process in the background until complete.
@@ -265,11 +262,10 @@ class ProgramExecutor(BaseModel, abc.ABC):
         terminate_after = kwargs.pop("interupt_after", None)
         with popen(args, **kwargs) as proc:
             if terminate_after is None:
-                proc.wait(timeout=timeout)
+                proc["proc"].wait(timeout=timeout)
             else:
                 time.sleep(terminate_after)
-                terminate_process(proc)
+                terminate_process(proc["proc"])
+        retcode = proc["proc"].poll()
 
-            retcode = proc.poll()
-
-        return retcode == 0
+        return retcode == 0, proc
