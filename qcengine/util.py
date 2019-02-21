@@ -267,15 +267,24 @@ if True:
         command : list of str
         infiles : Dict[str] = str
             Input file names (names, not full paths) and contents.
-            to be written in scratch dir.
-            May be {}.
-        outfiles :
-            May be {}.
+            to be written in scratch dir. May be {}.
+        outfiles : Dict[str] = None
+            Output file names to be collected after execution into
+            values. May be {}.
+        scratch_name : str, optional
+            Passed to scratch_directory
+        scratch_location : str, optional
+            Passed to scratch_directory
+        scratch_messy : bool, optional
+            Passed to scratch_directory
+        blocking_files : list, optional
+            Files which should stop execution if present beforehand.
 
         Raises
         ------
         FileExistsError
             If any file in `blocking` is present
+
         """
         parent = kwargs.pop('scratch_location', None)
         child = kwargs.pop('scratch_name', True)
@@ -294,9 +303,9 @@ if True:
 
         timeout = kwargs.pop("timeout", 30)
         terminate_after = kwargs.pop("interupt_after", None)
-        with scratch_directory(parent, child, messy) as scrdir:
+        with scratch_directory(child, parent, messy) as scrdir:
             kwargs['cwd'] = scrdir
-            with jot_scan(infiles, outfiles, scrdir) as extrafiles:
+            with disk_files(infiles, outfiles, scrdir) as extrafiles:
                 with popen(command, **kwargs) as proc:
 
                     if terminate_after is None:
@@ -313,8 +322,24 @@ if True:
 
 
 @contextmanager
-def scratch_directory(parent=None, child=True, messy=False):
+def scratch_directory(child=True, parent=None, messy=False):
     """
+
+    Parameters
+    ----------
+    child : str, optional
+        By default, `True`, quarantine directory generated through
+        `tempfile.mdktemp` so guaranteed unique and safe. When specified,
+        quarantine directory has exactly `name`.
+    parent : str, optional
+        Create dirctory `child` elsewhere than TMP default.
+    messy : bool, optional
+        Leave scratch directory and contents on disk after completion.
+
+    Yields
+    ------
+    str
+        Full path of scratch directory.
 
     Raises
     ------
@@ -342,7 +367,21 @@ def scratch_directory(parent=None, child=True, messy=False):
 
 
 @contextmanager
-def jot_scan(infiles, outfiles, cwd=None):
+def disk_files(infiles, outfiles, cwd=None):
+    """
+
+    Parameters
+    ----------
+    infiles : Dict[str] = str
+        Input file names (names, not full paths) and contents.
+        to be written in scratch dir. May be {}.
+    outfiles : Dict[str] = None
+        Output file names to be collected after execution into
+        values. May be {}.
+    cwd : str, optional
+        Directory to which to write and read files.
+
+    """
     if cwd is None:
         lwd = Path.cwd()
     else:
@@ -358,7 +397,6 @@ def jot_scan(infiles, outfiles, cwd=None):
         yield outfiles
 
     finally:
-        # change in behavior -- not detected becomes None, not key not formed
         for fl in outfiles.keys():
             try:
                 filename = lwd / fl
