@@ -34,7 +34,7 @@ def run_json(jobrec):
     pp.pprint(jobrec)
 
     # This is currently a forced override
-    if jobrec["schema_name"] != "qc_schema_input":
+    if jobrec["schema_name"] != "qcschema_input":
         raise KeyError(f"""Schema name of '{jobrec["schema_name"]}' not understood.""")
 
     if jobrec["schema_version"] != 1:
@@ -59,6 +59,7 @@ def run_json(jobrec):
     # for k, v in json_data["keywords"].items():
     #     core.set_global_option(k, v)
 
+    kw = jobrec["keywords"].copy()
     try:
         dftd3_driver(jobrec)
     except Exception as exc:
@@ -71,9 +72,29 @@ def run_json(jobrec):
         raise exc
 
     jobrec['success'] = True
-    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
-    if jobrec['driver'] == 'gradient':
+    for k, v in jobrec["qcvars"].items():
+        v = v.data
+        if isinstance(v, np.ndarray):
+            v = v.ravel().tolist()
+        elif isinstance(v, Decimal):
+            v = float(v)
+
+        jobrec["qcvars"][k] = v
+
+
+    jobrec["qcvars"]["CURRENT ENERGY"] = jobrec['qcvars']['DISPERSION CORRECTION ENERGY']
+    jobrec['properties'] = {"return_energy": jobrec['qcvars']['CURRENT ENERGY']}
+
+    if jobrec['driver'] == 'energy':
+        jobrec["return_result"] = jobrec["properties"]["return_energy"]
+    elif jobrec['driver'] == 'gradient':
         jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec["return_result"] = jobrec["qcvars"]["CURRENT GRADIENT"]
+
+    jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
+    jobrec["extra"] = {"qcvars": jobrec.pop("qcvars"),
+                       "info": jobrec.pop("keywords")}
+    jobrec["keywords"] = kw
 
     return jobrec
 
@@ -462,7 +483,7 @@ def dftd3_harvest(jobrec, dftd3rec):
     jobrec['qcvars'] = calcinfo
 
     prov = {}
-    prov['creator'] = 'DFTD3'
+    prov['creator'] = 'dftd3'
     prov['routine'] = sys._getframe().f_code.co_name
     prov['version'] = version
     jobrec['provenance'] = prov
