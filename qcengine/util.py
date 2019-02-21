@@ -3,17 +3,21 @@ Several import utilities
 """
 
 import abc
+import errno
 import importlib
 import io
 import json
 import operator
 import os
 import signal
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
@@ -219,6 +223,7 @@ def popen(args, **kwargs):
 
     kwargs['stdout'] = subprocess.PIPE
     kwargs['stderr'] = subprocess.PIPE
+    print('Popen', args, kwargs)
     ret = {"proc": subprocess.Popen(args, **kwargs)}
     try:
         yield ret
@@ -251,21 +256,112 @@ class ProgramExecutor(BaseModel, abc.ABC):
         pass
 
 if True:
-    def execute(args, **kwargs):
+    def execute(command, infiles, outfiles, **kwargs):
         """
         Runs a process in the background until complete.
 
         Returns True if exit code zero
+
+        Parameters
+        ----------
+        command : list of str
+        infiles : Dict[str] = str
+            Input file names (names, not full paths) and contents.
+            to be written in scratch dir.
+            May be {}.
+        outfiles :
+            May be {}.
+
+        Raises
+        ------
+        FileExistsError
+            If any file in `blocking` is present
         """
+        parent = kwargs.pop('scratch_location', None)
+        child = kwargs.pop('scratch_name', True)
+        messy = kwargs.pop('scratch_messy', False)
+        blocking = kwargs.pop('blocking_files', [])
+
+        if 'cwd' in kwargs:
+            raise ValueError('do not set scratch this way')
+
+        if 'env' in kwargs:
+            kwargs['env'] = {k: v for k, v in kwargs['env'].items() if v is not None}
+
+        for fl in blocking:
+            if os.path.isfile(fl):
+                raise OSError(errno.EEXIST, 'Existing file can interfere with execute operation.', fl)
 
         timeout = kwargs.pop("timeout", 30)
         terminate_after = kwargs.pop("interupt_after", None)
-        with popen(args, **kwargs) as proc:
-            if terminate_after is None:
-                proc["proc"].wait(timeout=timeout)
-            else:
-                time.sleep(terminate_after)
-                terminate_process(proc["proc"])
-        retcode = proc["proc"].poll()
+        with scratch_directory(parent, child, messy) as scrdir:
+            kwargs['cwd'] = scrdir
+            with jot_scan(infiles, outfiles, scrdir) as extrafiles:
+                with popen(command, **kwargs) as proc:
+
+                    if terminate_after is None:
+                        proc["proc"].wait(timeout=timeout)
+                    else:
+                        time.sleep(terminate_after)
+                        terminate_process(proc["proc"])
+
+                retcode = proc["proc"].poll()
+            proc['outfiles'] = extrafiles
+        proc['scratch_directory'] = scrdir
 
         return retcode == 0, proc
+
+
+@contextmanager
+def scratch_directory(parent=None, child=True, messy=False):
+    """
+
+    Raises
+    ------
+    FileExistsError
+        If `child` specified and directory already exists (perhaps from a
+        previous `messy=True` run).
+
+    """
+    if child is True:
+        tmpdir = tempfile.mkdtemp(dir=parent)
+    else:
+        if parent is None:
+            parent = Path(tempfile.gettempdir())
+        else:
+            parent = Path(parent)
+        tmpdir = parent / child
+        os.mkdir(tmpdir)
+    try:
+        yield tmpdir
+
+    finally:
+        if not messy:
+            shutil.rmtree(tmpdir)
+            print(f'... Removing {tmpdir}')
+
+
+@contextmanager
+def jot_scan(infiles, outfiles, cwd=None):
+    if cwd is None:
+        lwd = Path.cwd()
+    else:
+        lwd = Path(cwd)
+    try:
+        # need an extra flag for text/binary
+        for fl, content in infiles.items():
+            with open(lwd / fl, 'w') as fp:
+                fp.write(content)
+                print('... Writing ', lwd / fl)
+
+        yield outfiles
+
+    finally:
+        # change in behavior -- not detected becomes None, not key not formed
+        for fl in outfiles.keys():
+            try:
+                with open(lwd / fl, 'r') as fp:
+                    outfiles[fl] = fp.read()
+                    print('... Reading', lwd / fl)
+            except (OSError, FileNotFoundError) as err:
+                outfiles[fl] = None
