@@ -23,7 +23,7 @@ from typing import Any, Dict, Optional
 from pydantic import BaseModel
 from qcelemental.models import ComputeError, FailedOperation
 
-from . import config
+from .config import get_provenance_augments, LOGGER
 
 __all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
 
@@ -150,11 +150,11 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
     if raise_error and (output_fusion["success"] is not True):
         msg = "stdout:\n" + output_fusion["stdout"]
         msg += "\nstderr:\n" + output_fusion["stderr"]
-        print(msg)
+        LOGGER.info(msg)
         raise ValueError(output_fusion["error"]["error_message"])
 
     # Fill out provenance datadata
-    provenance_augments = config.get_provenance_augments()
+    provenance_augments = get_provenance_augments()
     provenance_augments["wall_time"] = metadata["wall_time"]
     if "provenance" in output_fusion:
         output_fusion["provenance"].update(provenance_augments)
@@ -223,7 +223,7 @@ def popen(args, **kwargs):
 
     kwargs['stdout'] = subprocess.PIPE
     kwargs['stderr'] = subprocess.PIPE
-    print('Popen', args, kwargs)
+    LOGGER.info('Popen', args, kwargs)
     ret = {"proc": subprocess.Popen(args, **kwargs)}
     try:
         yield ret
@@ -338,7 +338,7 @@ def scratch_directory(parent=None, child=True, messy=False):
     finally:
         if not messy:
             shutil.rmtree(tmpdir)
-            print(f'... Removing {tmpdir}')
+            LOGGER.info(f'... Removing {tmpdir}')
 
 
 @contextmanager
@@ -350,9 +350,10 @@ def jot_scan(infiles, outfiles, cwd=None):
     try:
         # need an extra flag for text/binary
         for fl, content in infiles.items():
-            with open(lwd / fl, 'w') as fp:
+            filename = lwd / fl
+            with open(filename, 'w') as fp:
                 fp.write(content)
-                print('... Writing ', lwd / fl)
+                LOGGER.info(f'... Writing: {filename}')
 
         yield outfiles
 
@@ -360,8 +361,9 @@ def jot_scan(infiles, outfiles, cwd=None):
         # change in behavior -- not detected becomes None, not key not formed
         for fl in outfiles.keys():
             try:
-                with open(lwd / fl, 'r') as fp:
+                filename = lwd / fl
+                with open(filename, 'r') as fp:
                     outfiles[fl] = fp.read()
-                    print('... Reading', lwd / fl)
+                    LOGGER.info(f'... Writing: {filename}')
             except (OSError, FileNotFoundError) as err:
                 outfiles[fl] = None
