@@ -11,10 +11,11 @@ import xml.etree.ElementTree as ET
 
 def _format_input(input_model, config):
     input_file = []
+    posthf_methods = {'mp2', 'ccsd', 'ccsd(t)'}
 
     # Write header info
     input_file.append("!Title")
-    memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
+    memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
 
     input_file.append("memory,{},M".format(memory_mw_core))
 
@@ -41,7 +42,6 @@ def _format_input(input_model, config):
     input_file.append('')
 
     # Write Molpro commands
-    posthf_methods = ['mp2', 'ccsd', 'ccsd(t)']
     write_hf = input_model.model.method.lower() in posthf_methods
     if write_hf:
         input_file.append('{hf}')
@@ -60,22 +60,24 @@ def _format_input(input_model, config):
 def _parse_output(xml_file):
     tree = ET.parse(xml_file)
     root = tree.getroot()
-    #print(root.tag)
+    # print(root.tag)
 
     # TODO Try to grab the last total energy in the general case?
-    #      - Would be useful for arbitrarly complicated input file
-    #      - However, would need every different string used specify that (e.g. HF --> Energy, MP2 --> total energy)
-    # FIXME Need to properly construct output_data to pass to Result()
+    #      - Would be useful for arbitrarily complicated input file
+    #      - However would need every different string used to specify energy (e.g. HF --> Energy, MP2 --> total energy)
+    # TODO Need to properly construct output_data to pass to Result()
     output_data = {}
+    name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
+    methods_set = {'HF', 'RHF', 'MP2', 'CCSD'}
 
     # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
-    for jobstep in root.findall(
-            '{http://www.molpro.net/schema/molpro-output}job/{http://www.molpro.net/schema/molpro-output}jobstep'):
-        #print("jobstep.tag: ")
+    for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
+        # print("jobstep.tag: ")
+        # print(jobstep.tag)
 
         if 'SCF' in jobstep.attrib['command']:
             # Grab properties (e.g. Energy and Dipole moment)
-            for child in jobstep.findall('{http://www.molpro.net/schema/molpro-output}property'):
+            for child in jobstep.findall('molpro_uri:property', name_space):
                 if child.attrib['name'] == 'Energy':
                     output_data['scf_method'] = child.attrib['method']
                     output_data['scf_total_energy'] = float(child.attrib['value'])
@@ -85,7 +87,7 @@ def _parse_output(xml_file):
 
         elif 'MP2' in jobstep.attrib['command']:
             # Grab properties (e.g. Energy and Dipole moment)
-            for child in jobstep.findall('{http://www.molpro.net/schema/molpro-output}property'):
+            for child in jobstep.findall('molpro_uri:property', name_space):
                 if child.attrib['name'] == 'total energy':
                     output_data['mp2_method'] = child.attrib['method']
                     output_data['mp2_total_energy'] = float(child.attrib['value'])
@@ -97,15 +99,22 @@ def _parse_output(xml_file):
                     output_data['mp2_dipole_moment'] = [float(x) for x in child.attrib['value'].split()]
 
         # Grab gradient
+        # TODO Handle situation where there are multiple FORCE calls
         elif 'FORCE' in jobstep.attrib['command']:
             # Grab properties (e.g. Energy and Dipole moment)
-            for child in jobstep.findall('{http://www.molpro.net/schema/molpro-output}gradient'):
-                print("gradient.attrib: ")
-                print(child.attrib)
+            for child in jobstep.findall('molpro_uri:gradient', name_space):
+                # print("gradient.attrib: ")
+                # print(child.attrib)
+                # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
+                output_data['gradient'] = [float(x) for x in child.text.split()]
+
+    output_data['schema_name'] = 'qcschema_output'
+    # TODO Should only return True if Molpro calculation terminated properly
+    output_data['success'] = True
 
     print(output_data)
 
-    #return Result(**output_data)
+    # return Result(**{**input_data, **output_data})
 
 
 def molpro(input_model, config):
