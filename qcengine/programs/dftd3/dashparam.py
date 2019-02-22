@@ -452,7 +452,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
 
     """
     if verbose > 1:
-        print('intf_dftd3.from_arrays HINTS:', name_hint, level_hint, param_tweaks, bool(dashcoeff_supplement))
+        print('dftd3.from_arrays HINTS:', name_hint, level_hint, param_tweaks, bool(dashcoeff_supplement))
 
     # << 0 >> prep
     if dashcoeff_supplement is not None:
@@ -607,7 +607,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
 
     if verbose > 1:
         print(
-            f'intf_dftd3.from_arrays RESOLVED: dashlevel={dashleveleff}, dashparams={disp_params}, fctldash={fctldasheff}, dashparams_citation={citeff}'
+            f'dftd3.from_arrays RESOLVED: dashlevel={dashleveleff}, dashparams={disp_params}, fctldash={fctldasheff}, dashparams_citation={citeff}'
         )
 
     return {

@@ -4,71 +4,81 @@ Calls the Psi4 executable.
 
 from qcelemental.models import FailedOperation, Result
 
+from .executor import ProgramExecutor
 
-def psi4(input_model, config):
-    """
-    Runs Psi4 in API mode
-    """
 
-    from pkg_resources import parse_version
+class Psi4Executor(ProgramExecutor):
 
-    def _parse_psi_version(version):
-        if "undef" in version:
-            raise TypeError(
-                "Using custom build Psi4 without tags. Please `git pull origin master --tags` and recompile Psi4.")
+    _defaults = {
+        "name": "Psi4",
+        "scratch": True,
+        "thread_safe": False,
+        "thread_parallel": True,
+        "node_parallel": False,
+        "managed_memory": True,
+    }
 
-        return parse_version(version)
+    class Config(ProgramExecutor.Config):
+        pass
 
-    try:
-        import psi4
-    except ImportError:
-        raise ImportError("Could not find Psi4 in the Python path.")
+    def __init__(self, **kwargs):
+        super().__init__(**{**self._defaults, **kwargs})
 
-    # Setup the job
-    input_data = input_model.copy().dict()
-    input_data["nthreads"] = config.ncores
-    input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
-    input_data["success"] = False
-    input_data["return_output"] = True
+    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+        """
+        Runs Psi4 in API mode
+        """
 
-    if input_data["schema_name"] == "qcschema_input":
-        input_data["schema_name"] = "qc_schema_input"
+        try:
+            import psi4
+        except ImportError:
+            raise ImportError("Could not find Psi4 in the Python path.")
 
-    scratch = config.scratch_directory
-    if scratch is not None:
-        input_data["scratch_location"] = scratch
+        # Setup the job
+        input_data = input_data.copy().dict()
+        input_data["nthreads"] = config.ncores
+        input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
+        input_data["success"] = False
+        input_data["return_output"] = True
 
-    psi_version = _parse_psi_version(psi4.__version__)
+        if input_data["schema_name"] == "qcschema_input":
+            input_data["schema_name"] = "qc_schema_input"
 
-    if psi_version > parse_version("1.2"):
+        scratch = config.scratch_directory
+        if scratch is not None:
+            input_data["scratch_location"] = scratch
 
-        mol = psi4.core.Molecule.from_schema(input_data)
-        if mol.multiplicity() != 1:
-            input_data["keywords"]["reference"] = "uks"
+        psi_version = self.parse_version(psi4.__version__)
 
-        output_data = psi4.json_wrapper.run_json(input_data)
+        if psi_version > self.parse_version("1.2"):
 
-    else:
-        raise TypeError("Psi4 version '{}' not understood.".format(psi_version))
+            mol = psi4.core.Molecule.from_schema(input_data)
+            if mol.multiplicity() != 1:
+                input_data["keywords"]["reference"] = "uks"
 
-    # Reset the schema if required
-    output_data["schema_name"] = "qcschema_output"
+            output_data = psi4.json_wrapper.run_json(input_data)
 
-    # Dispatch errors, PSIO Errors are not recoverable for future runs
-    if output_data["success"] is False:
+        else:
+            raise TypeError("Psi4 version '{}' not understood.".format(psi_version))
 
-        if "PSIO Error" in output_data["error"]:
-            raise ValueError(output_data["error"])
+        # Reset the schema if required
+        output_data["schema_name"] = "qcschema_output"
 
-    # Move several pieces up a level
-    if output_data["success"]:
-        output_data["provenance"]["memory"] = round(output_data.pop("memory") / (1024**3), 3)  # Move back to GB
-        output_data["provenance"]["nthreads"] = output_data.pop("nthreads")
-        output_data["stdout"] = output_data.pop("raw_output", None)
+        # Dispatch errors, PSIO Errors are not recoverable for future runs
+        if output_data["success"] is False:
 
-        # Delete keys
-        output_data.pop("return_ouput", None)
+            if "PSIO Error" in output_data["error"]:
+                raise ValueError(output_data["error"])
 
-        return Result(**output_data)
-    return FailedOperation(
-        success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
+        # Move several pieces up a level
+        if output_data["success"]:
+            output_data["provenance"]["memory"] = round(output_data.pop("memory") / (1024**3), 3)  # Move back to GB
+            output_data["provenance"]["nthreads"] = output_data.pop("nthreads")
+            output_data["stdout"] = output_data.pop("raw_output", None)
+
+            # Delete keys
+            output_data.pop("return_ouput", None)
+
+            return Result(**output_data)
+        return FailedOperation(
+            success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)

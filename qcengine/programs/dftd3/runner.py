@@ -1,5 +1,9 @@
 """Compute dispersion correction using Grimme's DFTD3 executable."""
 
+import os
+import pathlib
+import socket
+
 import re
 import sys
 import copy
@@ -11,9 +15,9 @@ from decimal import Decimal
 import numpy as np
 import qcelemental as qcel
 
+from ...util import execute
 #from ..pdict import PreservingDict
 from . import dashparam
-from .worker import dftd3_subprocess
 from .util import provenance_stamp, parse_dertype
 
 
@@ -27,10 +31,10 @@ def run_json(jobrec):
         Please see molssi-qc-schema.readthedocs.io/en/latest/spec_components.html for further details.
 
     """
-    pp.pprint(jobrec)
+    # pp.pprint(jobrec)
 
     # This is currently a forced override
-    if jobrec["schema_name"] != "qc_schema_input":
+    if jobrec["schema_name"] != "qcschema_input":
         raise KeyError(f"""Schema name of '{jobrec["schema_name"]}' not understood.""")
 
     if jobrec["schema_version"] != 1:
@@ -55,6 +59,7 @@ def run_json(jobrec):
     # for k, v in json_data["keywords"].items():
     #     core.set_global_option(k, v)
 
+    kw = jobrec["keywords"].copy()
     try:
         dftd3_driver(jobrec)
     except Exception as exc:
@@ -67,9 +72,29 @@ def run_json(jobrec):
         raise exc
 
     jobrec['success'] = True
-    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
-    if jobrec['driver'] == 'gradient':
-        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+    #    for k, v in jobrec["extra"]["qcvars"].items():
+    #        v = v.data
+    #        if isinstance(v, np.ndarray):
+    #            v = v.ravel().tolist()
+    #        elif isinstance(v, Decimal):
+    #            v = float(v)
+    #
+    #        jobrec["extra"]["qcvars"][k] = v
+
+    jobrec["extra"]["qcvars"]["CURRENT ENERGY"] = jobrec["extra"]['qcvars']['DISPERSION CORRECTION ENERGY']
+    jobrec['properties'] = {"return_energy": jobrec["extra"]['qcvars']['CURRENT ENERGY']}
+
+    if jobrec['driver'] == 'energy':
+        jobrec["return_result"] = jobrec["properties"]["return_energy"]
+    elif jobrec['driver'] == 'gradient':
+        jobrec["extra"]['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(
+            jobrec["extra"]['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec["return_result"] = jobrec["extra"]["qcvars"]["CURRENT GRADIENT"]
+
+    jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
+    #    jobrec["extra"] = {"qcvars": jobrec.pop("qcvars"),
+    #                       "info": jobrec.pop("keywords")}
+    jobrec["keywords"] = kw
 
     return jobrec
 
@@ -112,9 +137,11 @@ def run_dftd3(name, molecule, options, **kwargs):
         raise exc
 
     jobrec['success'] = True
-    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
+    jobrec['extra']['qcvars']['CURRENT ENERGY'] = copy.deepcopy(
+        jobrec['extra']['qcvars']['DISPERSION CORRECTION ENERGY'])
     if jobrec['driver'] == 'gradient':
-        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec['extra']['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(
+            jobrec['extra']['qcvars']['DISPERSION CORRECTION GRADIENT'])
 
     return jobrec
 
@@ -166,9 +193,11 @@ def run_dftd3_from_arrays(molrec,
         raise exc
 
     jobrec['success'] = True
-    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
+    jobrec['extra']['qcvars']['CURRENT ENERGY'] = copy.deepcopy(
+        jobrec['extra']['qcvars']['DISPERSION CORRECTION ENERGY'])
     if jobrec['driver'] == 'gradient':
-        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec['extra']['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(
+            jobrec['extra']['qcvars']['DISPERSION CORRECTION GRADIENT'])
 
     return jobrec
 
@@ -177,15 +206,10 @@ def dftd3_driver(jobrec, verbose=1):
     """Drive the jobrec@i (input) -> dftd3rec@i -> dftd3rec@io -> jobrec@io (returned) process."""
 
     return module_driver(
-        jobrec=jobrec,
-        module_label='dftd3',
-        plant=dftd3_plant,
-        run=dftd3_subprocess,
-        harvest=dftd3_harvest,
-        verbose=verbose)
+        jobrec=jobrec, module_label='dftd3', plant=dftd3_plant, harvest=dftd3_harvest, verbose=verbose)
 
 
-def module_driver(jobrec, module_label, plant, run, harvest, verbose=1):
+def module_driver(jobrec, module_label, plant, harvest, verbose=1):
     """Drive the jobrec@i (input) -> modulerec@i -> modulerec@io -> jobrec@io (returned) process.
 
     Input Fields
@@ -217,7 +241,21 @@ def module_driver(jobrec, module_label, plant, run, harvest, verbose=1):
         pp.pprint(modulerec)
         print('>>>\n')
 
-    run(modulerec)  # updates modulerec
+    #run(modulerec)  # updates modulerec
+    #execute(modulerec)  # updates modulerec
+
+    command = modulerec.pop('command')
+    infiles = modulerec.pop('infiles')
+    outfiles = modulerec.pop('outfiles')
+    env = modulerec.pop('env')
+    blocking_files = modulerec.pop('blocking_files')
+
+    ans, dans = execute(command, infiles, outfiles,
+                        **{'scratch_messy': True,
+                           'environment': env,
+                           'blocking_files': blocking_files})
+    modulerec.update(dans)
+    modulerec.update({'command': command, 'infiles': infiles, 'env': env})
 
     if verbose > 3:
         print(f'[3] {module_label.upper()}REC POST-SUBPROCESS (m@io) <<<')
@@ -273,12 +311,28 @@ def dftd3_plant(jobrec):
     # * form dftd3_geometry string that supplies geometry to dispersion calc
     # * form command and arguments
 
-    dftd3rec['dftd3par'] = dftd3_coeff_formatter(dftd3rec['dashlevel'], dftd3rec['dashparams'])
+    dftd3rec['infiles'] = {}
+    dftd3rec['infiles']['.dftd3par.local'] = dftd3_coeff_formatter(dftd3rec['dashlevel'], dftd3rec['dashparams'])
 
     # Have to pass outer level, not jobrec['molecule'] b/c qc_schema is in outer
     # Need 'real' field later and that's only guaranteed for molrec
     molrec = qcel.molparse.from_schema(jobrec)
-    dftd3rec['dftd3_geometry'] = qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format='')
+    dftd3rec['infiles']['dftd3_geometry.xyz'] = qcel.molparse.to_string(
+        molrec, dtype='xyz', units='Angstrom', ghost_format='')
+
+    dftd3rec['outfiles'] = [
+        'dftd3_gradient',
+        'dftd3_abc_gradient',
+    ]
+    dftd3rec['env'] = {
+            'HOME': os.environ.get('HOME'),
+            'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
+                    os.pathsep + os.environ.get('PATH'),
+            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
+            'NONSENSE': None
+        }
+    dftd3rec['blocking_files'] = [os.path.join(pathlib.Path.home(), '.dftd3par.' + socket.gethostname())]
+
     jobrec['molecule']['real'] = molrec['real']
 
     command = ['dftd3', 'dftd3_geometry.xyz']
@@ -336,11 +390,10 @@ def dftd3_harvest(jobrec, dftd3rec):
     text = dftd3rec['stdout']
     text += '\n  <<<  DFTD3 Results  >>>\n'
 
-    for fl in ['dftd3_gradient', 'dftd3_abc_gradient']:
-        field = 'output_' + fl.lower()
-        if field in dftd3rec:
+    for fl, contents in dftd3rec['outfiles'].items():
+        if contents is not None:
             text += f'\n  DFTD3 scratch file {fl} has been read.\n'
-            text += dftd3rec[field]
+            text += contents
 
     # parse energy output (could go further and break into E6, E8, E10 and Cn coeff)
     real = np.array(jobrec['molecule']['real'])
@@ -360,18 +413,18 @@ def dftd3_harvest(jobrec, dftd3rec):
             break
     else:
         if not ((real_nat == 1) and (jobrec['driver'] == 'gradient')):
-            raise Dftd3Error('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
+            raise ValueError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
 
     # parse gradient output
     # * DFTD3 crashes on one-atom gradients. Avoid the error (above) and just force the correct result (below).
-    if 'output_dftd3_gradient' in dftd3rec:
-        srealgrad = dftd3rec['output_dftd3_gradient'].replace('D', 'E')
+    if dftd3rec['outfiles']['dftd3_gradient'] is not None:
+        srealgrad = dftd3rec['outfiles']['dftd3_gradient'].replace('D', 'E')
         realgrad = np.fromstring(srealgrad, count=3 * real_nat, sep=' ').reshape((-1, 3))
     elif real_nat == 1:
         realgrad = np.zeros((1, 3))
 
-    if 'output_dftd3_abc_gradient' in dftd3rec:
-        srealgrad = dftd3rec['output_dftd3_abc_gradient'].replace('D', 'E')
+    if dftd3rec['outfiles']['dftd3_abc_gradient'] is not None:
+        srealgrad = dftd3rec['outfiles']['dftd3_abc_gradient'].replace('D', 'E')
         realgradabc = np.fromstring(srealgrad, count=3 * real_nat, sep=' ').reshape((-1, 3))
     elif real_nat == 1:
         realgradabc = np.zeros((1, 3))
@@ -411,8 +464,10 @@ def dftd3_harvest(jobrec, dftd3rec):
             if qcvkey:
                 calcinfo.append(qcel.Datum(f'{qcvkey} DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
 
-    calcinfo = {info.label: info for info in calcinfo}
-    text += qcel.datum.print_variables(calcinfo)
+    calcinfo1 = {info.label: info for info in calcinfo}
+    text += qcel.datum.print_variables(calcinfo1)
+    calcinfo = {info.label: info.data for info in calcinfo}
+    calcinfo = qcel.util.unnp(calcinfo, flat=True)
 
     # NEW WAY
     #module_vars = {}
@@ -428,10 +483,11 @@ def dftd3_harvest(jobrec, dftd3rec):
     #text += print_variables(calcinfo)
 
     jobrec['stdout'] = text
-    jobrec['qcvars'] = calcinfo
+    jobrec['extra'] = {}
+    jobrec['extra']['qcvars'] = calcinfo
 
     prov = {}
-    prov['creator'] = 'DFTD3'
+    prov['creator'] = 'dftd3'
     prov['routine'] = sys._getframe().f_code.co_name
     prov['version'] = version
     jobrec['provenance'] = prov

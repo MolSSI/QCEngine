@@ -1,4 +1,3 @@
-from .addons import using_dftd3, using_dftd3_321, using_psi4, using_qcdb
 
 import copy
 
@@ -7,7 +6,8 @@ import numpy as np
 import qcelemental as qcel
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
-from qcengine.programs import intf_dftd3
+from qcengine.programs import dftd3
+from qcengine.testing import using_dftd3, using_dftd3_321, using_psi4, using_qcdb, is_psi4_new_enough
 
 
 ## Resources
@@ -386,6 +386,8 @@ Ne 0 0 0
 
 
 def eneyne_ne_qcdbmols():
+    if not is_psi4_new_enough("1.3rc2"):
+        pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     from psi4.driver import qcdb
 
     eneyne = qcdb.Molecule(seneyne)
@@ -406,6 +408,8 @@ def eneyne_ne_qcdbmols():
 
 
 def eneyne_ne_psi4mols():
+    if not is_psi4_new_enough("1.3rc2"):
+        pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     import psi4
 
     eneyne = psi4.core.Molecule.from_string(seneyne)
@@ -524,11 +528,11 @@ def _compute_key(pjrec):
     (({'name_hint': 'bp86-atmgr'}, 'ATM(GR)'), atmgr),
     (({'name_hint': 'asdf-chg'}, 'CHG'), chg),
 ])  # yapf: disable
-def test_intf_dftd3__from_arrays(inp, expected):
-    res = intf_dftd3.from_arrays(**inp[0])
+def test_dftd3__from_arrays(inp, expected):
+    res = dftd3.from_arrays(**inp[0])
     assert compare_recursive(expected, res, atol=1.e-4)
     assert compare(inp[1], _compute_key(res), 'key')
-    res = intf_dftd3.from_arrays(
+    res = dftd3.from_arrays(
         name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert compare_recursive(expected, res, tnm() + ' idempotent', atol=1.e-4)
 
@@ -541,12 +545,12 @@ def test_intf_dftd3__from_arrays(inp, expected):
     ({'name_hint': 'asdf-d4'}),
     ({'name_hint': 'atm(gr)', 'level_hint': 'chg'}),
 ])  # yapf:disable
-def test_intf_dftd3__from_arrays__error(inp):
+def test_dftd3__from_arrays__error(inp):
     with pytest.raises(ValueError):
-        intf_dftd3.from_arrays(**inp)
+        dftd3.from_arrays(**inp)
 
 
-def test_intf_dftd3__from_arrays__supplement():
+def test_dftd3__from_arrays__supplement():
     ans = {
         'dashlevel': 'chg',
         'dashparams': {
@@ -557,13 +561,13 @@ def test_intf_dftd3__from_arrays__supplement():
     }
     supp = {'chg': {'definitions': {'asdf-d4': {'params': {'s6': 4.05}, 'citation': '    mypaper\n'}}}}
 
-    res = intf_dftd3.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
+    res = dftd3.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
     print(res)
     assert compare_recursive(ans, res, atol=1.e-4)
     with pytest.raises(ValueError) as e:
-        intf_dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
+        dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert "Can't guess -D correction level" in str(e)
-    res = intf_dftd3.from_arrays(
+    res = dftd3.from_arrays(
         name_hint=res['fctldash'],
         level_hint=res['dashlevel'],
         param_tweaks=res['dashparams'],
@@ -575,7 +579,7 @@ def test_intf_dftd3__from_arrays__supplement():
 def test_3():
     sys = qcel.molparse.from_string(seneyne)['qm']
 
-    res = intf_dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
+    res = dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
     print(res)
     assert compare('B3LYP-D3(BJ)', _compute_key(res['keywords']), 'key')
 
@@ -599,8 +603,9 @@ def test_3():
         #({'first': 'b3lyp', 'second': 'atmgr', 'parent': 'eneyne', 'subject': 'mA', 'lbl': 'ATM'}),
         #({'first': 'pbe', 'second': 'atm(gr)', 'parent': 'eneyne', 'subject': 'mB', 'lbl': 'ATM'}),
         #({'first': '', 'second': 'ATMgr', 'parent': 'eneyne', 'subject': 'mAgB', 'lbl': 'ATM'}),
-        pytest.param({'first': 'atmgr', 'second': 'atmgr', 'parent': 'eneyne', 'subject': 'gAmB', 'lbl': 'ATM'}, marks=using_dftd3_321),
-        pytest.param({'first': 'pbe-atmgr', 'second': None, 'parent': 'ne', 'subject': 'atom', 'lbl': 'ATM'}, marks=using_dftd3_321),
+        # below two xfail until dftd3 that's only 2-body is out of psi4 proper
+        pytest.param({'first': 'atmgr', 'second': 'atmgr', 'parent': 'eneyne', 'subject': 'gAmB', 'lbl': 'ATM'}, marks=[using_dftd3_321, pytest.mark.xfail]),
+        pytest.param({'first': 'pbe-atmgr', 'second': None, 'parent': 'ne', 'subject': 'atom', 'lbl': 'ATM'}, marks=[using_dftd3_321, pytest.mark.xfail]),
     ])  # yapf: disable
 def test_molecule__run_dftd3__23body(inp, subjects):
     subject = subjects()[inp['parent']][inp['subject']]
@@ -650,28 +655,32 @@ def test_qcdb__energy_d3():
     ({'parent': 'eneyne', 'name': 'd3-PBE-D2', 'subject': 'mAgB', 'lbl': 'PBE-D2'}),
     ({'parent': 'ne', 'name': 'd3-b3lyp-d3bj', 'subject': 'atom', 'lbl': 'B3LYP-D3(BJ)'}),
 ])  # yapf: disable
-def test_intf_dftd3__run_dftd3__2body(inp, subjects, request):
+def test_dftd3__run_dftd3__2body(inp, subjects, request):
     subject = subjects()[inp['parent']][inp['subject']]
     expected = ref[inp['parent']][inp['lbl']][inp['subject']]
-    gexpected = gref[inp['parent']][inp['lbl']][inp['subject']]
+    gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
 
     if 'qcmol' in request.node.name:
-        subject.update({'model': {'method': inp['name']}, 'driver': 'gradient', 'keywords': {}})
-        jrec = intf_dftd3.run_json(subject)
+        subject.update({'model': {'method': inp['name']},
+                        'driver': 'gradient',
+                        'keywords': {},
+                        'schema_name': 'qcschema_input',
+                        'schema_version': 1})
+        jrec = dftd3.run_json(subject)
     else:
-        jrec = intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+        jrec = dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
 
-    assert len(jrec['qcvars']) == 8
+    assert len(jrec['extra']['qcvars']) == 8
 
-    assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, atol=1.e-7)
-    assert compare_values(expected, jrec['qcvars']['DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
-    assert compare_values(expected, jrec['qcvars']['2-BODY DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
-    assert compare_values(expected, jrec['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
+    assert compare_values(expected, jrec['extra']['qcvars']['CURRENT ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extra']['qcvars']['DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extra']['qcvars']['2-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extra']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION ENERGY'], atol=1.e-7)
 
-    assert compare_values(gexpected, jrec['qcvars']['CURRENT GRADIENT'].data, atol=1.e-7)
-    assert compare_values(gexpected, jrec['qcvars']['DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
-    assert compare_values(gexpected, jrec['qcvars']['2-BODY DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
-    assert compare_values(gexpected, jrec['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
+    assert compare_values(gexpected, jrec['extra']['qcvars']['CURRENT GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extra']['qcvars']['DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extra']['qcvars']['2-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extra']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
 
 
 @using_dftd3_321
@@ -690,25 +699,29 @@ def test_intf_dftd3__run_dftd3__2body(inp, subjects, request):
     ({'parent': 'eneyne', 'name': 'd3-atmgr', 'subject': 'gAmB', 'lbl': 'ATM'}),
     ({'parent': 'ne', 'name': 'd3-atmgr', 'subject': 'atom', 'lbl': 'ATM'}),
 ])  # yapf: disable
-def test_intf_dftd3__run_dftd3__3body(inp, subjects, request):
+def test_dftd3__run_dftd3__3body(inp, subjects, request):
     subject = subjects()[inp['parent']][inp['subject']]
     expected = ref[inp['parent']][inp['lbl']][inp['subject']]
-    gexpected = gref[inp['parent']][inp['lbl']][inp['subject']]
+    gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
 
     if 'qcmol' in request.node.name:
-        subject.update({'model': {'method': inp['name']}, 'driver': 'gradient', 'keywords': {}})
-        jrec = intf_dftd3.run_json(subject)
+        subject.update({'model': {'method': inp['name']},
+                        'driver': 'gradient',
+                        'keywords': {},
+                        'schema_name': 'qcschema_input',
+                        'schema_version': 1})
+        jrec = dftd3.run_json(subject)
     else:
-        jrec = intf_dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+        jrec = dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
 
-    assert len(jrec['qcvars']) == 8
+    assert len(jrec['extra']['qcvars']) == 8
 
-    assert compare_values(expected, jrec['qcvars']['CURRENT ENERGY'].data, atol=1.e-7)
-    assert compare_values(expected, jrec['qcvars']['DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
-    assert compare_values(expected, jrec['qcvars']['3-BODY DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
-    assert compare_values(expected, jrec['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY'].data, atol=1.e-7)
+    assert compare_values(expected, jrec['extra']['qcvars']['CURRENT ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extra']['qcvars']['DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extra']['qcvars']['3-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extra']['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
 
-    assert compare_values(gexpected, jrec['qcvars']['CURRENT GRADIENT'].data, atol=1.e-7)
-    assert compare_values(gexpected, jrec['qcvars']['DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
-    assert compare_values(gexpected, jrec['qcvars']['3-BODY DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
-    assert compare_values(gexpected, jrec['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION GRADIENT'].data, atol=1.e-7)
+    assert compare_values(gexpected, jrec['extra']['qcvars']['CURRENT GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extra']['qcvars']['DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extra']['qcvars']['3-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extra']['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
