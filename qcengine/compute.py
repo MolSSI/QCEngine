@@ -59,7 +59,7 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
     with compute_wrapper(capture_output=capture_output) as metadata:
         output_data = input_data.copy()  # Initial in case of error handling
         try:
-            output_data = get_program(program)(input_data, config)
+            output_data = get_program(program).compute(input_data, config)
         except KeyError as e:
             output_data = FailedOperation(
                 input_data=output_data.dict(),

@@ -18,7 +18,7 @@ import time
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 from qcelemental.models import ComputeError, FailedOperation
@@ -239,54 +239,7 @@ def popen(args, **kwargs):
             ret["stderr"] = error.decode()
 
 
-class ProgramExecutor(BaseModel, abc.ABC):
 
-    requires_folder: bool
-    requires_scratch: bool
-    single_node: bool
-    thread_safe: bool
-    max_cores: Optional[int]
-    max_memory: Optional[float]
-
-    @abc.abstractmethod
-    def build_input(self, input: 'ResultInput', config: 'Config', template: Optional[str]=None):
-        default_template = """
-
-        geometry {
-        {{molecule}}
-        }
-        set,charge={{molecular_charge}}
-
-        {{method}}
-
-        """
-        pass
-
-    @abc.abstractmethod
-    def parse_output(self):
-        pass
-
-    @abc.abstractmethod
-    def compute(self, inp: 'ResultInput', config: 'Config') -> 'Result':
-        # build_input
-        # execute
-        # parse_output
-        pass
-
-    def execute(self, inputs, extra_outfiles, extra_commands, scratch_name, timeout):
-
-        # who forms the basic command if not generated along with the input file?
-        commands = ["molpro", "-s", self.scratch]
-        infiles = {"input.dat"}
-        outfiles = ["output.dat"]  | extra_outfiles
-
-
-        execute(...)
-        execute(
-            outfiles=outfiles,
-            scratch_name=scratch_name,
-            timeout=timeout
-            )
 
 def execute(self,
             commands: List[str],
