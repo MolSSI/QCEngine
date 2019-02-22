@@ -7,7 +7,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 from qcengine.programs import dftd3
-from qcengine.tests.addons import using_dftd3, using_dftd3_321, using_psi4, using_qcdb
+from qcengine.testing import using_dftd3, using_dftd3_321, using_psi4, using_qcdb, is_psi4_new_enough
 
 
 ## Resources
@@ -386,6 +386,8 @@ Ne 0 0 0
 
 
 def eneyne_ne_qcdbmols():
+    if not is_psi4_new_enough("1.3rc2"):
+        pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     from psi4.driver import qcdb
 
     eneyne = qcdb.Molecule(seneyne)
@@ -406,6 +408,8 @@ def eneyne_ne_qcdbmols():
 
 
 def eneyne_ne_psi4mols():
+    if not is_psi4_new_enough("1.3rc2"):
+        pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     import psi4
 
     eneyne = psi4.core.Molecule.from_string(seneyne)
