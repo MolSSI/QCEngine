@@ -72,28 +72,28 @@ def run_json(jobrec):
         raise exc
 
     jobrec['success'] = True
-    for k, v in jobrec["qcvars"].items():
-        v = v.data
-        if isinstance(v, np.ndarray):
-            v = v.ravel().tolist()
-        elif isinstance(v, Decimal):
-            v = float(v)
+#    for k, v in jobrec["extra"]["qcvars"].items():
+#        v = v.data
+#        if isinstance(v, np.ndarray):
+#            v = v.ravel().tolist()
+#        elif isinstance(v, Decimal):
+#            v = float(v)
+#
+#        jobrec["extra"]["qcvars"][k] = v
 
-        jobrec["qcvars"][k] = v
 
-
-    jobrec["qcvars"]["CURRENT ENERGY"] = jobrec['qcvars']['DISPERSION CORRECTION ENERGY']
-    jobrec['properties'] = {"return_energy": jobrec['qcvars']['CURRENT ENERGY']}
+    jobrec["extra"]["qcvars"]["CURRENT ENERGY"] = jobrec["extra"]['qcvars']['DISPERSION CORRECTION ENERGY']
+    jobrec['properties'] = {"return_energy": jobrec["extra"]['qcvars']['CURRENT ENERGY']}
 
     if jobrec['driver'] == 'energy':
         jobrec["return_result"] = jobrec["properties"]["return_energy"]
     elif jobrec['driver'] == 'gradient':
-        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
-        jobrec["return_result"] = jobrec["qcvars"]["CURRENT GRADIENT"]
+        jobrec["extra"]['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec["extra"]['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec["return_result"] = jobrec["extra"]["qcvars"]["CURRENT GRADIENT"]
 
     jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
-    jobrec["extra"] = {"qcvars": jobrec.pop("qcvars"),
-                       "info": jobrec.pop("keywords")}
+#    jobrec["extra"] = {"qcvars": jobrec.pop("qcvars"),
+#                       "info": jobrec.pop("keywords")}
     jobrec["keywords"] = kw
 
     return jobrec
@@ -137,9 +137,9 @@ def run_dftd3(name, molecule, options, **kwargs):
         raise exc
 
     jobrec['success'] = True
-    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
+    jobrec['extra']['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['extra']['qcvars']['DISPERSION CORRECTION ENERGY'])
     if jobrec['driver'] == 'gradient':
-        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec['extra']['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['extra']['qcvars']['DISPERSION CORRECTION GRADIENT'])
 
     return jobrec
 
@@ -191,9 +191,9 @@ def run_dftd3_from_arrays(molrec,
         raise exc
 
     jobrec['success'] = True
-    jobrec['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION ENERGY'])
+    jobrec['extra']['qcvars']['CURRENT ENERGY'] = copy.deepcopy(jobrec['extra']['qcvars']['DISPERSION CORRECTION ENERGY'])
     if jobrec['driver'] == 'gradient':
-        jobrec['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['qcvars']['DISPERSION CORRECTION GRADIENT'])
+        jobrec['extra']['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(jobrec['extra']['qcvars']['DISPERSION CORRECTION GRADIENT'])
 
     return jobrec
 
@@ -463,8 +463,10 @@ def dftd3_harvest(jobrec, dftd3rec):
             if qcvkey:
                 calcinfo.append(qcel.Datum(f'{qcvkey} DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
 
-    calcinfo = {info.label: info for info in calcinfo}
-    text += qcel.datum.print_variables(calcinfo)
+    calcinfo1 = {info.label: info for info in calcinfo}
+    text += qcel.datum.print_variables(calcinfo1)
+    calcinfo = {info.label: info.data for info in calcinfo}
+    calcinfo = qcel.util.unnp(calcinfo, flat=True)
 
     # NEW WAY
     #module_vars = {}
@@ -480,7 +482,8 @@ def dftd3_harvest(jobrec, dftd3rec):
     #text += print_variables(calcinfo)
 
     jobrec['stdout'] = text
-    jobrec['qcvars'] = calcinfo
+    jobrec['extra'] = {}
+    jobrec['extra']['qcvars'] = calcinfo
 
     prov = {}
     prov['creator'] = 'dftd3'
