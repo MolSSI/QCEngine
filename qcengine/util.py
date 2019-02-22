@@ -244,81 +244,130 @@ class ProgramExecutor(BaseModel, abc.ABC):
     requires_folder: bool
     requires_scratch: bool
     single_node: bool
+    thread_safe: bool
     max_cores: Optional[int]
     max_memory: Optional[float]
 
     @abc.abstractmethod
-    def build_input(self):
+    def build_input(self, input: 'ResultInput', config: 'Config', template: Optional[str]=None):
+        default_template = """
+
+        geometry {
+        {{molecule}}
+        }
+        set,charge={{molecular_charge}}
+
+        {{method}}
+
+        """
         pass
 
     @abc.abstractmethod
     def parse_output(self):
         pass
 
-if True:
-    def execute(command, infiles, outfiles, **kwargs):
-        """
-        Runs a process in the background until complete.
+    @abc.abstractmethod
+    def compute(self, inp: 'ResultInput', config: 'Config') -> 'Result':
+        # build_input
+        # execute
+        # parse_output
+        pass
 
-        Returns True if exit code zero
+    def execute(self, inputs, extra_outfiles, extra_commands, scratch_name, timeout):
 
-        Parameters
-        ----------
-        command : list of str
-        infiles : Dict[str] = str
-            Input file names (names, not full paths) and contents.
-            to be written in scratch dir. May be {}.
-        outfiles : Dict[str] = None
-            Output file names to be collected after execution into
-            values. May be {}.
-        scratch_name : str, optional
-            Passed to scratch_directory
-        scratch_location : str, optional
-            Passed to scratch_directory
-        scratch_messy : bool, optional
-            Passed to scratch_directory
-        blocking_files : list, optional
-            Files which should stop execution if present beforehand.
+        # who forms the basic command if not generated along with the input file?
+        commands = ["molpro", "-s", self.scratch]
+        infiles = {"input.dat"}
+        outfiles = ["output.dat"]  | extra_outfiles
 
-        Raises
-        ------
-        FileExistsError
-            If any file in `blocking` is present
 
-        """
-        parent = kwargs.pop('scratch_location', None)
-        child = kwargs.pop('scratch_name', True)
-        messy = kwargs.pop('scratch_messy', False)
-        blocking = kwargs.pop('blocking_files', [])
+        execute(...)
+        execute(
+            outfiles=outfiles,
+            scratch_name=scratch_name,
+            timeout=timeout
+            )
 
-        if 'cwd' in kwargs:
-            raise ValueError('do not set scratch this way')
+def execute(self,
+            commands: List[str],
+            infiles: Optional[Dict[str, str]]=None,
+            outfiles: Optional[List[str]]=None,
+            *,
+            scratch_name: Optional[str]=None,
+            scratch_location: Optional[None],
+            scratch_messy: bool=False,
+            blocking_files: Optional[List[str]]=None,
+            timeout: Optional[int]=None,
+            interupt_after: Optional[int]=None) -> Dict[str, str]:
+    """
+    Runs a process in the background until complete.
 
-        if 'env' in kwargs:
-            kwargs['env'] = {k: v for k, v in kwargs['env'].items() if v is not None}
+    Returns True if exit code zero
 
-        for fl in blocking:
-            if os.path.isfile(fl):
-                raise OSError(errno.EEXIST, 'Existing file can interfere with execute operation.', fl)
+    Parameters
+    ----------
+    command : list of str
+    infiles : Dict[str] = str
+        Input file names (names, not full paths) and contents.
+        to be written in scratch dir. May be {}.
+    outfiles : Dict[str] = None
+        Output file names to be collected after execution into
+        values. May be {}.
+    scratch_name : str, optional
+        Passed to scratch_directory
+    scratch_location : str, optional
+        Passed to scratch_directory
+    scratch_messy : bool, optional
+        Passed to scratch_directory
+    blocking_files : list, optional
+        Files which should stop execution if present beforehand.
+    timeout : int, optional
+        Stop the process after n seconds.
+    interupt_after : int, optional
+        Interupt the process (not hard kill) after n seconds.
 
-        timeout = kwargs.pop("timeout", 30)
-        terminate_after = kwargs.pop("interupt_after", None)
-        with scratch_directory(child, parent, messy) as scrdir:
-            kwargs['cwd'] = scrdir
-            with disk_files(infiles, outfiles, scrdir) as extrafiles:
-                with popen(command, **kwargs) as proc:
+    Raises
+    ------
+    FileExistsError
+        If any file in `blocking` is present
 
-                    if terminate_after is None:
-                        proc["proc"].wait(timeout=timeout)
-                    else:
-                        time.sleep(terminate_after)
-                        terminate_process(proc["proc"])
+    """
 
-                retcode = proc["proc"].poll()
-            proc['outfiles'] = extrafiles
-        proc['scratch_directory'] = scrdir
+    # Format inputs
+    if infiles is None:
+        infiles = {}
 
-        return retcode == 0, proc
+    if outfiles is None:
+        outfiles = []
+    outfiles = {k: None for k in outfiles}
+
+    if blocking_files is None:
+        blocking_files = []
+
+    #
+    if 'env' in kwargs:
+        kwargs['env'] = {k: v for k, v in kwargs['env'].items() if v is not None}
+
+    for fl in blocking:
+        if os.path.isfile(fl):
+            raise FileExistsError('Existing file can interfere with execute operation.', fl)
+
+    with scratch_directory(child, parent, messy) as scrdir:
+        kwargs['cwd'] = scrdir
+        with disk_files(infiles, outfiles, scrdir) as extrafiles:
+            with popen(command, **kwargs) as proc:
+
+                if terminate_after is None:
+                    proc["proc"].wait(timeout=timeout)
+                else:
+                    time.sleep(terminate_after)
+                    terminate_process(proc["proc"])
+
+            retcode = proc["proc"].poll()
+        proc['outfiles'] = extrafiles
+    proc['scratch_directory'] = scrdir
+
+    return retcode == 0, proc
 
 
 @contextmanager
