@@ -7,15 +7,11 @@ from pydantic import BaseModel
 class ProgramExecutor(BaseModel, abc.ABC):
 
     name: str
-    requires_folder: bool
-    requires_scratch: bool
-    single_node: bool
+    scratch: bool
     thread_safe: bool
-    max_cores: Optional[int]
-    max_memory: Optional[float]
-
-    requires_gpu: bool=False
-    has_gpu: bool=False
+    thread_parallel: bool
+    node_parallel: bool
+    managed_memory: bool
 
     class Config:
         allow_mutation: False
@@ -24,6 +20,19 @@ class ProgramExecutor(BaseModel, abc.ABC):
     @abc.abstractmethod
     def compute(self, input_data: 'ResultInput', config: 'Config') -> 'Result':
         pass
+
+## Utility
+
+    @staticmethod
+    def parse_version(version):
+        from pkg_resources import parse_version
+        if "undef" in version:
+            raise TypeError(
+                "Using custom build without tags. Please pull git tags with `git pull origin master --tags`.")
+
+        return parse_version(version)
+
+## Computers
 
     def build_input(self, input: 'ResultInput', config: 'Config', template: Optional[str]=None):
         raise ValueError("build_input is not implemented for {}.", self.__class__)

@@ -15,13 +15,11 @@ class TorchANIExecutor(ProgramExecutor):
 
     _defaults = {
         "name": "TorchANI",
-        "requires_folder": False,
-        "requires_scratch": False,
-        "single_node": True,
+        "scratch": False,
         "thread_safe": True,
-        "max_cores": 1,
-        "max_memory": 0.2,
-        "has_gpu": True
+        "thread_parallel": False,
+        "node_parallel": False,
+        "managed_memory": False
     }
 
     class Config(ProgramExecutor.Config):

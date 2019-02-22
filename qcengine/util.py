@@ -18,7 +18,7 @@ import time
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 from qcelemental.models import ComputeError, FailedOperation
@@ -198,7 +198,7 @@ def terminate_process(proc, timeout: int=15):
 
 
 @contextmanager
-def popen(args, **kwargs):
+def popen(args, append_prefix: bool=False, popen_kwargs: Optional[Dict[str, Any]]=None):
     """
     Opens a background task
 
@@ -206,6 +206,10 @@ def popen(args, **kwargs):
     https://github.com/dask/distributed
     """
     args = list(args)
+    if popen_kwargs is None:
+        popen_kwargs = {}
+    else:
+        popen_kwargs = popen_kwargs.copy()
 
     # Bin prefix
     if sys.platform.startswith('win'):
@@ -214,17 +218,17 @@ def popen(args, **kwargs):
         bin_prefix = os.path.join(sys.prefix, 'bin')
 
     # Do we prefix with Python?
-    if kwargs.pop("append_prefix", False):
+    if append_prefix:
         args[0] = os.path.join(bin_prefix, args[0])
 
     if sys.platform.startswith('win'):
         # Allow using CTRL_C_EVENT / CTRL_BREAK_EVENT
-        kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+        popen_kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-    kwargs['stdout'] = subprocess.PIPE
-    kwargs['stderr'] = subprocess.PIPE
-    LOGGER.info('Popen', args, kwargs)
-    ret = {"proc": subprocess.Popen(args, **kwargs)}
+    popen_kwargs['stdout'] = subprocess.PIPE
+    popen_kwargs['stderr'] = subprocess.PIPE
+    LOGGER.info('Popen', args, popen_kwargs)
+    ret = {"proc": subprocess.Popen(args, **popen_kwargs)}
     try:
         yield ret
     except Exception:
@@ -239,19 +243,18 @@ def popen(args, **kwargs):
             ret["stderr"] = error.decode()
 
 
-
-
-def execute(self,
-            commands: List[str],
+def execute(
+            command: List[str],
             infiles: Optional[Dict[str, str]]=None,
             outfiles: Optional[List[str]]=None,
             *,
-            scratch_name: Optional[str]=None,
-            scratch_location: Optional[None],
+            scratch_name: Union[bool, str]=True,
+            scratch_location: Optional[str]=None,
             scratch_messy: bool=False,
             blocking_files: Optional[List[str]]=None,
             timeout: Optional[int]=None,
-            interupt_after: Optional[int]=None) -> Dict[str, str]:
+            interupt_after: Optional[int]=None,
+            environment: Optional[Dict[str, str]]=None) -> Dict[str, str]:
     """
     Runs a process in the background until complete.
 
@@ -278,6 +281,8 @@ def execute(self,
         Stop the process after n seconds.
     interupt_after : int, optional
         Interupt the process (not hard kill) after n seconds.
+    environment : dict, optional
+        The environment to run in
 
     Raises
     ------
@@ -294,26 +299,27 @@ def execute(self,
         outfiles = []
     outfiles = {k: None for k in outfiles}
 
-    if blocking_files is None:
-        blocking_files = []
+    # Check for blocking files
+    if blocking_files is not None:
+        for fl in blocking_files:
+            if os.path.isfile(fl):
+                raise FileExistsError('Existing file can interfere with execute operation.', fl)
 
-    #
-    if 'env' in kwargs:
-        kwargs['env'] = {k: v for k, v in kwargs['env'].items() if v is not None}
+    # Format popen
+    popen_kwargs = {}
+    if environment is not None:
+        popen_kwargs["env"] = {k: v for k, v in environment.items() if v is not None}
 
-    for fl in blocking:
-        if os.path.isfile(fl):
-            raise FileExistsError('Existing file can interfere with execute operation.', fl)
-
-    with scratch_directory(child, parent, messy) as scrdir:
-        kwargs['cwd'] = scrdir
+    # Execute
+    with scratch_directory(scratch_name, scratch_location, scratch_messy) as scrdir:
+        popen_kwargs["cwd"] = scrdir
         with disk_files(infiles, outfiles, scrdir) as extrafiles:
-            with popen(command, **kwargs) as proc:
+            with popen(command, popen_kwargs=popen_kwargs) as proc:
 
-                if terminate_after is None:
+                if interupt_after is None:
                     proc["proc"].wait(timeout=timeout)
                 else:
-                    time.sleep(terminate_after)
+                    time.sleep(interupt_after)
                     terminate_process(proc["proc"])
 
             retcode = proc["proc"].poll()

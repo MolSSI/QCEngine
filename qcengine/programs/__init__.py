@@ -2,7 +2,7 @@
 Imports the various compute backends
 """
 
-from . import psi4
+from .psi4 import Psi4Executor
 from .rdkit import RDKitExecutor
 from .torchani import TorchANIExecutor
 
@@ -27,6 +27,6 @@ def get_programs():
     return programs.keys()
 
 
-# register_program('psi4', psi4.psi4)
+register_program(Psi4Executor())
 register_program(RDKitExecutor())
 register_program(TorchANIExecutor())
