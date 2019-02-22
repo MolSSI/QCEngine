@@ -2,8 +2,6 @@
 Several import utilities
 """
 
-import abc
-import errno
 import importlib
 import io
 import json
@@ -18,9 +16,8 @@ import time
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from pydantic import BaseModel
 from qcelemental.models import ComputeError, FailedOperation
 
 from .config import get_provenance_augments, LOGGER
@@ -28,7 +25,7 @@ from .config import get_provenance_augments, LOGGER
 __all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
 
 
-def model_wrapper(input_data, model):
+def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel':
     """
     Wrap input data in the given model, or return a controlled error
     """
@@ -47,7 +44,7 @@ def model_wrapper(input_data, model):
 
 
 @contextmanager
-def compute_wrapper(capture_output=True):
+def compute_wrapper(capture_output: bool=True) -> Dict[str, Any]:
     """Wraps compute for timing, output capturing, and raise protection
     """
 
@@ -92,7 +89,7 @@ def compute_wrapper(capture_output=True):
         ret["stderr"] = "stderr not captured"
 
 
-def get_module_function(module, func_name, subpackage=None):
+def get_module_function(module: str, func_name: str, subpackage=None) -> Callable[..., Any]:
     """Obtains a function from a given string
 
     Parameters
@@ -123,7 +120,10 @@ def get_module_function(module, func_name, subpackage=None):
     return operator.attrgetter(func_name)(pkg)
 
 
-def handle_output_metadata(output_data, metadata, raise_error=False, return_dict=True):
+def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
+                           metadata: Dict[str, Any],
+                           raise_error: bool=False,
+                           return_dict: bool=True) -> Union[Dict[str, Any], 'BaseModel']:
     """
     Fuses general metadata and output together.
 
@@ -178,7 +178,7 @@ def handle_output_metadata(output_data, metadata, raise_error=False, return_dict
         return ret
 
 
-def terminate_process(proc, timeout: int=15):
+def terminate_process(proc: Any, timeout: int=15) -> None:
     if proc.poll() is None:
 
         # Sigint (keyboard interupt)
@@ -198,7 +198,7 @@ def terminate_process(proc, timeout: int=15):
 
 
 @contextmanager
-def popen(args, append_prefix: bool=False, popen_kwargs: Optional[Dict[str, Any]]=None):
+def popen(args: List[str], append_prefix: bool=False, popen_kwargs: Optional[Dict[str, Any]]=None) -> Dict[str, Any]:
     """
     Opens a background task
 
@@ -243,8 +243,7 @@ def popen(args, append_prefix: bool=False, popen_kwargs: Optional[Dict[str, Any]
             ret["stderr"] = error.decode()
 
 
-def execute(
-            command: List[str],
+def execute(command: List[str],
             infiles: Optional[Dict[str, str]]=None,
             outfiles: Optional[List[str]]=None,
             *,
@@ -330,7 +329,7 @@ def execute(
 
 
 @contextmanager
-def scratch_directory(child=True, parent=None, messy=False):
+def scratch_directory(child: bool=True, parent: bool=None, messy: bool=False) -> str:
     """
 
     Parameters
@@ -375,7 +374,7 @@ def scratch_directory(child=True, parent=None, messy=False):
 
 
 @contextmanager
-def disk_files(infiles, outfiles, cwd=None):
+def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional[str]=None) -> Dict[str, str]:
     """
 
     Parameters

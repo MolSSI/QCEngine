@@ -7,14 +7,13 @@ import getpass
 import logging
 import os
 import socket
-from typing import Optional
+from typing import Any, Dict, Union, Optional
 
 import pydantic
 
 from .extras import get_information
 
 __all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
-
 
 # Start a globals dictionary with small starting values
 _global_values = None
@@ -24,7 +23,7 @@ LOGGER.setLevel(logging.CRITICAL)
 
 
 # Generic globals
-def get_global(key=None):
+def get_global(key: Optional[str]=None) -> Union[str, Dict[str, Any]]:
     import cpuinfo
     import psutil
     global _global_values
@@ -70,7 +69,7 @@ class NodeDescriptor(pydantic.BaseModel):
     ncores: Optional[int] = None
     jobs_per_node: int = 2
 
-    def __init__(self, **data):
+    def __init__(self, **data: Dict[str, Any]) -> 'BaseModel':
 
         data = parse_environment(data)
         super().__init__(**data)
@@ -90,7 +89,7 @@ class JobConfig(pydantic.BaseModel):
         ignore_extra = False
 
 
-def _load_defaults():
+def _load_defaults() -> None:
     """
     Pulls the defaults from the QCA folder
     """
@@ -126,7 +125,7 @@ def _load_defaults():
 _load_defaults()
 
 
-def global_repr():
+def global_repr() -> str:
     """
     A representation of the current global configuration.
     """
@@ -157,7 +156,7 @@ def global_repr():
     return ret
 
 
-def get_node_descriptor(hostname=None):
+def get_node_descriptor(hostname: Optional[str]=None) -> NodeDescriptor:
     """
     Find the correct NodeDescriptor based off current hostname
     """
@@ -180,7 +179,7 @@ def get_node_descriptor(hostname=None):
     return config
 
 
-def parse_environment(data):
+def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Parses a dictionary looking for environmental variables
     """
@@ -198,7 +197,7 @@ def parse_environment(data):
     return ret
 
 
-def get_config(*, hostname=None, local_options=None):
+def get_config(*, hostname: Optional[str]=None, local_options: Dict[str, Any]=None) -> JobConfig:
     """
     Returns the configuration key for qcengine.
     """
@@ -235,7 +234,7 @@ def get_config(*, hostname=None, local_options=None):
     return JobConfig(**config)
 
 
-def get_provenance_augments():
+def get_provenance_augments() -> Dict[str, str]:
     return {
         "cpu": get_global("cpu_brand"),
         "hostname": get_global("hostname"),
@@ -244,5 +243,5 @@ def get_provenance_augments():
     }
 
 
-def get_logger():
+def get_logger() -> 'Logger':
     return LOGGER

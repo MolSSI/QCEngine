@@ -1,8 +1,9 @@
 import abc
 
-from typing import Optional, List
+from typing import Optional
 
 from pydantic import BaseModel
+
 
 class ProgramExecutor(BaseModel, abc.ABC):
 
@@ -18,13 +19,13 @@ class ProgramExecutor(BaseModel, abc.ABC):
         extra: "forbid"
 
     @abc.abstractmethod
-    def compute(self, input_data: 'ResultInput', config: 'Config') -> 'Result':
+    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         pass
 
 ## Utility
 
     @staticmethod
-    def parse_version(version):
+    def parse_version(version: str):
         from pkg_resources import parse_version
         if "undef" in version:
             raise TypeError(
@@ -34,7 +35,7 @@ class ProgramExecutor(BaseModel, abc.ABC):
 
 ## Computers
 
-    def build_input(self, input: 'ResultInput', config: 'Config', template: Optional[str]=None):
+    def build_input(self, input: 'ResultInput', config: 'JobConfig', template: Optional[str]=None):
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
     def execute(self, inputs, extra_outfiles, extra_commands, scratch_name, timeout):
@@ -42,5 +43,3 @@ class ProgramExecutor(BaseModel, abc.ABC):
 
     def parse_output(self):
         raise ValueError("parse_output is not implemented for {}.", self.__class__)
-
-

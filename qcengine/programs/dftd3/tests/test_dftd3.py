@@ -1,4 +1,3 @@
-from .addons import using_dftd3, using_dftd3_321, using_psi4, using_qcdb
 
 import copy
 
@@ -8,6 +7,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 from qcengine.programs import dftd3
+from qcengine.tests.addons import using_dftd3, using_dftd3_321, using_psi4, using_qcdb
 
 
 ## Resources

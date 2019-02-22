@@ -48,7 +48,7 @@ class TorchANIExecutor(ProgramExecutor):
         else:
             return False
 
-    def compute(self, input_data: 'ResultInput', config: 'Config') -> 'Result':
+    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Runs TorchANI in FF typing
         """

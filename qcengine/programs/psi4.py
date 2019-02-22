@@ -24,7 +24,7 @@ class Psi4Executor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
-    def compute(self, input_data: 'ResultInput', config: 'Config') -> 'Result':
+    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Runs Psi4 in API mode
         """
