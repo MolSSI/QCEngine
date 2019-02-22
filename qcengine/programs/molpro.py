@@ -21,6 +21,9 @@ def _format_input(input_model, config):
 
     input_file.append('')
 
+    # TODO Hook for global options
+    # input_file.append('{symmetry,nosym}')
+
     # Write the geom
     input_file.append('geometry={')
     for sym, geom in zip(input_model.molecule.symbols, input_model.molecule.geometry):
@@ -65,6 +68,10 @@ def _parse_output(xml_file):
     # TODO Try to grab the last total energy in the general case?
     #      - Would be useful for arbitrarily complicated input file
     #      - However would need every different string used to specify energy (e.g. HF --> Energy, MP2 --> total energy)
+    # TODO Read information from molecule tag
+    #      - cml:molecule, cml:atomArray (?)
+    #      - basisSet
+    #      - orbitals
     # TODO Need to properly construct output_data to pass to Result()
     output_data = {}
     name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
