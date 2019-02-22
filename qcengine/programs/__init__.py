@@ -4,7 +4,7 @@ Imports the various compute backends
 
 from . import psi4
 from .rdkit import RDKitExecutor
-from . import torchani
+from .torchani import TorchANIExecutor
 
 __all__ = ["register_program", "get_program", "get_programs"]
 
@@ -29,4 +29,4 @@ def get_programs():
 
 # register_program('psi4', psi4.psi4)
 register_program(RDKitExecutor())
-# register_program('torchani', torchani.torchani)
+register_program(TorchANIExecutor())

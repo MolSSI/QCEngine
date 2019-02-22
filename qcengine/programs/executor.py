@@ -14,6 +14,9 @@ class ProgramExecutor(BaseModel, abc.ABC):
     max_cores: Optional[int]
     max_memory: Optional[float]
 
+    requires_gpu: bool=False
+    has_gpu: bool=False
+
     class Config:
         allow_mutation: False
         extra: "forbid"
