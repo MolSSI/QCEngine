@@ -278,7 +278,7 @@ def execute(command: List[str],
     infiles : Dict[str] = str
         Input file names (names, not full paths) and contents.
         to be written in scratch dir. May be {}.
-    outfiles : Dict[str] = None
+    outfiles : List[str] = None
         Output file names to be collected after execution into
         values. May be {}.
     scratch_name : str, optional
@@ -400,6 +400,11 @@ def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional
         values. May be {}.
     cwd : str, optional
         Directory to which to write and read files.
+
+    Yields
+    ------
+    Dict[str] = str
+        outfiles with RHS filled in.
 
     """
     if cwd is None:
