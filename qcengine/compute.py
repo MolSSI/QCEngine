@@ -123,7 +123,9 @@ def compute_procedure(input_data,
 
             output_data["schema_name"] = "qcschema_optimization_output"
             output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
-            output_data = Optimization(**output_data)
+            if output_data["success"]:
+                output_data = Optimization(**output_data)
+
         else:
             output_data = FailedOperation(
                 input_data=input_data.dict(),
