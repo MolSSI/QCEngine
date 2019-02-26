@@ -55,6 +55,7 @@ install:
       exit 1
     fi
   - source activate test
+  - git+https://github.com/MolSSI/QCEngineRecords.git#egg=qcenginerecords
 
     # Build and install package
   - python setup.py develop --no-deps
