@@ -9,6 +9,8 @@ from .rdkit import RDKitExecutor
 from .torchani import TorchANIExecutor
 from .molpro import MolproExecutor
 from .dftd3 import DFTD3Executor
+from .terachem import TeraChemExecutor
+>>>>>>> TeraChem: Replace with executor class and integrated with the testing from QCEngineRecords
 
 __all__ = ["register_program", "get_program", "list_all_programs", "list_available_programs"]
 
@@ -59,3 +61,4 @@ register_program(RDKitExecutor())
 register_program(TorchANIExecutor())
 register_program(MolproExecutor())
 register_program(DFTD3Executor())
+register_program(TeraChemExecutor())
