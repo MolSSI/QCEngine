@@ -98,7 +98,7 @@ def test_geometric_stdout():
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
     assert ret["success"] is True
     assert "Converged!" in ret["stdout"]
-    assert ret["stderr"] == "No stderr recieved."
+    assert ret["stderr"] is None
 
     with pytest.raises(ValueError):
         _ = qcng.compute_procedure(inp, "rdkit", raise_error=True)
@@ -135,4 +135,4 @@ def test_geometric_torchani():
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
     assert ret["success"] is True
     assert "Converged!" in ret["stdout"]
-    assert ret["stderr"] == "No stderr recieved."
+    assert ret["stderr"] is None

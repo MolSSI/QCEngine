@@ -37,12 +37,15 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
         A FailedOperation returns
 
     """
-    input_data = model_wrapper(input_data, ResultInput)
+
+    # Validate input
+    input_data = model_wrapper(input_data, ResultInput, raise_error)
     if isinstance(input_data, FailedOperation):
         if return_dict:
             return input_data.dict()
         return input_data
 
+    # Build out local options
     if local_options is None:
         local_options = {}
 
@@ -53,6 +56,7 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
 
     # Run the program
     with compute_wrapper(capture_output=capture_output) as metadata:
+
         output_data = input_data.copy()  # Initial in case of error handling
         try:
             output_data = get_program(program).compute(input_data, config)
@@ -97,7 +101,7 @@ def compute_procedure(input_data,
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
 
-    input_data = model_wrapper(input_data, OptimizationInput)
+    input_data = model_wrapper(input_data, OptimizationInput, raise_error)
     if isinstance(input_data, FailedOperation):
         if return_dict:
             return input_data.dict()
