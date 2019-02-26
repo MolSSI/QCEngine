@@ -46,11 +46,7 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
     if local_options is None:
         local_options = {}
 
-    try:
-        input_engine_options = input_data._qcengine_local_config
-        input_data = input_data.copy(exclude={'_qcengine_local_config'})
-    except AttributeError:
-        input_engine_options = {}
+    input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
 
     local_options = {**local_options, **input_engine_options}
     config = get_config(local_options=local_options)
@@ -116,13 +112,13 @@ def compute_procedure(input_data,
         if procedure == "geometric":
             # Augment the input
             geometric_input = input_data.dict()
-            geometric_input["input_specification"]["_qcengine_local_config"] = config.dict()
+            geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = config.dict()
 
             # Run the program
             output_data = get_module_function(procedure, "run_json.geometric_run_json")(geometric_input)
 
             output_data["schema_name"] = "qcschema_optimization_output"
-            output_data["input_specification"].pop("_qcengine_local_config", None)
+            output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
             output_data = Optimization(**output_data)
         else:
             output_data = FailedOperation(

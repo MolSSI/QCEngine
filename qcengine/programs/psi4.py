@@ -57,6 +57,7 @@ class Psi4Executor(ProgramExecutor):
                 input_data["keywords"]["reference"] = "uks"
 
             output_data = psi4.json_wrapper.run_json(input_data)
+            output_data["extras"] = {"psi4_qcvars": output_data.pop("psi4:qcvars")}
 
         else:
             raise TypeError("Psi4 version '{}' not understood.".format(psi_version))

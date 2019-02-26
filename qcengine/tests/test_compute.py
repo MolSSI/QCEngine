@@ -26,7 +26,6 @@ def test_psi4_task():
     json_data["driver"] = "energy"
     json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
     json_data["keywords"] = {"scf_type": "df"}
-    json_data["return_output"] = False
 
     ret = qcng.compute(json_data, "psi4", raise_error=True, capture_output=False)
 

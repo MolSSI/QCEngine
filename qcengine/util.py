@@ -148,8 +148,8 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
 
     # Raise an error if one exists and a user requested a raise
     if raise_error and (output_fusion["success"] is not True):
-        msg = "stdout:\n" + output_fusion["stdout"]
-        msg += "\nstderr:\n" + output_fusion["stderr"]
+        msg = "stdout:\n{}".format(output_fusion["stdout"])
+        msg += "\nstderr:\n{}".format(output_fusion["stderr"])
         LOGGER.info(msg)
         raise ValueError(output_fusion["error"]["error_message"])
 
