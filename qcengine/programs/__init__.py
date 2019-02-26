@@ -5,6 +5,7 @@ Imports the various compute backends
 from .psi4 import Psi4Executor
 from .rdkit import RDKitExecutor
 from .torchani import TorchANIExecutor
+from .molpro import MolproExecutor
 
 __all__ = ["register_program", "get_program", "get_programs"]
 
@@ -23,10 +24,11 @@ def get_program(name):
     return programs[name.lower()]['entry_point']
 
 
-def get_programs():
+def list_programs():
     return programs.keys()
 
 
 register_program(Psi4Executor())
 register_program(RDKitExecutor())
 register_program(TorchANIExecutor())
+register_program(MolproExecutor())

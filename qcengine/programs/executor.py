@@ -1,6 +1,6 @@
 import abc
 
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 
@@ -35,11 +35,11 @@ class ProgramExecutor(BaseModel, abc.ABC):
 
 ## Computers
 
-    def build_input(self, input: 'ResultInput', config: 'JobConfig', template: Optional[str]=None):
+    def build_input(self, input_model: 'ResultInput', config: 'JobConfig', template: Optional[str]=None) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
     def execute(self, inputs, extra_outfiles, extra_commands, scratch_name, timeout):
         raise ValueError("execute is not implemented for {}.", self.__class__)
 
-    def parse_output(self):
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
         raise ValueError("parse_output is not implemented for {}.", self.__class__)
