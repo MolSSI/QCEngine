@@ -116,6 +116,11 @@ def compute_procedure(input_data,
         if procedure == "geometric":
             # Augment the input
             geometric_input = input_data.dict()
+
+            # Older QCElemental compat, can be removed in v0.6
+            if "extras" not in geometric_input["input_specification"]:
+                 geometric_input["input_specification"]["extras"] = {}
+
             geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = config.dict()
 
             # Run the program

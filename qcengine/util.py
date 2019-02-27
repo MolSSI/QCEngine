@@ -38,6 +38,13 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel', raise_error: b
             input_data = input_data.copy()
         else:
             raise KeyError("Input type of {} not understood.".format(type(model)))
+
+        # Older QCElemental compat
+        try:
+            input_data.extras
+        except AttributeError:
+            input_data = input_data.copy(update={"extras": {}})
+
     except Exception:
         input_data = FailedOperation(
             input_data=input_data,
