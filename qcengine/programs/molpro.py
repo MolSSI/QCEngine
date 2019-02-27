@@ -5,9 +5,10 @@ Calls the Molpro executable.
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
-from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+#from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+from qcelemental.models import Result
 
-from ..units import ureg
+#from ..units import ureg
 from .executor import ProgramExecutor
 
 
@@ -100,7 +101,8 @@ class MolproExecutor(ProgramExecutor):
         #      - orbitals
         output_data = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
-        methods_set = {'HF', 'RHF', 'MP2', 'CCSD'}
+        # TODO Create enum class to take jobstep.attrib['command'] and determine what method it is
+        # methods_set = {'HF', 'RHF', 'MP2', 'CCSD'}
 
         mp2_map = {
             "total energy": "mp2_total_energy",
@@ -132,8 +134,8 @@ class MolproExecutor(ProgramExecutor):
                     if child.attrib['name'] in mp2_map:
                         properties[mp2_map[child.attrib['name']]] = float(child.attrib['value'])
 
-                    # Grab gradient
-                    # TODO Handle situation where there are multiple FORCE calls
+            # Grab gradient
+            # TODO Handle situation where there are multiple FORCE calls
             elif 'FORCE' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
