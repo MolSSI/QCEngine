@@ -24,7 +24,7 @@ class Psi4Executor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Runs Psi4 in API mode
         """
@@ -35,28 +35,29 @@ class Psi4Executor(ProgramExecutor):
             raise ImportError("Could not find Psi4 in the Python path.")
 
         # Setup the job
-        input_data = input_data.copy().dict()
-        input_data["nthreads"] = config.ncores
-        input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
-        input_data["success"] = False
-        input_data["return_output"] = True
+        input_model = input_model.copy().dict()
+        input_model["nthreads"] = config.ncores
+        input_model["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
+        input_model["success"] = False
+        input_model["return_output"] = True
 
-        if input_data["schema_name"] == "qcschema_input":
-            input_data["schema_name"] = "qc_schema_input"
+        if input_model["schema_name"] == "qcschema_input":
+            input_model["schema_name"] = "qc_schema_input"
 
         scratch = config.scratch_directory
         if scratch is not None:
-            input_data["scratch_location"] = scratch
+            input_model["scratch_location"] = scratch
 
         psi_version = self.parse_version(psi4.__version__)
 
         if psi_version > self.parse_version("1.2"):
 
-            mol = psi4.core.Molecule.from_schema(input_data)
+            mol = psi4.core.Molecule.from_schema(input_model)
             if mol.multiplicity() != 1:
-                input_data["keywords"]["reference"] = "uks"
+                input_model["keywords"]["reference"] = "uks"
 
-            output_data = psi4.json_wrapper.run_json(input_data)
+
+            output_data = psi4.json_wrapper.run_json(input_model)
             if "extras" not in output_data:
                 output_data["extras"] = {}
 
@@ -85,4 +86,4 @@ class Psi4Executor(ProgramExecutor):
 
             return Result(**output_data)
         return FailedOperation(
-            success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
+            success=output_data.pop("success", False), error=output_data.pop("error"), input_model=output_data)
