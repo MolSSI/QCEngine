@@ -98,7 +98,6 @@ class MolproExecutor(ProgramExecutor):
         #      - cml:molecule, cml:atomArray (?)
         #      - basisSet
         #      - orbitals
-        # TODO Need to properly construct output_data to pass to Result()
         output_data = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
         methods_set = {'HF', 'RHF', 'MP2', 'CCSD'}
@@ -153,8 +152,8 @@ class MolproExecutor(ProgramExecutor):
                 raise KeyError("Could not find SCF total energy")
 
         output_data["properties"] = properties
-
         output_data['schema_name'] = 'qcschema_output'
+
         # TODO Should only return True if Molpro calculation terminated properly
         output_data['success'] = True
 
