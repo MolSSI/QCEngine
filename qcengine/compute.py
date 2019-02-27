@@ -37,26 +37,26 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
         A FailedOperation returns
 
     """
-    input_data = model_wrapper(input_data, ResultInput)
+
+    # Validate input
+    input_data = model_wrapper(input_data, ResultInput, raise_error)
     if isinstance(input_data, FailedOperation):
         if return_dict:
             return input_data.dict()
         return input_data
 
+    # Build out local options
     if local_options is None:
         local_options = {}
 
-    try:
-        input_engine_options = input_data._qcengine_local_config
-        input_data = input_data.copy(exclude={'_qcengine_local_config'})
-    except AttributeError:
-        input_engine_options = {}
+    input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
 
     local_options = {**local_options, **input_engine_options}
     config = get_config(local_options=local_options)
 
     # Run the program
     with compute_wrapper(capture_output=capture_output) as metadata:
+
         output_data = input_data.copy()  # Initial in case of error handling
         try:
             output_data = get_program(program).compute(input_data, config)
@@ -101,7 +101,7 @@ def compute_procedure(input_data,
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
 
-    input_data = model_wrapper(input_data, OptimizationInput)
+    input_data = model_wrapper(input_data, OptimizationInput, raise_error)
     if isinstance(input_data, FailedOperation):
         if return_dict:
             return input_data.dict()
@@ -116,14 +116,21 @@ def compute_procedure(input_data,
         if procedure == "geometric":
             # Augment the input
             geometric_input = input_data.dict()
-            geometric_input["input_specification"]["_qcengine_local_config"] = config.dict()
+
+            # Older QCElemental compat, can be removed in v0.6
+            if "extras" not in geometric_input["input_specification"]:
+                 geometric_input["input_specification"]["extras"] = {}
+
+            geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = config.dict()
 
             # Run the program
             output_data = get_module_function(procedure, "run_json.geometric_run_json")(geometric_input)
 
             output_data["schema_name"] = "qcschema_optimization_output"
-            output_data["input_specification"].pop("_qcengine_local_config", None)
-            output_data = Optimization(**output_data)
+            output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
+            if output_data["success"]:
+                output_data = Optimization(**output_data)
+
         else:
             output_data = FailedOperation(
                 input_data=input_data.dict(),

@@ -25,22 +25,39 @@ from .config import get_provenance_augments, LOGGER
 __all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
 
 
-def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel':
+def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel', raise_error: bool) -> 'BaseModel':
     """
     Wrap input data in the given model, or return a controlled error
     """
+
+    success = True
     try:
         if isinstance(input_data, dict):
             input_data = model(**input_data)
+        elif isinstance(input_data, model):
+            input_data = input_data.copy()
+        else:
+            raise KeyError("Input type of {} not understood.".format(type(model)))
+
+        # Older QCElemental compat
+        try:
+            input_data.extras
+        except AttributeError:
+            input_data = input_data.copy(update={"extras": {}})
+
     except Exception:
-        failure = FailedOperation(
+        input_data = FailedOperation(
             input_data=input_data,
             success=False,
             error=ComputeError(
                 error_type="input_error",
                 error_message=("Input data could not be processed correctly:\n" + traceback.format_exc())))
-        return failure
-    return input_data
+        success = False
+
+    if raise_error and success is False:
+        raise TypeError(input_data.error.error_message)
+    else:
+        return input_data
 
 
 @contextmanager
@@ -48,7 +65,7 @@ def compute_wrapper(capture_output: bool=True) -> Dict[str, Any]:
     """Wraps compute for timing, output capturing, and raise protection
     """
 
-    ret = {"stdout": "", "stderr": ""}
+    metadata = {"stdout": None, "stderr": None}
 
     # Start timer
     comp_time = time.time()
@@ -62,31 +79,21 @@ def compute_wrapper(capture_output: bool=True) -> Dict[str, Any]:
         old_stderr, sys.stderr = sys.stderr, new_stderr
 
     try:
-        yield ret
-        ret["success"] = True
+        yield metadata
+        metadata["success"] = True
     except Exception as e:
-        ret["error_message"] = "QCEngine Call Error:\n" + traceback.format_exc()
-        ret["success"] = False
+        metadata["error_message"] = "QCEngine Call Error:\n" + traceback.format_exc()
+        metadata["success"] = False
 
     # Place data
-    ret["wall_time"] = time.time() - comp_time
+    metadata["wall_time"] = time.time() - comp_time
     if capture_output:
-        ret["stdout"] = new_stdout.getvalue()
-        ret["stderr"] = new_stderr.getvalue()
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
 
-        if ret["stdout"] == "":
-            ret["stdout"] = "No stdout recieved."
-
-        if ret["stderr"] == "":
-            ret["stderr"] = "No stderr recieved."
-
-        # Replace stdout/err
-        if capture_output:
-            sys.stdout = old_stdout
-            sys.stderr = old_stderr
-    else:
-        ret["stdout"] = "stdout not captured"
-        ret["stderr"] = "stderr not captured"
+        # Pull over values
+        metadata["stdout"] = new_stdout.getvalue() or None
+        metadata["stderr"] = new_stderr.getvalue() or None
 
 
 def get_module_function(module: str, func_name: str, subpackage=None) -> Callable[..., Any]:
@@ -139,8 +146,8 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
         output_fusion = output_data.dict()
 
     # Do not override if computer generates
-    output_fusion["stdout"] = output_fusion.pop("stdout", metadata["stdout"])
-    output_fusion["stderr"] = output_fusion.pop("stderr", metadata["stderr"])
+    output_fusion["stdout"] = output_fusion.get("stdout", None) or metadata["stdout"]
+    output_fusion["stderr"] = output_fusion.get("stderr", None) or metadata["stderr"]
 
     if metadata["success"] is not True:
         output_fusion["success"] = False
@@ -148,8 +155,8 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
 
     # Raise an error if one exists and a user requested a raise
     if raise_error and (output_fusion["success"] is not True):
-        msg = "stdout:\n" + output_fusion["stdout"]
-        msg += "\nstderr:\n" + output_fusion["stderr"]
+        msg = "stdout:\n{}".format(output_fusion["stdout"])
+        msg += "\nstderr:\n{}".format(output_fusion["stderr"])
         LOGGER.info(msg)
         raise ValueError(output_fusion["error"]["error_message"])
 
@@ -164,6 +171,11 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
         provenance_augments["version"] = provenance_augments["qcengine_version"]
         output_fusion["provenance"] = provenance_augments
 
+    # Make sure pydantic sparsity is upheld
+    for val in ["stdout", "stderr"]:
+        if output_fusion[val] is None:
+            output_fusion.pop(val)
+
     # We need to return the correct objects; e.g. Results, Procedures
     if output_fusion["success"]:
         # This will only execute if everything went well
@@ -172,6 +184,7 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
         # Should only be reachable on failures
         ret = FailedOperation(
             success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion)
+
     if return_dict:
         return json.loads(ret.json())  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
     else:

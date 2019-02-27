@@ -56,7 +56,12 @@ class Psi4Executor(ProgramExecutor):
             if mol.multiplicity() != 1:
                 input_model["keywords"]["reference"] = "uks"
 
+
             output_data = psi4.json_wrapper.run_json(input_model)
+            if "extras" not in output_data:
+                output_data["extras"] = {}
+
+            output_data["extras"]["local_qcvars"] = output_data.pop("psi4:qcvars")
 
         else:
             raise TypeError("Psi4 version '{}' not understood.".format(psi_version))

@@ -19,6 +19,11 @@ def test_missing_key():
     assert "hello" in ret or ("input_data" in ret and "hello" in ret["input_data"])
 
 
+def test_missing_key_raises():
+    with pytest.raises(TypeError):
+        ret = qcng.compute({"hello": "hi"}, "bleh", raise_error=True)
+
+
 @testing.using_psi4
 def test_psi4_task():
     json_data = copy.deepcopy(_base_json)
@@ -26,7 +31,6 @@ def test_psi4_task():
     json_data["driver"] = "energy"
     json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
     json_data["keywords"] = {"scf_type": "df"}
-    json_data["return_output"] = False
 
     ret = qcng.compute(json_data, "psi4", raise_error=True, capture_output=False)
 
@@ -70,9 +74,8 @@ def test_rdkit_task():
     json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = qcng.get_molecule("water")
     json_data["driver"] = "gradient"
-    json_data["model"] = {"method": "UFF", "basis": ""}
+    json_data["model"] = {"method": "UFF"}
     json_data["keywords"] = {}
-    json_data["return_output"] = False
 
     ret = qcng.compute(json_data, "rdkit", raise_error=True)
 
@@ -86,7 +89,6 @@ def test_rdkit_connectivity_error():
     json_data["driver"] = "gradient"
     json_data["model"] = {"method": "UFF", "basis": ""}
     json_data["keywords"] = {}
-    json_data["return_output"] = False
     del json_data["molecule"]["connectivity"]
 
     ret = qcng.compute(json_data, "rdkit")
@@ -105,7 +107,6 @@ def test_torchani_task():
     json_data["driver"] = "gradient"
     json_data["model"] = {"method": "ANI1", "basis": None}
     json_data["keywords"] = {}
-    json_data["return_output"] = False
 
     ret = qcng.compute(json_data, "torchani", raise_error=True)
 
