@@ -143,6 +143,7 @@ class MolproExecutor(ProgramExecutor):
                     output_data['return_result'] = [float(x) for x in child.text.split()]
 
         # A _bad_ way of figuring the correct energy
+        # TODO Maybe a better way would be to use the method specified from the input?
         if "return_result" not in output_data:
             if "mp2_total_energy" in properties:
                 output_data["return_result"] = properties["mp2_total_energy"]
