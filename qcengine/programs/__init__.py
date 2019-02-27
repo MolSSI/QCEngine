@@ -7,7 +7,7 @@ from .rdkit import RDKitExecutor
 from .torchani import TorchANIExecutor
 from .molpro import MolproExecutor
 
-__all__ = ["register_program", "get_program", "get_programs"]
+__all__ = ["register_program", "get_program", "list_programs"]
 
 programs = {}
 
