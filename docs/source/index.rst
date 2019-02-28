@@ -36,7 +36,7 @@ These input specifications can be executed with the ``compute`` syntax along wit
 
 .. code:: python
 
-    >>> ret = qcng.compute(job, "psi4", return_dict=False)
+    >>> ret = qcng.compute(inp, "psi4")
 
 The results contain a complete record of the computation:
 
@@ -50,6 +50,30 @@ The results contain a complete record of the computation:
 
     >>> ret.provenance.cpu
     Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz
+
+Backends
+--------
+
+Currently available compute backends for single results are as follow:
+
+- Quantum Chemistry:
+
+  - `Psi4 <http://www.psicode.org>`_
+
+- AI Evaluation:
+
+  - `TorchANI <https://github.com/aiqm/torchani>`_
+
+- Molecule Mechanics:
+
+  - `RDKit <http://rdkit.org>`_
+
+In addition, several procedures are available:
+
+- Geometry Optimization:
+
+  - `geomeTRIC <https://github.com/leeping/geomeTRIC>`_
+
 
 Configuration Determination
 ---------------------------
@@ -105,6 +129,7 @@ Index
 
 **User Interface**
 
+* :doc:`single_compute`
 * :doc:`environment`
 
 .. toctree::
@@ -112,6 +137,7 @@ Index
     :hidden:
     :caption: User Interface
 
+    single_compute
     environment
 
 
