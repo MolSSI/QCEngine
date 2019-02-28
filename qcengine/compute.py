@@ -15,7 +15,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             raise_error: bool=False,
             capture_output: bool=True,
             local_options: Optional[Dict[str, str]]=None,
-            return_dict: bool=True) -> 'Result':
+            return_dict: bool=False) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
