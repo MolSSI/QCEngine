@@ -107,19 +107,33 @@ The QCArchive project's primary support comes from `The Molecular Sciences Softw
 
 ========
 
-Table of Contents
-=================
+Index
+-----
+
+**Getting Started**
+
+* :doc:`install`
+* :doc:`community`
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :hidden:
    :caption: Getting Started
 
    install
    community
 
+
+**Developer Documentationd**
+
+* :doc:`api`
+* :doc:`changelog`
+* :doc:`dev_guidelines`
+
 .. toctree::
    :maxdepth: 2
    :caption: Developer Documentation
 
+   api
    changelog
    dev_guidelines

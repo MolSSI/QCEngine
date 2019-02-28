@@ -13,6 +13,7 @@ Discussion
 - The QCArchive GitHub repositories contain future roadmaps, current code updates, and a list of issues that are being worked and provide an excellent overview of the development status of the project. See the following links:
 
    - `QCSchema <https://github.com/MolSSI/QC_JSON_Schema>`_
+   - `QCElemental <https://github.com/MolSSI/QCElemental>`_
    - `QCEngine <https://github.com/MolSSI/QCEngine>`_
    - `QCFractal <https://github.com/MolSSI/QCFractal>`_
 

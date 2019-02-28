@@ -1,15 +1,21 @@
 """
 Integrates the computes together
 """
-
+from typing import Any, Dict, Optional, Union
 from qcelemental.models import ComputeError, FailedOperation, Optimization, OptimizationInput, ResultInput
 
 from .config import get_config
 from .programs import get_program
 from .util import compute_wrapper, get_module_function, handle_output_metadata, model_wrapper
 
+__all__ = ["compute", "compute_procedure"]
 
-def compute(input_data, program, raise_error=False, capture_output=True, local_options=None, return_dict=True):
+def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
+            program: str,
+            raise_error: bool=False,
+            capture_output: bool=True,
+            local_options: Optional[Dict[str, str]]=None,
+            return_dict: bool=True) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -17,24 +23,23 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
 
     Parameters
     ----------
-    input_data : dict or qcelemental.models.ResultInput
+    input_data:
         A QC Schema input specification in dictionary or model from QCElemental.models
-    program : {"psi4", "rdkit"}
-        The program to run the input under
-    raise_error : bool, optional
+    program:
+        The program to execute the input with
+    raise_error:
         Determines if compute should raise an error or not.
-    capture_output : bool, optional
+    capture_output:
         Determines if stdout/stderr should be captured.
-    local_options : dict, optional
+    local_options:
         A dictionary of local configuration options
-    return_dict : bool, optional, default True
+    return_dict:
         Returns a dict instead of qcelemental.models.ResultInput
 
     Returns
     -------
-    ret : dict, Result, FailedOperation
-        A QC Schema output, type depends on return_dict key
-        A FailedOperation returns
+    : Result
+        A QC Schema output or type depending on return_dict key
 
     """
 
@@ -119,7 +124,7 @@ def compute_procedure(input_data,
 
             # Older QCElemental compat, can be removed in v0.6
             if "extras" not in geometric_input["input_specification"]:
-                 geometric_input["input_specification"]["extras"] = {}
+                geometric_input["input_specification"]["extras"] = {}
 
             geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = config.dict()
 
