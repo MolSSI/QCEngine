@@ -12,9 +12,9 @@ An input description has the following fields:
 
 - ``molecule`` - A QCSchema compliant dictionary or Molecule model.
 - ``driver`` - The ``energy``, ``gradient``, ``hessian``, or ``properties`` option.
-- ``model`` - A description of the evaluation model, for quantum chemistry this is typically ``method`` and ``basis``. However,
+- ``model`` - A description of the evaluation model. For quantum chemistry this is typically ``method`` and ``basis``. However,
   non-quantum chemistry models are often a simple ``method`` as in ``method = 'UFF'`` for forcefield evaluation.
-- ``keywords`` - a dictionary of keywords to pass to the underlying program, these are program-specific keywords.
+- ``keywords`` - a dictionary of keywords to pass to the underlying program. These are program-specific keywords.
 
 An example input is as follows:
 
@@ -46,7 +46,7 @@ A single computation can be evaluated with the ``compute`` function as follows:
 
     >>> ret = qcng.compute(inp, "psi4")
 
-By default the job is given resources relating to the compute environment it in; however, these variables can be overridden:
+By default the job is given resources relating to the compute environment it is in; however, these variables can be overridden:
 
 .. code:: python
 

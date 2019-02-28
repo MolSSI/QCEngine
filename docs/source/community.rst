@@ -12,7 +12,7 @@ Discussion
 - QCArchive Slack is a great place to get feedback and advice from the community. Click `here <https://join.slack.com/t/qcdb/shared_invite/enQtNDIzNTQ2OTExODk0LWM3OTgxN2ExYTlkMTlkZjA0OTExZDlmNGRlY2M4NWJlNDlkZGQyYWUxOTJmMzc3M2VlYzZjMjgxMDRkYzFmOTE>`_ to get started.
 - The QCArchive GitHub repositories contain future roadmaps, current code updates, and a list of issues that are being worked and provide an excellent overview of the development status of the project. See the following links:
 
-   - `QCSchema <https://github.com/MolSSI/QC_JSON_Schema>`_
+   - `QCSchema <https://github.com/MolSSI/QCSchema>`_
    - `QCElemental <https://github.com/MolSSI/QCElemental>`_
    - `QCEngine <https://github.com/MolSSI/QCEngine>`_
    - `QCFractal <https://github.com/MolSSI/QCFractal>`_
@@ -22,11 +22,11 @@ Work with us!
 -------------
 
 The QCArchive project is actively looking for early collaborations to use our
-tools, help us shake out the bugs, and be evangelist within the computational
+tools, help us shake out the bugs, and be evangelists within the computational
 molecular science community for this code ecosystem. In return you will receive
 the following benefits:
 
-- Work directly with MolSSI Software Scientist who will discuss your problem and provide ideas.
+- Work directly with a MolSSI Software Scientist who will discuss your problem and provide ideas.
 - Develop the requirements and potential solutions for your use case within the QCArchive ecosystem.
 - Setup monthly meetings to ensure your project stays on track.
 - Highlight your project within the QCArchive ecosystem.

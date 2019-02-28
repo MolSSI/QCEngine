@@ -64,7 +64,7 @@ Currently available compute backends for single results are as follow:
 
   - `TorchANI <https://github.com/aiqm/torchani>`_
 
-- Molecule Mechanics:
+- Molecular Mechanics:
 
   - `RDKit <http://rdkit.org>`_
 
@@ -141,7 +141,7 @@ Index
     environment
 
 
-**Developer Documentationd**
+**Developer Documentation**
 
 * :doc:`api`
 * :doc:`changelog`
