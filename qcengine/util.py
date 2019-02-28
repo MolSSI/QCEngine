@@ -429,3 +429,16 @@ def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional
                     LOGGER.info(f'... Writing: {filename}')
             except (OSError, FileNotFoundError) as err:
                 outfiles[fl] = None
+
+
+def which(command, return_bool=False):
+    # environment is $PATH, less any None values
+    lenv = {'PATH': ':' + os.environ.get('PATH')}
+    lenv = {k: v for k, v in lenv.items() if v is not None}
+
+    ans = shutil.which(command, mode=os.F_OK | os.X_OK, path=lenv['PATH'])
+
+    if return_bool:
+        return bool(ans)
+    else:
+        return ans

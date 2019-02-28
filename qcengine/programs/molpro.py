@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional
 #from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 from qcelemental.models import Result
 
-#from ..units import ureg
 from .executor import ProgramExecutor
+from ..util import which
 
 
 class MolproExecutor(ProgramExecutor):
@@ -163,8 +163,4 @@ class MolproExecutor(ProgramExecutor):
         return Result(**{**input_model.dict(), **output_data})
 
     def found(self) -> bool:
-
-        if which('molpro'):
-            return True
-        else:
-            return False
+        return which('dftd3', return_bool=True)

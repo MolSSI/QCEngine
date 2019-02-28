@@ -8,6 +8,7 @@ import subprocess
 
 import pytest
 from contextlib import contextmanager
+from .util import which
 
 
 @contextmanager
@@ -25,19 +26,6 @@ def environ_context(env):
                 del os.environ[key]
             else:
                 os.environ[key] = value
-
-
-def which(command, return_bool=False):
-    # environment is $PATH, less any None values
-    lenv = {'PATH': ':' + os.environ.get('PATH')}
-    lenv = {k: v for k, v in lenv.items() if v is not None}
-
-    ans = shutil.which(command, mode=os.F_OK | os.X_OK, path=lenv['PATH'])
-
-    if return_bool:
-        return bool(ans)
-    else:
-        return ans
 
 
 def _plugin_import(plug):
@@ -93,7 +81,8 @@ using_torchani = pytest.mark.skipif(
     _plugin_import("torchani") is False, reason="Could not find TorchAni. Please install the package to enable tests")
 
 using_qcdb = pytest.mark.skipif(
-    _plugin_import("qcdb") is False, reason='Not detecting common driver. Install package if necessary and add to envvar PYTHONPATH')
+    _plugin_import("qcdb") is False,
+    reason='Not detecting common driver. Install package if necessary and add to envvar PYTHONPATH')
 
 using_dftd3 = pytest.mark.skipif(
     which('dftd3', return_bool=True) is False,

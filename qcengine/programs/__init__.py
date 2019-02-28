@@ -47,7 +47,7 @@ def list_available_programs() -> Set[str]:
     """
 
     ret = set()
-    for k, p in programs.keys():
+    for k, p in programs.items():
         if p.found():
             ret.add(k)
 

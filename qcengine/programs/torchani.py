@@ -53,11 +53,12 @@ class TorchANIExecutor(ProgramExecutor):
         Runs TorchANI in FF typing
         """
 
-        import numpy as np
         try:
             import torchani
         except ModuleNotFoundError:
             raise ModuleNotFoundError("Could not find TorchANI in the Python path.")
+        import torch
+        import numpy as np
 
         device = torch.device('cpu')
         builtin = torchani.neurochem.Builtins()
