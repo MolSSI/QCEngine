@@ -148,7 +148,7 @@ Index
 * :doc:`dev_guidelines`
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: Developer Documentation
 
     api
