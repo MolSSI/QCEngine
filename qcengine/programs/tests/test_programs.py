@@ -113,20 +113,3 @@ def test_torchani_task():
     assert ret.driver == "gradient"
 
 
-@testing.using_dftd3
-def test_dftd3_task():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("eneyne")
-    json_data["driver"] = "energy"
-    json_data["model"] = {"method": "b3lyp-d3", "basis": ""}
-
-    ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True)
-
-    assert ret["driver"] == "energy"
-    assert "provenance" in ret
-    assert "normal termination of dftd3" in ret["stdout"]
-
-    for key in ["cpu", "hostname", "username", "wall_time"]:
-        assert key in ret["provenance"]
-
-    assert ret["success"] is True

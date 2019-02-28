@@ -66,28 +66,30 @@ def is_dftd3_new_enough(version_feature_introduced):
     return parse_version(candidate_version) >= parse_version(version_feature_introduced)
 
 
+# Figure out what is imported
+_programs = {
+    "dftd3": which('dftd3', return_bool=True),
+    "geometric": _plugin_import("geometric"),
+    "psi4": is_psi4_new_enough("1.2"),
+    "rdkit": _plugin_import("rdkit"),
+    "qcdb": _plugin_import("qcdb"),
+    "torchani": _plugin_import("torchani"),
+}
+
+def has_program(name):
+    return _programs[name]
+
+def _build_pytest_skip(program):
+    import_message = "Not detecting module {}. Install package if necessary to enable tests."
+    return pytest.mark.skipif(has_program(program) is False, reason=import_message.format(program))
+
 # Add flags
-using_psi4 = pytest.mark.skipif(
-    is_psi4_new_enough("1.2") is False,
-    reason="Could not find psi4 or version too old. Please install the package to enable tests")
-
-using_rdkit = pytest.mark.skipif(
-    _plugin_import("rdkit") is False, reason="Could not find rdkit. Please install the package to enable tests")
-
-using_geometric = pytest.mark.skipif(
-    _plugin_import("geometric") is False,
-    reason="could not find geomeTRIC. Please install the package to enable tests")
-
-using_torchani = pytest.mark.skipif(
-    _plugin_import("torchani") is False, reason="Could not find TorchAni. Please install the package to enable tests")
-
-using_qcdb = pytest.mark.skipif(
-    _plugin_import("qcdb") is False,
-    reason='Not detecting common driver. Install package if necessary and add to envvar PYTHONPATH')
-
-using_dftd3 = pytest.mark.skipif(
-    which('dftd3', return_bool=True) is False,
-    reason='Not detecting executable dftd3. Install package if necessary and add to envvar PATH')
+using_dftd3 = _build_pytest_skip("dftd3")
+using_geometric = _build_pytest_skip("geometric")
+using_psi4 = _build_pytest_skip("psi4")
+using_rdkit = _build_pytest_skip("rdkit")
+using_qcdb = _build_pytest_skip("qcdb")
+using_torchani = _build_pytest_skip("torchani")
 
 using_dftd3_321 = pytest.mark.skipif(
     is_dftd3_new_enough("3.2.1") is False,
