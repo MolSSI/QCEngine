@@ -30,7 +30,7 @@ class DFTD3Executor(ProgramExecutor):
     _defaults = {
         "name": "DFTD3",
         "scratch": True,
-        "thread_safe": False,
+        "thread_safe": True,
         "thread_parallel": False,
         "node_parallel": False,
         "managed_memory": False,
