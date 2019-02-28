@@ -16,92 +16,71 @@ A simple example of QCEngine's capabilities is as follows:
 
 .. code:: python
 
-    >>> import qcengine
+    >>> import qcengine as qcng
+    >>> import qcelemental as qcel
 
-    >>> job = {
-      "schema_name": "qc_schema_input",
-      "schema_version": 1,
-      "molecule": {
-        "geometry": [
-          0.0,  0.0,  -0.129,
-          0.0, -1.494, 1.027,
-          0.0,  1.494, 1.027
-        ],
-        "symbols": [ "O", "H", "H"],
-      },
-      "driver": "energy",
-      "model": {
-        "method": "SCF",
-        "basis": "sto-3g"
-      },
-      "keywords": {
-        "scf_type": "df"
-      }
-    }
+    >>> mol = qcel.models.Molecule.from_data("""
+    O  0.0  0.000  -0.129
+    H  0.0 -1.494  1.027
+    H  0.0  1.494  1.027
+    """)
 
-    >>> qcengine.compute(job, "psi4")
-    {
-      ...,
-      "provenance": {
-        "creator": "Psi4",
-        "version": "1.2",
-        "routine": "psi4.json.run_json",
-        "memory": 2.235,
-        "nthreads": 2,
-        "cpu": "Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz",
-        "hostname": "xxx.xxx.com",
-        "username": "username",
-        "wall_time": 0.8911292552947998
-      },
-      "return_result": -74.96475169985112,
-      "properties": {
-        "calcinfo_nbasis": 7,
-        "calcinfo_nmo": 7,
-        "calcinfo_nalpha": 5,
-        "calcinfo_nbeta": 5,
-        "calcinfo_natom": 3,
-        "scf_one_electron_energy": -121.67648822935482,
-        "scf_two_electron_energy": 37.91027446887428,
-        "nuclear_repulsion_energy": 8.80146206062943,
-        "scf_dipole_moment": [0.0, 0.0, 1.668684476563345],
-        "scf_iterations": 6,
-        "scf_total_energy": -74.96475169985112,
-        "return_energy": -74.96475169985112
-      }
-    }
+    >>> inp = qcel.models.ResultInput(
+        molecule=mol,
+        driver="energy",
+        model={"method": "SCF", "basis": "sto-3g"},
+        keywords={"scf_type": "df"}
+        )
 
+These input specifications can be executed with the ``compute`` syntax along with a program specifier:
 
-The QCEngine middleware can automatically determine:
+.. code:: python
+
+    >>> ret = qcng.compute(job, "psi4", return_dict=False)
+
+The results contain a complete record of the computation:
+
+.. code:: python
+
+    >>> ret.return_result
+    -74.45994963230625
+
+    >>> ret.properties.scf_dipole_moment
+    [0.0, 0.0, 0.6635967188869244]
+
+    >>> ret.provenance.cpu
+    Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz
+
+Configuration Determination
+---------------------------
+
+In addition, QCEngine can automatically determine the following quantites:
 
 - The number of physical cores on the system and to use.
 - The amount of physical memory on the system and the amount to use.
 - The provenance of a computation (hardware, software versions, and compute resources).
-- Locations of scratch disk space.
-- Locations of quantum chemistry programs.
+- Location of scratch disk space.
+- Location of quantum chemistry programs binaries or Python modules.
 
+Each of these options can be specified by the user as well.
 
-QCArchive
----------
+.. code:: python
 
-This module is part of the QCArchive project which sets out to answer the
-the fundamental question of "How do we compile, aggregate, query, and share quantum
-chemistry data to accelerate the understanding of new method performance,
-fitting of novel force fields, and supporting the incredible data needs of
-machine learning for computational molecular science?"
+    >>> qcng.get_config()
+    <JobConfig ncores=2 memory=2.506 scratch_directory=None>
 
-The QCArchive project is made up of three primary modules:
+    >>> qcng.get_config(local_options={"scratch_directory": "/tmp"})
+    <JobConfig ncores=2 memory=2.506 scratch_directory='/tmp'>
 
-- `QCSchema <https://github.com/MolSSI/QC_JSON_Schema>`_ - A key/value schema for quantum chemistry.
-- `QCEngine <https://github.com/MolSSI/QCEngine>`_ - A computational middleware to provide IO to a variety of quantum chemistry programs.
-- `QCFractal <https://github.com/MolSSI/QCFractal>`_ - A distributed compute and database platform powered by QCEngine and QCSchema.
-
-The QCArchive project's primary support comes from `The Molecular Sciences Software Institute <https://molssi.org>`_.
+    >>> os.environ["SCRATCH"] = "/my_scratch"
+    >>> qcng.get_config(local_options={"scratch_directory": "$SCRATCH"})
+    <JobConfig ncores=2 memory=2.506 scratch_directory='/my_scratch'>
 
 ========
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
 
 
@@ -116,12 +95,24 @@ Index
 * :doc:`community`
 
 .. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Getting Started
+    :maxdepth: 1
+    :hidden:
+    :caption: Getting Started
 
-   install
-   community
+    install
+    community
+
+
+**User Interface**
+
+* :doc:`environment`
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+    :caption: User Interface
+
+    environment
 
 
 **Developer Documentationd**
@@ -131,9 +122,9 @@ Index
 * :doc:`dev_guidelines`
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Developer Documentation
+    :maxdepth: 2
+    :caption: Developer Documentation
 
-   api
-   changelog
-   dev_guidelines
+    api
+    changelog
+    dev_guidelines
