@@ -26,7 +26,8 @@ def environ_context(env):
             else:
                 os.environ[key] = value
 
-def _which(command, return_bool=False):
+
+def which(command, return_bool=False):
     # environment is $PATH, less any None values
     lenv = {'PATH': ':' + os.environ.get('PATH')}
     lenv = {k: v for k, v in lenv.items() if v is not None}
@@ -65,10 +66,10 @@ def is_psi4_new_enough(version_feature_introduced):
 
 
 def is_dftd3_new_enough(version_feature_introduced):
-    if not _which('dftd3', return_bool=True):
+    if not which('dftd3', return_bool=True):
         return False
     # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
-    command = [_which('dftd3'), '-version']
+    command = [which('dftd3'), '-version']
     proc = subprocess.run(command, stdout=subprocess.PIPE)
     candidate_version = proc.stdout.decode('utf-8').strip()
 
@@ -95,7 +96,7 @@ using_qcdb = pytest.mark.skipif(
     _plugin_import("qcdb") is False, reason='Not detecting common driver. Install package if necessary and add to envvar PYTHONPATH')
 
 using_dftd3 = pytest.mark.skipif(
-    _which('dftd3', return_bool=True) is False,
+    which('dftd3', return_bool=True) is False,
     reason='Not detecting executable dftd3. Install package if necessary and add to envvar PATH')
 
 using_dftd3_321 = pytest.mark.skipif(

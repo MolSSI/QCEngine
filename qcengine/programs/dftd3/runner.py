@@ -14,11 +14,49 @@ from decimal import Decimal
 
 import numpy as np
 import qcelemental as qcel
+from qcelemental.models import FailedOperation, Result
 
 from ...util import execute
+from ...testing import which
+from ..executor import ProgramExecutor
 #from ..pdict import PreservingDict
 from . import dashparam
 from .util import provenance_stamp, parse_dertype
+
+
+
+class DFTD3Executor(ProgramExecutor):
+
+    _defaults = {
+        "name": "DFTD3",
+        "scratch": True,
+        "thread_safe": True,
+        "thread_parallel": False,
+        "node_parallel": False,
+        "managed_memory": False,
+    }
+
+    class Config(ProgramExecutor.Config):
+        pass
+
+    def __init__(self, **kwargs):
+        super().__init__(**{**self._defaults, **kwargs})
+
+    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+
+        if not which('dftd3', return_bool=True):
+            raise ImportError("Could not find dftd3 in the envvar path.")
+
+        # Setup the job
+        input_data = input_data.copy().dict()
+        input_data["success"] = False
+
+        output_data = run_json(input_data)
+
+        if output_data["success"]:
+            return Result(**output_data)
+        return FailedOperation(
+            success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
 
 
 def run_json(jobrec):
@@ -34,7 +72,7 @@ def run_json(jobrec):
     # pp.pprint(jobrec)
 
     # This is currently a forced override
-    if jobrec["schema_name"] != "qcschema_input":
+    if jobrec["schema_name"] not in ["qc_schema_input", "qcschema_input"]:
         raise KeyError(f"""Schema name of '{jobrec["schema_name"]}' not understood.""")
 
     if jobrec["schema_version"] != 1:
@@ -108,7 +146,7 @@ def run_dftd3(name, molecule, options, **kwargs):
     opts = {}
 
     jobrec = {}
-    jobrec['schema_name'] = 'qc_schema_input'  # --> qcschema_input
+    jobrec['schema_name'] = 'qcschema_input'
     jobrec['schema_version'] = 1  # --> 2
     jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
 
