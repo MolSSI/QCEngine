@@ -15,8 +15,8 @@ _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 
 def test_missing_key():
     ret = qcng.compute({"hello": "hi"}, "bleh")
-    assert ret["success"] is False
-    assert "hello" in ret or ("input_data" in ret and "hello" in ret["input_data"])
+    assert ret.success is False
+    assert "hello" in ret.input_data
 
 
 def test_missing_key_raises():
@@ -32,7 +32,7 @@ def test_psi4_task():
     json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
     json_data["keywords"] = {"scf_type": "df"}
 
-    ret = qcng.compute(json_data, "psi4", raise_error=True, capture_output=False)
+    ret = qcng.compute(json_data, "psi4", raise_error=True, capture_output=False, return_dict=True)
 
     assert ret["driver"] == "energy"
     assert "provenance" in ret
@@ -79,7 +79,7 @@ def test_rdkit_task():
 
     ret = qcng.compute(json_data, "rdkit", raise_error=True)
 
-    assert ret["success"] is True
+    assert ret.success is True
 
 
 @testing.using_rdkit
@@ -92,9 +92,8 @@ def test_rdkit_connectivity_error():
     del json_data["molecule"]["connectivity"]
 
     ret = qcng.compute(json_data, "rdkit")
-    assert ret["success"] is False
-    assert "error" in ret
-    assert "connectivity" in ret["error"]["error_message"]
+    assert ret.success is False
+    assert "connectivity" in ret.error.error_message
 
     with pytest.raises(ValueError):
         qcng.compute(json_data, "rdkit", raise_error=True)
@@ -110,9 +109,8 @@ def test_torchani_task():
 
     ret = qcng.compute(json_data, "torchani", raise_error=True)
 
-    assert ret["success"] is True
-    assert ret["driver"] == "gradient"
-    assert "provenance" in ret
+    assert ret.success is True
+    assert ret.driver == "gradient"
 
 
 @testing.using_dftd3
@@ -122,9 +120,7 @@ def test_dftd3_task():
     json_data["driver"] = "energy"
     json_data["model"] = {"method": "b3lyp-d3", "basis": ""}
 
-    ret = qcng.compute(json_data, "dftd3", raise_error=True, capture_output=True)
-    import pprint
-    pprint.pprint(ret)
+    ret = qcng.compute(json_data, "dftd3", raise_error=True, capture_output=True, return_dict=True)
 
     assert ret["driver"] == "energy"
     assert "provenance" in ret

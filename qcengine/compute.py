@@ -10,6 +10,7 @@ from .util import compute_wrapper, get_module_function, handle_output_metadata, 
 
 __all__ = ["compute", "compute_procedure"]
 
+
 def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             program: str,
             raise_error: bool=False,
@@ -43,7 +44,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
 
     """
 
-    # Validate input
+    # Build the model and validate
     input_data = model_wrapper(input_data, ResultInput, raise_error)
     if isinstance(input_data, FailedOperation):
         if return_dict:
@@ -77,12 +78,11 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
 
-def compute_procedure(input_data,
-                      procedure,
-                      raise_error=False,
-                      capture_output=True,
-                      local_options=None,
-                      return_dict=True):
+def compute_procedure(input_data: Dict[str, Any],
+                      procedure: str,
+                      raise_error: bool=False,
+                      local_options: Optional[Dict[str, str]]=None,
+                      return_dict: bool=False) -> 'BaseModel':
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters
@@ -93,8 +93,6 @@ def compute_procedure(input_data,
         The name of the procedure to run
     raise_error : bool, option
         Determines if compute should raise an error or not.
-    capture_output : bool, optional
-        Determines if stdout/stderr should be captured.
     local_options : dict, optional
         A dictionary of local configuration options
     return_dict : bool, optional, default True
@@ -106,6 +104,7 @@ def compute_procedure(input_data,
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
 
+    # Build the model and validate
     input_data = model_wrapper(input_data, OptimizationInput, raise_error)
     if isinstance(input_data, FailedOperation):
         if return_dict:
@@ -115,7 +114,7 @@ def compute_procedure(input_data,
     config = get_config(local_options=local_options)
 
     # Run the procedure
-    with compute_wrapper(capture_output=capture_output) as metadata:
+    with compute_wrapper(capture_output=False) as metadata:
         # Create a base output data in case of errors
         output_data = input_data.copy()  # lgtm [py/multiple-definition]
         if procedure == "geometric":

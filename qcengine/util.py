@@ -90,7 +90,6 @@ def compute_wrapper(capture_output: bool=True) -> Dict[str, Any]:
     if capture_output:
         sys.stdout = old_stdout
         sys.stderr = old_stderr
-
         # Pull over values
         metadata["stdout"] = new_stdout.getvalue() or None
         metadata["stderr"] = new_stderr.getvalue() or None
