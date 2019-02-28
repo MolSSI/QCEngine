@@ -1,14 +1,13 @@
 
 import copy
 
-import pytest
 import numpy as np
+import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 from qcengine.programs import dftd3
-from qcengine.testing import using_dftd3, using_dftd3_321, using_psi4, using_qcdb, is_psi4_new_enough
-
+from qcengine.testing import is_psi4_new_enough, using_dftd3, using_dftd3_321, using_psi4, using_qcdb
 
 ## Resources
 

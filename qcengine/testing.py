@@ -5,9 +5,10 @@ Utilities for the testing suite.
 import os
 import shutil
 import subprocess
+from contextlib import contextmanager
 
 import pytest
-from contextlib import contextmanager
+
 from .util import which
 
 

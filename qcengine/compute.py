@@ -2,6 +2,7 @@
 Integrates the computes together
 """
 from typing import Any, Dict, Optional, Union
+
 from qcelemental.models import ComputeError, FailedOperation, Optimization, OptimizationInput, ResultInput
 
 from .config import get_config
@@ -13,10 +14,10 @@ __all__ = ["compute", "compute_procedure"]
 
 def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             program: str,
-            raise_error: bool=False,
-            capture_output: bool=True,
-            local_options: Optional[Dict[str, str]]=None,
-            return_dict: bool=False) -> 'Result':
+            raise_error: bool = False,
+            capture_output: bool = True,
+            local_options: Optional[Dict[str, str]] = None,
+            return_dict: bool = False) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -80,9 +81,9 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
 
 def compute_procedure(input_data: Dict[str, Any],
                       procedure: str,
-                      raise_error: bool=False,
-                      local_options: Optional[Dict[str, str]]=None,
-                      return_dict: bool=False) -> 'BaseModel':
+                      raise_error: bool = False,
+                      local_options: Optional[Dict[str, str]] = None,
+                      return_dict: bool = False) -> 'BaseModel':
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters

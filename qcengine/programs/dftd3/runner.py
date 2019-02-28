@@ -1,26 +1,26 @@
 """Compute dispersion correction using Grimme's DFTD3 executable."""
 
-import os
-import pathlib
-import socket
-
-import re
-import sys
 import copy
 import json
+import os
+import pathlib
 import pprint
-pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
+import re
+import socket
+import sys
 from decimal import Decimal
 
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
 
-from ...util import execute, which
-from ..executor import ProgramExecutor
 #from ..pdict import PreservingDict
 from . import dashparam
-from .util import provenance_stamp, parse_dertype
+from ...util import execute, which
+from ..executor import ProgramExecutor
+from .util import parse_dertype, provenance_stamp
+
+pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class DFTD3Executor(ProgramExecutor):
@@ -289,10 +289,11 @@ def module_driver(jobrec, module_label, plant, harvest, verbose=1):
     env = modulerec.pop('env')
     blocking_files = modulerec.pop('blocking_files')
 
-    ans, dans = execute(command, infiles, outfiles,
-                        **{'scratch_messy': True,
-                           'environment': env,
-                           'blocking_files': blocking_files})
+    ans, dans = execute(command, infiles, outfiles, **{
+        'scratch_messy': True,
+        'environment': env,
+        'blocking_files': blocking_files
+    })
     modulerec.update(dans)
     modulerec.update({'command': command, 'infiles': infiles, 'env': env})
 

@@ -1,7 +1,7 @@
 """Collect empirical dispersion parameters."""
 
-import copy
 import collections
+import copy
 
 ## ==> Dispersion Aliases and Parameters <== ##
 

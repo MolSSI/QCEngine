@@ -56,7 +56,6 @@ class Psi4Executor(ProgramExecutor):
             if mol.multiplicity() != 1:
                 input_model["keywords"]["reference"] = "uks"
 
-
             output_data = psi4.json_wrapper.run_json(input_model)
             if "extras" not in output_data:
                 output_data["extras"] = {}
@@ -94,4 +93,3 @@ class Psi4Executor(ProgramExecutor):
             return True
         except ModuleNotFoundError:
             return False
-
