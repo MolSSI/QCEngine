@@ -6,6 +6,8 @@ dependencies:
     - python=3
     - sphinx
     - sphinx_rtd_theme
+    - sphinx-automodapi
+    - graphviz
     
       # QCEngine depends
     - numpy
