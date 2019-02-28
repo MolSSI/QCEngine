@@ -15,7 +15,6 @@ __all__ = ["compute", "compute_procedure"]
 def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             program: str,
             raise_error: bool = False,
-            capture_output: bool = True,
             local_options: Optional[Dict[str, str]] = None,
             return_dict: bool = False) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
@@ -62,7 +61,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     config = get_config(local_options=local_options)
 
     # Run the program
-    with compute_wrapper(capture_output=capture_output) as metadata:
+    with compute_wrapper(capture_output=False) as metadata:
 
         output_data = input_data.copy()  # Initial in case of error handling
         try:

@@ -18,7 +18,7 @@ from qcelemental.models import FailedOperation, Result
 from . import dashparam
 from ...util import execute, which
 from ..executor import ProgramExecutor
-from .util import parse_dertype, provenance_stamp
+from ...extras import parse_dertype, provenance_stamp
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 

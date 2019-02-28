@@ -23,7 +23,7 @@ LOGGER.setLevel(logging.CRITICAL)
 
 
 # Generic globals
-def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
+def get_global(key: Optional[str]=None) -> Union[str, Dict[str, Any]]:
     import cpuinfo
     import psutil
     global _global_values
@@ -75,7 +75,7 @@ class NodeDescriptor(pydantic.BaseModel):
         super().__init__(**data)
 
     class Config:
-        ignore_extra = False
+        extra = "forbid"
 
 
 class JobConfig(pydantic.BaseModel):
@@ -86,7 +86,7 @@ class JobConfig(pydantic.BaseModel):
     scratch_directory: Optional[str]  # What location to use as scratch
 
     class Config:
-        ignore_extra = False
+        extra = "forbid"
 
 
 def _load_defaults() -> None:
@@ -156,7 +156,7 @@ def global_repr() -> str:
     return ret
 
 
-def get_node_descriptor(hostname: Optional[str] = None) -> NodeDescriptor:
+def get_node_descriptor(hostname: Optional[str]=None) -> NodeDescriptor:
     """
     Find the correct NodeDescriptor based off current hostname
     """
@@ -197,7 +197,7 @@ def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     return ret
 
 
-def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] = None) -> JobConfig:
+def get_config(*, hostname: Optional[str]=None, local_options: Dict[str, Any]=None) -> JobConfig:
     """
     Returns the configuration key for qcengine.
     """

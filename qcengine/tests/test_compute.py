@@ -32,7 +32,7 @@ def test_psi4_task():
     json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
     json_data["keywords"] = {"scf_type": "df"}
 
-    ret = qcng.compute(json_data, "psi4", raise_error=True, capture_output=False, return_dict=True)
+    ret = qcng.compute(json_data, "psi4", raise_error=True, return_dict=True)
 
     assert ret["driver"] == "energy"
     assert "provenance" in ret
@@ -120,7 +120,7 @@ def test_dftd3_task():
     json_data["driver"] = "energy"
     json_data["model"] = {"method": "b3lyp-d3", "basis": ""}
 
-    ret = qcng.compute(json_data, "dftd3", raise_error=True, capture_output=True, return_dict=True)
+    ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True)
 
     assert ret["driver"] == "energy"
     assert "provenance" in ret
