@@ -58,10 +58,9 @@ def test_geometric_psi4():
     inp = OptimizationInput(**inp)
 
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
-    assert 10 > len(ret["trajectory"]) > 1
+    assert 10 > len(ret.trajectory) > 1
 
-    geom = ret["final_molecule"]["geometry"]
-    assert pytest.approx(_bond_dist(geom, 0, 1), 1.e-4) == 1.3459150737
+    assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.e-4) == 1.3459150737
 
 
 @testing.using_psi4
@@ -77,11 +76,11 @@ def test_geometric_local_options():
 
     # Set some extremely large number to test
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True, local_options={"memory": "5000"})
-    assert pytest.approx(ret["trajectory"][0]["provenance"]["memory"], 1) == 4900
+    assert pytest.approx(ret.trajectory[0].provenance.memory, 1) == 4900
 
     # Make sure we cleaned up
-    assert "_qcengine_local_config" not in ret["input_specification"]
-    assert "_qcengine_local_config" not in ret["trajectory"][0]
+    assert "_qcengine_local_config" not in ret.input_specification
+    assert "_qcengine_local_config" not in ret.trajectory[0].extras
 
 
 @testing.using_rdkit
@@ -96,9 +95,8 @@ def test_geometric_stdout():
     inp = OptimizationInput(**inp)
 
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
-    assert ret["success"] is True
-    assert "Converged!" in ret["stdout"]
-    assert ret.pop("stderr", None) is None
+    assert ret.success is True
+    assert "Converged!" in ret.stdout
 
     with pytest.raises(ValueError):
         _ = qcng.compute_procedure(inp, "rdkit", raise_error=True)
@@ -116,8 +114,8 @@ def test_geometric_rdkit_error():
     inp = OptimizationInput(**inp)
 
     ret = qcng.compute_procedure(inp, "geometric")
-    assert ret["success"] is False
-    assert isinstance(ret["error"]["error_message"], str)
+    assert ret.success is False
+    assert isinstance(ret.error.error_message, str)
 
     with pytest.raises(ValueError):
         _ = qcng.compute_procedure(inp, "rdkit", raise_error=True)
@@ -133,5 +131,5 @@ def test_geometric_torchani():
     inp["keywords"]["program"] = "torchani"
 
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
-    assert ret["success"] is True
-    assert "Converged!" in ret["stdout"]
+    assert ret.success is True
+    assert "Converged!" in ret.stdout

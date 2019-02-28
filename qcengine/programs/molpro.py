@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 #from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 from qcelemental.models import Result
 
-#from ..units import ureg
+from ..util import which
 from .executor import ProgramExecutor
 
 
@@ -33,7 +33,7 @@ class MolproExecutor(ProgramExecutor):
         pass
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
-                    template: Optional[str]=None) -> Dict[str, Any]:
+                    template: Optional[str] = None) -> Dict[str, Any]:
         input_file = []
         posthf_methods = {'mp2', 'ccsd', 'ccsd(t)'}
 
@@ -161,3 +161,6 @@ class MolproExecutor(ProgramExecutor):
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
+
+    def found(self) -> bool:
+        return which('dftd3', return_bool=True)

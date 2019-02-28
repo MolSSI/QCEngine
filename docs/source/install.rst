@@ -10,9 +10,7 @@ You can update qcengine using `conda <https://www.anaconda.com/download/>`_::
 
     conda install qcengine -c conda-forge
 
-This installs qcengine and the NumPy dependancy.
-
-The qcengine package is maintained on the
+This command installs qcengine and its dependencies. The qcengine package is maintained on the
 `conda-forge channel <https://conda-forge.github.io/>`_.
 
 
@@ -42,7 +40,7 @@ or use ``pip`` for a local install::
 Test
 ----
 
-Test qcengine with ``py.test``::
+Test qcengine with ``pytest``::
 
     cd qcengine
-    py.test
+    pytest -v

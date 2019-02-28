@@ -1,13 +1,35 @@
-
 import copy
 
-import pytest
 import numpy as np
+import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
+import qcengine as qcng
 from qcengine.programs import dftd3
-from qcengine.testing import using_dftd3, using_dftd3_321, using_psi4, using_qcdb, is_psi4_new_enough
+from qcengine.testing import is_psi4_new_enough, using_dftd3, using_dftd3_321, using_psi4, using_qcdb
+
+
+@using_dftd3
+@pytest.mark.parametrize("method", [
+    "b3lyp-d3",
+    "b3lyp-d3m",
+    "b3lyp-d3bj",
+    "b3lyp-d3mbj",
+])
+def test_dftd3_task(method):
+    json_data = {"molecule": qcng.get_molecule("eneyne"), "driver": "energy", "model": {"method": method}}
+
+    ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True)
+
+    assert ret["driver"] == "energy"
+    assert "provenance" in ret
+    assert "normal termination of dftd3" in ret["stdout"]
+
+    for key in ["cpu", "hostname", "username", "wall_time"]:
+        assert key in ret["provenance"]
+
+    assert ret["success"] is True
 
 
 ## Resources
@@ -437,7 +459,8 @@ def eneyne_ne_qcschemamols():
     ne = qcel.molparse.to_schema(qcel.molparse.from_string(sne)['qm'], dtype=1)
 
     mAgB = qcel.molparse.from_string(seneyne)['qm']
-    mAgB['real'] = [(iat < mAgB['fragment_separators'][0]) for iat in range(len(mAgB['elem']))]  # works b/c chgmult doesn't need refiguring
+    mAgB['real'] = [(iat < mAgB['fragment_separators'][0])
+                    for iat in range(len(mAgB['elem']))]  # works b/c chgmult doesn't need refiguring
     mAgB = qcel.molparse.to_schema(mAgB, dtype=1)
 
     gAmB = qcel.molparse.from_string(seneyne)['qm']
@@ -532,8 +555,7 @@ def test_dftd3__from_arrays(inp, expected):
     res = dftd3.from_arrays(**inp[0])
     assert compare_recursive(expected, res, atol=1.e-4)
     assert compare(inp[1], _compute_key(res), 'key')
-    res = dftd3.from_arrays(
-        name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
+    res = dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert compare_recursive(expected, res, tnm() + ' idempotent', atol=1.e-4)
 
 
@@ -562,7 +584,6 @@ def test_dftd3__from_arrays__supplement():
     supp = {'chg': {'definitions': {'asdf-d4': {'params': {'s6': 4.05}, 'citation': '    mypaper\n'}}}}
 
     res = dftd3.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
-    print(res)
     assert compare_recursive(ans, res, atol=1.e-4)
     with pytest.raises(ValueError) as e:
         dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
@@ -580,15 +601,16 @@ def test_3():
     sys = qcel.molparse.from_string(seneyne)['qm']
 
     res = dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
-    print(res)
     assert compare('B3LYP-D3(BJ)', _compute_key(res['keywords']), 'key')
 
 
 @using_dftd3
 @pytest.mark.parametrize(
-    "subjects", [
+    "subjects",
+    [
         pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
-        pytest.param(eneyne_ne_qcdbmols, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_qcdbmols,
+                     marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
     ],
     ids=['qmol', 'pmol'])
 @pytest.mark.parametrize(
@@ -641,9 +663,11 @@ def test_qcdb__energy_d3():
 
 @using_dftd3
 @pytest.mark.parametrize(
-    "subjects", [
+    "subjects",
+    [
         pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
-        pytest.param(eneyne_ne_qcdbmols, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_qcdbmols,
+                     marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
     ids=['qmol', 'pmol', 'qcmol'])
@@ -661,33 +685,40 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
 
     if 'qcmol' in request.node.name:
-        subject.update({'model': {'method': inp['name']},
-                        'driver': 'gradient',
-                        'keywords': {},
-                        'schema_name': 'qcschema_input',
-                        'schema_version': 1})
+        subject.update({
+            'model': {
+                'method': inp['name']
+            },
+            'driver': 'gradient',
+            'keywords': {},
+            'schema_name': 'qcschema_input',
+            'schema_version': 1
+        })
         jrec = dftd3.run_json(subject)
     else:
         jrec = dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
 
-    assert len(jrec['extra']['qcvars']) == 8
+    assert len(jrec['extras']['qcvars']) == 8
 
-    assert compare_values(expected, jrec['extra']['qcvars']['CURRENT ENERGY'], atol=1.e-7)
-    assert compare_values(expected, jrec['extra']['qcvars']['DISPERSION CORRECTION ENERGY'], atol=1.e-7)
-    assert compare_values(expected, jrec['extra']['qcvars']['2-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
-    assert compare_values(expected, jrec['extra']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars']['CURRENT ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars']['DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars']['2-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION ENERGY'], atol=1.e-7)
 
-    assert compare_values(gexpected, jrec['extra']['qcvars']['CURRENT GRADIENT'], atol=1.e-7)
-    assert compare_values(gexpected, jrec['extra']['qcvars']['DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
-    assert compare_values(gexpected, jrec['extra']['qcvars']['2-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
-    assert compare_values(gexpected, jrec['extra']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extras']['qcvars']['CURRENT GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extras']['qcvars']['DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extras']['qcvars']['2-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(
+        gexpected, jrec['extras']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
 
 
 @using_dftd3_321
 @pytest.mark.parametrize(
-    "subjects", [
+    "subjects",
+    [
         pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
-        pytest.param(eneyne_ne_qcdbmols, marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_qcdbmols,
+                     marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
     ids=['qmol', 'pmol', 'qcmol'])
@@ -705,23 +736,29 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
 
     if 'qcmol' in request.node.name:
-        subject.update({'model': {'method': inp['name']},
-                        'driver': 'gradient',
-                        'keywords': {},
-                        'schema_name': 'qcschema_input',
-                        'schema_version': 1})
+        subject.update({
+            'model': {
+                'method': inp['name']
+            },
+            'driver': 'gradient',
+            'keywords': {},
+            'schema_name': 'qcschema_input',
+            'schema_version': 1
+        })
         jrec = dftd3.run_json(subject)
     else:
         jrec = dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
 
-    assert len(jrec['extra']['qcvars']) == 8
+    assert len(jrec['extras']['qcvars']) == 8
 
-    assert compare_values(expected, jrec['extra']['qcvars']['CURRENT ENERGY'], atol=1.e-7)
-    assert compare_values(expected, jrec['extra']['qcvars']['DISPERSION CORRECTION ENERGY'], atol=1.e-7)
-    assert compare_values(expected, jrec['extra']['qcvars']['3-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
-    assert compare_values(expected, jrec['extra']['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars']['CURRENT ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars']['DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars']['3-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(
+        expected, jrec['extras']['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY'], atol=1.e-7)
 
-    assert compare_values(gexpected, jrec['extra']['qcvars']['CURRENT GRADIENT'], atol=1.e-7)
-    assert compare_values(gexpected, jrec['extra']['qcvars']['DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
-    assert compare_values(gexpected, jrec['extra']['qcvars']['3-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
-    assert compare_values(gexpected, jrec['extra']['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extras']['qcvars']['CURRENT GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extras']['qcvars']['DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extras']['qcvars']['3-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(
+        gexpected, jrec['extras']['qcvars']['AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION GRADIENT'], atol=1.e-7)

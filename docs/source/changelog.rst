@@ -13,6 +13,31 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.6.0 / 2019-02-28
+-------------------
+
+Breaking Changes
+++++++++++++++++
+
+- (:pr:`36`) **breaking change** Model objects are returned by default rather than a dictionary.
+
+New Features
+++++++++++++
+
+- (:pr:`18`) Add the ``dftd3`` program to available computers.
+- (:pr:`29`) Adds preliminary support for the ``Molpro`` compute engine.
+- (:pr:`31`) Moves all computation to ``ProgramExecutor`` to allow for a more flexible input generation, execution, output parsing interface.
+- (:pr:`32`) Adds a general ``execute`` process which safely runs subprocess jobs.
+
+Enhancements
+++++++++++++
+
+- (:pr:`33`) Moves the ``dftd3`` executor to the new ``ProgramExecutor`` interface.
+- (:pr:`34`) Updates models to the more strict QCElemental v0.3.0 model classes.
+- (:pr:`35`) Updates CI to avoid pulling CUDA libraries for ``torchani``.
+- (:pr:`36`) First pass at documentation.
+
+
 v0.5.2 / 2019-02-13
 -------------------
 

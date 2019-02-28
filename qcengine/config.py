@@ -7,7 +7,7 @@ import getpass
 import logging
 import os
 import socket
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
 import pydantic
 
@@ -75,7 +75,7 @@ class NodeDescriptor(pydantic.BaseModel):
         super().__init__(**data)
 
     class Config:
-        ignore_extra = False
+        extra = "forbid"
 
 
 class JobConfig(pydantic.BaseModel):
@@ -86,7 +86,7 @@ class JobConfig(pydantic.BaseModel):
     scratch_directory: Optional[str]  # What location to use as scratch
 
     class Config:
-        ignore_extra = False
+        extra = "forbid"
 
 
 def _load_defaults() -> None:

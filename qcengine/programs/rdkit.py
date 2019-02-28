@@ -5,7 +5,6 @@ Calls the Psi4 executable.
 from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 
 from ..units import ureg
-
 from .executor import ProgramExecutor
 
 
@@ -35,8 +34,8 @@ class RDKitExecutor(ProgramExecutor):
             import rdkit
             from rdkit import Chem
             from rdkit.Chem import AllChem
-        except ImportError:
-            raise ImportError("Could not find RDKit in the Python path.")
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Could not find RDKit in the Python path.")
 
         # Failure flag
         ret_data = {"success": False}
@@ -117,3 +116,10 @@ class RDKitExecutor(ProgramExecutor):
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
         return Result(**{**input_data.dict(), **ret_data})
+
+    def found(self) -> bool:
+        try:
+            import rdkit
+            return True
+        except ModuleNotFoundError:
+            return False

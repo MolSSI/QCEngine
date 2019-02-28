@@ -1,5 +1,5 @@
 QCEngine
-==============================
+========
 [![Travis Build Status](https://travis-ci.org/MolSSI/QCEngine.png)](https://travis-ci.org/MolSSI/QCEngine)
 [![codecov](https://codecov.io/gh/MolSSI/QCEngine/branch/master/graph/badge.svg)](https://codecov.io/gh/MolSSI/QCEngine/branch/master)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MolSSI/QCEngine.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MolSSI/QCEngine/context:python)
@@ -18,6 +18,48 @@ Available Compute Programs:
 Available Procedures:
  - [Geometric](https://github.com/leeping/geomeTRIC)
 
+
+# Example
+
+A simple example of QCEngine's capabilities is as follows:
+
+```python
+>>> import qcengine as qcng
+>>> import qcelemental as qcel
+
+>>> mol = qcel.models.Molecule.from_data("""
+O  0.0  0.000  -0.129
+H  0.0 -1.494  1.027
+H  0.0  1.494  1.027
+""")
+
+>>> inp = qcel.models.ResultInput(
+    molecule=mol,
+    driver="energy",
+    model={"method": "SCF", "basis": "sto-3g"},
+    keywords={"scf_type": "df"}
+    )
+```
+
+These input specifications can be executed with the ``compute`` function along with a program specifier:
+
+```python
+>>> ret = qcng.compute(inp, "psi4", return_dict=False)
+```
+
+The results contain a complete record of the computation:
+
+
+```python
+>>> ret.return_result
+-74.45994963230625
+
+>>> ret.properties.scf_dipole_moment
+[0.0, 0.0, 0.6635967188869244]
+
+>>> ret.provenance.cpu
+Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz
+```
 
 See the [documentation](https://qcengine.readthedocs.io/en/latest/) for more information.
 

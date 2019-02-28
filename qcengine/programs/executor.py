@@ -1,5 +1,4 @@
 import abc
-
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
@@ -22,6 +21,13 @@ class ProgramExecutor(BaseModel, abc.ABC):
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         pass
 
+    @abc.abstractmethod
+    def found(self) -> bool:
+        """
+        Checks if the program can be found.
+        """
+        pass
+
 ## Utility
 
     @staticmethod
@@ -33,9 +39,11 @@ class ProgramExecutor(BaseModel, abc.ABC):
 
         return parse_version(version)
 
+
 ## Computers
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig', template: Optional[str]=None) -> Dict[str, Any]:
+    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+                    template: Optional[str] = None) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
     def execute(self, inputs, extra_outfiles, extra_commands, scratch_name, timeout):

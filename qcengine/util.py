@@ -7,8 +7,8 @@ import io
 import json
 import operator
 import os
-import signal
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -20,7 +20,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from qcelemental.models import ComputeError, FailedOperation
 
-from .config import get_provenance_augments, LOGGER
+from .config import LOGGER, get_provenance_augments
 
 __all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
 
@@ -61,7 +61,7 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel', raise_error: b
 
 
 @contextmanager
-def compute_wrapper(capture_output: bool=True) -> Dict[str, Any]:
+def compute_wrapper(capture_output: bool = True) -> Dict[str, Any]:
     """Wraps compute for timing, output capturing, and raise protection
     """
 
@@ -90,7 +90,6 @@ def compute_wrapper(capture_output: bool=True) -> Dict[str, Any]:
     if capture_output:
         sys.stdout = old_stdout
         sys.stderr = old_stderr
-
         # Pull over values
         metadata["stdout"] = new_stdout.getvalue() or None
         metadata["stderr"] = new_stderr.getvalue() or None
@@ -129,8 +128,8 @@ def get_module_function(module: str, func_name: str, subpackage=None) -> Callabl
 
 def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
                            metadata: Dict[str, Any],
-                           raise_error: bool=False,
-                           return_dict: bool=True) -> Union[Dict[str, Any], 'BaseModel']:
+                           raise_error: bool = False,
+                           return_dict: bool = True) -> Union[Dict[str, Any], 'BaseModel']:
     """
     Fuses general metadata and output together.
 
@@ -191,7 +190,7 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
         return ret
 
 
-def terminate_process(proc: Any, timeout: int=15) -> None:
+def terminate_process(proc: Any, timeout: int = 15) -> None:
     if proc.poll() is None:
 
         # Sigint (keyboard interupt)
@@ -211,7 +210,8 @@ def terminate_process(proc: Any, timeout: int=15) -> None:
 
 
 @contextmanager
-def popen(args: List[str], append_prefix: bool=False, popen_kwargs: Optional[Dict[str, Any]]=None) -> Dict[str, Any]:
+def popen(args: List[str], append_prefix: bool = False,
+          popen_kwargs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Opens a background task
 
@@ -257,16 +257,16 @@ def popen(args: List[str], append_prefix: bool=False, popen_kwargs: Optional[Dic
 
 
 def execute(command: List[str],
-            infiles: Optional[Dict[str, str]]=None,
-            outfiles: Optional[List[str]]=None,
+            infiles: Optional[Dict[str, str]] = None,
+            outfiles: Optional[List[str]] = None,
             *,
-            scratch_name: Union[bool, str]=True,
-            scratch_location: Optional[str]=None,
-            scratch_messy: bool=False,
-            blocking_files: Optional[List[str]]=None,
-            timeout: Optional[int]=None,
-            interupt_after: Optional[int]=None,
-            environment: Optional[Dict[str, str]]=None) -> Dict[str, str]:
+            scratch_name: Union[bool, str] = True,
+            scratch_location: Optional[str] = None,
+            scratch_messy: bool = False,
+            blocking_files: Optional[List[str]] = None,
+            timeout: Optional[int] = None,
+            interupt_after: Optional[int] = None,
+            environment: Optional[Dict[str, str]] = None) -> Dict[str, str]:
     """
     Runs a process in the background until complete.
 
@@ -342,7 +342,7 @@ def execute(command: List[str],
 
 
 @contextmanager
-def scratch_directory(child: bool=True, parent: bool=None, messy: bool=False) -> str:
+def scratch_directory(child: bool = True, parent: bool = None, messy: bool = False) -> str:
     """
 
     Parameters
@@ -387,7 +387,7 @@ def scratch_directory(child: bool=True, parent: bool=None, messy: bool=False) ->
 
 
 @contextmanager
-def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional[str]=None) -> Dict[str, str]:
+def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional[str] = None) -> Dict[str, str]:
     """
 
     Parameters
@@ -430,3 +430,16 @@ def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional
                     LOGGER.info(f'... Writing: {filename}')
             except (OSError, FileNotFoundError) as err:
                 outfiles[fl] = None
+
+
+def which(command, return_bool=False):
+    # environment is $PATH, less any None values
+    lenv = {'PATH': ':' + os.environ.get('PATH')}
+    lenv = {k: v for k, v in lenv.items() if v is not None}
+
+    ans = shutil.which(command, mode=os.F_OK | os.X_OK, path=lenv['PATH'])
+
+    if return_bool:
+        return bool(ans)
+    else:
+        return ans

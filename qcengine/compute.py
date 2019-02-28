@@ -1,6 +1,7 @@
 """
 Integrates the computes together
 """
+from typing import Any, Dict, Optional, Union
 
 from qcelemental.models import ComputeError, FailedOperation, Optimization, OptimizationInput, ResultInput
 
@@ -8,8 +9,14 @@ from .config import get_config
 from .programs import get_program
 from .util import compute_wrapper, get_module_function, handle_output_metadata, model_wrapper
 
+__all__ = ["compute", "compute_procedure"]
 
-def compute(input_data, program, raise_error=False, capture_output=True, local_options=None, return_dict=True):
+
+def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
+            program: str,
+            raise_error: bool = False,
+            local_options: Optional[Dict[str, str]] = None,
+            return_dict: bool = False) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -17,28 +24,27 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
 
     Parameters
     ----------
-    input_data : dict or qcelemental.models.ResultInput
+    input_data:
         A QC Schema input specification in dictionary or model from QCElemental.models
-    program : {"psi4", "rdkit"}
-        The program to run the input under
-    raise_error : bool, optional
+    program:
+        The program to execute the input with
+    raise_error:
         Determines if compute should raise an error or not.
-    capture_output : bool, optional
+    capture_output:
         Determines if stdout/stderr should be captured.
-    local_options : dict, optional
+    local_options:
         A dictionary of local configuration options
-    return_dict : bool, optional, default True
+    return_dict:
         Returns a dict instead of qcelemental.models.ResultInput
 
     Returns
     -------
-    ret : dict, Result, FailedOperation
-        A QC Schema output, type depends on return_dict key
-        A FailedOperation returns
+    : Result
+        A QC Schema output or type depending on return_dict key
 
     """
 
-    # Validate input
+    # Build the model and validate
     input_data = model_wrapper(input_data, ResultInput, raise_error)
     if isinstance(input_data, FailedOperation):
         if return_dict:
@@ -55,7 +61,7 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
     config = get_config(local_options=local_options)
 
     # Run the program
-    with compute_wrapper(capture_output=capture_output) as metadata:
+    with compute_wrapper(capture_output=False) as metadata:
 
         output_data = input_data.copy()  # Initial in case of error handling
         try:
@@ -72,12 +78,11 @@ def compute(input_data, program, raise_error=False, capture_output=True, local_o
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
 
-def compute_procedure(input_data,
-                      procedure,
-                      raise_error=False,
-                      capture_output=True,
-                      local_options=None,
-                      return_dict=True):
+def compute_procedure(input_data: Dict[str, Any],
+                      procedure: str,
+                      raise_error: bool = False,
+                      local_options: Optional[Dict[str, str]] = None,
+                      return_dict: bool = False) -> 'BaseModel':
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters
@@ -88,8 +93,6 @@ def compute_procedure(input_data,
         The name of the procedure to run
     raise_error : bool, option
         Determines if compute should raise an error or not.
-    capture_output : bool, optional
-        Determines if stdout/stderr should be captured.
     local_options : dict, optional
         A dictionary of local configuration options
     return_dict : bool, optional, default True
@@ -101,6 +104,7 @@ def compute_procedure(input_data,
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
 
+    # Build the model and validate
     input_data = model_wrapper(input_data, OptimizationInput, raise_error)
     if isinstance(input_data, FailedOperation):
         if return_dict:
@@ -110,7 +114,7 @@ def compute_procedure(input_data,
     config = get_config(local_options=local_options)
 
     # Run the procedure
-    with compute_wrapper(capture_output=capture_output) as metadata:
+    with compute_wrapper(capture_output=False) as metadata:
         # Create a base output data in case of errors
         output_data = input_data.copy()  # lgtm [py/multiple-definition]
         if procedure == "geometric":
@@ -119,7 +123,7 @@ def compute_procedure(input_data,
 
             # Older QCElemental compat, can be removed in v0.6
             if "extras" not in geometric_input["input_specification"]:
-                 geometric_input["input_specification"]["extras"] = {}
+                geometric_input["input_specification"]["extras"] = {}
 
             geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = config.dict()
 

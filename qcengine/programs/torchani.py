@@ -5,7 +5,6 @@ Calls the Psi4 executable.
 from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 
 from ..units import ureg
-
 from .executor import ProgramExecutor
 
 
@@ -53,15 +52,12 @@ class TorchANIExecutor(ProgramExecutor):
         Runs TorchANI in FF typing
         """
 
-        import numpy as np
-        try:
-            import torch
-        except ImportError:
-            raise ImportError("Could not find PyTorch in the Python path.")
         try:
             import torchani
-        except ImportError:
-            raise ImportError("Could not find TorchANI in the Python path.")
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Could not find TorchANI in the Python path.")
+        import torch
+        import numpy as np
 
         device = torch.device('cpu')
         builtin = torchani.neurochem.Builtins()
@@ -115,3 +111,10 @@ class TorchANIExecutor(ProgramExecutor):
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
         return Result(**{**input_data.dict(), **ret_data})
+
+    def found(self) -> bool:
+        try:
+            import torchani
+            return True
+        except ModuleNotFoundError:
+            return False
