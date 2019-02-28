@@ -22,6 +22,13 @@ class ProgramExecutor(BaseModel, abc.ABC):
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         pass
 
+    @abc.abstractmethod
+    def found(self) -> bool:
+        """
+        Checks if the program can be found.
+        """
+        pass
+
 ## Utility
 
     @staticmethod

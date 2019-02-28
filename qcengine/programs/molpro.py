@@ -161,3 +161,10 @@ class MolproExecutor(ProgramExecutor):
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
+
+    def found(self) -> bool:
+
+        if which('molpro'):
+            return True
+        else:
+            return False

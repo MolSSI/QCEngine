@@ -31,8 +31,8 @@ class Psi4Executor(ProgramExecutor):
 
         try:
             import psi4
-        except ImportError:
-            raise ImportError("Could not find Psi4 in the Python path.")
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
 
         # Setup the job
         input_model = input_model.copy().dict()
@@ -87,3 +87,11 @@ class Psi4Executor(ProgramExecutor):
             return Result(**output_data)
         return FailedOperation(
             success=output_data.pop("success", False), error=output_data.pop("error"), input_model=output_data)
+
+    def found(self) -> bool:
+        try:
+            import psi4
+            return True
+        except ModuleNotFoundError:
+            return False
+
