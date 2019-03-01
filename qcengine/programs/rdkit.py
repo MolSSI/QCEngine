@@ -79,7 +79,7 @@ class RDKitExecutor(ProgramExecutor):
         mol.AddConformer(conf)
         Chem.rdmolops.SanitizeMol(mol)
 
-        if input_data.model.method == "UFF":
+        if input_data.model.method.lower() == "uff":
             ff = AllChem.UFFGetMoleculeForceField(mol)
             all_params = AllChem.UFFHasAllMoleculeParams(mol)
         else:
