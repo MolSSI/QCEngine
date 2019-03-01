@@ -13,6 +13,14 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.6.1 / 2019-02-20
+-------------------
+
+Bug Fixes
++++++++++
+
+- (:pr:`37`) Fixed an issue where RDKit methods were not case agnostic.
+
 v0.6.0 / 2019-02-28
 -------------------
 
