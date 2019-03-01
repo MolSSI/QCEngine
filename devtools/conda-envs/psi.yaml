@@ -4,6 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - psi4=1.2
+  - libint=1.2.1=h87b9b30_4
   - dftd3
 
     # Core
