@@ -1,4 +1,4 @@
-set -eu -o pipefail
+#set -eu -o pipefail
 
 # Temporarily change directory to $HOME to install software
 pushd .
@@ -43,7 +43,7 @@ else
     export PATH=$MINICONDA_HOME/bin:$PATH
 
     conda config --set always_yes yes --set changeps1 no
-    conda update --q conda
+    conda update -q conda
 
     rm -f $MINICONDA
 fi
@@ -51,4 +51,4 @@ echo "-- Done with latest Miniconda"
 
 # Restore original directory
 popd
-set +u
+#set +u
