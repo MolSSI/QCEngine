@@ -1,5 +1,3 @@
-#set -eu -o pipefail
-
 # Temporarily change directory to $HOME to install software
 pushd .
 cd "$HOME"
@@ -51,4 +49,3 @@ echo "-- Done with latest Miniconda"
 
 # Restore original directory
 popd
-#set +u

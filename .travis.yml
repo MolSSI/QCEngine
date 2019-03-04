@@ -12,11 +12,11 @@ cache:
     - $HOME/miniconda
 
 matrix:
-  allow_failures:
-    - os: linux
-      env:
-        - PYTHON_VER=3.6
-        - PROG=PSI4
+  #allow_failures:
+  #  - os: linux
+  #    env:
+  #      - PYTHON_VER=3.6
+  #      - PROG=PSI4
 
   include:
     - os: linux
