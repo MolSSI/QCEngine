@@ -1,3 +1,5 @@
+set -eu -o pipefail
+
 # Temporarily change directory to $HOME to install software
 pushd .
 cd $HOME
