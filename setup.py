@@ -1,7 +1,12 @@
+import sys
 import setuptools
 import versioneer
 
 short_description = "QCEngine provides a wrapper to ingest and produce QCSchema for a variety of quantum chemistry programs."
+
+# from https://github.com/pytest-dev/pytest-runner#conditional-requirement
+needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
+pytest_runner = ['pytest-runner'] if needs_pytest else []
 
 try:
     with open("README.md", "r") as handle:
@@ -20,6 +25,7 @@ if __name__ == "__main__":
         version=versioneer.get_version(),
         cmdclass=versioneer.get_cmdclass(),
         packages=setuptools.find_packages(),
+        setup_requires=[] + pytest_runner,
         install_requires=[
             'pyyaml',
             'py-cpuinfo',
