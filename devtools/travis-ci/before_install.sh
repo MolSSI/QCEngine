@@ -51,3 +51,4 @@ echo "-- Done with latest Miniconda"
 
 # Restore original directory
 popd
+set +u
