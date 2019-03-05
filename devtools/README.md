@@ -16,16 +16,6 @@ Windows testing if you only plan to deploy on specific platforms. These are just
 * `appveyor`: Windows based testing through [AppVeyor](https://www.appveyor.com/)
   * `install_conda.ps1` Powershell installation script of Conda components
 
-### Conda Recipe:
-
-This directory contains the files to build and deploy on [Conda](https://conda.io/).
-
-* `conda-recipie`: directory containing all the build objects required for Conda. All files in this folder must have their given names
-  * `meta.yaml`: The yaml file needed by Conda to construct the build
-  * `build.sh`: Unix-based instructions for how to install the software interpreted by Conda
-  * `bld.bat`: Windows-based instructions for how to install the software interpreted by Conda
-
-
 ## How to contribute changes
 - Clone the repository if you have write access to the main repo, fork the repository if you are a collaborator.
 - Make a new branch with `git checkout -b {your branch name}`

@@ -4,7 +4,8 @@ channels:
   - conda-forge
 dependencies:
   - psi4
-  - dftd3 3.2.0
+  - dftd3 3.2.1
+  - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
 
     # Core
   - python
