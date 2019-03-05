@@ -54,7 +54,7 @@ class Psi4Executor(ProgramExecutor):
 
             mol = psi4.core.Molecule.from_schema(input_model)
             if (mol.multiplicity() != 1) and ("reference" not in input_model["keywords"]):
-                input_model["keywords"]["reference"] = "uks"
+                input_model["keywords"]["reference"] = "uhf"
 
             output_data = psi4.json_wrapper.run_json(input_model)
             if "extras" not in output_data:

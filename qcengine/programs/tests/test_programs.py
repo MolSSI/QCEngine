@@ -44,6 +44,7 @@ def test_psi4_task():
     assert ret["success"] is True
 
 
+@testing.using_psi4
 def test_psi4_internal_failure():
 
     mol = Molecule.from_data("""0 3
@@ -56,11 +57,12 @@ def test_psi4_internal_failure():
             "method": "ccsd",
             "basis": "6-31g"
         },
+        "keywords": {"reference": "rhf"}
     }
     with pytest.raises(ValueError) as exc:
         ret = qcng.compute(psi4_task, "psi4", raise_error=True)
 
-    assert "not avail" in str(exc.value)
+    assert "reference is only" in str(exc.value)
 
 
 @testing.using_psi4
@@ -73,7 +75,7 @@ def test_psi4_ref_switch():
         },
         "driver": "energy",
         "model": {
-            "method": "SCF",
+            "method": "B3LYP",
             "basis": "sto-3g"
         },
         "keywords": {
