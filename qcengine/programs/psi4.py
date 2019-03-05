@@ -53,14 +53,16 @@ class Psi4Executor(ProgramExecutor):
         if psi_version > self.parse_version("1.2"):
 
             mol = psi4.core.Molecule.from_schema(input_model)
-            if mol.multiplicity() != 1:
-                input_model["keywords"]["reference"] = "uks"
+            if (mol.multiplicity() != 1) and ("reference" not in input_model["keywords"]):
+                input_model["keywords"]["reference"] = "uhf"
 
             output_data = psi4.json_wrapper.run_json(input_model)
             if "extras" not in output_data:
                 output_data["extras"] = {}
 
-            output_data["extras"]["local_qcvars"] = output_data.pop("psi4:qcvars")
+            output_data["extras"]["local_qcvars"] = output_data.pop("psi4:qcvars", None)
+            if output_data["success"] is False:
+                output_data["error"] = {"error_type": "internal_error", "error_message": output_data["error"]}
 
         else:
             raise TypeError("Psi4 version '{}' not understood.".format(psi_version))
@@ -84,8 +86,9 @@ class Psi4Executor(ProgramExecutor):
             output_data.pop("return_ouput", None)
 
             return Result(**output_data)
-        return FailedOperation(
-            success=output_data.pop("success", False), error=output_data.pop("error"), input_model=output_data)
+        else:
+            return FailedOperation(
+                success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
 
     def found(self) -> bool:
         try:

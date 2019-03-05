@@ -45,6 +45,27 @@ def test_psi4_task():
 
 
 @testing.using_psi4
+def test_psi4_internal_failure():
+
+    mol = Molecule.from_data("""0 3
+     O    0.000000000000     0.000000000000    -0.068516245955
+    """)
+    psi4_task = {
+        "molecule": mol,
+        "driver": "energy",
+        "model": {
+            "method": "ccsd",
+            "basis": "6-31g"
+        },
+        "keywords": {"reference": "rhf"}
+    }
+    with pytest.raises(ValueError) as exc:
+        ret = qcng.compute(psi4_task, "psi4", raise_error=True)
+
+    assert "reference is only" in str(exc.value)
+
+
+@testing.using_psi4
 def test_psi4_ref_switch():
     inp = ResultInput(**{
         "molecule": {
@@ -54,7 +75,7 @@ def test_psi4_ref_switch():
         },
         "driver": "energy",
         "model": {
-            "method": "SCF",
+            "method": "B3LYP",
             "basis": "sto-3g"
         },
         "keywords": {
@@ -111,5 +132,3 @@ def test_torchani_task():
 
     assert ret.success is True
     assert ret.driver == "gradient"
-
-
