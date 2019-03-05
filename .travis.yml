@@ -4,6 +4,11 @@ language: generic
 dist: xenial
 
 before_cache:
+  # if I understand internet correctly, this is equiv to "after_success"
+  - |
+      if [[ $TRAVIS_TEST_RESULT = 0 ]]; then
+        codecov
+      fi
   - conda deactivate
   - conda remove --name test --all
 cache:
@@ -79,6 +84,3 @@ script:
 
 notifications:
     email: false
-
-after_success:
-  - codecov
