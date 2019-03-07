@@ -6,8 +6,8 @@ from typing import Any, Dict, Optional, Union
 from qcelemental.models import ComputeError, FailedOperation, Optimization, OptimizationInput, ResultInput
 
 from .config import get_config
-from .programs import get_program
-from .procedures import list_available_procedures, get_procedure, list_all_procedures
+from .procedures import get_procedure, list_all_procedures, list_available_procedures
+from .programs import get_program, list_all_programs, list_available_programs
 from .util import compute_wrapper, get_module_function, handle_output_metadata, model_wrapper
 
 __all__ = ["compute", "compute_procedure"]
@@ -19,7 +19,10 @@ def _process_failure_and_return(model, return_dict, raise_error):
             raise ValueError(model.error.error_message)
         elif return_dict:
             return model.dict()
-        return model
+        else:
+            return model
+    else:
+        return False
 
 
 def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
@@ -54,9 +57,33 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
 
     """
 
+    program = program.lower()
+    if program not in list_all_programs():
+        input_data = FailedOperation(
+            input_data=input_data,
+            error=ComputeError(
+                error_type="not_registered",
+                error_message="QCEngine Call Error:\n"
+                "Program {} is not registered with QCEngine".format(program)))
+    elif program not in list_available_programs():
+        input_data = FailedOperation(
+            input_data=input_data,
+            error=ComputeError(
+                error_type="not_available",
+                error_message="QCEngine Call Error:\n"
+                "Program {} is registered with QCEngine, but cannot be found".format(program)))
+    error = _process_failure_and_return(input_data, return_dict, raise_error)
+    if error:
+        return error
+
     # Build the model and validate
     input_data = model_wrapper(input_data, ResultInput)
-    _process_failure_and_return(input_data, return_dict, raise_error)
+    error = _process_failure_and_return(input_data, return_dict, raise_error)
+    if error:
+        return error
+
+    # Grab the executor and build the input model
+    executor = get_program(program)
 
     # Build out local options
     if local_options is None:
@@ -70,17 +97,8 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     # Run the program
     with compute_wrapper(capture_output=False) as metadata:
 
-        output_data = input_data.copy()  # Initial in case of error handling
-        try:
-            output_data = get_program(program).compute(input_data, config)
-        except KeyError as e:
-            output_data = FailedOperation(
-                input_data=output_data.dict(),
-                success=False,
-                error=ComputeError(
-                    error_type='program_error',
-                    error_message="QCEngine Call Error:\nProgram {} not understood."
-                    "\nError Message: {}".format(program, str(e))))
+        output_data = input_data.copy()  # lgtm [py/multiple-definition]
+        output_data = executor.compute(input_data, config)
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
@@ -119,21 +137,25 @@ def compute_procedure(input_data: Union[Dict[str, Any], 'BaseModel'],
                 error_type="not_registered",
                 error_message="QCEngine Call Error:\n"
                 "Procedure {} is not registered with QCEngine".format(procedure)))
-    if procedure not in list_available_procedures():
+    elif procedure not in list_available_procedures():
         input_data = FailedOperation(
             input_data=input_data,
             error=ComputeError(
                 error_type="not_available",
                 error_message="QCEngine Call Error:\n"
                 "Procedure {} is registered with QCEngine, but cannot be found".format(procedure)))
-    _process_failure_and_return(input_data, return_dict, raise_error)
+    error = _process_failure_and_return(input_data, return_dict, raise_error)
+    if error:
+        return error
 
     # Grab the executor and build the input model
     executor = get_procedure(procedure)
 
     config = get_config(local_options=local_options)
     input_data = executor.build_input_model(input_data)
-    _process_failure_and_return(input_data, return_dict, raise_error)
+    error = _process_failure_and_return(input_data, return_dict, raise_error)
+    if error:
+        return error
 
     # Run the procedure
     with compute_wrapper(capture_output=False) as metadata:

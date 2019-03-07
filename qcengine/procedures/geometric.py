@@ -1,7 +1,8 @@
-from .procedure_model import BaseProcedure
-
 from typing import Any, Dict, Union
+
 from qcelemental.models import ComputeError, FailedOperation, Optimization, OptimizationInput
+
+from .procedure_model import BaseProcedure
 
 
 class GeometricProcedure(BaseProcedure):
