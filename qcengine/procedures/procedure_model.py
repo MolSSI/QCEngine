@@ -48,9 +48,9 @@ class BaseProcedure(BaseModel, abc.ABC):
         """
         pass
 
-    def _build_model(self, data: Dict[str, Any], raise_error: bool, model: 'BaseModel') -> 'BaseModel':
+    def _build_model(self, data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel':
         """
         Quick wrapper around util.model_wrapper for inherited classes
         """
 
-        return model_wrapper(data, model, raise_error)
+        return model_wrapper(data, model)

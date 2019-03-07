@@ -14,9 +14,8 @@ class GeometricProcedure(BaseProcedure):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
-    def build_input_model(self, data: Union[Dict[str, Any], 'OptimizationInput'],
-                          raise_error: bool=True) -> 'OptimizationInput':
-        return _build_model(data, raise_error, OptimizationInput)
+    def build_input_model(self, data: Union[Dict[str, Any], 'OptimizationInput']) -> 'OptimizationInput':
+        return self._build_model(data, OptimizationInput)
 
     def compute(self, input_data: 'OptimizationInput', config: 'JobConfig') -> 'Optimization':
         try:

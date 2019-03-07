@@ -7,16 +7,26 @@ from qcelemental.models import ComputeError, FailedOperation, Optimization, Opti
 
 from .config import get_config
 from .programs import get_program
+from .procedures import list_available_procedures, get_procedure, list_all_procedures
 from .util import compute_wrapper, get_module_function, handle_output_metadata, model_wrapper
 
 __all__ = ["compute", "compute_procedure"]
 
 
+def _process_failure_and_return(model, return_dict, raise_error):
+    if isinstance(model, FailedOperation):
+        if raise_error:
+            raise ValueError(model.error.error_message)
+        elif return_dict:
+            return model.dict()
+        return model
+
+
 def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             program: str,
-            raise_error: bool = False,
-            local_options: Optional[Dict[str, str]] = None,
-            return_dict: bool = False) -> 'Result':
+            raise_error: bool=False,
+            local_options: Optional[Dict[str, str]]=None,
+            return_dict: bool=False) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -45,11 +55,8 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     """
 
     # Build the model and validate
-    input_data = model_wrapper(input_data, ResultInput, raise_error)
-    if isinstance(input_data, FailedOperation):
-        if return_dict:
-            return input_data.dict()
-        return input_data
+    input_data = model_wrapper(input_data, ResultInput)
+    _process_failure_and_return(input_data, return_dict, raise_error)
 
     # Build out local options
     if local_options is None:
@@ -78,11 +85,11 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
 
-def compute_procedure(input_data: Dict[str, Any],
+def compute_procedure(input_data: Union[Dict[str, Any], 'BaseModel'],
                       procedure: str,
-                      raise_error: bool = False,
-                      local_options: Optional[Dict[str, str]] = None,
-                      return_dict: bool = False) -> 'BaseModel':
+                      raise_error: bool=False,
+                      local_options: Optional[Dict[str, str]]=None,
+                      return_dict: bool=False) -> 'BaseModel':
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters
@@ -104,44 +111,35 @@ def compute_procedure(input_data: Dict[str, Any],
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
 
-    # Build the model and validate
-    input_data = model_wrapper(input_data, OptimizationInput, raise_error)
-    if isinstance(input_data, FailedOperation):
-        if return_dict:
-            return input_data.dict()
-        return input_data
+    procedure = procedure.lower()
+    if procedure not in list_all_procedures():
+        input_data = FailedOperation(
+            input_data=input_data,
+            error=ComputeError(
+                error_type="not_registered",
+                error_message="QCEngine Call Error:\n"
+                "Procedure {} is not registered with QCEngine".format(procedure)))
+    if procedure not in list_available_procedures():
+        input_data = FailedOperation(
+            input_data=input_data,
+            error=ComputeError(
+                error_type="not_available",
+                error_message="QCEngine Call Error:\n"
+                "Procedure {} is registered with QCEngine, but cannot be found".format(procedure)))
+    _process_failure_and_return(input_data, return_dict, raise_error)
+
+    # Grab the executor and build the input model
+    executor = get_procedure(procedure)
 
     config = get_config(local_options=local_options)
+    input_data = executor.build_input_model(input_data)
+    _process_failure_and_return(input_data, return_dict, raise_error)
 
     # Run the procedure
     with compute_wrapper(capture_output=False) as metadata:
+
         # Create a base output data in case of errors
         output_data = input_data.copy()  # lgtm [py/multiple-definition]
-        if procedure == "geometric":
-            # Augment the input
-            geometric_input = input_data.dict()
-
-            # Older QCElemental compat, can be removed in v0.6
-            if "extras" not in geometric_input["input_specification"]:
-                geometric_input["input_specification"]["extras"] = {}
-
-            geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = config.dict()
-
-            # Run the program
-            output_data = get_module_function(procedure, "run_json.geometric_run_json")(geometric_input)
-
-            output_data["schema_name"] = "qcschema_optimization_output"
-            output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
-            if output_data["success"]:
-                output_data = Optimization(**output_data)
-
-        else:
-            output_data = FailedOperation(
-                input_data=input_data.dict(),
-                success=False,
-                error=ComputeError(
-                    error_type="program_error",
-                    error_message="QCEngine Call Error:"
-                    "\nProcedure {} not understood".format(procedure)))
+        output_data = executor.compute(input_data, config)
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)

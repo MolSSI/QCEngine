@@ -25,12 +25,11 @@ from .config import LOGGER, get_provenance_augments
 __all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
 
 
-def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel', raise_error: bool) -> 'BaseModel':
+def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel':
     """
     Wrap input data in the given model, or return a controlled error
     """
 
-    success = True
     try:
         if isinstance(input_data, dict):
             input_data = model(**input_data)
@@ -52,12 +51,8 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel', raise_error: b
             error=ComputeError(
                 error_type="input_error",
                 error_message=("Input data could not be processed correctly:\n" + traceback.format_exc())))
-        success = False
 
-    if raise_error and success is False:
-        raise TypeError(input_data.error.error_message)
-    else:
-        return input_data
+    return input_data
 
 
 @contextmanager
