@@ -4,6 +4,8 @@ Imports the various procedure backends
 
 from typing import List, Set
 
+from .geometric import GeometricProcedure
+
 __all__ = ["register_procedure", "get_procedure", "list_all_procedures", "list_available_procedures"]
 
 procedures = {}
@@ -47,3 +49,5 @@ def list_available_procedures() -> Set[str]:
 
     return ret
 
+
+register_procedure(GeometricProcedure())
