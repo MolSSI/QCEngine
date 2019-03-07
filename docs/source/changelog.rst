@@ -13,6 +13,28 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.6.2 / 2019-03-07
+-------------------
+
+Enhancements
+++++++++++++
+
+- (:pr:`38` and :pr:`39`) Documentation now pulls from the custom QC Archive Sphinx Theme, but can fall back to the standard
+  RTD theme. This allows all docs across QCA to appear consistent with each other.
+- (:pr:`43`) Added a base model for all ``Procedure`` objects to derive from. This allows
+  procedures' interactions with compute programs to be more unified. This PR also ensured
+  GeomeTRIC provides Provenance information. 
+
+Bug Fixes
++++++++++
+- (:pr:`40`) This PR improved numerous back-end and testing quality of life aspects.
+  Fixed ``setup.py`` to call ``pytest`` instead of ``unittest`` when running tests on install.
+  Some conda packages for Travis-CI are cached to reduce the download time of the larger computation codes.
+  Psi4 is now pinned to the 1.3 version to fix build-level pin of libint.
+  Conda-build recipe removed to avoid possible confusion for everyone who isn't a Conda-Forge
+  recipe maintainer. Tests now rely exclusively on the ``conda env`` setups.
+
+
 v0.6.1 / 2019-02-20
 -------------------
 
