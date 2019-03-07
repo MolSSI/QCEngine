@@ -61,6 +61,8 @@ def test_geometric_psi4():
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.e-4) == 1.3459150737
+    assert ret.provenance.creator.lower() == "geometric"
+    assert ret.trajectory[0].provenance.creator.lower() == "psi4"
 
 
 @testing.using_psi4
@@ -98,9 +100,6 @@ def test_geometric_stdout():
     assert ret.success is True
     assert "Converged!" in ret.stdout
 
-    with pytest.raises(ValueError):
-        _ = qcng.compute_procedure(inp, "rdkit", raise_error=True)
-
 
 @testing.using_rdkit
 @testing.using_geometric
@@ -116,9 +115,6 @@ def test_geometric_rdkit_error():
     ret = qcng.compute_procedure(inp, "geometric")
     assert ret.success is False
     assert isinstance(ret.error.error_message, str)
-
-    with pytest.raises(ValueError):
-        _ = qcng.compute_procedure(inp, "rdkit", raise_error=True)
 
 
 @testing.using_torchani

@@ -20,7 +20,7 @@ def test_missing_key():
 
 
 def test_missing_key_raises():
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         ret = qcng.compute({"hello": "hi"}, "bleh", raise_error=True)
 
 
