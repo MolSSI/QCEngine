@@ -62,7 +62,7 @@ class DFTD3Executor(ProgramExecutor):
 
 def run_json(jobrec):
     """
-    An implementation of the QC JSON Schema (molssi-qc-schema.readthedocs.io/en/latest/index.html#) implementation in Psi4.
+    An implementation of the QC JSON Schema (molssi-qc-schema.readthedocs.io/en/latest/index.html#) for DFTD3 (from Psi4).
 
     Parameters
     ----------
@@ -148,14 +148,14 @@ def run_dftd3(name, molecule, options, **kwargs):
 
     jobrec = {}
     jobrec['schema_name'] = 'qcschema_input'
-    jobrec['schema_version'] = 1  # --> 2
+    jobrec['schema_version'] = 1
     jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
 
     # strip engine hint
     if name.startswith('d3-'):
         name = name[3:]
 
-    jobrec.update(molecule.to_schema(dtype=1))  # --> jobrec['molecule'] =
+    jobrec['molecule'] = molecule.to_schema(dtype=2)
     jobrec['model'] = {
         'method': name,
         'basis': '(auto)',
@@ -198,8 +198,8 @@ def run_dftd3_from_arrays(molrec,
 
     """
     jobrec = {}
-    jobrec['schema_name'] = 'qc_schema_input'  # --> qcschema_input
-    jobrec['schema_version'] = 1  # --> 2
+    jobrec['schema_name'] = 'qcschema_input'
+    jobrec['schema_version'] = 1
     jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
 
     # strip engine hint
@@ -211,7 +211,7 @@ def run_dftd3_from_arrays(molrec,
     opts['params_tweaks'] = param_tweaks
     opts['dashcoeff_supplement'] = dashcoeff_supplement
 
-    jobrec.update(qcel.molparse.to_schema(molrec, dtype=1))  # --> jobrec['molecule'] =
+    jobrec['molecule'] = qcel.molparse.to_schema(molrec, dtype=2)
     jobrec['model'] = {
         'method': name_hint,
         'basis': '(auto)',
@@ -249,21 +249,8 @@ def dftd3_driver(jobrec, verbose=1):
 
 
 def module_driver(jobrec, module_label, plant, harvest, verbose=1):
-    """Drive the jobrec@i (input) -> modulerec@i -> modulerec@io -> jobrec@io (returned) process.
+    """Drive the jobrec@i (input) -> modulerec@i -> modulerec@io -> jobrec@io (returned) process."""
 
-    Input Fields
-    ------------
-
-    Optional Input Fields
-    ---------------------
-
-    Output Fields
-    -------------
-
-    Optional Output Fields
-    ----------------------
-
-    """
     if verbose > 2:
         print(f'[1] {module_label.upper()} JOBREC PRE-PLANT (j@i) <<<')
         pp.pprint(jobrec)
