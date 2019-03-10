@@ -1,11 +1,9 @@
 """Compute dispersion correction using Greenwell & Beran's MP2D executable."""
 
 import copy
-import json
 import os
 import pprint
 import re
-import subprocess
 import sys
 import traceback
 from decimal import Decimal
@@ -16,7 +14,7 @@ from qcelemental.models import FailedOperation, Result
 
 from .dftd3 import dashparam
 from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
-from ..util import execute, which
+from ..util import which
 from .executor import ProgramExecutor
 from ..extras import provenance_stamp
 
@@ -54,6 +52,7 @@ class MP2DExecutor(ProgramExecutor):
 
         # Note: no version at present. Need to get Chandler to set one up
         #command = [which('mp2d'), '-version']
+        #import subprocess
         #proc = subprocess.run(command, stdout=subprocess.PIPE)
         #candidate_version = proc.stdout.decode('utf-8').strip()
         candidate_version = '0.1'

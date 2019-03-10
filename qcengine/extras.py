@@ -6,7 +6,7 @@ import re
 
 from . import _version
 
-__all__ = ["get_information", "provenance_stamp", "parse_dertype"]
+__all__ = ["get_information", "provenance_stamp"]
 
 versions = _version.get_versions()
 
