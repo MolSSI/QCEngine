@@ -5,6 +5,7 @@ channels:
 dependencies:
   - psi4
   - dftd3 3.2.1
+  - mp2d
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
 
     # Core
@@ -12,7 +13,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.3.0
+#  - qcelemental >=0.3.0
   - pydantic >=0.20.0
 
     # Testing
@@ -23,3 +24,4 @@ dependencies:
   - pip:
     - codecov
     - git+https://github.com/leeping/geomeTRIC#egg=geometric
+    - git+git://github.com/MolSSI/QCElemental.git@master#egg=qcelemental
