@@ -19,7 +19,7 @@ from qcelemental.models import FailedOperation, Result
 from . import dashparam
 from ...util import execute, which
 from ..executor import ProgramExecutor
-from ...extras import parse_dertype, provenance_stamp
+from ...extras import provenance_stamp
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -199,14 +199,6 @@ def dftd3_plant(jobrec):
         program-specific commands and files.
 
     """
-    try:
-        jobrec['driver']
-        jobrec['model']['method']
-        jobrec['keywords']
-        jobrec['molecule']
-    except KeyError as exc:
-        raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(jobrec.keys()))) from exc
-
     # temp until actual options object
     jobrec['extras']['info'] = dashparam.from_arrays(
         name_hint=jobrec['model']['method'],
@@ -238,7 +230,6 @@ def dftd3_plant(jobrec):
             'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
                     os.pathsep + os.environ.get('PATH'),
             'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
-            'NONSENSE': None
         }
     modulerec['blocking_files'] = [os.path.join(pathlib.Path.home(), '.dftd3par.' + socket.gethostname())]
 
@@ -282,19 +273,6 @@ def dftd3_harvest(jobrec, modulerec):
     set to run with some dummy values, the 2-body values are no good.
 
     """
-    try:
-        jobrec['molecule']['real']
-        jobrec['driver']
-        jobrec['provenance']
-        jobrec['extras']['info']['fctldash']
-    except KeyError as exc:
-        raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(jobrec.keys()))) from exc
-
-    try:
-        modulerec['stdout']
-    except KeyError as exc:
-        raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(modulerec.keys()))) from exc
-
     # amalgamate output
     text = modulerec['stdout']
     text += '\n  <<<  DFTD3 Results  >>>\n'
