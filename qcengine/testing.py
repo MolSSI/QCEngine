@@ -88,6 +88,7 @@ _programs = {
     "rdkit": _plugin_import("rdkit"),
     "qcdb": _plugin_import("qcdb"),
     "torchani": _plugin_import("torchani"),
+    "mp2d": which('mp2d', return_bool=True),
 }
 
 def has_program(name):
@@ -104,6 +105,7 @@ using_psi4 = _build_pytest_skip("psi4")
 using_rdkit = _build_pytest_skip("rdkit")
 using_qcdb = _build_pytest_skip("qcdb")
 using_torchani = _build_pytest_skip("torchani")
+using_mp2d = _build_pytest_skip("mp2d")
 
 using_dftd3_321 = pytest.mark.skipif(
     is_program_new_enough("dftd3", "3.2.1") is False,
