@@ -42,8 +42,21 @@ class DFTD3Executor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
-    def found(self) -> bool:
+    @staticmethod
+    def found() -> bool:
         return which('dftd3', return_bool=True)
+
+    def get_version(self) -> str:
+        if not self.found():
+            raise ImportError("Could not find DFTD3 to the shell path.")
+        # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
+        command = [which('dftd3'), '-version']
+        import subprocess
+        proc = subprocess.run(command, stdout=subprocess.PIPE)
+        candidate_version = proc.stdout.decode('utf-8').strip()
+
+        from pkg_resources import safe_version
+        return safe_version(candidate_version)
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
 
@@ -568,18 +581,3 @@ def dftd3_coeff_formatter(dashlvl, dashcoeff):
         return dashformatter.format(1.0, 0.0, 0.0, 0.0, dashcoeff['alpha6'], 3)
     else:
         raise ValueError(f"""-D correction level {dashlvl} is not available. Choose among {dashcoeff.keys()}.""")
-
-
-"""
-Notes
------
-The DFTD3 executable must be independently compiled and found in :envvar:`PATH` or :envvar:`PSIPATH`.
-research site: https://www.chemie.uni-bonn.de/pctc/mulliken-center/software/dft-d3
-Psi4 mode: When `psi4` the python module is importable at `import qcdb`
-           time, Psi4 mode is activated, with the following alterations:
-           * output goes to output file
-           * gradient returned as psi4.core.Matrix, not list o'lists
-           * scratch is written to randomly named subdirectory of psi scratch
-           * psivar "DISPERSION CORRECTION ENERGY" is set
-           * `verbose` triggered when PRINT keywork of SCF module >=3
-"""

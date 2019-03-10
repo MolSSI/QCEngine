@@ -614,8 +614,6 @@ def test_3():
     }
     res = qcng.compute(resinp, 'dftd3', raise_error=True)
     res = res.dict()
-    import pprint
-    pprint.pprint(res)
 
     #res = dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
     assert compare('B3LYP-D3(BJ)', _compute_key(res['extras']['info']), 'key')

@@ -1,6 +1,7 @@
 """
 Calls the Psi4 executable.
 """
+from pkg_resources import safe_version, parse_version
 
 from qcelemental.models import FailedOperation, Result
 
@@ -26,6 +27,27 @@ class Psi4Executor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
+    @staticmethod
+    def found() -> bool:
+        try:
+            import psi4
+        except ModuleNotFoundError:
+            return False
+        else:
+            return True
+
+    def get_version(self) -> str:
+        if not self.found():
+            raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
+
+        import psi4
+        candidate_version = psi4.__version__
+        if "undef" in candidate_version:
+            raise TypeError(
+                "Using custom build without tags. Please pull git tags with `git pull origin master --tags`.")
+
+        return safe_version(candidate_version)
+
     def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Runs Psi4 in API mode
@@ -48,9 +70,7 @@ class Psi4Executor(ProgramExecutor):
 
         scratch = config.scratch_directory
 
-        psi_version = self.parse_version(psi4.__version__)
-
-        if psi_version > self.parse_version("1.2"):
+        if parse_version(self.get_version()) > parse_version("1.2"):
 
             mol = psi4.core.Molecule.from_schema(input_model)
             if (mol.multiplicity() != 1) and ("reference" not in input_model["keywords"]):
@@ -68,7 +88,7 @@ class Psi4Executor(ProgramExecutor):
                 output_data["error"] = {"error_type": "internal_error", "error_message": output_data["error"]}
 
         else:
-            raise TypeError("Psi4 version '{}' not understood.".format(psi_version))
+            raise TypeError("Psi4 version '{}' not understood.".format(self.get_version()))
 
         # Reset the schema if required
         output_data["schema_name"] = "qcschema_output"

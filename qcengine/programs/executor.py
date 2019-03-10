@@ -30,15 +30,9 @@ class ProgramExecutor(BaseModel, abc.ABC):
 
 ## Utility
 
-    @staticmethod
-    def parse_version(version: str):
-        from pkg_resources import parse_version
-        if "undef" in version:
-            raise TypeError(
-                "Using custom build without tags. Please pull git tags with `git pull origin master --tags`.")
-
-        return parse_version(version)
-
+    def get_version(self) -> str:
+        """Finds program, extracts version, returns normalized version string."""
+        pass
 
 ## Computers
 

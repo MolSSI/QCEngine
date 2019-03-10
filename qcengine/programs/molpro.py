@@ -163,4 +163,4 @@ class MolproExecutor(ProgramExecutor):
         return Result(**{**input_model.dict(), **output_data})
 
     def found(self) -> bool:
-        return which('dftd3', return_bool=True)
+        return which('molpro', return_bool=True)
