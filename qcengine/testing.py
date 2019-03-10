@@ -10,7 +10,7 @@ from pkg_resources import parse_version
 
 import pytest
 
-from .util import which
+from .util import which, which_import
 from .programs import list_available_programs, get_program
 
 
@@ -31,31 +31,6 @@ def environ_context(env):
                 os.environ[key] = value
 
 
-def _plugin_import(plug):
-    """
-    Tests to see if a module is available
-    """
-    import sys
-    if sys.version_info >= (3, 4):
-        from importlib import util
-        plug_spec = util.find_spec(plug)
-    else:
-        import pkgutil
-        plug_spec = pkgutil.find_loader(plug)
-    if plug_spec is None:
-        return False
-    else:
-        return True
-
-
-def is_psi4_new_enough(version_feature_introduced):
-    if not _plugin_import('psi4'):
-        return False
-    import psi4
-
-    return parse_version(psi4.__version__) >= parse_version(version_feature_introduced)
-
-
 def is_program_new_enough(program, version_feature_introduced):
     """Returns True if `program` registered in QCEngine, locatable in
     environment, has parseable version, and that version in normalized
@@ -69,25 +44,14 @@ def is_program_new_enough(program, version_feature_introduced):
     return parse_version(candidate_version) >= parse_version(version_feature_introduced)
 
 
-def is_dftd3_new_enough(version_feature_introduced):
-    if not which('dftd3', return_bool=True):
-        return False
-    # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
-    command = [which('dftd3'), '-version']
-    proc = subprocess.run(command, stdout=subprocess.PIPE)
-    candidate_version = proc.stdout.decode('utf-8').strip()
-
-    return parse_version(candidate_version) >= parse_version(version_feature_introduced)
-
-
 # Figure out what is imported
 _programs = {
     "dftd3": which('dftd3', return_bool=True),
-    "geometric": _plugin_import("geometric"),
+    "geometric": which_import("geometric", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
-    "rdkit": _plugin_import("rdkit"),
-    "qcdb": _plugin_import("qcdb"),
-    "torchani": _plugin_import("torchani"),
+    "rdkit": which_import("rdkit", return_bool=True),
+    "qcdb": which_import("qcdb", return_bool=True),
+    "torchani": which_import("torchani", return_bool=True),
     "mp2d": which('mp2d', return_bool=True),
 }
 

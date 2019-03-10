@@ -42,25 +42,28 @@ class MP2DExecutor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found() -> bool:
-        return which('mp2d', return_bool=True)
+    def found(raise_error=False) -> bool:
+        is_found = which('mp2d', return_bool=True)
+
+        if not is_found and raise_error:
+            raise ImportError("Could not find MP2D in the shell path.")
+        else:
+            return is_found
 
     def get_version(self) -> str:
-        if not self.found():
-            raise ImportError("Could not find MP2D in the shell path.")
-        # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
-        command = [which('mp2d'), '-version']
-        import subprocess
-        proc = subprocess.run(command, stdout=subprocess.PIPE)
-        candidate_version = proc.stdout.decode('utf-8').strip()
+        self.found(raise_error=True)
+
+        # Note: no version at present. Need to get Chandler to set one up
+        #command = [which('mp2d'), '-version']
+        #proc = subprocess.run(command, stdout=subprocess.PIPE)
+        #candidate_version = proc.stdout.decode('utf-8').strip()
+        candidate_version = '0.1'
 
         from pkg_resources import safe_version
         return safe_version(candidate_version)
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
-
-        if not which('mp2d', return_bool=True):
-            raise ImportError("Could not find mp2d in the envvar path.")
+        self.found(raise_error=True)
 
         # Set up the job
         input_data = input_data.copy().dict()
@@ -92,7 +95,7 @@ def run_json(jobrec):
     if mtd.startswith('mp2d-'):
         jobrec['model']['method'] = mtd[5:]
 
-    if jobrec['driver'].derint() > 1:
+    if jobrec['driver'].derivative_int() > 1:
         jobrec['success'] = False
         jobrec['error'] = {
             'error_type': 'ValueError',

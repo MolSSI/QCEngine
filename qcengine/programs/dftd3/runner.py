@@ -42,12 +42,17 @@ class DFTD3Executor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found() -> bool:
-        return which('dftd3', return_bool=True)
+    def found(raise_error=False) -> bool:
+        is_found = which('dftd3', return_bool=True)
+
+        if not is_found and raise_error:
+            raise ImportError("Could not find DFTD3 in the shell path.")
+        else:
+            return is_found
 
     def get_version(self) -> str:
-        if not self.found():
-            raise ImportError("Could not find DFTD3 to the shell path.")
+        self.found(raise_error=True)
+
         # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
         command = [which('dftd3'), '-version']
         import subprocess
@@ -58,9 +63,7 @@ class DFTD3Executor(ProgramExecutor):
         return safe_version(candidate_version)
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
-
-        if not which('dftd3', return_bool=True):
-            raise ImportError("Could not find dftd3 in the envvar path.")
+        self.found(raise_error=True)
 
         # Set up the job
         input_data = input_data.copy().dict()
@@ -92,7 +95,7 @@ def run_json(jobrec):
     if mtd.startswith('d3-'):
         jobrec['model']['method'] = mtd[3:]
 
-    if jobrec['driver'].derint() > 1:
+    if jobrec['driver'].derivative_int() > 1:
         jobrec['success'] = False
         jobrec['error'] = {
             'error_type': 'ValueError',

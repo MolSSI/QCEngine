@@ -5,6 +5,7 @@ from pkg_resources import safe_version, parse_version
 
 from qcelemental.models import FailedOperation, Result
 
+from ..util import which_import
 from .executor import ProgramExecutor
 
 from ..util import scratch_directory
@@ -28,17 +29,16 @@ class Psi4Executor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found() -> bool:
-        try:
-            import psi4
-        except ModuleNotFoundError:
-            return False
+    def found(raise_error=False) -> bool:
+        is_found = which_import("psi4", return_bool=True)
+
+        if not is_found and raise_error:
+            raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
         else:
-            return True
+            return is_found
 
     def get_version(self) -> str:
-        if not self.found():
-            raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
+        self.found(raise_error=True)
 
         import psi4
         candidate_version = psi4.__version__
@@ -52,11 +52,8 @@ class Psi4Executor(ProgramExecutor):
         """
         Runs Psi4 in API mode
         """
-
-        try:
-            import psi4
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
+        self.found(raise_error=True)
+        import psi4
 
         # Setup the job
         input_model = input_model.copy().dict()
@@ -113,10 +110,3 @@ class Psi4Executor(ProgramExecutor):
         else:
             return FailedOperation(
                 success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
-
-    def found(self) -> bool:
-        try:
-            import psi4
-            return True
-        except ModuleNotFoundError:
-            return False
