@@ -8,7 +8,9 @@ import pprint
 import re
 import socket
 import sys
+import traceback
 from decimal import Decimal
+from typing import Any, Dict, Optional
 
 import numpy as np
 import qcelemental as qcel
@@ -48,7 +50,7 @@ class DFTD3Executor(ProgramExecutor):
         if not which('dftd3', return_bool=True):
             raise ImportError("Could not find dftd3 in the envvar path.")
 
-        # Setup the job
+        # Set up the job
         input_data = input_data.copy().dict()
         input_data["success"] = False
 
@@ -66,19 +68,11 @@ def run_json(jobrec):
 
     Parameters
     ----------
+    mjobrec : qcelemental.models.ResultInput
     jobrec : JSON
         Please see molssi-qc-schema.readthedocs.io/en/latest/spec_components.html for further details.
 
     """
-    # pp.pprint(jobrec)
-
-    # This is currently a forced override
-    if jobrec["schema_name"] not in ["qc_schema_input", "qcschema_input"]:
-        raise KeyError(f"""Schema name of '{jobrec["schema_name"]}' not understood.""")
-
-    if jobrec["schema_version"] != 1:
-        raise KeyError(f"""Schema version of '{jobrec["schema_version"]}' not understood.""")
-
     jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
 
     # strip engine hint
@@ -90,7 +84,14 @@ def run_json(jobrec):
     #     'method': name,
     #     'basis': '(auto)',
     # }
-    # _, jobrec['driver'] = parse_dertype(kwargs['ptype'], max_derivative=1)
+
+    if jobrec['driver'].derint() > 1:
+        jobrec['success'] = False
+        jobrec['error'] = {
+            'error_type': 'ValueError',
+            'error_message': """DFTD3 produces max gradient, not {jobrec['driver']}"""
+        }
+        raise ValueError("""DFTD3 produces max gradient, not {jobrec['driver']}""")
 
     # jobrec['options'] = opts
     # jobrec['options'] = copy.deepcopy(options)
@@ -102,7 +103,6 @@ def run_json(jobrec):
     try:
         dftd3_driver(jobrec)
     except Exception as exc:
-        import traceback
         jobrec['success'] = False
         jobrec['error'] = {
             'error_type': type(exc).__name__,
@@ -131,114 +131,112 @@ def run_json(jobrec):
         jobrec["return_result"] = jobrec["extras"]["qcvars"]["CURRENT GRADIENT"]
 
     jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
-    #    jobrec["extras"] = {"qcvars": jobrec.pop("qcvars"),
-    #                       "info": jobrec.pop("keywords")}
     jobrec["keywords"] = kw
 
     return jobrec
 
 
-def run_dftd3(name, molecule, options, **kwargs):
-    """QCDriver signature for computing `name` on `molecule` with `options` with engine `DFTD3`."""
-
-    # * ONLY takes self-sufficient fctl-dash for name
-    # * tweakparams are only valid options
-
-    opts = {}
-
-    jobrec = {}
-    jobrec['schema_name'] = 'qcschema_input'
-    jobrec['schema_version'] = 1
-    jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
-
-    # strip engine hint
-    if name.startswith('d3-'):
-        name = name[3:]
-
-    jobrec['molecule'] = molecule.to_schema(dtype=2)
-    jobrec['model'] = {
-        'method': name,
-        'basis': '(auto)',
-    }
-    _, jobrec['driver'] = parse_dertype(kwargs['ptype'], max_derivative=1)
-    jobrec['keywords'] = opts
-    #jobrec['options'] = copy.deepcopy(options)
-
-    try:
-        dftd3_driver(jobrec)
-    except Exception as exc:
-        import traceback
-        jobrec['success'] = False
-        jobrec['error'] = {
-            'error_type': type(exc).__name__,
-            'error_message': ''.join(traceback.format_exception(*sys.exc_info())),
-        }
-        raise exc
-
-    jobrec['success'] = True
-    jobrec['extras']['qcvars']['CURRENT ENERGY'] = copy.deepcopy(
-        jobrec['extras']['qcvars']['DISPERSION CORRECTION ENERGY'])
-    if jobrec['driver'] == 'gradient':
-        jobrec['extras']['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(
-            jobrec['extras']['qcvars']['DISPERSION CORRECTION GRADIENT'])
-
-    return jobrec
-
-
-def run_dftd3_from_arrays(molrec,
-                          name_hint=None,
-                          level_hint=None,
-                          param_tweaks=None,
-                          ptype='energy',
-                          dashcoeff_supplement=None,
-                          verbose=1):
-    """Specialized signature disentangling dispersion level and
-    parameters for computing on `molecule` with engine `DFTD3`. See
-    `dashparam.from_array` for parameter details.
-
-    """
-    jobrec = {}
-    jobrec['schema_name'] = 'qcschema_input'
-    jobrec['schema_version'] = 1
-    jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
-
-    # strip engine hint
-    if name_hint.startswith('d3-'):
-        name_hint = name_hint[3:]
-
-    opts = {}
-    opts['level_hint'] = level_hint
-    opts['params_tweaks'] = param_tweaks
-    opts['dashcoeff_supplement'] = dashcoeff_supplement
-
-    jobrec['molecule'] = qcel.molparse.to_schema(molrec, dtype=2)
-    jobrec['model'] = {
-        'method': name_hint,
-        'basis': '(auto)',
-    }
-    _, jobrec['driver'] = parse_dertype(ptype, max_derivative=1)
-    jobrec['keywords'] = opts
-    #jobrec['options'] = copy.deepcopy(options)
-
-    try:
-        dftd3_driver(jobrec)
-    except Exception as exc:
-        import traceback
-        jobrec['success'] = False
-        jobrec['error'] = {
-            'error_type': type(exc).__name__,
-            'error_message': ''.join(traceback.format_exception(*sys.exc_info())),
-        }
-        raise exc
-
-    jobrec['success'] = True
-    jobrec['extras']['qcvars']['CURRENT ENERGY'] = copy.deepcopy(
-        jobrec['extras']['qcvars']['DISPERSION CORRECTION ENERGY'])
-    if jobrec['driver'] == 'gradient':
-        jobrec['extras']['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(
-            jobrec['extras']['qcvars']['DISPERSION CORRECTION GRADIENT'])
-
-    return jobrec
+#def run_dftd3(name, molecule, options, **kwargs):
+#    """QCDriver signature for computing `name` on `molecule` with `options` with engine `DFTD3`."""
+#
+#    # * ONLY takes self-sufficient fctl-dash for name
+#    # * tweakparams are only valid options
+#
+#    opts = {}
+#
+#    jobrec = {}
+#    jobrec['schema_name'] = 'qcschema_input'
+#    jobrec['schema_version'] = 1
+#    jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
+#
+#    # strip engine hint
+#    if name.startswith('d3-'):
+#        name = name[3:]
+#
+#    jobrec['molecule'] = molecule.to_schema(dtype=2)
+#    jobrec['model'] = {
+#        'method': name,
+#        'basis': '(auto)',
+#    }
+#    _, jobrec['driver'] = parse_dertype(kwargs['ptype'], max_derivative=1)
+#    jobrec['keywords'] = opts
+#    #jobrec['options'] = copy.deepcopy(options)
+#
+#    try:
+#        dftd3_driver(jobrec)
+#    except Exception as exc:
+#        import traceback
+#        jobrec['success'] = False
+#        jobrec['error'] = {
+#            'error_type': type(exc).__name__,
+#            'error_message': ''.join(traceback.format_exception(*sys.exc_info())),
+#        }
+#        raise exc
+#
+#    jobrec['success'] = True
+#    jobrec['extras']['qcvars']['CURRENT ENERGY'] = copy.deepcopy(
+#        jobrec['extras']['qcvars']['DISPERSION CORRECTION ENERGY'])
+#    if jobrec['driver'] == 'gradient':
+#        jobrec['extras']['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(
+#            jobrec['extras']['qcvars']['DISPERSION CORRECTION GRADIENT'])
+#
+#    return jobrec
+#
+#
+#def run_dftd3_from_arrays(molrec,
+#                          name_hint=None,
+#                          level_hint=None,
+#                          param_tweaks=None,
+#                          ptype='energy',
+#                          dashcoeff_supplement=None,
+#                          verbose=1):
+#    """Specialized signature disentangling dispersion level and
+#    parameters for computing on `molecule` with engine `DFTD3`. See
+#    `dashparam.from_array` for parameter details.
+#
+#    """
+#    jobrec = {}
+#    jobrec['schema_name'] = 'qcschema_input'
+#    jobrec['schema_version'] = 1
+#    jobrec['provenance'] = provenance_stamp(sys._getframe().f_code.co_name + '.' + __name__)
+#
+#    # strip engine hint
+#    if name_hint.startswith('d3-'):
+#        name_hint = name_hint[3:]
+#
+#    opts = {}
+#    opts['level_hint'] = level_hint
+#    opts['params_tweaks'] = param_tweaks
+#    opts['dashcoeff_supplement'] = dashcoeff_supplement
+#
+#    jobrec['molecule'] = qcel.molparse.to_schema(molrec, dtype=2)
+#    jobrec['model'] = {
+#        'method': name_hint,
+#        'basis': '(auto)',
+#    }
+#    _, jobrec['driver'] = parse_dertype(ptype, max_derivative=1)
+#    jobrec['keywords'] = opts
+#    #jobrec['options'] = copy.deepcopy(options)
+#
+#    try:
+#        dftd3_driver(jobrec)
+#    except Exception as exc:
+#        import traceback
+#        jobrec['success'] = False
+#        jobrec['error'] = {
+#            'error_type': type(exc).__name__,
+#            'error_message': ''.join(traceback.format_exception(*sys.exc_info())),
+#        }
+#        raise exc
+#
+#    jobrec['success'] = True
+#    jobrec['extras']['qcvars']['CURRENT ENERGY'] = copy.deepcopy(
+#        jobrec['extras']['qcvars']['DISPERSION CORRECTION ENERGY'])
+#    if jobrec['driver'] == 'gradient':
+#        jobrec['extras']['qcvars']['CURRENT GRADIENT'] = copy.deepcopy(
+#            jobrec['extras']['qcvars']['DISPERSION CORRECTION GRADIENT'])
+#
+#    return jobrec
 
 
 def dftd3_driver(jobrec, verbose=1):
@@ -330,8 +328,7 @@ def dftd3_plant(jobrec):
         level_hint=jobrec['keywords'].get('level_hint', None),
         param_tweaks=jobrec['keywords'].get('params_tweaks', None),
         dashcoeff_supplement=jobrec['keywords'].get('dashcoeff_supplement', None))
-    # sketchy: adding to options during planting season
-    jobrec['keywords'].update(dftd3rec)
+    jobrec['extras']['info'] = dftd3rec
 
     # this is what the dftd3 program needs, not what the job needs
     # * form dftd3_parameters string that governs dispersion calc
@@ -404,7 +401,7 @@ def dftd3_harvest(jobrec, dftd3rec):
         jobrec['molecule']['real']
         jobrec['driver']
         jobrec['provenance']
-        jobrec['keywords']['fctldash']
+        jobrec['extras']['info']['fctldash']
     except KeyError as exc:
         raise KeyError('Required field ({}) missing among ({})'.format(str(exc), list(jobrec.keys()))) from exc
 
@@ -465,7 +462,7 @@ def dftd3_harvest(jobrec, dftd3rec):
         except NameError as exc:
             raise Dftd3Error('Unsuccessful gradient collection.') from exc
 
-    qcvkey = jobrec['keywords']['fctldash'].upper()
+    qcvkey = jobrec['extras']['info']['fctldash'].upper()
 
     # OLD WAY
     calcinfo = []
@@ -510,7 +507,6 @@ def dftd3_harvest(jobrec, dftd3rec):
     #text += print_variables(calcinfo)
 
     jobrec['stdout'] = text
-    jobrec['extras'] = {}
     jobrec['extras']['qcvars'] = calcinfo
 
     prov = {}
