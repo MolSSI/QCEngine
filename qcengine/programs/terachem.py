@@ -7,6 +7,10 @@ from typing import Any, Dict, Optional
 from qcelemental.models import Result
 
 from .executor import ProgramExecutor
+from ..util import which
+import os
+import errno
+import subprocess
 
 
 class TeraChemExecutor(ProgramExecutor):
@@ -23,11 +27,42 @@ class TeraChemExecutor(ProgramExecutor):
     class Config(ProgramExecutor.Config):
         pass
 
+
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs}) 
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
-        pass
+        if not found():
+            raise ImportError("Could not find terachem in the envvar path.")
+        input_data = input_data.copy().dict()
+        job_inputs = build_input(self, input_data, config)
+        # Setup the job
+        scratch = config.scratch_directory
+        if scratch is not None:
+            job_inputs["scratch_location"] = scratch
+        else:
+            job_inputs["scratch_location"] = os.getcwd()
+        # Run terachem
+        # TODO: ask about extra_outfile, extra_commands, scratch_name, timeout
+        exe_outputs = excute(job_inputs)
+
+        output_data = {}
+
+        # Determine whether the calculation succeeded
+        if not exe_outputs["exe_success"]:
+            output_data["success"] = False
+            output_data["error"] = {"error_type": "internal_error", 
+                                    "error_message": exe_outputs["error"]
+                                   }
+            return FailedOperation(
+                success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
+
+        # If execution succeeded, collect results
+        Result = parse_output(exe_outputs["outfiles"], input_data)
+        return Result
+
+    def found(self) -> bool:
+        return which('terachem', return_bool=True)
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig', 
                     template: Optional[str]=None) -> Dict[str, Any]:
@@ -60,9 +95,9 @@ class TeraChemExecutor(ProgramExecutor):
             input_file.append("{} {}".format(k, v))
   
         return {
-            "commands": ["terachem","example.in"],
+            "commands": ["terachem", "tc.in"],
             "infiles": {
-                "example.in": input_file,
+                "tc.in": input_file,
                 "geometry.xyz": xyz_file
             },
             "input_result": input_model.copy(deep=True)
@@ -73,7 +108,7 @@ class TeraChemExecutor(ProgramExecutor):
         properties = {}
 
         # Parse the output file, collect properties and gradient
-        output_lines = open(outfiles["example.out"]).readlines()
+        output_lines = open(outfiles["tc.out"]).readlines()
         gradients = []
         for idx,line in enumerate(output_lines):
             if "FINAL ENERGY" in line:
@@ -120,3 +155,56 @@ class TeraChemExecutor(ProgramExecutor):
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
+
+    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+        exe_success = False
+        # First move the scratch dir
+        scrdir = inputs["scratch_location"]
+        if not os.path.exists(scrdir):
+            try:
+                os.mkdir(scrdir)
+            except OSError as exc:
+                if exc.errno != errno.EEXIST :
+                    print("Error: Creating scratch folder " + scrdir + "failed")
+                    if exc.errno == errno.EACCES:
+                        raise OSError("Permission Denied")
+                    elif exc.errno == errno.ENOSPC:
+                        raise OSError("No space left on disk")
+                    elif exc.errno == errno.EROFS:
+                        raise OSError("Readonly file system")
+                    else:
+                        raise OSError("Other OSError")
+                pass
+        os.chdir(scrdir)
+        
+        # Then create the input files
+        tcin = open("tc.in")
+        tcin.write(inputs["infiles"]["tc.in"])
+        tcin.close()
+
+        xyz = open("geometry.xyz")
+        xyz.write(inputs["infiles"]["geometry.xyz"])
+        xyz.close()
+
+        tcoutfile = os.path.join(scrdir, "tc.out")
+        tcout = open(tcoutfile)
+
+        # Execute TeraChem
+        commands = inputs["commands"]
+        err = ""
+        try:
+            subprocess.Popen(commands, stdout=tcout, stderr=tcout)
+            exe_success = True
+        except OSError as err:
+            exe_success = False
+        tcout.close()
+
+        # Construct output
+        return {
+            "sucess": exe_success,
+            "outfiles":{
+                "tc.out": tcoutfile
+            },
+            "error": err
+        }
+
