@@ -26,8 +26,8 @@ import qcengine
 # -- Project information -----------------------------------------------------
 
 project = 'QCEngine'
-copyright = '2018, Daniel G. A. Smith'
-author = 'Daniel G. A. Smith'
+copyright = '2018-2019, The Molecular Sciences Software Institute'
+author = 'The QCArchive Development Team'
 
 # The short X.Y version
 version = qcengine.__version__
@@ -155,7 +155,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'QCEngine.tex', 'QCEngine Documentation',
-     'Daniel G. A. Smith', 'manual'),
+     'The QCArchive Development Team', 'manual'),
 ]
 
 
