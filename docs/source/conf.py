@@ -6,6 +6,7 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
+import datetime
 import os
 import sys
 
@@ -26,7 +27,7 @@ import qcengine
 # -- Project information -----------------------------------------------------
 
 project = 'QCEngine'
-copyright = '2018-2019, The Molecular Sciences Software Institute'
+copyright = f'2018-{datetime.datetime.today().year}, The Molecular Sciences Software Institute'
 author = 'The QCArchive Development Team'
 
 # The short X.Y version
