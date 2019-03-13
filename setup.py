@@ -18,8 +18,8 @@ if __name__ == "__main__":
     setuptools.setup(
         name='qcengine',
         description='A compute wrapper for Quantum Chemistry.',
-        author='Daniel G. A. Smith',
-        author_email='dgasmith@vt.edu',
+        author='The QCArchive Development Team',
+        author_email='qcarchive@molssi.org',
         url="https://github.com/MolSSI/QCEngine",
         license='BSD-3C',
         version=versioneer.get_version(),
