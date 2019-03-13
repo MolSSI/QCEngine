@@ -3,14 +3,6 @@ language: generic
 # Run jobs on container-based infrastructure, can be overridden per job
 dist: xenial
 
-before_cache:
-  # if I understand internet correctly, this is equiv to "after_success"
-  - |
-      if [[ $TRAVIS_TEST_RESULT = 0 ]]; then
-        codecov
-      fi
-  - conda deactivate
-  - conda remove --name test --all
 cache:
   timeout: 1000
   directories:
@@ -76,6 +68,18 @@ script:
 
     # Run canonical tests
   - pytest -v --cov=qcengine/ qcengine/
+
+
+before_cache:
+  - |
+      if [[ $TRAVIS_TEST_RESULT = 0 ]]; then
+        codecov
+      fi
+
+  - conda deactivate
+  - conda remove --name test --all
+  - conda clean --index-cache --lock --packages --force-pkg-dirs
+
 
 notifications:
     email: false
