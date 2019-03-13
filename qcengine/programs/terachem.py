@@ -8,9 +8,6 @@ from qcelemental.models import Result
 
 from .executor import ProgramExecutor
 from ..util import which
-import os
-import errno
-import subprocess
 import qcengine.util as uti
 
 
@@ -156,7 +153,7 @@ class TeraChemExecutor(ProgramExecutor):
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
-        exe = uni.execute(inputs["commands"],
+        exe = uti.execute(inputs["commands"],
                           infiles = inputs["infiles"],
                           outfiles = ["tc.out"],
                           scratch_location = inputs["scratch_location"],
