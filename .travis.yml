@@ -78,10 +78,8 @@ before_cache:
 
   - conda deactivate
   - conda remove --name test --all
-  - ls -l $HOME/miniconda/pkgs/cache/
-  - rm -rf $HOME/miniconda/pkgs/cache/
-  #- conda clean --all
-#  - conda clean --index-cache
+#  - rm -rf $HOME/miniconda/pkgs/cache/
+  - conda clean --index-cache --lock --force-pkgs-dirs
   #- conda clean --index-cache --lock --packages --force-pkg-dirs
 
 
