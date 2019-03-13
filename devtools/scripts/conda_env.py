@@ -27,5 +27,5 @@ print("PYTHON VERSION  {}".format(args.python[0]))
 print("CONDA FILE NAME {}".format(args.conda_file[0]))
 print("CONDA path      {}".format(conda_path))
 
-sp.call("{} env create -n {} -f {} -v".format(conda_path, args.name[0], tmp_file), shell=True)
+sp.call("{} env create -n {} -f {}".format(conda_path, args.name[0], tmp_file), shell=True)
 os.unlink(tmp_file)
