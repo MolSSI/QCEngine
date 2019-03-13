@@ -78,7 +78,8 @@ before_cache:
 
   - conda deactivate
   - conda remove --name test --all
-  - conda clean --all
+  #- conda clean --all
+  - conda clean --index-cache
   #- conda clean --index-cache --lock --packages --force-pkg-dirs
 
 
