@@ -9,6 +9,7 @@ from qcelemental.models import Result
 from .executor import ProgramExecutor
 from ..util import which
 import qcengine.util as uti
+from qcelemental.models import FailedOperation
 
 
 class TeraChemExecutor(ProgramExecutor):
@@ -32,18 +33,17 @@ class TeraChemExecutor(ProgramExecutor):
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         if self.found() == False:
             raise ImportError("Could not find terachem in the envvar path.")
-        input_data = input_data.copy().dict()
         # Setup the job
         job_inputs = self.build_input(input_data, config)
         # Run terachem
-        exe_outputs = execute(job_inputs)
+        exe_outputs = self.execute(job_inputs)
         [exe_success, proc] = exe_outputs
         # Determine whether the calculation succeeded
         output_data = {}
         if not exe_success:
             output_data["success"] = False
             output_data["error"] = {"error_type": "internal_error", 
-                                    "error_message": proc["stderror"]
+                                    "error_message": proc["stderr"]
                                    }
             return FailedOperation(
                 success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
@@ -84,6 +84,8 @@ class TeraChemExecutor(ProgramExecutor):
         input_file.append("\n# keywords")
         for k, v in input_model.keywords.items():
             input_file.append("{} {}".format(k, v))
+
+        input_file = "\n".join(input_file)
   
         return {
             "commands": ["terachem", "tc.in"],
