@@ -6,6 +6,8 @@ from qcelemental.models import FailedOperation, Result
 
 from .executor import ProgramExecutor
 
+from ..util import scratch_directory
+
 
 class Psi4Executor(ProgramExecutor):
 
@@ -45,8 +47,6 @@ class Psi4Executor(ProgramExecutor):
             input_model["schema_name"] = "qc_schema_input"
 
         scratch = config.scratch_directory
-        if scratch is not None:
-            input_model["scratch_location"] = scratch
 
         psi_version = self.parse_version(psi4.__version__)
 
@@ -56,7 +56,10 @@ class Psi4Executor(ProgramExecutor):
             if (mol.multiplicity() != 1) and ("reference" not in input_model["keywords"]):
                 input_model["keywords"]["reference"] = "uhf"
 
-            output_data = psi4.json_wrapper.run_json(input_model)
+            with scratch_directory(parent=scratch) as scrdir:
+                input_model["scratch_location"] = scrdir
+                output_data = psi4.json_wrapper.run_json(input_model)
+
             if "extras" not in output_data:
                 output_data["extras"] = {}
 
@@ -84,6 +87,7 @@ class Psi4Executor(ProgramExecutor):
 
             # Delete keys
             output_data.pop("return_ouput", None)
+            output_data.pop("scratch_location", None)
 
             return Result(**output_data)
         else:
