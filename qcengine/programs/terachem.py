@@ -37,7 +37,7 @@ class TeraChemExecutor(ProgramExecutor):
         job_inputs = self.build_input(input_data, config)
         # Run terachem
         exe_outputs = self.execute(job_inputs)
-        [exe_success, proc] = exe_outputs
+        exe_success, proc = exe_outputs
         # Determine whether the calculation succeeded
         output_data = {}
         if not exe_success:

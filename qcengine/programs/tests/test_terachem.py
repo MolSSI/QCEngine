@@ -27,7 +27,7 @@ def test_terachem_output_parser(test_case):
      assert compare_recursive(output_ref.dict(), output.dict()) 
 
 @pytest.mark.parametrize('test_case', terachem_info.list_test_cases())
-def test_molpro_input_formatter(test_case):
+def test_terachem_input_formatter(test_case):
 
     # Get output file data
     data = terachem_info.get_test_data(test_case)
