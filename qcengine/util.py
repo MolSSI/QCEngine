@@ -337,8 +337,8 @@ def execute(command: List[str],
 
 
 @contextmanager
-def scratch_directory(child: bool = True, parent: bool = None, messy: bool = False) -> str:
-    """
+def scratch_directory(child: Union[bool, str] = True, parent: str = None, messy: bool = False) -> str:
+    """Create and cleanup a quarantined working directory with a parent scratch directory.
 
     Parameters
     ----------
@@ -361,6 +361,15 @@ def scratch_directory(child: bool = True, parent: bool = None, messy: bool = Fal
     FileExistsError
         If `child` specified and directory already exists (perhaps from a
         previous `messy=True` run).
+
+    Examples
+    --------
+    parent            child    -->  creates
+    ------            -----         -------
+    None              True     --> /tmp/tmpliyp1i7x/
+    None              myqcjob  --> /tmp/myqcjob/
+    /scratch/johndoe  True     --> /scratch/johndoe/tmpliyp1i7x/
+    /scratch/johndoe  myqcjob  --> /scratch/johndoe/myqcjob/
 
     """
     if child is True:
