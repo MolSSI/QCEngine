@@ -367,6 +367,18 @@ dashcoeff = {
             '***'     : {'params': {'alpha6': 14.0}, 'citation' : ''},  # alpha6 = 14 => damping parameter used is alp8 = 16
         }
     },
+    'dmp2': {
+        'formal'      : "DMP2",
+        'alias'       : [],
+        'description' : "    Beran's MP2D Dispersion Correction for MP2",
+        'citation'    : "    Rezac, J.; Greenwell, C.; Beran, G. (2018), J. Chem. Theory Comput., 14: 4711-4721\n",
+        'bibtex'      : "Rezac:2018:4711",
+        'doi'         : '10.1021/acs.jctc.8b00548',
+        'default'     : collections.OrderedDict([("s8", 1.187), ("a1", 0.944), ("a2", 0.480), ("rcut", 0.72), ("w", 0.20)]),
+        'definitions' : {
+            'mp2'     : {'params': {'s8':  1.187, 'a1': 0.944, 'a2': 0.480, 'rcut': 0.72, 'w': 0.20}},  # Rezac:2018:4711
+        }
+    },
 } # yapf: disable
 
 

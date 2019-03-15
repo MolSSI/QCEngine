@@ -7,7 +7,7 @@ from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
 from qcengine.programs import dftd3
-from qcengine.testing import is_psi4_new_enough, using_dftd3, using_dftd3_321, using_psi4, using_qcdb
+from qcengine.testing import is_program_new_enough, using_dftd3, using_dftd3_321, using_psi4, using_qcdb, using_mp2d
 
 
 @using_dftd3
@@ -408,7 +408,7 @@ Ne 0 0 0
 
 
 def eneyne_ne_qcdbmols():
-    if not is_psi4_new_enough("1.3rc2"):
+    if not is_program_new_enough("psi4", "1.4a1.dev55"):
         pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     from psi4.driver import qcdb
 
@@ -430,7 +430,7 @@ def eneyne_ne_qcdbmols():
 
 
 def eneyne_ne_psi4mols():
-    if not is_psi4_new_enough("1.3rc2"):
+    if not is_program_new_enough("psi4", "1.4a1.dev55"):
         pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     import psi4
 
@@ -453,19 +453,19 @@ def eneyne_ne_psi4mols():
 
 def eneyne_ne_qcschemamols():
 
-    eneyne = qcel.molparse.to_schema(qcel.molparse.from_string(seneyne)['qm'], dtype=1)
-    mA = qcel.molparse.to_schema(qcel.molparse.from_string('\n'.join(seneyne.splitlines()[:7]))['qm'], dtype=1)
-    mB = qcel.molparse.to_schema(qcel.molparse.from_string('\n'.join(seneyne.splitlines()[-4:]))['qm'], dtype=1)
-    ne = qcel.molparse.to_schema(qcel.molparse.from_string(sne)['qm'], dtype=1)
+    eneyne = qcel.molparse.to_schema(qcel.molparse.from_string(seneyne)['qm'], dtype=2)
+    mA = qcel.molparse.to_schema(qcel.molparse.from_string('\n'.join(seneyne.splitlines()[:7]))['qm'], dtype=2)
+    mB = qcel.molparse.to_schema(qcel.molparse.from_string('\n'.join(seneyne.splitlines()[-4:]))['qm'], dtype=2)
+    ne = qcel.molparse.to_schema(qcel.molparse.from_string(sne)['qm'], dtype=2)
 
     mAgB = qcel.molparse.from_string(seneyne)['qm']
     mAgB['real'] = [(iat < mAgB['fragment_separators'][0])
                     for iat in range(len(mAgB['elem']))]  # works b/c chgmult doesn't need refiguring
-    mAgB = qcel.molparse.to_schema(mAgB, dtype=1)
+    mAgB = qcel.molparse.to_schema(mAgB, dtype=2)
 
     gAmB = qcel.molparse.from_string(seneyne)['qm']
     gAmB['real'] = [(iat >= gAmB['fragment_separators'][0]) for iat in range(len(gAmB['elem']))]
-    gAmB = qcel.molparse.to_schema(gAmB, dtype=1)
+    gAmB = qcel.molparse.to_schema(gAmB, dtype=2)
 
     mols = {
         'eneyne': {
@@ -528,6 +528,19 @@ chg = {
     'fctldash': 'chg',
 }
 
+dmp2dmp2 = {
+    'dashlevel': 'dmp2',
+    'dashparams': {
+        's8': 1.187,
+        'a1': 0.944,
+        'a2': 0.480,
+        'rcut': 0.72,
+        'w': 0.20,
+    },
+    'dashparams_citation': '',
+    'fctldash': 'mp2-dmp2'
+}
+
 
 def _compute_key(pjrec):
     return pjrec['fctldash'].upper()
@@ -550,6 +563,8 @@ def _compute_key(pjrec):
     (({'name_hint': 'atmgr'}, 'ATM(GR)'), atmgr),
     (({'name_hint': 'bp86-atmgr'}, 'ATM(GR)'), atmgr),
     (({'name_hint': 'asdf-chg'}, 'CHG'), chg),
+    (({'name_hint': 'mp2-dmp2'}, 'MP2-DMP2'), dmp2dmp2),
+    (({'name_hint': 'MP2', 'level_hint': 'dmp2'}, 'MP2-DMP2'), dmp2dmp2),
 ])  # yapf: disable
 def test_dftd3__from_arrays(inp, expected):
     res = dftd3.from_arrays(**inp[0])
@@ -600,8 +615,23 @@ def test_dftd3__from_arrays__supplement():
 def test_3():
     sys = qcel.molparse.from_string(seneyne)['qm']
 
-    res = dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
-    assert compare('B3LYP-D3(BJ)', _compute_key(res['keywords']), 'key')
+    resinp = {
+        'schema_name': 'qcschema_input',
+        'schema_version': 1,
+        'molecule': qcel.molparse.to_schema(sys, dtype=2),
+        'driver': 'energy',
+        'model': {
+            'method': 'b3lyp',
+        },
+        'keywords': {
+            'level_hint': 'd3bj'
+        },
+    }
+    res = qcng.compute(resinp, 'dftd3', raise_error=True)
+    res = res.dict()
+
+    #res = dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
+    assert compare('B3LYP-D3(BJ)', _compute_key(res['extras']['info']), 'key')
 
 
 @using_dftd3
@@ -661,6 +691,54 @@ def test_qcdb__energy_d3():
                           jrec['qcvars']['B3LYP-D3(BJ) DISPERSION CORRECTION ENERGY'].data, 7, tnm())
 
 
+@using_mp2d
+@pytest.mark.parametrize(
+    "subjects",
+    [
+        pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
+        pytest.param(eneyne_ne_qcdbmols,
+                     marks=using_psi4),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_qcschemamols),
+    ],
+    ids=['qmol', 'pmol', 'qcmol'])
+@pytest.mark.parametrize("inp", [
+    ({'parent': 'eneyne', 'name': 'mp2d-mp2-dmp2', 'subject': 'dimer', 'lbl': 'MP2-DMP2'}),
+    ({'parent': 'eneyne', 'name': 'mp2d-mp2-dmp2', 'subject': 'mA', 'lbl': 'MP2-DMP2'}),
+    ({'parent': 'eneyne', 'name': 'mp2d-mp2-dmp2', 'subject': 'mB', 'lbl': 'MP2-DMP2'}),
+    ({'parent': 'eneyne', 'name': 'mp2d-mp2-dmp2', 'subject': 'gAmB', 'lbl': 'MP2-DMP2'}),
+    ({'parent': 'eneyne', 'name': 'mp2d-mp2-dmp2', 'subject': 'mAgB', 'lbl': 'MP2-DMP2'}),
+    ({'parent': 'ne', 'name': 'mp2d-mp2-dmp2', 'subject': 'atom', 'lbl': 'MP2-DMP2'}),
+])  # yapf: disable
+def test_mp2d__run_mp2d__2body(inp, subjects, request):
+    subject = subjects()[inp['parent']][inp['subject']]
+    expected = ref[inp['parent']][inp['lbl']][inp['subject']]
+    #gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
+
+    if 'qcmol' in request.node.name:
+        mol = subject
+    else:
+        mol = subject.to_schema(dtype=2)
+
+    resinp = {
+        'schema_name': 'qcschema_input',
+        'schema_version': 1,
+        'molecule': mol,
+        'driver': 'energy', #gradient',
+        'model': {
+            'method': inp['name']
+        },
+        'keywords': {},
+    }
+    jrec = qcng.compute(resinp, 'mp2d', raise_error=True)
+    jrec = jrec.dict()
+
+    #assert len(jrec['extras']['qcvars']) == 8
+
+    assert compare_values(expected, jrec['extras']['qcvars']['CURRENT ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars']['DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+    assert compare_values(expected, jrec['extras']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+
+
 @using_dftd3
 @pytest.mark.parametrize(
     "subjects",
@@ -685,18 +763,22 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
 
     if 'qcmol' in request.node.name:
-        subject.update({
-            'model': {
-                'method': inp['name']
-            },
-            'driver': 'gradient',
-            'keywords': {},
-            'schema_name': 'qcschema_input',
-            'schema_version': 1
-        })
-        jrec = dftd3.run_json(subject)
+        mol = subject
     else:
-        jrec = dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+        mol = subject.to_schema(dtype=2)
+
+    resinp = {
+        'schema_name': 'qcschema_input',
+        'schema_version': 1,
+        'molecule': mol,
+        'driver': 'gradient',
+        'model': {
+            'method': inp['name']
+        },
+        'keywords': {},
+    }
+    jrec = qcng.compute(resinp, 'dftd3', raise_error=True)
+    jrec = jrec.dict()
 
     assert len(jrec['extras']['qcvars']) == 8
 
@@ -736,18 +818,22 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
     gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
 
     if 'qcmol' in request.node.name:
-        subject.update({
-            'model': {
-                'method': inp['name']
-            },
-            'driver': 'gradient',
-            'keywords': {},
-            'schema_name': 'qcschema_input',
-            'schema_version': 1
-        })
-        jrec = dftd3.run_json(subject)
+        mol = subject
     else:
-        jrec = dftd3.run_dftd3(inp['name'], subject, options={}, ptype='gradient')
+        mol = subject.to_schema(dtype=2)
+
+    resinp = {
+        'schema_name': 'qcschema_input',
+        'schema_version': 1,
+        'molecule': mol,
+        'driver': 'gradient',
+        'model': {
+            'method': inp['name']
+        },
+        'keywords': {},
+    }
+    jrec = qcng.compute(resinp, 'dftd3', raise_error=True)
+    jrec = jrec.dict()
 
     assert len(jrec['extras']['qcvars']) == 8
 

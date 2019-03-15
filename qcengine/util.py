@@ -437,6 +437,32 @@ def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional
                 outfiles[fl] = None
 
 
+def which_import(plug, return_bool=False):
+    """Tests to see if a Python module is available.
+
+    Returns
+    -------
+    str or None
+        By default, returns `__init__.py`-like path if module found or `None` if not.
+    bool
+        When `return_bool=True`, returns whether or not found.
+
+    """
+    import pkgutil
+    plug_spec = pkgutil.find_loader(plug)
+
+    if plug_spec is None:
+        if return_bool:
+            return False
+        else:
+            return None
+    else:
+        if return_bool:
+            return True
+        else:
+            return plug_spec.path
+
+
 def which(command, return_bool=False):
     # environment is $PATH, less any None values
     lenv = {'PATH': ':' + os.environ.get('PATH')}

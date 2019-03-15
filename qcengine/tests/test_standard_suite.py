@@ -47,12 +47,15 @@ def test_compute_gradient(program, model):
     ("psi4", {"method": "bad"}),
     ("rdkit", {"method": "bad"}),
     ("torchani", {"method": "bad"}),
+    ("dftd3", {"method": "b3lyp-d3", "driver": "hessian"}),
 ])
 def test_compute_bad_models(program, model):
     if not testing.has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
-    inp = ResultInput(molecule=qcng.get_molecule("hydrogen"), driver="energy", model=model)
+    adriver = model.pop("driver", "energy")
+    amodel = model
+    inp = ResultInput(molecule=qcng.get_molecule("hydrogen"), driver=adriver, model=amodel)
 
     with pytest.raises(ValueError) as exc:
         ret = qcng.compute(inp, program, raise_error=True)
