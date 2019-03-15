@@ -17,7 +17,7 @@ import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
 
 from . import dashparam
-from ...util import execute, which
+from ...util import execute, which, safe_version
 from ..executor import ProgramExecutor
 from ...extras import provenance_stamp
 
@@ -59,7 +59,6 @@ class DFTD3Executor(ProgramExecutor):
         proc = subprocess.run(command, stdout=subprocess.PIPE)
         candidate_version = proc.stdout.decode('utf-8').strip()
 
-        from pkg_resources import safe_version
         return safe_version(candidate_version)
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
