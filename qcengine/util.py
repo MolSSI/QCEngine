@@ -337,17 +337,18 @@ def execute(command: List[str],
 
 
 @contextmanager
-def scratch_directory(child: Union[bool, str] = True, parent: str = None, messy: bool = False) -> str:
+def scratch_directory(child: str = None, parent: str = None, messy: bool = False) -> str:
     """Create and cleanup a quarantined working directory with a parent scratch directory.
 
     Parameters
     ----------
     child : str, optional
-        By default, `True`, quarantine directory generated through
+        By default, `None`, quarantine directory generated through
         `tempfile.mdktemp` so guaranteed unique and safe. When specified,
         quarantine directory has exactly `name`.
     parent : str, optional
-        Create dirctory `child` elsewhere than TMP default.
+        Create directory `child` elsewhere than TMP default.
+        For TMP default, see https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
     messy : bool, optional
         Leave scratch directory and contents on disk after completion.
 
@@ -366,13 +367,13 @@ def scratch_directory(child: Union[bool, str] = True, parent: str = None, messy:
     --------
     parent            child    -->  creates
     ------            -----         -------
-    None              True     --> /tmp/tmpliyp1i7x/
+    None              None     --> /tmp/tmpliyp1i7x/
     None              myqcjob  --> /tmp/myqcjob/
-    /scratch/johndoe  True     --> /scratch/johndoe/tmpliyp1i7x/
+    /scratch/johndoe  None     --> /scratch/johndoe/tmpliyp1i7x/
     /scratch/johndoe  myqcjob  --> /scratch/johndoe/myqcjob/
 
     """
-    if child is True:
+    if child is None:
         tmpdir = tempfile.mkdtemp(dir=parent)
     else:
         if parent is None:
