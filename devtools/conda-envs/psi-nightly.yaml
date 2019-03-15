@@ -5,7 +5,7 @@ channels:
 dependencies:
   - psi4
   - dftd3 3.2.1
-  - mp2d
+  - mp2d <0.2
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
 
     # Core
@@ -13,7 +13,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.3.0
+  - qcelemental >=0.3.3
   - pydantic >=0.20.0
 
     # Testing

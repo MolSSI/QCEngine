@@ -408,7 +408,7 @@ Ne 0 0 0
 
 
 def eneyne_ne_qcdbmols():
-    if not is_program_new_enough("psi4", "1.3rc2"):
+    if not is_program_new_enough("psi4", "1.4a1.dev55"):
         pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     from psi4.driver import qcdb
 
@@ -430,7 +430,7 @@ def eneyne_ne_qcdbmols():
 
 
 def eneyne_ne_psi4mols():
-    if not is_program_new_enough("psi4", "1.3rc2"):
+    if not is_program_new_enough("psi4", "1.4a1.dev55"):
         pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     import psi4
 
