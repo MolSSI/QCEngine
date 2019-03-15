@@ -3,6 +3,8 @@ Calls the Psi4 executable.
 """
 import json
 
+from typing import Dict
+
 from qcelemental.models import FailedOperation, Result
 
 from ..util import scratch_directory, execute, which, popen, safe_version, parse_version
@@ -19,6 +21,7 @@ class Psi4Executor(ProgramExecutor):
         "node_parallel": False,
         "managed_memory": True,
     }
+    version_cache: Dict[str, str] ={}
 
     class Config(ProgramExecutor.Config):
         pass
@@ -38,10 +41,14 @@ class Psi4Executor(ProgramExecutor):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        with popen([which('psi4'), '--version']) as exc:
-            exc["proc"].wait(timeout=5)
+        which_psi = which('psi4')
+        if which_psi not in self.version_cache:
+            with popen([which('psi4'), '--version']) as exc:
+                exc["proc"].wait(timeout=5)
+            self.version_cache[which_psi] = exc["stdout"]
 
-        candidate_version = exc["stdout"]
+        candidate_version = self.version_cache[which_psi]
+
         if "undef" in candidate_version:
             raise TypeError(
                 "Using custom build without tags. Please pull git tags with `git pull origin master --tags`.")
@@ -73,7 +80,7 @@ class Psi4Executor(ProgramExecutor):
                 input_data["keywords"]["reference"] = "uhf"
 
             # Execute the program
-            success, output = execute(["psi4", "--json", "data.json"], {"data.json": json.dumps(input_data)}, ["data.json"])
+            success, output = execute([which("psi4"), "--json", "data.json"], {"data.json": json.dumps(input_data)}, ["data.json"])
 
             if success:
                 output_data = json.loads(output["outfiles"]["data.json"])
@@ -106,7 +113,7 @@ class Psi4Executor(ProgramExecutor):
             output_data["stdout"] = output_data.pop("raw_output", None)
 
             # Delete keys
-            output_data.pop("return_ouput", None)
+            output_data.pop("return_output", None)
             output_data.pop("scratch_location", None)
 
             return Result(**output_data)
