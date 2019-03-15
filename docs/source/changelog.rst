@@ -20,13 +20,13 @@ New Features
 ++++++++++++
 
 - (:pr:`28`) TeraChem is now a registered executor in Engine! Thanks to @ffangliu for implementing.
+- (:pr:`46`) MP2D is now a registered executor in Engine! Thanks to @loriab for implementing.
 
 Enhancements
 ++++++++++++
 
-- (:pr:`46`) ``dftd3``'s workings received and overhaul. The ``mol`` keyword has been replaced with ``dtype=2``,
+- (:pr:`46`) ``dftd3``'s workings received an overhaul. The ``mol`` keyword has been replaced with ``dtype=2``,
   full Psi4 support is now provided, and an MP2D interface has been added.
-- (:pr:`47`) Engine is now licensed under QCArchive's dev team. Please attribute appropriately when referencing.
 
 Bug Fixes
 +++++++++
