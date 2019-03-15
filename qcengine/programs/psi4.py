@@ -1,14 +1,12 @@
 """
 Calls the Psi4 executable.
 """
-from pkg_resources import safe_version, parse_version
+import json
 
 from qcelemental.models import FailedOperation, Result
 
-from ..util import which_import
+from ..util import scratch_directory, execute, which, popen, safe_version, parse_version
 from .executor import ProgramExecutor
-
-from ..util import scratch_directory
 
 
 class Psi4Executor(ProgramExecutor):
@@ -30,7 +28,7 @@ class Psi4Executor(ProgramExecutor):
 
     @staticmethod
     def found(raise_error=False) -> bool:
-        is_found = which_import("psi4", return_bool=True)
+        is_found = which("psi4", return_bool=True)
 
         if not is_found and raise_error:
             raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
@@ -40,8 +38,10 @@ class Psi4Executor(ProgramExecutor):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        import psi4
-        candidate_version = psi4.__version__
+        with popen([which('psi4'), '--version']) as exc:
+            exc["proc"].wait(timeout=5)
+
+        candidate_version = exc["stdout"]
         if "undef" in candidate_version:
             raise TypeError(
                 "Using custom build without tags. Please pull git tags with `git pull origin master --tags`.")
@@ -53,36 +53,39 @@ class Psi4Executor(ProgramExecutor):
         Runs Psi4 in API mode
         """
         self.found(raise_error=True)
-        import psi4
 
         # Setup the job
-        input_model = input_model.copy().dict()
-        input_model["nthreads"] = config.ncores
-        input_model["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
-        input_model["success"] = False
-        input_model["return_output"] = True
+        input_data = input_model.json_dict()
+        input_data["nthreads"] = config.ncores
+        input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
+        input_data["success"] = False
+        input_data["return_output"] = True
 
-        if input_model["schema_name"] == "qcschema_input":
-            input_model["schema_name"] = "qc_schema_input"
+        if input_data["schema_name"] == "qcschema_input":
+            input_data["schema_name"] = "qc_schema_input"
 
-        scratch = config.scratch_directory
+        if config.scratch_directory:
+            input_data["scratch_location"] = config.scratch_directory
 
         if parse_version(self.get_version()) > parse_version("1.2"):
 
-            mol = psi4.core.Molecule.from_schema(input_model)
-            if (mol.multiplicity() != 1) and ("reference" not in input_model["keywords"]):
-                input_model["keywords"]["reference"] = "uhf"
+            if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in input_data["keywords"]):
+                input_data["keywords"]["reference"] = "uhf"
 
-            with scratch_directory(parent=scratch) as scrdir:
-                input_model["scratch_location"] = scrdir
-                output_data = psi4.json_wrapper.run_json(input_model)
+            # Execute the program
+            success, output = execute(["psi4", "--json", "data.json"], {"data.json": json.dumps(input_data)}, ["data.json"])
 
-            if "extras" not in output_data:
-                output_data["extras"] = {}
+            if success:
+                output_data = json.loads(output["outfiles"]["data.json"])
+                if "extras" not in output_data:
+                    output_data["extras"] = {}
 
-            output_data["extras"]["local_qcvars"] = output_data.pop("psi4:qcvars", None)
-            if output_data["success"] is False:
-                output_data["error"] = {"error_type": "internal_error", "error_message": output_data["error"]}
+                output_data["extras"]["local_qcvars"] = output_data.pop("psi4:qcvars", None)
+                if output_data["success"] is False:
+                    output_data["error"] = {"error_type": "internal_error", "error_message": output_data["error"]}
+            else:
+                output_data = input_data
+                output_data["error"] = {"error_type": "execution_error", "error_message": output["stderr"]}
 
         else:
             raise TypeError("Psi4 version '{}' not understood.".format(self.get_version()))
