@@ -56,7 +56,7 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel'
 
 
 @contextmanager
-def compute_wrapper(capture_output: bool = True) -> Dict[str, Any]:
+def compute_wrapper(capture_output: bool=True) -> Dict[str, Any]:
     """Wraps compute for timing, output capturing, and raise protection
     """
 
@@ -123,8 +123,8 @@ def get_module_function(module: str, func_name: str, subpackage=None) -> Callabl
 
 def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
                            metadata: Dict[str, Any],
-                           raise_error: bool = False,
-                           return_dict: bool = True) -> Union[Dict[str, Any], 'BaseModel']:
+                           raise_error: bool=False,
+                           return_dict: bool=True) -> Union[Dict[str, Any], 'BaseModel']:
     """
     Fuses general metadata and output together.
 
@@ -185,7 +185,7 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
         return ret
 
 
-def terminate_process(proc: Any, timeout: int = 15) -> None:
+def terminate_process(proc: Any, timeout: int=15) -> None:
     if proc.poll() is None:
 
         # Sigint (keyboard interupt)
@@ -205,8 +205,7 @@ def terminate_process(proc: Any, timeout: int = 15) -> None:
 
 
 @contextmanager
-def popen(args: List[str], append_prefix: bool = False,
-          popen_kwargs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def popen(args: List[str], append_prefix: bool=False, popen_kwargs: Optional[Dict[str, Any]]=None) -> Dict[str, Any]:
     """
     Opens a background task
 
@@ -252,16 +251,16 @@ def popen(args: List[str], append_prefix: bool = False,
 
 
 def execute(command: List[str],
-            infiles: Optional[Dict[str, str]] = None,
-            outfiles: Optional[List[str]] = None,
+            infiles: Optional[Dict[str, str]]=None,
+            outfiles: Optional[List[str]]=None,
             *,
-            scratch_name: Optional[str] = None,
-            scratch_location: Optional[str] = None,
-            scratch_messy: bool = False,
-            blocking_files: Optional[List[str]] = None,
-            timeout: Optional[int] = None,
-            interupt_after: Optional[int] = None,
-            environment: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+            scratch_name: Optional[str]=None,
+            scratch_location: Optional[str]=None,
+            scratch_messy: bool=False,
+            blocking_files: Optional[List[str]]=None,
+            timeout: Optional[int]=None,
+            interupt_after: Optional[int]=None,
+            environment: Optional[Dict[str, str]]=None) -> Dict[str, str]:
     """
     Runs a process in the background until complete.
 
@@ -337,7 +336,7 @@ def execute(command: List[str],
 
 
 @contextmanager
-def scratch_directory(child: str = None, parent: str = None, messy: bool = False) -> str:
+def scratch_directory(child: str=None, parent: str=None, messy: bool=False) -> str:
     """Create and cleanup a quarantined working directory with a parent scratch directory.
 
     Parameters
@@ -392,7 +391,7 @@ def scratch_directory(child: str = None, parent: str = None, messy: bool = False
 
 
 @contextmanager
-def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional[str] = None) -> Dict[str, str]:
+def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional[str]=None) -> Dict[str, str]:
     """
 
     Parameters
@@ -474,3 +473,19 @@ def which(command, return_bool=False):
         return bool(ans)
     else:
         return ans
+
+
+def safe_version(*args, **kwargs):
+    """
+    Package resources is a very slow load
+    """
+    import pkg_resources
+    return pkg_resources.safe_version(*args, **kwargs)
+
+
+def parse_version(*args, **kwargs):
+    """
+    Package resources is a very slow load
+    """
+    import pkg_resources
+    return pkg_resources.parse_version(*args, **kwargs)
