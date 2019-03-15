@@ -76,7 +76,8 @@ class Psi4Executor(ProgramExecutor):
 
         if parse_version(self.get_version()) > parse_version("1.2"):
 
-            if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in input_data["keywords"]):
+            caseless_keywords = {k.lower(): v for k, v in input_model["keywords"].items()}
+            if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in caseless_keywords):
                 input_data["keywords"]["reference"] = "uhf"
 
             # Execute the program
