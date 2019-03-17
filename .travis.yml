@@ -55,6 +55,10 @@ install:
       exit 1
     fi
   - source activate test
+  - |
+    if [ $PROG == "PSI4DEV" ]; then
+      conda remove qcengine --force
+    fi
   - pip install git+https://github.com/MolSSI/QCEngineRecords.git#egg=qcenginerecords
   - conda list
 
