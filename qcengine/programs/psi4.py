@@ -90,7 +90,9 @@ class Psi4Executor(ProgramExecutor):
 
                 output_data["extras"]["local_qcvars"] = output_data.pop("psi4:qcvars", None)
                 if output_data["success"] is False:
-                    output_data["error"] = {"error_type": "internal_error", "error_message": output_data["error"]}
+                    if "error_message" not in output_data["error"]:
+                        # older c. 1.3 message-only run_json
+                        output_data["error"] = {"error_type": "internal_error", "error_message": output_data["error"]}
             else:
                 output_data = input_data
                 output_data["error"] = {"error_type": "execution_error", "error_message": output["stderr"]}
