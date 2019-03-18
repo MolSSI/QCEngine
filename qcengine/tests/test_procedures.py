@@ -30,22 +30,6 @@ _base_json = {
 }
 
 
-def _bond_dist(geom, a1, a2):
-    """
-    Computes a simple bond distance between two rows in a flat (n, 3) list of coordinates
-    """
-    if isinstance(geom, np.ndarray):
-        geom = geom.flatten().tolist()
-    a13 = a1 * 3
-    a23 = a2 * 3
-
-    xd = (geom[a13] - geom[a23])**2
-    yd = (geom[a13 + 1] - geom[a23 + 1])**2
-    zd = (geom[a13 + 2] - geom[a23 + 2])**2
-
-    return (xd + yd + zd)**0.5
-
-
 @testing.using_psi4
 @testing.using_geometric
 def test_geometric_psi4():
