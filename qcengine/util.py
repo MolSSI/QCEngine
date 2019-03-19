@@ -322,12 +322,21 @@ def execute(command: List[str],
         with disk_files(infiles, outfiles, scrdir) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
 
+                realtime_stdout = ""
+                while True:
+                    output = proc["proc"].stdout.readline()
+                    if output == b'' and proc["proc"].poll() is not None:
+                        break
+                    if output:
+                        realtime_stdout += output.decode('utf-8')
+
                 if interupt_after is None:
                     proc["proc"].wait(timeout=timeout)
                 else:
                     time.sleep(interupt_after)
                     terminate_process(proc["proc"])
 
+            proc["stdout"] = realtime_stdout
             retcode = proc["proc"].poll()
         proc['outfiles'] = extrafiles
     proc['scratch_directory'] = scrdir
