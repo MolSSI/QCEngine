@@ -32,6 +32,7 @@ class MolproExecutor(ProgramExecutor):
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         pass
 
+    # TODO Switch over to Jinja
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         input_file = []
@@ -43,8 +44,9 @@ class MolproExecutor(ProgramExecutor):
         input_file.append("memory,{},M".format(memory_mw_core))
         input_file.append('')
 
-        # TODO Hook for global options
-        # input_file.append('{symmetry,nosym}')
+        # Have no symmetry by default
+        input_file.append('{symmetry,nosym}')
+        input_file.append('')
 
         # Write the geom
         input_file.append('geometry={')
@@ -69,12 +71,12 @@ class MolproExecutor(ProgramExecutor):
         # Write energy call
         write_hf = input_model.model.method.lower() in posthf_methods
         if write_hf:
-            input_file.append('{hf}')
+            input_file.append('{HF}')
         input_file.append('{{{:s}}}'.format(input_model.model.method))
-        input_file.append('')
 
         # Write gradient call if asked for
         if input_model.driver == 'gradient':
+            input_file.append('')
             input_file.append('{force}')
 
         input_file = "\n".join(input_file)
