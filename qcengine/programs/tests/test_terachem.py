@@ -1,7 +1,5 @@
-import copy
-
+import os
 import pytest
-import numpy as np
 import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
@@ -29,10 +27,33 @@ def test_terachem_output_parser(test_case):
 @pytest.mark.parametrize('test_case', terachem_info.list_test_cases())
 def test_terachem_input_formatter(test_case):
 
-    # Get output file data
+    # Get input file data
     data = terachem_info.get_test_data(test_case)
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
     # Just test that it runs for now
     input_file = qcng.get_program('terachem').build_input(inp, qcng.get_config())
     assert input_file.keys() >= {"commands", "infiles"}
+
+@pytest.mark.skipif(os.environ.get('TeraChem') == None, reason="TeraChem executable not found")
+@pytest.mark.parametrize('test_case', terachem_info.list_test_cases())
+def test_terachem_executer(test_case):
+
+    # Get input file data
+    data = terachem_info.get_test_data(test_case)
+    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+
+    # Just test that it runs for now
+    result = qcng.get_program('terachem').compute(inp, qcng.get_config())
+    assert result.success == True
+
+    # Get output file data
+
+    output_ref = qcel.models.Result.parse_raw(data["output.json"])
+
+    if result.success:
+        atol = 1e-6
+        if result.driver == "gradient":
+            atol = 1e-3
+        assert compare_recursive(output_ref.return_result,
+                result.return_result, atol = atol) 

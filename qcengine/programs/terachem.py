@@ -94,6 +94,7 @@ class TeraChemExecutor(ProgramExecutor):
                 "geometry.xyz": xyz_file
             },
             "scratch_location": config.scratch_directory,
+            "environment":config.environment,
             "input_result": input_model.copy(deep=True)
         }
 
@@ -155,11 +156,13 @@ class TeraChemExecutor(ProgramExecutor):
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
-        exe = uti.execute(inputs["commands"],
+        exe_success, proc = uti.execute(inputs["commands"],
                           infiles = inputs["infiles"],
                           outfiles = ["tc.out"],
                           scratch_location = inputs["scratch_location"],
+                          environment = inputs["environment"],
                           timeout = timeout
                           #TODO: add the environment variable 
                           )
-        return exe
+        proc["outfiles"]["tc.out"] = proc["stdout"]
+        return exe_success, proc

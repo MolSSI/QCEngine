@@ -84,6 +84,7 @@ class JobConfig(pydantic.BaseModel):
     ncores: int  # Number of ncores per job
     memory: float  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
+    environment: Dict[str,str]=None
 
     class Config:
         extra = "forbid"
@@ -211,6 +212,7 @@ def get_config(*, hostname: Optional[str]=None, local_options: Dict[str, Any]=No
     node = get_node_descriptor(hostname)
     ncores = node.ncores or get_global("ncores")
     scratch_directory = local_options.get("scratch_directory", None) or node.scratch_directory
+    environment = parse_environment(os.environ)
 
     # Jobs per node
     jobs_per_node = local_options.pop("jobs_per_node", None) or node.jobs_per_node
@@ -227,7 +229,9 @@ def get_config(*, hostname: Optional[str]=None, local_options: Dict[str, Any]=No
     if ncores < 1:
         raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
-    config = {"ncores": ncores, "memory": memory, "scratch_directory": scratch_directory}
+    config = {"ncores": ncores, "memory": memory,
+              "scratch_directory":scratch_directory,
+              "environment": environment}
     if local_options is not None:
         config.update(local_options)
 
