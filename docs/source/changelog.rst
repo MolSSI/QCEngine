@@ -13,6 +13,19 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.6.4 / 2019-03-21
+-------------------
+
+Bug Fixes
++++++++++
+
+- (:pr:`54`) Psi4's Engine implementation now checks its key words in a case insensitive way to give the same value
+  whether you called Psi4 or Engine to do the compute.
+- (:pr:`55`) Fixed an error handling routine in Engine to match Psi4.
+- (:pr:`56`) Complex inputs are now handled better through Psi4's wrapper which caused Engine to hang while trying
+  to write to ``stdout``.
+
+
 v0.6.3 / 2019-03-15
 -------------------
 
@@ -30,6 +43,7 @@ Enhancements
 
 Bug Fixes
 +++++++++
+
 - (:pr:`50` and :pr:`51`) Executing Psi4 on a single node with multiprocessing is more stable because Psi4 temps are
   moved to scratch directories. This behavior is now better documented with an example as well.
 - (:pr:`52`) Psi4 calls are now executed through the ``subprocess`` module to prevent possible multiprocessing issues
