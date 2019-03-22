@@ -113,6 +113,13 @@ class MolproExecutor(ProgramExecutor):
             "triplet pair energy": "mp2_opposite_spin_correlation_energy",
         }
 
+        ccsd_map = {
+            "total energy": "ccsd_total_energy",
+            "correlation energy": "ccsd_total_correlation_energy",
+            "singlet pair energy": "ccsd_same_spin_correlation_energy",
+            "triplet pair energy": "ccsd_opposite_spin_correlation_energy",
+        }
+
         properties = {}
 
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
@@ -120,13 +127,13 @@ class MolproExecutor(ProgramExecutor):
             # print("jobstep.tag: ")
             # print(jobstep.tag)
 
+            # TODO Handle situation with multiple SCF calls
             if 'SCF' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
                 for child in jobstep.findall('molpro_uri:property', name_space):
                     if child.attrib['name'] == 'Energy':
                         # properties['scf_method'] = child.attrib['method']
                         properties['scf_total_energy'] = float(child.attrib['value'])
-
                     elif child.attrib['name'] == 'Dipole moment':
                         properties['scf_dipole_moment'] = [float(x) for x in child.attrib['value'].split()]
 
@@ -136,18 +143,26 @@ class MolproExecutor(ProgramExecutor):
                     if child.attrib['name'] in mp2_map:
                         properties[mp2_map[child.attrib['name']]] = float(child.attrib['value'])
 
+            elif 'CCSD' in jobstep.attrib['command']:
+                # Grab properties (e.g. Energy and Dipole moment)
+                for child in jobstep.findall('molpro_uri:property', name_space):
+                    if child.attrib['name'] in ccsd_map:
+                        properties[ccsd_map[child.attrib['name']]] = float(child.attrib['value'])
+                if "ccsd_total_energy" not in properties:
+                    raise KeyError("CCSD total energy not found.")
+
             # Grab gradient
             # TODO Handle situation where there are multiple FORCE calls
             elif 'FORCE' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
-                    # print("gradient.attrib: ")
-                    # print(child.attrib)
                     # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
                     output_data['return_result'] = [float(x) for x in child.text.split()]
 
         # A _bad_ way of figuring the correct energy
         # TODO Maybe a better way would be to use the method specified from the input?
+        # Could also use the molecule tag in the xml file. Contains the last energy calculated along with
+        # the method and basis set.
         if "return_result" not in output_data:
             if "mp2_total_energy" in properties:
                 output_data["return_result"] = properties["mp2_total_energy"]
