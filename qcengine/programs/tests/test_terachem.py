@@ -2,6 +2,7 @@ import os
 import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_recursive
+from qcengine.testing import using_terachem
 
 import qcengine as qcng
 
@@ -35,7 +36,7 @@ def test_terachem_input_formatter(test_case):
     input_file = qcng.get_program('terachem').build_input(inp, qcng.get_config())
     assert input_file.keys() >= {"commands", "infiles"}
 
-@pytest.mark.skipif(os.environ.get('TeraChem') == None, reason="TeraChem executable not found")
+@using_terachem
 @pytest.mark.parametrize('test_case', terachem_info.list_test_cases())
 def test_terachem_executer(test_case):
 
