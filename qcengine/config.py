@@ -228,6 +228,7 @@ def get_config(*, hostname: Optional[str]=None, local_options: Dict[str, Any]=No
         raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
     config = {"ncores": ncores, "memory": memory, "scratch_directory": scratch_directory}
+
     if local_options is not None:
         config.update(local_options)
 

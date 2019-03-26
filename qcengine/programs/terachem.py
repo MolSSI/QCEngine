@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 from qcelemental.models import Result
 
 from .executor import ProgramExecutor
-from ..util import which
+from ..util import which, popen, parse_version, safe_version
 import qcengine.util as uti
 from qcelemental.models import FailedOperation
 
@@ -22,6 +22,7 @@ class TeraChemExecutor(ProgramExecutor):
          "node_parallel": False,
          "managed_memory": True,
     }
+    version_cache: Dict[str, str] ={}
 
     class Config(ProgramExecutor.Config):
         pass
@@ -30,9 +31,17 @@ class TeraChemExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs}) 
 
+
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
-        if self.found() == False:
-            raise ImportError("Could not find terachem in the envvar path.")
+        """
+        Run TeraChem
+        """
+        self.found(raise_error=True)
+        
+        # Check TeraChem version
+        if parse_version(self.get_version()) < parse_version("1.5"):
+           raise TypeError("TeraChem version '{}' not understood".format(self.get_version()))
+
         # Setup the job
         job_inputs = self.build_input(input_data, config)
         # Run terachem
@@ -52,8 +61,26 @@ class TeraChemExecutor(ProgramExecutor):
         Result = self.parse_output(proc["outfiles"], input_data)
         return Result
 
-    def found(self) -> bool:
-        return which('terachem', return_bool=True)
+    @staticmethod
+    def found(raise_error=False) -> bool:
+        is_found = which("terachem", return_bool=True)
+
+        if not is_found and raise_error:
+             raise ModuleNotFoundError("Could not find TeraChem in the Python path.")
+        else:
+             return is_found
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        which_terachem = which('terachem')
+        if which_terachem not in self.version_cache:
+            with popen([which('terachem'), '--version']) as exc:
+                exc["proc"].wait(timeout=5)
+            self.version_cache[which_terachem] = exc["stdout"].split()[2].strip('K')
+
+        candidate_version = self.version_cache[which_terachem]
+        return safe_version(candidate_version)
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig', 
                     template: Optional[str]=None) -> Dict[str, Any]:
@@ -155,11 +182,11 @@ class TeraChemExecutor(ProgramExecutor):
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
-        exe = uti.execute(inputs["commands"],
+        exe_success, proc = uti.execute(inputs["commands"],
                           infiles = inputs["infiles"],
                           outfiles = ["tc.out"],
                           scratch_location = inputs["scratch_location"],
                           timeout = timeout
-                          #TODO: add the environment variable 
                           )
-        return exe
+        proc["outfiles"]["tc.out"] = proc["stdout"]
+        return exe_success, proc
