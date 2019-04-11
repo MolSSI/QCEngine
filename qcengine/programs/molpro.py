@@ -116,8 +116,8 @@ class MolproExecutor(ProgramExecutor):
         ccsd_map = {
             "total energy": "ccsd_total_energy",
             "correlation energy": "ccsd_total_correlation_energy",
-            "singlet pair energy": "ccsd_same_spin_correlation_energy",
-            "triplet pair energy": "ccsd_opposite_spin_correlation_energy",
+            "singlet pair energy": "ccsd_opposite_spin_correlation_energy",
+            "triplet pair energy": "ccsd_same_spin_correlation_energy",
         }
 
         properties = {}
