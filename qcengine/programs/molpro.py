@@ -109,16 +109,21 @@ class MolproExecutor(ProgramExecutor):
         mp2_map = {
             "total energy": "mp2_total_energy",
             "correlation energy": "mp2_total_correlation_energy",
-            "singlet pair energy": "mp2_same_spin_correlation_energy",
-            "triplet pair energy": "mp2_opposite_spin_correlation_energy",
+            "singlet pair energy": "singlet_pair_energy",
+            "triplet pair energy": "triplet_pair_energy",
         }
 
         ccsd_map = {
             "total energy": "ccsd_total_energy",
             "correlation energy": "ccsd_total_correlation_energy",
-            "singlet pair energy": "ccsd_opposite_spin_correlation_energy",
-            "triplet pair energy": "ccsd_same_spin_correlation_energy",
+            "singlet pair energy": "singlet_pair_energy",
+            "triplet pair energy": "triplet_pair_energy",
         }
+
+        pair_energy = [
+            "singlet_pair_energy",
+            "triplet_pair_energy",
+        ]
 
         properties = {}
 
@@ -142,6 +147,12 @@ class MolproExecutor(ProgramExecutor):
                 for child in jobstep.findall('molpro_uri:property', name_space):
                     if child.attrib['name'] in mp2_map:
                         properties[mp2_map[child.attrib['name']]] = float(child.attrib['value'])
+                if pair_energy[0] and pair_energy[1] in properties:
+                    properties["mp2_same_spin_correlation_energy"] = (2.0/3.0) * properties[pair_energy[1]]
+                    properties["mp2_opposite_spin_correlation_energy"] = (1.0/3.0) * properties[pair_energy[1]] \
+                                                                         + properties[pair_energy[0]]
+                    del properties[pair_energy[0]]
+                    del properties[pair_energy[1]]
 
             elif 'CCSD' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
@@ -150,6 +161,12 @@ class MolproExecutor(ProgramExecutor):
                         properties[ccsd_map[child.attrib['name']]] = float(child.attrib['value'])
                 if "ccsd_total_energy" not in properties:
                     raise KeyError("CCSD total energy not found.")
+                if pair_energy[0] and pair_energy[1] in properties:
+                    properties["ccsd_same_spin_correlation_energy"] = (2.0/3.0) * properties[pair_energy[1]]
+                    properties["ccsd_opposite_spin_correlation_energy"] = (1.0/3.0) * properties[pair_energy[1]] \
+                                                                         + properties[pair_energy[0]]
+                    del properties[pair_energy[0]]
+                    del properties[pair_energy[1]]
 
             # Grab gradient
             # TODO Handle situation where there are multiple FORCE calls
