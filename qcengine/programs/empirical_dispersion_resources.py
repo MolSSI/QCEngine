@@ -266,6 +266,10 @@ dashcoeff = {
             'pbe'     : {'params': {'s6': 1.000, 's8':  0.000000, 'sr6': 2.340218, 'beta': 0.129434}},
             'pbe0'    : {'params': {'s6': 1.000, 's8':  0.000081, 'sr6': 2.077949, 'beta': 0.116755}},
             'wpbe'    : {'params': {'s6': 1.000, 's8':  1.280619, 'sr6': 1.366361, 'beta': 0.003160}},  # formerly lcwpbe
+            #'hfsapt0' : {'params': {'s6': 1.000, 's8':  1.54923046, 'sr6': 1.32742461, 'beta': 0.01319687}},  # seeded from HF-D3zero
+            'hfsapt0' : {'params': {'s6': 1.000, 's8':  1.703, 'sr6': 0.03476439, 'beta': -0.3476441}},  # seeded from HF-D3zero
+            'sapt0'   : {'params': {'s6': 1.000, 's8':  0.000079, 'sr6': 1.395191, 'beta': 0.078757}},  # seeded from b3lyp-d3zero
+            'fisapt0' : {'params': {'s6': 1.000, 's8':  0.000079, 'sr6': 1.395191, 'beta': 0.078757}},  # seeded from b3lyp-d3zero
         }
     },
     'd3mbj': {
@@ -285,6 +289,10 @@ dashcoeff = {
             'pbe'     : {'params': {'s6': 1.000, 's8': 0.358940, 'a1': 0.012092, 'a2': 5.938951}},
             'pbe0'    : {'params': {'s6': 1.000, 's8': 0.528823, 'a1': 0.007912, 'a2': 6.162326}},
             'wpbe'    : {'params': {'s6': 1.000, 's8': 0.906564, 'a1': 0.563761, 'a2': 3.593680}},  # formerly lcwpbe
+            #'hfsapt0'   : {'params': {'s6': 1.000, 's8': 1.54319469, 'a1': 0.30804213, 'a2': 4.55337292}},  # seeded from hf-d3bj
+            'hfsapt0'   : {'params': {'s6': 1.000, 's8': 1.9889, 'a1': 1.76523485, 'a2': 5.06585804}},  # seeded from hf-d3bj
+            'sapt0'   : {'params': {'s6': 1.000, 's8': 0.700794, 'a1': 0.001557, 'a2': 5.793898}},  # seeded from b3lyp-d3bj
+            'fisapt0' : {'params': {'s6': 1.000, 's8': 0.700794, 'a1': 0.001557, 'a2': 5.793898}},  # seeded from b3lyp-d3bj
         }
     },
     'nl': {
