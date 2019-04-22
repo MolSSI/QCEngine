@@ -85,7 +85,7 @@ class TeraChemExecutor(ProgramExecutor):
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig', 
                     template: Optional[str]=None) -> Dict[str, Any]:
         #Write the geom xyz file with unit au 
-        xyz_file = input_model.molecule.to_string(dtype='terachem')
+        xyz_file = input_model.molecule.to_string(dtype='terachem', units='Bohr')
 
         # Write input file
         input_file = []
