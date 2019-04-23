@@ -115,7 +115,7 @@ class MolproExecutor(ProgramExecutor):
 
         ccsd_map = {
             "total energy": "ccsd_total_energy",
-            "correlation energy": "ccsd_total_correlation_energy",
+            "correlation energy": "ccsd_correlation_energy",
             "singlet pair energy": "singlet_pair_energy",
             "triplet pair energy": "triplet_pair_energy",
         }
@@ -181,13 +181,16 @@ class MolproExecutor(ProgramExecutor):
         # Could also use the molecule tag in the xml file. Contains the last energy calculated along with
         # the method and basis set.
         if "return_result" not in output_data:
-            if "mp2_total_energy" in properties:
+            if "ccsd_total_energy" in properties:
+                output_data["return_result"] = properties["ccsd_total_energy"]
+            elif "mp2_total_energy" in properties:
                 output_data["return_result"] = properties["mp2_total_energy"]
             elif "scf_total_energy" in properties:
                 output_data["return_result"] = properties["scf_total_energy"]
             else:
                 raise KeyError("Could not find SCF total energy")
 
+        print(properties)
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
 
