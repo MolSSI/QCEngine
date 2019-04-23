@@ -84,19 +84,13 @@ class TeraChemExecutor(ProgramExecutor):
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig', 
                     template: Optional[str]=None) -> Dict[str, Any]:
-        #Write the geom xyz file
-        xyz_file = [] 
-        s = str(len(input_model.molecule.symbols))  
-        xyz_file.append(s+"\n")
-        for sym, geom in zip(input_model.molecule.symbols, input_model.molecule.geometry):
-            s = "{:<4s} {:>{width}.{prec}f} {:>{width}.{prec}f} {:>{width}.{prec}f}".format(sym, *geom, width=14, prec=10)
-            xyz_file.append(s)
-  
-        xyz_file = "\n".join(xyz_file)
+        #Write the geom xyz file with unit au 
+        xyz_file = input_model.molecule.to_string(dtype='terachem', units='Bohr')
 
         # Write input file
         input_file = []
         input_file.append("# molecule definition")
+        input_file.append("units bohr")
         input_file.append( "charge " + str(int(input_model.molecule.molecular_charge)))
         input_file.append( "spinmult " + str(input_model.molecule.molecular_multiplicity))
         input_file.append( "coordinates geometry.xyz")
