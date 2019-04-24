@@ -5,8 +5,7 @@ Calls the Molpro executable.
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
-#from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
-from qcelemental.models import Result
+from qcelemental.models import Result, FailedOperation
 
 from ..util import which
 from .executor import ProgramExecutor
@@ -30,7 +29,35 @@ class MolproExecutor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
-        pass
+        """
+        Run Molpro
+        """
+        self.found(raise_error=True)
+
+        # Check Molpro version
+        # if parse_version(self.get_version()) < parse_version("1.5"):
+        #     raise TypeError("TeraChem version '{}' not understood".format(self.get_version()))
+
+        # Setup the job
+        job_inputs = self.build_input(input_data, config)
+
+        # Run Molpro
+        exe_outputs = self.execute(job_inputs)
+        exe_success, proc = exe_outputs
+
+        # Determine whether the calculation succeeded
+        output_data = {}
+        if not exe_success:
+            output_data["success"] = False
+            output_data["error"] = {"error_type": "internal_error",
+                                    "error_message": proc["stderr"]
+                                    }
+            return FailedOperation(
+                success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
+
+        # If execution succeeded, collect results
+        result = self.parse_output(proc["outfiles"], input_data)
+        return result
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
@@ -156,11 +183,15 @@ class MolproExecutor(ProgramExecutor):
 
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
-
-        # TODO Should only return True if Molpro calculation terminated properly
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
 
-    def found(self) -> bool:
-        return which('molpro', return_bool=True)
+    @staticmethod
+    def found(raise_error=False) -> bool:
+        is_found = which("molpro", return_bool=True)
+
+        if not is_found and raise_error:
+            raise ImportError("Could not find Molpro in PATH.")
+        else:
+            return is_found
