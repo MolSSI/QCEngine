@@ -108,7 +108,7 @@ class MolproExecutor(ProgramExecutor):
 
         mp2_map = {
             "total energy": "mp2_total_energy",
-            "correlation energy": "mp2_total_correlation_energy",
+            "correlation energy": "mp2_correlation_energy",
             "singlet pair energy": "singlet_pair_energy",
             "triplet pair energy": "triplet_pair_energy",
         }
@@ -190,7 +190,6 @@ class MolproExecutor(ProgramExecutor):
             else:
                 raise KeyError("Could not find SCF total energy")
 
-        print(properties)
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
 
