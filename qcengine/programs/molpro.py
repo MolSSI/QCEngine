@@ -5,7 +5,7 @@ Calls the Molpro executable.
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
-#from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+# from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 from qcelemental.models import Result
 from qcelemental.util import which
 
@@ -13,7 +13,6 @@ from .executor import ProgramExecutor
 
 
 class MolproExecutor(ProgramExecutor):
-
     _defaults = {
         "name": "Molpro",
         "scratch": True,
@@ -40,7 +39,7 @@ class MolproExecutor(ProgramExecutor):
 
         # Write header info
         input_file.append("!Title")
-        memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
+        memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
         input_file.append("memory,{},M".format(memory_mw_core))
         input_file.append('')
 
@@ -101,8 +100,9 @@ class MolproExecutor(ProgramExecutor):
         #      - basisSet
         #      - orbitals
         output_data = {}
+        properties = {}
+        extras = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
-        # supported_methods_set = {'HF', 'RHF', 'MP2', 'CCSD'}
 
         scf_map = {
             "Energy": "scf_total_energy"
@@ -112,75 +112,87 @@ class MolproExecutor(ProgramExecutor):
             "Dipole moment": "scf_dipole_moment"
         }
 
+        scf_extras = {
+            "method": "molpro_scf_method"
+        }
+
         mp2_map = {
             "total energy": "mp2_total_energy",
             "correlation energy": "mp2_correlation_energy",
-            "singlet pair energy": "singlet_pair_energy",
-            "triplet pair energy": "triplet_pair_energy"
+            "singlet pair energy": "mp2_singlet_pair_energy",
+            "triplet pair energy": "mp2_triplet_pair_energy"
+        }
+
+        mp2_dipole_map = {
+            "Dipole moment": "mp2_dipole_moment"
         }
 
         ccsd_map = {
             "total energy": "ccsd_total_energy",
             "correlation energy": "ccsd_correlation_energy",
-            "singlet pair energy": "singlet_pair_energy",
-            "triplet pair energy": "triplet_pair_energy"
+            "singlet pair energy": "ccsd_singlet_pair_energy",
+            "triplet pair energy": "ccsd_triplet_pair_energy"
         }
 
-        pair_energy = [
-            "singlet_pair_energy",
-            "triplet_pair_energy"
-        ]
+        ccsd_dipole_map = {
+            "Dipole moment": "ccsd_dipole_moment"
+        }
 
-        properties = {}
+        supported_methods = {"HF-SCF", "MP2", "CCSD"}
 
+        energy_map = {
+            "HF-SCF": scf_map,
+            "MP2": mp2_map,
+            "CCSD": ccsd_map
+        }
+
+        dipole_map = {
+            "HF-SCF": scf_dipole_map,
+            "MP2": mp2_dipole_map,
+            "CCSD": ccsd_dipole_map
+        }
+
+        # TODO Think of how to handle multiple calls of same command.
+        #      Currently it will grab the last one in the file.
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
             # print("jobstep.tag: ")
             # print(jobstep.tag)
 
-            # TODO Handle situation with multiple SCF calls
-            if 'SCF' in jobstep.attrib['command']:
-                # Grab properties (e.g. Energy and Dipole moment)
+            command = jobstep.attrib['command']
+            if command in supported_methods:
                 for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] in scf_map:
-                        properties[scf_map[child.attrib['name']]] = float(child.attrib['value'])
-                        # properties['scf_method'] = child.attrib['method']
-                    elif child.attrib['name'] in scf_dipole_map:
-                        properties[scf_dipole_map[child.attrib['name']]] = [float(x) for x in child.attrib['value'].split()]
-
-            elif 'MP2' in jobstep.attrib['command']:
-                # Grab properties (e.g. Energy and Dipole moment)
-                for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] in mp2_map:
-                        properties[mp2_map[child.attrib['name']]] = float(child.attrib['value'])
-                if pair_energy[0] and pair_energy[1] in properties:
-                    properties["mp2_same_spin_correlation_energy"] = (2.0/3.0) * properties[pair_energy[1]]
-                    properties["mp2_opposite_spin_correlation_energy"] = (1.0/3.0) * properties[pair_energy[1]] \
-                                                                         + properties[pair_energy[0]]
-                    del properties[pair_energy[0]]
-                    del properties[pair_energy[1]]
-
-            elif 'CCSD' in jobstep.attrib['command']:
-                # Grab properties (e.g. Energy and Dipole moment)
-                for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] in ccsd_map:
-                        properties[ccsd_map[child.attrib['name']]] = float(child.attrib['value'])
-                if "ccsd_total_energy" not in properties:
-                    raise KeyError("CCSD total energy not found.")
-                if pair_energy[0] and pair_energy[1] in properties:
-                    properties["ccsd_same_spin_correlation_energy"] = (2.0/3.0) * properties[pair_energy[1]]
-                    properties["ccsd_opposite_spin_correlation_energy"] = (1.0/3.0) * properties[pair_energy[1]] \
-                                                                         + properties[pair_energy[0]]
-                    del properties[pair_energy[0]]
-                    del properties[pair_energy[1]]
-
+                    if child.attrib['name'] in energy_map[command]:
+                        properties[energy_map[command][child.attrib['name']]] = float(child.attrib['value'])
+                        if (child.attrib['name'] == 'Energy' or child.attrib['name'] == 'total energy') \
+                                and (energy_map[command][child.attrib['name']] not in properties):
+                            raise KeyError("{:s} total energy not found.".format(command))
+                    elif child.attrib['name'] in dipole_map[command]:
+                        properties[dipole_map[command][child.attrib['name']]] = [float(x) for x in
+                                                                                 child.attrib['value'].split()]
             # Grab gradient
-            # TODO Handle situation where there are multiple FORCE calls
             elif 'FORCE' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
                     # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
                     output_data['return_result'] = [float(x) for x in child.text.split()]
+
+        # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
+        if 'mp2_singlet_pair_energy' in properties and 'mp2_triplet_pair_energy' in properties:
+            properties["mp2_same_spin_correlation_energy"] = (2.0 / 3.0) * properties['mp2_triplet_pair_energy']
+            properties["mp2_opposite_spin_correlation_energy"] = (1.0 / 3.0) \
+                                                                 * properties['mp2_triplet_pair_energy'] \
+                                                                 + properties['mp2_singlet_pair_energy']
+            del properties['mp2_singlet_pair_energy']
+            del properties['mp2_triplet_pair_energy']
+
+        if 'ccsd_singlet_pair_energy' in properties and 'ccsd_triplet_pair_energy' in properties:
+            properties["ccsd_same_spin_correlation_energy"] = (2.0 / 3.0) * properties['ccsd_triplet_pair_energy']
+            properties["ccsd_opposite_spin_correlation_energy"] = (1.0 / 3.0) \
+                                                                  * properties['ccsd_triplet_pair_energy'] \
+                                                                  + properties['ccsd_singlet_pair_energy']
+            del properties['ccsd_singlet_pair_energy']
+            del properties['ccsd_triplet_pair_energy']
 
         # A _bad_ way of figuring the correct energy
         # TODO Maybe a better way would be to use the method specified from the input?
