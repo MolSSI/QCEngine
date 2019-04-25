@@ -164,12 +164,15 @@ class MolproExecutor(ProgramExecutor):
                 for child in jobstep.findall('molpro_uri:property', name_space):
                     if child.attrib['name'] in energy_map[command]:
                         properties[energy_map[command][child.attrib['name']]] = float(child.attrib['value'])
-                        if (child.attrib['name'] == 'Energy' or child.attrib['name'] == 'total energy') \
-                                and (energy_map[command][child.attrib['name']] not in properties):
-                            raise KeyError("{:s} total energy not found.".format(command))
                     elif child.attrib['name'] in dipole_map[command]:
                         properties[dipole_map[command][child.attrib['name']]] = [float(x) for x in
                                                                                  child.attrib['value'].split()]
+
+            # Do some checks
+            # TODO Where should this check happen?
+            if command == 'CCSD' and energy_map[command]['total energy'] not in properties:
+                raise KeyError("{:s} total energy not found.".format(command))
+
             # Grab gradient
             elif 'FORCE' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
