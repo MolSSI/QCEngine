@@ -5,9 +5,10 @@ Calls the TeraChem executable.
 from typing import Any, Dict, Optional
 
 from qcelemental.models import Result
+from qcelemental.util import parse_version, safe_version, which
 
 from .executor import ProgramExecutor
-from ..util import which, popen, parse_version, safe_version
+from ..util import popen
 import qcengine.util as uti
 from qcelemental.models import FailedOperation
 
