@@ -93,73 +93,72 @@ class MolproExecutor(ProgramExecutor):
         root = tree.getroot()
         # print(root.tag)
 
-        # TODO Try to grab the last total energy in the general case?
-        #      - Would be useful for arbitrarily complicated input file
+        # TODO Think of how to handle multiple calls of same command.
+        #      Currently it will grab the last one in the file.
         # TODO Read information from molecule tag
         #      - cml:molecule, cml:atomArray (?)
         #      - basisSet
         #      - orbitals
         output_data = {}
         properties = {}
-        extras = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
 
-        scf_map = {
-            "Energy": "scf_total_energy"
-        }
+        # SCF maps
+        scf_energy_map = {"Energy": "scf_total_energy"}
+        scf_dipole_map = {"Dipole moment": "scf_dipole_moment"}
+        scf_extras = {"method": "molpro_scf_method"}
 
-        scf_dipole_map = {
-            "Dipole moment": "scf_dipole_moment"
-        }
-
-        scf_extras = {
-            "method": "molpro_scf_method"
-        }
-
-        mp2_map = {
+        # MP2 maps
+        mp2_energy_map = {
             "total energy": "mp2_total_energy",
             "correlation energy": "mp2_correlation_energy",
             "singlet pair energy": "mp2_singlet_pair_energy",
             "triplet pair energy": "mp2_triplet_pair_energy"
         }
+        mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
+        mp2_extras = {}
 
-        mp2_dipole_map = {
-            "Dipole moment": "mp2_dipole_moment"
-        }
-
-        ccsd_map = {
+        # CCSD maps
+        ccsd_energy_map = {
             "total energy": "ccsd_total_energy",
             "correlation energy": "ccsd_correlation_energy",
             "singlet pair energy": "ccsd_singlet_pair_energy",
             "triplet pair energy": "ccsd_triplet_pair_energy"
         }
+        ccsd_dipole_map = {"Dipole moment": "ccsd_dipole_moment"}
+        ccsd_extras = {}
 
-        ccsd_dipole_map = {
-            "Dipole moment": "ccsd_dipole_moment"
-        }
-
-        supported_methods = {"HF-SCF", "MP2", "CCSD"}
-
+        # Compiling the method maps
+        supported_methods = {"HF", "RHF", "MP2", "CCSD"}
         energy_map = {
-            "HF-SCF": scf_map,
-            "MP2": mp2_map,
-            "CCSD": ccsd_map
+            "HF": scf_energy_map,
+            "RHF": scf_energy_map,
+            "MP2": mp2_energy_map,
+            "CCSD": ccsd_energy_map
         }
-
         dipole_map = {
-            "HF-SCF": scf_dipole_map,
+            "HF": scf_dipole_map,
+            "RHF": scf_dipole_map,
             "MP2": mp2_dipole_map,
             "CCSD": ccsd_dipole_map
         }
+        extras_map = {
+            "HF": scf_extras,
+            "RHF": scf_extras,
+            "MP2": mp2_extras,
+            "CCSD": ccsd_extras
+        }
 
-        # TODO Think of how to handle multiple calls of same command.
-        #      Currently it will grab the last one in the file.
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
             # print("jobstep.tag: ")
             # print(jobstep.tag)
 
+            # Remove the -SCF part of the command string when Molpro calls HF or KS
             command = jobstep.attrib['command']
+            if '-SCF' in command:
+                command = command[:-4]
+
             if command in supported_methods:
                 for child in jobstep.findall('molpro_uri:property', name_space):
                     if child.attrib['name'] in energy_map[command]:
@@ -170,8 +169,8 @@ class MolproExecutor(ProgramExecutor):
 
             # Do some checks
             # TODO Where should this check happen?
-            if command == 'CCSD' and energy_map[command]['total energy'] not in properties:
-                raise KeyError("{:s} total energy not found.".format(command))
+            # if command == 'CCSD' and energy_map[command]['total energy'] not in properties:
+            #     raise KeyError("{:s} total energy not found.".format(command))
 
             # Grab gradient
             elif 'FORCE' in jobstep.attrib['command']:
@@ -197,24 +196,18 @@ class MolproExecutor(ProgramExecutor):
             del properties['ccsd_singlet_pair_energy']
             del properties['ccsd_triplet_pair_energy']
 
-        # A _bad_ way of figuring the correct energy
-        # TODO Maybe a better way would be to use the method specified from the input?
-        # Could also use the molecule tag in the xml file. Contains the last energy calculated along with
-        # the method and basis set.
+        # A slightly more robust way of determining the correct energy
+        method = input_model.model.method
         if "return_result" not in output_data:
-            if "ccsd_total_energy" in properties:
-                output_data["return_result"] = properties["ccsd_total_energy"]
-            elif "mp2_total_energy" in properties:
-                output_data["return_result"] = properties["mp2_total_energy"]
-            elif "scf_total_energy" in properties:
-                output_data["return_result"] = properties["scf_total_energy"]
+            if 'total energy' in energy_map[method]:
+                output_data["return_result"] = properties[energy_map[method]['total energy']]
+            elif 'Energy' in energy_map[method]:
+                output_data["return_result"] = properties[energy_map[method]['Energy']]
             else:
-                raise KeyError("Could not find SCF total energy")
+                raise KeyError("Could not {:s} find total energy".format(method))
 
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
-
-        # TODO Should only return True if Molpro calculation terminated properly
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
