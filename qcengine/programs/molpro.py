@@ -96,33 +96,39 @@ class MolproExecutor(ProgramExecutor):
 
         # TODO Try to grab the last total energy in the general case?
         #      - Would be useful for arbitrarily complicated input file
-        #      - However would need every different string used to specify energy (e.g. HF --> Energy, MP2 --> total energy)
         # TODO Read information from molecule tag
         #      - cml:molecule, cml:atomArray (?)
         #      - basisSet
         #      - orbitals
         output_data = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
-        # TODO Create enum class to take jobstep.attrib['command'] and determine what method it is
-        # methods_set = {'HF', 'RHF', 'MP2', 'CCSD'}
+        # supported_methods_set = {'HF', 'RHF', 'MP2', 'CCSD'}
+
+        scf_map = {
+            "Energy": "scf_total_energy"
+        }
+
+        scf_dipole_map = {
+            "Dipole moment": "scf_dipole_moment"
+        }
 
         mp2_map = {
             "total energy": "mp2_total_energy",
             "correlation energy": "mp2_correlation_energy",
             "singlet pair energy": "singlet_pair_energy",
-            "triplet pair energy": "triplet_pair_energy",
+            "triplet pair energy": "triplet_pair_energy"
         }
 
         ccsd_map = {
             "total energy": "ccsd_total_energy",
             "correlation energy": "ccsd_correlation_energy",
             "singlet pair energy": "singlet_pair_energy",
-            "triplet pair energy": "triplet_pair_energy",
+            "triplet pair energy": "triplet_pair_energy"
         }
 
         pair_energy = [
             "singlet_pair_energy",
-            "triplet_pair_energy",
+            "triplet_pair_energy"
         ]
 
         properties = {}
@@ -136,11 +142,11 @@ class MolproExecutor(ProgramExecutor):
             if 'SCF' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
                 for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] == 'Energy':
+                    if child.attrib['name'] in scf_map:
+                        properties[scf_map[child.attrib['name']]] = float(child.attrib['value'])
                         # properties['scf_method'] = child.attrib['method']
-                        properties['scf_total_energy'] = float(child.attrib['value'])
-                    elif child.attrib['name'] == 'Dipole moment':
-                        properties['scf_dipole_moment'] = [float(x) for x in child.attrib['value'].split()]
+                    elif child.attrib['name'] in scf_dipole_map:
+                        properties[scf_dipole_map[child.attrib['name']]] = [float(x) for x in child.attrib['value'].split()]
 
             elif 'MP2' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
