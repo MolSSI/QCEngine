@@ -164,7 +164,6 @@ class MolproExecutor(ProgramExecutor):
                                                                                                   child.attrib['value'].split()]
             # Grab gradient
             elif 'FORCE' in jobstep.attrib['command']:
-                # Grab properties (e.g. Energy and Dipole moment)
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
                     # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
                     output_data['return_result'] = [float(x) for x in child.text.split()]
