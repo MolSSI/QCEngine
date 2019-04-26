@@ -189,16 +189,10 @@ class MolproExecutor(ProgramExecutor):
         # Throws an error if the energy isn't found for the method specified from the input_model.
         method = input_model.model.method
         method_energy_map = supported_methods[method]['energy']
-        if 'total energy' in method_energy_map:
-            if method_energy_map['total energy'] in properties:
-                final_energy = properties[method_energy_map['total energy']]
-            else:
-                raise KeyError("Could not find {:s} total energy".format(method))
-        elif 'Energy' in method_energy_map:
-            if method_energy_map['Energy'] in properties:
-                final_energy = properties[method_energy_map['Energy']]
-            else:
-                raise KeyError("Could not find {:s} total energy".format(method))
+        if 'total energy' in method_energy_map and method_energy_map['total energy'] in properties:
+            final_energy = properties[method_energy_map['total energy']]
+        elif 'Energy' in method_energy_map and method_energy_map['Energy'] in properties:
+            final_energy = properties[method_energy_map['Energy']]
         else:
             raise KeyError("Could not find {:s} total energy".format(method))
 
