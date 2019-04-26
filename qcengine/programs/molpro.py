@@ -106,7 +106,7 @@ class MolproExecutor(ProgramExecutor):
         # SCF maps
         scf_energy_map = {"Energy": "scf_total_energy"}
         scf_dipole_map = {"Dipole moment": "scf_dipole_moment"}
-        scf_extras = {"method": "molpro_scf_method"}
+        # scf_extras = {"method": "molpro_scf_method"}
 
         # MP2 maps
         mp2_energy_map = {
@@ -116,7 +116,7 @@ class MolproExecutor(ProgramExecutor):
             "triplet pair energy": "mp2_triplet_pair_energy"
         }
         mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
-        mp2_extras = {}
+        # mp2_extras = {}
 
         # CCSD maps
         ccsd_energy_map = {
@@ -126,7 +126,7 @@ class MolproExecutor(ProgramExecutor):
             "triplet pair energy": "ccsd_triplet_pair_energy"
         }
         ccsd_dipole_map = {"Dipole moment": "ccsd_dipole_moment"}
-        ccsd_extras = {}
+        # ccsd_extras = {}
 
         # Compiling the method maps
         supported_methods = {"HF", "RHF", "MP2", "CCSD"}
@@ -142,17 +142,15 @@ class MolproExecutor(ProgramExecutor):
             "MP2": mp2_dipole_map,
             "CCSD": ccsd_dipole_map
         }
-        extras_map = {
-            "HF": scf_extras,
-            "RHF": scf_extras,
-            "MP2": mp2_extras,
-            "CCSD": ccsd_extras
-        }
+        # extras_map = {
+        #     "HF": scf_extras,
+        #     "RHF": scf_extras,
+        #     "MP2": mp2_extras,
+        #     "CCSD": ccsd_extras
+        # }
 
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
-            # print("jobstep.tag: ")
-            # print(jobstep.tag)
 
             # Remove the -SCF part of the command string when Molpro calls HF or KS
             command = jobstep.attrib['command']
@@ -166,12 +164,6 @@ class MolproExecutor(ProgramExecutor):
                     elif child.attrib['name'] in dipole_map[command]:
                         properties[dipole_map[command][child.attrib['name']]] = [float(x) for x in
                                                                                  child.attrib['value'].split()]
-
-            # Do some checks
-            # TODO Where should this check happen?
-            # if command == 'CCSD' and energy_map[command]['total energy'] not in properties:
-            #     raise KeyError("{:s} total energy not found.".format(command))
-
             # Grab gradient
             elif 'FORCE' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
@@ -196,15 +188,25 @@ class MolproExecutor(ProgramExecutor):
             del properties['ccsd_singlet_pair_energy']
             del properties['ccsd_triplet_pair_energy']
 
-        # A slightly more robust way of determining the correct energy
+        # A slightly more robust way of determining the final energy.
+        # Throws an error if the energy isn't found for the method specified from the input_model.
         method = input_model.model.method
-        if "return_result" not in output_data:
-            if 'total energy' in energy_map[method]:
-                output_data["return_result"] = properties[energy_map[method]['total energy']]
-            elif 'Energy' in energy_map[method]:
-                output_data["return_result"] = properties[energy_map[method]['Energy']]
+        if 'total energy' in energy_map[method]:
+            if energy_map[method]['total energy'] in properties:
+                final_energy = properties[energy_map[method]['total energy']]
             else:
-                raise KeyError("Could not {:s} find total energy".format(method))
+                raise KeyError("Could not find {:s} total energy".format(method))
+        elif 'Energy' in energy_map[method]:
+            if energy_map[method]['Energy'] in properties:
+                final_energy = properties[energy_map[method]['Energy']]
+            else:
+                raise KeyError("Could not find {:s} total energy".format(method))
+        else:
+            raise KeyError("Could not find {:s} total energy".format(method))
+
+        # Replace return_result with final_energy if gradient wasn't called
+        if "return_result" not in output_data:
+            output_data["return_result"] = final_energy
 
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
