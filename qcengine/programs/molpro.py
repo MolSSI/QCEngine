@@ -106,7 +106,7 @@ class MolproExecutor(ProgramExecutor):
         # SCF maps
         scf_energy_map = {"Energy": "scf_total_energy"}
         scf_dipole_map = {"Dipole moment": "scf_dipole_moment"}
-        # scf_extras = {"method": "molpro_scf_method"}
+        scf_extras = {}
 
         # MP2 maps
         mp2_energy_map = {
@@ -116,7 +116,7 @@ class MolproExecutor(ProgramExecutor):
             "triplet pair energy": "mp2_triplet_pair_energy"
         }
         mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
-        # mp2_extras = {}
+        mp2_extras = {}
 
         # CCSD maps
         ccsd_energy_map = {
@@ -126,28 +126,25 @@ class MolproExecutor(ProgramExecutor):
             "triplet pair energy": "ccsd_triplet_pair_energy"
         }
         ccsd_dipole_map = {"Dipole moment": "ccsd_dipole_moment"}
-        # ccsd_extras = {}
+        ccsd_extras = {}
 
         # Compiling the method maps
-        supported_methods = {"HF", "RHF", "MP2", "CCSD"}
-        energy_map = {
-            "HF": scf_energy_map,
-            "RHF": scf_energy_map,
-            "MP2": mp2_energy_map,
-            "CCSD": ccsd_energy_map
+        scf_maps = {
+            "energy": scf_energy_map,
+            "dipole": scf_dipole_map,
+            "extras": scf_extras
         }
-        dipole_map = {
-            "HF": scf_dipole_map,
-            "RHF": scf_dipole_map,
-            "MP2": mp2_dipole_map,
-            "CCSD": ccsd_dipole_map
+        mp2_maps = {
+            "energy": mp2_energy_map,
+            "dipole": mp2_dipole_map,
+            "extras": mp2_extras
         }
-        # extras_map = {
-        #     "HF": scf_extras,
-        #     "RHF": scf_extras,
-        #     "MP2": mp2_extras,
-        #     "CCSD": ccsd_extras
-        # }
+        ccsd_maps = {
+            "energy": ccsd_energy_map,
+            "dipole": ccsd_dipole_map,
+            "extras": ccsd_extras
+        }
+        supported_methods = {"HF": scf_maps, "RHF": scf_maps, "MP2": mp2_maps, "CCSD": ccsd_maps}
 
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
@@ -159,11 +156,11 @@ class MolproExecutor(ProgramExecutor):
 
             if command in supported_methods:
                 for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] in energy_map[command]:
-                        properties[energy_map[command][child.attrib['name']]] = float(child.attrib['value'])
-                    elif child.attrib['name'] in dipole_map[command]:
-                        properties[dipole_map[command][child.attrib['name']]] = [float(x) for x in
-                                                                                 child.attrib['value'].split()]
+                    if child.attrib['name'] in supported_methods[command]['energy']:
+                        properties[supported_methods[command]['energy'][child.attrib['name']]] = float(child.attrib['value'])
+                    elif child.attrib['name'] in supported_methods[command]['dipole']:
+                        properties[supported_methods[command]['dipole'][child.attrib['name']]] = [float(x) for x in
+                                                                                                  child.attrib['value'].split()]
             # Grab gradient
             elif 'FORCE' in jobstep.attrib['command']:
                 # Grab properties (e.g. Energy and Dipole moment)
@@ -191,14 +188,15 @@ class MolproExecutor(ProgramExecutor):
         # A slightly more robust way of determining the final energy.
         # Throws an error if the energy isn't found for the method specified from the input_model.
         method = input_model.model.method
-        if 'total energy' in energy_map[method]:
-            if energy_map[method]['total energy'] in properties:
-                final_energy = properties[energy_map[method]['total energy']]
+        method_energy_map = supported_methods[method]['energy']
+        if 'total energy' in method_energy_map:
+            if method_energy_map['total energy'] in properties:
+                final_energy = properties[method_energy_map['total energy']]
             else:
                 raise KeyError("Could not find {:s} total energy".format(method))
-        elif 'Energy' in energy_map[method]:
-            if energy_map[method]['Energy'] in properties:
-                final_energy = properties[energy_map[method]['Energy']]
+        elif 'Energy' in method_energy_map:
+            if method_energy_map['Energy'] in properties:
+                final_energy = properties[method_energy_map['Energy']]
             else:
                 raise KeyError("Could not find {:s} total energy".format(method))
         else:
