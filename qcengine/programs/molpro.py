@@ -154,6 +154,7 @@ class MolproExecutor(ProgramExecutor):
             if '-SCF' in command:
                 command = command[:-4]
 
+            # Grab energies and dipole moment
             if command in supported_methods:
                 for child in jobstep.findall('molpro_uri:property', name_space):
                     if child.attrib['name'] in supported_methods[command]['energy']:
