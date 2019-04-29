@@ -43,8 +43,12 @@ class MolproExecutor(ProgramExecutor):
         job_inputs = self.build_input(input_data, config)
 
         # Run Molpro
-        exe_outputs = self.execute(job_inputs)
-        exe_success, proc = exe_outputs
+        exe_success, proc = uti.execute(job_inputs["commands"],
+                                        infiles=job_inputs["infiles"],
+                                        outfiles=["dispatch.out", "dispatch.xml"],
+                                        scratch_location=job_inputs["scratch_location"],
+                                        timeout=None
+                                        )
 
         # Determine whether the calculation succeeded
         output_data = {}
@@ -200,13 +204,3 @@ class MolproExecutor(ProgramExecutor):
             raise ImportError("Could not find Molpro in PATH.")
         else:
             return is_found
-
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
-        exe_success, proc = uti.execute(inputs["commands"],
-                                        infiles=inputs["infiles"],
-                                        outfiles=["dispatch.out", "dispatch.xml"],
-                                        scratch_location=inputs["scratch_location"],
-                                        timeout=timeout
-                                        )
-        proc["outfiles"]["tc.out"] = proc["stdout"]
-        return exe_success, proc
