@@ -8,11 +8,11 @@ from typing import Any, Dict, Optional
 from qcelemental.models import Result, FailedOperation
 
 from ..util import which
+import qcengine.util as uti
 from .executor import ProgramExecutor
 
 
 class MolproExecutor(ProgramExecutor):
-
     _defaults = {
         "name": "Molpro",
         "scratch": True,
@@ -32,11 +32,12 @@ class MolproExecutor(ProgramExecutor):
         """
         Run Molpro
         """
+        # Check if Molpro executable is found
         self.found(raise_error=True)
 
         # Check Molpro version
         # if parse_version(self.get_version()) < parse_version("1.5"):
-        #     raise TypeError("TeraChem version '{}' not understood".format(self.get_version()))
+        #     raise TypeError("Molpro version '{}' not understood".format(self.get_version()))
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
@@ -59,6 +60,11 @@ class MolproExecutor(ProgramExecutor):
         result = self.parse_output(proc["outfiles"], input_data)
         return result
 
+    # TODO Additional features
+    #   - allow separate xyz file to be provided
+    #   - pass scratch location info to Molpro command (-d option)
+    #   - pass number of cores to Molpro command (-n option)
+    #   - add support of wfu files? (-W option)
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         input_file = []
@@ -66,11 +72,10 @@ class MolproExecutor(ProgramExecutor):
 
         # Write header info
         input_file.append("!Title")
-        memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
+        memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
         input_file.append("memory,{},M".format(memory_mw_core))
         input_file.append('')
 
-        # TODO Hook for global options
         # input_file.append('{symmetry,nosym}')
 
         # Write the geom
@@ -195,3 +200,13 @@ class MolproExecutor(ProgramExecutor):
             raise ImportError("Could not find Molpro in PATH.")
         else:
             return is_found
+
+    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+        exe_success, proc = uti.execute(inputs["commands"],
+                                        infiles=inputs["infiles"],
+                                        outfiles=["dispatch.out", "dispatch.xml"],
+                                        scratch_location=inputs["scratch_location"],
+                                        timeout=timeout
+                                        )
+        proc["outfiles"]["tc.out"] = proc["stdout"]
+        return exe_success, proc
