@@ -7,7 +7,7 @@ from typing import Dict
 
 from qcelemental.models import FailedOperation, Result
 
-from ..util import scratch_directory, execute, which, popen, safe_version, parse_version
+from ..util import execute, which, popen, safe_version, parse_version
 from .executor import ProgramExecutor
 
 

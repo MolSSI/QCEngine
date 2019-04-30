@@ -22,7 +22,8 @@ from qcelemental.models import ComputeError, FailedOperation
 
 from .config import LOGGER, get_provenance_augments
 
-__all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
+__all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata",
+           "execute", "which", "popen", "safe_version", "parse_version"]
 
 
 def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel':
@@ -38,7 +39,7 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel'
         else:
             raise KeyError("Input type of {} not understood.".format(type(model)))
 
-        # Older QCElemental compat
+        # Older QCElemental compatibility
         try:
             input_data.extras
         except AttributeError:
@@ -471,9 +472,9 @@ def which_import(plug, return_bool=False):
             return plug_spec.path
 
 
-def which(command, return_bool=False):
+def which(command, return_bool=False) -> Union[str, None, bool]:
     # environment is $PATH, less any None values
-    lenv = {'PATH': ':' + os.environ.get('PATH')}
+    lenv = {'PATH': ':' + os.environ.get('PATH') + ":" + os.path.dirname(sys.executable)}
     lenv = {k: v for k, v in lenv.items() if v is not None}
 
     ans = shutil.which(command, mode=os.F_OK | os.X_OK, path=lenv['PATH'])

@@ -8,7 +8,7 @@ from qcelemental.models import ComputeError, FailedOperation, Optimization, Opti
 from .config import get_config
 from .procedures import get_procedure, list_all_procedures, list_available_procedures
 from .programs import get_program, list_all_programs, list_available_programs
-from .util import compute_wrapper, get_module_function, handle_output_metadata, model_wrapper
+from .util import compute_wrapper, handle_output_metadata, model_wrapper
 
 __all__ = ["compute", "compute_procedure"]
 

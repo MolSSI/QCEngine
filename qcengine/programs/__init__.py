@@ -2,7 +2,7 @@
 Imports the various compute backends
 """
 
-from typing import List, Set
+from typing import Set
 
 from .psi4 import Psi4Executor
 from .rdkit import RDKitExecutor
