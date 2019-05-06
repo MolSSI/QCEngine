@@ -4,8 +4,9 @@ Calls the Psi4 executable.
 
 from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 
-from ..units import ureg
 from .executor import ProgramExecutor
+from ..units import ureg
+from ..util import parse_version, safe_version
 
 
 class TorchANIExecutor(ProgramExecutor):
@@ -27,7 +28,20 @@ class TorchANIExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
-    def get_model(self, name):
+    def found(self) -> bool:
+        try:
+            import torchani
+            return True
+        except ModuleNotFoundError:
+            return False
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        import torchani
+        return safe_version(torchani.__version__)
+
+    def get_model(self, name: str) -> 'torchani.models.BuiltinModels':
         name = name.lower()
 
         if name in self._CACHE:
@@ -36,31 +50,27 @@ class TorchANIExecutor(ProgramExecutor):
         import torch
         import torchani
 
-        if name == "ani1":
-            # Build model
-            builtin = torchani.neurochem.Builtins()
-            model = torch.nn.Sequential(builtin.aev_computer, builtin.models, builtin.energy_shifter)
-            self._CACHE[name] = model
+        if name == "ani1x":
+            self._CACHE[name] = torchani.models.ANI1x()
 
-            return model
+        elif name == "ani1ccx":
+            self._CACHE[name] = torchani.models.ANI1ccx()
 
         else:
             return False
+
+        return self._CACHE[name]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Runs TorchANI in FF typing
         """
 
-        try:
-            import torchani
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError("Could not find TorchANI in the Python path.")
+        self.found(raise_error=True)
         import torch
         import numpy as np
 
         device = torch.device('cpu')
-        builtin = torchani.neurochem.Builtins()
 
         # Failure flag
         ret_data = {"success": False}
@@ -69,7 +79,7 @@ class TorchANIExecutor(ProgramExecutor):
         model = self.get_model(input_data.model.method)
         if model is False:
             ret_data["error"] = ComputeError(
-                error_type="input_error", error_message="run_torchani only accepts the ANI1 method.")
+                error_type="input_error", error_message="run_torchani only accepts the ANI1x or ANI1ccx method.")
             return FailedOperation(input_data=input_data.dict(), **ret_data)
 
         # Build species
@@ -82,7 +92,7 @@ class TorchANIExecutor(ProgramExecutor):
                     input_data.model.method, unknown_sym))
             return FailedOperation(input_data=input_data.dict(), **ret_data)
 
-        species = builtin.consts.species_to_tensor(species).to(device).unsqueeze(0)
+        species = model.species_to_tensor(species).to(device).unsqueeze(0)
 
         # Build coord array
         geom_array = input_data.molecule.geometry.reshape(1, -1, 3) * ureg.conversion_factor("bohr", "angstrom")
@@ -112,9 +122,3 @@ class TorchANIExecutor(ProgramExecutor):
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
         return Result(**{**input_data.dict(), **ret_data})
 
-    def found(self) -> bool:
-        try:
-            import torchani
-            return True
-        except ModuleNotFoundError:
-            return False

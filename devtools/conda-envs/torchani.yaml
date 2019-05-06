@@ -19,4 +19,4 @@ dependencies:
   - pytest-cov
   - codecov
   - pip:
-    - git+git://github.com/aiqm/torchani.git@cf192be#egg=torchani
+    - torchani
