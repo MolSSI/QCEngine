@@ -31,7 +31,7 @@ class TeraChemExecutor(ProgramExecutor):
 
 
     def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs}) 
+        super().__init__(**{**self._defaults, **kwargs})
 
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
@@ -39,7 +39,7 @@ class TeraChemExecutor(ProgramExecutor):
         Run TeraChem
         """
         self.found(raise_error=True)
-        
+
         # Check TeraChem version
         if parse_version(self.get_version()) < parse_version("1.5"):
            raise TypeError("TeraChem version '{}' not understood".format(self.get_version()))
@@ -53,7 +53,7 @@ class TeraChemExecutor(ProgramExecutor):
         output_data = {}
         if not exe_success:
             output_data["success"] = False
-            output_data["error"] = {"error_type": "internal_error", 
+            output_data["error"] = {"error_type": "internal_error",
                                     "error_message": proc["stderr"]
                                    }
             return FailedOperation(
@@ -84,9 +84,9 @@ class TeraChemExecutor(ProgramExecutor):
         candidate_version = self.version_cache[which_terachem]
         return safe_version(candidate_version)
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig', 
+    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str]=None) -> Dict[str, Any]:
-        #Write the geom xyz file with unit au 
+        #Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='terachem', units='Bohr')
 
         # Write input file
@@ -96,20 +96,20 @@ class TeraChemExecutor(ProgramExecutor):
         input_file.append( "charge " + str(int(input_model.molecule.molecular_charge)))
         input_file.append( "spinmult " + str(input_model.molecule.molecular_multiplicity))
         input_file.append( "coordinates geometry.xyz")
-        
+
         input_file.append("\n# model")
         input_file.append("basis " + str(input_model.model.basis))
-        
-        
+
+
         input_file.append("\n# driver")
         input_file.append("run " +input_model.driver)
-        
+
         input_file.append("\n# keywords")
         for k, v in input_model.keywords.items():
             input_file.append("{} {}".format(k, v))
 
         input_file = "\n".join(input_file)
-  
+
         return {
             "commands": ["terachem", "tc.in"],
             "infiles": {
@@ -146,11 +146,11 @@ class TeraChemExecutor(ProgramExecutor):
             elif "Gradient units are Hartree/Bohr" in line:
                 #Gradient is stored as (dE/dx1,dE/dy1,dE/dz1,dE/dx2,dE/dy2,...)
                 for i in range(idx+3,idx+3+natom):
-                   grad = output_lines[i].strip('\n').split() 
+                   grad = output_lines[i].strip('\n').split()
                    for x in grad:
                        gradients.append( float(x) )
 
-        # Look for the last line that is the SCF info 
+        # Look for the last line that is the SCF info
         DECIMAL = r"""(
           (?:[-+]?\d*\.\d+(?:[DdEe][-+]?\d+)?) |  # .num with optional sign, exponent, wholenum
           (?:[-+]?\d+\.\d*(?:[DdEe][-+]?\d+)?)    # num. with optional sign, exponent, decimals
@@ -165,14 +165,14 @@ class TeraChemExecutor(ProgramExecutor):
                 last_scf_line = output_lines[idx]
                 break
 
-                     
+
         if len(last_scf_line) > 0:
             properties["scf_iterations"] = int(last_scf_line.split()[0])
             if "XC Energy" in output_lines:
                 properties["scf_xc_energy"] = float(last_scf_line.split()[4])
         else:
             raise ValueError("SCF iteration lines not found in TeraChem output")
-                       
+
         if len(gradients) > 0:
             output_data["return_result"] = gradients
 
@@ -182,10 +182,10 @@ class TeraChemExecutor(ProgramExecutor):
         #       properties["spin_S2"] = float(line.strip('\n').split()[2])
         # Parse files in scratch folder
         #properties["atomic_charge"] = []
-        #atomic_charge_lines =  open(outfiles["charge.xls"]).readlines()  
+        #atomic_charge_lines =  open(outfiles["charge.xls"]).readlines()
         #for line in atomic_charge_lines:
-        #    properties["atomic_charge"].append(line.strip('\n').split()[-1]) 
-        
+        #    properties["atomic_charge"].append(line.strip('\n').split()[-1])
+
         if "return_result" not in output_data:
             if "scf_total_energy" in properties:
                 output_data["return_result"] = properties["scf_total_energy"]

@@ -64,14 +64,3 @@ class ProgramExecutor(BaseModel, abc.ABC):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
         raise ValueError("parse_output is not implemented for {}.", self.__class__)
-
-## Internals
-
-    @staticmethod
-    def _pyfound(program: str, raise_error: bool) -> bool:
-        found = which_import(program, return_bool=True)
-
-        if raise_error and not found:
-            raise ModuleNotFoundError(f"Could not find program {program} in Python path.")
-
-        return found

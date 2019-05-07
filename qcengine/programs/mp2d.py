@@ -9,6 +9,7 @@ import traceback
 from decimal import Decimal
 
 import numpy as np
+
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import which
@@ -17,6 +18,7 @@ from .dftd3 import dashparam
 from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
 from .executor import ProgramExecutor
 from ..extras import provenance_stamp
+from ..util import which
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 

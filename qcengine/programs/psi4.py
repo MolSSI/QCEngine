@@ -2,14 +2,13 @@
 Calls the Psi4 executable.
 """
 import json
-
 from typing import Dict
 
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
 
-from ..util import scratch_directory, execute, popen
 from .executor import ProgramExecutor
+from ..util import execute, parse_version, popen, safe_version, scratch_directory, which
 
 
 class Psi4Executor(ProgramExecutor):

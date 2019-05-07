@@ -4,13 +4,13 @@ Imports the various compute backends
 
 from typing import List, Set
 
+from .dftd3 import DFTD3Executor
+from .molpro import MolproExecutor
+from .mp2d import MP2DExecutor
 from .psi4 import Psi4Executor
 from .rdkit import RDKitExecutor
-from .torchani import TorchANIExecutor
-from .molpro import MolproExecutor
-from .dftd3 import DFTD3Executor
 from .terachem import TeraChemExecutor
-from .mp2d import MP2DExecutor
+from .torchani import TorchANIExecutor
 
 __all__ = ["register_program", "get_program", "list_all_programs", "list_available_programs"]
 

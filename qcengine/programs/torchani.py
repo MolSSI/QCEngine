@@ -6,7 +6,7 @@ from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 
 from .executor import ProgramExecutor
 from ..units import ureg
-from ..util import parse_version, safe_version
+from ..util import parse_version, safe_version, which_import
 
 
 class TorchANIExecutor(ProgramExecutor):
@@ -28,8 +28,9 @@ class TorchANIExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
+    @staticmethod
     def found(raise_error: bool=False) -> bool:
-        return self._pyfound("torchani", raise_error)
+        return which_import("torchani", return_bool=True, raise_error=raise_error)
 
     def get_version(self) -> str:
         self.found(raise_error=True)
