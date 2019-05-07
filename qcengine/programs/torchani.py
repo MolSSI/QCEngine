@@ -28,12 +28,8 @@ class TorchANIExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
-    def found(self) -> bool:
-        try:
-            import torchani
-            return True
-        except ModuleNotFoundError:
-            return False
+    def found(raise_error: bool=False) -> bool:
+        return self._pyfound("torchani", raise_error)
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -66,7 +62,13 @@ class TorchANIExecutor(ProgramExecutor):
         Runs TorchANI in FF typing
         """
 
+        # Check if existings and version
         self.found(raise_error=True)
+        if parse_version(self.get_version()) < parse_version("0.5"):
+            ret_data["error"] = ComputeError(
+                error_type="version_error", error_message="QCEngine's TorchANI wrapper requires version 0.5 or greater.")
+            return FailedOperation(input_data=input_data.dict(), **ret_data)
+
         import torch
         import numpy as np
 
@@ -121,4 +123,3 @@ class TorchANIExecutor(ProgramExecutor):
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
         return Result(**{**input_data.dict(), **ret_data})
-
