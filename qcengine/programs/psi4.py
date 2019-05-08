@@ -34,7 +34,7 @@ class Psi4Executor(ProgramExecutor):
         is_found = which("psi4", return_bool=True)
 
         if not is_found and raise_error:
-            raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
+            raise ModuleNotFoundError("Could not find Psi4 in the Python path. Please 'conda install psi4 -c psi4'.")
         else:
             return is_found
 

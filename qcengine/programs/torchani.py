@@ -30,7 +30,13 @@ class TorchANIExecutor(ProgramExecutor):
 
     @staticmethod
     def found(raise_error: bool=False) -> bool:
-        return which_import("torchani", return_bool=True, raise_error=raise_error)
+        is_found = which_import("torchani", return_bool=True)
+
+        if not is_found and raise_error:
+            raise ModuleNotFoundError("Could not find 'torchani' in the Python path. Please 'pip install torchani'.")
+
+        return is_found
+
 
     def get_version(self) -> str:
         self.found(raise_error=True)

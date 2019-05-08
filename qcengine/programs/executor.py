@@ -3,8 +3,6 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 
-from ..util import which_import
-
 
 class ProgramExecutor(BaseModel, abc.ABC):
 
@@ -25,7 +23,7 @@ class ProgramExecutor(BaseModel, abc.ABC):
 
     @staticmethod
     @abc.abstractmethod
-    def found(raise_error: bool=False) -> bool:
+    def found(raise_error: bool = False) -> bool:
         """
         Checks if the program can be found.
 
@@ -53,10 +51,11 @@ class ProgramExecutor(BaseModel, abc.ABC):
         """
         pass
 
+
 ## Computers
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
-                    template: Optional[str]=None) -> Dict[str, Any]:
+                    template: Optional[str] = None) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
     def execute(self, inputs, extra_outfiles, extra_commands, scratch_name, timeout):
