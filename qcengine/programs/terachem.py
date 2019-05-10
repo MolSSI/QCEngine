@@ -118,6 +118,29 @@ class TeraChemExecutor(ProgramExecutor):
             "input_result": input_model.copy(deep=True)
         }
 
+    # Check whether a string represent a float ( excluding integers)
+    def is_float(self, input_string):
+        if input_string.isdigit():
+            return False
+        else:
+            try:
+                float(input_string)
+                return True
+            except ValueError:
+                return False
+    def is_scf_line(self, current_line):
+        result = False
+        min_columns_per_scf_line = 5 
+        min_width_per_scf_line = 68
+
+        items = current_line.strip('\n').split()
+        if len(current_line) >= min_width_per_scf_line:
+            if len(items) >= min_columns_per_scf_line and items[0].isdigit():
+                result = True
+                for col in items[1:]:
+                      result = result and self.is_float(col)
+        return result
+
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
         output_data = {}
         properties = {}
@@ -126,13 +149,14 @@ class TeraChemExecutor(ProgramExecutor):
         output_lines = outfiles["tc.out"].split('\n')
         gradients = []
         natom = 0
+        line_final_energy = -1
+        line_scf_header = -1
         for idx,line in enumerate(output_lines):
             if "FINAL ENERGY" in line:
                 properties["scf_total_energy"] = float(line.strip('\n').split()[2])
-                last_scf_line = output_lines[idx-2]
-                properties["scf_iterations"] = int(last_scf_line.split()[0])
-                if "XC Energy" in output_lines:
-                    properties["scf_xc_energy"] = float(last_scf_line.split()[4])
+                line_final_energy = idx
+            elif "Start SCF Iterations" in line:
+                line_scf_header = idx
             elif "Total atoms" in line:
                 natom = int(line.split()[-1])
             elif "DIPOLE MOMENT" in line:
@@ -146,6 +170,21 @@ class TeraChemExecutor(ProgramExecutor):
                    grad = output_lines[i].strip('\n').split() 
                    for x in grad:
                        gradients.append( float(x) )
+
+        # Look for the last line that is the SCF info 
+        last_scf_line = ""
+        for idx in reversed(range(line_scf_header, line_final_energy)):
+            current_line = output_lines[idx]
+            if self.is_scf_line(current_line):
+                last_scf_line = current_line 
+                break
+                     
+        if len(last_scf_line) > 0:
+            properties["scf_iterations"] = int(last_scf_line.split()[0])
+            if "XC Energy" in output_lines:
+                properties["scf_xc_energy"] = float(last_scf_line.split()[4])
+        else:
+            raise ValueError("SCF iteration lines not found in TeraChem output")
                        
         if len(gradients) > 0:
             output_data["return_result"] = gradients
@@ -169,6 +208,7 @@ class TeraChemExecutor(ProgramExecutor):
         output_data["properties"] = properties
 
         output_data['schema_name'] = 'qcschema_output'
+        output_data['stdout'] = outfiles["tc.out"]
         # TODO Should only return True if TeraChem calculation terminated properly
         output_data['success'] = True
 
