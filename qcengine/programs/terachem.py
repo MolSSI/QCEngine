@@ -10,6 +10,7 @@ from .executor import ProgramExecutor
 from ..util import which, popen, parse_version, safe_version
 import qcengine.util as uti
 from qcelemental.models import FailedOperation
+import re
 
 
 class TeraChemExecutor(ProgramExecutor):
@@ -118,29 +119,6 @@ class TeraChemExecutor(ProgramExecutor):
             "input_result": input_model.copy(deep=True)
         }
 
-    # Check whether a string represent a float ( excluding integers)
-    def is_float(self, input_string):
-        if input_string.isdigit():
-            return False
-        else:
-            try:
-                float(input_string)
-                return True
-            except ValueError:
-                return False
-    def is_scf_line(self, current_line):
-        result = False
-        min_columns_per_scf_line = 5 
-        min_width_per_scf_line = 68
-
-        items = current_line.strip('\n').split()
-        if len(current_line) >= min_width_per_scf_line:
-            if len(items) >= min_columns_per_scf_line and items[0].isdigit():
-                result = True
-                for col in items[1:]:
-                      result = result and self.is_float(col)
-        return result
-
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
         output_data = {}
         properties = {}
@@ -172,12 +150,20 @@ class TeraChemExecutor(ProgramExecutor):
                        gradients.append( float(x) )
 
         # Look for the last line that is the SCF info 
+        DECIMAL = r"""(
+          (?:[-+]?\d*\.\d+(?:[DdEe][-+]?\d+)?) |  # .num with optional sign, exponent, wholenum
+          (?:[-+]?\d+\.\d*(?:[DdEe][-+]?\d+)?)    # num. with optional sign, exponent, decimals
+        )"""
+
         last_scf_line = ""
         for idx in reversed(range(line_scf_header, line_final_energy)):
-            current_line = output_lines[idx]
-            if self.is_scf_line(current_line):
-                last_scf_line = current_line 
+            mobj = re.search(
+                r'^\s*\d+\s+' + DECIMAL + r'\s+' + DECIMAL + r'\s+' + DECIMAL + r'\s+' + DECIMAL
+                , output_lines[idx], re.VERBOSE)
+            if mobj:
+                last_scf_line = output_lines[idx]
                 break
+
                      
         if len(last_scf_line) > 0:
             properties["scf_iterations"] = int(last_scf_line.split()[0])
