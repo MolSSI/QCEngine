@@ -92,7 +92,7 @@ A list of all fields is available through the ``fields`` property on the input a
 
 .. code:: python
 
-    >>> ret.driver
+    >>> ret.fields
     ['molecule', 'driver', 'model', 'id', 'schema_name', 'schema_version', 'keywords',
      'extras', 'provenance', 'return_result', 'success', 'properties', 'stdout', 'stderr', 'error']
 

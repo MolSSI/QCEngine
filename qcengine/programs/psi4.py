@@ -8,7 +8,7 @@ from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
 
 from .executor import ProgramExecutor
-from ..util import execute, popen, scratch_directory
+from ..util import execute, popen
 
 
 class Psi4Executor(ProgramExecutor):
