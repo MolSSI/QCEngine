@@ -3,10 +3,10 @@ Calls the Psi4 executable.
 """
 
 from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+from qcelemental.util import which_import
 
 from .executor import ProgramExecutor
 from ..units import ureg
-from ..util import which_import
 
 
 class RDKitExecutor(ProgramExecutor):

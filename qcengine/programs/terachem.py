@@ -2,16 +2,15 @@
 Calls the TeraChem executable.
 """
 
+import re
 from typing import Any, Dict, Optional
 
-from qcelemental.models import Result
+import qcengine.util as uti
+from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
 
 from .executor import ProgramExecutor
 from ..util import popen
-import qcengine.util as uti
-from qcelemental.models import FailedOperation
-import re
 
 
 class TeraChemExecutor(ProgramExecutor):

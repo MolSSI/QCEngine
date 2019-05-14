@@ -10,7 +10,6 @@ from qcelemental.models import Result
 from qcelemental.util import which
 
 from .executor import ProgramExecutor
-from ..util import which
 
 
 class MolproExecutor(ProgramExecutor):
