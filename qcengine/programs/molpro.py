@@ -5,7 +5,7 @@ Calls the Molpro executable.
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
-#from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+# from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 from qcelemental.models import Result
 from qcelemental.util import which
 
@@ -13,7 +13,6 @@ from .executor import ProgramExecutor
 
 
 class MolproExecutor(ProgramExecutor):
-
     _defaults = {
         "name": "Molpro",
         "scratch": True,
@@ -32,6 +31,7 @@ class MolproExecutor(ProgramExecutor):
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         pass
 
+    # TODO Switch over to Jinja
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         input_file = []
@@ -39,12 +39,13 @@ class MolproExecutor(ProgramExecutor):
 
         # Write header info
         input_file.append("!Title")
-        memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
+        memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
         input_file.append("memory,{},M".format(memory_mw_core))
         input_file.append('')
 
-        # TODO Hook for global options
-        # input_file.append('{symmetry,nosym}')
+        # Have no symmetry by default
+        input_file.append('{symmetry,nosym}')
+        input_file.append('')
 
         # Write the geom
         input_file.append('geometry={')
@@ -69,12 +70,12 @@ class MolproExecutor(ProgramExecutor):
         # Write energy call
         write_hf = input_model.model.method.lower() in posthf_methods
         if write_hf:
-            input_file.append('{hf}')
+            input_file.append('{HF}')
         input_file.append('{{{:s}}}'.format(input_model.model.method))
-        input_file.append('')
 
         # Write gradient call if asked for
         if input_model.driver == 'gradient':
+            input_file.append('')
             input_file.append('{force}')
 
         input_file = "\n".join(input_file)
@@ -92,72 +93,115 @@ class MolproExecutor(ProgramExecutor):
         root = tree.getroot()
         # print(root.tag)
 
-        # TODO Try to grab the last total energy in the general case?
-        #      - Would be useful for arbitrarily complicated input file
-        #      - However would need every different string used to specify energy (e.g. HF --> Energy, MP2 --> total energy)
+        # TODO Think of how to handle multiple calls of same command.
+        #      Currently it will grab the last one in the file.
         # TODO Read information from molecule tag
         #      - cml:molecule, cml:atomArray (?)
         #      - basisSet
         #      - orbitals
         output_data = {}
-        name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
-        # TODO Create enum class to take jobstep.attrib['command'] and determine what method it is
-        # methods_set = {'HF', 'RHF', 'MP2', 'CCSD'}
-
-        mp2_map = {
-            "total energy": "mp2_total_energy",
-            "correlation energy": "mp2_total_correlation_energy",
-            "singlet pair energy": "mp2_same_spin_correlation_energy",
-            "triplet pair energy": "mp2_opposite_spin_correlation_energy",
-        }
-
         properties = {}
+        name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
+
+        # SCF maps
+        scf_energy_map = {"Energy": "scf_total_energy"}
+        scf_dipole_map = {"Dipole moment": "scf_dipole_moment"}
+        scf_extras = {}
+
+        # MP2 maps
+        mp2_energy_map = {
+            "total energy": "mp2_total_energy",
+            "correlation energy": "mp2_correlation_energy",
+            "singlet pair energy": "mp2_singlet_pair_energy",
+            "triplet pair energy": "mp2_triplet_pair_energy"
+        }
+        mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
+        mp2_extras = {}
+
+        # CCSD maps
+        ccsd_energy_map = {
+            "total energy": "ccsd_total_energy",
+            "correlation energy": "ccsd_correlation_energy",
+            "singlet pair energy": "ccsd_singlet_pair_energy",
+            "triplet pair energy": "ccsd_triplet_pair_energy"
+        }
+        ccsd_dipole_map = {"Dipole moment": "ccsd_dipole_moment"}
+        ccsd_extras = {}
+
+        # Compiling the method maps
+        scf_maps = {
+            "energy": scf_energy_map,
+            "dipole": scf_dipole_map,
+            "extras": scf_extras
+        }
+        mp2_maps = {
+            "energy": mp2_energy_map,
+            "dipole": mp2_dipole_map,
+            "extras": mp2_extras
+        }
+        ccsd_maps = {
+            "energy": ccsd_energy_map,
+            "dipole": ccsd_dipole_map,
+            "extras": ccsd_extras
+        }
+        supported_methods = {"HF": scf_maps, "RHF": scf_maps, "MP2": mp2_maps, "CCSD": ccsd_maps}
 
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
-            # print("jobstep.tag: ")
-            # print(jobstep.tag)
 
-            if 'SCF' in jobstep.attrib['command']:
-                # Grab properties (e.g. Energy and Dipole moment)
+            # Remove the -SCF part of the command string when Molpro calls HF or KS
+            command = jobstep.attrib['command']
+            if '-SCF' in command:
+                command = command[:-4]
+
+            # Grab energies and dipole moment
+            if command in supported_methods:
                 for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] == 'Energy':
-                        # properties['scf_method'] = child.attrib['method']
-                        properties['scf_total_energy'] = float(child.attrib['value'])
-
-                    elif child.attrib['name'] == 'Dipole moment':
-                        properties['scf_dipole_moment'] = [float(x) for x in child.attrib['value'].split()]
-
-            elif 'MP2' in jobstep.attrib['command']:
-                # Grab properties (e.g. Energy and Dipole moment)
-                for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] in mp2_map:
-                        properties[mp2_map[child.attrib['name']]] = float(child.attrib['value'])
-
+                    if child.attrib['name'] in supported_methods[command]['energy']:
+                        properties[supported_methods[command]['energy'][child.attrib['name']]] = float(child.attrib['value'])
+                    elif child.attrib['name'] in supported_methods[command]['dipole']:
+                        properties[supported_methods[command]['dipole'][child.attrib['name']]] = [float(x) for x in
+                                                                                                  child.attrib['value'].split()]
             # Grab gradient
-            # TODO Handle situation where there are multiple FORCE calls
             elif 'FORCE' in jobstep.attrib['command']:
-                # Grab properties (e.g. Energy and Dipole moment)
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
-                    # print("gradient.attrib: ")
-                    # print(child.attrib)
                     # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
                     output_data['return_result'] = [float(x) for x in child.text.split()]
 
-        # A _bad_ way of figuring the correct energy
-        # TODO Maybe a better way would be to use the method specified from the input?
+        # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
+        if 'mp2_singlet_pair_energy' in properties and 'mp2_triplet_pair_energy' in properties:
+            properties["mp2_same_spin_correlation_energy"] = (2.0 / 3.0) * properties['mp2_triplet_pair_energy']
+            properties["mp2_opposite_spin_correlation_energy"] = (1.0 / 3.0) \
+                                                                 * properties['mp2_triplet_pair_energy'] \
+                                                                 + properties['mp2_singlet_pair_energy']
+            del properties['mp2_singlet_pair_energy']
+            del properties['mp2_triplet_pair_energy']
+
+        if 'ccsd_singlet_pair_energy' in properties and 'ccsd_triplet_pair_energy' in properties:
+            properties["ccsd_same_spin_correlation_energy"] = (2.0 / 3.0) * properties['ccsd_triplet_pair_energy']
+            properties["ccsd_opposite_spin_correlation_energy"] = (1.0 / 3.0) \
+                                                                  * properties['ccsd_triplet_pair_energy'] \
+                                                                  + properties['ccsd_singlet_pair_energy']
+            del properties['ccsd_singlet_pair_energy']
+            del properties['ccsd_triplet_pair_energy']
+
+        # A slightly more robust way of determining the final energy.
+        # Throws an error if the energy isn't found for the method specified from the input_model.
+        method = input_model.model.method
+        method_energy_map = supported_methods[method]['energy']
+        if 'total energy' in method_energy_map and method_energy_map['total energy'] in properties:
+            final_energy = properties[method_energy_map['total energy']]
+        elif 'Energy' in method_energy_map and method_energy_map['Energy'] in properties:
+            final_energy = properties[method_energy_map['Energy']]
+        else:
+            raise KeyError("Could not find {:s} total energy".format(method))
+
+        # Replace return_result with final_energy if gradient wasn't called
         if "return_result" not in output_data:
-            if "mp2_total_energy" in properties:
-                output_data["return_result"] = properties["mp2_total_energy"]
-            elif "scf_total_energy" in properties:
-                output_data["return_result"] = properties["scf_total_energy"]
-            else:
-                raise KeyError("Could not find SCF total energy")
+            output_data["return_result"] = final_energy
 
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
-
-        # TODO Should only return True if Molpro calculation terminated properly
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
