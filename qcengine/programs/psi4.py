@@ -2,14 +2,13 @@
 Calls the Psi4 executable.
 """
 import json
-
 from typing import Dict
 
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
 
-from ..util import scratch_directory, execute, popen
 from .executor import ProgramExecutor
+from ..util import execute, popen
 
 
 class Psi4Executor(ProgramExecutor):
@@ -35,7 +34,7 @@ class Psi4Executor(ProgramExecutor):
         is_found = which("psi4", return_bool=True)
 
         if not is_found and raise_error:
-            raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
+            raise ModuleNotFoundError("Could not find Psi4 in the Python path. Please 'conda install psi4 -c psi4'.")
         else:
             return is_found
 

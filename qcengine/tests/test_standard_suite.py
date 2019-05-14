@@ -14,7 +14,7 @@ _canonical_methods = [
     ("dftd3", {"method": "b3lyp-d3"}),
     ("psi4", {"method": "hf", "basis": "6-31G"}),
     ("rdkit", {"method": "UFF"}),
-    ("torchani", {"method": "ANI1"}),
+    ("torchani", {"method": "ANI1x"}),
 ]
 
 @pytest.mark.parametrize("program, model", _canonical_methods)

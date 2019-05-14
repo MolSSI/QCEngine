@@ -9,6 +9,7 @@ import traceback
 from decimal import Decimal
 
 import numpy as np
+
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import which

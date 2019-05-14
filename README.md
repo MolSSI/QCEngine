@@ -10,15 +10,6 @@ QCEngine
 
 Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QCSchema)) for quantum chemistry.
 
-Available Compute Programs:
- - [Psi4](http://www.psicode.org)
- - [RDKit](http://rdkit.org)
- - [TorchANI](https://github.com/aiqm/torchani)
-
-Available Procedures:
- - [Geometric](https://github.com/leeping/geomeTRIC)
-
-
 # Example
 
 A simple example of QCEngine's capabilities is as follows:
@@ -44,7 +35,7 @@ H  0.0  1.494  1.027
 These input specifications can be executed with the ``compute`` function along with a program specifier:
 
 ```python
->>> ret = qcng.compute(inp, "psi4", return_dict=False)
+>>> ret = qcng.compute(inp, "psi4")
 ```
 
 The results contain a complete record of the computation:

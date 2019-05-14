@@ -25,7 +25,7 @@ A simple example of QCEngine's capabilities is as follows:
     H  0.0  1.494  1.027
     """)
 
-    >>> inp = qcel.models.ResultInput(
+    >>> input = qcel.models.ResultInput(
         molecule=mol,
         driver="energy",
         model={"method": "SCF", "basis": "sto-3g"},
@@ -36,7 +36,7 @@ These input specifications can be executed with the ``compute`` syntax along wit
 
 .. code:: python
 
-    >>> ret = qcng.compute(inp, "psi4")
+    >>> ret = qcng.compute(input, "psi4")
 
 The results contain a complete record of the computation:
 
@@ -58,6 +58,8 @@ Currently available compute backends for single results are as follow:
 
 - Quantum Chemistry:
 
+  - `Terachem <http://www.petachem.com>`_
+  - `Molpro <https://www.molpro.net>`_
   - `Psi4 <http://www.psicode.org>`_
 
 - AI Evaluation:

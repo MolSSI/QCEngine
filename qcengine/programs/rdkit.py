@@ -3,9 +3,10 @@ Calls the Psi4 executable.
 """
 
 from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+from qcelemental.util import which_import
 
-from ..units import ureg
 from .executor import ProgramExecutor
+from ..units import ureg
 
 
 class RDKitExecutor(ProgramExecutor):
@@ -25,17 +26,24 @@ class RDKitExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
+    @staticmethod
+    def found(raise_error: bool=False) -> bool:
+        is_found = which_import("rdkit", return_bool=True)
+
+        if not is_found and raise_error:
+            raise ModuleNotFoundError("Could not find 'rdkit' in the Python path. Please 'conda install rdkit -c conda-forge'.")
+
+        return is_found
+
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Runs RDKit in FF typing
         """
 
-        try:
-            import rdkit
-            from rdkit import Chem
-            from rdkit.Chem import AllChem
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError("Could not find RDKit in the Python path.")
+        self.found(raise_error=True)
+        import rdkit
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
 
         # Failure flag
         ret_data = {"success": False}
@@ -116,10 +124,3 @@ class RDKitExecutor(ProgramExecutor):
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
         return Result(**{**input_data.dict(), **ret_data})
-
-    def found(self) -> bool:
-        try:
-            import rdkit
-            return True
-        except ModuleNotFoundError:
-            return False

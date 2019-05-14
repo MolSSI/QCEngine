@@ -21,18 +21,36 @@ class ProgramExecutor(BaseModel, abc.ABC):
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         pass
 
+    @staticmethod
     @abc.abstractmethod
-    def found(self) -> bool:
+    def found(raise_error: bool = False) -> bool:
         """
         Checks if the program can be found.
+
+        Parameters
+        ----------
+        raise_error : bool, optional
+            If True, raises an error if the program cannot be found.
+
+        Returns
+        -------
+        bool
+            Returns True if the program was found, False otherwise.
         """
         pass
 
 ## Utility
 
     def get_version(self) -> str:
-        """Finds program, extracts version, returns normalized version string."""
+        """Finds program, extracts version, returns normalized version string.
+
+        Returns
+        -------
+        str
+            Return a valid, safe python version string.
+        """
         pass
+
 
 ## Computers
 
