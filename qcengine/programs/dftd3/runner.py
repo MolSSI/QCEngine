@@ -15,9 +15,10 @@ from typing import Any, Dict, Optional
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
+from qcelemental.util import safe_version, which
 
 from . import dashparam
-from ...util import execute, which, safe_version
+from ...util import execute
 from ..executor import ProgramExecutor
 from ...extras import provenance_stamp
 

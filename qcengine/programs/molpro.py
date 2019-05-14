@@ -7,8 +7,8 @@ from typing import Any, Dict, Optional
 
 #from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 from qcelemental.models import Result
+from qcelemental.util import which
 
-from ..util import which
 from .executor import ProgramExecutor
 
 
