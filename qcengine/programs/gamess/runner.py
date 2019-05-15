@@ -9,8 +9,9 @@ from typing import Any, Dict, Optional
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Molecule, Result
+from qcelemental.util import which, safe_version
 
-from ...util import execute, which, safe_version
+from ...util import execute
 from ..executor import ProgramExecutor
 #from ...extras import provenance_stamp
 from ..util import PreservingDict
