@@ -2,6 +2,8 @@
 Calls the Psi4 executable.
 """
 
+from typing import Dict
+
 from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 from qcelemental.util import parse_version, safe_version, which_import
 
@@ -21,6 +23,7 @@ class TorchANIExecutor(ProgramExecutor):
         "node_parallel": False,
         "managed_memory": False
     }
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramExecutor.Config):
         pass
@@ -30,19 +33,17 @@ class TorchANIExecutor(ProgramExecutor):
 
     @staticmethod
     def found(raise_error: bool=False) -> bool:
-        is_found = which_import("torchani", return_bool=True)
-
-        if not is_found and raise_error:
-            raise ModuleNotFoundError("Could not find 'torchani' in the Python path. Please 'pip install torchani'.")
-
-        return is_found
-
+        return which_import('torchani', return_bool=True, raise_error=raise_error, raise_msg='Please install via `pip install torchani`.')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        import torchani
-        return safe_version(torchani.__version__)
+        which_prog = which_import('torchani')
+        if which_prog not in self.version_cache:
+            import torchani
+            self.version_cache[which_prog] = safe_version(torchani.__version__)
+
+        return self.version_cache[which_prog]
 
     def get_model(self, name: str) -> 'torchani.models.BuiltinModels':
         name = name.lower()

@@ -28,6 +28,9 @@ class MolproExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
+    def found(self) -> bool:
+        return which('molpro', return_bool=True, raise_error=raise_error, raise_msg='Please install via https://www.molpro.net/')
+
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         pass
 
@@ -205,6 +208,3 @@ class MolproExecutor(ProgramExecutor):
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
-
-    def found(self) -> bool:
-        return which('molpro', return_bool=True)

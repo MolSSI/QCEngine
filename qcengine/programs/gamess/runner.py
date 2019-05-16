@@ -29,6 +29,7 @@ class GAMESSExecutor(ProgramExecutor):
         "node_parallel": True,
         "managed_memory": True,
     }
+    version_cache: Dict[str, str] ={}
 
     class Config(ProgramExecutor.Config):
         pass
@@ -38,24 +39,22 @@ class GAMESSExecutor(ProgramExecutor):
 
     @staticmethod
     def found(raise_error=False) -> bool:
-        is_found = which('rungms', return_bool=True)
+        return which('rungms', return_bool=True, raise_error=raise_error, raise_msg='Please install via https://www.msg.chem.iastate.edu/GAMESS/GAMESS.html')
 
-        if not is_found and raise_error:
-            raise ImportError("Could not find `rungms` for GAMESS in the shell path.")
-        else:
-            return is_found
+    def get_version(self) -> str:
+        self.found(raise_error=True)
 
-#    def get_version(self) -> str:
-#        self.found(raise_error=True)
-#
-#        # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
-#        command = [which('dftd3'), '-version']
-#        import subprocess
-#        proc = subprocess.run(command, stdout=subprocess.PIPE)
-#        candidate_version = proc.stdout.decode('utf-8').strip()
-#
-#        return safe_version(candidate_version)
+        which_prog = which('rungms')
+        if which_prog not in self.version_cache:
+            success, output = execute([which_prog, "v.inp"], {"v.inp": ""})
 
+            if success:
+                for line in output["stdout"].splitlines():
+                    if 'GAMESS VERSION' in line:
+                        branch = ' '.join(line.strip(' *\t').split()[3:])
+                self.version_cache[which_prog] = safe_version(branch)
+
+        return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         self.found(raise_error=True)
