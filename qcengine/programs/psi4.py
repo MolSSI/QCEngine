@@ -39,7 +39,7 @@ class Psi4Executor(ProgramExecutor):
         which_prog = which('psi4')
         if which_prog not in self.version_cache:
             with popen([which_prog, '--version']) as exc:
-                exc["proc"].wait(timeout=5)
+                exc["proc"].wait(timeout=15)
             self.version_cache[which_prog] = safe_version(exc["stdout"])
 
         candidate_version = self.version_cache[which_prog]
