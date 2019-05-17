@@ -5,9 +5,9 @@ Tests the DQM compute dispatch module
 import copy
 
 import pytest
-from qcelemental.models import Molecule, ResultInput
 
 import qcengine as qcng
+from qcelemental.models import Molecule, ResultInput
 from qcengine import testing
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
@@ -119,7 +119,7 @@ def test_rdkit_connectivity_error():
     assert ret.success is False
     assert "connectivity" in ret.error.error_message
 
-    with pytest.raises(ValueError):
+    with pytest.raises(qcng.exceptions.InputError):
         qcng.compute(json_data, "rdkit", raise_error=True)
 
 

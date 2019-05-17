@@ -66,7 +66,7 @@ class TeraChemExecutor(ProgramExecutor):
         output_data = {}
         if not exe_success:
             output_data["success"] = False
-            output_data["error"] = {"error_type": "internal_error",
+            output_data["error"] = {"error_type": "unknown_error",
                                     "error_message": proc["stderr"]
                                    }
             return FailedOperation(

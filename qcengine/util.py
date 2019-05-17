@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from pydantic import ValidationError
+
 from qcelemental.models import ComputeError, FailedOperation
 
 from .config import LOGGER, get_provenance_augments
@@ -42,31 +43,17 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel'
     else:
         raise InputError("Input type of {} not understood.".format(type(model)))
 
-<<<<<<< HEAD
-    except Exception:
-        input_data = FailedOperation(input_data=input_data,
-                                     success=False,
-                                     error=ComputeError(
-                                         error_type="input_error",
-                                         error_message=("Input data could not be processed correctly:\n" +
-                                                        traceback.format_exc())))
-=======
     # Older QCElemental compat
     try:
         input_data.extras
     except AttributeError:
         input_data = input_data.copy(update={"extras": {}})
->>>>>>> Exc: Begins integrating new exception capabilities into the compute_wrapper
 
     return input_data
 
 
 @contextmanager
-<<<<<<< HEAD
-def compute_wrapper(capture_output: bool = True) -> Dict[str, Any]:
-=======
 def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> Dict[str, Any]:
->>>>>>> Exc: Begins integrating new exception capabilities into the compute_wrapper
     """Wraps compute for timing, output capturing, and raise protection
     """
 
