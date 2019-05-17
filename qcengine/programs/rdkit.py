@@ -5,6 +5,7 @@ Calls the Psi4 executable.
 from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
 from qcelemental.util import which_import
 
+from ..exceptions import InputError
 from .executor import ProgramExecutor
 from ..units import ureg
 
@@ -48,9 +49,10 @@ class RDKitExecutor(ProgramExecutor):
 
         # Handle errors
         if abs(jmol.molecular_charge) > 1.e-6:
-            ret_data["error"] = ComputeError(
-                error_type="input_error", error_message="run_rdkit does not currently support charged molecules")
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError("RDKit does not currently support charged molecules")
+            # ret_data["error"] = ComputeError(
+            #     error_type="input_error", error_message="run_rdkit does not currently support charged molecules")
+            # return FailedOperation(input_data=input_data.dict(), **ret_data)
 
         if not jmol.connectivity:  # Check for empty list
             ret_data["error"] = ComputeError(

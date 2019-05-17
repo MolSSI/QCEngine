@@ -57,47 +57,24 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
 
     """
 
-    program = program.lower()
-    if program not in list_all_programs():
-        input_data = FailedOperation(
-            input_data=input_data,
-            error=ComputeError(
-                error_type="not_registered",
-                error_message="QCEngine Call Error:\n"
-                "Program {} is not registered with QCEngine".format(program)))
-    elif program not in list_available_programs():
-        input_data = FailedOperation(
-            input_data=input_data,
-            error=ComputeError(
-                error_type="not_available",
-                error_message="QCEngine Call Error:\n"
-                "Program {} is registered with QCEngine, but cannot be found".format(program)))
-    error = _process_failure_and_return(input_data, return_dict, raise_error)
-    if error:
-        return error
+    output_data = input_data.copy()  # lgtm [py/multiple-definition]
+    with compute_wrapper(capture_output=False, raise_error=raise_error) as metadata:
 
-    # Build the model and validate
-    input_data = model_wrapper(input_data, ResultInput)
-    error = _process_failure_and_return(input_data, return_dict, raise_error)
-    if error:
-        return error
+        # Build the model and validate
+        input_data = model_wrapper(input_data, ResultInput)
 
-    # Grab the executor and build the input model
-    executor = get_program(program)
+        # Grab the executor and build the input model
+        executor = get_program(program)
 
-    # Build out local options
-    if local_options is None:
-        local_options = {}
+        # Build out local options
+        if local_options is None:
+            local_options = {}
 
-    input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
+        input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
 
-    local_options = {**local_options, **input_engine_options}
-    config = get_config(local_options=local_options)
+        local_options = {**local_options, **input_engine_options}
+        config = get_config(local_options=local_options)
 
-    # Run the program
-    with compute_wrapper(capture_output=False) as metadata:
-
-        output_data = input_data.copy()  # lgtm [py/multiple-definition]
         output_data = executor.compute(input_data, config)
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)

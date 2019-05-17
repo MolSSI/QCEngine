@@ -20,7 +20,7 @@ def test_missing_key():
 
 
 def test_missing_key_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(qcng.exceptions.InputError):
         ret = qcng.compute({"hello": "hi"}, "bleh", raise_error=True)
 
 
@@ -57,7 +57,9 @@ def test_psi4_internal_failure():
             "method": "ccsd",
             "basis": "6-31g"
         },
-        "keywords": {"reference": "rhf"}
+        "keywords": {
+            "reference": "rhf"
+        }
     }
     with pytest.raises(ValueError) as exc:
         ret = qcng.compute(psi4_task, "psi4", raise_error=True)
@@ -67,21 +69,22 @@ def test_psi4_internal_failure():
 
 @testing.using_psi4
 def test_psi4_ref_switch():
-    inp = ResultInput(**{
-        "molecule": {
-            "symbols": ["Li"],
-            "geometry": [0, 0, 0],
-            "molecular_multiplicity": 2
-        },
-        "driver": "energy",
-        "model": {
-            "method": "B3LYP",
-            "basis": "sto-3g"
-        },
-        "keywords": {
-            "scf_type": "df"
-        }
-    })
+    inp = ResultInput(
+        **{
+            "molecule": {
+                "symbols": ["Li"],
+                "geometry": [0, 0, 0],
+                "molecular_multiplicity": 2
+            },
+            "driver": "energy",
+            "model": {
+                "method": "B3LYP",
+                "basis": "sto-3g"
+            },
+            "keywords": {
+                "scf_type": "df"
+            }
+        })
 
     ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
 

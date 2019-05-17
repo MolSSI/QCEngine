@@ -18,9 +18,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from pydantic import ValidationError
 from qcelemental.models import ComputeError, FailedOperation
 
 from .config import LOGGER, get_provenance_augments
+from .exceptions import InputError, QCEngineException
 
 __all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
 
@@ -30,20 +32,17 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel'
     Wrap input data in the given model, or return a controlled error
     """
 
-    try:
-        if isinstance(input_data, dict):
-            input_data = model(**input_data)
-        elif isinstance(input_data, model):
-            input_data = input_data.copy()
-        else:
-            raise KeyError("Input type of {} not understood.".format(type(model)))
-
-        # Older QCElemental compat
+    if isinstance(input_data, dict):
         try:
-            input_data.extras
-        except AttributeError:
-            input_data = input_data.copy(update={"extras": {}})
+            input_data = model(**input_data)
+        except ValidationError as exc:
+            raise InputError(f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}")
+    elif isinstance(input_data, model):
+        input_data = input_data.copy()
+    else:
+        raise InputError("Input type of {} not understood.".format(type(model)))
 
+<<<<<<< HEAD
     except Exception:
         input_data = FailedOperation(input_data=input_data,
                                      success=False,
@@ -51,16 +50,27 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel'
                                          error_type="input_error",
                                          error_message=("Input data could not be processed correctly:\n" +
                                                         traceback.format_exc())))
+=======
+    # Older QCElemental compat
+    try:
+        input_data.extras
+    except AttributeError:
+        input_data = input_data.copy(update={"extras": {}})
+>>>>>>> Exc: Begins integrating new exception capabilities into the compute_wrapper
 
     return input_data
 
 
 @contextmanager
+<<<<<<< HEAD
 def compute_wrapper(capture_output: bool = True) -> Dict[str, Any]:
+=======
+def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> Dict[str, Any]:
+>>>>>>> Exc: Begins integrating new exception capabilities into the compute_wrapper
     """Wraps compute for timing, output capturing, and raise protection
     """
 
-    metadata = {"stdout": None, "stderr": None}
+    metadata = {"stdout": None, "stderr": None, "success": True}
 
     # Start timer
     comp_time = time.time()
@@ -75,9 +85,23 @@ def compute_wrapper(capture_output: bool = True) -> Dict[str, Any]:
 
     try:
         yield metadata
-        metadata["success"] = True
-    except Exception as e:
-        metadata["error_message"] = "QCEngine Call Error:\n" + traceback.format_exc()
+
+    # Canonical QCEngine, do not show traceback - return error
+    except QCEngineException as exc:
+        if raise_error:
+            raise exc
+
+        metadata["error_type"] = exc.error_type
+        metadata["error_message"] = exc.error_message
+        metadata["success"] = False
+
+    # Unknown QCEngine exception likely in the Python layer, show traceback
+    except Exception as exc:
+        if raise_error:
+            raise exc
+
+        metadata["error_type"] = "unknown_error"
+        metadata["error_message"] = "QCEngine Execution Error:\n" + traceback.format_exc()
         metadata["success"] = False
 
     # Place data
@@ -145,7 +169,7 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
 
     if metadata["success"] is not True:
         output_fusion["success"] = False
-        output_fusion["error"] = {"error_type": "meta_error", "error_message": metadata["error_message"]}
+        output_fusion["error"] = {"error_type": metadata["error_type"], "error_message": metadata["error_message"]}
 
     # Raise an error if one exists and a user requested a raise
     if raise_error and (output_fusion["success"] is not True):
