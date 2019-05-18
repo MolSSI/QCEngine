@@ -29,7 +29,7 @@ class NWChemExecutor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found(raise_error=False) -> bool:
+    def found(raise_error: bool=False) -> bool:
         return which('nwchem', return_bool=True, raise_error=raise_error, raise_msg='Please install via http://www.nwchem-sw.org/index.php/Download')
 
     def get_version(self) -> str:

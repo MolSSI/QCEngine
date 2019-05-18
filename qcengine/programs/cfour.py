@@ -37,7 +37,7 @@ class CfourExecutor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found(raise_error=False) -> bool:
+    def found(raise_error: bool=False) -> bool:
         return which('xcfour', return_bool=True, raise_error=raise_error, raise_msg='Please install via http://cfour.de/')
 
     def get_version(self) -> str:

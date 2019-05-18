@@ -30,7 +30,7 @@ class Psi4Executor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found(raise_error=False) -> bool:
+    def found(raise_error: bool=False) -> bool:
         return which('psi4', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install psi4 -c psi4`.')
 
     def get_version(self) -> str:

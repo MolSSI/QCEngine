@@ -1,6 +1,5 @@
 """Compute quantum chemistry using Iowa State's GAMESS executable."""
 
-import copy
 import pprint
 import re
 from decimal import Decimal
@@ -8,7 +7,7 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import FailedOperation, Molecule, Result
+from qcelemental.models import Molecule, Result
 from qcelemental.util import which, safe_version
 
 from ...util import execute
@@ -38,7 +37,7 @@ class GAMESSExecutor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found(raise_error=False) -> bool:
+    def found(raise_error: bool=False) -> bool:
         return which('rungms', return_bool=True, raise_error=raise_error, raise_msg='Please install via https://www.msg.chem.iastate.edu/GAMESS/GAMESS.html')
 
     def get_version(self) -> str:

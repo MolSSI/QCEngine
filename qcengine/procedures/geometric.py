@@ -1,6 +1,7 @@
 from typing import Any, Dict, Union
 
 from qcelemental.models import ComputeError, FailedOperation, Optimization, OptimizationInput
+from qcelemental.util import which_import
 
 from .procedure_model import BaseProcedure
 
@@ -14,6 +15,9 @@ class GeometricProcedure(BaseProcedure):
 
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
+
+    def found(self, raise_error: bool=False) -> bool:
+        return which_import('geometric', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install geometric -c conda-forge`.')
 
     def build_input_model(self, data: Union[Dict[str, Any], 'OptimizationInput']) -> 'OptimizationInput':
         return self._build_model(data, OptimizationInput)
@@ -47,10 +51,3 @@ class GeometricProcedure(BaseProcedure):
             output_data = Optimization(**output_data)
 
         return output_data
-
-    def found(self) -> bool:
-        try:
-            import geometric
-            return True
-        except ModuleNotFoundError:
-            return False
