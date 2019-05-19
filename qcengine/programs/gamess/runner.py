@@ -1,6 +1,7 @@
 """Compute quantum chemistry using Iowa State's GAMESS executable."""
 
 import pprint
+from decimal import Decimal
 from typing import Any, Dict, Optional
 
 import qcelemental as qcel

@@ -15,7 +15,6 @@ class PreservingDict(dict):
     works in decimal.Decimal (scalar) and np.ndarray (non-scalar)
 
     """
-    verbose = 1
 
     def __init__(self, *args, **kwargs):
         self.update(*args, **kwargs)
@@ -37,12 +36,10 @@ class PreservingDict(dict):
                     raise ValueError(
                         """Output file yielded both {} and {} as values for quantity {}.""".
                             format(self[key], value, key))
-                if verbose:
-                    print("""Resetting array {} to {}""".format(key, best_value))
+                # print("""Resetting array {} to {}""".format(key, best_value))
             else:
                 best_value = value
-                if verbose:
-                    print("""Setting   array {} to {}""".format(key, best_value))
+                # print("""Setting   array {} to {}""".format(key, best_value))
 
         else:
             # scalar
@@ -72,12 +69,10 @@ class PreservingDict(dict):
                     raise ValueError(
                         """Output file yielded both %s and %s as values for quantity %s.""" %
                         (self[key].to_eng_string(), value.to_eng_string(), key))
-                if verbose:
-                    print("""Resetting variable {} to {}""".format(key, best_value.to_eng_string()))
+                # print("""Resetting variable {} to {}""".format(key, best_value.to_eng_string()))
             else:
                 best_value = value
-                if verbose:
-                    print("""Setting   variable {} to {}""".format(key, best_value.to_eng_string()))
+                # print("""Setting   variable {} to {}""".format(key, best_value.to_eng_string()))
 
         super(PreservingDict, self).__setitem__(key, best_value)
 
