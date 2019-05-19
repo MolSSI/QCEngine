@@ -1,27 +1,20 @@
-"""Compute quantum chemistry using Mainz-Austin-Budapest-Gainesville's Cfour executable."""
+"""Compute quantum chemistry using Mainz-Austin-Budapest-Gainesville's CFOUR executable."""
 
-import copy
 import pprint
-import re
-from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Dict
 
-import numpy as np
-import qcelemental as qcel
-from qcelemental.models import FailedOperation, Molecule, Result
 from qcelemental.util import which, safe_version
 
 from ..util import execute
 from .executor import ProgramExecutor
-#from ...extras import provenance_stamp
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
-class CfourExecutor(ProgramExecutor):
+class CFOURExecutor(ProgramExecutor):
 
     _defaults = {
-        "name": "Cfour",
+        "name": "CFOUR",
         "scratch": True,
         "thread_safe": False,
         "thread_parallel": True,

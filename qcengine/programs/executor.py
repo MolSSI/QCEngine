@@ -58,7 +58,7 @@ class ProgramExecutor(BaseModel, abc.ABC):
                     template: Optional[str] = None) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
-    def execute(self, inputs, extra_outfiles, extra_commands, scratch_name, timeout):
+    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
         raise ValueError("execute is not implemented for {}.", self.__class__)
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':

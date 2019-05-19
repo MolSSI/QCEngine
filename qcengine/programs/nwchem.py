@@ -1,7 +1,6 @@
 """
 Calls the NWChem executable.
 """
-import json
 from typing import Dict
 
 from qcelemental.util import safe_version, which
