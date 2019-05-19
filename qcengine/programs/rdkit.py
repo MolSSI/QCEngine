@@ -28,12 +28,7 @@ class RDKitExecutor(ProgramExecutor):
 
     @staticmethod
     def found(raise_error: bool=False) -> bool:
-        is_found = which_import("rdkit", return_bool=True)
-
-        if not is_found and raise_error:
-            raise ModuleNotFoundError("Could not find 'rdkit' in the Python path. Please 'conda install rdkit -c conda-forge'.")
-
-        return is_found
+        return which_import('rdkit', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install rdkit -c conda-forge`.')
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """

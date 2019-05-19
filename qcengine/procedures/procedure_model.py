@@ -38,7 +38,7 @@ class BaseProcedure(BaseModel, abc.ABC):
         pass
 
     @abc.abstractmethod
-    def found(self) -> bool:
+    def found(self, raise_error: bool=False) -> bool:
         """
         Checks if the program can be found.
 

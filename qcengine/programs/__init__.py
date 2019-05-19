@@ -4,7 +4,10 @@ Imports the various compute backends
 
 from typing import List, Set
 
+from .cfour import CFOURExecutor
 from .dftd3 import DFTD3Executor
+from .gamess import GAMESSExecutor
+from .nwchem import NWChemExecutor
 from .molpro import MolproExecutor
 from .mp2d import MP2DExecutor
 from .psi4 import Psi4Executor
@@ -63,3 +66,6 @@ register_program(MolproExecutor())
 register_program(DFTD3Executor())
 register_program(TeraChemExecutor())
 register_program(MP2DExecutor())
+#register_program(GAMESSExecutor())
+#register_program(NWChemExecutor())
+#register_program(CFOURExecutor())

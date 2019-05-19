@@ -32,6 +32,20 @@ class TeraChemExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
+    @staticmethod
+    def found(raise_error: bool=False) -> bool:
+        return which('terachem', return_bool=True, raise_error=raise_error, raise_msg='Please install via http://www.petachem.com/index.html')
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        which_prog = which('terachem')
+        if which_prog not in self.version_cache:
+            with popen([which_prog, '--version']) as exc:
+                exc["proc"].wait(timeout=5)
+            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[2].strip('K'))
+
+        return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
@@ -61,27 +75,6 @@ class TeraChemExecutor(ProgramExecutor):
         # If execution succeeded, collect results
         Result = self.parse_output(proc["outfiles"], input_data)
         return Result
-
-    @staticmethod
-    def found(raise_error=False) -> bool:
-        is_found = which("terachem", return_bool=True)
-
-        if not is_found and raise_error:
-             raise ModuleNotFoundError("Could not find TeraChem in the Python path.")
-        else:
-             return is_found
-
-    def get_version(self) -> str:
-        self.found(raise_error=True)
-
-        which_terachem = which('terachem')
-        if which_terachem not in self.version_cache:
-            with popen([which('terachem'), '--version']) as exc:
-                exc["proc"].wait(timeout=5)
-            self.version_cache[which_terachem] = exc["stdout"].split()[2].strip('K')
-
-        candidate_version = self.version_cache[which_terachem]
-        return safe_version(candidate_version)
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str]=None) -> Dict[str, Any]:

@@ -21,6 +21,7 @@ class MolproExecutor(ProgramExecutor):
         "node_parallel": False,
         "managed_memory": True,
     }
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramExecutor.Config):
         pass
@@ -28,8 +29,26 @@ class MolproExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
+    def found(self, raise_error: bool=False) -> bool:
+        return which('molpro', return_bool=True, raise_error=raise_error, raise_msg='Please install via https://www.molpro.net/')
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        #which_prog = which('molpro')
+        #if which_prog not in self.version_cache:
+        #    success, output = execute([which_prog, "v.inp"], {"v.inp": ""})
+
+        #    if success:
+        #        for line in output["stdout"].splitlines():
+        #            if 'GAMESS VERSION' in line:
+        #                branch = ' '.join(line.strip(' *\t').split()[3:])
+        #        self.version_cache[which_prog] = safe_version(branch)
+
+        #return self.version_cache[which_prog]
+
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
-        pass
+        self.found(raise_error=True)
 
     # TODO Switch over to Jinja
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
@@ -205,6 +224,3 @@ class MolproExecutor(ProgramExecutor):
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
-
-    def found(self) -> bool:
-        return which('molpro', return_bool=True)

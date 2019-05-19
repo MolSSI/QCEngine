@@ -35,6 +35,7 @@ class DFTD3Executor(ProgramExecutor):
         "node_parallel": False,
         "managed_memory": False,
     }
+    version_cache: Dict[str, str] ={}
 
     class Config(ProgramExecutor.Config):
         pass
@@ -43,24 +44,21 @@ class DFTD3Executor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found(raise_error=False) -> bool:
-        is_found = which('dftd3', return_bool=True)
-
-        if not is_found and raise_error:
-            raise ImportError("Could not find DFTD3 in the shell path.")
-        else:
-            return is_found
+    def found(raise_error: bool=False) -> bool:
+        return which('dftd3', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install dftd3 -c psi4`.')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
-        command = [which('dftd3'), '-version']
-        import subprocess
-        proc = subprocess.run(command, stdout=subprocess.PIPE)
-        candidate_version = proc.stdout.decode('utf-8').strip()
+        which_prog = which('dftd3')
+        if which_prog not in self.version_cache:
+            # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
+            command = [which_prog, '-version']
+            import subprocess
+            proc = subprocess.run(command, stdout=subprocess.PIPE)
+            self.version_cache[which_prog] = safe_version(proc.stdout.decode('utf-8').strip())
 
-        return safe_version(candidate_version)
+        return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         self.found(raise_error=True)

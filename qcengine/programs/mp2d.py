@@ -6,13 +6,14 @@ import pprint
 import re
 import sys
 import traceback
+from typing import Dict
 from decimal import Decimal
 
 import numpy as np
 
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
-from qcelemental.util import which
+from qcelemental.util import safe_version, which
 
 from .dftd3 import dashparam
 from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
@@ -32,6 +33,7 @@ class MP2DExecutor(ProgramExecutor):
         "node_parallel": False,
         "managed_memory": False,
     }
+    version_cache: Dict[str, str] ={}
 
     class Config(ProgramExecutor.Config):
         pass
@@ -40,26 +42,21 @@ class MP2DExecutor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found(raise_error=False) -> bool:
-        is_found = which('mp2d', return_bool=True)
-
-        if not is_found and raise_error:
-            raise ImportError("Could not find MP2D in the shell path.")
-        else:
-            return is_found
+    def found(raise_error: bool=False) -> bool:
+        return which('mp2d', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install mp2d -c psi4`')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        # Note: no version at present. Need to get Chandler to set one up
-        #command = [which('mp2d'), '-version']
-        #import subprocess
-        #proc = subprocess.run(command, stdout=subprocess.PIPE)
-        #candidate_version = proc.stdout.decode('utf-8').strip()
-        candidate_version = '0.1'
+        which_prog = which('mp2d')
+        if which_prog not in self.version_cache:
+            #command = [which_prog, '-version']
+            #import subprocess
+            #proc = subprocess.run(command, stdout=subprocess.PIPE)
+            #self.version_cache[which_prog] = safe_version(proc.stdout.decode('utf-8').strip())
+            self.version_cache[which_prog] = safe_version('0.1')
 
-        from pkg_resources import safe_version
-        return safe_version(candidate_version)
+        return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         self.found(raise_error=True)
