@@ -60,11 +60,11 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     output_data = input_data.copy()  # lgtm [py/multiple-definition]
     with compute_wrapper(capture_output=False, raise_error=raise_error) as metadata:
 
-        # Build the model and validate
-        input_data = model_wrapper(input_data, ResultInput)
-
         # Grab the executor and build the input model
         executor = get_program(program)
+
+        # Build the model and validate
+        input_data = model_wrapper(input_data, ResultInput)
 
         # Build out local options
         if local_options is None:
@@ -106,36 +106,14 @@ def compute_procedure(input_data: Union[Dict[str, Any], 'BaseModel'],
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
 
-    procedure = procedure.lower()
-    if procedure not in list_all_procedures():
-        input_data = FailedOperation(
-            input_data=input_data,
-            error=ComputeError(
-                error_type="not_registered",
-                error_message="QCEngine Call Error:\n"
-                "Procedure {} is not registered with QCEngine".format(procedure)))
-    elif procedure not in list_available_procedures():
-        input_data = FailedOperation(
-            input_data=input_data,
-            error=ComputeError(
-                error_type="not_available",
-                error_message="QCEngine Call Error:\n"
-                "Procedure {} is registered with QCEngine, but cannot be found".format(procedure)))
-    error = _process_failure_and_return(input_data, return_dict, raise_error)
-    if error:
-        return error
+    output_data = input_data.copy()  # lgtm [py/multiple-definition]
+    with compute_wrapper(capture_output=False, raise_error=raise_error) as metadata:
 
-    # Grab the executor and build the input model
-    executor = get_procedure(procedure)
+        # Grab the executor and build the input model
+        executor = get_procedure(procedure)
 
-    config = get_config(local_options=local_options)
-    input_data = executor.build_input_model(input_data)
-    error = _process_failure_and_return(input_data, return_dict, raise_error)
-    if error:
-        return error
-
-    # Run the procedure
-    with compute_wrapper(capture_output=False) as metadata:
+        config = get_config(local_options=local_options)
+        input_data = executor.build_input_model(input_data)
 
         # Create a base output data in case of errors
         output_data = input_data.copy()  # lgtm [py/multiple-definition]

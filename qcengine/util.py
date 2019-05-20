@@ -37,7 +37,7 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel'
         try:
             input_data = model(**input_data)
         except ValidationError as exc:
-            raise InputError(f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}")
+            raise InputError(f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}") from None
     elif isinstance(input_data, model):
         input_data = input_data.copy()
     else:

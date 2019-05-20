@@ -3,6 +3,7 @@ Imports the various procedure backends
 """
 
 from typing import List, Set
+from ..exceptions import InputError, ResourceError
 
 from .geometric import GeometricProcedure
 
@@ -27,7 +28,17 @@ def get_procedure(name: str) -> 'BaseProcedure':
     """
     Returns a procedures executor class
     """
-    return procedures[name.lower()]
+
+    name = name.lower()
+
+    if name not in procedures:
+        raise InputError(f"Procedure {name} is not registered to QCEngine.")
+
+    ret = procedures[name]
+    if not ret.found():
+        raise ResourceError(f"Procedure {name} is registered with QCEngine, but cannot be found.")
+
+    return ret
 
 
 def list_all_procedures() -> Set[str]:
