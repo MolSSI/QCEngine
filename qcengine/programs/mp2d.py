@@ -18,6 +18,7 @@ from qcelemental.util import safe_version, which
 from .dftd3 import dashparam
 from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
 from .executor import ProgramExecutor
+from ..exceptions import InputError, ResourceError, UnknownError
 from ..extras import provenance_stamp
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -97,7 +98,7 @@ def run_json(jobrec):
             'error_type': 'ValueError',
             'error_message': """MP2D produces max gradient, not {jobrec['driver']}"""
         }
-        raise ValueError("""MP2D produces max gradient, not {jobrec['driver']}""")
+        raise InputError(f"""MP2D can valid driver options are 'energy' and 'gradient', not {jobrec['driver']}""")
 
     try:
         mp2d_driver(jobrec)
@@ -240,7 +241,7 @@ def mp2d_harvest(jobrec, modulerec):
             break
     else:
         if not ((real_nat == 1) and (jobrec['driver'] == 'gradient')):
-            raise ValueError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
+            raise ResourceError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
 
     # parse gradient output
     if modulerec['outfiles']['mp2d_gradient'] is not None:
@@ -253,7 +254,7 @@ def mp2d_harvest(jobrec, modulerec):
         try:
             fullgrad[ireal, :] = realgrad
         except NameError as exc:
-            raise NameError('Unsuccessful gradient collection.') from exc
+            raise UnknownError('Unsuccessful gradient collection.') from exc
 
     qcvkey = jobrec['extras']['info']['fctldash'].upper()
 
@@ -308,5 +309,5 @@ def mp2d_coeff_formatter(dashlvl, dashcoeff):
     if dashlvl == 'dmp2':
         return dashformatter.format(dashcoeff['a1'], dashcoeff['a2'], dashcoeff['rcut'], dashcoeff['w'], dashcoeff['s8'])
     else:
-        raise ValueError(
+        raise InputError(
             """-D correction level %s is not available. Choose among %s.""" % (dashlvl, dashcoeff.keys()))

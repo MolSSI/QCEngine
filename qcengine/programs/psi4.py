@@ -8,6 +8,7 @@ from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
 
 from .executor import ProgramExecutor
+from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from ..util import execute, popen
 
 
@@ -21,7 +22,7 @@ class Psi4Executor(ProgramExecutor):
         "node_parallel": False,
         "managed_memory": True,
     }
-    version_cache: Dict[str, str] ={}
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramExecutor.Config):
         pass
@@ -76,7 +77,8 @@ class Psi4Executor(ProgramExecutor):
                 input_data["keywords"]["reference"] = "uhf"
 
             # Execute the program
-            success, output = execute([which("psi4"), "--json", "data.json"], {"data.json": json.dumps(input_data)}, ["data.json"])
+            success, output = execute([which("psi4"), "--json", "data.json"], {"data.json": json.dumps(input_data)},
+                                      ["data.json"])
 
             if success:
                 output_data = json.loads(output["outfiles"]["data.json"])
@@ -93,28 +95,33 @@ class Psi4Executor(ProgramExecutor):
                 output_data["error"] = {"error_type": "execution_error", "error_message": output["stderr"]}
 
         else:
-            raise TypeError("Psi4 version '{}' not understood.".format(self.get_version()))
+            raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version()))
 
         # Reset the schema if required
         output_data["schema_name"] = "qcschema_output"
 
         # Dispatch errors, PSIO Errors are not recoverable for future runs
         if output_data["success"] is False:
+            error_message = output_data["error"]["error_message"]
 
-            if "PSIO Error" in output_data["error"]:
-                raise ValueError(output_data["error"])
+            if "PSIO Error" in error_message:
+                raise ResourceError(error_message)
+            elif "SIGSEV" in error_message:
+                raise RandomError(error_message)
+            elif "TypeError: set_global_option" in error_message:
+                raise InputError(error_message)
+            elif "RHF reference is only for singlets" in error_message:
+                raise InputError(error_message)
+            else:
+                raise UnknownError(error_message)
 
         # Move several pieces up a level
-        if output_data["success"]:
-            output_data["provenance"]["memory"] = round(output_data.pop("memory") / (1024**3), 3)  # Move back to GB
-            output_data["provenance"]["nthreads"] = output_data.pop("nthreads")
-            output_data["stdout"] = output_data.pop("raw_output", None)
+        output_data["provenance"]["memory"] = round(output_data.pop("memory") / (1024**3), 3)  # Move back to GB
+        output_data["provenance"]["nthreads"] = output_data.pop("nthreads")
+        output_data["stdout"] = output_data.pop("raw_output", None)
 
-            # Delete keys
-            output_data.pop("return_output", None)
-            output_data.pop("scratch_location", None)
+        # Delete keys
+        output_data.pop("return_output", None)
+        output_data.pop("scratch_location", None)
 
-            return Result(**output_data)
-        else:
-            return FailedOperation(
-                success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
+        return Result(**output_data)

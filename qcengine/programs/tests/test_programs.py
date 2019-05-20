@@ -61,7 +61,7 @@ def test_psi4_internal_failure():
             "reference": "rhf"
         }
     }
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(qcng.exceptions.InputError) as exc:
         ret = qcng.compute(psi4_task, "psi4", raise_error=True)
 
     assert "reference is only" in str(exc.value)

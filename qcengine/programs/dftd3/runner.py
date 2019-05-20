@@ -13,14 +13,16 @@ from decimal import Decimal
 from typing import Any, Dict, Optional
 
 import numpy as np
+
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import safe_version, which
 
 from . import dashparam
-from ...util import execute
 from ..executor import ProgramExecutor
+from ...exceptions import InputError, ResourceError
 from ...extras import provenance_stamp
+from ...util import execute
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -99,7 +101,7 @@ def run_json(jobrec):
             'error_type': 'ValueError',
             'error_message': """DFTD3 produces max gradient, not {jobrec['driver']}"""
         }
-        raise ValueError("""DFTD3 produces max gradient, not {jobrec['driver']}""")
+        raise InputError("""DFTD3 can valid driver options are 'energy' and 'gradient', not {jobrec['driver']}""")
 
     try:
         dftd3_driver(jobrec)
@@ -291,14 +293,14 @@ def dftd3_harvest(jobrec, modulerec):
         elif re.match(' Edisp /kcal,au', ln):
             ene = Decimal(ln.split()[3])
         elif re.match(r" E6\(ABC\) \"   :", ln):  # c. v3.2.0
-            raise ValueError("Cannot process ATM results from DFTD3 prior to v3.2.1.")
+            raise ResourceError("Cannot process ATM results from DFTD3 prior to v3.2.1.")
         elif re.match(r""" E6\(ABC\) /kcal,au:""", ln):
             atm = Decimal(ln.split()[-1])
         elif re.match(' normal termination of dftd3', ln):
             break
     else:
         if not ((real_nat == 1) and (jobrec['driver'] == 'gradient')):
-            raise ValueError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
+            raise ResourceError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
 
     # parse gradient output
     # * DFTD3 crashes on one-atom gradients. Avoid the error (above) and just force the correct result (below).
@@ -428,4 +430,4 @@ def dftd3_coeff_formatter(dashlvl, dashcoeff):
         # need to set first four parameters to something other than None, otherwise DFTD3 gets mad or a bit wrong
         return dashformatter.format(1.0, 0.0, 0.0, 0.0, dashcoeff['alpha6'], 3)
     else:
-        raise ValueError(f"""-D correction level {dashlvl} is not available. Choose among {dashcoeff.keys()}.""")
+        raise InputError(f"""-D correction level {dashlvl} is not available. Choose among {dashcoeff.keys()}.""")
