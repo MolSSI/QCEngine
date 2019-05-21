@@ -17,6 +17,7 @@ molpro_info = qcer.get_info('molpro')
 
 @pytest.mark.parametrize('test_case', molpro_info.list_test_cases())
 def test_molpro_output_parser(test_case):
+
     # Get output file data
     data = molpro_info.get_test_data(test_case)
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
@@ -34,6 +35,7 @@ def test_molpro_output_parser(test_case):
 
 @pytest.mark.parametrize('test_case', molpro_info.list_test_cases())
 def test_molpro_input_formatter(test_case):
+
     # Get output file data
     data = molpro_info.get_test_data(test_case)
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
