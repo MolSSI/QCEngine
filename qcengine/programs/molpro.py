@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
 from qcelemental.models import Result, FailedOperation
-import qcengine.util as uti
+from ..util import execute
 from qcelemental.util import which
 
 from .executor import ProgramExecutor
@@ -46,7 +46,7 @@ class MolproExecutor(ProgramExecutor):
         #        self.version_cache[which_prog] = safe_version(branch)
 
         #return self.version_cache[which_prog]
-        
+
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Run Molpro
@@ -55,19 +55,19 @@ class MolproExecutor(ProgramExecutor):
         self.found(raise_error=True)
 
         # Check Molpro version
-        # if parse_version(self.get_version()) < parse_version("1.5"):
+        # if parse_version(self.get_version()) < parse_version("2018.1"):
         #     raise TypeError("Molpro version '{}' not understood".format(self.get_version()))
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
 
         # Run Molpro
-        exe_success, proc = uti.execute(job_inputs["commands"],
-                                        infiles=job_inputs["infiles"],
-                                        outfiles=["dispatch.out", "dispatch.xml"],
-                                        scratch_location=job_inputs["scratch_location"],
-                                        timeout=None
-                                        )
+        exe_success, proc = execute(job_inputs["commands"],
+                                    infiles=job_inputs["infiles"],
+                                    outfiles=["dispatch.out", "dispatch.xml", "dispatch.wfu"],
+                                    scratch_location=job_inputs["scratch_location"],
+                                    timeout=None
+                                    )
 
         # Determine whether the calculation succeeded
         output_data = {}
@@ -85,9 +85,9 @@ class MolproExecutor(ProgramExecutor):
 
     # TODO Additional features
     #   - allow separate xyz file to be provided
-    #   - pass scratch location info to Molpro command (-d option)
-    #   - pass number of cores to Molpro command (-n option)
     #   - add support of wfu files? (-W option)
+    # FIXME Molpro takes xyz input in Angstrom by default, but MolSSI stores xyz in bohr
+    #   - Either need to convert to Angstrom or change Molpro input to read bohr
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         input_file = []
@@ -95,8 +95,11 @@ class MolproExecutor(ProgramExecutor):
 
         # Write header info
         input_file.append("!Title")
+        # Memory is in megawords per core for Molpro
         memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
         input_file.append("memory,{},M".format(memory_mw_core))
+        # TODO Add specification of wfu file only if asked for
+        # input_file.append('file,2,dispatch.wfu')
         input_file.append('')
 
         # Have no symmetry by default
@@ -137,10 +140,11 @@ class MolproExecutor(ProgramExecutor):
         input_file = "\n".join(input_file)
 
         return {
-            "commands": ["molpro", "dispatch.mol"],
+            "commands": ["molpro", "dispatch.mol", "-d", ".", "-W", ".", "-n", str(config.ncores)],
             "infiles": {
                 "dispatch.mol": input_file
             },
+            "scratch_location": config.scratch_directory,
             "input_result": input_model.copy(deep=True)
         }
 
