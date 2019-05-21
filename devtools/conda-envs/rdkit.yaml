@@ -10,7 +10,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.3.0
+  - qcelemental >=0.4.0
   - pydantic >=0.20.0
 
     # Testing

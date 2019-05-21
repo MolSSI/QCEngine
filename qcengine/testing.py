@@ -10,7 +10,8 @@ from pkg_resources import parse_version
 
 import pytest
 
-from .util import which, which_import
+from qcelemental.util import which, which_import
+
 from .programs import list_available_programs, get_program
 
 

@@ -13,6 +13,23 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+
+vX.Y.0 / 2019-MM-DD
+-------------------
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+
+- (:pr:`63`) QCEngine functions ``util.which``, ``util.which_version``, ``util.parse_version``, and
+  ``util.safe_version`` removed after migrating to QCElemental.
+
+Bug Fixes
++++++++++
+
+
 v0.6.4 / 2019-03-21
 -------------------
 

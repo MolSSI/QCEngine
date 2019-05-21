@@ -149,9 +149,8 @@ class MolproExecutor(ProgramExecutor):
         root = tree.getroot()
         # print(root.tag)
 
-        # TODO Try to grab the last total energy in the general case?
-        #      - Would be useful for arbitrarily complicated input file
-        #      - However would need every different string used to specify energy (e.g. HF --> Energy, MP2 --> total energy)
+        # TODO Think of how to handle multiple calls of same command.
+        #      Currently it will grab the last one in the file.
         # TODO Read information from molecule tag
         #      - cml:molecule, cml:atomArray (?)
         #      - basisSet

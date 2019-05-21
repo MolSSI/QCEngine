@@ -12,10 +12,10 @@ Discussion
 - QCArchive Slack is a great place to get feedback and advice from the community. Click `here <https://join.slack.com/t/qcdb/shared_invite/enQtNDIzNTQ2OTExODk0LWM3OTgxN2ExYTlkMTlkZjA0OTExZDlmNGRlY2M4NWJlNDlkZGQyYWUxOTJmMzc3M2VlYzZjMjgxMDRkYzFmOTE>`_ to get started.
 - The QCArchive GitHub repositories contain future roadmaps, current code updates, and a list of issues that are being worked and provide an excellent overview of the development status of the project. See the following links:
 
-   - `QCSchema <https://github.com/MolSSI/QCSchema>`_
-   - `QCElemental <https://github.com/MolSSI/QCElemental>`_
-   - `QCEngine <https://github.com/MolSSI/QCEngine>`_
-   - `QCFractal <https://github.com/MolSSI/QCFractal>`_
+  - `QCSchema <https://github.com/MolSSI/QCSchema>`_
+  - `QCElemental <https://github.com/MolSSI/QCElemental>`_
+  - `QCEngine <https://github.com/MolSSI/QCEngine>`_
+  - `QCFractal <https://github.com/MolSSI/QCFractal>`_
 
 
 Work with us!

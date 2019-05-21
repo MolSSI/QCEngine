@@ -125,7 +125,7 @@ def test_torchani_task():
     json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = qcng.get_molecule("water")
     json_data["driver"] = "gradient"
-    json_data["model"] = {"method": "ANI1", "basis": None}
+    json_data["model"] = {"method": "ANI1x", "basis": None}
     json_data["keywords"] = {}
 
     ret = qcng.compute(json_data, "torchani", raise_error=True)

@@ -41,6 +41,7 @@ def test_molpro_input_formatter(test_case):
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
     # Just test that it runs for now
+    # TODO add actual comparison
     input_file = qcng.get_program('molpro').build_input(inp, qcng.get_config())
     assert input_file.keys() >= {"commands", "infiles"}
 

@@ -2,13 +2,13 @@
 Calls the Psi4 executable.
 """
 import json
-
 from typing import Dict
 
 from qcelemental.models import FailedOperation, Result
+from qcelemental.util import parse_version, safe_version, which
 
-from ..util import scratch_directory, execute, which, popen, safe_version, parse_version
 from .executor import ProgramExecutor
+from ..util import execute, popen
 
 
 class Psi4Executor(ProgramExecutor):
@@ -30,30 +30,25 @@ class Psi4Executor(ProgramExecutor):
         super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
-    def found(raise_error=False) -> bool:
-        is_found = which("psi4", return_bool=True)
-
-        if not is_found and raise_error:
-            raise ModuleNotFoundError("Could not find Psi4 in the Python path.")
-        else:
-            return is_found
+    def found(raise_error: bool=False) -> bool:
+        return which('psi4', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install psi4 -c psi4`.')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_psi = which('psi4')
-        if which_psi not in self.version_cache:
-            with popen([which('psi4'), '--version']) as exc:
+        which_prog = which('psi4')
+        if which_prog not in self.version_cache:
+            with popen([which_prog, '--version']) as exc:
                 exc["proc"].wait(timeout=5)
-            self.version_cache[which_psi] = exc["stdout"]
+            self.version_cache[which_prog] = safe_version(exc["stdout"])
 
-        candidate_version = self.version_cache[which_psi]
+        candidate_version = self.version_cache[which_prog]
 
         if "undef" in candidate_version:
             raise TypeError(
                 "Using custom build without tags. Please pull git tags with `git pull origin master --tags`.")
 
-        return safe_version(candidate_version)
+        return candidate_version
 
     def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
         """

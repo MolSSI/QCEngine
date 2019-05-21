@@ -2,14 +2,15 @@
 Calls the TeraChem executable.
 """
 
+import re
 from typing import Any, Dict, Optional
 
-from qcelemental.models import Result
+import qcengine.util as uti
+from qcelemental.models import FailedOperation, Result
+from qcelemental.util import parse_version, safe_version, which
 
 from .executor import ProgramExecutor
-from ..util import which, popen, parse_version, safe_version
-import qcengine.util as uti
-from qcelemental.models import FailedOperation
+from ..util import popen
 
 
 class TeraChemExecutor(ProgramExecutor):
@@ -29,15 +30,29 @@ class TeraChemExecutor(ProgramExecutor):
 
 
     def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs}) 
+        super().__init__(**{**self._defaults, **kwargs})
 
+    @staticmethod
+    def found(raise_error: bool=False) -> bool:
+        return which('terachem', return_bool=True, raise_error=raise_error, raise_msg='Please install via http://www.petachem.com/index.html')
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        which_prog = which('terachem')
+        if which_prog not in self.version_cache:
+            with popen([which_prog, '--version']) as exc:
+                exc["proc"].wait(timeout=5)
+            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[2].strip('K'))
+
+        return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Run TeraChem
         """
         self.found(raise_error=True)
-        
+
         # Check TeraChem version
         if parse_version(self.get_version()) < parse_version("1.5"):
            raise TypeError("TeraChem version '{}' not understood".format(self.get_version()))
@@ -51,7 +66,7 @@ class TeraChemExecutor(ProgramExecutor):
         output_data = {}
         if not exe_success:
             output_data["success"] = False
-            output_data["error"] = {"error_type": "internal_error", 
+            output_data["error"] = {"error_type": "internal_error",
                                     "error_message": proc["stderr"]
                                    }
             return FailedOperation(
@@ -61,30 +76,9 @@ class TeraChemExecutor(ProgramExecutor):
         Result = self.parse_output(proc["outfiles"], input_data)
         return Result
 
-    @staticmethod
-    def found(raise_error=False) -> bool:
-        is_found = which("terachem", return_bool=True)
-
-        if not is_found and raise_error:
-             raise ModuleNotFoundError("Could not find TeraChem in the Python path.")
-        else:
-             return is_found
-
-    def get_version(self) -> str:
-        self.found(raise_error=True)
-
-        which_terachem = which('terachem')
-        if which_terachem not in self.version_cache:
-            with popen([which('terachem'), '--version']) as exc:
-                exc["proc"].wait(timeout=5)
-            self.version_cache[which_terachem] = exc["stdout"].split()[2].strip('K')
-
-        candidate_version = self.version_cache[which_terachem]
-        return safe_version(candidate_version)
-
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig', 
+    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str]=None) -> Dict[str, Any]:
-        #Write the geom xyz file with unit au 
+        #Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='terachem', units='Bohr')
 
         # Write input file
@@ -94,20 +88,20 @@ class TeraChemExecutor(ProgramExecutor):
         input_file.append( "charge " + str(int(input_model.molecule.molecular_charge)))
         input_file.append( "spinmult " + str(input_model.molecule.molecular_multiplicity))
         input_file.append( "coordinates geometry.xyz")
-        
+
         input_file.append("\n# model")
         input_file.append("basis " + str(input_model.model.basis))
-        
-        
+
+
         input_file.append("\n# driver")
         input_file.append("run " +input_model.driver)
-        
+
         input_file.append("\n# keywords")
         for k, v in input_model.keywords.items():
             input_file.append("{} {}".format(k, v))
 
         input_file = "\n".join(input_file)
-  
+
         return {
             "commands": ["terachem", "tc.in"],
             "infiles": {
@@ -126,13 +120,14 @@ class TeraChemExecutor(ProgramExecutor):
         output_lines = outfiles["tc.out"].split('\n')
         gradients = []
         natom = 0
+        line_final_energy = -1
+        line_scf_header = -1
         for idx,line in enumerate(output_lines):
             if "FINAL ENERGY" in line:
                 properties["scf_total_energy"] = float(line.strip('\n').split()[2])
-                last_scf_line = output_lines[idx-2]
-                properties["scf_iterations"] = int(last_scf_line.split()[0])
-                if "XC Energy" in output_lines:
-                    properties["scf_xc_energy"] = float(last_scf_line.split()[4])
+                line_final_energy = idx
+            elif "Start SCF Iterations" in line:
+                line_scf_header = idx
             elif "Total atoms" in line:
                 natom = int(line.split()[-1])
             elif "DIPOLE MOMENT" in line:
@@ -143,10 +138,33 @@ class TeraChemExecutor(ProgramExecutor):
             elif "Gradient units are Hartree/Bohr" in line:
                 #Gradient is stored as (dE/dx1,dE/dy1,dE/dz1,dE/dx2,dE/dy2,...)
                 for i in range(idx+3,idx+3+natom):
-                   grad = output_lines[i].strip('\n').split() 
+                   grad = output_lines[i].strip('\n').split()
                    for x in grad:
                        gradients.append( float(x) )
-                       
+
+        # Look for the last line that is the SCF info
+        DECIMAL = r"""(
+          (?:[-+]?\d*\.\d+(?:[DdEe][-+]?\d+)?) |  # .num with optional sign, exponent, wholenum
+          (?:[-+]?\d+\.\d*(?:[DdEe][-+]?\d+)?)    # num. with optional sign, exponent, decimals
+        )"""
+
+        last_scf_line = ""
+        for idx in reversed(range(line_scf_header, line_final_energy)):
+            mobj = re.search(
+                r'^\s*\d+\s+' + DECIMAL + r'\s+' + DECIMAL + r'\s+' + DECIMAL + r'\s+' + DECIMAL
+                , output_lines[idx], re.VERBOSE)
+            if mobj:
+                last_scf_line = output_lines[idx]
+                break
+
+
+        if len(last_scf_line) > 0:
+            properties["scf_iterations"] = int(last_scf_line.split()[0])
+            if "XC Energy" in output_lines:
+                properties["scf_xc_energy"] = float(last_scf_line.split()[4])
+        else:
+            raise ValueError("SCF iteration lines not found in TeraChem output")
+
         if len(gradients) > 0:
             output_data["return_result"] = gradients
 
@@ -156,10 +174,10 @@ class TeraChemExecutor(ProgramExecutor):
         #       properties["spin_S2"] = float(line.strip('\n').split()[2])
         # Parse files in scratch folder
         #properties["atomic_charge"] = []
-        #atomic_charge_lines =  open(outfiles["charge.xls"]).readlines()  
+        #atomic_charge_lines =  open(outfiles["charge.xls"]).readlines()
         #for line in atomic_charge_lines:
-        #    properties["atomic_charge"].append(line.strip('\n').split()[-1]) 
-        
+        #    properties["atomic_charge"].append(line.strip('\n').split()[-1])
+
         if "return_result" not in output_data:
             if "scf_total_energy" in properties:
                 output_data["return_result"] = properties["scf_total_energy"]
@@ -169,6 +187,7 @@ class TeraChemExecutor(ProgramExecutor):
         output_data["properties"] = properties
 
         output_data['schema_name'] = 'qcschema_output'
+        output_data['stdout'] = outfiles["tc.out"]
         # TODO Should only return True if TeraChem calculation terminated properly
         output_data['success'] = True
 

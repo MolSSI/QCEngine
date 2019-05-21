@@ -107,7 +107,7 @@ def test_geometric_torchani():
     inp = copy.deepcopy(_base_json)
 
     inp["initial_molecule"] = qcng.get_molecule("water")
-    inp["input_specification"]["model"] = {"method": "ANI1", "basis": None}
+    inp["input_specification"]["model"] = {"method": "ANI1x", "basis": None}
     inp["keywords"]["program"] = "torchani"
 
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
