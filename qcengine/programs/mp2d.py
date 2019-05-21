@@ -95,10 +95,10 @@ def run_json(jobrec):
     if jobrec['driver'].derivative_int() > 1:
         jobrec['success'] = False
         jobrec['error'] = {
-            'error_type': 'ValueError',
+            'error_type': 'input_error',
             'error_message': """MP2D produces max gradient, not {jobrec['driver']}"""
         }
-        raise InputError(f"""MP2D can valid driver options are 'energy' and 'gradient', not {jobrec['driver']}""")
+        raise InputError(f"""MP2D valid driver options are 'energy' and 'gradient', not {jobrec['driver']}""")
 
     try:
         mp2d_driver(jobrec)
@@ -241,7 +241,7 @@ def mp2d_harvest(jobrec, modulerec):
             break
     else:
         if not ((real_nat == 1) and (jobrec['driver'] == 'gradient')):
-            raise ResourceError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
+            raise UnknownError('Unknown issue occured.')
 
     # parse gradient output
     if modulerec['outfiles']['mp2d_gradient'] is not None:
