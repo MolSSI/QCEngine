@@ -3,6 +3,8 @@
 import collections
 import copy
 
+from ...exceptions import InputError
+
 ## ==> Dispersion Aliases and Parameters <== ##
 
 # The dashcoeff dict below defines the -D parameters for most of the DFT methods. Some 'd2' are
@@ -480,7 +482,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
 
     # << 1 >> use name_hint and/or level_hint to determine intended dispersion level
     if name_hint is None and level_hint is None:
-        raise ValueError("""Can't guess -D level without name_hint ({}) or level_hint ({})""".format(
+        raise InputError("""Can't guess -D level without name_hint ({}) or level_hint ({})""".format(
             name_hint, level_hint))
 
     if level_hint is None:
@@ -490,7 +492,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
         try:
             dashlevel_candidate_1 = get_dispersion_aliases()[level_hint]
         except KeyError:
-            raise ValueError("""Requested -D correction level ({}) not among ({})""".format(
+            raise InputError("""Requested -D correction level ({}) not among ({})""".format(
                 level_hint, dashcoeff.keys()))
 
     if name_hint is None:
@@ -543,16 +545,16 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
         #    disp_params = dashcoeff[dashlevel_candidate_2]['definitions'][name_key]['params']
         else:
             dashlevel_candidate_2 = None
-            raise ValueError("""Can't guess -D correction level from ({})""".format(name_hint))
+            raise InputError("""Can't guess -D correction level from ({})""".format(name_hint))
 
     disp_params = copy.deepcopy(disp_params)
 
     if dashlevel_candidate_1 is None and dashlevel_candidate_2 is None:
-        raise ValueError(
+        raise InputError(
             f"""Can't guess -D correction level from name_hint ({name_hint}) and level_hint ({level_hint})""")
     elif dashlevel_candidate_1 is not None and dashlevel_candidate_2 is not None:
         if dashlevel_candidate_1 != dashlevel_candidate_2:
-            raise ValueError(
+            raise InputError(
                 f"""Inconsistent -D correction level ({dashlevel_candidate_2} != {dashlevel_candidate_1}) from name_hint ({name_hint}) and level_hint ({level_hint})"""
             )
     dashleveleff = dashlevel_candidate_1 or dashlevel_candidate_2
@@ -561,7 +563,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
 
     # << 2 >> use name_hint and/or param_tweaks to determine intended dispersion parameters
     if name_hint is None and param_tweaks is None:
-        raise ValueError("""Can't guess -D parameters without name_hint ({}) or param_tweaks ({})""".format(
+        raise InputError("""Can't guess -D parameters without name_hint ({}) or param_tweaks ({})""".format(
             name_hint, param_tweaks))
 
     if isinstance(param_tweaks, list):
@@ -571,13 +573,13 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
         param_tweaks = {}
 
     if not set(param_tweaks.keys()).issubset(allowed_params):
-        raise ValueError('Requested keys ({}) not among allowed ({}) for dispersion level ({})'.format(
+        raise InputError('Requested keys ({}) not among allowed ({}) for dispersion level ({})'.format(
             list(param_tweaks.keys()), list(allowed_params), dashleveleff))
 
     disp_params.update(param_tweaks)
 
     if disp_params.keys() != allowed_params:
-        raise ValueError('Requested keys ({}) insufficient ({}) for dispersion level ({})'.format(
+        raise InputError('Requested keys ({}) insufficient ({}) for dispersion level ({})'.format(
             list(param_tweaks.keys()), list(allowed_params), dashleveleff))
 
     # << 3 >> use final dashlevel and disp_params to determine if a defined "fctl-disp" label exists

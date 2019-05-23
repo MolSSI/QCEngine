@@ -57,5 +57,5 @@ def test_compute_bad_models(program, model):
     amodel = model
     inp = ResultInput(molecule=qcng.get_molecule("hydrogen"), driver=adriver, model=amodel)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(qcng.exceptions.InputError) as exc:
         ret = qcng.compute(inp, program, raise_error=True)

@@ -10,6 +10,7 @@ from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
 
 from .executor import ProgramExecutor
+from ..exceptions import UnknownError
 from ..util import popen
 
 
@@ -66,7 +67,7 @@ class TeraChemExecutor(ProgramExecutor):
         output_data = {}
         if not exe_success:
             output_data["success"] = False
-            output_data["error"] = {"error_type": "internal_error",
+            output_data["error"] = {"error_type": "unknown_error",
                                     "error_message": proc["stderr"]
                                    }
             return FailedOperation(
@@ -163,7 +164,7 @@ class TeraChemExecutor(ProgramExecutor):
             if "XC Energy" in output_lines:
                 properties["scf_xc_energy"] = float(last_scf_line.split()[4])
         else:
-            raise ValueError("SCF iteration lines not found in TeraChem output")
+            raise UnknownError("SCF iteration lines not found in TeraChem output")
 
         if len(gradients) > 0:
             output_data["return_result"] = gradients

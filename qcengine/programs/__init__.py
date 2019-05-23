@@ -3,6 +3,7 @@ Imports the various compute backends
 """
 
 from typing import List, Set
+from ..exceptions import InputError, ResourceError
 
 from .cfour import CFOURExecutor
 from .dftd3 import DFTD3Executor
@@ -36,7 +37,16 @@ def get_program(name: str) -> 'ProgramExecutor':
     """
     Returns a programs executor class
     """
-    return programs[name.lower()]
+    name = name.lower()
+
+    if name not in programs:
+        raise InputError(f"Program {name} is not registered to QCEngine.")
+
+    ret = programs[name]
+    if not ret.found():
+        raise ResourceError(f"Program {name} is registered with QCEngine, but cannot be found.")
+
+    return ret
 
 
 def list_all_programs() -> Set[str]:

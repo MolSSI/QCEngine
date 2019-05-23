@@ -583,7 +583,7 @@ def test_dftd3__from_arrays(inp, expected):
     ({'name_hint': 'atm(gr)', 'level_hint': 'chg'}),
 ])  # yapf:disable
 def test_dftd3__from_arrays__error(inp):
-    with pytest.raises(ValueError):
+    with pytest.raises(qcng.exceptions.InputError):
         dftd3.from_arrays(**inp)
 
 
@@ -600,7 +600,7 @@ def test_dftd3__from_arrays__supplement():
 
     res = dftd3.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
     assert compare_recursive(ans, res, atol=1.e-4)
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(qcng.exceptions.InputError) as e:
         dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert "Can't guess -D correction level" in str(e)
     res = dftd3.from_arrays(

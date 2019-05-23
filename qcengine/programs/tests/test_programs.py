@@ -5,9 +5,9 @@ Tests the DQM compute dispatch module
 import copy
 
 import pytest
-from qcelemental.models import Molecule, ResultInput
 
 import qcengine as qcng
+from qcelemental.models import Molecule, ResultInput
 from qcengine import testing
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
@@ -20,7 +20,7 @@ def test_missing_key():
 
 
 def test_missing_key_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(qcng.exceptions.InputError):
         ret = qcng.compute({"hello": "hi"}, "bleh", raise_error=True)
 
 
@@ -57,9 +57,11 @@ def test_psi4_internal_failure():
             "method": "ccsd",
             "basis": "6-31g"
         },
-        "keywords": {"reference": "rhf"}
+        "keywords": {
+            "reference": "rhf"
+        }
     }
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(qcng.exceptions.InputError) as exc:
         ret = qcng.compute(psi4_task, "psi4", raise_error=True)
 
     assert "reference is only" in str(exc.value)
@@ -67,21 +69,22 @@ def test_psi4_internal_failure():
 
 @testing.using_psi4
 def test_psi4_ref_switch():
-    inp = ResultInput(**{
-        "molecule": {
-            "symbols": ["Li"],
-            "geometry": [0, 0, 0],
-            "molecular_multiplicity": 2
-        },
-        "driver": "energy",
-        "model": {
-            "method": "B3LYP",
-            "basis": "sto-3g"
-        },
-        "keywords": {
-            "scf_type": "df"
-        }
-    })
+    inp = ResultInput(
+        **{
+            "molecule": {
+                "symbols": ["Li"],
+                "geometry": [0, 0, 0],
+                "molecular_multiplicity": 2
+            },
+            "driver": "energy",
+            "model": {
+                "method": "B3LYP",
+                "basis": "sto-3g"
+            },
+            "keywords": {
+                "scf_type": "df"
+            }
+        })
 
     ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
 
@@ -116,7 +119,7 @@ def test_rdkit_connectivity_error():
     assert ret.success is False
     assert "connectivity" in ret.error.error_message
 
-    with pytest.raises(ValueError):
+    with pytest.raises(qcng.exceptions.InputError):
         qcng.compute(json_data, "rdkit", raise_error=True)
 
 

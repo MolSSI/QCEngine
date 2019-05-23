@@ -4,10 +4,11 @@ Calls the Psi4 executable.
 
 from typing import Dict
 
-from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+from qcelemental.models import Provenance, Result
 from qcelemental.util import parse_version, safe_version, which_import
 
 from .executor import ProgramExecutor
+from ..exceptions import InputError, ResourceError
 from ..units import ureg
 
 
@@ -73,9 +74,7 @@ class TorchANIExecutor(ProgramExecutor):
         # Check if existings and version
         self.found(raise_error=True)
         if parse_version(self.get_version()) < parse_version("0.5"):
-            ret_data["error"] = ComputeError(
-                error_type="version_error", error_message="QCEngine's TorchANI wrapper requires version 0.5 or greater.")
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise ResourceError("QCEngine's TorchANI wrapper requires version 0.5 or greater.")
 
         import torch
         import numpy as np
@@ -88,19 +87,13 @@ class TorchANIExecutor(ProgramExecutor):
         # Build model
         model = self.get_model(input_data.model.method)
         if model is False:
-            ret_data["error"] = ComputeError(
-                error_type="input_error", error_message="run_torchani only accepts the ANI1x or ANI1ccx method.")
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError("TorchANI only accepts the ANI1x or ANI1ccx method.")
 
         # Build species
         species = "".join(input_data.molecule.symbols)
         unknown_sym = set(species) - {"H", "C", "N", "O"}
         if unknown_sym:
-            ret_data["error"] = ComputeError(
-                error_type="input_error",
-                error_message="The '{}' model does not support symbols: {}.".format(
-                    input_data.model.method, unknown_sym))
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError(f"TorchANI model '{input_data.model.method}' does not support symbols: {unknown_sym}.")
 
         species = model.species_to_tensor(species).to(device).unsqueeze(0)
 
@@ -118,10 +111,7 @@ class TorchANIExecutor(ProgramExecutor):
             ret_data["return_result"] = np.asarray(
                 derivative * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
         else:
-            ret_data["error"] = ComputeError(
-                error_type="input_error",
-                error_message="run_torchani did not understand driver method '{}'.".format(input_data.driver))
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError(f"TorchANI can only compute energy and gradient driver methods. Found {input_data.driver}.")
 
         ret_data["provenance"] = Provenance(
             creator="torchani", version="unknown", routine='torchani.builtin.aev_computer')

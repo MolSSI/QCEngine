@@ -2,10 +2,11 @@
 Calls the Psi4 executable.
 """
 
-from qcelemental.models import ComputeError, FailedOperation, Provenance, Result
+from qcelemental.models import Provenance, Result
 from qcelemental.util import which_import
 
 from .executor import ProgramExecutor
+from ..exceptions import InputError
 from ..units import ureg
 
 
@@ -48,14 +49,10 @@ class RDKitExecutor(ProgramExecutor):
 
         # Handle errors
         if abs(jmol.molecular_charge) > 1.e-6:
-            ret_data["error"] = ComputeError(
-                error_type="input_error", error_message="run_rdkit does not currently support charged molecules")
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError("RDKit does not currently support charged molecules.")
 
         if not jmol.connectivity:  # Check for empty list
-            ret_data["error"] = ComputeError(
-                error_type="input_error", error_message="run_rdkit molecule must have a connectivity graph")
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError("RDKit requires molecules to have a connectivity graph.")
 
         # Build out the base molecule
         base_mol = Chem.Mol()
@@ -86,14 +83,10 @@ class RDKitExecutor(ProgramExecutor):
             ff = AllChem.UFFGetMoleculeForceField(mol)
             all_params = AllChem.UFFHasAllMoleculeParams(mol)
         else:
-            ret_data["error"] = ComputeError(
-                error_type="input_error", error_message="run_rdkit can only accepts UFF methods")
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError("RDKit only supports the UFF method currently.")
 
         if all_params is False:
-            ret_data["error"] = ComputeError(
-                error_type="input_error", error_message="run_rdkit did not match all parameters to molecule")
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError("RDKit parameters not found for all atom types in molecule.")
 
         ff.Initialize()
 
@@ -105,14 +98,11 @@ class RDKitExecutor(ProgramExecutor):
             coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
             ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
         else:
-            ret_data["error"] = ComputeError(
-                error_type="input_error",
-                error_message="run_rdkit did not understand driver method "
-                "'{}'.".format(ret_data["driver"]))
-            return FailedOperation(input_data=input_data.dict(), **ret_data)
+            raise InputError(f"RDKit can only compute energy and gradient driver methods. Found {input_data.driver}.")
 
-        ret_data["provenance"] = Provenance(
-            creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField")
+        ret_data["provenance"] = Provenance(creator="rdkit",
+                                            version=rdkit.__version__,
+                                            routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField")
 
         ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True
