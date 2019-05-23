@@ -2,7 +2,7 @@
 Imports the various procedure backends
 """
 
-from typing import List, Set
+from typing import Set
 from ..exceptions import InputError, ResourceError
 
 from .geometric import GeometricProcedure

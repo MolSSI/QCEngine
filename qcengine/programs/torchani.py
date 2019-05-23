@@ -93,7 +93,7 @@ class TorchANIExecutor(ProgramExecutor):
         species = "".join(input_data.molecule.symbols)
         unknown_sym = set(species) - {"H", "C", "N", "O"}
         if unknown_sym:
-            raise InputError(f"TorchANI model '{input_data.model.method}' does not symbols: {unknown_sym}.")
+            raise InputError(f"TorchANI model '{input_data.model.method}' does not support symbols: {unknown_sym}.")
 
         species = model.species_to_tensor(species).to(device).unsqueeze(0)
 

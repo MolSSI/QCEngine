@@ -10,7 +10,7 @@ import socket
 import sys
 import traceback
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Dict
 
 import numpy as np
 
@@ -20,7 +20,7 @@ from qcelemental.util import safe_version, which
 
 from . import dashparam
 from ..executor import ProgramExecutor
-from ...exceptions import InputError, ResourceError
+from ...exceptions import InputError, ResourceError, UnknownError
 from ...extras import provenance_stamp
 from ...util import execute
 
@@ -300,7 +300,7 @@ def dftd3_harvest(jobrec, modulerec):
             break
     else:
         if not ((real_nat == 1) and (jobrec['driver'] == 'gradient')):
-            raise ResourceError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
+            raise UnknownError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
 
     # parse gradient output
     # * DFTD3 crashes on one-atom gradients. Avoid the error (above) and just force the correct result (below).

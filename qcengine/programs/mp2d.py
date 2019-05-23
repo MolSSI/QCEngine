@@ -6,11 +6,10 @@ import pprint
 import re
 import sys
 import traceback
-from typing import Dict
 from decimal import Decimal
+from typing import Dict
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import safe_version, which
@@ -18,7 +17,7 @@ from qcelemental.util import safe_version, which
 from .dftd3 import dashparam
 from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
 from .executor import ProgramExecutor
-from ..exceptions import InputError, ResourceError, UnknownError
+from ..exceptions import InputError, UnknownError
 from ..extras import provenance_stamp
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)

@@ -19,8 +19,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from pydantic import ValidationError
-
-from qcelemental.models import ComputeError, FailedOperation
+from qcelemental.models import FailedOperation
 
 from .config import LOGGER, get_provenance_augments
 from .exceptions import InputError, QCEngineException

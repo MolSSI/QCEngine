@@ -49,7 +49,7 @@ class ResourceError(QCEngineException):
 
 class ConvergenceError(QCEngineException):
     """
-    Failed iteration convergence error, likely recoverable with tweak parameters.
+    Failed iteration convergence error, likely recoverable with tweaked parameters.
     """
     error_type = "convergence_error"
     header = "QCEngine Convergence Error"

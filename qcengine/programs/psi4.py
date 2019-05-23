@@ -4,7 +4,7 @@ Calls the Psi4 executable.
 import json
 from typing import Dict
 
-from qcelemental.models import FailedOperation, Result
+from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
 
 from .executor import ProgramExecutor
