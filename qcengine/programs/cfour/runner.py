@@ -4,8 +4,10 @@ import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
+import numpy as np
+
 import qcelemental as qcel
-from qcelemental.models import Result
+from qcelemental.models import Provenance, Result
 from qcelemental.util import which, safe_version
 
 from ...util import execute
@@ -100,6 +102,12 @@ class CFOURExecutor(ProgramExecutor):
         if c4hess is not None:
             qcvars['CURRENT HESSIAN'] = c4hess
 
+        retres = qcvars[f'CURRENT {input_model.driver.upper()}']
+        if isinstance(retres, Decimal):
+            retres = float(retres)
+        elif isinstance(retres, np.ndarray):
+            retres = retres.ravel().tolist()
+
         output_data = {
             'schema_name': 'qcschema_output',
             'schema_version': 1,
@@ -107,7 +115,8 @@ class CFOURExecutor(ProgramExecutor):
                 'outfiles': outfiles,
             },
             'properties': {},
-            'return_result': qcvars[f'CURRENT {input_model.driver.upper()}'],
+            'provenance': Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour"),
+            'return_result': retres,
             'stdout': stdout,
         }
 

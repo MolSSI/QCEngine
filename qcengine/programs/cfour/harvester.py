@@ -6,10 +6,7 @@ import numpy as np
 import qcelemental as qcel
 from qcelemental.models import Molecule
 
-#from ..exceptions import *
-from ..util import PreservingDict
-#from ..hessparse import load_hessian
-
+from ..util import load_hessian, PreservingDict
 
 
 def harvest_output(outtext):
@@ -480,7 +477,7 @@ def harvest_outfile_pass(outtext):
         print('matched atom')
         # Dinky Molecule
         molxyz = '1 bohr\n\n%s 0.0 0.0 0.0\n' % (mobj.group(1))
-        psivar_coord = Molecule.from_string(molxyz, dtype='xyz+', fix_com=True, fix_orientation=True)
+        psivar_coord = Molecule(validate=False, **qcel.molparse.to_schema(qcel.molparse.from_string(molxyz, dtype='xyz+', fix_com=True, fix_orientation=True)["qm"], dtype=2))
 
     # Process error codes
     mobj = re.search(
@@ -667,17 +664,21 @@ def harvest(p4Mol, c4out, **largs):
         #outPsivar['CURRENT DIPOLE Y'] = str(oriDip[1] * psi_dipmom_au2debye)
         #outPsivar['CURRENT DIPOLE Z'] = str(oriDip[2] * psi_dipmom_au2debye)
 
-    if oriGrad is not None:
-        retGrad = oriGrad
-    elif grdGrad is not None:
-        retGrad = grdGrad
-    else:
-        retGrad = None
+    #if oriGrad is not None:
+    #    retGrad = oriGrad
+    #elif grdGrad is not None:
+    #    retGrad = grdGrad
+    #else:
+    #    retGrad = None
 
-    if oriHess is not None:
-        retHess = oriHess
-    else:
-        retHess = None
+    #if oriHess is not None:
+    #    retHess = oriHess
+    #else:
+    #    retHess = None
+
+    retGrad = oriGrad or grdGrad or None
+    retHess = oriHess or None
+    retCoord = oriCoord or None
 
     return outPsivar, retHess, retGrad, retMol, version, error
 
@@ -721,12 +722,10 @@ def harvest_zmat(zmat):
     charge = 0
     mult = 1
     molxyz = ''
-    cgeom = []
     for line in zmat:
         if line.strip() == '':
             readCoord = False
         elif readCoord:
-            lline = line.split()
             molxyz += line + '\n'
             Nat += 1
         else:
