@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - pytorch
 dependencies:
+  - pytorch-cpu
   - pytorch-nightly-cpu
   - ignite
 
