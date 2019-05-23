@@ -3,12 +3,12 @@ channels:
   - conda-forge
   - pytorch
 dependencies:
-  - pytorch-cpu
   - pytorch-nightly-cpu
   - ignite
 
     # Core
   - python
+  - pip
   - pyyaml
   - py-cpuinfo
   - psutil

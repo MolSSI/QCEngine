@@ -7,6 +7,7 @@ dependencies:
   - dftd3 3.2.1
   - mp2d <0.2
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
+  - codecov
 
     # Core
   - python
@@ -19,8 +20,4 @@ dependencies:
     # Testing
   - pytest
   - pytest-cov
-
-    # Pip depends
-  - pip:
-    - codecov
-    - git+https://github.com/leeping/geomeTRIC#egg=geometric
+  - codeocv

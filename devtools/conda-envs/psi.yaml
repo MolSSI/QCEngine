@@ -5,6 +5,7 @@ channels:
 dependencies:
   - psi4=1.3
   - dftd3
+  - geometric
 
     # Core
   - python
@@ -17,8 +18,4 @@ dependencies:
     # Testing
   - pytest
   - pytest-cov
-
-    # Pip depends
-  - pip:
-    - codecov
-    - git+https://github.com/leeping/geomeTRIC#egg=geometric
+  - codecov
