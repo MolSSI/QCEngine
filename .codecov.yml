@@ -1,6 +1,8 @@
 coverage:
   ignore:
     - qcengine/test/.*
+    - qcengine/programs/cfour/.*
+    - qcengine/programs/gamess/.*
     - setup.py
   status:
     patch: false
