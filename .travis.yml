@@ -70,8 +70,6 @@ script:
     # Get a bit of info first
   - python -c "import qcengine; print(qcengine.config.global_repr())"
 
-  - python -c "import qcenginerecords as qcer; print(qcer.list_programs()); print(qcer.get_info('molpro')); print(qcer.get_info('molpro').base_folder)"
-
     # Run canonical tests
   - pytest -rsx -v --cov=qcengine/ qcengine/
 
