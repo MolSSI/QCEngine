@@ -664,21 +664,22 @@ def harvest(p4Mol, c4out, **largs):
         #outPsivar['CURRENT DIPOLE Y'] = str(oriDip[1] * psi_dipmom_au2debye)
         #outPsivar['CURRENT DIPOLE Z'] = str(oriDip[2] * psi_dipmom_au2debye)
 
-    #if oriGrad is not None:
-    #    retGrad = oriGrad
-    #elif grdGrad is not None:
-    #    retGrad = grdGrad
-    #else:
-    #    retGrad = None
+    if oriGrad is not None:
+        retGrad = oriGrad
+    elif grdGrad is not None:
+        retGrad = grdGrad
+    else:
+        retGrad = None
 
-    #if oriHess is not None:
-    #    retHess = oriHess
-    #else:
-    #    retHess = None
+    if oriHess is not None:
+        retHess = oriHess
+    else:
+        retHess = None
 
-    retGrad = oriGrad or grdGrad or None
-    retHess = oriHess or None
-    retCoord = oriCoord or None
+    if oriCoord is not None:
+        retCoord = oriCoord
+    else:
+        retCoord = None
 
     return outPsivar, retHess, retGrad, retMol, version, error
 
