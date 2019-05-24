@@ -1,10 +1,7 @@
 name: test
 channels:
   - conda-forge
-  - pytorch
 dependencies:
-  - pytorch-nightly-cpu
-  - ignite
 
     # Core
   - python
@@ -19,5 +16,3 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
-  - pip:
-    - torchani
