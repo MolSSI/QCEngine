@@ -92,15 +92,11 @@ class MolproHarness(ProgramHarness):
     # TODO Additional features
     #   - allow separate xyz file to be provided
     #   - add support of wfu files? (-W option)
-    # FIXME Molpro takes xyz input in Angstrom by default, but MolSSI stores xyz in bohr
-    #   - Either need to convert to Angstrom or change Molpro input to read bohr
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         input_file = []
         posthf_methods = {'mp2', 'ccsd', 'ccsd(t)'}
 
-        # Write header info
-        input_file.append("!Title")
         # Memory is in megawords per core for Molpro
         memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
         input_file.append("memory,{},M".format(memory_mw_core))
@@ -108,11 +104,22 @@ class MolproHarness(ProgramHarness):
         # input_file.append('file,2,dispatch.wfu')
         input_file.append('')
 
-        # Have no symmetry by default
-        input_file.append('{symmetry,nosym}')
+        # Don't orient the molecule if asked to fix_com or fix_orientation
+        if input_model.molecule.fix_orientation or input_model.molecule.fix_com:
+            input_file.append('{noorient}')
+            input_file.append('')
+
+        # Have no symmetry if asked to fix_symmetry
+        if input_model.molecule.fix_symmetry == 'c1':
+            input_file.append('{symmetry,nosym}')
+        # TODO Figure out how to write symmetry properly in Molpro
+        # else:
+        #     input_file.append('{symmetry,}')
         input_file.append('')
 
         # Write the geom
+        # FIXME Molpro takes xyz input in Angstrom by default, but MolSSI stores xyz in bohr
+        #   - Either need to convert to Angstrom or change Molpro input to read bohr
         input_file.append('geometry={')
         for sym, geom in zip(input_model.molecule.symbols, input_model.molecule.geometry):
             s = "{:<4s} {:>{width}.{prec}f} {:>{width}.{prec}f} {:>{width}.{prec}f}".format(
@@ -159,8 +166,6 @@ class MolproHarness(ProgramHarness):
         root = tree.getroot()
         # print(root.tag)
 
-        # TODO Think of how to handle multiple calls of same command.
-        #      Currently it will grab the last one in the file.
         # TODO Read information from molecule tag
         #      - cml:molecule, cml:atomArray (?)
         #      - basisSet
@@ -175,24 +180,27 @@ class MolproHarness(ProgramHarness):
         scf_extras = {}
 
         # MP2 maps
+        # TODO Think about storing singlet pair and triplet pair in extras field then convert to same-spin and opp-spin
         mp2_energy_map = {
             "total energy": "mp2_total_energy",
-            "correlation energy": "mp2_correlation_energy",
+            "correlation energy": "mp2_correlation_energy"
+        }
+        mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
+        mp2_extras = {
             "singlet pair energy": "mp2_singlet_pair_energy",
             "triplet pair energy": "mp2_triplet_pair_energy"
         }
-        mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
-        mp2_extras = {}
 
         # CCSD maps
         ccsd_energy_map = {
             "total energy": "ccsd_total_energy",
-            "correlation energy": "ccsd_correlation_energy",
+            "correlation energy": "ccsd_correlation_energy"
+        }
+        ccsd_dipole_map = {"Dipole moment": "ccsd_dipole_moment"}
+        ccsd_extras = {
             "singlet pair energy": "ccsd_singlet_pair_energy",
             "triplet pair energy": "ccsd_triplet_pair_energy"
         }
-        ccsd_dipole_map = {"Dipole moment": "ccsd_dipole_moment"}
-        ccsd_extras = {}
 
         # Compiling the method maps
         scf_maps = {
@@ -224,12 +232,15 @@ class MolproHarness(ProgramHarness):
 
             # Grab energies and dipole moment
             if command in supported_methods:
+                command_map = supported_methods[command]
                 for child in jobstep.findall('molpro_uri:property', name_space):
                     if child.attrib['name'] in supported_methods[command]['energy']:
-                        properties[supported_methods[command]['energy'][child.attrib['name']]] = float(child.attrib['value'])
+                        properties[command_map['energy'][child.attrib['name']]] = float(child.attrib['value'])
+                    elif child.attrib['name'] in supported_methods[command]['extras']:
+                        properties[command_map['extras'][child.attrib['name']]] = float(child.attrib['value'])
                     elif child.attrib['name'] in supported_methods[command]['dipole']:
-                        properties[supported_methods[command]['dipole'][child.attrib['name']]] = [float(x) for x in
-                                                                                                  child.attrib['value'].split()]
+                        properties[command_map['dipole'][child.attrib['name']]] = [float(x) for x in
+                                                                                   child.attrib['value'].split()]
             # Grab gradient
             elif 'FORCE' in jobstep.attrib['command']:
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
