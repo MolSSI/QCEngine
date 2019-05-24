@@ -5,8 +5,8 @@ Calls the entos executable.
 from typing import Any, Dict, Optional
 
 from qcelemental.models import Result, FailedOperation
-from ..util import execute
-from qcelemental.util import which
+from ..util import execute, popen
+from qcelemental.util import which, safe_version, parse_version
 
 from .executor import ProgramExecutor
 
@@ -28,23 +28,19 @@ class EntosExecutor(ProgramExecutor):
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
-    def found(self, raise_error: bool=False) -> bool:
+    def found(self, raise_error: bool = False) -> bool:
         return which('entos', return_bool=True, raise_error=raise_error, raise_msg='Please install via XXX')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        #which_prog = which('molpro')
-        #if which_prog not in self.version_cache:
-        #    success, output = execute([which_prog, "v.inp"], {"v.inp": ""})
+        which_prog = which('entos')
+        if which_prog not in self.version_cache:
+            with popen([which_prog, '--version']) as exc:
+                exc["proc"].wait(timeout=5)
+            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[2])
 
-        #    if success:
-        #        for line in output["stdout"].splitlines():
-        #            if 'GAMESS VERSION' in line:
-        #                branch = ' '.join(line.strip(' *\t').split()[3:])
-        #        self.version_cache[which_prog] = safe_version(branch)
-
-        #return self.version_cache[which_prog]
+        return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
@@ -54,8 +50,8 @@ class EntosExecutor(ProgramExecutor):
         self.found(raise_error=True)
 
         # Check entos version
-        # if parse_version(self.get_version()) < parse_version("2018.1"):
-        #     raise TypeError("entos version '{}' not understood".format(self.get_version()))
+        if parse_version(self.get_version()) < parse_version("0.5"):
+            raise TypeError("entos version '{}' not understood".format(self.get_version()))
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
@@ -67,6 +63,7 @@ class EntosExecutor(ProgramExecutor):
                                     scratch_location=job_inputs["scratch_location"],
                                     timeout=None
                                     )
+        proc["outfiles"]["dispatch.out"] = proc["stdout"]
 
         # Determine whether the calculation succeeded
         output_data = {}
@@ -120,48 +117,34 @@ class EntosExecutor(ProgramExecutor):
         output_data = {}
         properties = {}
 
-        # SCF maps
-        scf_energy_map = {"Energy": "scf_total_energy"}
-        scf_dipole_map = {"Dipole moment": "scf_dipole_moment"}
-        scf_extras = {}
+        # Parse the output file, collect properties and gradient
+        output_lines = outfiles["dispatch.out"].split('\n')
+        gradients = []
+        natom = len(input_model.molecule.symbols)
+        for idx, line in enumerate(output_lines):
+            fields = line.split()
+            if fields[:2] == ["TOTAL", "ENERGY:"]:
+                properties["scf_total_energy"] = float(fields[-1])
+            elif fields[:2] == ["Molecular", "Dipole:"]:
+                properties["scf_dipole_moment"] = [float(x) for x in fields[2:5]]
+            elif fields[:3] == ["SCF", "converged", "in"]:
+                properties["scf_iterations"] = int(fields[3])
+            # elif fields == ["Gradient units are Hartree/Bohr"]:
+            #     # Gradient is stored as (dE/dx1,dE/dy1,dE/dz1,dE/dx2,dE/dy2,...)
+            #     for i in range(idx + 3, idx + 3 + natom):
+            #         grad = output_lines[i].strip('\n').split()
+            #         for x in grad:
+            #             gradients.append(float(x))
 
-        # MP2 maps
-        mp2_energy_map = {
-            "total energy": "mp2_total_energy",
-            "correlation energy": "mp2_correlation_energy",
-            "singlet pair energy": "mp2_singlet_pair_energy",
-            "triplet pair energy": "mp2_triplet_pair_energy"
-        }
-        mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
-        mp2_extras = {}
-
-        # Compiling the method maps
-        scf_maps = {
-            "energy": scf_energy_map,
-            "dipole": scf_dipole_map,
-            "extras": scf_extras
-        }
-        mp2_maps = {
-            "energy": mp2_energy_map,
-            "dipole": mp2_dipole_map,
-            "extras": mp2_extras
-        }
-        supported_methods = {"HF": scf_maps, "RHF": scf_maps, "MP2": mp2_maps}
-
-        # A slightly more robust way of determining the final energy.
-        # Throws an error if the energy isn't found for the method specified from the input_model.
-        method = input_model.model.method
-        method_energy_map = supported_methods[method]['energy']
-        if 'total energy' in method_energy_map and method_energy_map['total energy'] in properties:
-            final_energy = properties[method_energy_map['total energy']]
-        elif 'Energy' in method_energy_map and method_energy_map['Energy'] in properties:
-            final_energy = properties[method_energy_map['Energy']]
-        else:
-            raise KeyError("Could not find {:s} total energy".format(method))
+        if len(gradients) > 0:
+            output_data["return_result"] = gradients
 
         # Replace return_result with final_energy if gradient wasn't called
         if "return_result" not in output_data:
-            output_data["return_result"] = final_energy
+            if "scf_total_energy" in properties:
+                output_data["return_result"] = properties["scf_total_energy"]
+            else:
+                raise KeyError("Could not find SCF total energy")
 
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'

@@ -25,7 +25,6 @@ def test_entos_output_parser(test_case):
     output_ref = qcel.models.Result.parse_raw(data["output.json"]).dict()
     output_ref.pop("provenance", None)
 
-    # TODO add `skip` to compare_recursive
     check = compare_recursive(output_ref, output)
     assert check, check
 
