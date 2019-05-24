@@ -56,6 +56,7 @@ _programs = {
     "mp2d": which('mp2d', return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1")
+    "entos": which("entos", return_bool=True)
 }
 
 def has_program(name):
@@ -75,6 +76,7 @@ using_torchani = _build_pytest_skip("torchani")
 using_mp2d = _build_pytest_skip("mp2d")
 using_terachem = _build_pytest_skip("terachem")
 using_molpro = _build_pytest_skip("molpro")
+using_entos = _build_pytest_skip("entos")
 
 using_dftd3_321 = pytest.mark.skipif(
     is_program_new_enough("dftd3", "3.2.1") is False,
