@@ -29,7 +29,7 @@ def _process_failure_and_return(model, return_dict, raise_error):
 def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             program: str,
             raise_error: bool=False,
-            local_options: Optional[Dict[str, str]]=None,
+            local_options: Optional[Dict[str, Any]]=None,
             return_dict: bool=False) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
 
