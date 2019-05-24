@@ -22,7 +22,7 @@ def test_molpro_output_parser(test_case):
     data = molpro_info.get_test_data(test_case)
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
-    output = qcng.get_program('molpro').parse_output(data, inp).dict()
+    output = qcng.get_program('molpro', check=False).parse_output(data, inp).dict()
     output.pop("provenance", None)
 
     output_ref = qcel.models.Result.parse_raw(data["output.json"]).dict()
@@ -41,7 +41,7 @@ def test_molpro_input_formatter(test_case):
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
-    input_file = qcng.get_program('molpro').build_input(inp, qcng.get_config())
+    input_file = qcng.get_program('molpro', check=False).build_input(inp, qcng.get_config())
     assert input_file.keys() >= {"commands", "infiles"}
 
 
