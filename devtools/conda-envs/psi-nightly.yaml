@@ -19,8 +19,4 @@ dependencies:
     # Testing
   - pytest
   - pytest-cov
-
-    # Pip depends
-  - pip:
-    - codecov
-    - git+https://github.com/leeping/geomeTRIC#egg=geometric
+  - codecov
