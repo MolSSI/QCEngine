@@ -9,7 +9,7 @@ import qcengine.util as uti
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
 
-from .executor import ProgramExecutor
+from .model import ProgramExecutor
 from ..exceptions import UnknownError
 from ..util import popen
 

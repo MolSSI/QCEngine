@@ -9,7 +9,7 @@ from qcelemental.models import Result, FailedOperation
 from ..util import execute
 from qcelemental.util import which, safe_version, parse_version
 
-from .executor import ProgramExecutor
+from .model import ProgramExecutor
 
 
 class MolproExecutor(ProgramExecutor):

@@ -19,7 +19,7 @@ from qcelemental.models import FailedOperation, Result
 from qcelemental.util import safe_version, which
 
 from . import dashparam
-from ..executor import ProgramExecutor
+from ..model import ProgramExecutor
 from ...exceptions import InputError, ResourceError, UnknownError
 from ...extras import provenance_stamp
 from ...util import execute

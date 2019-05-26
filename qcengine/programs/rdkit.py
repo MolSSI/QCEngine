@@ -5,7 +5,7 @@ Calls the Psi4 executable.
 from qcelemental.models import Provenance, Result
 from qcelemental.util import which_import
 
-from .executor import ProgramExecutor
+from .model import ProgramExecutor
 from ..exceptions import InputError
 from ..units import ureg
 

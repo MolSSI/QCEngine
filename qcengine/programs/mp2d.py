@@ -16,7 +16,7 @@ from qcelemental.util import safe_version, which
 
 from .dftd3 import dashparam
 from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
-from .executor import ProgramExecutor
+from .model import ProgramExecutor
 from ..exceptions import InputError, UnknownError
 from ..extras import provenance_stamp
 

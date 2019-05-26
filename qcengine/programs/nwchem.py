@@ -5,7 +5,7 @@ from typing import Dict
 
 from qcelemental.util import safe_version, which
 
-from .executor import ProgramExecutor
+from .model import ProgramExecutor
 from ..util import execute
 
 

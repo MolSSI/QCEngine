@@ -9,7 +9,7 @@ from qcelemental.models import Result
 from qcelemental.util import which, safe_version
 
 from ...util import execute
-from ..executor import ProgramExecutor
+from ..model import ProgramExecutor
 from .harvester import harvest
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)

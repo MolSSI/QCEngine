@@ -2,7 +2,7 @@
 
 import pprint
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
@@ -11,7 +11,7 @@ from qcelemental.models import Provenance, Result
 from qcelemental.util import which, safe_version
 
 from ...util import execute
-from ..executor import ProgramExecutor
+from ..model import ProgramExecutor
 from .harvester import harvest
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -57,31 +57,34 @@ class CFOURExecutor(ProgramExecutor):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
         self.found(raise_error=True)
 
-        job_inputs = self.fake_input(input_data, config)
+        job_inputs = self.fake_input(input_model, config)
         success, dexe = self.execute(job_inputs)
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
-            return self.parse_output(dexe["outfiles"], input_data)
+            return self.parse_output(dexe["outfiles"], input_model)
+
+    def build_input(self, input_model: 'ResultInput', config: 'JobConfig', template: Optional[str] = None) -> Dict[str, Any]:
+        pass
 
     def fake_input(self, input_model: 'ResultInput', config: 'JobConfig',
                    template: Optional[str] = None) -> Dict[str, Any]:
 
         return {
-            "commands": [which("xcfour")],
+            "command": [which("xcfour")],
             "infiles": input_model.extras['infiles'],
             "scratch_location": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
         }
 
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None) -> Tuple[bool, Dict]:
 
         success, dexe = execute(
-            inputs["commands"],
+            inputs["command"],
             inputs["infiles"],
             ["GRD", "FCMFINAL", "DIPOL"],
             scratch_messy=True,
