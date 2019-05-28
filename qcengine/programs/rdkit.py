@@ -1,16 +1,16 @@
 """
-Calls the Psi4 executable.
+Calls the RDKit package.
 """
 
 from qcelemental.models import Provenance, Result
 from qcelemental.util import which_import
 
-from .model import ProgramExecutor
+from .model import ProgramHarness
 from ..exceptions import InputError
 from ..units import ureg
 
 
-class RDKitExecutor(ProgramExecutor):
+class RDKitHarness(ProgramHarness):
 
     _defaults = {
         "name": "RDKit",
@@ -21,7 +21,7 @@ class RDKitExecutor(ProgramExecutor):
         "managed_memory": False,
     }
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):

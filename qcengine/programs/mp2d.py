@@ -16,14 +16,14 @@ from qcelemental.util import safe_version, which
 
 from .dftd3 import dashparam
 from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
-from .model import ProgramExecutor
+from .model import ProgramHarness
 from ..exceptions import InputError, UnknownError
 from ..extras import provenance_stamp
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
-class MP2DExecutor(ProgramExecutor):
+class MP2DHarness(ProgramHarness):
 
     _defaults = {
         "name": "MP2D",
@@ -35,7 +35,7 @@ class MP2DExecutor(ProgramExecutor):
     }
     version_cache: Dict[str, str] ={}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):

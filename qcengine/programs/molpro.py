@@ -9,10 +9,10 @@ from qcelemental.models import Result, FailedOperation
 from ..util import execute
 from qcelemental.util import which, safe_version, parse_version
 
-from .model import ProgramExecutor
+from .model import ProgramHarness
 
 
-class MolproExecutor(ProgramExecutor):
+class MolproHarness(ProgramHarness):
     _defaults = {
         "name": "Molpro",
         "scratch": True,
@@ -23,7 +23,7 @@ class MolproExecutor(ProgramExecutor):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):

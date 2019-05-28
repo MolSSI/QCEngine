@@ -5,11 +5,11 @@ from typing import Dict
 
 from qcelemental.util import safe_version, which
 
-from .model import ProgramExecutor
+from .model import ProgramHarness
 from ..util import execute
 
 
-class NWChemExecutor(ProgramExecutor):
+class NWChemHarness(ProgramHarness):
 
     _defaults = {
         "name": "NWChem",
@@ -21,7 +21,7 @@ class NWChemExecutor(ProgramExecutor):
     }
     version_cache: Dict[str, str] ={}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):

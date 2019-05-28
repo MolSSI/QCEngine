@@ -11,13 +11,13 @@ from qcelemental.models import Provenance, Result
 from qcelemental.util import which, safe_version
 
 from ...util import execute
-from ..model import ProgramExecutor
+from ..model import ProgramHarness
 from .harvester import harvest
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
-class CFOURExecutor(ProgramExecutor):
+class CFOURHarness(ProgramHarness):
 
     _defaults = {
         "name": "CFOUR",
@@ -29,7 +29,7 @@ class CFOURExecutor(ProgramExecutor):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):
