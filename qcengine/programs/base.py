@@ -39,9 +39,17 @@ def register_program(entry_point: 'ProgramExecutor', check: bool = True) -> None
     programs[name.lower()] = entry_point
 
 
-def get_program(name: str) -> 'ProgramExecutor':
+def get_program(name: str, check: bool = True) -> 'ProgramExecutor':
     """
     Returns a program's executor class
+
+    Parameters
+    ----------
+    check
+        ``True`` Do raise error if program not found. ``False`` is handy for
+        the specialized case of calling non-execution methods (like parsing for testing)
+        on the returned ``Executor``.
+
     """
     name = name.lower()
 
@@ -49,7 +57,7 @@ def get_program(name: str) -> 'ProgramExecutor':
         raise InputError(f"Program {name} is not registered to QCEngine.")
 
     ret = programs[name]
-    if not ret.found():
+    if check and not ret.found():
         raise ResourceError(f"Program {name} is registered with QCEngine, but cannot be found.")
 
     return ret
