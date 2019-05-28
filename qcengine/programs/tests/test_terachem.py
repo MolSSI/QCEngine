@@ -20,7 +20,7 @@ def test_terachem_output_parser(test_case):
     data = terachem_info.get_test_data(test_case)
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
-    output = qcng.get_program('terachem').parse_output(data, inp)
+    output = qcng.get_program('terachem', check=False).parse_output(data, inp)
 
     output_ref = qcel.models.Result.parse_raw(data["output.json"])
 
@@ -34,7 +34,7 @@ def test_terachem_input_formatter(test_case):
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
-    input_file = qcng.get_program('terachem').build_input(inp, qcng.get_config())
+    input_file = qcng.get_program('terachem', check=False).build_input(inp, qcng.get_config())
     assert input_file.keys() >= {"commands", "infiles"}
 
 
