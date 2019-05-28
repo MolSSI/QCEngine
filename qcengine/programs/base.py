@@ -2,7 +2,7 @@
 Imports the various compute backends
 """
 
-from typing import List, Set
+from typing import Set
 from ..exceptions import InputError, ResourceError
 
 from .cfour import CFOURExecutor

@@ -39,7 +39,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     Parameters
     ----------
     input_data:
-        A QC Schema input specification in dictionary or model from QCElemental.models
+        A QCSchema input specification in dictionary or model from QCElemental.models
     program:
         The program to execute the input with
     raise_error:
@@ -54,7 +54,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     Returns
     -------
     : Result
-        A QC Schema output or type depending on return_dict key
+        A QCSchema output or type depending on return_dict key
 
     """
 
