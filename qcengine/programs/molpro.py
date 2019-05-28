@@ -204,7 +204,9 @@ class MolproExecutor(ProgramExecutor):
             "dipole": ccsd_dipole_map,
             "extras": ccsd_extras
         }
-        supported_methods = {"HF": scf_maps, "RHF": scf_maps, "MP2": mp2_maps, "CCSD": ccsd_maps}
+        scf_methods = {"HF": scf_maps, "RHF": scf_maps}
+        post_hf_methods = {"MP2": mp2_maps, "CCSD": ccsd_maps}
+        supported_methods = {**scf_methods, **post_hf_methods}
 
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
@@ -245,16 +247,30 @@ class MolproExecutor(ProgramExecutor):
             del properties['ccsd_singlet_pair_energy']
             del properties['ccsd_triplet_pair_energy']
 
+        # Look for final energy in the molecule tag in case it's needed
+        molecule = root.find('molpro_uri:job/molpro_uri:molecule', name_space)
+        mol_method = molecule.attrib['method']
+        mol_final_energy = float(molecule.attrib['energy'])
+
         # A slightly more robust way of determining the final energy.
         # Throws an error if the energy isn't found for the method specified from the input_model.
         method = input_model.model.method
         method_energy_map = supported_methods[method]['energy']
-        if 'total energy' in method_energy_map and method_energy_map['total energy'] in properties:
+        if method in post_hf_methods and method_energy_map['total energy'] in properties:
             final_energy = properties[method_energy_map['total energy']]
-        elif 'Energy' in method_energy_map and method_energy_map['Energy'] in properties:
+        elif method in scf_methods and method_energy_map['Energy'] in properties:
             final_energy = properties[method_energy_map['Energy']]
         else:
-            raise KeyError("Could not find {:s} total energy".format(method))
+            # Use the total energy from the molecule tag if it matches the input method
+            if mol_method == method:
+                final_energy = mol_final_energy
+                if method in post_hf_methods:
+                    properties[method_energy_map['total energy']] = mol_final_energy
+                    properties[method_energy_map['correlation energy']] = mol_final_energy - properties['scf_total_energy']
+                elif method in scf_methods:
+                    properties[method_energy_map['Energy']] = mol_final_energy
+            else:
+                raise KeyError("Could not find {:s} total energy".format(method))
 
         # Replace return_result with final_energy if gradient wasn't called
         if "return_result" not in output_data:
