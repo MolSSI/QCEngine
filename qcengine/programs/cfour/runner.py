@@ -68,7 +68,8 @@ class CFOURExecutor(ProgramExecutor):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig', template: Optional[str] = None) -> Dict[str, Any]:
+    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+                    template: Optional[str] = None) -> Dict[str, Any]:
         pass
 
     def fake_input(self, input_model: 'ResultInput', config: 'JobConfig',
@@ -81,12 +82,18 @@ class CFOURExecutor(ProgramExecutor):
             "input_result": input_model.copy(deep=True),
         }
 
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None) -> Tuple[bool, Dict]:
+    def execute(self,
+                inputs: Dict[str, Any],
+                *,
+                extra_outfiles=None,
+                extra_commands=None,
+                scratch_name=None,
+                timeout=None) -> Tuple[bool, Dict]:
 
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["GRD", "FCMFINAL", "DIPOL"],
+            ["GRD", "FCMFINAL", "DIPOL", "zmat*", "ZMAT"],
             scratch_messy=True,
             scratch_location=inputs["scratch_location"],
         )
