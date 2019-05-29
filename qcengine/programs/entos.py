@@ -51,7 +51,7 @@ class EntosExecutor(ProgramExecutor):
 
         # Check entos version
         if parse_version(self.get_version()) < parse_version("0.5"):
-            raise TypeError("entos version '{}' not understood".format(self.get_version()))
+            raise TypeError("entos version '{}' not supported".format(self.get_version()))
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
@@ -81,32 +81,34 @@ class EntosExecutor(ProgramExecutor):
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
+        # Write the geom xyz file with unit au
+        xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
+
+        # Write input file
         input_file = []
-
-        # Write header info
-        input_file.append("!Title")
-        input_file.append("memory,{},M".format(config.memory))
-        input_file.append('')
-
-        # Write the geom
-        input_file.append('geometry={')
-        for sym, geom in zip(input_model.molecule.symbols, input_model.molecule.geometry):
-            s = "{:<4s} {:>{width}.{prec}f} {:>{width}.{prec}f} {:>{width}.{prec}f}".format(
-                sym, *geom, width=14, prec=10)
-            input_file.append(s)
-        input_file.append('}')
 
         # Write gradient call if asked for
         if input_model.driver == 'gradient':
-            input_file.append('')
-            input_file.append('{force}')
+            input_file.append('gradient(')
+
+        # TODO Need command structure
+
+        input_file.append("structure( file = 'geometry.xyz' )")
+        input_file.append("xc = '{}'".format(input_model.model.method))
+        input_file.append("ao = '{}'".format(input_model.model.basis))
+        # TODO Add df_basis as part of input
+        input_file.append("df_basis = '{}'".format(input_model.model.basis))
+
+        if input_model.driver == 'gradient':
+            input_file.append(')')
 
         input_file = "\n".join(input_file)
 
         return {
             "commands": ["entos", "dispatch.in", "-n", str(config.ncores)],
             "infiles": {
-                "dispatch.in": input_file
+                "dispatch.in": input_file,
+                "geometry.xyz": xyz_file
             },
             "scratch_location": config.scratch_directory,
             "input_result": input_model.copy(deep=True)
