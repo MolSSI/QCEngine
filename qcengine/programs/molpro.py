@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 
 from qcelemental.models import Result, FailedOperation
 from ..util import execute
-from qcelemental.util import which
+from qcelemental.util import which, safe_version, parse_version
 
 from .executor import ProgramExecutor
 
@@ -35,17 +35,23 @@ class MolproExecutor(ProgramExecutor):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        #which_prog = which('molpro')
-        #if which_prog not in self.version_cache:
-        #    success, output = execute([which_prog, "v.inp"], {"v.inp": ""})
+        name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
+        which_prog = which('molpro')
+        if which_prog not in self.version_cache:
+            success, output = execute([which_prog, "version.inp", "-d", ".", "-W", "."],
+                                      infiles={"version.inp": ""},
+                                      outfiles=["version.out", "version.xml"])
 
-        #    if success:
-        #        for line in output["stdout"].splitlines():
-        #            if 'GAMESS VERSION' in line:
-        #                branch = ' '.join(line.strip(' *\t').split()[3:])
-        #        self.version_cache[which_prog] = safe_version(branch)
+            if success:
+                tree = ET.ElementTree(ET.fromstring(output["outfiles"]["version.xml"]))
+                root = tree.getroot()
+                version_tree = root.find('molpro_uri:job/molpro_uri:platform/molpro_uri:version', name_space)
+                year = version_tree.attrib['major']
+                minor = version_tree.attrib['minor']
+                molpro_version = year + "." + minor
+                self.version_cache[which_prog] = safe_version(molpro_version)
 
-        #return self.version_cache[which_prog]
+        return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
@@ -55,8 +61,8 @@ class MolproExecutor(ProgramExecutor):
         self.found(raise_error=True)
 
         # Check Molpro version
-        # if parse_version(self.get_version()) < parse_version("2018.1"):
-        #     raise TypeError("Molpro version '{}' not understood".format(self.get_version()))
+        if parse_version(self.get_version()) < parse_version("2018.1"):
+            raise TypeError("Molpro version '{}' not supported".format(self.get_version()))
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
