@@ -55,7 +55,7 @@ _programs = {
     "torchani": which_import("torchani", return_bool=True),
     "mp2d": which('mp2d', return_bool=True),
     "terachem": which("terachem", return_bool=True),
-    "molpro": is_program_new_enough("molpro", "2018.1")
+    "molpro": is_program_new_enough("molpro", "2018.1"),
     "entos": is_program_new_enough("entos", "0.5")
 }
 

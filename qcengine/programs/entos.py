@@ -2,16 +2,16 @@
 Calls the entos executable.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 from qcelemental.models import Result, FailedOperation
 from ..util import execute, popen
 from qcelemental.util import which, safe_version, parse_version
 
-from .executor import ProgramExecutor
+from .model import ProgramHarness
 
 
-class EntosExecutor(ProgramExecutor):
+class EntosHarness(ProgramHarness):
     _defaults = {
         "name": "entos",
         "scratch": True,
@@ -22,7 +22,7 @@ class EntosExecutor(ProgramExecutor):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):
@@ -81,31 +81,47 @@ class EntosExecutor(ProgramExecutor):
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
+
         # Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
 
         # Write input file
-        input_file = []
+        input_dict = {}
+
+        # TODO Is there a way to require keywords?
+        if input_model.driver == 'energy':
+            input_dict = {'dft': {
+                            'structure': {
+                              'file': 'geometry.xyz'
+                              },
+                            'xc': input_model.model.method,
+                            'ao': input_model.model.basis.upper(),
+                            'df_basis': input_model.keywords["df_basis"].upper(),
+                            'charge': input_model.molecule.molecular_charge
+                            }
+                          }
 
         # Write gradient call if asked for
         if input_model.driver == 'gradient':
-            input_file.append('gradient(')
+            input_dict = {'gradient': {
+                            'structure': {
+                              'file': 'geometry.xyz'
+                              },
+                            'dft': {
+                              'xc': input_model.model.method,
+                              'ao': input_model.model.basis,
+                              'df_basis': input_model.keywords["df_basis"].upper(),
+                              'charge': input_model.molecule.molecular_charge
+                               }
+                             }
+                          }
 
-        # TODO Need command structure
-
-        input_file.append("structure( file = 'geometry.xyz' )")
-        input_file.append("xc = '{}'".format(input_model.model.method))
-        input_file.append("ao = '{}'".format(input_model.model.basis))
-        # TODO Add df_basis as part of input
-        input_file.append("df_basis = '{}'".format(input_model.model.basis))
-
-        if input_model.driver == 'gradient':
-            input_file.append(')')
-
+        # Write input file
+        input_file = self.write_input_recursive(input_dict)
         input_file = "\n".join(input_file)
 
         return {
-            "commands": ["entos", "dispatch.in", "-n", str(config.ncores)],
+            "commands": ["entos", "-n", str(config.ncores), "dispatch.in"],
             "infiles": {
                 "dispatch.in": input_file,
                 "geometry.xyz": xyz_file
@@ -113,6 +129,22 @@ class EntosExecutor(ProgramExecutor):
             "scratch_location": config.scratch_directory,
             "input_result": input_model.copy(deep=True)
         }
+
+    def write_input_recursive(self, d: Dict[str, Any]) -> List:
+        input_file = []
+        for key, value in d.items():
+            if isinstance(value, dict):
+                input_file.append(key + '(')
+                rec_input = self.write_input_recursive(value)
+                indented_line = map(lambda x: "  " + x, rec_input)
+                input_file.extend(indented_line)
+                input_file.append(')')
+            else:
+                if isinstance(value, str):
+                    input_file.append("{0} = '{1}'".format(key, value))
+                else:
+                    input_file.append("{0} = {1}".format(key, value))
+        return input_file
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 

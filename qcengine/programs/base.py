@@ -7,6 +7,7 @@ from ..exceptions import InputError, ResourceError
 
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
+from .entos import EntosHarness
 from .gamess import GAMESSHarness
 from .nwchem import NWChemHarness
 from .molpro import MolproHarness
@@ -87,3 +88,4 @@ register_program(MP2DHarness())
 #register_program(GAMESSHarness())
 #register_program(NWChemHarness())
 #register_program(CFOURHarness())
+register_program(EntosHarness())
