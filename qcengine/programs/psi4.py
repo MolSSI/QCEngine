@@ -7,12 +7,12 @@ from typing import Dict
 from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
 
-from .executor import ProgramExecutor
+from .model import ProgramHarness
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from ..util import execute, popen
 
 
-class Psi4Executor(ProgramExecutor):
+class Psi4Harness(ProgramHarness):
 
     _defaults = {
         "name": "Psi4",
@@ -24,7 +24,7 @@ class Psi4Executor(ProgramExecutor):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):

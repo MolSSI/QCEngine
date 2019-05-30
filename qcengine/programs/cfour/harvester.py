@@ -395,6 +395,15 @@ def harvest_outfile_pass(outtext):
         psivar['[T] CORRECTION ENERGY'] = mobj.group('bkttcorr')
         psivar['CCSD(T) TOTAL ENERGY'] = mobj.group('ttot')
 
+    # Process DBOC
+    mobj = re.search(
+        r'^\s*' + r'(?:The total diagonal Born-Oppenheimer correction \(DBOC\) is:)\s+' +
+        r'(?P<dboc>' + NUMBER + ')' + r'\s*a.u.\s*',
+        outtext, re.MULTILINE | re.DOTALL)
+    if mobj:
+        print('matched dboc ecc')
+        psivar['CCSD DBOC ENERGY'] = mobj.group('dboc')
+
     # Process SCS-CC
     mobj = re.search(
         r'^\s+' + r'(?P<fullCC>(?P<iterCC>CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
@@ -664,21 +673,22 @@ def harvest(p4Mol, c4out, **largs):
         #outPsivar['CURRENT DIPOLE Y'] = str(oriDip[1] * psi_dipmom_au2debye)
         #outPsivar['CURRENT DIPOLE Z'] = str(oriDip[2] * psi_dipmom_au2debye)
 
-    #if oriGrad is not None:
-    #    retGrad = oriGrad
-    #elif grdGrad is not None:
-    #    retGrad = grdGrad
-    #else:
-    #    retGrad = None
+    if oriGrad is not None:
+        retGrad = oriGrad
+    elif grdGrad is not None:
+        retGrad = grdGrad
+    else:
+        retGrad = None
 
-    #if oriHess is not None:
-    #    retHess = oriHess
-    #else:
-    #    retHess = None
+    if oriHess is not None:
+        retHess = oriHess
+    else:
+        retHess = None
 
-    retGrad = oriGrad or grdGrad or None
-    retHess = oriHess or None
-    retCoord = oriCoord or None
+    if oriCoord is not None:
+        retCoord = oriCoord
+    else:
+        retCoord = None
 
     return outPsivar, retHess, retGrad, retMol, version, error
 
@@ -750,29 +760,6 @@ def harvest_zmat(zmat):
     mol = Molecule.init_with_xyz(molxyz, no_com=True, no_reorient=True, contentsNotFilename=True)
 
     return mol
-
-
-#def harvest_FCM(fcm):
-#    """Parses the contents *fcm* of the Cfour FCMFINAL file into a hessian array.
-#
-#    """
-#    fcm = fcm.splitlines()
-#    Nat = int(fcm[0].split()[0])
-#    Ndof = int(fcm[0].split()[1])
-#
-#    empty = True
-#    hess = []
-#    for df in range(Ndof):
-#        for at in range(Nat):
-#            lline = fcm[Ndof * at + at + 1].split()
-#            if empty:
-#                if (abs(float(lline[0])) > 1.0e-8) or \
-#                   (abs(float(lline[1])) > 1.0e-8) or \
-#                   (abs(float(lline[2])) > 1.0e-8):
-#                    empty = False
-#            fcm.append([float(lline[0]), float(lline[1]), float(lline[2])])
-#
-#    return None if empty else hess
 
 
 def harvest_DIPOL(dipol):

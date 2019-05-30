@@ -3,14 +3,14 @@ from typing import Any, Dict, Union
 from qcelemental.models import Optimization, OptimizationInput
 from qcelemental.util import which_import
 
-from .procedure_model import BaseProcedure
+from .model import ProcedureHarness
 
 
-class GeometricProcedure(BaseProcedure):
+class GeometricProcedure(ProcedureHarness):
 
     _defaults = {"name": "geomeTRIC", "procedure": "optimization"}
 
-    class Config(BaseProcedure.Config):
+    class Config(ProcedureHarness.Config):
         pass
 
     def __init__(self, **kwargs):

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from ..util import model_wrapper
 
 
-class BaseProcedure(BaseModel, abc.ABC):
+class ProcedureHarness(BaseModel, abc.ABC):
 
     name: str
     procedure: str

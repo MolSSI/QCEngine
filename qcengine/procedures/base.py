@@ -12,9 +12,9 @@ __all__ = ["register_procedure", "get_procedure", "list_all_procedures", "list_a
 procedures = {}
 
 
-def register_procedure(entry_point: 'BaseProcedure') -> None:
+def register_procedure(entry_point: 'ProcedureHarness') -> None:
     """
-    Register a new BaseProcedure with QCEngine
+    Register a new ProcedureHarness with QCEngine
     """
 
     name = entry_point.name
@@ -24,7 +24,7 @@ def register_procedure(entry_point: 'BaseProcedure') -> None:
     procedures[name.lower()] = entry_point
 
 
-def get_procedure(name: str) -> 'BaseProcedure':
+def get_procedure(name: str) -> 'ProcedureHarness':
     """
     Returns a procedures executor class
     """

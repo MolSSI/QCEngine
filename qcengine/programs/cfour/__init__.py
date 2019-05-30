@@ -1,1 +1,1 @@
-from .runner import CFOURExecutor
+from .runner import CFOURHarness

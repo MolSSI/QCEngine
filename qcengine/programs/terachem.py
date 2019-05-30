@@ -9,12 +9,12 @@ import qcengine.util as uti
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
 
-from .executor import ProgramExecutor
+from .model import ProgramHarness
 from ..exceptions import UnknownError
 from ..util import popen
 
 
-class TeraChemExecutor(ProgramExecutor):
+class TeraChemHarness(ProgramHarness):
 
     _defaults = {
          "name": "TeraChem",
@@ -26,7 +26,7 @@ class TeraChemExecutor(ProgramExecutor):
     }
     version_cache: Dict[str, str] ={}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
 

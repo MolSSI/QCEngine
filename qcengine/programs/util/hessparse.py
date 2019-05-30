@@ -2,8 +2,22 @@ import numpy as np
 
 from qcelemental.util import filter_comments
 
-def load_hessian(shess, dtype):
+def load_hessian(shess: str, dtype: str) -> np.ndarray:
+    """Construct a Hessian array from any recognized string format.
 
+    Parameters
+    ----------
+    shess
+        Multiline string specification of Hessian in a recognized format.
+    dtype : {'fcmfinal', 'cfour'}
+        Hessian format name.
+
+    Returns
+    -------
+    np.ndarray
+        Hessian array in square shape.
+
+    """
     # list o'lines w/o comments or blanks
     shess = filter_comments(shess)
     lhess = list(filter(None, map(str.strip, shess.splitlines())))
@@ -26,22 +40,3 @@ def hess_to_string(hess, handle, dtype):
 
     header = '{:5}{:5}'.format(nat, 6 * nat)
     np.savetxt(handle, hess.reshape((-1, 3)), fmt='%20.10f', delimiter='', newline='\n', header=header, comments='')
-
-
-#    fcm = fcm.splitlines()
-#    Nat = int(fcm[0].split()[0])
-#    Ndof = int(fcm[0].split()[1])
-#
-#    empty = True
-#    hess = []
-#    for df in range(Ndof):
-#        for at in range(Nat):
-#            lline = fcm[Ndof * at + at + 1].split()
-#            if empty:
-#                if (abs(float(lline[0])) > 1.0e-8) or \
-#                   (abs(float(lline[1])) > 1.0e-8) or \
-#                   (abs(float(lline[2])) > 1.0e-8):
-#                    empty = False
-#            fcm.append([float(lline[0]), float(lline[1]), float(lline[2])])
-#
-#    return None if empty else hess

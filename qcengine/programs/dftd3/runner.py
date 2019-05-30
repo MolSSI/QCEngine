@@ -19,7 +19,7 @@ from qcelemental.models import FailedOperation, Result
 from qcelemental.util import safe_version, which
 
 from . import dashparam
-from ..executor import ProgramExecutor
+from ..model import ProgramHarness
 from ...exceptions import InputError, ResourceError, UnknownError
 from ...extras import provenance_stamp
 from ...util import execute
@@ -27,7 +27,7 @@ from ...util import execute
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
-class DFTD3Executor(ProgramExecutor):
+class DFTD3Harness(ProgramHarness):
 
     _defaults = {
         "name": "DFTD3",
@@ -39,7 +39,7 @@ class DFTD3Executor(ProgramExecutor):
     }
     version_cache: Dict[str, str] ={}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):

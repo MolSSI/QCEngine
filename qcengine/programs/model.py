@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 from pydantic import BaseModel
 
 
-class ProgramExecutor(BaseModel, abc.ABC):
+class ProgramHarness(BaseModel, abc.ABC):
 
     name: str
     scratch: bool

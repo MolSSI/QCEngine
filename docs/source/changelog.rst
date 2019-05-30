@@ -17,14 +17,37 @@ Changelog
 vX.Y.0 / 2019-MM-DD
 -------------------
 
+dgas
+- (:pr:`65`) Torchani Update  Enhancement
+- (:pr:`69`) Custom Exceptions
+- (:pr:`74`) Travis: Removes caching and reduces pytorch overhead
+
+fang
+- (:pr:`62`) TeraChem: Changed the input parser to call qcelemental to_string method with bohr unit
+- (:pr:`67`) TeraChem: Improvement of output parser: Parse stdout into Result.
+
+seb
+- (:pr:`59`) Molpro: (WIP) Added CCSD support to output parsing
+- (:pr:`71`) Molpro can now be run by QCEngine
+- (:pr:`75`) Compute: Updated the type for option local_options to be Dict[str, Any]
+- (:pr:`76`) (WIP) get_program: Added check option and fixed Molpro test jobs
+- (:pr:`78`) Molpro: Implementing get_version for Molpro engine
+
+
 New Features
 ++++++++++++
+
+- (:pr:`60`) WIP: QCEngine interface to GAMESS can run the program (after light editing of rungms)
+  and parse selected output (HF, CC, FCI) into QCSchema.
+- (:pr:`73`) WIP: QCEngine interface to CFOUR can run the program and parse a variety of output into QCSchema.
 
 Enhancements
 ++++++++++++
 
 - (:pr:`63`) QCEngine functions ``util.which``, ``util.which_version``, ``util.parse_version``, and
   ``util.safe_version`` removed after migrating to QCElemental.
+- (:pr:`77`) Rename ``ProgramExecutor`` to ``ProgramHarness`` and ``BaseProcedure`` to ``ProcedureHarness``.
+- (:pr:`77`) Function ``util.execute(..., outfiles=[])`` learned to collect output files matching a globbed filename.
 
 Bug Fixes
 +++++++++

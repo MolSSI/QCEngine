@@ -454,4 +454,14 @@ def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional
                     outfiles[fl] = fp.read()
                     LOGGER.info(f'... Writing: {filename}')
             except (OSError, FileNotFoundError) as err:
-                outfiles[fl] = None
+                if '*' in fl:
+                    gfls = {}
+                    for gfl in lwd.glob(fl):
+                        with open(gfl, 'r') as fp:
+                            gfls[gfl.name] = fp.read()
+                            LOGGER.info(f'... Writing: {gfl}')
+                    if not gfls:
+                        gfls = None
+                    outfiles[fl] = gfls
+                else:
+                    outfiles[fl] = None

@@ -1,5 +1,5 @@
 """
-Calls the Psi4 executable.
+Calls the TorchANI package.
 """
 
 from typing import Dict
@@ -7,12 +7,12 @@ from typing import Dict
 from qcelemental.models import Provenance, Result
 from qcelemental.util import parse_version, safe_version, which_import
 
-from .executor import ProgramExecutor
+from .model import ProgramHarness
 from ..exceptions import InputError, ResourceError
 from ..units import ureg
 
 
-class TorchANIExecutor(ProgramExecutor):
+class TorchANIHarness(ProgramHarness):
 
     _CACHE = {}
 
@@ -26,7 +26,7 @@ class TorchANIExecutor(ProgramExecutor):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramExecutor.Config):
+    class Config(ProgramHarness.Config):
         pass
 
     def __init__(self, **kwargs):
