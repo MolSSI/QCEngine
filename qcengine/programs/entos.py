@@ -98,6 +98,9 @@ class EntosHarness(ProgramHarness):
                             'ao': input_model.model.basis.upper(),
                             'df_basis': input_model.keywords["df_basis"].upper(),
                             'charge': input_model.molecule.molecular_charge
+                            },
+                          'print': {
+                            'results': True
                             }
                           }
 
@@ -113,7 +116,10 @@ class EntosHarness(ProgramHarness):
                               'df_basis': input_model.keywords["df_basis"].upper(),
                               'charge': input_model.molecule.molecular_charge
                                }
-                             }
+                             },
+                          'print': {
+                            'results': True
+                            }
                           }
 
         # Write input file
@@ -142,6 +148,8 @@ class EntosHarness(ProgramHarness):
             else:
                 if isinstance(value, str):
                     input_file.append("{0} = '{1}'".format(key, value))
+                elif isinstance(value, bool):
+                    input_file.append("{0} = {1}".format(key, str(value).lower()))
                 else:
                     input_file.append("{0} = {1}".format(key, value))
         return input_file
@@ -157,21 +165,23 @@ class EntosHarness(ProgramHarness):
         natom = len(input_model.molecule.symbols)
         for idx, line in enumerate(output_lines):
             fields = line.split()
-            if fields[:2] == ["TOTAL", "ENERGY:"]:
+            if fields[:1] == ["energy:"]:
                 properties["scf_total_energy"] = float(fields[-1])
             elif fields[:2] == ["Molecular", "Dipole:"]:
                 properties["scf_dipole_moment"] = [float(x) for x in fields[2:5]]
             elif fields[:3] == ["SCF", "converged", "in"]:
                 properties["scf_iterations"] = int(fields[3])
-            # elif fields == ["Gradient units are Hartree/Bohr"]:
-            #     # Gradient is stored as (dE/dx1,dE/dy1,dE/dz1,dE/dx2,dE/dy2,...)
-            #     for i in range(idx + 3, idx + 3 + natom):
-            #         grad = output_lines[i].strip('\n').split()
-            #         for x in grad:
-            #             gradients.append(float(x))
+            elif fields == ["Gradient", "(hartree/bohr):"]:
+                # Gradient is stored as (dE/dx1,dE/dy1,dE/dz1,dE/dx2,dE/dy2,...)
+                for i in range(idx + 2, idx + 2 + natom):
+                    grad = output_lines[i].strip('\n').split()[1:]
+                    gradients.extend([float(x) for x in grad])
 
-        if len(gradients) > 0:
-            output_data["return_result"] = gradients
+        if input_model.driver == 'gradient':
+            if len(gradients) == 0:
+                raise ValueError('Gradient not found.')
+            else:
+                output_data["return_result"] = gradients
 
         # Replace return_result with final_energy if gradient wasn't called
         if "return_result" not in output_data:
