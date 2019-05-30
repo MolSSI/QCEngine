@@ -21,19 +21,13 @@ __all__ = ["register_program", "get_program", "list_all_programs", "list_availab
 programs = {}
 
 
-def register_program(entry_point: 'ProgramHarness', check: bool = True) -> None:
-    """Register a new ProgramHarness with QCEngine.
-
-    Parameters
-    ----------
-    entry_point
-    check
-        Do raise error if program already registered? ``False`` is handy when overwriting a
-        registration with a new Harness class.
-
+def register_program(entry_point: 'ProgramHarness') -> None:
     """
+    Register a new ProgramHarness with QCEngine.
+    """
+
     name = entry_point.name
-    if check and name.lower() in programs.keys():
+    if name.lower() in programs.keys():
         raise ValueError('{} is already a registered program.'.format(name))
 
     programs[name.lower()] = entry_point
