@@ -60,15 +60,6 @@ class EntosHarness(ProgramHarness):
         # Run entos
         exe_success, proc = self.execute(job_inputs)
 
-        # # Run entos
-        # exe_success, proc = execute(job_inputs["commands"],
-        #                             infiles=job_inputs["infiles"],
-        #                             outfiles=["dispatch.out"],
-        #                             scratch_location=job_inputs["scratch_location"],
-        #                             timeout=None
-        #                             )
-        # proc["outfiles"]["dispatch.out"] = proc["stdout"]
-
         # Determine whether the calculation succeeded
         output_data = {}
         if not exe_success:
@@ -84,14 +75,24 @@ class EntosHarness(ProgramHarness):
         result = self.parse_output(proc["outfiles"], input_data)
         return result
 
-    # TODO actually use the optional options
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
-        # Run entos
-        exe_success, proc = execute(inputs["commands"],
+
+        if extra_outfiles is not None:
+            outfiles = ["dispatch.out"].extend(extra_outfiles)
+        else:
+            outfiles = ["dispatch.out"]
+
+        if extra_commands is not None:
+            commands = inputs["commands"]
+        else:
+            commands = inputs["commands"]
+
+        exe_success, proc = execute(commands,
                                     infiles=inputs["infiles"],
-                                    outfiles=["dispatch.out"],
+                                    outfiles=outfiles,
                                     scratch_location=inputs["scratch_location"],
-                                    timeout=None
+                                    scratch_name=scratch_name,
+                                    timeout=timeout
                                     )
         proc["outfiles"]["dispatch.out"] = proc["stdout"]
         return exe_success, proc
@@ -105,7 +106,6 @@ class EntosHarness(ProgramHarness):
         # Creat input dictionary
         if template is None:
             input_dict = {}
-            # TODO Is there a way to require keywords?
             if input_model.driver == 'energy':
                 input_dict = {'dft': {
                                 'structure': {
