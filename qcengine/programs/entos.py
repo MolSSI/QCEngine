@@ -9,6 +9,7 @@ from ..util import execute, popen
 from qcelemental.util import which, safe_version, parse_version
 
 from .model import ProgramHarness
+import string
 
 
 class EntosHarness(ProgramHarness):
@@ -57,13 +58,16 @@ class EntosHarness(ProgramHarness):
         job_inputs = self.build_input(input_data, config)
 
         # Run entos
-        exe_success, proc = execute(job_inputs["commands"],
-                                    infiles=job_inputs["infiles"],
-                                    outfiles=["dispatch.out"],
-                                    scratch_location=job_inputs["scratch_location"],
-                                    timeout=None
-                                    )
-        proc["outfiles"]["dispatch.out"] = proc["stdout"]
+        exe_success, proc = self.execute(job_inputs)
+
+        # # Run entos
+        # exe_success, proc = execute(job_inputs["commands"],
+        #                             infiles=job_inputs["infiles"],
+        #                             outfiles=["dispatch.out"],
+        #                             scratch_location=job_inputs["scratch_location"],
+        #                             timeout=None
+        #                             )
+        # proc["outfiles"]["dispatch.out"] = proc["stdout"]
 
         # Determine whether the calculation succeeded
         output_data = {}
@@ -72,6 +76,7 @@ class EntosHarness(ProgramHarness):
             output_data["error"] = {"error_type": "internal_error",
                                     "error_message": proc["stderr"]
                                     }
+            print(output_data["error"])
             return FailedOperation(
                 success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
 
@@ -79,52 +84,81 @@ class EntosHarness(ProgramHarness):
         result = self.parse_output(proc["outfiles"], input_data)
         return result
 
+    # TODO actually use the optional options
+    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+        # Run entos
+        exe_success, proc = execute(inputs["commands"],
+                                    infiles=inputs["infiles"],
+                                    outfiles=["dispatch.out"],
+                                    scratch_location=inputs["scratch_location"],
+                                    timeout=None
+                                    )
+        proc["outfiles"]["dispatch.out"] = proc["stdout"]
+        return exe_success, proc
+
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
         # Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
 
-        # Write input file
-        input_dict = {}
+        # Creat input dictionary
+        if template is None:
+            input_dict = {}
+            # TODO Is there a way to require keywords?
+            if input_model.driver == 'energy':
+                input_dict = {'dft': {
+                                'structure': {
+                                  'file': 'geometry.xyz'
+                                  },
+                                'xc': input_model.model.method,
+                                'ao': input_model.model.basis.upper(),
+                                'df_basis': input_model.keywords["df_basis"].upper(),
+                                'charge': input_model.molecule.molecular_charge
+                                },
+                              'print': {
+                                'results': True
+                                }
+                              }
 
-        # TODO Is there a way to require keywords?
-        if input_model.driver == 'energy':
-            input_dict = {'dft': {
-                            'structure': {
-                              'file': 'geometry.xyz'
-                              },
-                            'xc': input_model.model.method,
-                            'ao': input_model.model.basis.upper(),
-                            'df_basis': input_model.keywords["df_basis"].upper(),
-                            'charge': input_model.molecule.molecular_charge
-                            },
-                          'print': {
-                            'results': True
-                            }
-                          }
+            # Write gradient call if asked for
+            if input_model.driver == 'gradient':
+                input_dict = {'gradient': {
+                                'structure': {
+                                  'file': 'geometry.xyz'
+                                  },
+                                'dft': {
+                                  'xc': input_model.model.method,
+                                  'ao': input_model.model.basis,
+                                  'df_basis': input_model.keywords["df_basis"].upper(),
+                                  'charge': input_model.molecule.molecular_charge
+                                   }
+                                 },
+                              'print': {
+                                'results': True
+                                }
+                              }
+            # Write input file
+            input_file = self.write_input_recursive(input_dict)
+            input_file = "\n".join(input_file)
+        else:
+            # Some of the potential different template options
+            # (A) ordinary build_input (need to define a base template)
+            # (B) user wants to add stuff after normal template (A)
+            # (C) user knows their domain language (doesn't use any QCSchema quantities)
 
-        # Write gradient call if asked for
-        if input_model.driver == 'gradient':
-            input_dict = {'gradient': {
-                            'structure': {
-                              'file': 'geometry.xyz'
-                              },
-                            'dft': {
-                              'xc': input_model.model.method,
-                              'ao': input_model.model.basis,
-                              'df_basis': input_model.keywords["df_basis"].upper(),
-                              'charge': input_model.molecule.molecular_charge
-                               }
-                             },
-                          'print': {
-                            'results': True
-                            }
-                          }
+            # Build dictionary for substitute
+            sub_dict = {
+                "method": input_model.model.method,
+                "basis": input_model.model.basis,
+                "df_basis": input_model.keywords["df_basis"].upper(),
+                "charge": input_model.molecule.molecular_charge
+            }
 
-        # Write input file
-        input_file = self.write_input_recursive(input_dict)
-        input_file = "\n".join(input_file)
+            # Perform substitution to create input file
+            str_template = string.Template(template)
+            input_file = str_template.substitute(sub_dict)
+            print(input_file)
 
         return {
             "commands": ["entos", "-n", str(config.ncores), "dispatch.in"],
