@@ -9,7 +9,7 @@ from ..util import execute, popen
 from qcelemental.util import which, safe_version, parse_version
 
 from .model import ProgramHarness
-import string
+import jinja2
 
 
 class EntosHarness(ProgramHarness):
@@ -58,22 +58,14 @@ class EntosHarness(ProgramHarness):
         job_inputs = self.build_input(input_data, config)
 
         # Run entos
-        exe_success, proc = self.execute(job_inputs)
+        proc = self.execute(job_inputs)
 
-        # Determine whether the calculation succeeded
-        output_data = {}
-        if not exe_success:
-            output_data["success"] = False
-            output_data["error"] = {"error_type": "internal_error",
-                                    "error_message": proc["stderr"]
-                                    }
-            print(output_data["error"])
-            return FailedOperation(
-                success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
-
-        # If execution succeeded, collect results
-        result = self.parse_output(proc["outfiles"], input_data)
-        return result
+        if isinstance(proc, FailedOperation):
+            return proc
+        else:
+            # If execution succeeded, collect results
+            result = self.parse_output(proc["outfiles"], input_data)
+            return result
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
@@ -83,7 +75,7 @@ class EntosHarness(ProgramHarness):
             outfiles = ["dispatch.out"]
 
         if extra_commands is not None:
-            commands = inputs["commands"]
+            commands = extra_commands
         else:
             commands = inputs["commands"]
 
@@ -95,7 +87,18 @@ class EntosHarness(ProgramHarness):
                                     timeout=timeout
                                     )
         proc["outfiles"]["dispatch.out"] = proc["stdout"]
-        return exe_success, proc
+
+        # Determine whether the calculation succeeded
+        output_data = {}
+        if not exe_success:
+            output_data["success"] = False
+            output_data["error"] = {"error_type": "internal_error",
+                                    "error_message": proc["stderr"]
+                                    }
+            return FailedOperation(
+                success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
+
+        return proc
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
@@ -103,7 +106,7 @@ class EntosHarness(ProgramHarness):
         # Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
 
-        # Creat input dictionary
+        # Create input dictionary
         if template is None:
             input_dict = {}
             if input_model.driver == 'energy':
@@ -147,18 +150,17 @@ class EntosHarness(ProgramHarness):
             # (B) user wants to add stuff after normal template (A)
             # (C) user knows their domain language (doesn't use any QCSchema quantities)
 
-            # Build dictionary for substitute
-            sub_dict = {
-                "method": input_model.model.method,
-                "basis": input_model.model.basis,
-                "df_basis": input_model.keywords["df_basis"].upper(),
-                "charge": input_model.molecule.molecular_charge
-            }
+            # # Build dictionary for substitute
+            # sub_dict = {
+            #     "method": input_model.model.method,
+            #     "basis": input_model.model.basis,
+            #     "df_basis": input_model.keywords["df_basis"].upper(),
+            #     "charge": input_model.molecule.molecular_charge
+            # }
 
             # Perform substitution to create input file
-            str_template = string.Template(template)
-            input_file = str_template.substitute(sub_dict)
-            print(input_file)
+            str_template = jinja2.Template(template)
+            input_file = str_template.render()
 
         return {
             "commands": ["entos", "-n", str(config.ncores), "dispatch.in"],
