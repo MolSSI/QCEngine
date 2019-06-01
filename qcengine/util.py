@@ -342,9 +342,10 @@ def execute(command: List[str],
         popen_kwargs["env"] = {k: v for k, v in environment.items() if v is not None}
 
     # Execute
-    with scratch_directory(scratch_name, scratch_location, scratch_messy, scratch_exist_ok) as scrdir:
+    with scratch_directory(child=scratch_name, parent=scratch_location, messy=scratch_messy,
+                           exist_ok=scratch_exist_ok) as scrdir:
         popen_kwargs["cwd"] = scrdir
-        with disk_files(infiles, outfiles, scrdir, as_binary) as extrafiles:
+        with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
 
                 realtime_stdout = ""
@@ -370,7 +371,7 @@ def execute(command: List[str],
 
 
 @contextmanager
-def scratch_directory(child: str = None, parent: str = None, messy: bool = False, exist_ok: bool = False) -> str:
+def scratch_directory(child: str = None, *, parent: str = None, messy: bool = False, exist_ok: bool = False) -> str:
     """Create and cleanup a quarantined working directory with a parent scratch directory.
 
     Parameters
@@ -433,8 +434,12 @@ def scratch_directory(child: str = None, parent: str = None, messy: bool = False
 
 
 @contextmanager
-def disk_files(infiles: Dict[str, Union[str, bytes]], outfiles: Dict[str, None], cwd: Optional[str] = None, as_binary: Optional[List[str]] = None) -> Dict[str, Union[str, bytes]]:
-    """
+def disk_files(infiles: Dict[str, Union[str, bytes]],
+               outfiles: Dict[str, None],
+               *,
+               cwd: Optional[str] = None,
+               as_binary: Optional[List[str]] = None) -> Dict[str, Union[str, bytes]]:
+    """Write and collect files.
 
     Parameters
     ----------
@@ -461,6 +466,7 @@ def disk_files(infiles: Dict[str, Union[str, bytes]], outfiles: Dict[str, None],
         lwd = Path(cwd)
     if as_binary is None:
         as_binary = []
+    assert set(as_binary) <= (set(infiles) | set(outfiles))
 
     try:
         for fl, content in infiles.items():
@@ -468,7 +474,7 @@ def disk_files(infiles: Dict[str, Union[str, bytes]], outfiles: Dict[str, None],
             filename = lwd / fl
             with open(filename, omode) as fp:
                 fp.write(content)
-                LOGGER.info(f'... Writing: {filename}')
+                LOGGER.info(f'... Writing ({omode}): {filename}')
 
         yield outfiles
 
@@ -479,14 +485,14 @@ def disk_files(infiles: Dict[str, Union[str, bytes]], outfiles: Dict[str, None],
                 filename = lwd / fl
                 with open(filename, omode) as fp:
                     outfiles[fl] = fp.read()
-                    LOGGER.info(f'... Writing: {filename}')
+                    LOGGER.info(f'... Writing ({omode}): {filename}')
             except (OSError, FileNotFoundError) as err:
                 if '*' in fl:
                     gfls = {}
                     for gfl in lwd.glob(fl):
                         with open(gfl, omode) as fp:
                             gfls[gfl.name] = fp.read()
-                            LOGGER.info(f'... Writing: {gfl}')
+                            LOGGER.info(f'... Writing ({omode}): {gfl}')
                     if not gfls:
                         gfls = None
                     outfiles[fl] = gfls
