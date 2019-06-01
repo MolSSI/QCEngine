@@ -85,7 +85,15 @@ class Psi4Harness(ProgramHarness):
                 if "extras" not in output_data:
                     output_data["extras"] = {}
 
-                output_data["extras"]["local_qcvars"] = output_data.pop("psi4:qcvars", None)
+                # Check QCVars
+                local_qcvars = output_data.pop("psi4:qcvars", None)
+                if local_qcvars:
+                    # Edge case where we might already have qcvars, should not happen
+                    if "qcvars" in output_data["extras"]:
+                        output_data["extras"]["local_qcvars"] = local_qcvars
+                    else:
+                        output_data["extras"]["qcvars"] = local_qcvars
+
                 if output_data["success"] is False:
                     if "error_message" not in output_data["error"]:
                         # older c. 1.3 message-only run_json

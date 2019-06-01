@@ -37,6 +37,7 @@ def test_geometric_psi4():
 
     inp["initial_molecule"] = qcng.get_molecule("hydrogen")
     inp["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
+    inp["input_specification"]["keywords"] = {"scf_properties": ["wiberg_lowdin_indices"]}
     inp["keywords"]["program"] = "psi4"
 
     inp = OptimizationInput(**inp)
@@ -47,6 +48,11 @@ def test_geometric_psi4():
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.e-4) == 1.3459150737
     assert ret.provenance.creator.lower() == "geometric"
     assert ret.trajectory[0].provenance.creator.lower() == "psi4"
+
+    # Check keywords passing
+    for single in ret.trajectory:
+        assert "scf_properties" in single.keywords
+        assert "WIBERG_LOWDIN_INDICES" in single.extras["qcvars"]
 
 
 @testing.using_psi4
