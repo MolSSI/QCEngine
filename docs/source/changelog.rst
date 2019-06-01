@@ -48,6 +48,8 @@ Enhancements
   ``util.safe_version`` removed after migrating to QCElemental.
 - (:pr:`77`) Rename ``ProgramExecutor`` to ``ProgramHarness`` and ``BaseProcedure`` to ``ProcedureHarness``.
 - (:pr:`77`) Function ``util.execute(..., outfiles=[])`` learned to collect output files matching a globbed filename.
+- (:pr:`81`) Function ``util.execute(..., as_binary=[])`` learned argument ``as_binary`` to handle input or output
+  files as binary rather than string.
 
 Bug Fixes
 +++++++++

@@ -16,7 +16,7 @@ import time
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pydantic import ValidationError
 from qcelemental.models import FailedOperation
@@ -36,7 +36,8 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel'
         try:
             input_data = model(**input_data)
         except ValidationError as exc:
-            raise InputError(f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}") from None
+            raise InputError(
+                f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}") from None
     elif isinstance(input_data, model):
         input_data = input_data.copy()
     else:
@@ -266,13 +267,15 @@ def execute(command: List[str],
             infiles: Optional[Dict[str, str]] = None,
             outfiles: Optional[List[str]] = None,
             *,
+            as_binary: Optional[List[str]] = None,
             scratch_name: Optional[str] = None,
             scratch_location: Optional[str] = None,
             scratch_messy: bool = False,
+            scratch_exist_ok: bool = False,
             blocking_files: Optional[List[str]] = None,
             timeout: Optional[int] = None,
             interupt_after: Optional[int] = None,
-            environment: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+            environment: Optional[Dict[str, str]] = None) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
 
@@ -287,11 +290,15 @@ def execute(command: List[str],
     outfiles : List[str] = None
         Output file names to be collected after execution into
         values. May be {}.
+    as_binary : List[str] = None
+        Keys of `infiles` or `outfiles` to be treated as bytes.
     scratch_name : str, optional
         Passed to scratch_directory
     scratch_location : str, optional
         Passed to scratch_directory
     scratch_messy : bool, optional
+        Passed to scratch_directory
+    scratch_exist_ok : bool, optional
         Passed to scratch_directory
     blocking_files : list, optional
         Files which should stop execution if present beforehand.
@@ -306,6 +313,12 @@ def execute(command: List[str],
     ------
     FileExistsError
         If any file in `blocking` is present
+
+    Examples
+    --------
+    # execute multiple commands in same dir
+    >>> success, dexe = qcng.util.execute(['command_1'], infiles, [], scratch_messy=True)
+    >>> success, dexe = qcng.util.execute(['command_2'], {}, outfiles, scratch_messy=False, scratch_name=Path(dexe['scratch_directory']).name, scratch_exist_ok=True)
 
     """
 
@@ -329,9 +342,9 @@ def execute(command: List[str],
         popen_kwargs["env"] = {k: v for k, v in environment.items() if v is not None}
 
     # Execute
-    with scratch_directory(scratch_name, scratch_location, scratch_messy) as scrdir:
+    with scratch_directory(scratch_name, scratch_location, scratch_messy, scratch_exist_ok) as scrdir:
         popen_kwargs["cwd"] = scrdir
-        with disk_files(infiles, outfiles, scrdir) as extrafiles:
+        with disk_files(infiles, outfiles, scrdir, as_binary) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
 
                 realtime_stdout = ""
@@ -357,7 +370,7 @@ def execute(command: List[str],
 
 
 @contextmanager
-def scratch_directory(child: str = None, parent: str = None, messy: bool = False) -> str:
+def scratch_directory(child: str = None, parent: str = None, messy: bool = False, exist_ok: bool = False) -> str:
     """Create and cleanup a quarantined working directory with a parent scratch directory.
 
     Parameters
@@ -371,6 +384,8 @@ def scratch_directory(child: str = None, parent: str = None, messy: bool = False
         For TMP default, see https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
     messy : bool, optional
         Leave scratch directory and contents on disk after completion.
+    exist_ok : bool, optional
+        Run commands in a possibly pre-existing directory.
 
     Yields
     ------
@@ -401,7 +416,13 @@ def scratch_directory(child: str = None, parent: str = None, messy: bool = False
         else:
             parent = Path(parent)
         tmpdir = parent / child
-        os.mkdir(tmpdir)
+        try:
+            os.mkdir(tmpdir)
+        except FileExistsError:
+            if exist_ok:
+                pass
+            else:
+                raise
     try:
         yield tmpdir
 
@@ -412,7 +433,7 @@ def scratch_directory(child: str = None, parent: str = None, messy: bool = False
 
 
 @contextmanager
-def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional[str] = None) -> Dict[str, str]:
+def disk_files(infiles: Dict[str, Union[str, bytes]], outfiles: Dict[str, None], cwd: Optional[str] = None, as_binary: Optional[List[str]] = None) -> Dict[str, Union[str, bytes]]:
     """
 
     Parameters
@@ -425,6 +446,8 @@ def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional
         values. May be {}.
     cwd : str, optional
         Directory to which to write and read files.
+    as_binary : List[str] = None
+        Keys in `infiles` (`outfiles`) to be written (read) as bytes, not decoded.
 
     Yields
     ------
@@ -436,11 +459,14 @@ def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional
         lwd = Path.cwd()
     else:
         lwd = Path(cwd)
+    if as_binary is None:
+        as_binary = []
+
     try:
-        # need an extra flag for text/binary
         for fl, content in infiles.items():
+            omode = 'wb' if fl in as_binary else 'w'
             filename = lwd / fl
-            with open(filename, 'w') as fp:
+            with open(filename, omode) as fp:
                 fp.write(content)
                 LOGGER.info(f'... Writing: {filename}')
 
@@ -448,16 +474,17 @@ def disk_files(infiles: Dict[str, str], outfiles: Dict[str, None], cwd: Optional
 
     finally:
         for fl in outfiles.keys():
+            omode = 'rb' if fl in as_binary else 'r'
             try:
                 filename = lwd / fl
-                with open(filename, 'r') as fp:
+                with open(filename, omode) as fp:
                     outfiles[fl] = fp.read()
                     LOGGER.info(f'... Writing: {filename}')
             except (OSError, FileNotFoundError) as err:
                 if '*' in fl:
                     gfls = {}
                     for gfl in lwd.glob(fl):
-                        with open(gfl, 'r') as fp:
+                        with open(gfl, omode) as fp:
                             gfls[gfl.name] = fp.read()
                             LOGGER.info(f'... Writing: {gfl}')
                     if not gfls:
