@@ -93,8 +93,8 @@ class CFOURHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["GRD", "FCMFINAL", "DIPOL", "zmat*", "ZMAT"],
-            scratch_messy=True,
+            ["GRD", "FCMFINAL", "DIPOL"],
+            scratch_messy=False,
             scratch_location=inputs["scratch_location"],
         )
         return success, dexe

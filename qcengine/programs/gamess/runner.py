@@ -118,7 +118,7 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
         success, dexe = execute(inputs["commands"],
                                 inputs["infiles"],
                                 [],
-                                scratch_messy=True,
+                                scratch_messy=False,
                                 scratch_location=inputs["scratch_location"],
                         )
         return success, dexe

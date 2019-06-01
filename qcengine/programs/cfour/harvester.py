@@ -717,51 +717,6 @@ def harvest_GRD(grd):
     return mol, grad
 
 
-def harvest_zmat(zmat):
-    """Parses the contents of the Cfour ZMAT file into array and
-    coordinate information. The coordinate info is converted into a
-    rather dinky Molecule (no fragment, but does read charge, mult,
-    unit). Return qcdb.Molecule. Written for findif zmat* where
-    geometry always Cartesian and Bohr.
-
-    """
-    zmat = zmat.splitlines()[1:]  # skip comment line
-    Nat = 0
-    readCoord = True
-    isBohr = ''
-    charge = 0
-    mult = 1
-    molxyz = ''
-    for line in zmat:
-        if line.strip() == '':
-            readCoord = False
-        elif readCoord:
-            molxyz += line + '\n'
-            Nat += 1
-        else:
-            if line.find('CHARGE') > -1:
-                idx = line.find('CHARGE')
-                charge = line[idx + 7:]
-                idxc = charge.find(',')
-                if idxc > -1:
-                    charge = charge[:idxc]
-                charge = int(charge)
-            if line.find('MULTIPLICITY') > -1:
-                idx = line.find('MULTIPLICITY')
-                mult = line[idx + 13:]
-                idxc = mult.find(',')
-                if idxc > -1:
-                    mult = mult[:idxc]
-                mult = int(mult)
-            if line.find('UNITS=BOHR') > -1:
-                isBohr = ' bohr'
-
-    molxyz = '%d%s\n%d %d\n' % (Nat, isBohr, charge, mult) + molxyz
-    mol = Molecule.init_with_xyz(molxyz, no_com=True, no_reorient=True, contentsNotFilename=True)
-
-    return mol
-
-
 def harvest_DIPOL(dipol):
     """Parses the contents *dipol* of the Cfour DIPOL file into a dipol vector.
 
