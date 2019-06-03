@@ -6,10 +6,9 @@ from typing import Any, Dict, Optional, List
 
 from qcelemental.models import Result, FailedOperation
 from ..util import execute, popen
-from qcelemental.util import which, safe_version, parse_version
+from qcelemental.util import which, safe_version, parse_version, which_import
 
 from .model import ProgramHarness
-import jinja2
 
 
 class EntosHarness(ProgramHarness):
@@ -103,6 +102,11 @@ class EntosHarness(ProgramHarness):
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
+        # Ensure (optional dependency) jinja2 exists if template is provided
+        if template is not None and not which_import('jinja2', return_bool=True):
+            raise ModuleNotFoundError("""Python module jinja2 not found. Solve by installing it: `conda install 
+            jinja2` or `pip install jinja2`""")
+
         # Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
 
@@ -145,6 +149,7 @@ class EntosHarness(ProgramHarness):
             input_file = self.write_input_recursive(input_dict)
             input_file = "\n".join(input_file)
         else:
+            import jinja2
             # Some of the potential different template options
             # (A) ordinary build_input (need to define a base template)
             # (B) user wants to add stuff after normal template (A)

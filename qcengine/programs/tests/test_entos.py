@@ -1,7 +1,7 @@
 import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_recursive
-from qcengine.testing import using_entos
+from qcengine.testing import using_entos, using_jinja2
 
 import qcengine as qcng
 
@@ -19,7 +19,7 @@ def test_entos_output_parser(test_case):
     data = entos_info.get_test_data(test_case)
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
-    output = qcng.get_program('entos').parse_output(data, inp).dict()
+    output = qcng.get_program('entos', check=False).parse_output(data, inp).dict()
     output.pop("provenance", None)
 
     output_ref = qcel.models.Result.parse_raw(data["output.json"]).dict()
@@ -37,7 +37,20 @@ def test_entos_input_formatter(test_case):
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
-    input_file = qcng.get_program('entos').build_input(inp, qcng.get_config())
+    input_file = qcng.get_program('entos', check=False).build_input(inp, qcng.get_config())
+    assert input_file.keys() >= {"commands", "infiles"}
+
+
+@using_jinja2
+@pytest.mark.parametrize('test_case', entos_info.list_test_cases())
+def test_entos_input_formatter_jinja2(test_case):
+
+    # Get input file data
+    data = entos_info.get_test_data(test_case)
+    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+
+    # TODO add actual comparison of generated input file
+    input_file = qcng.get_program('entos',  check=False).build_input(inp, qcng.get_config(), template="Test template")
     assert input_file.keys() >= {"commands", "infiles"}
 
 

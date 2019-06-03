@@ -19,3 +19,6 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
+
+    # Optional depends
+  - jinja2

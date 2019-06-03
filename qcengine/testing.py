@@ -81,3 +81,7 @@ using_entos = _build_pytest_skip("entos")
 using_dftd3_321 = pytest.mark.skipif(
     is_program_new_enough("dftd3", "3.2.1") is False,
     reason='DFTD3 does not include 3.2.1 features. Update package and add to PATH')
+
+using_jinja2 = pytest.mark.skipif(
+    which_import('jinja2', return_bool=True) is False,
+    reason='Not detecting module jinja2. Install package if necessary and add to envvar PYTHONPATH')
