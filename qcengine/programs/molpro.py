@@ -68,11 +68,33 @@ class MolproHarness(ProgramHarness):
         job_inputs = self.build_input(input_data, config)
 
         # Run Molpro
-        exe_success, proc = execute(job_inputs["commands"],
-                                    infiles=job_inputs["infiles"],
-                                    outfiles=["dispatch.out", "dispatch.xml", "dispatch.wfu"],
-                                    scratch_directory=job_inputs["scratch_directory"],
-                                    timeout=None
+        proc = self.execute(job_inputs)
+
+        if isinstance(proc, FailedOperation):
+            return proc
+        else:
+            # If execution succeeded, collect results
+            result = self.parse_output(proc["outfiles"], input_data)
+            return result
+
+    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+
+        if extra_outfiles is not None:
+            outfiles = ["dispatch.out", "dispatch.xml", "dispatch.wfu"].extend(extra_outfiles)
+        else:
+            outfiles = ["dispatch.out", "dispatch.xml", "dispatch.wfu"]
+
+        if extra_commands is not None:
+            commands = extra_commands
+        else:
+            commands = inputs["commands"]
+
+        exe_success, proc = execute(commands,
+                                    infiles=inputs["infiles"],
+                                    outfiles=outfiles,
+                                    scratch_location=inputs["scratch_location"],
+                                    scratch_name=scratch_name,
+                                    timeout=timeout
                                     )
 
         # Determine whether the calculation succeeded
@@ -85,72 +107,82 @@ class MolproHarness(ProgramHarness):
             return FailedOperation(
                 success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
 
-        # If execution succeeded, collect results
-        result = self.parse_output(proc["outfiles"], input_data)
-        return result
+        return proc
 
     # TODO Additional features
     #   - allow separate xyz file to be provided
     #   - add support of wfu files? (-W option)
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
-        input_file = []
-        posthf_methods = {'mp2', 'ccsd', 'ccsd(t)'}
+        if template is None:
+            input_file = []
+            posthf_methods = {'mp2', 'ccsd', 'ccsd(t)'}
 
-        # Memory is in megawords per core for Molpro
-        memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
-        input_file.append("memory,{},M".format(memory_mw_core))
-        # TODO Add specification of wfu file only if asked for
-        # input_file.append('file,2,dispatch.wfu')
-        input_file.append('')
-
-        # Don't orient the molecule if asked to fix_com or fix_orientation
-        if input_model.molecule.fix_orientation or input_model.molecule.fix_com:
-            input_file.append('{noorient}')
+            # Memory is in megawords per core for Molpro
+            memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
+            input_file.append("memory,{},M".format(memory_mw_core))
+            # TODO Add specification of wfu file only if asked for
+            # input_file.append('file,2,dispatch.wfu')
             input_file.append('')
 
-        # Have no symmetry if asked to fix_symmetry
-        if input_model.molecule.fix_symmetry == 'c1':
-            input_file.append('{symmetry,nosym}')
-        # TODO Figure out how to write symmetry properly in Molpro
-        # else:
-        #     input_file.append('{symmetry,}')
-        input_file.append('')
+            # Don't orient the molecule if asked to fix_com or fix_orientation
+            if input_model.molecule.fix_orientation or input_model.molecule.fix_com:
+                input_file.append('{orient,noorient}')
 
-        # Write the geom
-        # FIXME Molpro takes xyz input in Angstrom by default, but MolSSI stores xyz in bohr
-        #   - Either need to convert to Angstrom or change Molpro input to read bohr
-        input_file.append('geometry={')
-        for sym, geom in zip(input_model.molecule.symbols, input_model.molecule.geometry):
-            s = "{:<4s} {:>{width}.{prec}f} {:>{width}.{prec}f} {:>{width}.{prec}f}".format(
-                sym, *geom, width=14, prec=10)
-            input_file.append(s)
-        input_file.append('}')
+            # Have no symmetry if asked to fix_symmetry
+            if input_model.molecule.fix_symmetry == 'c1':
+                input_file.append('{symmetry,nosym}')
+            else:
+                input_file.append('{symmetry,auto}')
 
-        # Write charge and multiplicity
-        input_file.append('set,charge={}'.format(input_model.molecule.molecular_charge))
-        input_file.append('set,multiplicity={}'.format(input_model.molecule.molecular_multiplicity))
-        input_file.append('')
-
-        # Write the basis set
-        input_file.append('basis={')
-        input_file.append('default,{}'.format(input_model.model.basis))
-        input_file.append('}')
-        input_file.append('')
-
-        # Start of Molpro Commands
-        # Write energy call
-        write_hf = input_model.model.method.lower() in posthf_methods
-        if write_hf:
-            input_file.append('{HF}')
-        input_file.append('{{{:s}}}'.format(input_model.model.method))
-
-        # Write gradient call if asked for
-        if input_model.driver == 'gradient':
             input_file.append('')
-            input_file.append('{force}')
 
-        input_file = "\n".join(input_file)
+            # Write the geom
+            xyz_file = input_model.molecule.to_string(dtype='molpro', units='Bohr')
+            input_file.append(xyz_file)
+
+            # Write charge and multiplicity
+            input_file.append('set,charge={}'.format(input_model.molecule.molecular_charge))
+            input_file.append('set,multiplicity={}'.format(input_model.molecule.molecular_multiplicity))
+            input_file.append('')
+
+            # Write the basis set
+            input_file.append('basis={')
+            input_file.append('default,{}'.format(input_model.model.basis))
+            input_file.append('}')
+            input_file.append('')
+
+            # Start of Molpro Commands
+            # Write energy call
+            write_hf = input_model.model.method.lower() in posthf_methods
+            if write_hf:
+                input_file.append('{HF}')
+            input_file.append('{{{:s}}}'.format(input_model.model.method))
+
+            # Write gradient call if asked for
+            if input_model.driver == 'gradient':
+                input_file.append('')
+                input_file.append('{force}')
+
+            input_file = "\n".join(input_file)
+        else:
+            import jinja2
+            # Some of the potential different template options
+            # (A) ordinary build_input (need to define a base template)
+            # (B) user wants to add stuff after normal template (A)
+            # (C) user knows their domain language (doesn't use any QCSchema quantities)
+
+            # # Build dictionary for substitute
+            # sub_dict = {
+            #     "method": input_model.model.method,
+            #     "basis": input_model.model.basis,
+            #     "df_basis": input_model.keywords["df_basis"].upper(),
+            #     "charge": input_model.molecule.molecular_charge
+            # }
+
+            # Perform substitution to create input file
+            str_template = jinja2.Template(template)
+            input_file = str_template.render()
 
         return {
             "commands": ["molpro", "dispatch.mol", "-d", ".", "-W", ".", "-n", str(config.ncores)],
