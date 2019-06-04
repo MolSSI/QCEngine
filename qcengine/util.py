@@ -270,6 +270,7 @@ def execute(command: List[str],
             as_binary: Optional[List[str]] = None,
             scratch_name: Optional[str] = None,
             scratch_location: Optional[str] = None,
+            scratch_suffix: Optional[str] = None,
             scratch_messy: bool = False,
             scratch_exist_ok: bool = False,
             blocking_files: Optional[List[str]] = None,
@@ -295,6 +296,8 @@ def execute(command: List[str],
     scratch_name : str, optional
         Passed to scratch_directory
     scratch_location : str, optional
+        Passed to scratch_directory
+    scratch_suffix : str, optional
         Passed to scratch_directory
     scratch_messy : bool, optional
         Passed to scratch_directory
@@ -342,8 +345,11 @@ def execute(command: List[str],
         popen_kwargs["env"] = {k: v for k, v in environment.items() if v is not None}
 
     # Execute
-    with scratch_directory(child=scratch_name, parent=scratch_location, messy=scratch_messy,
-                           exist_ok=scratch_exist_ok) as scrdir:
+    with scratch_directory(child=scratch_name,
+                           parent=scratch_location,
+                           messy=scratch_messy,
+                           exist_ok=scratch_exist_ok,
+                           suffix=scratch_suffix) as scrdir:
         popen_kwargs["cwd"] = scrdir
         with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
@@ -371,7 +377,12 @@ def execute(command: List[str],
 
 
 @contextmanager
-def scratch_directory(child: str = None, *, parent: str = None, messy: bool = False, exist_ok: bool = False) -> str:
+def scratch_directory(child: str = None,
+                      *,
+                      parent: str = None,
+                      suffix: str = None,
+                      messy: bool = False,
+                      exist_ok: bool = False) -> str:
     """Create and cleanup a quarantined working directory with a parent scratch directory.
 
     Parameters
@@ -383,6 +394,9 @@ def scratch_directory(child: str = None, *, parent: str = None, messy: bool = Fa
     parent : str, optional
         Create directory `child` elsewhere than TMP default.
         For TMP default, see https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
+    suffix : str, optional
+        Create `child` with identifying label by passing to ``tempfile.mkdtemp``.
+        Encouraged use for debugging only.
     messy : bool, optional
         Leave scratch directory and contents on disk after completion.
     exist_ok : bool, optional
@@ -401,16 +415,17 @@ def scratch_directory(child: str = None, *, parent: str = None, messy: bool = Fa
 
     Examples
     --------
-    parent            child    -->  creates
-    ------            -----         -------
-    None              None     --> /tmp/tmpliyp1i7x/
-    None              myqcjob  --> /tmp/myqcjob/
-    /scratch/johndoe  None     --> /scratch/johndoe/tmpliyp1i7x/
-    /scratch/johndoe  myqcjob  --> /scratch/johndoe/myqcjob/
+    parent            child     suffix   -->  creates
+    ------            -----     ------        -------
+    None              None      None     -->  /tmp/tmpliyp1i7x/
+    None              None      _anharm  -->  /tmp/tmpliyp1i7x_anharm/
+    None              myqcjob   None     -->  /tmp/myqcjob/
+    /scratch/johndoe  None      None     -->  /scratch/johndoe/tmpliyp1i7x/
+    /scratch/johndoe  myqcjob   None     -->  /scratch/johndoe/myqcjob/
 
     """
     if child is None:
-        tmpdir = tempfile.mkdtemp(dir=parent)
+        tmpdir = tempfile.mkdtemp(dir=parent, suffix=suffix)
     else:
         if parent is None:
             parent = Path(tempfile.gettempdir())
