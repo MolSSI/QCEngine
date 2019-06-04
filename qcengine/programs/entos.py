@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, List
 from qcelemental.models import Result, FailedOperation
 from ..util import execute, popen
 from qcelemental.util import which, safe_version, parse_version, which_import
+from ..exceptions import UnknownError
 
 from .model import ProgramHarness
 
@@ -37,7 +38,7 @@ class EntosHarness(ProgramHarness):
         which_prog = which('entos')
         if which_prog not in self.version_cache:
             with popen([which_prog, '--version']) as exc:
-                exc["proc"].wait(timeout=5)
+                exc["proc"].wait(timeout=15)
             self.version_cache[which_prog] = safe_version(exc["stdout"].split()[2])
 
         return self.version_cache[which_prog]
@@ -88,14 +89,8 @@ class EntosHarness(ProgramHarness):
         proc["outfiles"]["dispatch.out"] = proc["stdout"]
 
         # Determine whether the calculation succeeded
-        output_data = {}
         if not exe_success:
-            output_data["success"] = False
-            output_data["error"] = {"error_type": "internal_error",
-                                    "error_message": proc["stderr"]
-                                    }
-            return FailedOperation(
-                success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
+            return UnknownError(proc["stderr"])
 
         return proc
 
@@ -112,39 +107,26 @@ class EntosHarness(ProgramHarness):
 
         # Create input dictionary
         if template is None:
-            input_dict = {}
-            if input_model.driver == 'energy':
-                input_dict = {'dft': {
-                                'structure': {
-                                  'file': 'geometry.xyz'
-                                  },
-                                'xc': input_model.model.method,
-                                'ao': input_model.model.basis.upper(),
-                                'df_basis': input_model.keywords["df_basis"].upper(),
-                                'charge': input_model.molecule.molecular_charge
-                                },
-                              'print': {
-                                'results': True
-                                }
-                              }
+            structure = {'structure': {'file': 'geometry.xyz'}}
+            dft_info = {'xc': input_model.model.method,
+                        'ao': input_model.model.basis.upper(),
+                        'df_basis': input_model.keywords["df_basis"].upper(),
+                        'charge': input_model.molecule.molecular_charge
+                        }
+            print_results = {'print': {'results': True}}
 
-            # Write gradient call if asked for
-            if input_model.driver == 'gradient':
-                input_dict = {'gradient': {
-                                'structure': {
-                                  'file': 'geometry.xyz'
-                                  },
-                                'dft': {
-                                  'xc': input_model.model.method,
-                                  'ao': input_model.model.basis,
-                                  'df_basis': input_model.keywords["df_basis"].upper(),
-                                  'charge': input_model.molecule.molecular_charge
-                                   }
-                                 },
-                              'print': {
-                                'results': True
-                                }
+            if input_model.driver == 'energy':
+                input_dict = {'dft': {**structure, **dft_info},
+                              **print_results
                               }
+            # Write gradient call if asked for
+            elif input_model.driver == 'gradient':
+                input_dict = {'gradient': {**structure, 'dft': {**dft_info}},
+                              **print_results
+                              }
+            else:
+                raise NotImplementedError('Driver {} not implemented for entos.'.format(input_model.driver))
+
             # Write input file
             input_file = self.write_input_recursive(input_dict)
             input_file = "\n".join(input_file)
