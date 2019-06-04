@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 import qcengine.util as uti
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import parse_version, safe_version, which
+from qcelemental.molparse.regex import NUMBER, DECIMAL
 
 from .model import ProgramHarness
 from ..exceptions import UnknownError
@@ -44,7 +45,9 @@ class TeraChemHarness(ProgramHarness):
         if which_prog not in self.version_cache:
             with popen([which_prog, '--version']) as exc:
                 exc["proc"].wait(timeout=5)
-            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[2].strip('K'))
+            mobj = re.search(NUMBER,exc["stdout"],re.VERBOSE)
+            version = mobj.group(0)
+            self.version_cache[which_prog] = safe_version(version)
 
         return self.version_cache[which_prog]
 
@@ -142,12 +145,6 @@ class TeraChemHarness(ProgramHarness):
                    grad = output_lines[i].strip('\n').split()
                    for x in grad:
                        gradients.append( float(x) )
-
-        # Look for the last line that is the SCF info
-        DECIMAL = r"""(
-          (?:[-+]?\d*\.\d+(?:[DdEe][-+]?\d+)?) |  # .num with optional sign, exponent, wholenum
-          (?:[-+]?\d+\.\d*(?:[DdEe][-+]?\d+)?)    # num. with optional sign, exponent, decimals
-        )"""
 
         last_scf_line = ""
         for idx in reversed(range(line_scf_header, line_final_energy)):
