@@ -1,7 +1,7 @@
 import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_recursive
-from qcengine.testing import using_entos, using_jinja2
+from qcengine.testing import using_entos
 
 import qcengine as qcng
 
@@ -41,9 +41,8 @@ def test_entos_input_formatter(test_case):
     assert input_file.keys() >= {"commands", "infiles"}
 
 
-@using_jinja2
 @pytest.mark.parametrize('test_case', entos_info.list_test_cases())
-def test_entos_input_formatter_jinja2(test_case):
+def test_entos_input_formatter_template(test_case):
 
     # Get input file data
     data = entos_info.get_test_data(test_case)
