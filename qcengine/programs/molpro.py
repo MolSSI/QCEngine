@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 from qcelemental.models import Result, FailedOperation
 from ..util import execute
 from qcelemental.util import which, safe_version, parse_version
+from ..exceptions import UnknownError
 
 from .model import ProgramHarness
 
@@ -98,20 +99,13 @@ class MolproHarness(ProgramHarness):
                                     )
 
         # Determine whether the calculation succeeded
-        output_data = {}
         if not exe_success:
-            output_data["success"] = False
-            output_data["error"] = {"error_type": "internal_error",
-                                    "error_message": proc["stderr"]
-                                    }
-            return FailedOperation(
-                success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)
+            return UnknownError(proc["stderr"])
 
         return proc
 
     # TODO Additional features
     #   - allow separate xyz file to be provided
-    #   - add support of wfu files? (-W option)
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         if template is None:
@@ -121,8 +115,8 @@ class MolproHarness(ProgramHarness):
             # Memory is in megawords per core for Molpro
             memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
             input_file.append("memory,{},M".format(memory_mw_core))
-            # TODO Add specification of wfu file only if asked for
-            # input_file.append('file,2,dispatch.wfu')
+            if input_model.keywords.get('wfu') is not None:
+                input_file.append('file,2,{}'.format(input_model.keywords.get('wfu')))
             input_file.append('')
 
             # Don't orient the molecule if asked to fix_com or fix_orientation
@@ -154,15 +148,21 @@ class MolproHarness(ProgramHarness):
 
             # Start of Molpro Commands
             # Write energy call
+            energy_call = []
             write_hf = input_model.model.method.lower() in posthf_methods
             if write_hf:
-                input_file.append('{HF}')
-            input_file.append('{{{:s}}}'.format(input_model.model.method))
+                energy_call.append('{HF}')
+            energy_call.append('{{{:s}}}'.format(input_model.model.method))
 
-            # Write gradient call if asked for
-            if input_model.driver == 'gradient':
+            # Write appropriate driver call
+            if input_model.driver == 'energy':
+                input_file.extend(energy_call)
+            elif input_model.driver == 'gradient':
+                input_file.extend(energy_call)
                 input_file.append('')
                 input_file.append('{force}')
+            else:
+                raise NotImplementedError('Driver {} not implemented for Molpro.'.format(input_model.driver))
 
             input_file = "\n".join(input_file)
         else:
