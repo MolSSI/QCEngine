@@ -1,21 +1,18 @@
 """Compute dispersion correction using Greenwell & Beran's MP2D executable."""
 
-import copy
 import os
 import pprint
 import re
 import sys
-import traceback
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import FailedOperation, Provenance, Result
+from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
 
 from .dftd3 import dashparam
-from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
 from .model import ProgramHarness
 from ..exceptions import InputError, ResourceError, UnknownError
 from ..util import execute
@@ -125,13 +122,13 @@ class MP2DHarness(ProgramHarness):
         infiles = {'mp2d_geometry': xyz}
         #jobrec['molecule']['real'] = molrec['real']
 
-        env = {
-            'HOME': os.environ.get('HOME'),
-            'PATH': os.environ.get('PATH'),
-            #'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
-            #        os.pathsep + os.environ.get('PATH'),
-            #'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
-        }
+        #env = {
+        #    'HOME': os.environ.get('HOME'),
+        #    'PATH': os.environ.get('PATH'),
+        #    #'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
+        #    #        os.pathsep + os.environ.get('PATH'),
+        #    #'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
+        #}
 
         command = ['mp2d', 'mp2d_geometry']
         command.extend("""--TT_a1={a1} --TT_a2={a2} --rcut={rcut} --w={w} --s8={s8}""".format(
@@ -197,8 +194,7 @@ class MP2DHarness(ProgramHarness):
             if qcvkey:
                 calcinfo.append(qcel.Datum(f'{qcvkey} DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
 
-        calcinfo1 = {info.label: info for info in calcinfo}
-        #LOGtext += qcel.datum.print_variables(calcinfo1)
+        #LOGtext += qcel.datum.print_variables({info.label: info for info in calcinfo})
         calcinfo = {info.label: info.data for info in calcinfo}
         #calcinfo = qcel.util.unnp(calcinfo, flat=True)
 
