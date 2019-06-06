@@ -11,6 +11,7 @@ from qcelemental.util import which, safe_version, parse_version
 from ..exceptions import UnknownError
 
 from .model import ProgramHarness
+import string
 
 
 class MolproHarness(ProgramHarness):
@@ -80,15 +81,17 @@ class MolproHarness(ProgramHarness):
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
+        outfiles = ["dispatch.out", "dispatch.xml"]
         if extra_outfiles is not None:
-            outfiles = ["dispatch.out", "dispatch.xml", "dispatch.wfu"].extend(extra_outfiles)
-        else:
-            outfiles = ["dispatch.out", "dispatch.xml", "dispatch.wfu"]
+            outfiles.extend(extra_outfiles)
 
+        # TODO Add test to make sure this works
+        if inputs["input_result"].keywords.get("wfu") is not None:
+            outfiles.append(inputs["input_result"].keywords.get("wfu"))
+
+        commands = inputs["commands"]
         if extra_commands is not None:
             commands = extra_commands
-        else:
-            commands = inputs["commands"]
 
         exe_success, proc = execute(commands,
                                     infiles=inputs["infiles"],
@@ -104,8 +107,6 @@ class MolproHarness(ProgramHarness):
 
         return proc
 
-    # TODO Additional features
-    #   - allow separate xyz file to be provided
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         if template is None:
@@ -115,6 +116,7 @@ class MolproHarness(ProgramHarness):
             # Memory is in megawords per core for Molpro
             memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
             input_file.append("memory,{},M".format(memory_mw_core))
+            # TODO Add test to make sure this works
             if input_model.keywords.get('wfu') is not None:
                 input_file.append('file,2,{}'.format(input_model.keywords.get('wfu')))
             input_file.append('')
@@ -134,11 +136,6 @@ class MolproHarness(ProgramHarness):
             # Write the geom
             xyz_file = input_model.molecule.to_string(dtype='molpro', units='Bohr')
             input_file.append(xyz_file)
-
-            # Write charge and multiplicity
-            input_file.append('set,charge={}'.format(input_model.molecule.molecular_charge))
-            input_file.append('set,multiplicity={}'.format(input_model.molecule.molecular_multiplicity))
-            input_file.append('')
 
             # Write the basis set
             input_file.append('basis={')
@@ -166,7 +163,6 @@ class MolproHarness(ProgramHarness):
 
             input_file = "\n".join(input_file)
         else:
-            import jinja2
             # Some of the potential different template options
             # (A) ordinary build_input (need to define a base template)
             # (B) user wants to add stuff after normal template (A)
@@ -176,13 +172,12 @@ class MolproHarness(ProgramHarness):
             # sub_dict = {
             #     "method": input_model.model.method,
             #     "basis": input_model.model.basis,
-            #     "df_basis": input_model.keywords["df_basis"].upper(),
             #     "charge": input_model.molecule.molecular_charge
             # }
 
             # Perform substitution to create input file
-            str_template = jinja2.Template(template)
-            input_file = str_template.render()
+            str_template = string.Template(template)
+            input_file = str_template.substitute()
 
         return {
             "commands": ["molpro", "dispatch.mol", "-d", ".", "-W", ".", "-n", str(config.ncores)],
@@ -212,7 +207,6 @@ class MolproHarness(ProgramHarness):
         scf_extras = {}
 
         # MP2 maps
-        # TODO Think about storing singlet pair and triplet pair in extras field then convert to same-spin and opp-spin
         mp2_energy_map = {
             "total energy": "mp2_total_energy",
             "correlation energy": "mp2_correlation_energy"
