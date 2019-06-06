@@ -6,7 +6,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
-from qcengine.programs import dftd3
+from qcengine.programs import empirical_dispersion_resources
 from qcengine.testing import is_program_new_enough, using_dftd3, using_dftd3_321, using_psi4, using_qcdb, using_mp2d
 
 
@@ -614,10 +614,10 @@ def _compute_key(pjrec):
     (({'name_hint': 'MP2', 'level_hint': 'dmp2'}, 'MP2-DMP2'), dmp2dmp2),
 ])  # yapf: disable
 def test_dftd3__from_arrays(inp, expected):
-    res = dftd3.from_arrays(**inp[0])
+    res = empirical_dispersion_resources.from_arrays(**inp[0])
     assert compare_recursive(expected, res, atol=1.e-4)
     assert compare(inp[1], _compute_key(res), 'key')
-    res = dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
+    res = empirical_dispersion_resources.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert compare_recursive(expected, res, tnm() + ' idempotent', atol=1.e-4)
 
 
@@ -631,7 +631,7 @@ def test_dftd3__from_arrays(inp, expected):
 ])  # yapf:disable
 def test_dftd3__from_arrays__error(inp):
     with pytest.raises(qcng.exceptions.InputError):
-        dftd3.from_arrays(**inp)
+        empirical_dispersion_resources.from_arrays(**inp)
 
 
 def test_dftd3__from_arrays__supplement():
@@ -645,12 +645,12 @@ def test_dftd3__from_arrays__supplement():
     }
     supp = {'chg': {'definitions': {'asdf-d4': {'params': {'s6': 4.05}, 'citation': '    mypaper\n'}}}}
 
-    res = dftd3.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
+    res = empirical_dispersion_resources.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
     assert compare_recursive(ans, res, atol=1.e-4)
     with pytest.raises(qcng.exceptions.InputError) as e:
-        dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
+        empirical_dispersion_resources.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert "Can't guess -D correction level" in str(e)
-    res = dftd3.from_arrays(
+    res = empirical_dispersion_resources.from_arrays(
         name_hint=res['fctldash'],
         level_hint=res['dashlevel'],
         param_tweaks=res['dashparams'],

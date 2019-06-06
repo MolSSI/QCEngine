@@ -1,6 +1,5 @@
 """Compute dispersion correction using Greenwell & Beran's MP2D executable."""
 
-import os
 import pprint
 import re
 import sys
@@ -12,7 +11,7 @@ import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
 
-from .dftd3 import dashparam
+from . import empirical_dispersion_resources
 from .model import ProgramHarness
 from ..exceptions import InputError, ResourceError, UnknownError
 from ..util import execute
@@ -110,7 +109,7 @@ class MP2DHarness(ProgramHarness):
             raise InputError(f"""MP2D valid driver options are 'energy' and 'gradient', not {input_model.driver}""")
 
         # temp until actual options object
-        input_model.extras['info'] = dashparam.from_arrays(
+        input_model.extras['info'] = empirical_dispersion_resources.from_arrays(
             name_hint=mtd,
             level_hint=input_model.keywords.get('level_hint', None),
             param_tweaks=input_model.keywords.get('params_tweaks', None),

@@ -18,7 +18,7 @@ import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import safe_version, which
 
-from . import dashparam
+from .. import empirical_dispersion_resources
 from ..model import ProgramHarness
 from ...exceptions import InputError, ResourceError, UnknownError
 from ...extras import provenance_stamp
@@ -200,7 +200,7 @@ def dftd3_plant(jobrec):
 
     """
     # temp until actual options object
-    jobrec['extras']['info'] = dashparam.from_arrays(
+    jobrec['extras']['info'] = empirical_dispersion_resources.from_arrays(
         name_hint=jobrec['model']['method'],
         level_hint=jobrec['keywords'].get('level_hint', None),
         param_tweaks=jobrec['keywords'].get('params_tweaks', None),
