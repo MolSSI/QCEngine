@@ -7,7 +7,7 @@ import re
 import sys
 import traceback
 from decimal import Decimal
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 import qcelemental as qcel
@@ -17,7 +17,7 @@ from qcelemental.util import safe_version, which
 from .dftd3 import dashparam
 from .dftd3.runner import module_driver  # nasty but temporary and better than duplicating fn
 from .model import ProgramHarness
-from ..exceptions import InputError, UnknownError
+from ..exceptions import InputError, ResourceError, UnknownError
 from ..extras import provenance_stamp
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -50,16 +50,21 @@ class MP2DHarness(ProgramHarness):
 
         which_prog = which('mp2d')
         if which_prog not in self.version_cache:
-            #command = [which_prog, '-version']
-            #import subprocess
-            #proc = subprocess.run(command, stdout=subprocess.PIPE)
-            #self.version_cache[which_prog] = safe_version(proc.stdout.decode('utf-8').strip())
-            self.version_cache[which_prog] = safe_version('0.1')
+            # Note: anything below v1.1 will return an input error message here. but that's fine as version compare evals to False.
+            command = [which_prog, '--version']
+            import subprocess
+            proc = subprocess.run(command, stdout=subprocess.PIPE)
+            self.version_cache[which_prog] = safe_version(proc.stdout.decode('utf-8').strip())
 
         return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+        from ..testing import is_program_new_enough
+
         self.found(raise_error=True)
+
+        if not is_program_new_enough('mp2d', '1.1'):
+            raise ResourceError(f"MP2D version '{self.get_version()}' too old. Please update to at least '1.1'.")
 
         # Set up the job
         input_data = input_data.copy().dict()
@@ -164,34 +169,33 @@ def mp2d_plant(jobrec):
     # * form command and arguments
 
     modulerec = {}
-    modulerec['infiles'] = {}
-    modulerec['infiles']['Params.txt'] = mp2d_coeff_formatter(jobrec['extras']['info']['dashlevel'],
-                                                              jobrec['extras']['info']['dashparams'])
 
     # Need 'real' field later and that's only guaranteed for molrec
     molrec = qcel.molparse.from_schema(jobrec['molecule'])
     xyz = qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format='')
-    modulerec['infiles']['mp2d_geometry.psi4'] = '\n'.join(['molecule {', '', *xyz.split('\n')[2:-1], 'units angstrom', '}'])
+    modulerec['infiles'] = {
+        'mp2d_geometry': xyz
+    }
 
     modulerec['outfiles'] = [
         'mp2d_gradient',
     ]
     modulerec['env'] = {
             'HOME': os.environ.get('HOME'),
-            'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
-                    os.pathsep + os.environ.get('PATH'),
-            'MP2D_PARAMPATH': '.',
-            'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
+            'PATH': os.environ.get('PATH'),
+            #'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
+            #        os.pathsep + os.environ.get('PATH'),
+            #'MP2D_PARAMPATH': '.',
+            #'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
         }
     modulerec['blocking_files'] = None
 
     jobrec['molecule']['real'] = molrec['real']
 
-    command = ['mp2d', 'mp2d_geometry.psi4']
+    command = ['mp2d', 'mp2d_geometry']
     if jobrec['driver'] == 'gradient':
-        command.append('-grad')
-    if jobrec['extras']['info']['dashlevel'] == 'atmgr':
-        command.append('-abc')
+        command.append('--gradient')
+    command.extend(mp2d_coeff_formatter(jobrec['extras']['info']['dashlevel'], jobrec['extras']['info']['dashparams']))
     modulerec['command'] = command
 
     return modulerec
@@ -232,11 +236,11 @@ def mp2d_harvest(jobrec, modulerec):
     real_nat = np.sum(real)
 
     for ln in modulerec['stdout'].splitlines():
-        if re.search('MP2D dispersion correction v', ln):
+        if re.search('MP2D Dispersion correction v', ln):
             version = ln.replace('MP2D dispersion correction', '').replace('-', '').strip().lower()
         elif re.match('   MP2D dispersion correction Eh', ln):
             ene = Decimal(ln.split()[4])
-        elif re.match('normal termination of mp2d', ln):
+        elif re.match('Atomic Coordinates in Angstroms', ln):
             break
     else:
         if not ((real_nat == 1) and (jobrec['driver'] == 'gradient')):
@@ -286,8 +290,8 @@ def mp2d_harvest(jobrec, modulerec):
     return jobrec
 
 
-def mp2d_coeff_formatter(dashlvl, dashcoeff):
-    """Return strings for MP2D program parameter file.
+def mp2d_coeff_formatter(dashlvl: str, dashcoeff: Dict[str, float]) -> List[str]:
+    """Return commands for MP2D program execution.
 
     Parameters
     ----------
@@ -298,15 +302,19 @@ def mp2d_coeff_formatter(dashlvl, dashcoeff):
 
     Returns
     -------
-    str
-        Suitable for `Params.txt` file.
+    Commands for `mp2d` execution.
 
     """
-    dashformatter = """a_one: {:.6f} a_two: {:.6f} rcut: {:.6f} width: {:.6f} s_8: {:.6f}\n"""
 
     dashlvl = dashlvl.lower()
     if dashlvl == 'dmp2':
-        return dashformatter.format(dashcoeff['a1'], dashcoeff['a2'], dashcoeff['rcut'], dashcoeff['w'], dashcoeff['s8'])
+        return [f"""--TT_a1={dashcoeff['a1']}""",
+                f"""--TT_a2={dashcoeff['a2']}""",
+                f"""--rcut={dashcoeff['rcut']}""",
+                f"""--w={dashcoeff['w']}""",
+                f"""--s8={dashcoeff['s8']}""",
+               ]
+
     else:
         raise InputError(
             """-D correction level %s is not available. Choose among %s.""" % (dashlvl, dashcoeff.keys()))
