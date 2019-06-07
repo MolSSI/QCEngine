@@ -5,7 +5,7 @@ Calls the Molpro executable.
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
-from qcelemental.models import Result, FailedOperation
+from qcelemental.models import Result
 from ..util import execute
 from qcelemental.util import which, safe_version, parse_version
 from ..exceptions import UnknownError
@@ -72,29 +72,29 @@ class MolproHarness(ProgramHarness):
         # Run Molpro
         proc = self.execute(job_inputs)
 
-        if isinstance(proc, FailedOperation):
+        if isinstance(proc, UnknownError):
             return proc
         else:
             # If execution succeeded, collect results
             result = self.parse_output(proc["outfiles"], input_data)
             return result
 
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+    def execute(self, inputs, extra_infiles=None, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
-        outfiles = ["dispatch.out", "dispatch.xml"]
+        infiles = inputs["infiles"]
+        if extra_infiles is not None:
+            infiles.extend(extra_infiles)
+
+        outfiles = ["dispatch.out", "dispatch.xml", "dispatch.wfu"]
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
-
-        # TODO Add test to make sure this works
-        if inputs["input_result"].keywords.get("wfu") is not None:
-            outfiles.append(inputs["input_result"].keywords.get("wfu"))
 
         commands = inputs["commands"]
         if extra_commands is not None:
             commands = extra_commands
 
         exe_success, proc = execute(commands,
-                                    infiles=inputs["infiles"],
+                                    infiles=infiles,
                                     outfiles=outfiles,
                                     scratch_location=inputs["scratch_location"],
                                     scratch_name=scratch_name,
@@ -116,9 +116,9 @@ class MolproHarness(ProgramHarness):
             # Memory is in megawords per core for Molpro
             memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
             input_file.append("memory,{},M".format(memory_mw_core))
-            # TODO Add test to make sure this works
-            if input_model.keywords.get('wfu') is not None:
-                input_file.append('file,2,{}'.format(input_model.keywords.get('wfu')))
+            # TODO Decide how I want this keyword to look/work
+            # if input_model.keywords.get('wfu') is not None:
+            #     input_file.append('file,2,{}'.format(input_model.keywords.get('wfu')))
             input_file.append('')
 
             # Don't orient the molecule if asked to fix_com or fix_orientation
