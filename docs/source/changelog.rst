@@ -26,13 +26,6 @@ fang
 - (:pr:`62`) TeraChem: Changed the input parser to call qcelemental to_string method with bohr unit
 - (:pr:`67`) TeraChem: Improvement of output parser: Parse stdout into Result.
 
-seb
-- (:pr:`59`) Molpro: (WIP) Added CCSD support to output parsing
-- (:pr:`71`) Molpro can now be run by QCEngine
-- (:pr:`75`) Compute: Updated the type for option local_options to be Dict[str, Any]
-- (:pr:`76`) (WIP) get_program: Added check option and fixed Molpro test jobs
-- (:pr:`78`) Molpro: Implementing get_version for Molpro engine
-
 
 New Features
 ++++++++++++
@@ -40,6 +33,10 @@ New Features
 - (:pr:`60`) WIP: QCEngine interface to GAMESS can run the program (after light editing of rungms)
   and parse selected output (HF, CC, FCI) into QCSchema.
 - (:pr:`73`) WIP: QCEngine interface to CFOUR can run the program and parse a variety of output into QCSchema.
+- (:pr:`59`, :pr:`71`, :pr:`75`, :pr:`76`, :pr:`78`) Molpro improvements: Molpro can be run by QCEngine; and
+  the input generator and output parser now supports CCSD energy and gradient calculations.
+- (:pr:`82`) QCEngine interface to entos can create input files (dft energy and gradients), run the program,
+  and parse the output.
 
 Enhancements
 ++++++++++++
