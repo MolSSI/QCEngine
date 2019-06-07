@@ -149,6 +149,7 @@ class MolproHarness(ProgramHarness):
             write_hf = input_model.model.method.lower() in posthf_methods
             if write_hf:
                 energy_call.append('{HF}')
+            # TODO Support DFT calls, need to check if method is a DFT XC functional and then write {rks,XC}
             energy_call.append('{{{:s}}}'.format(input_model.model.method))
 
             # Write appropriate driver call
@@ -228,6 +229,18 @@ class MolproHarness(ProgramHarness):
             "triplet pair energy": "ccsd_triplet_pair_energy"
         }
 
+        # CCSD(T) maps
+        # TODO There are two instances of "correlation energy" in the xml. One for CCSD and one for CCSD(T)
+        #      Will need a bit more logic to separate between the two
+        ccsd_prt_pr_energy_map = {
+            "total energy": "ccsd_prt_pr_total_energy",
+            "correlation energy": "ccsd_prt_pr_correlation_energy"
+        }
+        ccsd_prt_pr_dipole_map = {"Dipole moment": "ccsd_prt_pr_dipole_moment"}
+        ccsd_prt_pr_extras = {
+            **ccsd_extras
+        }
+
         # Compiling the method maps
         scf_maps = {
             "energy": scf_energy_map,
@@ -244,8 +257,13 @@ class MolproHarness(ProgramHarness):
             "dipole": ccsd_dipole_map,
             "extras": ccsd_extras
         }
-        scf_methods = {"HF": scf_maps, "RHF": scf_maps}
-        post_hf_methods = {"MP2": mp2_maps, "CCSD": ccsd_maps}
+        ccsd_prt_pr_maps = {
+            "energy": ccsd_prt_pr_energy_map,
+            "dipole": ccsd_prt_pr_dipole_map,
+            "extras": ccsd_prt_pr_extras
+        }
+        scf_methods = {"HF": scf_maps, "RHF": scf_maps}  # , "RKS": scf_maps}
+        post_hf_methods = {"MP2": mp2_maps, "CCSD": ccsd_maps}  # , "CCSD(T)": ccsd_prt_pr_maps}
         supported_methods = {**scf_methods, **post_hf_methods}
 
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
@@ -260,11 +278,11 @@ class MolproHarness(ProgramHarness):
             if command in supported_methods:
                 command_map = supported_methods[command]
                 for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] in supported_methods[command]['energy']:
+                    if child.attrib['name'] in command_map['energy']:
                         properties[command_map['energy'][child.attrib['name']]] = float(child.attrib['value'])
-                    elif child.attrib['name'] in supported_methods[command]['extras']:
+                    elif child.attrib['name'] in command_map['extras']:
                         properties[command_map['extras'][child.attrib['name']]] = float(child.attrib['value'])
-                    elif child.attrib['name'] in supported_methods[command]['dipole']:
+                    elif child.attrib['name'] in command_map['dipole']:
                         properties[command_map['dipole'][child.attrib['name']]] = [float(x) for x in
                                                                                    child.attrib['value'].split()]
             # Grab gradient
@@ -297,6 +315,7 @@ class MolproHarness(ProgramHarness):
 
         # A slightly more robust way of determining the final energy.
         # Throws an error if the energy isn't found for the method specified from the input_model.
+        # TODO Will need to be modified to work for DFT. XC --> RKS
         method = input_model.model.method
         method_energy_map = supported_methods[method]['energy']
         if method in post_hf_methods and method_energy_map['total energy'] in properties:
