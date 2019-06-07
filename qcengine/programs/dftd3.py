@@ -161,7 +161,7 @@ def module_driver(jobrec, module_label, plant, harvest, verbose=1):
                        modulerec.get('infiles'),
                        modulerec.pop('outfiles'),
                        **{
-        'scratch_messy': True,
+        'scratch_messy': False,
         'environment': modulerec.get('env'),
         'blocking_files': modulerec.get('blocking_files')
     })
