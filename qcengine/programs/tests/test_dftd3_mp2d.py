@@ -6,7 +6,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
-from qcengine.programs import dftd3
+from qcengine.programs import empirical_dispersion_resources
 from qcengine.testing import is_program_new_enough, using_dftd3, using_dftd3_321, using_psi4, using_qcdb, using_mp2d
 
 
@@ -383,6 +383,53 @@ gref['eneyne']['ATM'] = dict(zip(dmm, [
   0.00000000000000E+00,  0.00000000000000E+00,  0.67277034390041E-07,
   0.00000000000000E+00,  0.00000000000000E+00, -0.67289088637954E-07]).reshape((-1, 3)),
 ]))  # yapf: disable
+gref['eneyne']['MP2-DMP2'] = dict(zip(dmm, [
+    np.array([
+  0.000000000000,        8.33766812971e-05,     0.000109143431777,
+  0.000000000000,       -8.33766812971e-05,     0.000109143431777,
+  6.65762086716e-05,    -8.48726541848e-06,    -6.94161475862e-06,
+ -6.65762086716e-05,    -8.48726541848e-06,    -6.94161475862e-06,
+ -6.65762086716e-05,     8.48726541848e-06,    -6.94161475862e-06,
+  6.65762086716e-05,     8.48726541848e-06,    -6.94161475862e-06,
+  0.00000000000,         0.00000000000,        -6.06356381132e-05,
+  0.00000000000,         0.00000000000,        -0.000146587460686,
+  0.00000000000,         0.00000000000,         5.56226390549e-05,
+  0.00000000000,         0.00000000000,        -3.89199447758e-05]).reshape((-1, 3)),
+    np.array([
+  0.00000000000,         6.40910926532e-05,    -5.69353173759e-08,
+  0.00000000000,        -6.40910926532e-05,    -5.69353173759e-08,
+  6.40446102957e-05,    -5.1224992828e-06,      2.84676586879e-08,
+ -6.40446102957e-05,    -5.1224992828e-06,      2.84676586879e-08,
+ -6.40446102957e-05,     5.1224992828e-06,      2.84676586879e-08,
+  6.40446102957e-05,     5.1224992828e-06,      2.84676586879e-08]).reshape((-1, 3)),
+    np.array([
+  0.00000000000000E+00,  0.00000000000000E+00, -3.49290530324e-05,
+  0.00000000000000E+00,  0.00000000000000E+00,  3.41911680578e-05,
+  0.00000000000000E+00,  0.00000000000000E+00,  3.99755714285e-05,
+  0.00000000000000E+00,  0.00000000000000E+00, -3.9237686454e-05]).reshape((-1, 3)),
+    np.array([
+  0.00000000000,         6.40910926532e-05,    -5.69353173759e-08,
+  0.00000000000,        -6.40910926532e-05,    -5.69353173759e-08,
+  6.40446102957e-05,    -5.1224992828e-06,      2.84676586879e-08,
+ -6.40446102957e-05,    -5.1224992828e-06,      2.84676586879e-08,
+ -6.40446102957e-05,     5.1224992828e-06,      2.84676586879e-08,
+  6.40446102957e-05,     5.1224992828e-06,      2.84676586879e-08,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00]).reshape((-1, 3)),
+    np.array([
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00,  0.00000000000000E+00,
+  0.00000000000000E+00,  0.00000000000000E+00, -3.49290530324e-05,
+  0.00000000000000E+00,  0.00000000000000E+00,  3.41911680578e-05,
+  0.00000000000000E+00,  0.00000000000000E+00,  3.99755714285e-05,
+  0.00000000000000E+00,  0.00000000000000E+00, -3.9237686454e-05]).reshape((-1, 3)),
+]))  # yapf: disable
 gref['ne'] = {}
 gref['ne']['B3LYP-D3(BJ)'] = {'atom': np.zeros(3).reshape((-1, 3))}
 gref['ne']['MP2-DMP2'] = {'atom': np.zeros(3).reshape((-1, 3))}
@@ -567,10 +614,10 @@ def _compute_key(pjrec):
     (({'name_hint': 'MP2', 'level_hint': 'dmp2'}, 'MP2-DMP2'), dmp2dmp2),
 ])  # yapf: disable
 def test_dftd3__from_arrays(inp, expected):
-    res = dftd3.from_arrays(**inp[0])
+    res = empirical_dispersion_resources.from_arrays(**inp[0])
     assert compare_recursive(expected, res, atol=1.e-4)
     assert compare(inp[1], _compute_key(res), 'key')
-    res = dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
+    res = empirical_dispersion_resources.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert compare_recursive(expected, res, tnm() + ' idempotent', atol=1.e-4)
 
 
@@ -584,7 +631,7 @@ def test_dftd3__from_arrays(inp, expected):
 ])  # yapf:disable
 def test_dftd3__from_arrays__error(inp):
     with pytest.raises(qcng.exceptions.InputError):
-        dftd3.from_arrays(**inp)
+        empirical_dispersion_resources.from_arrays(**inp)
 
 
 def test_dftd3__from_arrays__supplement():
@@ -598,12 +645,12 @@ def test_dftd3__from_arrays__supplement():
     }
     supp = {'chg': {'definitions': {'asdf-d4': {'params': {'s6': 4.05}, 'citation': '    mypaper\n'}}}}
 
-    res = dftd3.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
+    res = empirical_dispersion_resources.from_arrays(name_hint='asdf-d4', level_hint='chg', dashcoeff_supplement=supp)
     assert compare_recursive(ans, res, atol=1.e-4)
     with pytest.raises(qcng.exceptions.InputError) as e:
-        dftd3.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
+        empirical_dispersion_resources.from_arrays(name_hint=res['fctldash'], level_hint=res['dashlevel'], param_tweaks=res['dashparams'])
     assert "Can't guess -D correction level" in str(e)
-    res = dftd3.from_arrays(
+    res = empirical_dispersion_resources.from_arrays(
         name_hint=res['fctldash'],
         level_hint=res['dashlevel'],
         param_tweaks=res['dashparams'],
@@ -712,7 +759,7 @@ def test_qcdb__energy_d3():
 def test_mp2d__run_mp2d__2body(inp, subjects, request):
     subject = subjects()[inp['parent']][inp['subject']]
     expected = ref[inp['parent']][inp['lbl']][inp['subject']]
-    #gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
+    gexpected = gref[inp['parent']][inp['lbl']][inp['subject']].ravel()
 
     if 'qcmol' in request.node.name:
         mol = subject
@@ -723,7 +770,7 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
         'schema_name': 'qcschema_input',
         'schema_version': 1,
         'molecule': mol,
-        'driver': 'energy', #gradient',
+        'driver': 'gradient',
         'model': {
             'method': inp['name']
         },
@@ -737,6 +784,11 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
     assert compare_values(expected, jrec['extras']['qcvars']['CURRENT ENERGY'], atol=1.e-7)
     assert compare_values(expected, jrec['extras']['qcvars']['DISPERSION CORRECTION ENERGY'], atol=1.e-7)
     assert compare_values(expected, jrec['extras']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION ENERGY'], atol=1.e-7)
+
+    assert compare_values(gexpected, jrec['extras']['qcvars']['CURRENT GRADIENT'], atol=1.e-7)
+    assert compare_values(gexpected, jrec['extras']['qcvars']['DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
+    assert compare_values(
+        gexpected, jrec['extras']['qcvars'][inp['lbl'] + ' DISPERSION CORRECTION GRADIENT'], atol=1.e-7)
 
 
 @using_dftd3

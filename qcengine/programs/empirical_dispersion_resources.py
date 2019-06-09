@@ -3,7 +3,7 @@
 import collections
 import copy
 
-from ...exceptions import InputError
+from ..exceptions import InputError
 
 ## ==> Dispersion Aliases and Parameters <== ##
 

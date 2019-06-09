@@ -18,11 +18,11 @@ import qcelemental as qcel
 from qcelemental.models import FailedOperation, Result
 from qcelemental.util import safe_version, which
 
-from . import dashparam
-from ..model import ProgramHarness
-from ...exceptions import InputError, ResourceError, UnknownError
-from ...extras import provenance_stamp
-from ...util import execute
+from . import empirical_dispersion_resources
+from .model import ProgramHarness
+from ..exceptions import InputError, ResourceError, UnknownError
+from ..extras import provenance_stamp
+from ..util import execute
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -161,7 +161,7 @@ def module_driver(jobrec, module_label, plant, harvest, verbose=1):
                        modulerec.get('infiles'),
                        modulerec.pop('outfiles'),
                        **{
-        'scratch_messy': True,
+        'scratch_messy': False,
         'environment': modulerec.get('env'),
         'blocking_files': modulerec.get('blocking_files')
     })
@@ -200,7 +200,7 @@ def dftd3_plant(jobrec):
 
     """
     # temp until actual options object
-    jobrec['extras']['info'] = dashparam.from_arrays(
+    jobrec['extras']['info'] = empirical_dispersion_resources.from_arrays(
         name_hint=jobrec['model']['method'],
         level_hint=jobrec['keywords'].get('level_hint', None),
         param_tweaks=jobrec['keywords'].get('params_tweaks', None),

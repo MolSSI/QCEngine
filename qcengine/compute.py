@@ -3,7 +3,7 @@ Integrates the computes together
 """
 from typing import Any, Dict, Optional, Union
 
-from qcelemental.models import ComputeError, FailedOperation, ResultInput
+from qcelemental.models import FailedOperation, ResultInput
 
 from .config import get_config
 from .exceptions import InputError

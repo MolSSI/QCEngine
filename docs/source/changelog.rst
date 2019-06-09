@@ -25,7 +25,7 @@ dgas
 fang
 - (:pr:`62`) TeraChem: Changed the input parser to call qcelemental to_string method with bohr unit
 - (:pr:`67`) TeraChem: Improvement of output parser: Parse stdout into Result.
-
+- (:pr:`83`) TeraChem: modified how TeraChem version is parsed 
 
 New Features
 ++++++++++++
@@ -37,6 +37,7 @@ New Features
   the input generator and output parser now supports CCSD energy and gradient calculations.
 - (:pr:`82`) QCEngine interface to entos can create input files (dft energy and gradients), run the program,
   and parse the output.
+- (:pr:`85`) MP2D interface switched to upstream repo and now produces correct analytic gradients.
 
 Enhancements
 ++++++++++++
@@ -49,9 +50,14 @@ Enhancements
   files as binary rather than string.
 - (:pr:`81`) Function ``util.execute`` learned bool argument ``scratch_exist_ok`` to run in a preexisting directory.
   This is handy for stringing together execute calls.
+- (:pr:`84`) Function ``util.execute`` learned str argument ``scratch_suffix`` to identify temp dictionaries for debugging.
+- (:pr:`85`) The resource file ``programs.dftd3.dashparam.py`` has relocated and renamed to
+  ``programs.empirical_dispersion_resources.py``.
 
 Bug Fixes
 +++++++++
+
+- (:pr:`80`) Fix "psi4:qcvars" handling for older Psi4 versions.
 
 
 v0.6.4 / 2019-03-21
