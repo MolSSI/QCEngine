@@ -91,7 +91,7 @@ class MP2DHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["mp2d_gradient"],
+            inputs["outfiles"],
             scratch_messy=False,
             scratch_location=inputs["scratch_location"],
         )
@@ -138,6 +138,7 @@ class MP2DHarness(ProgramHarness):
         return {
             "command": command,
             "infiles": infiles,
+            "outfiles": ['mp2d_gradient'],
             "scratch_location": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
         }
@@ -215,6 +216,7 @@ class MP2DHarness(ProgramHarness):
 
         output_data = {
             'extras': {
+                'local_keywords': input_model.extras['info'],
                 'qcvars': calcinfo,
             },
             'properties': {},
@@ -222,6 +224,7 @@ class MP2DHarness(ProgramHarness):
                                      version=self.get_version(),
                                      routine=__name__ + '.' + sys._getframe().f_code.co_name),
             'return_result': retres,
+            'stdout': stdout,
         }  # yapf: disable
 
         output_data['success'] = True
