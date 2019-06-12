@@ -79,11 +79,12 @@ class MolproHarness(ProgramHarness):
             result = self.parse_output(proc["outfiles"], input_data)
             return result
 
-    def execute(self, inputs, extra_infiles=None, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+    def execute(self, inputs, extra_infiles=None, extra_outfiles=None, extra_commands=None, scratch_name=None,
+                scratch_messy=False, timeout=None):
 
         infiles = inputs["infiles"]
         if extra_infiles is not None:
-            infiles.extend(extra_infiles)
+            infiles.update(extra_infiles)
 
         outfiles = ["dispatch.out", "dispatch.xml", "dispatch.wfu"]
         if extra_outfiles is not None:
@@ -98,6 +99,7 @@ class MolproHarness(ProgramHarness):
                                     outfiles=outfiles,
                                     scratch_location=inputs["scratch_location"],
                                     scratch_name=scratch_name,
+                                    scratch_messy=scratch_messy,
                                     timeout=timeout
                                     )
 
@@ -121,21 +123,9 @@ class MolproHarness(ProgramHarness):
             #     input_file.append('file,2,{}'.format(input_model.keywords.get('wfu')))
             input_file.append('')
 
-            # Don't orient the molecule if asked to fix_com or fix_orientation
-            if input_model.molecule.fix_orientation or input_model.molecule.fix_com:
-                input_file.append('{orient,noorient}')
-
-            # Have no symmetry if asked to fix_symmetry
-            if input_model.molecule.fix_symmetry == 'c1':
-                input_file.append('{symmetry,nosym}')
-            else:
-                input_file.append('{symmetry,auto}')
-
-            input_file.append('')
-
             # Write the geom
-            xyz_file = input_model.molecule.to_string(dtype='molpro', units='Bohr')
-            input_file.append(xyz_file)
+            xyz_block = input_model.molecule.to_string(dtype='molpro', units='Bohr')
+            input_file.append(xyz_block)
 
             # Write the basis set
             input_file.append('basis={')
@@ -234,11 +224,12 @@ class MolproHarness(ProgramHarness):
         #      Will need a bit more logic to separate between the two
         ccsd_prt_pr_energy_map = {
             "total energy": "ccsd_prt_pr_total_energy",
-            "correlation energy": "ccsd_prt_pr_correlation_energy"
+            "correlation energy": "ccsd_prt_pr_correlation_energy",
         }
         ccsd_prt_pr_dipole_map = {"Dipole moment": "ccsd_prt_pr_dipole_moment"}
         ccsd_prt_pr_extras = {
-            **ccsd_extras
+            **ccsd_extras,
+            "contribution": "prt_pr_contribution"
         }
 
         # Compiling the method maps
