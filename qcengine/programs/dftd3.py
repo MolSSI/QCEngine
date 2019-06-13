@@ -93,7 +93,7 @@ class DFTD3Harness(ProgramHarness):
             inputs["outfiles"],
             scratch_messy=False,
             #env=inputs["env"],
-            scratch_location=inputs["scratch_location"],
+            scratch_directory=inputs["scratch_directory"],
             blocking_files=inputs["blocking_files"],
         )
         return success, dexe
@@ -148,7 +148,7 @@ class DFTD3Harness(ProgramHarness):
             "command": command,
             "infiles": infiles,
             "outfiles": ['dftd3_gradient', 'dftd3_abc_gradient'],
-            "scratch_location": config.scratch_directory,
+            "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
             "blocking_files": [os.path.join(pathlib.Path.home(), '.dftd3par.' + socket.gethostname())],
         }

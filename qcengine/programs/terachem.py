@@ -112,7 +112,7 @@ class TeraChemHarness(ProgramHarness):
                 "tc.in": input_file,
                 "geometry.xyz": xyz_file
             },
-            "scratch_location": config.scratch_directory,
+            "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True)
         }
 
@@ -196,7 +196,7 @@ class TeraChemHarness(ProgramHarness):
         exe_success, proc = uti.execute(inputs["commands"],
                           infiles = inputs["infiles"],
                           outfiles = ["tc.out"],
-                          scratch_location = inputs["scratch_location"],
+                          scratch_directory=inputs["scratch_directory"],
                           timeout = timeout
                           )
         proc["outfiles"]["tc.out"] = proc["stdout"]

@@ -68,7 +68,7 @@ class Psi4Harness(ProgramHarness):
             input_data["schema_name"] = "qc_schema_input"
 
         if config.scratch_directory:
-            input_data["scratch_location"] = config.scratch_directory
+            input_data["scratch_directory"] = config.scratch_directory
 
         if parse_version(self.get_version()) > parse_version("1.2"):
 
@@ -135,6 +135,6 @@ class Psi4Harness(ProgramHarness):
 
         # Delete keys
         output_data.pop("return_output", None)
-        output_data.pop("scratch_location", None)
+        output_data.pop("scratch_directory", None)
 
         return Result(**output_data)

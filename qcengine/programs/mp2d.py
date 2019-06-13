@@ -93,7 +93,7 @@ class MP2DHarness(ProgramHarness):
             inputs["infiles"],
             inputs["outfiles"],
             scratch_messy=False,
-            scratch_location=inputs["scratch_location"],
+            scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
 
@@ -139,7 +139,7 @@ class MP2DHarness(ProgramHarness):
             "command": command,
             "infiles": infiles,
             "outfiles": ['mp2d_gradient'],
-            "scratch_location": config.scratch_directory,
+            "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
         }
 

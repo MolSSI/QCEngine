@@ -27,6 +27,18 @@ fang
 - (:pr:`67`) TeraChem: Improvement of output parser: Parse stdout into Result.
 - (:pr:`83`) TeraChem: modified how TeraChem version is parsed 
 
+seb
+- (:pr:`88`)
+
+Breaking Changes
+++++++++++++++++
+
+- (:pr:`85`) The resource file ``programs.dftd3.dashparam.py`` has relocated and renamed to
+  ``programs.empirical_dispersion_resources.py``.
+- (:pr:`89`) Function ``util.execute`` forgot str argument ``scratch_location`` and learned ``scratch_directory`` in
+  the same role of existing directory within which temporary directories are created and cleaned up. Non-user-facing
+  function ``util.scratch_directory`` renamed to ``util.temporary_directory``.
+
 New Features
 ++++++++++++
 
@@ -37,7 +49,8 @@ New Features
   the input generator and output parser now supports CCSD energy and gradient calculations.
 - (:pr:`82`) QCEngine interface to entos can create input files (dft energy and gradients), run the program,
   and parse the output.
-- (:pr:`85`) MP2D interface switched to upstream repo and now produces correct analytic gradients.
+- (:pr:`85`) MP2D interface switched to upstream repo (https://github.com/Chandemonium/MP2D v1.1) and now produces
+  correct analytic gradients.
 
 Enhancements
 ++++++++++++
@@ -51,8 +64,6 @@ Enhancements
 - (:pr:`81`) Function ``util.execute`` learned bool argument ``scratch_exist_ok`` to run in a preexisting directory.
   This is handy for stringing together execute calls.
 - (:pr:`84`) Function ``util.execute`` learned str argument ``scratch_suffix`` to identify temp dictionaries for debugging.
-- (:pr:`85`) The resource file ``programs.dftd3.dashparam.py`` has relocated and renamed to
-  ``programs.empirical_dispersion_resources.py``.
 
 Bug Fixes
 +++++++++

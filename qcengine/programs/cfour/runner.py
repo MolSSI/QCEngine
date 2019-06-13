@@ -78,7 +78,7 @@ class CFOURHarness(ProgramHarness):
         return {
             "command": [which("xcfour")],
             "infiles": input_model.extras['infiles'],
-            "scratch_location": config.scratch_directory,
+            "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
         }
 
@@ -95,7 +95,7 @@ class CFOURHarness(ProgramHarness):
             inputs["infiles"],
             ["GRD", "FCMFINAL", "DIPOL"],
             scratch_messy=False,
-            scratch_location=inputs["scratch_location"],
+            scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
 

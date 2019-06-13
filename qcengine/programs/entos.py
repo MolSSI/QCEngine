@@ -83,7 +83,7 @@ class EntosHarness(ProgramHarness):
         exe_success, proc = execute(commands,
                                     infiles=inputs["infiles"],
                                     outfiles=outfiles,
-                                    scratch_location=inputs["scratch_location"],
+                                    scratch_directory=inputs["scratch_directory"],
                                     scratch_name=scratch_name,
                                     timeout=timeout
                                     )
@@ -150,7 +150,7 @@ class EntosHarness(ProgramHarness):
                 "dispatch.in": input_file,
                 "geometry.xyz": xyz_file
             },
-            "scratch_location": config.scratch_directory,
+            "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True)
         }
 
