@@ -108,7 +108,7 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
                 #"gamess.inp": infile,
                 "gamess.inp": input_model.extras['gamess.inp'],
             },
-            "scratch_location": config.scratch_directory,
+            "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
         }
 
@@ -119,7 +119,7 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
                                 inputs["infiles"],
                                 [],
                                 scratch_messy=False,
-                                scratch_location=inputs["scratch_location"],
+                                scratch_directory=inputs["scratch_directory"],
                         )
         return success, dexe
 

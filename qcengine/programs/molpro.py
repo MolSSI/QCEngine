@@ -71,7 +71,7 @@ class MolproHarness(ProgramHarness):
         exe_success, proc = execute(job_inputs["commands"],
                                     infiles=job_inputs["infiles"],
                                     outfiles=["dispatch.out", "dispatch.xml", "dispatch.wfu"],
-                                    scratch_location=job_inputs["scratch_location"],
+                                    scratch_directory=job_inputs["scratch_directory"],
                                     timeout=None
                                     )
 
@@ -150,7 +150,7 @@ class MolproHarness(ProgramHarness):
             "infiles": {
                 "dispatch.mol": input_file
             },
-            "scratch_location": config.scratch_directory,
+            "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True)
         }
 

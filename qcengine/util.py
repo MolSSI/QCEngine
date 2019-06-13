@@ -269,7 +269,7 @@ def execute(command: List[str],
             *,
             as_binary: Optional[List[str]] = None,
             scratch_name: Optional[str] = None,
-            scratch_location: Optional[str] = None,
+            scratch_directory: Optional[str] = None,
             scratch_suffix: Optional[str] = None,
             scratch_messy: bool = False,
             scratch_exist_ok: bool = False,
@@ -294,15 +294,15 @@ def execute(command: List[str],
     as_binary : List[str] = None
         Keys of `infiles` or `outfiles` to be treated as bytes.
     scratch_name : str, optional
-        Passed to scratch_directory
-    scratch_location : str, optional
-        Passed to scratch_directory
+        Passed to temporary_directory
+    scratch_directory : str, optional
+        Passed to temporary_directory
     scratch_suffix : str, optional
-        Passed to scratch_directory
+        Passed to temporary_directory
     scratch_messy : bool, optional
-        Passed to scratch_directory
+        Passed to temporary_directory
     scratch_exist_ok : bool, optional
-        Passed to scratch_directory
+        Passed to temporary_directory
     blocking_files : list, optional
         Files which should stop execution if present beforehand.
     timeout : int, optional
@@ -345,11 +345,11 @@ def execute(command: List[str],
         popen_kwargs["env"] = {k: v for k, v in environment.items() if v is not None}
 
     # Execute
-    with scratch_directory(child=scratch_name,
-                           parent=scratch_location,
-                           messy=scratch_messy,
-                           exist_ok=scratch_exist_ok,
-                           suffix=scratch_suffix) as scrdir:
+    with temporary_directory(child=scratch_name,
+                             parent=scratch_directory,
+                             messy=scratch_messy,
+                             exist_ok=scratch_exist_ok,
+                             suffix=scratch_suffix) as scrdir:
         popen_kwargs["cwd"] = scrdir
         with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
@@ -377,12 +377,12 @@ def execute(command: List[str],
 
 
 @contextmanager
-def scratch_directory(child: str = None,
-                      *,
-                      parent: str = None,
-                      suffix: str = None,
-                      messy: bool = False,
-                      exist_ok: bool = False) -> str:
+def temporary_directory(child: str = None,
+                        *,
+                        parent: str = None,
+                        suffix: str = None,
+                        messy: bool = False,
+                        exist_ok: bool = False) -> str:
     """Create and cleanup a quarantined working directory with a parent scratch directory.
 
     Parameters
