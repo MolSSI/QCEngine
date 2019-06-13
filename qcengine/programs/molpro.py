@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 from qcelemental.models import Result
 from ..util import execute
 from qcelemental.util import which, safe_version, parse_version
-from ..exceptions import UnknownError
+from ..exceptions import UnknownError, InputError
 
 from .model import ProgramHarness
 import string
@@ -81,6 +81,9 @@ class MolproHarness(ProgramHarness):
 
     def execute(self, inputs, extra_infiles=None, extra_outfiles=None, extra_commands=None, scratch_name=None,
                 scratch_messy=False, timeout=None):
+        """
+        For option documentation go look at qcengine/util.execute
+        """
 
         infiles = inputs["infiles"]
         if extra_infiles is not None:
@@ -97,7 +100,7 @@ class MolproHarness(ProgramHarness):
         exe_success, proc = execute(commands,
                                     infiles=infiles,
                                     outfiles=outfiles,
-                                    scratch_location=inputs["scratch_location"],
+                                    scratch_directory=inputs["scratch_directory"],
                                     scratch_name=scratch_name,
                                     scratch_messy=scratch_messy,
                                     timeout=timeout
@@ -150,7 +153,7 @@ class MolproHarness(ProgramHarness):
                 input_file.append('')
                 input_file.append('{force}')
             else:
-                raise NotImplementedError('Driver {} not implemented for Molpro.'.format(input_model.driver))
+                raise InputError('Driver {} not implemented for Molpro.'.format(input_model.driver))
 
             input_file = "\n".join(input_file)
         else:
