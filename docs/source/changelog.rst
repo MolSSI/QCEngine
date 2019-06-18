@@ -14,21 +14,8 @@ Changelog
 .. +++++++++
 
 
-vX.Y.0 / 2019-MM-DD
+v0.7.0 / 2019-06-17
 -------------------
-
-dgas
-- (:pr:`65`) Torchani Update  Enhancement
-- (:pr:`69`) Custom Exceptions
-- (:pr:`74`) Travis: Removes caching and reduces pytorch overhead
-
-fang
-- (:pr:`62`) TeraChem: Changed the input parser to call qcelemental to_string method with bohr unit
-- (:pr:`67`) TeraChem: Improvement of output parser: Parse stdout into Result.
-- (:pr:`83`) TeraChem: modified how TeraChem version is parsed 
-
-seb
-- (:pr:`88`)
 
 Breaking Changes
 ++++++++++++++++
@@ -45,8 +32,11 @@ New Features
 - (:pr:`60`) WIP: QCEngine interface to GAMESS can run the program (after light editing of rungms)
   and parse selected output (HF, CC, FCI) into QCSchema.
 - (:pr:`73`) WIP: QCEngine interface to CFOUR can run the program and parse a variety of output into QCSchema.
-- (:pr:`59`, :pr:`71`, :pr:`75`, :pr:`76`, :pr:`78`) Molpro improvements: Molpro can be run by QCEngine; and
-  the input generator and output parser now supports CCSD energy and gradient calculations.
+- (:pr:`59`, :pr:`71`, :pr:`75`, :pr:`76`, :pr:`78`, :pr:`88`) Molpro improvements: Molpro can be run by QCEngine; and
+  the input generator and output parser now supports CCSD energy and gradient calculations. Large thanks to
+  @sjrl for many of the improvements
+- (:pr:`69`) Custom Exceptions have been added to QCEngine's returns which will make parsing and
+  diagnosing them easier and more programmatic for codes which invoke QCEngine. Thanks to @dgasmith for implementation.
 - (:pr:`82`) QCEngine interface to entos can create input files (dft energy and gradients), run the program,
   and parse the output.
 - (:pr:`85`) MP2D interface switched to upstream repo (https://github.com/Chandemonium/MP2D v1.1) and now produces
@@ -55,8 +45,13 @@ New Features
 Enhancements
 ++++++++++++
 
+- (:pr:`62`, :pr:`67`, :pr:`83`) A large block of TeraChem improvements thanks to @ffangliu contributions.
+  Changed the input parser to call qcelemental to_string method with bohr unit, improved output of parser to turn stdout
+  into Result, and modified how version is parsed.
 - (:pr:`63`) QCEngine functions ``util.which``, ``util.which_version``, ``util.parse_version``, and
   ``util.safe_version`` removed after migrating to QCElemental.
+- (:pr:`65`) Torchani can now handle the ANI1-x and ANI1-ccx models. Credit to @dgasmith for implementation
+- (:pr:`74`) Removes caching and reduces pytorch overhead from Travis CI. Credit to @dgasmith for implementation
 - (:pr:`77`) Rename ``ProgramExecutor`` to ``ProgramHarness`` and ``BaseProcedure`` to ``ProcedureHarness``.
 - (:pr:`77`) Function ``util.execute(..., outfiles=[])`` learned to collect output files matching a globbed filename.
 - (:pr:`81`) Function ``util.execute`` learned list argument ``as_binary`` to handle input or output
@@ -64,6 +59,7 @@ Enhancements
 - (:pr:`81`) Function ``util.execute`` learned bool argument ``scratch_exist_ok`` to run in a preexisting directory.
   This is handy for stringing together execute calls.
 - (:pr:`84`) Function ``util.execute`` learned str argument ``scratch_suffix`` to identify temp dictionaries for debugging.
+- (:pr:`90`) DFTD3 now supports parameters for zero and Becke-Johnson damping to use with SAPT0-D
 
 Bug Fixes
 +++++++++
