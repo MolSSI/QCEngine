@@ -13,6 +13,15 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.7.1 / 2019-06-18
+-------------------
+
+Bug Fixes
++++++++++
+
+- (:pr:`92`) Added an ``__init__.py`` file to the ``programs/tests`` directory so they are correctly bundled with the
+  package.
+
 
 v0.7.0 / 2019-06-17
 -------------------
