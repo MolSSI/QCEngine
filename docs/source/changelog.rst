@@ -59,7 +59,7 @@ Enhancements
 - (:pr:`81`) Function ``util.execute`` learned bool argument ``scratch_exist_ok`` to run in a preexisting directory.
   This is handy for stringing together execute calls.
 - (:pr:`84`) Function ``util.execute`` learned str argument ``scratch_suffix`` to identify temp dictionaries for debugging.
-- (:pr:`90`) DFTD3 now supports parameters for zero and Becke-Johnson damping to use with SAPT0-D
+- (:pr:`90`) DFTD3 now supports preliminary parameters for zero and Becke-Johnson damping to use with SAPT0-D
 
 Bug Fixes
 +++++++++
