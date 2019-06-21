@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 import qcelemental as qcel
 from qcelemental.models import Result
-from qcelemental.util import which, safe_version
+from qcelemental.util import which, safe_version, unnp
 
 from ...util import execute
 from ..model import ProgramHarness
@@ -131,8 +131,14 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, outfiles["stdout"]) #**gamessfiles)
 
+        if gamessgrad is not None:
+            qcvars['CURRENT GRADIENT'] = gamessgrad 
+
+        qcvars = unnp(qcvars, flat=True)
+
         output_data = {
             'schema_name': 'qcschema_output',
+            'molecule' : gamessmol,
             'schema_version': 1,
             'extras': {},
             'properties': {
@@ -153,9 +159,6 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
 #            #   to know the orientation at which grad, properties, etc. are returned (c4mol).
 #            #   c4mol is dinky, w/o chg, mult, dummies and retains name
 #            #   blank_molecule_psi4_yo so as to not interfere with future cfour {} blocks
-
-        if gamessgrad is not None:
-            qcvars['CURRENT GRADIENT'] = gamessgrad
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         output_data['extras']['qcvars'] = {k.upper(): float(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()}
