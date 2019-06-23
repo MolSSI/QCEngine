@@ -3,6 +3,7 @@ coverage:
     - qcengine/test/.*
     - qcengine/programs/cfour/.*
     - qcengine/programs/gamess/.*
+    - qcengine/programs/nwchem/.*
     - setup.py
   status:
     patch: false
