@@ -194,10 +194,22 @@ def harvest_outfile_pass(outtext):
         
         #mobj now lists, not groups
         for mobj_list in mobj:
-           if 'MBPT' in cc_name:
-               mp_replace = str.replace(mobj_list[0], 'MP', 3)
+           #can be done more elegantly, but for now quick fix 
+           if 'MBPT(2)' in mobj_list[0]:
+               mp_replace = mobj_list[0].replace('MBPT(2)', 'MP2')
+               print(mobj_list)
                print('matched %s' % mp_replace)
-               print(mp_replace)
+               psivar['%s CORRELATION ENERGY' % mp_replace] = mobj_list[1]
+               psivar['%s TOTAL ENERGY' % mp_replace] = mobj_list[3]
+           elif 'MBPT(3)' in mobj_list[0]:
+               mp_replace = mobj_list[0].replace('MBPT(3)', 'MP3')
+               print(mobj_list)
+               print('matched %s' % mp_replace) 
+               psivar['%s CORRELATION ENERGY' % mp_replace] = mobj_list[1]
+               psivar['%s TOTAL ENERGY' % mp_replace] = mobj_list[3]
+           elif 'MBPT(4)' in mobj_list[0]:
+               mp_replace = mobj_list[0].replace('MBPT(4)', 'MP4')
+               print('matched %s' % mp_replace)
                psivar['%s CORRELATION ENERGY' % mp_replace] = mobj_list[1]
                psivar['%s TOTAL ENERGY' % mp_replace] = mobj_list[3]
            else:
