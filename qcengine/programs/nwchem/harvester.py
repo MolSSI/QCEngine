@@ -536,7 +536,13 @@ def harvest_outfile_pass(outtext):
     if 'MP2 TOTAL ENERGY' in psivar and 'MP2 CORRELATION ENERGY' in psivar:
         psivar['CURRENT CORRELATION ENERGY'] = psivar['MP2 CORRELATION ENERGY']
         psivar['CURRENT ENERGY'] = psivar['MP2 TOTAL ENERGY']
-
+    if 'MP3 TOTAL ENERGY' in psivar and 'MP3 CORRELATION ENERGY' in psivar:
+        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP3 CORRELATION ENERGY']
+        psivar['CURRENT ENERGY'] = psivar['MP3 TOTAL ENERGY']
+    if 'MP4 TOTAL ENERGY' in psivar and 'MP4 CORRELATION ENERGY' in psivar:
+        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP4 CORRELATION ENERGY']
+        psivar['CURRENT ENERGY'] = psivar['MP4 TOTAL ENERGY']
+    
     if 'DFT TOTAL ENERGY' in psivar:
         psivar['CURRENT REFERENCE ENERGY'] = psivar['DFT TOTAL ENERGY']
         psivar['CURRENT ENERGY'] = psivar['DFT TOTAL ENERGY']
