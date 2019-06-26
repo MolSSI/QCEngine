@@ -619,8 +619,12 @@ def nwchem_psivar_list():
     VARH['nwc-scf'] = {'nwc-scf': 'HF TOTAL ENERGY'}
     VARH['nwc-hf'] = {'nwc-hf': 'HF TOTAL ENERGY'}
     VARH['nwc-mp2'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY'}
+    VARH['nwc-mp3'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-mp3':'MP3 TOTAL ENERGY'}
+    VARH['nwc-mp4'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-mp3':'MP3 TOTAL ENERGY', 'nwc-mp4':'MP4 TOTAL ENERGY'}
     VARH['nwc-lccd'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-lccd': 'LCCD TOTAL ENERGY'}
     VARH['nwc-cisd'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-cisd': 'CISD TOTAL ENERGY'}
+    VARH['nwc-cisdt'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-cisd': 'CISD TOTAL ENERGY', 'nwc-cisdt': 'CISDT TOTAL ENERGY'}
+    VARH['nwc-cisdtq'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY','nwc-cisd': 'CISD TOTAL ENERGY', 'nwc-cisdt': 'CISDT TOTAL ENERGY', 'nwc-cisdtq': 'CISDTQ TOTAL ENERGY'}
     VARH['nwc-ccsd'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-ccsd': 'CCSD TOTAL ENERGY'}
 
     VARH['nwc-ccsdt'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-ccsdt': 'CCSDT TOTAL ENERGY'}
