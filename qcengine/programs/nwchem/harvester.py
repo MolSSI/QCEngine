@@ -207,22 +207,20 @@ def harvest_outfile_pass(outtext):
                psivar['%s TOTAL ENERGY' % mobj_list[2]] = mobj_list[3]
             
         # Process CC '()' correction part through tce [dertype] command
-        mobj = re.search(
-            r'^\s+' + cc_name + r'\(' + r'(.*?)' + r'\)' + r'\s+' + r'correction energy / hartree' + r'\s+=\s*' +
-            NUMBER + r'\s*' + r'^\s+' + cc_name + r'\(' + r'(.*?)' + r'\)' + r'\s+' + r'correlation energy / hartree' +
-            r'\s+=\s*' + NUMBER + r'\s*' + r'^\s+' + cc_name + r'\(' + r'(.*?)' + r'\)' + r'\s+' +
-            r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
+        for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]']:
+            mobj = re.search(
+                r'^\s+' + cc_name + r'\s+' + r'correction energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
+                r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
+                r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
 
-        if mobj:
-            print('matched %s(%s)' % (cc_name, mobj.group(1)))
-            #print (mobj.group(1)) #correction ()
-            #print (mobj.group(2)) #correction () correction energy
-            #print (mobj.group(4)) #correction () corl. energy
-            #print (mobj.group(6)) #correction () total energy
+            if mobj:
+                cc_plain = cc_name.replace('\\', '')
+                cc_corr = cc_plain.replace('CCSD', '')
+                print(f'matched tce cc {cc_plain}')
 
-            psivar['(%s) CORRECTION ENERGY' % (mobj.group(1))] = mobj.group(2)
-            psivar['%s(%s) CORRELATION ENERGY' % (cc_name, mobj.group(1))] = mobj.group(4)
-            psivar['%s(%s) TOTAL ENERGY' % (cc_name, mobj.group(1))] = mobj.group(6)
+                psivar[f'{cc_corr} CORRECTION ENERGY'] = mobj.group(1)
+                psivar[f'{cc_plain} CORRELATION ENERGY'] = mobj.group(2)
+                psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
 
         #Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
         mobj = re.search(
