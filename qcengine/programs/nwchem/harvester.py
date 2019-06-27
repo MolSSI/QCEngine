@@ -187,37 +187,21 @@ def harvest_outfile_pass(outtext):
 
         #Process calculation through tce [dertype] command
         cc_name = ''
-        mobj = re.findall(
-            r'^\s+' + r'Iterations converged' + r'\s*' + r'^\s+' + r'(.*?)' + r' correlation energy / hartree' +
-            r'\s+=\s*' + NUMBER + r'\s*' + r'^\s+' + r'(.*?)' + r' total energy / hartree' + r'\s+=\s*' + NUMBER +
-            r'\s*$', outtext, re.MULTILINE | re.DOTALL) 
+        for cc_name in [r'MBPT\(2\)', r'MBPT\(3\)', r'MBPT\(4\)']:
+            mobj = re.search(
+                r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
+                r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
         
-        #mobj now lists, not groups
-        for mobj_list in mobj:
-           #can be done more elegantly, but for now quick fix 
-           if 'MBPT(2)' in mobj_list[0]:
-               mp_replace = mobj_list[0].replace('MBPT(2)', 'MP2')
-               print(mobj_list)
-               print('matched %s' % mp_replace)
-               psivar['%s CORRELATION ENERGY' % mp_replace] = mobj_list[1]
-               psivar['%s TOTAL ENERGY' % mp_replace] = mobj_list[3]
-           elif 'MBPT(3)' in mobj_list[0]:
-               mp_replace = mobj_list[0].replace('MBPT(3)', 'MP3')
-               print(mobj_list)
-               print('matched %s' % mp_replace) 
-               psivar['%s CORRELATION ENERGY' % mp_replace] = mobj_list[1]
-               psivar['%s TOTAL ENERGY' % mp_replace] = mobj_list[3]
-           elif 'MBPT(4)' in mobj_list[0]:
-               mp_replace = mobj_list[0].replace('MBPT(4)', 'MP4')
-               print('matched %s' % mp_replace)
-               psivar['%s CORRELATION ENERGY' % mp_replace] = mobj_list[1]
-               psivar['%s TOTAL ENERGY' % mp_replace] = mobj_list[3]
-           else:
-               print('matched %s' % mobj_list[0])
-               print(mobj_list)
-               psivar['%s CORRELATION ENERGY' % mobj_list[0]] = mobj_list[1]
-               psivar['%s TOTAL ENERGY' % mobj_list[2]] = mobj_list[3]
-            
+            if mobj:
+                mbpt_plain = cc_name.replace('\\', '').replace('MBPT', 'MP').replace('(', '').replace(')', '')
+                print(f'matched tce mbpt {mbpt_plain}', mobj.groups())
+
+                if mbpt_plain == 'MP2':
+                    psivar[f'{mbpt_plain} CORRELATION ENERGY'] = mobj.group(1)
+                else:
+                    psivar[f'{mbpt_plain} CORRECTION ENERGY'] = mobj.group(1)
+                psivar[f'{mbpt_plain} TOTAL ENERGY'] = mobj.group(2)
+
         # Process CC '()' correction part through tce [dertype] command
         for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]']:
             mobj = re.search(
@@ -233,6 +217,18 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_corr} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_plain} CORRELATION ENERGY'] = mobj.group(2)
                 psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
+        #Other TCE
+        #mobj = re.findall(
+        #        r'^\s+' + r'Iterations converged' + r'\s*' +
+         #       r'^\s+' + r'(.*?)' + r' correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*'
+         #       r'^\s+' + r'(.*?)' + r' total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', 
+          #      outtext, re.MULTILINE | re. DOTALL)
+
+        #for mobj_list in mobj:
+         #   print('matched %s' % mobj_list[0])
+         #   print(mobj_list)
+         #   psivar['%s CORRELATION ENERGY' % mobj_list[0]] = mobj_list[1]
+         #   psivar['%s TOTAL ENERGY' % mobj_list[2]] = mobj_list[3]
 
         #Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
         mobj = re.search(
