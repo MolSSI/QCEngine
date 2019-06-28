@@ -219,17 +219,17 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
         #Process other TCE cases
         for cc_name in [r'CISD', r'CISDT', r'CISDTQ', r'CCD', r'CCSD', r'CCSDT', r'CCSDTQ', r'LCCSD', r'LCCD']:
-            mobj = re.findall(
+            mobj = re.search(
                 r'^\s+' + r'Iterations converged' + r'\s*' +
-                r'^\s+' + cc_name + r' correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*'+
-                r'^\s+' + cc_name + r' total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', 
+                r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*'+
+                r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', 
                 outtext, re.MULTILINE)
 
-            for mobj_list in mobj:
-                print('matched %s'% cc_name)
+            if mobj:
+                print(f'matched {cc_name}')
                 print(mobj)
-                psivar[f'%s CORRELATION ENERGY' % cc_name] = mobj_list[0]
-                psivar[f'%s TOTAL ENERGY' % cc_name] = mobj_list[1]
+                psivar[f'{cc_name} CORRELATION ENERGY'] = mobj.group(1)
+                psivar[f'{cc_name} TOTAL ENERGY'] = mobj.group(2)
 
         #Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
         mobj = re.search(
