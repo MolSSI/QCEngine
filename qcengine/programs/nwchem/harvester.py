@@ -187,25 +187,21 @@ def harvest_outfile_pass(outtext):
 
         #Process calculation through tce [dertype] command
         cc_name = ''
-        mobj = re.findall(
-            r'^\s+' + r'Iterations converged' + r'\s*' + r'^\s+' + r'(.*?)' + r' correlation energy / hartree' +
-            r'\s+=\s*' + NUMBER + r'\s*' + r'^\s+' + r'(.*?)' + r' total energy / hartree' + r'\s+=\s*' + NUMBER +
-            r'\s*$', outtext, re.MULTILINE | re.DOTALL) 
+        for cc_name in [r'MBPT\(2\)', r'MBPT\(3\)', r'MBPT\(4\)']:
+            mobj = re.search(
+                r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
+                r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
         
-        #mobj now lists, not groups
-        for mobj_list in mobj:
-           if 'MBPT' in cc_name:
-               mp_replace = str.replace(mobj_list[0], 'MP', 3)
-               print('matched %s' % mp_replace)
-               print(mp_replace)
-               psivar['%s CORRELATION ENERGY' % mp_replace] = mobj_list[1]
-               psivar['%s TOTAL ENERGY' % mp_replace] = mobj_list[3]
-           else:
-               print('matched %s' % mobj_list[0])
-               print(mobj_list)
-               psivar['%s CORRELATION ENERGY' % mobj_list[0]] = mobj_list[1]
-               psivar['%s TOTAL ENERGY' % mobj_list[2]] = mobj_list[3]
-            
+            if mobj:
+                mbpt_plain = cc_name.replace('\\', '').replace('MBPT', 'MP').replace('(', '').replace(')', '')
+                print(f'matched tce mbpt {mbpt_plain}', mobj.groups())
+
+                if mbpt_plain == 'MP2':
+                    psivar[f'{mbpt_plain} CORRELATION ENERGY'] = mobj.group(1)
+                else:
+                    psivar[f'{mbpt_plain} CORRECTION ENERGY'] = mobj.group(1)
+                psivar[f'{mbpt_plain} TOTAL ENERGY'] = mobj.group(2)
+
         # Process CC '()' correction part through tce [dertype] command
         for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]']:
             mobj = re.search(
@@ -221,6 +217,18 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_corr} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_plain} CORRELATION ENERGY'] = mobj.group(2)
                 psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
+        #Other TCE
+        #mobj = re.findall(
+        #        r'^\s+' + r'Iterations converged' + r'\s*' +
+         #       r'^\s+' + r'(.*?)' + r' correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*'
+         #       r'^\s+' + r'(.*?)' + r' total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', 
+          #      outtext, re.MULTILINE | re. DOTALL)
+
+        #for mobj_list in mobj:
+         #   print('matched %s' % mobj_list[0])
+         #   print(mobj_list)
+         #   psivar['%s CORRELATION ENERGY' % mobj_list[0]] = mobj_list[1]
+         #   psivar['%s TOTAL ENERGY' % mobj_list[2]] = mobj_list[3]
 
         #Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
         mobj = re.search(
@@ -524,7 +532,13 @@ def harvest_outfile_pass(outtext):
     if 'MP2 TOTAL ENERGY' in psivar and 'MP2 CORRELATION ENERGY' in psivar:
         psivar['CURRENT CORRELATION ENERGY'] = psivar['MP2 CORRELATION ENERGY']
         psivar['CURRENT ENERGY'] = psivar['MP2 TOTAL ENERGY']
-
+    if 'MP3 TOTAL ENERGY' in psivar and 'MP3 CORRELATION ENERGY' in psivar:
+        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP3 CORRELATION ENERGY']
+        psivar['CURRENT ENERGY'] = psivar['MP3 TOTAL ENERGY']
+    if 'MP4 TOTAL ENERGY' in psivar and 'MP4 CORRELATION ENERGY' in psivar:
+        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP4 CORRELATION ENERGY']
+        psivar['CURRENT ENERGY'] = psivar['MP4 TOTAL ENERGY']
+    
     if 'DFT TOTAL ENERGY' in psivar:
         psivar['CURRENT REFERENCE ENERGY'] = psivar['DFT TOTAL ENERGY']
         psivar['CURRENT ENERGY'] = psivar['DFT TOTAL ENERGY']
@@ -601,8 +615,12 @@ def nwchem_psivar_list():
     VARH['nwc-scf'] = {'nwc-scf': 'HF TOTAL ENERGY'}
     VARH['nwc-hf'] = {'nwc-hf': 'HF TOTAL ENERGY'}
     VARH['nwc-mp2'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY'}
+    VARH['nwc-mp3'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-mp3':'MP3 TOTAL ENERGY'}
+    VARH['nwc-mp4'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-mp3':'MP3 TOTAL ENERGY', 'nwc-mp4':'MP4 TOTAL ENERGY'}
     VARH['nwc-lccd'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-lccd': 'LCCD TOTAL ENERGY'}
     VARH['nwc-cisd'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-cisd': 'CISD TOTAL ENERGY'}
+    VARH['nwc-cisdt'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-cisd': 'CISD TOTAL ENERGY', 'nwc-cisdt': 'CISDT TOTAL ENERGY'}
+    VARH['nwc-cisdtq'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY','nwc-cisd': 'CISD TOTAL ENERGY', 'nwc-cisdt': 'CISDT TOTAL ENERGY', 'nwc-cisdtq': 'CISDTQ TOTAL ENERGY'}
     VARH['nwc-ccsd'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-mp2': 'MP2 TOTAL ENERGY', 'nwc-ccsd': 'CCSD TOTAL ENERGY'}
 
     VARH['nwc-ccsdt'] = {'nwc-hf': 'HF TOTAL ENERGY', 'nwc-ccsdt': 'CCSDT TOTAL ENERGY'}
