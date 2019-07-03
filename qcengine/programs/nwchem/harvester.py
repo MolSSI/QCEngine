@@ -200,9 +200,27 @@ def harvest_outfile_pass(outtext):
                 else:
                     psivar[f'{mbpt_plain} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{mbpt_plain} TOTAL ENERGY'] = mobj.group(2)
+            #TCE dipole- MBPT(n)
+            mobj2 = re.search(
+                    r'^\s+' + cc_name + r'dipole moments / hartree & Debye' + r'\s*' +
+                    r'^\s+' + r'X' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Y' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Z' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Total' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
+                    outtext, re.MULTILINE)
 
-        # Process CC '()' correction part through tce [dertype] command
-        for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]']:
+            if mobj2:
+                mbpt_plain = cc_name.replace('\\', '').replace('MBPT', 'MP').replace('(', '').replace(')', '')
+                print(f'matched tce {mbpt_plain} dipole moment')
+
+                #only pulling Debye
+                psivar[f'{mbpt_plain} DIPOLE X'] = mobj2.group(2)
+                psivar[f'{mbpt_plain} DIPOLE Y'] = mobj2.group(4)
+                psivar[f'{mbpt_plain} DIPOLE Z'] = mobj2.group(6)
+
+        #TCE with () or [] 
+        for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]', r'CCSD\(2\)_T', r'CCSD\(2\)', r'CCSDT\(2\)_Q', \
+                        r'CR-CCSD\[T\]', r'CR-CCSD\(T\)', r'LR-CCSD\(T\)', r'LR-CCSD\(TQ\)-1', r'CREOMSD\(T\)']:
             mobj = re.search(
                 r'^\s+' + cc_name + r'\s+' + r'correction energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
@@ -212,13 +230,15 @@ def harvest_outfile_pass(outtext):
             if mobj:
                 cc_plain = cc_name.replace('\\', '')
                 cc_corr = cc_plain.replace('CCSD', '')
+                
                 logger.debug(f'matched tce cc {cc_plain}')
-
                 psivar[f'{cc_corr} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_plain} CORRELATION ENERGY'] = mobj.group(2)
                 psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
-        # Process other TCE cases
-        for cc_name in [r'CISD', r'CISDT', r'CISDTQ', r'CCD', r'CCSD', r'CCSDT', r'CCSDTQ', r'LCCSD', r'LCCD']:
+        
+        #Process other TCE cases
+        for cc_name in [r'CISD', r'CISDT', r'CISDTQ', r'CCD', r'CC2', r'CCSD', r'CCSDT', r'CCSDTQ', \ 
+                        r'LCCSD', r'LCCD', r'CCSDTA']:
             mobj = re.search(
                 r'^\s+' + r'Iterations converged' + r'\s*' + r'^\s+' + cc_name + r'\s+' +
                 r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' + r'^\s+' + cc_name + r'\s+' +
@@ -229,6 +249,23 @@ def harvest_outfile_pass(outtext):
                 logger.debug(mobj)
                 psivar[f'{cc_name} CORRELATION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_name} TOTAL ENERGY'] = mobj.group(2)
+        #TCE dipole
+            mobj2 = re.search(
+                    r'^\s+' + cc_name + r'dipole moments / hartree & Debye' + r'\s*' +
+                    r'^\s+' + r'X' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Y' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Z' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Total' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
+                    outtext, re.MULTILINE)
+
+            if mobj2:
+                print(f'matched tce {cc_name} dipole moment')
+
+                #only pulling Debye
+                psivar[f'{cc_name} DIPOLE X'] = mobj2.group(2)
+                psivar[f'{cc_name} DIPOLE Y'] = mobj2.group(4)
+                psivar[f'{cc_name} DIPOLE Z'] = mobj2.group(6)
+
 
         # Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
         mobj = re.search(
