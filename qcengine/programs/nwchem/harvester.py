@@ -219,8 +219,7 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{mbpt_plain} DIPOLE Z'] = mobj2.group(6)
 
         #TCE with () or [] 
-        for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]', r'CCSD\(2\)_T', r'CCSD\(2\)', r'CCSDT\(2\)_Q', \
-                        r'CR-CCSD\[T\]', r'CR-CCSD\(T\)', r'LR-CCSD\(T\)', r'LR-CCSD\(TQ\)-1', r'CREOMSD\(T\)']:
+        for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]', r'CCSD\(2\)_T', r'CCSD\(2\)', r'CCSDT\(2\)_Q', r'CR-CCSD\[T\]', r'CR-CCSD\(T\)', r'LR-CCSD\(T\)', r'LR-CCSD\(TQ\)-1', r'CREOMSD\(T\)']:
             mobj = re.search(
                 r'^\s+' + cc_name + r'\s+' + r'correction energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
@@ -230,8 +229,8 @@ def harvest_outfile_pass(outtext):
             if mobj:
                 cc_plain = cc_name.replace('\\', '')
                 cc_corr = cc_plain.replace('CCSD', '')
-                
                 logger.debug(f'matched tce cc {cc_plain}')
+
                 psivar[f'{cc_corr} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_plain} CORRELATION ENERGY'] = mobj.group(2)
                 psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
@@ -264,7 +263,6 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_name} DIPOLE X'] = mobj2.group(2)
                 psivar[f'{cc_name} DIPOLE Y'] = mobj2.group(4)
                 psivar[f'{cc_name} DIPOLE Z'] = mobj2.group(6)
-
         # Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
         mobj = re.search(
             r'^\s+' + r'-----------' + r'\s*' + r'^\s+' + r'CCSD Energy' + r'\s*' + r'^\s+' + r'-----------' + r'\s*' +
