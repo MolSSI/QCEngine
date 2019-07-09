@@ -138,6 +138,14 @@ def test_torchani_task():
     assert ret.success is True
     assert ret.driver == "gradient"
 
+def test_mopac_task():
+    json_data = copy.deepcopy(_base_json)
+    json_data["molecule"] = qcng.get_molecule("water")
+    json_data["driver"] = "gradient"
+    json_data["model"] = {"method": "PM6", "basis": None}
+    json_data["keywords"] = {}
+
+    ret = qcng.compute(json_data, "mopac", raise_error=True)
 
 @pytest.fixture(scope="module")
 def failure_engine():

@@ -35,15 +35,7 @@ class MopacHarness(ProgramHarness):
             "ev_to_kcalmol": 23.060529,
         }
         extras["au_to_debye"] = 2.99792458e10 * 1.602176462e0 * 1e-10 * extras["bohr_to_angstroms"]
-
-        # convert from kcal/mol to Hartree
-        extras["energy_conversion"] = 1.0 / (extras["hartree_to_ev"] * extras["ev_to_kcalmol"])
-
-        # convert from kcal/mol/angstrom to Hartree/bohr
-        extras["force_conversion"] = extras["bohr_to_angstroms"] / (extras["hartree_to_ev"] * extras["ev_to_kcalmol"])
-
-        # convert from Debye to atomic units
-        extras["dipole_conversion"] = 1.0 / extras["au_to_debye"]
+        extras["hartree_to_kcalmol"] = extras["hartree_to_ev"] * extras["ev_to_kcalmol"]
 
         kwargs["extras"] = extras
         super().__init__(**{**self._defaults, **kwargs})
@@ -130,10 +122,10 @@ class MopacHarness(ProgramHarness):
         input_file = []
 
         # 1SCF says not to compute a geometry optimization, always compute a gradient (free), and dump the aux file
-        input_file.append(f"{method.upper()} 1SCF GRADIENTS AUX "
+        input_file.append(f"{method.upper()} "
                           f"CHARGE={input_model.molecule.molecular_charge} "
-                          f"MS={(input_model.molecule.molecular_multiplicity-1)/2}")
-        input_file.append("")
+                          f"MS={(input_model.molecule.molecular_multiplicity-1)/2}&")
+        input_file.append("1SCF GRADIENTS AUX(PRECISION=9, XP, XS, XW)")
         input_file.append("")
 
         mol = input_model.molecule
@@ -165,30 +157,100 @@ class MopacHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 
-        print("======")
-        # Setup the job
-        data_dict = {}
-        in_section = False
+        keep_keys = {"heat_of_formation", "energy_electronic",
+        "energy_nuclear", "gradient_norm", "dip_vec", "spin_component",
+        "total_spin", "molecular_weight", "molecular_weight", "total_energy",
+        "gradients", "mopac_version", "atom_charges", "point_group"}
 
+        # Convert back to atomic units
+        conversions = {
+            "KCAL/MOL": 1 / self.extras["hartree_to_kcalmol"],
+            'KCAL/MOL/ANGSTROM': self.extras["bohr_to_angstroms"] / self.extras["hartree_to_kcalmol"],
+            "EV": 1 / self.extras["hartree_to_ev"],
+            "DEBYE": 1 / self.extras["au_to_debye"],
+            "AMU": 1,
+            None: 1
+        }
+
+        data = {}
         last_key = None
+        print(outfiles["dispatch.aux"])
+
+        # Parse the weird structure
         for line in outfiles["dispatch.aux"].splitlines():
             if ("START" in line) or ("END" in line) or ("#" in line):
                 continue
 
-            print(line)
             if "=" in line:
+
+                # Primary split
                 key, value = line.split("=", 1)
+
+                # Format key, may have units
+                # IONIZATION_POTENTIAL:EV
+                # GRADIENTS:KCAL/MOL/ANGSTROM[09]
+                key_list = key.split(":", 1)
+                if len(key_list) == 1:
+                    key, units = key_list[0], None
+                else:
+                    key, units = key.split(":", 1)
+
+                # Pop off [xx] items
+                if units and "[" in units:
+                    units, _ = units.split("[", 1)
+
+                if "[" in key:
+                    key, _ = key.split("[", 1)
+
+                key = key.strip().lower()
                 last_key = key
-                print(key, value)
+
+                # Skip keys that are not useful
+                if key not in keep_keys:
+                    last_key = None
+                    continue
+
+                # 1D+3 -> 1E3 conversion
+                cf = conversions[units]
+
+                value = value.strip().replace("D+", "E+").replace("D-", "E-")
+                if ("E+" in value) or ("E-" in value):
+                    if value.count("E") > 1:
+                        value = [float(x) * cf for x in value.split()]
+                    else:
+                        value = float(value) * cf
+
+                if value == "":
+                    value = []
+
+                data[key] = (cf, value)
             else:
+                if last_key is None:
+                    continue
+
+                cf = data[last_key][0]
+                data[last_key][1].extend([float(x) * cf for x in line.split()])
                 pass
 
+        data = {k: v[1] for k, v in data.items()}
+        for k, v in data.items():
+            print(k, v)
 
             # print(line)
 
+        gradient = data.pop("gradients")
 
-        output_data = input_model.dict()
+        output = input_model.dict()
+        output["provenance"] = {"creator": "mopac",
+                                     "version": data.pop("mopac_version")}
+        output["properties"] = {}
+        output["properties"]["return_energy"] = data["heat_of_formation"]
 
+        if input_model.driver == "energy":
+            output["return_result"] = data["heat_of_formation"]
+        else:
+            output["return_result"] = gradient
 
+        output["success"] = True
 
-        return Result(**output_data)
+        return Result(**output)
