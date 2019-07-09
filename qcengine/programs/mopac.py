@@ -17,7 +17,7 @@ class MopacHarness(ProgramHarness):
 
     _defaults = {
         "name": "MOPAC",
-        "scratch": True, # Input/output file
+        "scratch": True,  # Input/output file
         "thread_safe": True,
         "thread_parallel": True,
         "node_parallel": False,
@@ -63,17 +63,23 @@ class MopacHarness(ProgramHarness):
 
         output = self.execute(exec_commands)
         # print(output)
-        print(output["outfiles"]["dispatch.out"])
+        # print(output["outfiles"]["dispatch.out"])
         # print(output["outfiles"]["dispatch.aux"])
         # print(output["stderr"])
 
         ret = self.parse_output(output["outfiles"], input_model)
 
+        # raise Exception()
+        return ret
 
-        raise Exception()
-
-    def execute(self, inputs, extra_infiles=None, extra_outfiles=None, extra_commands=None, scratch_name=None,
-        scratch_messy=False, timeout=None):
+    def execute(self,
+                inputs,
+                extra_infiles=None,
+                extra_outfiles=None,
+                extra_commands=None,
+                scratch_name=None,
+                scratch_messy=False,
+                timeout=None):
         """
         For option documentation go look at qcengine/util.execute
         """
@@ -97,8 +103,7 @@ class MopacHarness(ProgramHarness):
                                     scratch_name=scratch_name,
                                     scratch_messy=scratch_messy,
                                     timeout=timeout,
-                                    environment=inputs.get("environment", None)
-                                    )
+                                    environment=inputs.get("environment", None))
 
         # Determine whether the calculation succeeded
         if not exe_success:
@@ -113,7 +118,10 @@ class MopacHarness(ProgramHarness):
             raise KeyError("MOPAC does not currently support input templates.")
 
         method = input_model.model.method.lower()
-        if method not in {"mndo", "am1", "pm3", "rm1", "mndod", "pm6", "pm6-d3", "pm6-dh+", "pm6-dh2", "pm6-dh2x", "pm6-d3h4", "pm6-3dh4x", "pm7", "pm7-ts"}:
+        if method not in {
+                "mndo", "am1", "pm3", "rm1", "mndod", "pm6", "pm6-d3", "pm6-dh+", "pm6-dh2", "pm6-dh2x", "pm6-d3h4",
+                "pm6-3dh4x", "pm7", "pm7-ts"
+        }:
             raise InputError(f"MOPAC does not have method: {method.upper()}")
 
         if input_model.driver not in ["energy", "gradient"]:
@@ -125,18 +133,18 @@ class MopacHarness(ProgramHarness):
         input_file.append(f"{method.upper()} "
                           f"CHARGE={input_model.molecule.molecular_charge} "
                           f"MS={(input_model.molecule.molecular_multiplicity-1)/2}&")
-        input_file.append("1SCF GRADIENTS AUX(PRECISION=9, XP, XS, XW)")
+        input_file.append("1SCF GRADIENTS AUX(PRECISION=9, XP, XS, XW) A0")
         input_file.append("")
 
         mol = input_model.molecule
-        geometry = mol.geometry * self.extras["bohr_to_angstroms"]
+        geometry = mol.geometry
 
         for x in range(len(mol.symbols)):
             if mol.real[x] is False:
                 continue
 
-            input_file.append(f"{mol.symbols[x]}  {geometry[x, 0]:17.12f}  {geometry[x, 1]:17.12f}  {geometry[x, 2]:17.12f}")
-
+            input_file.append(
+                f"{mol.symbols[x]}  {mol.geometry[x, 0]:17.12f}  {mol.geometry[x, 1]:17.12f}  {mol.geometry[x, 2]:17.12f}")
 
         env = os.environ.copy()
         env["MKL_NUM_THREADS"] = str(config.ncores)
@@ -157,10 +165,11 @@ class MopacHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 
-        keep_keys = {"heat_of_formation", "energy_electronic",
-        "energy_nuclear", "gradient_norm", "dip_vec", "spin_component",
-        "total_spin", "molecular_weight", "molecular_weight", "total_energy",
-        "gradients", "mopac_version", "atom_charges", "point_group"}
+        keep_keys = {
+            "heat_of_formation", "energy_electronic", "energy_nuclear", "gradient_norm", "dip_vec", "spin_component",
+            "total_spin", "molecular_weight", "molecular_weight", "total_energy", "gradients", "mopac_version",
+            "atom_charges", "point_group"
+        }
 
         # Convert back to atomic units
         conversions = {
@@ -174,7 +183,6 @@ class MopacHarness(ProgramHarness):
 
         data = {}
         last_key = None
-        print(outfiles["dispatch.aux"])
 
         # Parse the weird structure
         for line in outfiles["dispatch.aux"].splitlines():
@@ -233,18 +241,18 @@ class MopacHarness(ProgramHarness):
                 pass
 
         data = {k: v[1] for k, v in data.items()}
-        for k, v in data.items():
-            print(k, v)
-
-            # print(line)
+        # for k, v in data.items():
+        #     print(k, v)
 
         gradient = data.pop("gradients")
 
         output = input_model.dict()
-        output["provenance"] = {"creator": "mopac",
-                                     "version": data.pop("mopac_version")}
+        output["provenance"] = {"creator": "mopac", "version": data.pop("mopac_version")}
+
         output["properties"] = {}
         output["properties"]["return_energy"] = data["heat_of_formation"]
+
+        output["extras"] = data
 
         if input_model.driver == "energy":
             output["return_result"] = data["heat_of_formation"]

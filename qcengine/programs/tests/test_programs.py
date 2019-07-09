@@ -146,6 +146,7 @@ def test_mopac_task():
     json_data["keywords"] = {}
 
     ret = qcng.compute(json_data, "mopac", raise_error=True)
+    assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
 
 @pytest.fixture(scope="module")
 def failure_engine():
