@@ -64,7 +64,7 @@ class TeraChemHarness(ProgramHarness):
         # Setup the job
         job_inputs = self.build_input(input_data, config)
         # Run terachem
-        exe_outputs = self.execute(job_inputs)
+        exe_outputs = self.execute(job_inputs,extra_outfiles=input_data.extras)
         exe_success, proc = exe_outputs
         # Determine whether the calculation succeeded
         output_data = {}
@@ -189,13 +189,21 @@ class TeraChemHarness(ProgramHarness):
         # TODO Should only return True if TeraChem calculation terminated properly
         output_data['success'] = True
 
+        # return extra files requested by user as extras
+        for extra in input_model.extras.keys():
+            input_model.extras[extra] = outfiles[extra]
+
         return Result(**{**input_model.dict(), **output_data})
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
-
+        binaries = []
+        for filename in extra_outfiles:
+            if filename in ['scr/ca0', 'scr/cb0','scr/c0']:
+                binaries.append(filename)
         exe_success, proc = uti.execute(inputs["commands"],
                           infiles = inputs["infiles"],
-                          outfiles = ["tc.out"],
+                          outfiles = extra_outfiles,
+                          as_binary = binaries,
                           scratch_directory=inputs["scratch_directory"],
                           timeout = timeout
                           )
