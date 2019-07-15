@@ -1,0 +1,47 @@
+jobs:
+- job: 'Testing'
+  displayName: 'Unit Testing With Programs'
+  pool:
+    name: qcengine
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python37:
+        python.version: '3.7'
+    maxParallel: 3
+
+  steps:
+      # Specify to use the python version defined above
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: 'x64'
+
+      # Additional info about the build
+    - script: |
+        uname -a
+        free -m
+        df -h
+        ulimit -a
+
+    # Setup python environment
+    - script: |
+        # Create test environment for package
+        conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/openff.yaml
+        source activate test
+        # Build and install package
+        python setup.py develop --no-deps
+      displayName: "Conda Env Creation"
+
+    # Display MongoDB, Conda Environment, Python version
+    - script: |
+        sleep 5
+        python -V
+        conda list
+      displayName: 'Display'
+
+    # Run tests
+    - script: py.test -v --runslow --cov=qcfractal qcfractal/
+      displayName: 'pytest'
