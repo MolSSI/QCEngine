@@ -16,14 +16,9 @@ jobs:
     maxParallel: 3
 
   steps:
-      # Specify to use the python version defined above
-#    - task: UsePythonVersion@0
-#      inputs:
-#        versionSpec: '$(python.version)'
-#        architecture: 'x64'
     - script: |
-        echo '##vso[task.setvariable variable=WORKER]worker_test$(python.version)'
-        echo '##vso[task.setvariable variable=ENVPREFIX]$(Agent.TempDirectory)/testnv'
+        echo '##vso[task.setvariable variable=ENVPREFIX]$(Agent.TempDirectory)/testnv$(python.version)'
+      displayName: "Worker Variable Assignment"
 
       # Additional info about the build
     - script: |
@@ -37,9 +32,7 @@ jobs:
     - script: |
         source $(CONDASOURCE)
         # Create test environment for package
-        #conda env create -n $WORKER python=$(python.version) -f devtools/conda-envs/psi.yaml
         conda env create -p $ENVPREFIX python=$(python.version) -f devtools/conda-envs/psi.yaml
-        #conda activate $WORKER
         conda activate $ENVPREFIX
         # Build and install package
         python setup.py develop --no-deps
@@ -62,10 +55,3 @@ jobs:
         conda activate $ENVPREFIX
         pytest -rsx -v --cov=qcengine/ qcengine/
       displayName: 'pytest'
-
-    # Cleanup
-    - script: |
-        conda remove -n $WORKER --yes --all -d
-      condition: always()
-      failOnStderr: False
-      displayName: "Conda Env Cleanup"
