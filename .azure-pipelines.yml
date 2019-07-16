@@ -1,3 +1,6 @@
+variables:
+  CONDASOURCE: "~/miniconda3/etc/profile.d/conda.sh"
+
 jobs:
 - job: 'Testing'
   displayName: 'Unit Testing With Programs'
@@ -29,8 +32,9 @@ jobs:
     # Setup python environment
     - script: |
         WORKER=worker_test$PYTHON_VER
+        source $(CONDASOURCE)
         # Create test environment for package
-        conda env create -n WORKER python=$PYTHON_VER -f devtools/conda-envs/openff.yaml
+        conda env create -n WORKER python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
         conda activate worker_test
         # Build and install package
         python setup.py develop --no-deps
@@ -44,7 +48,7 @@ jobs:
       displayName: 'Display'
 
     # Run tests
-    - script: py.test -v --runslow --cov=qcfractal qcfractal/
+    - script: pytest -rsx -v --cov=qcengine/ qcengine/
       displayName: 'pytest'
 
     # Cleanup
@@ -53,3 +57,4 @@ jobs:
         conda remove -n $WORKER --yes --all
       condition: always()
       failOnStderr: False
+      displayName: "Conda Env Cleanup"
