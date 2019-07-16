@@ -237,8 +237,7 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
         
         #Process other TCE cases
-        for cc_name in [r'CISD', r'CISDT', r'CISDTQ', r'CCD', r'CC2', r'CCSD', r'CCSDT', r'CCSDTQ', \ 
-                        r'LCCSD', r'LCCD', r'CCSDTA']:
+        for cc_name in [r'CISD', r'CISDT', r'CISDTQ', r'CCD', r'CC2', r'CCSD', r'CCSDT', r'CCSDTQ', r'LCCSD', r'LCCD', r'CCSDTA']:
             mobj = re.search(
                 r'^\s+' + r'Iterations converged' + r'\s*' + r'^\s+' + cc_name + r'\s+' +
                 r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' + r'^\s+' + cc_name + r'\s+' +
@@ -265,7 +264,6 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_name} DIPOLE X'] = mobj2.group(2)
                 psivar[f'{cc_name} DIPOLE Y'] = mobj2.group(4)
                 psivar[f'{cc_name} DIPOLE Z'] = mobj2.group(6)
-
 
         # Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
         mobj = re.search(
