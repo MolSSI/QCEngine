@@ -23,6 +23,7 @@ jobs:
 #        architecture: 'x64'
     - script: |
         echo '##vso[task.setvariable variable=WORKER]worker_test$(python.version)'
+        echo '##vso[task.setvariable variable=ENVPREFIX]$(Agent.TempDirectory)/testnv'
 
       # Additional info about the build
     - script: |
@@ -36,8 +37,10 @@ jobs:
     - script: |
         source $(CONDASOURCE)
         # Create test environment for package
-        conda env create -n $WORKER python=$(python.version) -f devtools/conda-envs/psi.yaml
-        conda activate $WORKER
+        #conda env create -n $WORKER python=$(python.version) -f devtools/conda-envs/psi.yaml
+        conda env create -p $ENVPREFIX python=$(python.version) -f devtools/conda-envs/psi.yaml
+        #conda activate $WORKER
+        conda activate -p $ENVPREFIX
         # Build and install package
         python setup.py develop --no-deps
       displayName: "Conda Env Creation"
@@ -47,14 +50,17 @@ jobs:
         sleep 5
         python -V
         source $(CONDASOURCE)
-        conda activate
+        conda activate -p $ENVPREFIX
         conda list
         pwd
         ls -la
       displayName: 'Display'
 
     # Run tests
-    - script: pytest -rsx -v --cov=qcengine/ qcengine/
+    - script: |
+        source $(CONDASOURCE)
+        conda activate -p $ENVPREFIX
+        pytest -rsx -v --cov=qcengine/ qcengine/
       displayName: 'pytest'
 
     # Cleanup
