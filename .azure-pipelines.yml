@@ -40,7 +40,7 @@ jobs:
         #conda env create -n $WORKER python=$(python.version) -f devtools/conda-envs/psi.yaml
         conda env create -p $ENVPREFIX python=$(python.version) -f devtools/conda-envs/psi.yaml
         #conda activate $WORKER
-        conda activate -p $ENVPREFIX
+        conda activate $ENVPREFIX
         # Build and install package
         python setup.py develop --no-deps
       displayName: "Conda Env Creation"
@@ -50,7 +50,7 @@ jobs:
         sleep 5
         python -V
         source $(CONDASOURCE)
-        conda activate -p $ENVPREFIX
+        conda activate $ENVPREFIX
         conda list
         pwd
         ls -la
@@ -59,7 +59,7 @@ jobs:
     # Run tests
     - script: |
         source $(CONDASOURCE)
-        conda activate -p $ENVPREFIX
+        conda activate $ENVPREFIX
         pytest -rsx -v --cov=qcengine/ qcengine/
       displayName: 'pytest'
 
