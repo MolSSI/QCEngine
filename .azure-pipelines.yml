@@ -21,6 +21,8 @@ jobs:
 #      inputs:
 #        versionSpec: '$(python.version)'
 #        architecture: 'x64'
+    - script: |
+        echo '##vso[task.setvariable variable=WORKER]worker_test$(python.version)'
 
       # Additional info about the build
     - script: |
@@ -28,13 +30,13 @@ jobs:
         free -m
         df -h
         ulimit -a
+      displayName: "Build Info"
 
     # Setup python environment
     - script: |
-        WORKER=worker_test$PYTHON_VER
         source $(CONDASOURCE)
         # Create test environment for package
-        conda env create -n $WORKER python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
+        conda env create -n $WORKER python=$(python.version) -f devtools/conda-envs/psi.yaml
         conda activate $WORKER
         # Build and install package
         python setup.py develop --no-deps
@@ -44,6 +46,8 @@ jobs:
     - script: |
         sleep 5
         python -V
+        source $(CONDASOURCE)
+        conda activate
         conda list
         pwd
         ls -la
@@ -55,8 +59,7 @@ jobs:
 
     # Cleanup
     - script: |
-        WORKER=worker_test$PYTHON_VER
-        conda remove -n $WORKER --yes --all
+        conda remove -n $WORKER --yes --all -d
       condition: always()
       failOnStderr: False
       displayName: "Conda Env Cleanup"
