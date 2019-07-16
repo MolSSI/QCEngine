@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 
 import qcelemental as qcel
-from qcelemental.models import Provenance, Result
+from qcelemental.models import FailedOperation, Provenance, Result
 from qcelemental.util import safe_version, which
 
 from . import empirical_dispersion_resources
@@ -74,8 +74,12 @@ class DFTD3Harness(ProgramHarness):
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
-            output_model = input_model
-            output_model["error"] = {"error_type": "execution_error", "error_message": dexe["stderr"]}
+            output_model = FailedOperation(success=False,
+                                           error={
+                                               "error_type": "execution_error",
+                                               "error_message": dexe["stderr"]
+                                           },
+                                           input_data=input_model.dict())
 
         return output_model
 
