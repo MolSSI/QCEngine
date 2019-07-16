@@ -14,10 +14,10 @@ jobs:
 
   steps:
       # Specify to use the python version defined above
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
+#    - task: UsePythonVersion@0
+#      inputs:
+#        versionSpec: '$(python.version)'
+#        architecture: 'x64'
 
       # Additional info about the build
     - script: |
@@ -28,9 +28,10 @@ jobs:
 
     # Setup python environment
     - script: |
+        WORKER=worker_test$PYTHON_VER
         # Create test environment for package
-        conda env create -n test python=$PYTHON_VER -f devtools/conda-envs/openff.yaml
-        source activate test
+        conda env create -n WORKER python=$PYTHON_VER -f devtools/conda-envs/openff.yaml
+        conda activate worker_test
         # Build and install package
         python setup.py develop --no-deps
       displayName: "Conda Env Creation"
@@ -45,3 +46,10 @@ jobs:
     # Run tests
     - script: py.test -v --runslow --cov=qcfractal qcfractal/
       displayName: 'pytest'
+
+    # Cleanup
+    - script: |
+        WORKER=worker_test$PYTHON_VER
+        conda remove -n $WORKER --yes --all
+      condition: always()
+      failOnStderr: False
