@@ -34,8 +34,8 @@ jobs:
         WORKER=worker_test$PYTHON_VER
         source $(CONDASOURCE)
         # Create test environment for package
-        conda env create -n WORKER python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
-        conda activate worker_test
+        conda env create -n $WORKER python=$PYTHON_VER -f devtools/conda-envs/psi.yaml
+        conda activate $WORKER
         # Build and install package
         python setup.py develop --no-deps
       displayName: "Conda Env Creation"
@@ -45,6 +45,8 @@ jobs:
         sleep 5
         python -V
         conda list
+        pwd
+        ls -la
       displayName: 'Display'
 
     # Run tests
