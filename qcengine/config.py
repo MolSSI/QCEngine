@@ -23,7 +23,7 @@ LOGGER.setLevel(logging.CRITICAL)
 
 
 # Generic globals
-def get_global(key: Optional[str]=None) -> Union[str, Dict[str, Any]]:
+def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
     import cpuinfo
     import psutil
     global _global_values
@@ -156,7 +156,7 @@ def global_repr() -> str:
     return ret
 
 
-def get_node_descriptor(hostname: Optional[str]=None) -> NodeDescriptor:
+def get_node_descriptor(hostname: Optional[str] = None) -> NodeDescriptor:
     """
     Find the correct NodeDescriptor based off current hostname
     """
@@ -173,8 +173,10 @@ def get_node_descriptor(hostname: Optional[str]=None) -> NodeDescriptor:
             config = node
             break
     else:
-        config = NodeDescriptor(
-            name="default", hostname_pattern="*", memory=get_global("memory"), ncores=get_global("ncores"))
+        config = NodeDescriptor(name="default",
+                                hostname_pattern="*",
+                                memory=get_global("memory"),
+                                ncores=get_global("ncores"))
 
     return config
 
@@ -197,7 +199,7 @@ def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     return ret
 
 
-def get_config(*, hostname: Optional[str]=None, local_options: Dict[str, Any]=None) -> JobConfig:
+def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] = None) -> JobConfig:
     """
     Returns the configuration key for qcengine.
     """

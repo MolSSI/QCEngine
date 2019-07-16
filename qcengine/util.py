@@ -57,7 +57,7 @@ def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> D
     """Wraps compute for timing, output capturing, and raise protection
     """
 
-    metadata = {"stdout": None, "stderr": None, "success": True}
+    metadata = {"stdout": None, "stderr": None, "success": True, "retries": 0}
 
     # Start timer
     comp_time = time.time()
@@ -175,6 +175,9 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
         provenance_augments["creator"] = "QCEngine"
         provenance_augments["version"] = provenance_augments["qcengine_version"]
         output_fusion["provenance"] = provenance_augments
+
+    if metadata["retries"] != 0:
+        output_fusion["provenance"]["retries"] = metadata["retries"]
 
     # Make sure pydantic sparsity is upheld
     for val in ["stdout", "stderr"]:
