@@ -83,7 +83,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
                 output_data = executor.compute(input_data, config)
                 break
             except RandomError:
-                metadata["reties"] += 1
+                metadata["retries"] += 1
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
