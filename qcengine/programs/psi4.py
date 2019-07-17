@@ -28,9 +28,6 @@ class Psi4Harness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         return which('psi4',
@@ -107,14 +104,10 @@ class Psi4Harness(ProgramHarness):
                 if output_data["success"] is False:
                     if "error_message" not in output_data["error"]:
                         # older c. 1.3 message-only run_json
-                        output_data["error"] = {
-                            "error_type": "internal_error",
-                            "error_message": output_data["error"]
-                        }
+                        output_data["error"] = {"error_type": "internal_error", "error_message": output_data["error"]}
             else:
                 output_data = input_data
                 output_data["error"] = {"error_type": "execution_error", "error_message": output["stderr"]}
-
 
         # Reset the schema if required
         output_data["schema_name"] = "qcschema_output"

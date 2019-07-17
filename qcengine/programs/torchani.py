@@ -29,9 +29,6 @@ class TorchANIHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     @staticmethod
     def found(raise_error: bool=False) -> bool:
         return which_import('torchani', return_bool=True, raise_error=raise_error, raise_msg='Please install via `pip install torchani`.')

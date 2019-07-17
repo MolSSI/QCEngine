@@ -28,11 +28,11 @@ class MolproHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
-    def found(self, raise_error: bool=False) -> bool:
-        return which('molpro', return_bool=True, raise_error=raise_error, raise_msg='Please install via https://www.molpro.net/')
+    def found(self, raise_error: bool = False) -> bool:
+        return which('molpro',
+                     return_bool=True,
+                     raise_error=raise_error,
+                     raise_msg='Please install via https://www.molpro.net/')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -79,8 +79,14 @@ class MolproHarness(ProgramHarness):
             result = self.parse_output(proc["outfiles"], input_data)
             return result
 
-    def execute(self, inputs, extra_infiles=None, extra_outfiles=None, extra_commands=None, scratch_name=None,
-                scratch_messy=False, timeout=None):
+    def execute(self,
+                inputs,
+                extra_infiles=None,
+                extra_outfiles=None,
+                extra_commands=None,
+                scratch_name=None,
+                scratch_messy=False,
+                timeout=None):
         """
         For option documentation go look at qcengine/util.execute
         """
@@ -103,8 +109,7 @@ class MolproHarness(ProgramHarness):
                                     scratch_directory=inputs["scratch_directory"],
                                     scratch_name=scratch_name,
                                     scratch_messy=scratch_messy,
-                                    timeout=timeout
-                                    )
+                                    timeout=timeout)
 
         # Determine whether the calculation succeeded
         if not exe_success:
@@ -119,7 +124,7 @@ class MolproHarness(ProgramHarness):
             posthf_methods = {'mp2', 'ccsd', 'ccsd(t)'}
 
             # Memory is in megawords per core for Molpro
-            memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
+            memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
             input_file.append("memory,{},M".format(memory_mw_core))
             # TODO Decide how I want this keyword to look/work
             # if input_model.keywords.get('wfu') is not None:
@@ -174,7 +179,8 @@ class MolproHarness(ProgramHarness):
             input_file = str_template.substitute()
 
         return {
-            "commands": ["molpro", "dispatch.mol", "-d", ".", "-W", ".", "-n", str(config.ncores)],
+            "commands": ["molpro", "dispatch.mol", "-d", ".", "-W", ".", "-n",
+                         str(config.ncores)],
             "infiles": {
                 "dispatch.mol": input_file
             },
@@ -201,10 +207,7 @@ class MolproHarness(ProgramHarness):
         scf_extras = {}
 
         # MP2 maps
-        mp2_energy_map = {
-            "total energy": "mp2_total_energy",
-            "correlation energy": "mp2_correlation_energy"
-        }
+        mp2_energy_map = {"total energy": "mp2_total_energy", "correlation energy": "mp2_correlation_energy"}
         mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
         mp2_extras = {
             "singlet pair energy": "mp2_singlet_pair_energy",
@@ -212,10 +215,7 @@ class MolproHarness(ProgramHarness):
         }
 
         # CCSD maps
-        ccsd_energy_map = {
-            "total energy": "ccsd_total_energy",
-            "correlation energy": "ccsd_correlation_energy"
-        }
+        ccsd_energy_map = {"total energy": "ccsd_total_energy", "correlation energy": "ccsd_correlation_energy"}
         ccsd_dipole_map = {"Dipole moment": "ccsd_dipole_moment"}
         ccsd_extras = {
             "singlet pair energy": "ccsd_singlet_pair_energy",
@@ -230,27 +230,12 @@ class MolproHarness(ProgramHarness):
             "correlation energy": "ccsd_prt_pr_correlation_energy",
         }
         ccsd_prt_pr_dipole_map = {"Dipole moment": "ccsd_prt_pr_dipole_moment"}
-        ccsd_prt_pr_extras = {
-            **ccsd_extras,
-            "contribution": "prt_pr_contribution"
-        }
+        ccsd_prt_pr_extras = {**ccsd_extras, "contribution": "prt_pr_contribution"}
 
         # Compiling the method maps
-        scf_maps = {
-            "energy": scf_energy_map,
-            "dipole": scf_dipole_map,
-            "extras": scf_extras
-        }
-        mp2_maps = {
-            "energy": mp2_energy_map,
-            "dipole": mp2_dipole_map,
-            "extras": mp2_extras
-        }
-        ccsd_maps = {
-            "energy": ccsd_energy_map,
-            "dipole": ccsd_dipole_map,
-            "extras": ccsd_extras
-        }
+        scf_maps = {"energy": scf_energy_map, "dipole": scf_dipole_map, "extras": scf_extras}
+        mp2_maps = {"energy": mp2_energy_map, "dipole": mp2_dipole_map, "extras": mp2_extras}
+        ccsd_maps = {"energy": ccsd_energy_map, "dipole": ccsd_dipole_map, "extras": ccsd_extras}
         ccsd_prt_pr_maps = {
             "energy": ccsd_prt_pr_energy_map,
             "dipole": ccsd_prt_pr_dipole_map,
@@ -277,8 +262,9 @@ class MolproHarness(ProgramHarness):
                     elif child.attrib['name'] in command_map['extras']:
                         properties[command_map['extras'][child.attrib['name']]] = float(child.attrib['value'])
                     elif child.attrib['name'] in command_map['dipole']:
-                        properties[command_map['dipole'][child.attrib['name']]] = [float(x) for x in
-                                                                                   child.attrib['value'].split()]
+                        properties[command_map['dipole'][child.attrib['name']]] = [
+                            float(x) for x in child.attrib['value'].split()
+                        ]
             # Grab gradient
             elif 'FORCE' in jobstep.attrib['command']:
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
@@ -322,7 +308,8 @@ class MolproHarness(ProgramHarness):
                 final_energy = mol_final_energy
                 if method in post_hf_methods:
                     properties[method_energy_map['total energy']] = mol_final_energy
-                    properties[method_energy_map['correlation energy']] = mol_final_energy - properties['scf_total_energy']
+                    properties[
+                        method_energy_map['correlation energy']] = mol_final_energy - properties['scf_total_energy']
                 elif method in scf_methods:
                     properties[method_energy_map['Energy']] = mol_final_energy
             else:

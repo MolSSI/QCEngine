@@ -17,6 +17,9 @@ class ProgramHarness(BaseModel, abc.ABC):
         allow_mutation: False
         extra: "forbid"
 
+    def __init__(self, **kwargs):
+        super().__init__(**{**self._defaults, **kwargs})
+
     @abc.abstractmethod
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         pass
