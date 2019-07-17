@@ -80,8 +80,15 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             try:
                 output_data = executor.compute(input_data, config)
                 break
-            except RandomError:
-                metadata["retries"] += 1
+            except RandomError as e:
+
+                if x == config.retries:
+                    raise e
+                else:
+                    metadata["retries"] += 1
+            except:
+                raise
+
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 

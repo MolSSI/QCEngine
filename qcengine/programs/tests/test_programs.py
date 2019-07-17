@@ -7,8 +7,9 @@ import copy
 import pytest
 
 import qcengine as qcng
-from qcelemental.models import Molecule, ResultInput
+from qcelemental.models import Molecule, ResultInput, Result
 from qcengine import testing
+from typing import List
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 
@@ -42,6 +43,7 @@ def test_psi4_task():
         assert key in ret["provenance"]
 
     assert ret["success"] is True
+    assert "retries" not in ret["provenance"]
 
 
 @testing.using_psi4
@@ -135,3 +137,99 @@ def test_torchani_task():
 
     assert ret.success is True
     assert ret.driver == "gradient"
+
+
+@pytest.fixture(scope="module")
+def failure_engine():
+    unique_name = "asdflkj1234"
+
+    class FailEngine(qcng.programs.ProgramHarness):
+        iter_modes: List[str] = []
+        ncalls: int = 0
+
+        _defaults = {
+            "name": unique_name,
+            "scratch": False,
+            "thread_safe": True,
+            "thread_parallel": False,
+            "node_parallel": False,
+            "managed_memory": False,
+        }
+
+        class Config(qcng.programs.ProgramHarness.Config):
+            allow_mutation: True
+
+        @staticmethod
+        def found(raise_error: bool = False) -> bool:
+            return True
+
+        def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+            self.ncalls += 1
+            mode = self.iter_modes.pop(0)
+            if mode == "pass":
+                return Result(**{
+                    **input_data.dict(),
+                    **{
+                        "properties": {},
+                        "return_result": self.ncalls,
+                        "success": True
+                    }
+                })
+            elif mode == "random_error":
+                raise qcng.exceptions.RandomError("Whoops!")
+            elif mode == "input_error":
+                raise qcng.exceptions.InputError("Whoops!")
+            else:
+                raise KeyError("Testing error, should not arrive here.")
+
+        def get_job(self):
+            json_data = copy.deepcopy(_base_json)
+            json_data["molecule"] = qcng.get_molecule("water")
+            json_data["driver"] = "gradient"
+            json_data["model"] = {"method": "something"}
+
+            return json_data
+
+    engine = FailEngine()
+    qcng.register_program(engine)
+
+    yield engine
+
+    qcng.unregister_program(engine.name)
+
+
+def test_random_failure_no_retries(failure_engine):
+
+    failure_engine.iter_modes = ["input_error"]
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False)
+    assert ret.error.error_type == "input_error"
+    assert "retries" not in ret.input_data["provenance"].keys()
+
+    failure_engine.iter_modes = ["random_error"]
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False)
+    assert ret.error.error_type == "random_error"
+    assert "retries" not in ret.input_data["provenance"].keys()
+
+
+def test_random_failure_with_retries(failure_engine):
+
+    failure_engine.iter_modes = ["random_error", "random_error", "random_error"]
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 2})
+    assert ret.input_data["provenance"]["retries"] == 2
+    assert ret.error.error_type == "random_error"
+
+    failure_engine.iter_modes = ["random_error", "input_error"]
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 4})
+    assert ret.input_data["provenance"]["retries"] == 1
+    assert ret.error.error_type == "input_error"
+
+
+def test_random_failure_with_success(failure_engine):
+
+    failure_engine.iter_modes = ["random_error", "pass"]
+    failure_engine.ncalls = 0
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 1})
+
+    assert ret.success, ret.error.error_message
+    assert ret.provenance.retries == 1
+    assert ret.return_result == 2

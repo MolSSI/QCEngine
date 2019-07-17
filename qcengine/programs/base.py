@@ -34,6 +34,16 @@ def register_program(entry_point: 'ProgramHarness') -> None:
     programs[name.lower()] = entry_point
 
 
+def unregister_program(name: str) -> None:
+    """
+    Unregisters a given program.
+    """
+
+    ret = programs.pop(name.lower(), None)
+    if ret is None:
+        raise KeyError(f"Program {name} is not registered with QCEngine")
+
+
 def get_program(name: str, check: bool = True) -> 'ProgramHarness':
     """
     Returns a program's executor class

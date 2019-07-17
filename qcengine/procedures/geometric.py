@@ -36,7 +36,7 @@ class GeometricProcedure(ProcedureHarness):
 
         local_config = config.dict()
         local_config["retries"] = local_config.get("retries", 2)
-        geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = config.dict()
+        geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
         output_data = geometric.run_json.geometric_run_json(geometric_input)
