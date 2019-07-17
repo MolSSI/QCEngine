@@ -135,13 +135,15 @@ def test_config_default(opt_state_basic):
 
     config = qcng.config.get_config(hostname="dt149")
     assert config.ncores == 6
+    assert config.retries == 0
     assert pytest.approx(config.memory, 0.1) == 54
 
 
 def test_config_local_ncores(opt_state_basic):
-    config = qcng.config.get_config(hostname="something", local_options={"ncores": 10})
+    config = qcng.config.get_config(hostname="something", local_options={"ncores": 10, "retries": 3})
     assert config.ncores == 10
     assert config.memory == 4
+    assert config.retries == 3
 
 
 def test_config_local_njobs(opt_state_basic):

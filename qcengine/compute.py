@@ -28,8 +28,8 @@ def _process_failure_and_return(model, return_dict, raise_error):
 
 def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             program: str,
+            *,
             raise_error: bool = False,
-            retries: int = 0,
             local_options: Optional[Dict[str, Any]] = None,
             return_dict: bool = False) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
@@ -47,7 +47,6 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
         Determines if compute should raise an error or not.
     retries : int, optional
         The number of random tries to retry for.
-        Description
     local_options : Optional[Dict[str, Any]], optional
         A dictionary of local configuration options
     return_dict : bool, optional
@@ -73,12 +72,11 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             local_options = {}
 
         input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
-        retries = input_engine_options.pop("retries", retries)
 
         local_options = {**local_options, **input_engine_options}
         config = get_config(local_options=local_options)
 
-        for x in range(retries + 1):
+        for x in range(config.retries + 1):
             try:
                 output_data = executor.compute(input_data, config)
                 break
@@ -90,6 +88,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
 
 def compute_procedure(input_data: Union[Dict[str, Any], 'BaseModel'],
                       procedure: str,
+                      *,
                       raise_error: bool = False,
                       local_options: Optional[Dict[str, str]] = None,
                       return_dict: bool = False) -> 'BaseModel':

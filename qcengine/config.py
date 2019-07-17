@@ -68,6 +68,7 @@ class NodeDescriptor(pydantic.BaseModel):
     # Specifications
     ncores: Optional[int] = None
     jobs_per_node: int = 2
+    retries: int = 0
 
     def __init__(self, **data: Dict[str, Any]) -> 'BaseModel':
 
@@ -84,6 +85,7 @@ class JobConfig(pydantic.BaseModel):
     ncores: int  # Number of ncores per job
     memory: float  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
+    retries: int # Number of retries on random failures
 
     class Config:
         extra = "forbid"
@@ -208,11 +210,13 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
         local_options = {}
 
     local_options = parse_environment(local_options)
+    config = {}
 
     # Node data
     node = get_node_descriptor(hostname)
     ncores = node.ncores or get_global("ncores")
-    scratch_directory = local_options.get("scratch_directory", None) or node.scratch_directory
+    config["scratch_directory"] = local_options.pop("scratch_directory", node.scratch_directory)
+    config["retries"] = local_options.pop("retries", node.retries)
 
     # Jobs per node
     jobs_per_node = local_options.pop("jobs_per_node", None) or node.jobs_per_node
@@ -224,12 +228,14 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
         memory_coeff = (1 - node.memory_safety_factor / 100)
         memory = round(memory * memory_coeff / jobs_per_node, 3)
 
+    config["memory"] = memory
+
     # Handle ncores
-    ncores = local_options.pop("ncores", None) or int(ncores / jobs_per_node)
+    ncores = local_options.pop("ncores", int(ncores / jobs_per_node))
     if ncores < 1:
         raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
-    config = {"ncores": ncores, "memory": memory, "scratch_directory": scratch_directory}
+    config["ncores"] = ncores
 
     if local_options is not None:
         config.update(local_options)
