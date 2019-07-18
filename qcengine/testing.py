@@ -56,6 +56,7 @@ _programs = {
     "mp2d": which('mp2d', return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
+    "mopac": is_program_new_enough("mopac", "2016"),
     "entos": is_program_new_enough("entos", "0.5")
 }
 
@@ -68,15 +69,16 @@ def _build_pytest_skip(program):
 
 # Add flags
 using_dftd3 = _build_pytest_skip("dftd3")
-using_geometric = _build_pytest_skip("geometric")
-using_psi4 = _build_pytest_skip("psi4")
-using_rdkit = _build_pytest_skip("rdkit")
-using_qcdb = _build_pytest_skip("qcdb")
-using_torchani = _build_pytest_skip("torchani")
-using_mp2d = _build_pytest_skip("mp2d")
-using_terachem = _build_pytest_skip("terachem")
-using_molpro = _build_pytest_skip("molpro")
 using_entos = _build_pytest_skip("entos")
+using_geometric = _build_pytest_skip("geometric")
+using_mopac = _build_pytest_skip("mopac")
+using_molpro = _build_pytest_skip("molpro")
+using_mp2d = _build_pytest_skip("mp2d")
+using_psi4 = _build_pytest_skip("psi4")
+using_qcdb = _build_pytest_skip("qcdb")
+using_rdkit = _build_pytest_skip("rdkit")
+using_torchani = _build_pytest_skip("torchani")
+using_terachem = _build_pytest_skip("terachem")
 
 using_dftd3_321 = pytest.mark.skipif(
     is_program_new_enough("dftd3", "3.2.1") is False,

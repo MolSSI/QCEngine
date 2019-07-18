@@ -29,7 +29,7 @@ def test_molpro_output_parser(test_case):
     output_ref.pop("provenance", None)
 
     # TODO add `skip` to compare_recursive
-    check = compare_recursive(output_ref, output)
+    check = compare_recursive(output_ref, output, forgive={"stdout"})
     assert check, check
 
 

@@ -91,8 +91,8 @@ def test_geometric_stdout():
     assert "Converged!" in ret.stdout
 
 
-@testing.using_rdkit
 @testing.using_geometric
+@testing.using_rdkit
 def test_geometric_rdkit_error():
     inp = copy.deepcopy(_base_json)
 
@@ -107,15 +107,26 @@ def test_geometric_rdkit_error():
     assert isinstance(ret.error.error_message, str)
 
 
-@testing.using_torchani
 @testing.using_geometric
-def test_geometric_torchani():
+@pytest.mark.parametrize("program, model, bench", [
+    pytest.param("rdkit", {"method": "UFF"}, [1.87130923886072, 2.959448636243545, 104.50996425790237], marks=testing.using_rdkit),
+    pytest.param("torchani", {"method": "ANI1x"}, [1.825818737501941, 2.8663765267932697, 103.4332610730292], marks=testing.using_torchani),
+    pytest.param("mopac", {"method": "PM6"}, [1.793054066650722, 2.893333237502448, 107.57221117353501], marks=testing.using_mopac),
+])
+def test_geometric_generic(program, model, bench):
     inp = copy.deepcopy(_base_json)
 
     inp["initial_molecule"] = qcng.get_molecule("water")
-    inp["input_specification"]["model"] = {"method": "ANI1x", "basis": None}
-    inp["keywords"]["program"] = "torchani"
+    inp["input_specification"]["model"] = model
+    inp["keywords"]["program"] = program
 
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
     assert ret.success is True
     assert "Converged!" in ret.stdout
+
+    r01, r02, r12, a102 = ret.final_molecule.measure([[0, 1], [0, 2], [1, 2], [1, 0, 2]])
+
+    assert pytest.approx(r01, 1.e-4) == bench[0]
+    assert pytest.approx(r02, 1.e-4) == bench[0]
+    assert pytest.approx(r12, 1.e-4) == bench[1]
+    assert pytest.approx(a102, 1.e-4) == bench[2]
