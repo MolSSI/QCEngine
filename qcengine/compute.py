@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional, Union
 from qcelemental.models import FailedOperation, ResultInput
 
 from .config import get_config
-from .exceptions import InputError
+from .exceptions import InputError, RandomError
 from .procedures import get_procedure
 from .programs import get_program
 from .util import compute_wrapper, handle_output_metadata, model_wrapper
@@ -28,9 +28,10 @@ def _process_failure_and_return(model, return_dict, raise_error):
 
 def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
             program: str,
-            raise_error: bool=False,
-            local_options: Optional[Dict[str, Any]]=None,
-            return_dict: bool=False) -> 'Result':
+            *,
+            raise_error: bool = False,
+            local_options: Optional[Dict[str, Any]] = None,
+            return_dict: bool = False) -> 'Result':
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -38,24 +39,23 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
 
     Parameters
     ----------
-    input_data:
+    input_data : Union[Dict[str, Any], 'ResultInput']
         A QCSchema input specification in dictionary or model from QCElemental.models
-    program:
-        The program to execute the input with
-    raise_error:
+    program : str
+        The program to execute the input with.
+    raise_error : bool, optional
         Determines if compute should raise an error or not.
-    capture_output:
-        Determines if stdout/stderr should be captured.
-    local_options:
+    retries : int, optional
+        The number of random tries to retry for.
+    local_options : Optional[Dict[str, Any]], optional
         A dictionary of local configuration options
-    return_dict:
+    return_dict : bool, optional
         Returns a dict instead of qcelemental.models.ResultInput
 
     Returns
     -------
-    : Result
-        A QCSchema output or type depending on return_dict key
-
+    Result
+        A computed Result object.
     """
 
     output_data = input_data.copy()  # lgtm [py/multiple-definition]
@@ -76,16 +76,29 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
         local_options = {**local_options, **input_engine_options}
         config = get_config(local_options=local_options)
 
-        output_data = executor.compute(input_data, config)
+        for x in range(config.retries + 1):
+            try:
+                output_data = executor.compute(input_data, config)
+                break
+            except RandomError as e:
+
+                if x == config.retries:
+                    raise e
+                else:
+                    metadata["retries"] += 1
+            except:
+                raise
+
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
 
 def compute_procedure(input_data: Union[Dict[str, Any], 'BaseModel'],
                       procedure: str,
-                      raise_error: bool=False,
-                      local_options: Optional[Dict[str, str]]=None,
-                      return_dict: bool=False) -> 'BaseModel':
+                      *,
+                      raise_error: bool = False,
+                      local_options: Optional[Dict[str, str]] = None,
+                      return_dict: bool = False) -> 'BaseModel':
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters

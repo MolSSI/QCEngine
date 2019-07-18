@@ -30,10 +30,6 @@ class TeraChemHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     @staticmethod
     def found(raise_error: bool=False) -> bool:
         return which('terachem', return_bool=True, raise_error=raise_error, raise_msg='Please install via http://www.petachem.com/index.html')
@@ -89,9 +85,9 @@ class TeraChemHarness(ProgramHarness):
         input_file = []
         input_file.append("# molecule definition")
         input_file.append("units bohr")
-        input_file.append( "charge " + str(int(input_model.molecule.molecular_charge)))
-        input_file.append( "spinmult " + str(input_model.molecule.molecular_multiplicity))
-        input_file.append( "coordinates geometry.xyz")
+        input_file.append("charge " + str(int(input_model.molecule.molecular_charge)))
+        input_file.append("spinmult " + str(input_model.molecule.molecular_multiplicity))
+        input_file.append("coordinates geometry.xyz")
 
         input_file.append("\n# model")
         input_file.append("basis " + str(input_model.model.basis))

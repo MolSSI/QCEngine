@@ -30,9 +30,6 @@ class GAMESSHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     @staticmethod
     def found(raise_error: bool=False) -> bool:
         return which('rungms', return_bool=True, raise_error=raise_error, raise_msg='Please install via https://www.msg.chem.iastate.edu/GAMESS/GAMESS.html')
@@ -132,7 +129,7 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
         qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, outfiles["stdout"]) #**gamessfiles)
 
         if gamessgrad is not None:
-            qcvars['CURRENT GRADIENT'] = gamessgrad 
+            qcvars['CURRENT GRADIENT'] = gamessgrad
 
         qcvars = unnp(qcvars, flat=True)
 

@@ -38,9 +38,6 @@ class DFTD3Harness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         return which('dftd3',

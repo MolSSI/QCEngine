@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 class ProgramHarness(BaseModel, abc.ABC):
 
+    _defaults: Dict[str, Any] = {}
     name: str
     scratch: bool
     thread_safe: bool
@@ -16,6 +17,9 @@ class ProgramHarness(BaseModel, abc.ABC):
     class Config:
         allow_mutation: False
         extra: "forbid"
+
+    def __init__(self, **kwargs):
+        super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':

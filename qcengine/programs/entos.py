@@ -27,9 +27,6 @@ class EntosHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     def found(self, raise_error: bool = False) -> bool:
         return which('entos', return_bool=True, raise_error=raise_error, raise_msg='Please install via XXX')
 
