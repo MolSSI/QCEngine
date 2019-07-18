@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 class ProgramHarness(BaseModel, abc.ABC):
 
+    _defaults: Dict[str, Any] = {}
     name: str
     scratch: bool
     thread_safe: bool
