@@ -4,10 +4,15 @@ Tests the DQM compute dispatch module
 
 import copy
 
+import numpy as np
 import pytest
+from qcelemental.models import Molecule, ResultInput
 
 import qcengine as qcng
+<<<<<<< HEAD
 from qcelemental.models import Molecule, ResultInput, Result
+=======
+>>>>>>> Mopac: Testing cleanup and adds stdout
 from qcengine import testing
 from typing import List
 
@@ -138,6 +143,8 @@ def test_torchani_task():
     assert ret.success is True
     assert ret.driver == "gradient"
 
+
+@testing.using_mopac
 def test_mopac_task():
     json_data = copy.deepcopy(_base_json)
     json_data["molecule"] = qcng.get_molecule("water")
@@ -147,6 +154,19 @@ def test_mopac_task():
 
     ret = qcng.compute(json_data, "mopac", raise_error=True)
     assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
+    energy = pytest.approx(-0.08474117913025125, rel=1.e-5)
+
+    # Check gradient
+    ret = qcng.compute(json_data, "mopac", raise_error=True)
+    assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
+    assert np.linalg.norm(ret.return_result) == pytest.approx(0.03543560156912385, rel=1.e-4)
+    assert ret.properties.return_energy == energy
+
+    # Check energy
+    json_data["driver"] = "energy"
+    ret = qcng.compute(json_data, "mopac", raise_error=True)
+    assert ret.return_result == energy
+    assert "== MOPAC DONE ==" in ret.stdout
 
 @pytest.fixture(scope="module")
 def failure_engine():

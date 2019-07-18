@@ -1,16 +1,15 @@
 """
 Calls the Psi4 executable.
 """
-import json
 import os
 from typing import Any, Dict, Optional
 
 from qcelemental.models import Result
-from qcelemental.util import parse_version, safe_version, which
+from qcelemental.util import which
 
+from ..exceptions import InputError, UnknownError
+from ..util import execute
 from .model import ProgramHarness
-from ..exceptions import InputError, RandomError, ResourceError, UnknownError
-from ..util import execute, popen, temporary_directory
 
 
 class MopacHarness(ProgramHarness):
@@ -62,10 +61,6 @@ class MopacHarness(ProgramHarness):
         exec_commands = self.build_input(input_model, config)
 
         output = self.execute(exec_commands)
-        # print(output)
-        # print(output["outfiles"]["dispatch.out"])
-        # print(output["outfiles"]["dispatch.aux"])
-        # print(output["stderr"])
 
         ret = self.parse_output(output["outfiles"], input_model)
 
@@ -137,14 +132,11 @@ class MopacHarness(ProgramHarness):
         input_file.append("")
 
         mol = input_model.molecule
-        geometry = mol.geometry
 
         for x in range(len(mol.symbols)):
-            if mol.real[x] is False:
-                continue
-
             input_file.append(
-                f"{mol.symbols[x]}  {mol.geometry[x, 0]:17.12f}  {mol.geometry[x, 1]:17.12f}  {mol.geometry[x, 2]:17.12f}")
+                f"{mol.symbols[x]}  {mol.geometry[x, 0]:17.12f}  {mol.geometry[x, 1]:17.12f}  {mol.geometry[x, 2]:17.12f}"
+            )
 
         env = os.environ.copy()
         env["MKL_NUM_THREADS"] = str(config.ncores)
@@ -238,7 +230,6 @@ class MopacHarness(ProgramHarness):
 
                 cf = data[last_key][0]
                 data[last_key][1].extend([float(x) * cf for x in line.split()])
-                pass
 
         data = {k: v[1] for k, v in data.items()}
         # for k, v in data.items():
@@ -259,6 +250,7 @@ class MopacHarness(ProgramHarness):
         else:
             output["return_result"] = gradient
 
+        output['stdout'] = outfiles["dispatch.out"]
         output["success"] = True
 
         return Result(**output)

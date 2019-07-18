@@ -2,16 +2,16 @@
 Calls the Molpro executable.
 """
 
+import string
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
 from qcelemental.models import Result
-from ..util import execute
-from qcelemental.util import which, safe_version, parse_version
-from ..exceptions import UnknownError, InputError
+from qcelemental.util import parse_version, safe_version, which
 
+from ..exceptions import InputError, UnknownError
+from ..util import execute
 from .model import ProgramHarness
-import string
 
 
 class MolproHarness(ProgramHarness):
@@ -321,6 +321,7 @@ class MolproHarness(ProgramHarness):
 
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
+        output_data['stdout'] = outfiles["dispatch.out"]
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})

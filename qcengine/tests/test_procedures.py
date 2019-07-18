@@ -93,7 +93,7 @@ def test_geometric_stdout():
 
 @testing.using_geometric
 @testing.using_rdkit
-def test_geometric_rdkit_error(program, model, bench):
+def test_geometric_rdkit_error():
     inp = copy.deepcopy(_base_json)
 
     inp["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity"})
