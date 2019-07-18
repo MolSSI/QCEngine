@@ -3,18 +3,14 @@ Tests the DQM compute dispatch module
 """
 
 import copy
+from typing import List
 
 import numpy as np
 import pytest
-from qcelemental.models import Molecule, ResultInput
 
 import qcengine as qcng
-<<<<<<< HEAD
-from qcelemental.models import Molecule, ResultInput, Result
-=======
->>>>>>> Mopac: Testing cleanup and adds stdout
+from qcelemental.models import Molecule, Result, ResultInput
 from qcengine import testing
-from typing import List
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 

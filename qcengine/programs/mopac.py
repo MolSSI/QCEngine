@@ -37,7 +37,7 @@ class MopacHarness(ProgramHarness):
         extras["hartree_to_kcalmol"] = extras["hartree_to_ev"] * extras["ev_to_kcalmol"]
 
         kwargs["extras"] = extras
-        super().__init__(**{**self._defaults, **kwargs})
+        super().__init__(**kwargs)
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -58,9 +58,9 @@ class MopacHarness(ProgramHarness):
         """
         self.found(raise_error=True)
 
-        exec_commands = self.build_input(input_model, config)
+        exec_command = self.build_input(input_model, config)
 
-        output = self.execute(exec_commands)
+        output = self.execute(exec_command)
 
         ret = self.parse_output(output["outfiles"], input_model)
 
@@ -87,11 +87,11 @@ class MopacHarness(ProgramHarness):
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
-        commands = inputs["commands"]
+        command = inputs["command"]
         if extra_commands is not None:
-            commands = extra_commands
+            command.extend(extra_commands)
 
-        exe_success, proc = execute(commands,
+        exe_success, proc = execute(command,
                                     infiles=infiles,
                                     outfiles=outfiles,
                                     scratch_directory=inputs["scratch_directory"],
@@ -143,7 +143,7 @@ class MopacHarness(ProgramHarness):
         env["OMP_NUM_THREADS"] = str(config.ncores)
 
         return {
-            "commands": ["mopac", "dispatch.mop"],
+            "command": ["mopac", "dispatch.mop"],
             "infiles": {
                 "dispatch.mop": "\n".join(input_file),
             },
