@@ -13,22 +13,20 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
-v0.8.0 / 2019-07-18
+v0.8.0 / 2019-07-19
 -------------------
 
 New Features
 ++++++++++++
 
-- (:pr:`95`, :pr:`96`, :pr:`97`, and :pr:`98`) The NWChem interface from QCDB has been added adapted.
-  Thanks to @vivacebelles for this addition!
+- (:pr:`95`, :pr:`96`, :pr:`97`, and :pr:`98`) The NWChem interface from QCDB has been added.
+  Thanks to @vivacebelles and @jygrace for this addition!
 - (:pr:`100`) The MOPAC interface has now been added to QCEngine thanks help to from @godotalgorithm.
 
 Enhancements
 ++++++++++++
 
 - (:pr:`94`) The gradient and molecule parsed from a GAMESS calculation output file are now returned in ``parse_output``
-- (:pr:`99`) QCEngine now manages an explicit folder for each Psi4 job to write into and passes the scratch directory
-  via ``-s`` command line. This resolves a key mismatch which could cause an error.
 - (:pr:`101`) Enabled extra files in TeraChem scratch folder to be requested by users, collected after program
   execution, and recorded in the ``Result`` object as extras.
 - (:pr:`103`) Random errors can now be retried a finite, controllable number of times (current default is zero retries).
@@ -38,7 +36,10 @@ Enhancements
 Bug Fixes
 +++++++++
 
+- (:pr:`99`) QCEngine now manages an explicit folder for each Psi4 job to write into and passes the scratch directory
+  via ``-s`` command line. This resolves a key mismatch which could cause an error.
 - (:pr:`102`) DFTD3 errors are now correctly returned as a ``FailedOperation`` instead of a raw ``dict``.
+
 
 v0.7.1 / 2019-06-18
 -------------------
