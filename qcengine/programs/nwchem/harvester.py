@@ -544,13 +544,19 @@ def harvest_outfile_pass(outtext):
 
         # Process dipole
         mobj = re.search(
-            r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s' + r'A\.U\.' + r'\s*' + r'^\s+' + r'DMX' + r'\s+' +
-            NUMBER + r'.*' + r'\s*' + r'^\s+' + r'DMY' + r'\s+' + NUMBER + r'.*' + r'\s*' + r'^\s+' + r'DMZ' + r'\s+' +
-            NUMBER + r'.' + r'\s*' + r'^\s+' + r'.*' + r'\s*' + r'^\s+' + r'Total dipole' + r'\s+' + NUMBER + r'\s' +
-            r'A\.U\.' + r'\s*' + r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s' + r'Debye\(s\)' + r'\s*' +
-            r'^\s+' + r'DMX' + r'\s+' + NUMBER + r'.*' + r'\s*' + r'^\s+' + r'DMY' + r'\s+' + NUMBER + r'.*' + r'\s*' +
-            r'^\s+' + r'DMZ' + r'\s+' + NUMBER + r'.*' + r'\s*' + r'^\s+' + r'.*' + r'\s*' + r'^\s+' +
-            r'Total dipole' + r'\s+' + NUMBER + r'\s' + r'DEBYE\(S\)' + r'\s*$', outtext, re.MULTILINE)
+            r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s+' + r'A\.U\.' + r'\s*' + 
+            r'^\s+' + r'DMX' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'DMY' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'DMZ' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'.*' +
+            r'^\s+' + r'Total dipole' + r'\s+' + NUMBER + r'\s+' + r'A\.U\.' + r'\s*' + 
+            r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s' + r'Debye\(s\)' + r'\s*' +
+            r'^\s+' + r'DMX' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'DMY' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'DMZ' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'.*' + 
+            r'^\s+' + r'Total dipole' + r'\s+' + NUMBER + r'\s' + r'DEBYE\(S\)' + r'\s*$', 
+            outtext, re.MULTILINE)
 
         if mobj:
             print('matched total dipole')
