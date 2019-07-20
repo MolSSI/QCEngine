@@ -10,6 +10,7 @@ from qcelemental.models import OptimizationInput
 
 import qcengine as qcng
 from qcengine import testing
+from qcengine.testing import failure_engine
 
 _base_json = {
     "schema_name": "qcschema_optimization_input",
@@ -108,11 +109,53 @@ def test_geometric_rdkit_error():
 
 
 @testing.using_geometric
+@testing.using_rdkit
+def test_geometric_retries(failure_engine):
+    inp = copy.deepcopy(_base_json)
+
+    failure_engine.iter_modes = [
+        "random_error", "pass", # Iter 1
+        "random_error", "random_error", "pass", # Iter 2
+    ] # yapf: disable
+    failure_engine.iter_modes.extend(["pass"] * 20)
+
+    inp["initial_molecule"] = {"symbols": ["He", "He"], "geometry": [0, 0, 0, 0, 0, failure_engine.start_distance]}
+    inp["input_specification"]["model"] = {"method": "something"}
+    inp["keywords"]["program"] = failure_engine.name
+
+    inp = OptimizationInput(**inp)
+
+    ret = qcng.compute_procedure(inp, "geometric", local_options={"ncores": 13}, raise_error=True)
+    assert ret.success is True
+    assert ret.trajectory[0].provenance.retries == 1
+    assert ret.trajectory[0].provenance.ncores == 13
+    assert ret.trajectory[1].provenance.retries == 2
+    assert ret.trajectory[1].provenance.ncores == 13
+    assert "retries" not in ret.trajectory[2].provenance.dict()
+
+    # Ensure we still fail
+    failure_engine.iter_modes = [
+        "random_error", "pass", # Iter 1
+        "random_error", "random_error", "pass", # Iter 2
+    ] # yapf: disable
+    ret = qcng.compute_procedure(inp, "geometric", local_options={"ncores": 13, "retries": 1})
+    assert ret.success is False
+    assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
+    assert len(ret.input_data["trajectory"]) == 2
+
+
+@testing.using_geometric
 @pytest.mark.parametrize("program, model, bench", [
-    pytest.param("rdkit", {"method": "UFF"}, [1.87130923886072, 2.959448636243545, 104.50996425790237], marks=testing.using_rdkit),
-    pytest.param("torchani", {"method": "ANI1x"}, [1.825818737501941, 2.8663765267932697, 103.4332610730292], marks=testing.using_torchani),
-    pytest.param("mopac", {"method": "PM6"}, [1.793054066650722, 2.893333237502448, 107.57221117353501], marks=testing.using_mopac),
-])
+    pytest.param("rdkit", {"method": "UFF"},
+                 [1.87130923886072, 2.959448636243545, 104.5099642579023],
+                 marks=testing.using_rdkit),
+    pytest.param("torchani", {"method": "ANI1x"},
+                 [1.82581873750194, 2.866376526793269, 103.4332610730292],
+                 marks=testing.using_torchani),
+    pytest.param("mopac", {"method": "PM6"},
+                 [1.79305406665072, 2.893333237502448, 107.5722111735350],
+                 marks=testing.using_mopac),
+]) # yapf: disable
 def test_geometric_generic(program, model, bench):
     inp = copy.deepcopy(_base_json)
 

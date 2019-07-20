@@ -3,14 +3,14 @@ Tests the DQM compute dispatch module
 """
 
 import copy
-from typing import List
 
 import numpy as np
 import pytest
 
 import qcengine as qcng
-from qcelemental.models import Molecule, Result, ResultInput
+from qcelemental.models import Molecule, ResultInput
 from qcengine import testing
+from qcengine.testing import failure_engine
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 
@@ -164,64 +164,6 @@ def test_mopac_task():
     assert ret.return_result == energy
     assert "== MOPAC DONE ==" in ret.stdout
 
-@pytest.fixture(scope="module")
-def failure_engine():
-    unique_name = "asdflkj1234"
-
-    class FailEngine(qcng.programs.ProgramHarness):
-        iter_modes: List[str] = []
-        ncalls: int = 0
-
-        _defaults = {
-            "name": unique_name,
-            "scratch": False,
-            "thread_safe": True,
-            "thread_parallel": False,
-            "node_parallel": False,
-            "managed_memory": False,
-        }
-
-        class Config(qcng.programs.ProgramHarness.Config):
-            allow_mutation: True
-
-        @staticmethod
-        def found(raise_error: bool = False) -> bool:
-            return True
-
-        def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
-            self.ncalls += 1
-            mode = self.iter_modes.pop(0)
-            if mode == "pass":
-                return Result(**{
-                    **input_data.dict(),
-                    **{
-                        "properties": {},
-                        "return_result": self.ncalls,
-                        "success": True
-                    }
-                })
-            elif mode == "random_error":
-                raise qcng.exceptions.RandomError("Whoops!")
-            elif mode == "input_error":
-                raise qcng.exceptions.InputError("Whoops!")
-            else:
-                raise KeyError("Testing error, should not arrive here.")
-
-        def get_job(self):
-            json_data = copy.deepcopy(_base_json)
-            json_data["molecule"] = qcng.get_molecule("water")
-            json_data["driver"] = "gradient"
-            json_data["model"] = {"method": "something"}
-
-            return json_data
-
-    engine = FailEngine()
-    qcng.register_program(engine)
-
-    yield engine
-
-    qcng.unregister_program(engine.name)
-
 
 def test_random_failure_no_retries(failure_engine):
 
@@ -257,4 +199,4 @@ def test_random_failure_with_success(failure_engine):
 
     assert ret.success, ret.error.error_message
     assert ret.provenance.retries == 1
-    assert ret.return_result == 2
+    assert ret.extras["ncalls"] == 2
