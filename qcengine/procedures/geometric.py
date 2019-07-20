@@ -31,8 +31,9 @@ class GeometricProcedure(ProcedureHarness):
         if "extras" not in geometric_input["input_specification"]:
             geometric_input["input_specification"]["extras"] = {}
 
+        # Set retries to two if zero while respecting local_config
         local_config = config.dict()
-        local_config["retries"] = local_config.get("retries", 2)
+        local_config["retries"] = local_config.get("retries", 2) or 2
         geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program

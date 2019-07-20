@@ -81,7 +81,7 @@ def failure_engine():
             if geom.shape[0] != 2:
                 raise ValueError("Failure Test must have an input size of two.")
 
-            grad_value = (np.linalg.norm(geom[0] - geom[1]) - self.equilibrium_distance)**2
+            grad_value = np.abs(np.linalg.norm(geom[0] - geom[1]) - self.equilibrium_distance)
             grad = [0, 0, -grad_value, 0, 0, grad_value]
 
             if mode == "pass":
@@ -89,11 +89,17 @@ def failure_engine():
                     **{
                         **input_data.dict(),
                         **{
-                            "properties": {},
+                            "properties": {
+                                "return_energy": grad_value
+                            },
                             "return_result": grad,
                             "success": True,
                             "extras": {
                                 "ncalls": self.ncalls
+                            },
+                            "provenance": {
+                                "creator": "failure_engine",
+                                "ncores": config.ncores
                             }
                         }
                     })
