@@ -123,7 +123,7 @@ class Psi4Harness(ProgramHarness):
                 else:
                     # Likely a random error, worth retrying
                     raise RandomError(error_message)
-            elif "SIGSEV" in error_message:
+            elif ("SIGSEV" in error_message) or ("SIGSEGV" in error_message) or ("segmentation fault" in error_message):
                 raise RandomError(error_message)
             elif "TypeError: set_global_option" in error_message:
                 raise InputError(error_message)
