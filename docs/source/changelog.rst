@@ -13,6 +13,19 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.8.1 / 2019-07-22
+-------------------
+
+Enhancements
+++++++++++++
+
+- (:pr:`110`) Psi4's auto-retry exception handlers now catch more classes of random errors
+
+Bug Fixes
++++++++++
+
+- (:pr:`109`) Geometric auto-retry settings now correctly propagate through the base code.
+
 v0.8.0 / 2019-07-19
 -------------------
 
