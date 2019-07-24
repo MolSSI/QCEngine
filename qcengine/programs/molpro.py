@@ -27,6 +27,7 @@ class MolproHarness(ProgramHarness):
 
     # Set of implemented dft functionals in Molpro according to
     # https://www.molpro.net/info/release/doc/manual/node208.html (version 2019.2)
+    # TODO This isn't extensive because it definitely doesn't include component functionals (e.g. LYP, VWN5)
     _dft_functionals = {
         "B", "B-LYP", "BLYP", "B-P", "BP86", "B-VWN", "B3LYP", "B3LYP3", "B3LYP5", "B88X",
         "B97", "B97R", "BECKE", "BH-LYP", "CS", "D", "HFB", "HFS", "LDA", "LSDAC", "LSDC",
@@ -35,8 +36,10 @@ class MolproHarness(ProgramHarness):
         "M08-SO", "M11-L", "TPSS", "TPSSH", "M12HFC", "HJSWPBE", "HJSWPBEH", "TCSWPBE", "PBESOL"
     }
 
-    # Currently supported post-hf methods in QCEngine for Molpro
+    # Currently supported methods in QCEngine for Molpro
+    _scf_methods = {"HF", "RHF", "KS", "RKS"}
     _post_hf_methods = {'MP2', 'CCSD', 'CCSD(T)'}
+    _supported_methods = {*_scf_methods, *_post_hf_methods}
 
     class Config(ProgramHarness.Config):
         pass
@@ -222,49 +225,43 @@ class MolproHarness(ProgramHarness):
         properties = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
 
-        # SCF maps
-        scf_energy_map = {"Energy": "scf_total_energy"}
-        scf_dipole_map = {"Dipole moment": "scf_dipole_moment"}
-        scf_extras = {}
-
-        # MP2 maps
-        mp2_energy_map = {"total energy": "mp2_total_energy", "correlation energy": "mp2_correlation_energy"}
-        mp2_dipole_map = {"Dipole moment": "mp2_dipole_moment"}
-        mp2_extras = {
-            "singlet pair energy": "mp2_singlet_pair_energy",
-            "triplet pair energy": "mp2_triplet_pair_energy"
+        # Molpro map
+        molpro_map = {
+            "Energy": {
+                "HF": "scf_total_energy",
+                "RHF": "scf_total_energy",
+                "KS": "scf_total_energy",
+                "RKS": "scf_total_energy"
+            },
+            "total energy": {
+                "MP2": "mp2_total_energy",
+                "CCSD": "ccsd_total_energy",
+                "CCSD(T)": "ccsd_prt_pr_total_energy"
+            },
+            "correlation energy": {
+                "MP2": "mp2_correlation_energy",
+                "CCSD": "ccsd_correlation_energy",
+                "CCSD(T)": "ccsd_prt_pr_correlation_energy",  # Need both CCSD(T) and Total
+                "Total": "ccsd_prt_pr_correlation_energy"  # Total corresponds to CCSD(T) correlation energy
+            },
+            "singlet pair energy": {
+                "MP2": "mp2_singlet_pair_energy",
+                "CCSD": "ccsd_singlet_pair_energy"
+            },
+            "triplet pair energy": {
+                "MP2": "mp2_triplet_pair_energy",
+                "CCSD": "ccsd_triplet_pair_energy"
+            },
+            "Dipole moment": {
+                "HF": "scf_dipole_moment",
+                "RHF": "scf_dipole_moment",
+                "KS": "scf_dipole_moment",
+                "RKS": "scf_dipole_moment",
+                "MP2": "mp2_dipole_moment",
+                "CCSD": "ccsd_dipole_moment",
+                "CCSD(T)": "ccsd_prt_pr_dipole_moment"
+            }
         }
-
-        # CCSD maps
-        ccsd_energy_map = {"total energy": "ccsd_total_energy", "correlation energy": "ccsd_correlation_energy"}
-        ccsd_dipole_map = {"Dipole moment": "ccsd_dipole_moment"}
-        ccsd_extras = {
-            "singlet pair energy": "ccsd_singlet_pair_energy",
-            "triplet pair energy": "ccsd_triplet_pair_energy"
-        }
-
-        # CCSD(T) maps
-        # TODO There are two instances of "correlation energy" in the xml. One for CCSD and one for CCSD(T)
-        #      Will need a bit more logic to separate between the two
-        ccsd_prt_pr_energy_map = {
-            "total energy": "ccsd_prt_pr_total_energy",
-            "correlation energy": "ccsd_prt_pr_correlation_energy",
-        }
-        ccsd_prt_pr_dipole_map = {"Dipole moment": "ccsd_prt_pr_dipole_moment"}
-        ccsd_prt_pr_extras = {**ccsd_extras}  # , "contribution": "prt_pr_contribution"}
-
-        # Compiling the method maps
-        scf_maps = {"energy": scf_energy_map, "dipole": scf_dipole_map, "extras": scf_extras}
-        mp2_maps = {"energy": mp2_energy_map, "dipole": mp2_dipole_map, "extras": mp2_extras}
-        ccsd_maps = {"energy": ccsd_energy_map, "dipole": ccsd_dipole_map, "extras": ccsd_extras}
-        ccsd_prt_pr_maps = {
-            "energy": ccsd_prt_pr_energy_map,
-            "dipole": ccsd_prt_pr_dipole_map,
-            "extras": ccsd_prt_pr_extras
-        }
-        scf_method_maps = {"HF": scf_maps, "RHF": scf_maps, "RKS": scf_maps}
-        post_hf_method_maps = {"MP2": mp2_maps, "CCSD": ccsd_maps, "CCSD(T)": ccsd_prt_pr_maps}
-        supported_methods = {**scf_method_maps, **post_hf_method_maps}
 
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
@@ -275,17 +272,18 @@ class MolproHarness(ProgramHarness):
                 command = command[:-4]
 
             # Grab energies and dipole moment
-            if command in supported_methods:
-                command_map = supported_methods[command]
+            if command in self._supported_methods:
                 for child in jobstep.findall('molpro_uri:property', name_space):
-                    if child.attrib['name'] in command_map['energy']:
-                        properties[command_map['energy'][child.attrib['name']]] = float(child.attrib['value'])
-                    elif child.attrib['name'] in command_map['extras']:
-                        properties[command_map['extras'][child.attrib['name']]] = float(child.attrib['value'])
-                    elif child.attrib['name'] in command_map['dipole']:
-                        properties[command_map['dipole'][child.attrib['name']]] = [
-                            float(x) for x in child.attrib['value'].split()
-                        ]
+                    prop_name = child.attrib['name']
+                    prop_method = child.attrib['method']
+                    value = child.attrib['value']
+                    if prop_name in molpro_map:
+                        if prop_method in molpro_map[prop_name]:
+                            if prop_name == "Dipole moment":
+                                properties[molpro_map[prop_name][prop_method]] = [float(x) for x in value.split()]
+                            else:
+                                properties[molpro_map[prop_name][prop_method]] = float(value)
+
             # Grab gradient
             elif 'FORCE' in command:
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
@@ -310,6 +308,8 @@ class MolproHarness(ProgramHarness):
             del properties['ccsd_triplet_pair_energy']
 
         # Look for final energy in the molecule tag in case it's needed
+        # Note: Additionally, mol_method might be name of DFT functional plus R or U in front to
+        #       denote restricted or unrestricted cases.
         molecule = root.find('molpro_uri:job/molpro_uri:molecule', name_space)
         mol_method = molecule.attrib['method']
         mol_final_energy = float(molecule.attrib['energy'])
@@ -319,31 +319,23 @@ class MolproHarness(ProgramHarness):
         if method.upper() in self._dft_functionals:  # Determine if method is a DFT functional
             method = "RKS"
 
-        # Determine the energy map of the associated method
-        if method in supported_methods:
-            method_energy_map = supported_methods[method]['energy']
-        else:
-            raise InputError('Method {} not implemented for Molpro in QCEngine.'.format(method))
-
         # A slightly more robust way of determining the final energy.
         # Throws an error if the energy isn't found for the method specified from the input_model.
-        if method in post_hf_method_maps and method_energy_map['total energy'] in properties:
-            final_energy = properties[method_energy_map['total energy']]
-        elif method in scf_method_maps and method_energy_map['Energy'] in properties:
-            final_energy = properties[method_energy_map['Energy']]
+        if method in self._post_hf_methods and molpro_map['total energy'][method] in properties:
+            final_energy = properties[molpro_map['total energy'][method]]
+        elif method in self._scf_methods and molpro_map['Energy'][method] in properties:
+            final_energy = properties[molpro_map['Energy'][method]]
         else:
-            # TODO This won't work for DFT case since mol_method will be name of DFT functional
-            #      Additionally, mol_method might be name of DFT functional plus R or U in front to
-            #      denote restricted or unrestricted cases.
+            # Back up method for determining final energy if not already present in properties
             # Use the total energy from the molecule tag if it matches the input method
-            if mol_method == method:
+            if input_model.model.method in mol_method:
                 final_energy = mol_final_energy
-                if method in post_hf_method_maps:
-                    properties[method_energy_map['total energy']] = mol_final_energy
+                if method in self._post_hf_methods:
+                    properties[molpro_map['total energy'][method]] = mol_final_energy
                     properties[
-                        method_energy_map['correlation energy']] = mol_final_energy - properties['scf_total_energy']
-                elif method in scf_method_maps:
-                    properties[method_energy_map['Energy']] = mol_final_energy
+                        molpro_map['correlation energy'][method]] = mol_final_energy - properties['scf_total_energy']
+                elif method in self._scf_methods:
+                    properties[molpro_map['Energy'][method]] = mol_final_energy
             else:
                 raise KeyError("Could not find {:s} total energy".format(method))
 
