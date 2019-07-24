@@ -4,7 +4,7 @@ Calls the Molpro executable.
 
 import string
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
@@ -72,6 +72,7 @@ class MolproHarness(ProgramHarness):
         # Run Molpro
         proc = self.execute(job_inputs)
 
+        # Return proc if it is type UnknownError for error propagation otherwise process the output
         if isinstance(proc, UnknownError):
             return proc
         else:
@@ -80,34 +81,40 @@ class MolproHarness(ProgramHarness):
             return result
 
     def execute(self,
-                inputs,
-                extra_infiles=None,
-                extra_outfiles=None,
+                inputs: Dict[str, Any],
+                extra_infiles: Optional[List[str]] = None,
+                extra_outfiles: Optional[List[str]] = None,
+                as_binary: Optional[List[str]] = None,
                 extra_commands=None,
-                scratch_name=None,
-                scratch_messy=False,
-                timeout=None):
+                scratch_name: Optional[str] = None,
+                scratch_messy: bool = False,
+                timeout: Optional[int] = None):
         """
         For option documentation go look at qcengine/util.execute
         """
 
+        # Collect all input files and update with extra_infiles
         infiles = inputs["infiles"]
         if extra_infiles is not None:
             infiles.update(extra_infiles)
 
+        # Collect all output files and update with extra_outfiles
         outfiles = ["dispatch.out", "dispatch.xml", "dispatch.wfu"]
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
+        # Replace commands with extra_commands if present
         commands = inputs["commands"]
         if extra_commands is not None:
             commands = extra_commands
 
+        # Run the Molpro program
         exe_success, proc = execute(commands,
                                     infiles=infiles,
                                     outfiles=outfiles,
-                                    scratch_directory=inputs["scratch_directory"],
+                                    as_binary=as_binary,
                                     scratch_name=scratch_name,
+                                    scratch_directory=inputs["scratch_directory"],
                                     scratch_messy=scratch_messy,
                                     timeout=timeout)
 
