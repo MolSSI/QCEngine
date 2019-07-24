@@ -58,31 +58,50 @@ class EntosHarness(ProgramHarness):
         # Run entos
         proc = self.execute(job_inputs)
 
-        if isinstance(proc, FailedOperation):
+        if isinstance(proc, UnknownError):
             return proc
         else:
             # If execution succeeded, collect results
             result = self.parse_output(proc["outfiles"], input_data)
             return result
 
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+    def execute(self,
+                inputs: Dict[str, Any],
+                extra_infiles: Optional[List[str]] = None,
+                extra_outfiles: Optional[List[str]] = None,
+                extra_commands=None,
+                scratch_name: Optional[str] = None,
+                scratch_messy: bool = False,
+                timeout: Optional[int] = None):
+        """
+        For option documentation go look at qcengine/util.execute
+        """
 
+        # Collect all input files and update with extra_infiles
+        infiles = inputs["infiles"]
+        if extra_infiles is not None:
+            infiles.update(extra_infiles)
+
+        # Collect all input files and update with extra_infiles
+        outfiles = ["dispatch.out"]
         if extra_outfiles is not None:
-            outfiles = ["dispatch.out"].extend(extra_outfiles)
-        else:
-            outfiles = ["dispatch.out"]
+            outfiles.extend(extra_outfiles)
 
+        # Replace commands with extra_commands if present
+        commands = inputs["commands"]
         if extra_commands is not None:
             commands = extra_commands
-        else:
-            commands = inputs["commands"]
 
+        # Run the entos program
         exe_success, proc = execute(commands,
-                                    infiles=inputs["infiles"],
+                                    infiles=infiles,
                                     outfiles=outfiles,
-                                    scratch_directory=inputs["scratch_directory"],
                                     scratch_name=scratch_name,
+                                    scratch_directory=inputs["scratch_directory"],
+                                    scratch_messy=scratch_messy,
                                     timeout=timeout)
+
+        # Entos does not create an output file and only prints to stdout
         proc["outfiles"]["dispatch.out"] = proc["stdout"]
 
         # Determine whether the calculation succeeded
