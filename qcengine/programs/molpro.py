@@ -25,6 +25,19 @@ class MolproHarness(ProgramHarness):
     }
     version_cache: Dict[str, str] = {}
 
+    # Set of implemented dft functionals in Molpro according to
+    # https://www.molpro.net/info/release/doc/manual/node208.html (version 2019.2)
+    _dft_functionals = {
+        "B", "B-LYP", "BLYP", "B-P", "BP86", "B-VWN", "B3LYP", "B3LYP3", "B3LYP5", "B88X",
+        "B97", "B97R", "BECKE", "BH-LYP", "CS", "D", "HFB", "HFS", "LDA", "LSDAC", "LSDC",
+        "KYP88", "MM05", "MM05-2X", "MM06", "MM06-2X", "MM06-L", "MM06-HF", "PBE", "PBE0",
+        "PBE0MOL", "PBEREV", "PW91", "S", "S-VWN", "SLATER", "VS99", "VWN", "VWN80", "M08-HX",
+        "M08-SO", "M11-L", "TPSS", "TPSSH", "M12HFC", "HJSWPBE", "HJSWPBEH", "TCSWPBE", "PBESOL"
+    }
+
+    # Currently supported post-hf methods in QCEngine for Molpro
+    _post_hf_methods = {'MP2', 'CCSD', 'CCSD(T)'}
+
     class Config(ProgramHarness.Config):
         pass
 
@@ -128,7 +141,6 @@ class MolproHarness(ProgramHarness):
                     template: Optional[str] = None) -> Dict[str, Any]:
         if template is None:
             input_file = []
-            posthf_methods = {'mp2', 'ccsd', 'ccsd(t)'}
 
             # Memory is in megawords per core for Molpro
             memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
@@ -148,14 +160,16 @@ class MolproHarness(ProgramHarness):
             input_file.append('}')
             input_file.append('')
 
-            # Start of Molpro Commands
             # Write energy call
             energy_call = []
-            write_hf = input_model.model.method.lower() in posthf_methods
-            if write_hf:
+            # If post-hf method is called then make sure to write a HF call first
+            if input_model.model.method.upper() in self._post_hf_methods:
                 energy_call.append('{HF}')
-            # TODO Support DFT calls, need to check if method is a DFT XC functional and then write {rks,XC}
-            energy_call.append('{{{:s}}}'.format(input_model.model.method))
+            # If DFT call make sure to write {rks,method}
+            if input_model.model.method.upper() in self._dft_functionals:
+                energy_call.append('{{rks,{:s}}}'.format(input_model.model.method))
+            else:
+                energy_call.append('{{{:s}}}'.format(input_model.model.method))
 
             # Write appropriate driver call
             if input_model.driver == 'energy':
@@ -237,7 +251,7 @@ class MolproHarness(ProgramHarness):
             "correlation energy": "ccsd_prt_pr_correlation_energy",
         }
         ccsd_prt_pr_dipole_map = {"Dipole moment": "ccsd_prt_pr_dipole_moment"}
-        ccsd_prt_pr_extras = {**ccsd_extras, "contribution": "prt_pr_contribution"}
+        ccsd_prt_pr_extras = {**ccsd_extras}  # , "contribution": "prt_pr_contribution"}
 
         # Compiling the method maps
         scf_maps = {"energy": scf_energy_map, "dipole": scf_dipole_map, "extras": scf_extras}
@@ -248,9 +262,9 @@ class MolproHarness(ProgramHarness):
             "dipole": ccsd_prt_pr_dipole_map,
             "extras": ccsd_prt_pr_extras
         }
-        scf_methods = {"HF": scf_maps, "RHF": scf_maps}  # , "RKS": scf_maps}
-        post_hf_methods = {"MP2": mp2_maps, "CCSD": ccsd_maps}  # , "CCSD(T)": ccsd_prt_pr_maps}
-        supported_methods = {**scf_methods, **post_hf_methods}
+        scf_method_maps = {"HF": scf_maps, "RHF": scf_maps, "RKS": scf_maps}
+        post_hf_method_maps = {"MP2": mp2_maps, "CCSD": ccsd_maps, "CCSD(T)": ccsd_prt_pr_maps}
+        supported_methods = {**scf_method_maps, **post_hf_method_maps}
 
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
@@ -273,7 +287,7 @@ class MolproHarness(ProgramHarness):
                             float(x) for x in child.attrib['value'].split()
                         ]
             # Grab gradient
-            elif 'FORCE' in jobstep.attrib['command']:
+            elif 'FORCE' in command:
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
                     # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
                     output_data['return_result'] = [float(x) for x in child.text.split()]
@@ -300,24 +314,35 @@ class MolproHarness(ProgramHarness):
         mol_method = molecule.attrib['method']
         mol_final_energy = float(molecule.attrib['energy'])
 
+        # Grab the method from input
+        method = input_model.model.method
+        if method.upper() in self._dft_functionals:  # Determine if method is a DFT functional
+            method = "RKS"
+
+        # Determine the energy map of the associated method
+        if method in supported_methods:
+            method_energy_map = supported_methods[method]['energy']
+        else:
+            raise InputError('Method {} not implemented for Molpro in QCEngine.'.format(method))
+
         # A slightly more robust way of determining the final energy.
         # Throws an error if the energy isn't found for the method specified from the input_model.
-        # TODO Will need to be modified to work for DFT. XC --> RKS
-        method = input_model.model.method
-        method_energy_map = supported_methods[method]['energy']
-        if method in post_hf_methods and method_energy_map['total energy'] in properties:
+        if method in post_hf_method_maps and method_energy_map['total energy'] in properties:
             final_energy = properties[method_energy_map['total energy']]
-        elif method in scf_methods and method_energy_map['Energy'] in properties:
+        elif method in scf_method_maps and method_energy_map['Energy'] in properties:
             final_energy = properties[method_energy_map['Energy']]
         else:
+            # TODO This won't work for DFT case since mol_method will be name of DFT functional
+            #      Additionally, mol_method might be name of DFT functional plus R or U in front to
+            #      denote restricted or unrestricted cases.
             # Use the total energy from the molecule tag if it matches the input method
             if mol_method == method:
                 final_energy = mol_final_energy
-                if method in post_hf_methods:
+                if method in post_hf_method_maps:
                     properties[method_energy_map['total energy']] = mol_final_energy
                     properties[
                         method_energy_map['correlation energy']] = mol_final_energy - properties['scf_total_energy']
-                elif method in scf_methods:
+                elif method in scf_method_maps:
                     properties[method_energy_map['Energy']] = mol_final_energy
             else:
                 raise KeyError("Could not find {:s} total energy".format(method))
@@ -326,6 +351,7 @@ class MolproHarness(ProgramHarness):
         if "return_result" not in output_data:
             output_data["return_result"] = final_energy
 
+        # Final output_data assignments needed for the Result object
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
         output_data['stdout'] = outfiles["dispatch.out"]
