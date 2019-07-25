@@ -225,7 +225,7 @@ class MolproHarness(ProgramHarness):
         properties = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
 
-        # Molpro map
+        # Molpro commands map
         molpro_map = {
             "Energy": {
                 "HF": "scf_total_energy",
@@ -263,14 +263,20 @@ class MolproHarness(ProgramHarness):
             }
         }
 
+        # Molpro variables map used for quantities not found in the command map
+        molpro_var_map = {
+            "_ENUC": "nuclear_repulsion_energy",
+            "_DFTFUN": "scf_xc_energy"
+            # "_EMP2_SCS": "scs_mp2_total_energy"
+        }
+
+        # Loop through each jobstep
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
-
             # Remove the -SCF part of the command string when Molpro calls HF or KS
             command = jobstep.attrib['command']
             if '-SCF' in command:
                 command = command[:-4]
-
             # Grab energies and dipole moment
             if command in self._supported_methods:
                 for child in jobstep.findall('molpro_uri:property', name_space):
@@ -283,12 +289,23 @@ class MolproHarness(ProgramHarness):
                                 properties[molpro_map[prop_name][prop_method]] = [float(x) for x in value.split()]
                             else:
                                 properties[molpro_map[prop_name][prop_method]] = float(value)
-
             # Grab gradient
             elif 'FORCE' in command:
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
                     # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
                     output_data['return_result'] = [float(x) for x in child.text.split()]
+
+        # Look for final energy in the molecule tag in case it's needed
+        # Note: For the DFT case mol_method is the name of the functional plus R or U in front
+        molecule = root.find('molpro_uri:job/molpro_uri:molecule', name_space)
+        mol_method = molecule.attrib['method']
+        mol_final_energy = float(molecule.attrib['energy'])
+        # Loop over each variable under the variables tag to grab additional info from molpro_var_map
+        for variable in molecule.findall('molpro_uri:variables/molpro_uri:variable', name_space):
+            var_name = variable.attrib['name']
+            if var_name in molpro_var_map:
+                print(var_name, variable[0].text)
+                molpro_var_map[var_name] = float(variable[0].text)
 
         # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
         if 'mp2_singlet_pair_energy' in properties and 'mp2_triplet_pair_energy' in properties:
@@ -306,13 +323,6 @@ class MolproHarness(ProgramHarness):
                                                                   + properties['ccsd_singlet_pair_energy']
             del properties['ccsd_singlet_pair_energy']
             del properties['ccsd_triplet_pair_energy']
-
-        # Look for final energy in the molecule tag in case it's needed
-        # Note: Additionally, mol_method might be name of DFT functional plus R or U in front to
-        #       denote restricted or unrestricted cases.
-        molecule = root.find('molpro_uri:job/molpro_uri:molecule', name_space)
-        mol_method = molecule.attrib['method']
-        mol_final_energy = float(molecule.attrib['energy'])
 
         # Grab the method from input
         method = input_model.model.method
