@@ -25,15 +25,27 @@ class MolproHarness(ProgramHarness):
     }
     version_cache: Dict[str, str] = {}
 
-    # Set of implemented dft functionals in Molpro according to
-    # https://www.molpro.net/info/release/doc/manual/node208.html (version 2019.2)
-    # TODO This isn't extensive because it definitely doesn't include component functionals (e.g. LYP, VWN5)
+    # Set of implemented dft functionals in Molpro according to dfunc.registry (version 2019.2)
     _dft_functionals = {
-        "B", "B-LYP", "BLYP", "B-P", "BP86", "B-VWN", "B3LYP", "B3LYP3", "B3LYP5", "B88X",
-        "B97", "B97R", "BECKE", "BH-LYP", "CS", "D", "HFB", "HFS", "LDA", "LSDAC", "LSDC",
-        "KYP88", "MM05", "MM05-2X", "MM06", "MM06-2X", "MM06-L", "MM06-HF", "PBE", "PBE0",
-        "PBE0MOL", "PBEREV", "PW91", "S", "S-VWN", "SLATER", "VS99", "VWN", "VWN80", "M08-HX",
-        "M08-SO", "M11-L", "TPSS", "TPSSH", "M12HFC", "HJSWPBE", "HJSWPBEH", "TCSWPBE", "PBESOL"
+        "B86MGC", "B86R", "B86", "B88C", "B88", "B95", "B97DF", "B97RDF", "BR", "BRUEG", "BW", "CS1", "CS2",
+        "DIRAC", "ECERFPBE", "ECERF", "EXACT", "EXERFPBE", "EXERF", "G96", "HCTH120", "HCTH147",
+        "HCTH93", "HJSWPBEX", "LTA", "LYP", "M052XC", "M052XX", "M05C", "M05X", "M062XC",
+        "M062XX", "M06C", "M06HFC", "M06HFX", "M06LC", "M06LX", "M06X", "M12C", "MK00B", "MK00",
+        "P86", "PBEC", "PBESOLC", "PBESOLX", "PBEXREV", "PBEX", "PW86", "PW91C", "PW91X", "PW92C",
+        "STEST", "TFKE", "TH1", "TH2", "TH3", "TH4", "THGFCFO", "THGFCO", "THGFC", "THGFL",
+        "TPSSC", "TPSSX", "VSXC", "VW", "VWN3", "VWN5", "XC-M05-2X", "XC-M05", "XC-M06-2X",
+        "XC-M06-HF", "XC-M06-L", "XC-M06", "XC-M08-HX", "XC-M08-SO", "XC-M11-L", "XC-SOGGA11",
+        "XC-SOGGA11-X", "XC-SOGGA", "FRMTST", "LHF", "TLHF", "LXBECKE", "ELP", "NULL", "YTEST",
+        "TREF2", "TREF", "TTEST", "GLE", "GREEN", "SRB88", "SRLYP", "LB94", "EI", "SAOP", "USER",
+        "INE", "ECERF2", "ECERFINTER", "ECERFLOCAL2", "ECERFLOCAL", "EXERFLOCAL", "FC", "FCFO",
+        "FCO", "FL", "XC-M11", "PBEXANAL", "PBECANAL", "PBESOLCANAL", "PBESOLXANAL", "EXSRLDA",
+        "EXSRLPBE", "ECSRLPBE", "ECSRLLPBE", "ECSQRTLPBE", "ECMUDIVLPBE", "EXERFPHS", "ECLERFMUPBE",
+        "ECERFERFCPBE", "ECSQRTLDA", "REVPBEX", "B", "B-LYP", "BLYP", "B-P", "BP86", "B-VWN", "B3LYP",
+        "B3LYP3", "B3LYP5", "B88X", "B97", "B97R", "BECKE", "BH-LYP", "CS", "D", "HFB", "HFS", "LDA",
+        "LSDAC", "LSDC", "KYP88", "MM05", "MM05-2X", "MM06", "MM06-2X", "MM06-L", "MM06-HF", "PBE", "PBE0",
+        "PBE0MOL", "PBEREV", "PW91", "S", "S-VWN", "SLATER", "VS99", "VWN", "VWN80", 'M05',
+        "M05-2X", "M06", "M06-2X", "M06-L", "M06-HF", "M08-HX","M08-SO", "M11-L", "TPSS",
+        "TPSSH", "M12HFC", "HJSWPBE", "HJSWPBEH", "TCSWPBE", "PBESOL"
     }
 
     # Currently supported methods in QCEngine for Molpro
@@ -304,8 +316,7 @@ class MolproHarness(ProgramHarness):
         for variable in molecule.findall('molpro_uri:variables/molpro_uri:variable', name_space):
             var_name = variable.attrib['name']
             if var_name in molpro_var_map:
-                print(var_name, variable[0].text)
-                molpro_var_map[var_name] = float(variable[0].text)
+                properties[molpro_var_map[var_name]] = float(variable[0].text)
 
         # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
         if 'mp2_singlet_pair_energy' in properties and 'mp2_triplet_pair_energy' in properties:
