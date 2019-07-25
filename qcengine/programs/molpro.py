@@ -171,7 +171,7 @@ class MolproHarness(ProgramHarness):
 
             # Write the basis set
             input_file.append('basis={')
-            input_file.append('default,{}'.format(input_model.model.basis))
+            input_file.append(f'default,{input_model.model.basis}')
             input_file.append('}')
             input_file.append('')
 
@@ -182,9 +182,9 @@ class MolproHarness(ProgramHarness):
                 energy_call.append('{HF}')
             # If DFT call make sure to write {rks,method}
             if input_model.model.method.upper() in self._dft_functionals:
-                energy_call.append('{{rks,{:s}}}'.format(input_model.model.method))
+                energy_call.append(f'{{rks,{input_model.model.method}}}')
             else:
-                energy_call.append('{{{:s}}}'.format(input_model.model.method))
+                energy_call.append(f'{{{input_model.model.method}}}')
 
             # Write appropriate driver call
             if input_model.driver == 'energy':
@@ -194,7 +194,7 @@ class MolproHarness(ProgramHarness):
                 input_file.append('')
                 input_file.append('{force}')
             else:
-                raise InputError('Driver {} not implemented for Molpro.'.format(input_model.driver))
+                raise InputError(f'Driver {input_model.driver} not implemented for Molpro.')
 
             input_file = "\n".join(input_file)
         else:
@@ -358,7 +358,7 @@ class MolproHarness(ProgramHarness):
                 elif method in self._scf_methods:
                     properties[molpro_map['Energy'][method]] = mol_final_energy
             else:
-                raise KeyError("Could not find {:s} total energy".format(method))
+                raise KeyError(f"Could not find {method} total energy")
 
         # Replace return_result with final_energy if gradient wasn't called
         if "return_result" not in output_data:
