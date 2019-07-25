@@ -13,6 +13,16 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.8.2 / 2019-07-25
+-------------------
+
+Bug Fixes
++++++++++
+
+- (:pr:`114`) Make compute and compute_procedure not have required kwargs while debugging
+  a Fractal serialization issue. This is intended to be a temporary change and likely reverted
+  in a later release
+
 v0.8.1 / 2019-07-22
 -------------------
 
