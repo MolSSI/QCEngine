@@ -169,7 +169,6 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
 #
 #        optstash.restore()
 
-        # TODO Should only return True if Molpro calculation terminated properly
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
