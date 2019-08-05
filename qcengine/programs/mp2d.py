@@ -212,10 +212,7 @@ class MP2DHarness(ProgramHarness):
             retres = retres.ravel().tolist()
 
         output_data = {
-            'extras': {
-                'local_keywords': input_model.extras['info'],
-                'qcvars': calcinfo,
-            },
+            'extras': input_model.extras,
             'properties': {},
             'provenance': Provenance(creator="MP2D",
                                      version=self.get_version(),
@@ -223,6 +220,8 @@ class MP2DHarness(ProgramHarness):
             'return_result': retres,
             'stdout': stdout,
         }  # yapf: disable
+        output_data["extras"]["local_keywords"] = input_model.extras['info']
+        output_data["extras"]["qcvars"] = calcinfo
 
         output_data['success'] = True
         return Result(**{**input_model.dict(), **output_data})

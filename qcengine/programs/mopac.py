@@ -243,7 +243,7 @@ class MopacHarness(ProgramHarness):
         output["properties"] = {}
         output["properties"]["return_energy"] = data["heat_of_formation"]
 
-        output["extras"] = data
+        output["extras"].update(data)
 
         if input_model.driver == "energy":
             output["return_result"] = data["heat_of_formation"]
