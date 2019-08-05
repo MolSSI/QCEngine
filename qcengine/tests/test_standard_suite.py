@@ -12,10 +12,11 @@ from qcengine import testing
 
 _canonical_methods = [
     ("dftd3", {"method": "b3lyp-d3"}),
+    ("mopac", {"method": "PM6"}),
+    ("mp2d", {"method": "MP2-DMP2"}),
     ("psi4", {"method": "hf", "basis": "6-31G"}),
     ("rdkit", {"method": "UFF"}),
     ("torchani", {"method": "ANI1x"}),
-    ("mopac", {"method": "PM6"}),
 ] # yapf: disable
 
 @pytest.mark.parametrize("program, model", _canonical_methods)
@@ -48,11 +49,12 @@ def test_compute_gradient(program, model):
 
 @pytest.mark.parametrize("program, model", [
     ("dftd3", {"method": "bad"}),
+    ("dftd3", {"method": "b3lyp-d3", "driver": "hessian"}),
+    ("mopac", {"method": "bad"}),
+    ("mp2d", {"method": "bad"}),
     ("psi4", {"method": "bad"}),
     ("rdkit", {"method": "bad"}),
     ("torchani", {"method": "bad"}),
-    ("dftd3", {"method": "b3lyp-d3", "driver": "hessian"}),
-    ("mopac", {"method": "bad"}),
 ]) # yapf: disable
 def test_compute_bad_models(program, model):
     if not testing.has_program(program):
