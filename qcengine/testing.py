@@ -17,23 +17,6 @@ import qcelemental as qcel
 from qcelemental.util import which, which_import
 
 
-@contextmanager
-def environ_context(env):
-    """Temporarily set environment variables inside the context manager and
-    fully restore previous environment afterwards
-    """
-    original_env = {key: os.getenv(key) for key in env}
-    os.environ.update(env)
-    try:
-        yield
-    finally:
-        for key, value in original_env.items():
-            if value is None:
-                del os.environ[key]
-            else:
-                os.environ[key] = value
-
-
 def is_program_new_enough(program, version_feature_introduced):
     """Returns True if `program` registered in QCEngine, locatable in
     environment, has parseable version, and that version in normalized
