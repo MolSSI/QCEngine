@@ -10,7 +10,7 @@ You can install or update ``qcengine`` using `conda <https://www.anaconda.com/do
 
     conda install qcengine -c conda-forge
 
-This command installs qcengine and its dependencies. The ``qcengine`` package is maintained on the
+This command installs ``qcengine`` and its dependencies. The ``qcengine`` package is maintained on the
 `conda-forge channel <https://conda-forge.github.io/>`_.
 
 
@@ -24,7 +24,7 @@ Pip
 Install from Source
 -------------------
 
-To install qcengine from source, clone the repository from `github
+To install ``qcengine`` from source, clone the repository from `github
 <https://github.com/molssi/qcengine>`_::
 
     git clone https://github.com/MolSSI/QCEngine.git
