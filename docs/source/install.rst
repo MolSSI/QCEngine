@@ -1,12 +1,12 @@
 Installing QCEngine
 ===================
 
-You can install ``qcengine`` with ``conda``, with ``pip``, or by installing from source.
+You can install ``qcengine`` with ``conda``, with ``pip``, or from source.
 
 Conda
 -----
 
-You can update ``qcengine`` using `conda <https://www.anaconda.com/download/>`_::
+You can install or update ``qcengine`` using `conda <https://www.anaconda.com/download/>`_::
 
     conda install qcengine -c conda-forge
 
@@ -17,8 +17,7 @@ This command installs qcengine and its dependencies. The ``qcengine`` package is
 Pip
 ---
 
-To install ``qcengine`` with ``pip`` there are a few options, depending on which
-dependencies you would like to keep up to date::
+``qcengine`` may be installed with ``pip``::
 
     pip install qcengine
 
@@ -47,7 +46,7 @@ This will build out a new environment with several compute backends for
 
 
 Test
-----
+++++
 
 Test a ``qcengine`` local install with ``pytest``::
 
