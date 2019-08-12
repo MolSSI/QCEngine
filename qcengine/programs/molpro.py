@@ -4,7 +4,7 @@ Calls the Molpro executable.
 
 import string
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Set, Tuple, Optional
 
 from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
@@ -15,7 +15,7 @@ from .model import ProgramHarness
 
 
 class MolproHarness(ProgramHarness):
-    _defaults = {
+     _dft_functionals: Set[str] = {
         "name": "Molpro",
         "scratch": True,
         "thread_safe": False,
@@ -49,10 +49,9 @@ class MolproHarness(ProgramHarness):
     }
 
     # Currently supported methods in QCEngine for Molpro
-    _scf_methods = {"HF", "RHF", "KS", "RKS"}
-    _post_hf_methods = {'MP2', 'CCSD', 'CCSD(T)'}
-    _supported_methods = {*_scf_methods, *_post_hf_methods}
-
+    _scf_methods: Set[str] = {"HF", "RHF", "KS", "RKS"}
+    _post_hf_methods: Set[str] = {'MP2', 'CCSD', 'CCSD(T)'}
+    _supported_methods: Set[str] = {*_scf_methods, *_post_hf_methods}
     class Config(ProgramHarness.Config):
         pass
 
@@ -113,10 +112,10 @@ class MolproHarness(ProgramHarness):
                 extra_infiles: Optional[List[str]] = None,
                 extra_outfiles: Optional[List[str]] = None,
                 as_binary: Optional[List[str]] = None,
-                extra_commands=None,
+                extra_commands: bool = None,
                 scratch_name: Optional[str] = None,
                 scratch_messy: bool = False,
-                timeout: Optional[int] = None):
+                timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
         """
         For option documentation go look at qcengine/util.execute
         """
