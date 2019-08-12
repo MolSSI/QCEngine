@@ -574,7 +574,7 @@ def harvest_hessian(hess):
     Hess file name has to be "nwchem.hess". (default)
 
     """
-    hess = hess.splitlines()
+    raise NotImplementedError()
 
 
 def harvest(p4Mol, nwout, **largs):  #check orientation and scratch files
