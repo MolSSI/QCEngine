@@ -75,9 +75,9 @@ class GAMESSHarness(ProgramHarness):
     def fake_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
-# Note decr MEMORY=100000 to get
-# ***** ERROR: MEMORY REQUEST EXCEEDS AVAILABLE MEMORY
-# to test gms fail
+        # Note decr MEMORY=100000 to get
+        # ***** ERROR: MEMORY REQUEST EXCEEDS AVAILABLE MEMORY
+        # to test gms fail
         infile = \
 """ $CONTRL SCFTYP=ROHF MULT=3 RUNTYP=GRADIENT COORD=CART $END
  $SYSTEM TIMLIM=1 MEMORY=800000 $END
@@ -93,7 +93,6 @@ Carbon     6.0
 Hydrogen   1.0   -0.82884     0.7079   0.0
  $END
 """
-
         # edits to rungms
         # set SCR=./
         # set USERSCR=./
