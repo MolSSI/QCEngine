@@ -1,11 +1,10 @@
 import re
 from decimal import Decimal
 
-import numpy as np
 import qcelemental as qcel
 from qcelemental.models import Molecule
 
-from ..util import load_hessian, PreservingDict
+from ..util import PreservingDict
 
 def harvest_output(outtext):
     """Function to separate portions of a NWChem output file *outtext*,
