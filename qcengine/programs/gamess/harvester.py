@@ -98,6 +98,34 @@ def harvest_outfile_pass(outtext):
             qcvar['MP2 CORRELATION ENERGY'] = mobj.group(3)
             qcvar['MP2 TOTAL ENERGY'] = mobj.group(4)
 
+        # Process CCSD
+        mobj = re.search(
+            r'^\s+' + r'SUMMARY OF RESULTS' +
+            r'\s+' + r'\n'+
+            r'^\s+' + r'REFERENCE ENERGY:' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'MBPT\(2\) ENERGY:' + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*'+
+            r'^\s+' + r'CCSD    ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*$',
+            outtext, re.MULTILINE)
+        if mobj:
+            print('matched rhf ccsd')
+            qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
+            qcvar['MP2 CORRELATION ENERGY'] = mobj.group(3)
+            qcvar['MP2 TOTAL ENERGY'] = mobj.group(2)
+            qcvar['CCSD CORRELATION ENERGY'] = mobj.group(5)
+            qcvar['CCSD TOTAL ENERGY'] = mobj.group(4)
+
+        mobj = re.search(
+            r'^\s+' + r'SUMMARY OF CCSD RESULTS' +
+            r'\s+' + r'\n'+
+            r'^\s+' + r'REFERENCE ENERGY:' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'CCSD ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR. E=\s+' + r'\s+' + NUMBER + r'\s*$',
+            outtext, re.MULTILINE)
+        if mobj:
+            print('matched rohf ccsd')
+            qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
+            qcvar['CCSD CORRELATION ENERGY'] = mobj.group(3)
+            qcvar['CCSD TOTAL ENERGY'] = mobj.group(2)
+
         # Process CCSD(T)
         mobj = re.search(
             r'^\s+' + r'SUMMARY OF RESULTS' + 
@@ -207,6 +235,10 @@ def harvest_outfile_pass(outtext):
     if 'MP2 TOTAL ENERGY' in qcvar and 'MP2 CORRELATION ENERGY' in qcvar:
             qcvar['CURRENT CORRELATION ENERGY'] = qcvar['MP2 CORRELATION ENERGY']
             qcvar['CURRENT ENERGY'] = qcvar['MP2 TOTAL ENERGY']
+
+    if 'CCSD TOTAL ENERGY' in qcvar and 'CCSD CORRELATION ENERGY' in qcvar:
+        qcvar['CURRENT CORRELATION ENERGY'] = qcvar['CCSD CORRELATION ENERGY']
+        qcvar['CURRENT ENERGY'] = qcvar['CCSD TOTAL ENERGY']
 
     if 'CCSD(T) TOTAL ENERGY' in qcvar and 'CCSD(T) CORRELATION ENERGY' in qcvar:
         qcvar['CURRENT CORRELATION ENERGY'] = qcvar['CCSD(T) CORRELATION ENERGY']
