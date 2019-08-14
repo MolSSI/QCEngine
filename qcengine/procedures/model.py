@@ -58,3 +58,12 @@ class ProcedureHarness(BaseModel, abc.ABC):
         """
 
         return model_wrapper(data, model)
+
+    def get_version(self) -> str:
+        """Finds procedure, extracts version, returns normalized version string.
+        Returns
+        -------
+        str
+            Return a valid, safe python version string.
+        """
+        pass
