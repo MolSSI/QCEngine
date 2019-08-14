@@ -34,7 +34,6 @@ Enhancements
 - (:pr:`119`) Small visual improvements to the docs have been made.
 - (:pr:`120`) Lists inside models are now generally converted to numpy arrays for internal storage to maximize the
   benefit of the new Msgpack feature from Elemental.
-- (:pr:`128`) NWChem Harvester's ``harvest_hessian`` function has been implemented.
 - (:pr:`133`) The GAMESS Harness now collects the CCSD as part of its output.
 
 Bug Fixes
