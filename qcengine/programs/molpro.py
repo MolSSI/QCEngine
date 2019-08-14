@@ -26,7 +26,7 @@ class MolproHarness(ProgramHarness):
     version_cache: Dict[str, str] = {}
 
     # Set of implemented dft functionals in Molpro according to dfunc.registry (version 2019.2)
-    _dft_functionals = {
+    _dft_functionals: Set[str] = {
         "B86MGC", "B86R", "B86", "B88C", "B88", "B95", "B97DF", "B97RDF", "BR", "BRUEG", "BW", "CS1", "CS2",
         "DIRAC", "ECERFPBE", "ECERF", "EXACT", "EXERFPBE", "EXERF", "G96", "HCTH120", "HCTH147",
         "HCTH93", "HJSWPBEX", "LTA", "LYP", "M052XC", "M052XX", "M05C", "M05X", "M062XC",
@@ -52,6 +52,8 @@ class MolproHarness(ProgramHarness):
     _scf_methods: Set[str] = {"HF", "RHF", "KS", "RKS"}
     _post_hf_methods: Set[str] = {'MP2', 'CCSD', 'CCSD(T)'}
     _supported_methods: Set[str] = {*_scf_methods, *_post_hf_methods}
+
+
     class Config(ProgramHarness.Config):
         pass
 
