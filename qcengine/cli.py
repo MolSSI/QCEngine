@@ -19,7 +19,7 @@ def parse_args():
     subparsers = parser.add_subparsers(dest="command")
 
     info = subparsers.add_parser('info', help="Print information about QCEngine setup, version, and environment.")
-    info.add_argument('--version', action='store_true', help="Print version of qcengine and qcelemental.")
+    info.add_argument('--version', action='store_true', help="Print version of QCEngine and QCElemental.")
     info.add_argument('--programs', action='store_true', help="Print detected and supported programs.")
     info.add_argument('--procedures', action='store_true', help="Print detected and supported procedures.")
     info.add_argument('--config', action='store_true', help="Print host, compute, and job configuration.")
@@ -48,16 +48,14 @@ def parse_args():
 
     return args
 
+
 def info_cli(args):
 
     def info_version():
-        print(">>> Version information:")
+        import qcelemental
+        print(">>> Version information")
         print(f"QCEngine version:    {__version__}")
-        try:
-            import qcelemental
-            print(f"QCElemental version: {qcelemental.__version__}")
-        except ImportError as e:
-            print(e)
+        print(f"QCElemental version: {qcelemental.__version__}")
         print()
 
     def info_programs():
