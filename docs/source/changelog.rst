@@ -13,6 +13,36 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.9.0 / 2019-08-14
+-------------------
+
+New Features
+++++++++++++
+
+- (:pr:`120`) Engine now takes advantage of Elemental's new Msgpack serialization option for Models. Serialization
+  defaults to msgpack when available (``conda install msgpack-python [-c conda-forge]``), falling back to JSON
+  otherwise. This results in substantial speedups for both serialization and deserialization actions and should be a
+  transparent replacement for users within Engine and Elemental themselves.
+
+Enhancements
+++++++++++++
+
+- (:pr:`112`) The ``MolproHarness`` has been updated to handle DFT and CCSD(T) energies and gradients.
+- (:pr:`116`) An environment context manager has been added to catch NumPy style parallelization with Python functions.
+- (:pr:`117`) MOPAC and DFTD3 can now accept an ``extras`` field which can pass around additional
+  data, conforming to the rest of the Harnesses.
+- (:pr:`119`) Small visual improvements to the docs have been made.
+- (:pr:`120`) Lists inside models are now generally converted to numpy arrays for internal storage to maximize the
+  benefit of the new Msgpack feature from Elemental.
+- (:pr:`133`) The GAMESS Harness now collects the CCSD as part of its output.
+
+Bug Fixes
++++++++++
+
+- (:pr:`127`) Removed unused imports from the NWChem Harvester module.
+- (:pr:`129`) Missing type hints from the ``MolproHarness`` have been added.
+- (:pr:`131`) A code formatting redundancy in the GAMESS input file parser has been removed.
+
 v0.8.2 / 2019-07-25
 -------------------
 
