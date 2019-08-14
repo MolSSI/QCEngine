@@ -30,10 +30,6 @@ class GeometricProcedure(ProcedureHarness):
         # Temporary patch for geomeTRIC
         geometric_input["initial_molecule"]["symbols"] = list(geometric_input["initial_molecule"]["symbols"])
 
-        # Older QCElemental compat, can be removed in v0.6
-        if "extras" not in geometric_input["input_specification"]:
-            geometric_input["input_specification"]["extras"] = {}
-
         # Set retries to two if zero while respecting local_config
         local_config = config.dict()
         local_config["retries"] = local_config.get("retries", 2) or 2
