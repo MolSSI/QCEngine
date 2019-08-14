@@ -62,7 +62,7 @@ class Psi4Harness(ProgramHarness):
             raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version()))
 
         # Setup the job
-        input_data = input_model.json_dict()
+        input_data = input_model.dict(encoding="json")
         input_data["nthreads"] = config.ncores
         input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
         input_data["success"] = False
