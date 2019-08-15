@@ -4,10 +4,11 @@ Tests the DQM compute dispatch module
 
 import copy
 
+import numpy as np
 import pytest
-from qcelemental.models import Molecule, ResultInput
 
 import qcengine as qcng
+from qcelemental.models import Molecule, ResultInput
 from qcengine import testing
 
 _canonical_methods = [
@@ -43,7 +44,9 @@ def test_compute_gradient(program, model):
     ret = qcng.compute(inp, program, raise_error=True)
 
     assert ret.success is True
-    assert isinstance(ret.return_result, list)
+    assert isinstance(ret.return_result, np.ndarray)
+    assert len(ret.return_result.shape) == 2
+    assert ret.return_result.shape[1] == 3
     assert "mytag" in ret.extras, ret.extras
 
 
