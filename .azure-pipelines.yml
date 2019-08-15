@@ -49,5 +49,5 @@ jobs:
   - script: |
       source $(conda_source)
       conda activate test
-      pytest -v .
+      pytest -rsv .
     displayName: 'Run the Tests'
