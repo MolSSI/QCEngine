@@ -3,12 +3,11 @@ Provides a CLI for QCEngine
 """
 
 import argparse
-import json
 import os.path
 import sys
 
 from . import compute, compute_procedure  # run and run-procedure
-from qcelemental.models import ResultInput # run and run-procedure
+from qcelemental.models import ResultInput  # run and run-procedure
 from . import __version__, list_all_procedures, list_all_programs, list_available_procedures, \
     list_available_programs, get_procedure, get_program  # info
 from .config import global_repr  # info
@@ -23,35 +22,28 @@ def parse_args():
     subparsers = parser.add_subparsers(dest="command")
 
     info = subparsers.add_parser('info', help="Print information about QCEngine setup, version, and environment.")
-    info.add_argument('--version', action='store_true', help="Print version of QCEngine and QCElemental.")
-    info.add_argument('--programs', action='store_true', help="Print detected and supported programs.")
-    info.add_argument('--procedures', action='store_true', help="Print detected and supported procedures.")
-    info.add_argument('--config', action='store_true', help="Print host, compute, and job configuration.")
-    info.add_argument('--all', action='store_true', help="Print all available information.")
+    info.add_argument("category", nargs="*", default="all",
+                      choices=["version", "programs", "procedures", "config", "all"],
+                      help="The information categories to show.")
 
     run = subparsers.add_parser('run', help="Run a program on a given task. Output is printed as a JSON blob.")
     run.add_argument('program', type=str, help="The program to run.")
     run.add_argument('data', type=str, help="Data describing the task to run. "
-                                            "One of: (i) A JSON blob. "
-                                            "(ii) A file name. "
+                                            "One of: (i) A JSON blob, "
+                                            "(ii) A file name, "
                                             "(iii) '-', indicating data will be read from STDIN.")
 
     run_procedure = subparsers.add_parser('run-procedure', help="Run a procedure on a given task. "
                                                                 "Output is printed as a JSON blob.")
     run_procedure.add_argument('procedure', type=str, help="The procedure to run.")
     run_procedure.add_argument('data', type=str, help="Data describing the task to run. "
-                                                      "One of: (i) A JSON blob. "
-                                                      "(ii) A file name. "
+                                                      "One of: (i) A JSON blob, "
+                                                      "(ii) A file name, "
                                                       "(iii) '-', indicating data will be read from STDIN.")
 
     args = vars(parser.parse_args())
     if args["command"] is None:
         parser.print_help(sys.stderr)
-        exit(1)
-
-    # Print usage and exit if no info options are provided
-    if args["command"] == "info" and not any([v for v in args.values() if v != "info"]):
-        info.print_help()
         exit(1)
 
     return args
@@ -98,13 +90,18 @@ def info_cli(args):
         print(" ".join(sorted(all_procs - avail_procs)))
         print()
 
-    if args["version"] or args["all"]:
+    # default=["all"] does is not allowed by argparse
+    if not isinstance(args["category"], list):
+        args["category"] = [args["category"]]
+    cat = set(args["category"])
+
+    if "version" in cat or "all" in cat:
         info_version()
-    if args["programs"] or args["all"]:
+    if "programs" in cat or "all" in cat:
         info_programs()
-    if args["procedures"] or args["all"]:
+    if "procedures" in cat or "all" in cat:
         info_procedures()
-    if args["config"] or args["all"]:
+    if "config" in cat or "all" in cat:
         print(">>> Configuration information")
         print()
         print(global_repr())

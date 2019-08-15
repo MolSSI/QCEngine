@@ -15,7 +15,7 @@ Command Invocation
 
 .. code-block:: bash
 
-    qcengine info [<options>]
+    qcengine info <options>
 
 Command Description
 ~~~~~~~~~~~~~~~~~~~
@@ -25,20 +25,16 @@ This command prints information about the QCEngine environment.
 Arguments
 ~~~~~~~~~
 
-``--version``
-    Print version of QCEngine and QCElemental.
+``category``
+    The information categories to show. Choices include:
 
-``--programs``
-    Print detected and supported programs.
+    * ``version``: Print version of QCEngine and QCElemental.
+    * ``programs``: Print detected and supported programs.
+    * ``procedures``: Print detected and supported procedures.
+    * ``config``: Print host, compute, and job configuration
+    * ``all``: Print all available information.
 
-``--procedures``
-    Print detected and supported procedures.
-
-``--config``
-    Print host, compute, and job configuration
-
-``--all``
-    Print all available information.
+    By default, all available information is printed.
 
 Run Command
 -----------
