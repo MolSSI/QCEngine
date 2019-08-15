@@ -79,21 +79,21 @@ https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoint
 ### Linking the services
 
 1. Sign into the account which meets the pre-requisites through the DevOps login.
-1. From the DevOps team, go to the group account, and then go to the "Project settings" blade.
+2. From the DevOps team, go to the group account, and then go to the "Project settings" blade.
     * If you are not an "Administrator" of the Pipelines team, you will not see this button.
-2. Go to the "Service Connections" menu.
-3. Choose "+ New Service Connection" and then "Docker Registry"
-4. Select the "Azure Container Registry" radio button.
-5. Choose a "Connection Name" which is easy to recognize and human readable (arbitrary).
+3. Go to the "Service Connections" menu.
+4. Choose "+ New Service Connection" and then "Docker Registry"
+5. Select the "Azure Container Registry" radio button.
+6. Choose a "Connection Name" which is easy to recognize and human readable (arbitrary).
     * Make note of this, you will use it when referencing images.
-6. Select the "Azure Subscription" drop down, and choose the Azure Subscription which is linked to the ACR you want to 
+7. Select the "Azure Subscription" drop down, and choose the Azure Subscription which is linked to the ACR you want to 
    make available to this Pipeline group.
     * This will auto-fill if there is only 1 connected Azure Subscription. If nothing appears, the account you are 
     signed in with is missing permissions and likely not associated with the Azure Subscription (e.g. you are using the 
     wrong account).
-7. Select the "Azure Container Registry" drop down and follow the authentication before selecting which ACR (if there
+8. Select the "Azure Container Registry" drop down and follow the authentication before selecting which ACR (if there
    are several) you want to get authorization to. 
-8. Click "OK" and this Pipeline will now have access to the ACR through this Service Connection. All authorization 
+9. Click "OK" and this Pipeline will now have access to the ACR through this Service Connection. All authorization 
    will be handled by Azure DevOps invisibly and not exposed in the builds.
     * If the user is not an "Owner" of the ACR, this will throw an authentication error before the window is closed.
     
@@ -113,7 +113,7 @@ https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoint
   
 ### Creating the Image
 
-1. Start a new [Dockerfile](https://docs.docker.com/engine/reference/builder/) with the following one lline header:
+1. Start a new [Dockerfile](https://docs.docker.com/engine/reference/builder/) with the following one line header:
     ```Dockerfile
     FROM condaforge/linux-anvil-comp7
     
@@ -228,6 +228,6 @@ so we have to add something in each of our `steps` which tells the container to 
 
 ### Running against multiple images
 
-One avenue for future iomprovements is having multiple images on the ACR we want to reference. For that, we can
+One avenue for future improvements is having multiple images on the ACR we want to reference. For that, we can
 [take advantage of the `strategy` directive](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/container-phases?view=azure-devops&tabs=yaml#multiple-jobs) 
 of Azure YAML files to auto-queue up multiple jobs.
