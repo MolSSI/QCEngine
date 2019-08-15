@@ -33,7 +33,7 @@ ACR can only be done if the following conditions are met:
   to access the ACR.
 * The user with access to the ACR approves specific builds to have access to the ACR. 
 
-Then, and only then, can a Pipline build access images in the ACR. Further, no unauthorized user can see, manage, 
+Then, and only then, can a Pipeline build access images in the ACR. Further, no unauthorized user can see, manage, 
 or change these credentials.
 
 ## Authenticating a new users for ACR and Pipelines
