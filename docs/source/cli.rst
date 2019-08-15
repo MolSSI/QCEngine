@@ -62,7 +62,11 @@ Arguments
     The program to run.
 
 ``data``
-    A JSON blob of the task description. If '-', data will be read from STDIN.
+    Data describing the task. One of:
+
+    * A JSON blob.
+    * A file name.
+    * '-', indicating data will be read from STDIN.
 
 
 Run-Procedure Command
@@ -87,4 +91,8 @@ Arguments
     The procedure to run.
 
 ``data``
-    A JSON blob of the task description. If '-', data will be read from STDIN.
+    Data describing the task. One of:
+
+    * A JSON blob.
+    * A file name.
+    * '-', indicating data will be read from STDIN.

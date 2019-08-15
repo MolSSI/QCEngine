@@ -4,9 +4,11 @@ Provides a CLI for QCEngine
 
 import argparse
 import json
+import os.path
 import sys
 
 from . import compute, compute_procedure  # run and run-procedure
+from qcelemental.models import ResultInput # run and run-procedure
 from . import __version__, list_all_procedures, list_all_programs, list_available_procedures, \
     list_available_programs, get_procedure, get_program  # info
 from .config import global_repr  # info
@@ -16,6 +18,8 @@ __all__ = ["main"]
 
 def parse_args():
     parser = argparse.ArgumentParser(description='A CLI for the QCEngine.')
+    parser.add_argument('--version', action='version', version=f"{__version__}")
+
     subparsers = parser.add_subparsers(dest="command")
 
     info = subparsers.add_parser('info', help="Print information about QCEngine setup, version, and environment.")
@@ -27,14 +31,18 @@ def parse_args():
 
     run = subparsers.add_parser('run', help="Run a program on a given task. Output is printed as a JSON blob.")
     run.add_argument('program', type=str, help="The program to run.")
-    run.add_argument('data', type=str, help="A JSON blob of the task description. "
-                                            "If '-', data will be read from STDIN.")
+    run.add_argument('data', type=str, help="Data describing the task to run. "
+                                            "One of: (i) A JSON blob. "
+                                            "(ii) A file name. "
+                                            "(iii) '-', indicating data will be read from STDIN.")
 
     run_procedure = subparsers.add_parser('run-procedure', help="Run a procedure on a given task. "
                                                                 "Output is printed as a JSON blob.")
     run_procedure.add_argument('procedure', type=str, help="The procedure to run.")
-    run_procedure.add_argument('data', type=str, help="A JSON blob of the task description. "
-                                                      "If '-', data will be read from STDIN.")
+    run_procedure.add_argument('data', type=str, help="Data describing the task to run. "
+                                                      "One of: (i) A JSON blob. "
+                                                      "(ii) A file name. "
+                                                      "(iii) '-', indicating data will be read from STDIN.")
 
     args = vars(parser.parse_args())
     if args["command"] is None:
@@ -102,6 +110,28 @@ def info_cli(args):
         print(global_repr())
 
 
+def data_arg_helper(data_arg: str) -> 'ResultInput':
+    """
+    Converts the data argument of run and run-procedure commands to a ResultInput for compute
+
+    Parameters
+    ----------
+    data_arg: str
+        Either a data blob or file name or '-' for STDIN
+
+    Returns
+    -------
+    ResultInput
+        An input for compute.
+    """
+    if data_arg == "-":
+        return ResultInput.parse_raw(sys.stdin.read())
+    elif os.path.isfile(data_arg):
+        return ResultInput.parse_file(data_arg)
+    else:
+        return ResultInput.parse_raw(data_arg)
+
+
 def main(args=None):
     # Grab CLI args if not present
     if args is None:
@@ -110,10 +140,10 @@ def main(args=None):
     if command == "info":
         info_cli(args)
     elif command == "run":
-        ret = compute(json.loads(args["data"] if args["data"] != "-" else sys.stdin.read()), args["program"])
+        ret = compute(data_arg_helper(args["data"]), args["program"])
         print(ret.json())
     elif command == "run-procedure":
-        ret = compute_procedure(json.loads(args["data"] if args["data"] != "-" else sys.stdin.read()), args["procedure"])
+        ret = compute_procedure(data_arg_helper(args["data"]), args["procedure"])
         print(ret.json())
 
 
