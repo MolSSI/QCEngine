@@ -44,7 +44,7 @@ coordinate with one of the approved users who can upload your custom Docker imag
 ACR.
 
 1. Have an [Azure Portal](https://azure.microsoft.com/en-us/account/) account through a Virginia Tech email address 
-   (this is something which has to be authorized by VT so we can allow access to the ARC, this may be relaxed in the 
+   (this is something which has to be authorized by VT so we can allow access to the ACR, this may be relaxed in the 
    future.)
 2. Create an [Azure DevOps](https://azure.microsoft.com/en-us/services/devops/?nav=min) account with the same email 
    address. These are different login nodes, even though they both run through Azure. This will be for access to the 
@@ -91,7 +91,7 @@ https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoint
     * This will auto-fill if there is only 1 connected Azure Subscription. If nothing appears, the account you are 
     signed in with is missing permissions and likely not associated with the Azure Subscription (e.g. you are using the 
     wrong account).
-7. Select the "Azure Container Registry" drop down and follow the authentication before selecting which ARC (if there
+7. Select the "Azure Container Registry" drop down and follow the authentication before selecting which ACR (if there
    are several) you want to get authorization to. 
 8. Click "OK" and this Pipeline will now have access to the ACR through this Service Connection. All authorization 
    will be handled by Azure DevOps invisibly and not exposed in the builds.
@@ -101,7 +101,7 @@ See also:
  
 https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#sep-docreg
 
-## Creating and uploading a new image to the ARC
+## Creating and uploading a new image to the ACR
 
 ### Pre-requisites
 
@@ -153,7 +153,7 @@ These instructions are for adding new codes to the CI suite.
 * ACR and the Pipeline are linked services and you know the `Connection Name` inside the DevOps Pipeline 
   (see "Linking the services").
 * The Docker image has been uploaded to the private ACR and you know the image name and tag you want to use 
-  (see "Creating and uploading a new image to the ARC")
+  (see "Creating and uploading a new image to the ACR")
 * You have access to edit the `.azure-pipelines.yml` file of the Engine repository.
 
 ### Adding the Custom Image to the YAML Pipeline Container Resource
@@ -175,13 +175,15 @@ resources:
         endpoint: "QCArchive Azure Container Registry" # Name of the Service Connection the pipeline is configured with
 ```
 
-In this file, you need to specify each custom image in the ARC you want to use as an entry in the list. So for this 
-example, we have 2 images, one which we call `qcengineci` and the other `waffleiron`. The names after the `container:` 
-directive are arbitrary, but used later, so keep those in mind.
+In this file, you need to specify each custom image in the ACR you want to use as an entry in the list. So for this 
+example, we have 2 images, one which we call `qcengineci` and the other `waffleiron`. The names after the 
+`container:` directive are arbitrary, but used later, so keep those in mind.
 
 Next we have the `image:` directive which is the pointer to the image in the ACR of the form 
 `qcarchive.azurecr.io/{IMAGE_NAME}:{TAG}`. Even if you did not not upload the image yourself, if you know the name, you 
-can request the CI fetch it. 
+can request the CI fetch it. In these examples, there are two images we reference, both in the `qcarchive.azureacr.io` 
+registry, one image called `qcengineci` with the tag `latest`, and one image called `something_about_waffles` with the 
+tag `maple_syrup`.
 
 Finally, and most importantly, we have the `endpoint:` directive. This is the human-defined name when the ACR and the 
 Pipeline were linked through a "Service connection" in the `Connection Name` field. The specification of this field 
