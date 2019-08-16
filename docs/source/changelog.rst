@@ -13,6 +13,16 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.X.Y / 2019-??-??
+-------------------
+
+New Features
+++++++++++++
+
+- (:pr:`137`) A new CI pipeline through Azure has been developed which uses custom, private Docker images
+  to house non-public code which will enable us to test Engine through integrated CI on these codes securely.
+
+
 v0.9.0 / 2019-08-14
 -------------------
 
