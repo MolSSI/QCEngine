@@ -36,6 +36,19 @@ ACR can only be done if the following conditions are met:
 Then, and only then, can a Pipeline build access images in the ACR. Further, no unauthorized user can see, manage, 
 or change these credentials.
 
+## CI Runtime Security (When the builds trigger)
+
+Engine is, itself, a public code base, even though the codes it wraps may be private. Similarly, the Azure YAML file 
+which has the build and test instructions exist inside the Engine code and could be edited by anyone. In order to 
+block malicious edits from running and exposing the proprietary code by triggering the CI, the Engine developers only 
+allow builds to trigger on code which has been reviewed and approved, and merged into the code base already. No 
+outside user can propose a change which will automatically trigger the CI and execute unapproved code.
+
+The trade off to this level of security is that benign PRs which would actually benefit from said testing cannot 
+trigger tests on the secure ACR images. The code will be tested on merge into master, and we are working on a better 
+manual trigger on request system to let us test PRs which the administrators deem safe. @QCArchiveBot may make an 
+appearance as well!
+
 ## Authenticating a new users for ACR and Pipelines
 
 These are instructions for allowing a new user permission to use the private ACR instance paid for by MolSSI/VT. These 
