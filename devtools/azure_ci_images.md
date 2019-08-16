@@ -47,7 +47,7 @@ outside user can propose a change which will automatically trigger the CI and ex
 The trade off to this level of security is that benign PRs which would actually benefit from said testing cannot 
 trigger tests on the secure ACR images. The code will be tested on merge into master, and we are working on a better 
 manual trigger on request system to let us test PRs which the administrators deem safe. @QCArchiveBot may make an 
-appearance as well!
+appearance as well through a manual trigger phrase.
 
 ## Authenticating a new users for ACR and Pipelines
 
