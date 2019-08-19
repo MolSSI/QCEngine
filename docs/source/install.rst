@@ -6,7 +6,7 @@ You can install qcengine with ``conda``, with ``pip``.
 Conda
 -----
 
-You can update qcengine using `conda <https://www.anaconda.com/download/>`_:
+You can install qcengine using `conda <https://www.anaconda.com/download/>`_:
 
 .. code-block:: console
 
@@ -19,8 +19,7 @@ This installs QCEngine and its dependencies. The qcengine package is maintained 
 Pip
 ---
 
-To install QCEngine with ``pip`` there are a few options, depending on which
-dependencies you would like to keep up to date:
+You can also install QCEngine using ``pip``:
 
 .. code-block:: console
 
