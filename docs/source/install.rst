@@ -32,7 +32,7 @@ Test the Installation
 .. note::
 
    QCEngine is a wrapper for other quantum chemistry codes. The tests for QCEngine will only test the wrapper for a
-   given code if its detected in the PATH or current Python Environment, otherwise the tests for that package are
+   given code if its detected in the ``$PATH`` or current Python Environment, otherwise the tests for that package are
    skipped. Keep this in mind if you see many ``skip`` or ``s`` codes output from PyTest.
 
 You can test to make sure that Engine is installed correctly by first installing ``pytest``.
