@@ -1,54 +1,63 @@
-Installing QCEngine
-===================
+Install QCEngine
+================
 
-You can install ``qcengine`` with ``conda``, with ``pip``, or from source.
+You can install qcengine with ``conda`` or with ``pip``.
 
 Conda
 -----
 
-You can install or update ``qcengine`` using `conda <https://www.anaconda.com/download/>`_::
+You can install qcengine using `conda <https://www.anaconda.com/download/>`_:
 
-    conda install qcengine -c conda-forge
+.. code-block:: console
 
-This command installs ``qcengine`` and its dependencies. The ``qcengine`` package is maintained on the
+    >>> conda install qcengine -c conda-forge
+
+This installs QCEngine and its dependencies. The qcengine package is maintained on the
 `conda-forge channel <https://conda-forge.github.io/>`_.
 
 
 Pip
 ---
 
-``qcengine`` may be installed with ``pip``::
+You can also install QCEngine using ``pip``:
 
-    pip install qcengine
+.. code-block:: console
 
-Install from Source
--------------------
-
-To install ``qcengine`` from source, clone the repository from `github
-<https://github.com/molssi/qcengine>`_::
-
-    git clone https://github.com/MolSSI/QCEngine.git
-    cd qcengine
-    python setup.py install
-
-or use ``pip`` for a local install::
-
-    pip install -e .
-
-We recommend building a development environment with the following lines::
-
-    cd qcengine
-    python devtools/scripts/conda_env.py -n=qcngdev -p=3.6 devtools/conda-envs/psi.yaml
-    conda activate qcngdev
-
-This will build out a new environment with several compute backends for
-``qcengine`` which provides a platform to test and develop the code.
+   >>> pip install qcengine
 
 
-Test
-++++
+Test the Installation
+---------------------
 
-Test a ``qcengine`` local install with ``pytest``::
+.. note::
 
-    cd qcengine
-    pytest -v
+   QCEngine is a wrapper for other quantum chemistry codes. The tests for QCEngine will only test the wrapper for a
+   given code if its detected in the ``$PATH`` or current Python Environment, otherwise the tests for that package are
+   skipped. Keep this in mind if you see many ``skip`` or ``s`` codes output from PyTest.
+
+You can test to make sure that Engine is installed correctly by first installing ``pytest``.
+
+From ``conda``:
+
+.. code-block:: console
+
+   >>> conda install pytest -c conda-forge
+
+From ``pip``:
+
+.. code-block:: console
+
+   >>> pip install pytest
+
+Then, run the following command:
+
+.. code-block::
+
+   >>> pytest --pyargs qcengine
+
+
+Developing from Source
+----------------------
+
+If you are a developer and want to make contributions Engine, you can access the source code from
+`github <https://github.com/molssi/qcengine>`_.
