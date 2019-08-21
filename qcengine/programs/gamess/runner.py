@@ -1,5 +1,6 @@
 """Compute quantum chemistry using Iowa State's GAMESS executable."""
 
+import copy
 import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional
@@ -11,11 +12,23 @@ from qcelemental.util import which, safe_version, unnp
 from ...util import execute
 from ..model import ProgramHarness
 from .harvester import harvest
+from .molmtd import muster_modelchem
+from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class GAMESSHarness(ProgramHarness):
+    """
+
+    Notes
+    -----
+    Required edits to the ``rungms`` script are as follows::
+        set SCR=./                                  # will be managed by QCEngine instead
+        set USERSCR=./                              # ditto
+        set GMSPATH=/home/psilocaluser/gits/gamess  # full path to installation
+
+    """
 
     _defaults = {
         "name": "GAMESS",
@@ -55,8 +68,7 @@ class GAMESSHarness(ProgramHarness):
 #        print("QCSCHEMA_INPUT")
 #        print(input_data)
 
-        #job_inputs = self.build_input(input_data, config)
-        job_inputs = self.fake_input(input_data, config)
+        job_inputs = self.build_input(input_data, config)
 #        print('JOB_INPUTS')
 #        pp.pprint(job_inputs)
         success, dexe = self.execute(job_inputs)
@@ -70,43 +82,51 @@ class GAMESSHarness(ProgramHarness):
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
-        pass
+        gamessrec = {
+            'infiles': {},
+            'scratch_directory': config.scratch_directory,
+        }
 
-    def fake_input(self, input_model: 'ResultInput', config: 'JobConfig',
-                    template: Optional[str] = None) -> Dict[str, Any]:
+        opts = copy.deepcopy(input_model.keywords)
+        # Handle basis set
+        # * for gamess, usually insufficient b/c either ngauss or ispher needed
+        opts['basis__gbasis'] = input_model.model.basis
+
+        # Handle molecule
+        molcmd, moldata = input_model.molecule.to_string(dtype='gamess', units='Bohr', return_data=True)
+        opts.update(moldata['keywords'])
+
+        # Handle calc type and quantum chemical method
+        opts.update(muster_modelchem(input_model.model.method, input_model.driver.derivative_int()))
+
+        #print('JOB_OPTS')
+        #pp.pprint(opts)
+
+        # Handle conversion from schema (flat key/value) keywords into local format
+        optcmd = format_keywords(opts)
+
+        gamessrec['infiles']['gamess.inp'] = optcmd + molcmd
+        gamessrec['commands'] = [which("rungms"), "gamess"]  # rungms JOB VERNO NCPUS >& JOB.log &
+
+        return gamessrec
 
         # Note decr MEMORY=100000 to get
         # ***** ERROR: MEMORY REQUEST EXCEEDS AVAILABLE MEMORY
         # to test gms fail
-        infile = \
-""" $CONTRL SCFTYP=ROHF MULT=3 RUNTYP=GRADIENT COORD=CART $END
- $SYSTEM TIMLIM=1 MEMORY=800000 $END
- $SCF    DIRSCF=.TRUE. $END
- $BASIS  GBASIS=STO NGAUSS=2 $END
- $GUESS  GUESS=HUCKEL $END
- $DATA
-Methylene...3-B-1 state...ROHF/STO-2G
-Cnv  2
 
-Hydrogen   1.0    0.82884     0.7079   0.0
-Carbon     6.0
-Hydrogen   1.0   -0.82884     0.7079   0.0
- $END
-"""
-        # edits to rungms
-        # set SCR=./
-        # set USERSCR=./
-        # set GMSPATH=/home/psilocaluser/gits/gamess
-
-        return {
-            "commands": [which("rungms"), "gamess"],  # rungms JOB VERNO NCPUS >& JOB.log &
-            "infiles": {
-                "gamess.inp": infile
-            },
-            "scratch_directory": config.scratch_directory,
-            "input_result": input_model.copy(deep=True),
-        }
-
+        # $CONTRL SCFTYP=ROHF MULT=3 RUNTYP=GRADIENT COORD=CART $END
+        # $SYSTEM TIMLIM=1 MEMORY=800000 $END
+        # $SCF    DIRSCF=.TRUE. $END
+        # $BASIS  GBASIS=STO NGAUSS=2 $END
+        # $GUESS  GUESS=HUCKEL $END
+        # $DATA
+        #Methylene...3-B-1 state...ROHF/STO-2G
+        #Cnv  2
+        #
+        #Hydrogen   1.0    0.82884     0.7079   0.0
+        #Carbon     6.0
+        #Hydrogen   1.0   -0.82884     0.7079   0.0
+        # $END
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
