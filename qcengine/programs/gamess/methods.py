@@ -1,13 +1,13 @@
-
 def muster_modelchem(method, derint):
     method = method.lower()
     opts = {}
 
-    runtyp = {0: 'energy',
-              1: 'gradient',
-              2: 'hessian',
-              #'properties': 'prop',
-             }[derint]
+    runtyp = {
+        0: 'energy',
+        1: 'gradient',
+        2: 'hessian',
+        #'properties': 'prop',
+    }[derint]
 
     opts['contrl__runtyp'] = runtyp
 

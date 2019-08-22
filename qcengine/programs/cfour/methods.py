@@ -1,4 +1,3 @@
-
 def muster_modelchem(method, derint):
     method = method.lower()
     opts = {}
@@ -14,7 +13,6 @@ def muster_modelchem(method, derint):
 
     elif derint == 2:
         opts['vibration'] = 'exact'
-
 
     if method == 'cfour':
         pass

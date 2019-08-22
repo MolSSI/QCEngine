@@ -22,7 +22,13 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class CFOURHarness(ProgramHarness):
+    """
 
+    Notes
+    -----
+    * Looks for basis set file ``../basis/GENBAS`` from ``xcfour`` executable. If this doesn't work, file an issue.
+
+    """
     _defaults = {
         "name": "CFOUR",
         "scratch": True,

@@ -1,14 +1,13 @@
-
-
 def muster_modelchem(method, derint, use_tce):
     method = method.lower()
     opts = {}
 
-    runtyp = {0: 'energy',
-              1: 'gradient',
-              2: 'hessian',
-              #'properties': 'prop',
-             }[derint]
+    runtyp = {
+        0: 'energy',
+        1: 'gradient',
+        2: 'hessian',
+        #'properties': 'prop',
+    }[derint]
 
     if method == 'nwchem':
         pass
@@ -21,7 +20,7 @@ def muster_modelchem(method, derint, use_tce):
             mdccmd = f'task tce {runtyp}\n\n'
             opts['tce__mp2'] = True
         else:
-             mdccmd = f'task mp2 {runtyp}\n\n'
+            mdccmd = f'task mp2 {runtyp}\n\n'
 
     elif method == 'mp3':
         if use_tce:
@@ -43,7 +42,7 @@ def muster_modelchem(method, derint, use_tce):
             mdccmd = f'task tce {runtyp}\n\n'
             opts['tce__ccsd'] = True
         else:
-             mdccmd = f'task ccsd {runtyp}\n\n'
+            mdccmd = f'task ccsd {runtyp}\n\n'
 
     elif method == 'ccsdt':
         if use_tce:

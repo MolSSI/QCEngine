@@ -46,13 +46,14 @@ def format_keywords(options):
         group_level_lines = []
         for key, val in grouped_options[group].items():
             line = ' '.join(format_keyword(key, val, lop_off=False))
-            if group.lower() == 'basis' and any([word in line for word in ['spherical', 'cartesian', 'print', 'noprint', 'rel']]):
+            if group.lower() == 'basis' and any(
+                [word in line for word in ['spherical', 'cartesian', 'print', 'noprint', 'rel']]):
                 group_level_lines.append(line)
             else:
                 lines.append(line)
         if group == 'aaaglobal':
             grouped_lines[group] = '\n'.join(lines) + '\n'
         else:
-            grouped_lines[group] = f'{group.lower()} ' + ' '.join(group_level_lines) + '\n' + '\n  '.join(lines) + '\nend\n'
+            grouped_lines[group] = f'{group.lower()} ' + ' '.join(group_level_lines) + '\n ' + '\n '.join(lines) + '\nend\n'
 
     return '\n'.join(grouped_lines.values()) + '\n'
