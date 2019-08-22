@@ -1,7 +1,9 @@
 """Compute quantum chemistry using Mainz-Austin-Budapest-Gainesville's CFOUR executable."""
 
+import copy
 import pprint
 from decimal import Decimal
+from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
@@ -13,6 +15,8 @@ from qcelemental.util import which, safe_version
 from ...util import execute
 from ..model import ProgramHarness
 from .harvester import harvest
+from .keywords import format_keywords
+from .methods import muster_modelchem
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -57,7 +61,7 @@ class CFOURHarness(ProgramHarness):
     def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
         self.found(raise_error=True)
 
-        job_inputs = self.fake_input(input_model, config)
+        job_inputs = self.build_input(input_model, config)
         success, dexe = self.execute(job_inputs)
 
         if success:
@@ -67,17 +71,45 @@ class CFOURHarness(ProgramHarness):
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
-        pass
-
-    def fake_input(self, input_model: 'ResultInput', config: 'JobConfig',
-                   template: Optional[str] = None) -> Dict[str, Any]:
-
-        return {
-            "command": [which("xcfour")],
-            "infiles": input_model.extras['infiles'],
-            "scratch_directory": config.scratch_directory,
-            "input_result": input_model.copy(deep=True),
+        cfourrec = {
+            'infiles': {},
+            'scratch_directory': config.scratch_directory,
         }
+
+        opts = copy.deepcopy(input_model.keywords)
+
+        # Handle memory
+        # for cfour, [GiB] --> [MB]
+        opts['memory_size'] = int(config.memory * (1024**3) / 1e6)
+        opts['mem_unit'] = 'mb'
+
+        # Handle molecule
+        molcmd, moldata = input_model.molecule.to_string(dtype='cfour', units='Bohr', return_data=True)
+        opts.update(moldata['keywords'])
+
+        # Handle calc type and quantum chemical method
+        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver.derivative_int())
+        opts.update(mdcopts)
+
+        # Handle basis set
+        # * why, yes, this is highly questionable
+        #   * assuming relative file location between xcfour exe and GENBAS file
+        #   * reading a multi MB file into the inputs dict
+        opts['basis'] = input_model.model.basis
+
+        print('JOB_OPTS')
+        pp.pprint(opts)
+
+        # Handle conversion from schema (flat key/value) keywords into local format
+        optcmd = format_keywords(opts)
+
+        xcfour = which("xcfour")
+        genbas = Path(xcfour).parent.parent / 'basis' / 'GENBAS'
+        cfourrec['infiles']['ZMAT'] = molcmd + optcmd
+        cfourrec['infiles']['GENBAS'] = genbas.read_text()
+        cfourrec['command'] = [xcfour]
+
+        return cfourrec
 
     def execute(self,
                 inputs: Dict[str, Any],
