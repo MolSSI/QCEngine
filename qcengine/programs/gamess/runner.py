@@ -88,9 +88,10 @@ class GAMESSHarness(ProgramHarness):
         }
 
         opts = copy.deepcopy(input_model.keywords)
-        # Handle basis set
-        # * for gamess, usually insufficient b/c either ngauss or ispher needed
-        opts['basis__gbasis'] = input_model.model.basis
+
+        # Handle memory
+        # for gamess, [GiB] --> [MW]
+        opts['system__mwords'] = int(config.memory * (1024**3) / 8e6)
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype='gamess', units='Bohr', return_data=True)
@@ -99,6 +100,10 @@ class GAMESSHarness(ProgramHarness):
         # Handle calc type and quantum chemical method
         opts.update(muster_modelchem(input_model.model.method, input_model.driver.derivative_int()))
 
+        # Handle basis set
+        # * for gamess, usually insufficient b/c either ngauss or ispher needed
+        opts['basis__gbasis'] = input_model.model.basis
+
         #print('JOB_OPTS')
         #pp.pprint(opts)
 
@@ -106,7 +111,7 @@ class GAMESSHarness(ProgramHarness):
         optcmd = format_keywords(opts)
 
         gamessrec['infiles']['gamess.inp'] = optcmd + molcmd
-        gamessrec['commands'] = [which("rungms"), "gamess"]  # rungms JOB VERNO NCPUS >& JOB.log &
+        gamessrec['command'] = [which("rungms"), "gamess"]  # rungms JOB VERNO NCPUS >& JOB.log &
 
         return gamessrec
 
@@ -130,7 +135,7 @@ class GAMESSHarness(ProgramHarness):
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
-        success, dexe = execute(inputs["commands"],
+        success, dexe = execute(inputs["command"],
                                 inputs["infiles"],
                                 [],
                                 scratch_messy=False,

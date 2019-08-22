@@ -8,9 +8,6 @@ import qcengine as qcng
 from qcengine import testing
 
 
-_base_json = {"schema_name": "qcschema_input", "schema_version": 1}
-
-
 @pytest.fixture
 def h2o():
     smol = """
@@ -34,28 +31,32 @@ units au
     return qcel.models.Molecule.from_data(smol)
 
 
-@pytest.mark.parametrize('prog,bas,opts', [
-    #pytest.param('cfour', 'aug-pvdz', {'cfour_SCF_CONV': 12, 'cfour_CC_CONV': 12}, marks=testing.using_cfour),
-    #pytest.param('cfour', {}, marks=testing.using_cfour),
-    #pytest.param('nwchem', {}, marks=testing.using_nwchem),
-    #pytest.param('nwchem', {'qc_module': 'tce'}, marks=testing.using_nwchem),
-    pytest.param('psi4', 'aug-cc-pvdz', {}, marks=testing.using_psi4),
-    pytest.param('gamess', 'accd', {'ccinp__ncore': 0, 'contrl__ispher': 1}, marks=testing.using_gamess),
-])
-def test_sp_ccsd_rhf_full(prog, bas, opts, h2o):
+@pytest.mark.parametrize(
+    'program,basis,keywords',
+    [
+        #pytest.param('cfour', 'aug-pvdz', {'cfour_SCF_CONV': 12, 'cfour_CC_CONV': 12}, marks=testing.using_cfour),
+        #pytest.param('cfour', {}, marks=testing.using_cfour),
+        pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True}, marks=testing.using_nwchem),
+        #pytest.param('nwchem', {'qc_module': 'tce'}, marks=testing.using_nwchem),
+        pytest.param('psi4', 'aug-cc-pvdz', {}, marks=testing.using_psi4),
+        pytest.param('gamess', 'accd', {'ccinp__ncore': 0, 'contrl__ispher': 1}, marks=testing.using_gamess),
+    ])  # yapf: disable
+def test_sp_ccsd_rhf_full(program, basis, keywords, h2o):
     """cfour/sp-rhf-ccsd/input.dat
     #! single point CCSD/qz2p on water
 
     """
-    resi = copy.deepcopy(_base_json)
-    resi["molecule"] = h2o
-    resi["driver"] = "energy"
-    resi["model"] = {"method": "ccsd", "basis": bas}
-    resi["keywords"] = opts
+    resi = {
+        "molecule": h2o,
+        "driver": "energy",
+        "model": {
+            "method": "ccsd",
+            "basis": basis
+        },
+        "keywords": keywords,
+    }
 
-    res = qcng.compute(resi, prog, raise_error=True, return_dict=True)
-#    import pprint
-#    pprint.pprint(res)
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
 
     assert res["driver"] == "energy"
     assert "provenance" in res
@@ -70,8 +71,7 @@ def test_sp_ccsd_rhf_full(prog, bas, opts, h2o):
 
     atol = 1.e-6
     #assert compare_values(scftot, qcdb.variable('scf total energy'), tnm() + ' SCF', atol=atol)
-    #if not (mtd == 'nwc-ccsd' and opts.get('qc_module', 'nein').lower() == 'tce'):
+    #if not (mtd == 'nwc-ccsd' and keywords.get('qc_module', 'nein').lower() == 'tce'):
     #    assert compare_values(mp2tot, qcdb.variable('mp2 total energy'), tnm() + ' MP2', atol=atol)
     #assert compare_values(ccsdcorl, qcdb.variable('ccsd correlation energy'), tnm() + ' CCSD corl', atol=atol)
     assert compare_values(ccsdtot, res["return_result"], atol=atol)
-
