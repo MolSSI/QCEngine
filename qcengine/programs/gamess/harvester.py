@@ -24,6 +24,11 @@ def harvest(p4Mol, gamessout, **largs):
             if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError("""gamess outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f).""" % \
                             (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy()))
+
+        amol, data = outMol.align(p4Mol, atoms_map=False, mols_align=True, verbose=0)
+        mill = data['mill']
+        if outGrad is not None:
+            outGrad = mill.align_gradient(np.array(outGrad))
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
