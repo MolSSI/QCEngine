@@ -56,7 +56,7 @@ install:
     if [ $PROG == "PSI4DEV" ]; then
       conda remove qcengine --force
     elif [ $PROG == "ANI" ]; then
-      pip install torch_nightly -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
+      pip install torch_nightly -q -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
       pip install torchani
     fi
   - pip install git+https://github.com/MolSSI/QCEngineRecords.git#egg=qcenginerecords
