@@ -9,7 +9,7 @@ import pydantic
 import pytest
 
 import qcengine as qcng
-from qcengine.testing import environ_context
+from qcengine.util import environ_context
 
 
 def test_node_blank():
@@ -41,7 +41,7 @@ def test_node_auto():
 def test_node_environ():
 
     scratch_name = "myscratch1234"
-    with environ_context({"QCA_SCRATCH_DIR": scratch_name}):
+    with environ_context(env={"QCA_SCRATCH_DIR": scratch_name}):
         description = {
             "name": "something",
             "hostname_pattern": "*",
@@ -73,7 +73,7 @@ def opt_state_basic():
     old_node = copy.deepcopy(qcng.config.NODE_DESCRIPTORS)
 
     scratch_name = "myscratch1234"
-    with environ_context({"QCA_SCRATCH_DIR": scratch_name}):
+    with environ_context(env={"QCA_SCRATCH_DIR": scratch_name}):
 
         configs = [{
             "name": "dragonstooth",
@@ -135,13 +135,15 @@ def test_config_default(opt_state_basic):
 
     config = qcng.config.get_config(hostname="dt149")
     assert config.ncores == 6
+    assert config.retries == 0
     assert pytest.approx(config.memory, 0.1) == 54
 
 
 def test_config_local_ncores(opt_state_basic):
-    config = qcng.config.get_config(hostname="something", local_options={"ncores": 10})
+    config = qcng.config.get_config(hostname="something", local_options={"ncores": 10, "retries": 3})
     assert config.ncores == 10
     assert config.memory == 4
+    assert config.retries == 3
 
 
 def test_config_local_njobs(opt_state_basic):

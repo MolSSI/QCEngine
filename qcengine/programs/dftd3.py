@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 
 import qcelemental as qcel
-from qcelemental.models import Provenance, Result
+from qcelemental.models import FailedOperation, Provenance, Result
 from qcelemental.util import safe_version, which
 
 from . import empirical_dispersion_resources
@@ -37,9 +37,6 @@ class DFTD3Harness(ProgramHarness):
 
     class Config(ProgramHarness.Config):
         pass
-
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -74,8 +71,12 @@ class DFTD3Harness(ProgramHarness):
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
-            output_model = input_model
-            output_model["error"] = {"error_type": "execution_error", "error_message": dexe["stderr"]}
+            output_model = FailedOperation(success=False,
+                                           error={
+                                               "error_type": "execution_error",
+                                               "error_message": dexe["stderr"]
+                                           },
+                                           input_data=input_model.dict())
 
         return output_model
 
@@ -262,10 +263,7 @@ class DFTD3Harness(ProgramHarness):
             retres = retres.ravel().tolist()
 
         output_data = {
-            'extras': {
-                'local_keywords': input_model.extras['info'],
-                'qcvars': calcinfo,
-            },
+            'extras': input_model.extras,
             'properties': {},
             'provenance': Provenance(creator="DFTD3",
                                      version=self.get_version(),
@@ -273,6 +271,8 @@ class DFTD3Harness(ProgramHarness):
             'return_result': retres,
             'stdout': stdout,
         }  # yapf: disable
+        output_data["extras"]['local_keywords'] = input_model.extras['info']
+        output_data["extras"]['qcvars'] = calcinfo
 
         output_data['success'] = True
         return Result(**{**input_model.dict(), **output_data})

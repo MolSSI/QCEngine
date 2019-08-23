@@ -15,6 +15,9 @@ class ProcedureHarness(BaseModel, abc.ABC):
         allow_mutation: False
         extra: "forbid"
 
+    def __init__(self, **kwargs):
+        super().__init__(**{**self._defaults, **kwargs})
+
     @abc.abstractmethod
     def build_input_model(self, data: Union[Dict[str, Any], 'BaseModel'], raise_error: bool=True) -> 'BaseModel':
         """
@@ -55,3 +58,12 @@ class ProcedureHarness(BaseModel, abc.ABC):
         """
 
         return model_wrapper(data, model)
+
+    def get_version(self) -> str:
+        """Finds procedure, extracts version, returns normalized version string.
+        Returns
+        -------
+        str
+            Return a valid, safe python version string.
+        """
+        pass

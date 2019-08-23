@@ -2,6 +2,7 @@
 Calls the Psi4 executable.
 """
 import json
+import os
 from typing import Dict
 
 from qcelemental.models import Result
@@ -9,7 +10,7 @@ from qcelemental.util import parse_version, safe_version, which
 
 from .model import ProgramHarness
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
-from ..util import execute, popen
+from ..util import execute, popen, temporary_directory
 
 
 class Psi4Harness(ProgramHarness):
@@ -27,12 +28,12 @@ class Psi4Harness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     @staticmethod
-    def found(raise_error: bool=False) -> bool:
-        return which('psi4', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install psi4 -c psi4`.')
+    def found(raise_error: bool = False) -> bool:
+        return which('psi4',
+                     return_bool=True,
+                     raise_error=raise_error,
+                     raise_msg='Please install via `conda install psi4 -c psi4`.')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -57,8 +58,11 @@ class Psi4Harness(ProgramHarness):
         """
         self.found(raise_error=True)
 
+        if parse_version(self.get_version()) < parse_version("1.2"):
+            raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version()))
+
         # Setup the job
-        input_data = input_model.json_dict()
+        input_data = input_model.dict(encoding="json")
         input_data["nthreads"] = config.ncores
         input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
         input_data["success"] = False
@@ -67,18 +71,21 @@ class Psi4Harness(ProgramHarness):
         if input_data["schema_name"] == "qcschema_input":
             input_data["schema_name"] = "qc_schema_input"
 
-        if config.scratch_directory:
-            input_data["scratch_directory"] = config.scratch_directory
+        # Location resolution order config.scratch_dir, $PSI_SCRATCH, /tmp
+        parent = config.scratch_directory
+        if parent is None:
+            parent = os.environ.get("PSI_SCRATCH", None)
 
-        if parse_version(self.get_version()) > parse_version("1.2"):
+        with temporary_directory(parent=parent, suffix="_psi_scratch") as tmpdir:
 
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
             if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in caseless_keywords):
                 input_data["keywords"]["reference"] = "uhf"
 
             # Execute the program
-            success, output = execute([which("psi4"), "--json", "data.json"], {"data.json": json.dumps(input_data)},
-                                      ["data.json"])
+            success, output = execute([which("psi4"), "--scratch", tmpdir, "--json", "data.json"],
+                                      {"data.json": json.dumps(input_data)}, ["data.json"],
+                                      scratch_directory=tmpdir)
 
             if success:
                 output_data = json.loads(output["outfiles"]["data.json"])
@@ -102,9 +109,6 @@ class Psi4Harness(ProgramHarness):
                 output_data = input_data
                 output_data["error"] = {"error_type": "execution_error", "error_message": output["stderr"]}
 
-        else:
-            raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version()))
-
         # Reset the schema if required
         output_data["schema_name"] = "qcschema_output"
 
@@ -119,7 +123,7 @@ class Psi4Harness(ProgramHarness):
                 else:
                     # Likely a random error, worth retrying
                     raise RandomError(error_message)
-            elif "SIGSEV" in error_message:
+            elif ("SIGSEV" in error_message) or ("SIGSEGV" in error_message) or ("segmentation fault" in error_message):
                 raise RandomError(error_message)
             elif "TypeError: set_global_option" in error_message:
                 raise InputError(error_message)
@@ -135,6 +139,5 @@ class Psi4Harness(ProgramHarness):
 
         # Delete keys
         output_data.pop("return_output", None)
-        output_data.pop("scratch_directory", None)
 
         return Result(**output_data)

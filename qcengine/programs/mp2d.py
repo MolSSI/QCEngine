@@ -34,9 +34,6 @@ class MP2DHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         return which('mp2d',
@@ -215,10 +212,7 @@ class MP2DHarness(ProgramHarness):
             retres = retres.ravel().tolist()
 
         output_data = {
-            'extras': {
-                'local_keywords': input_model.extras['info'],
-                'qcvars': calcinfo,
-            },
+            'extras': input_model.extras,
             'properties': {},
             'provenance': Provenance(creator="MP2D",
                                      version=self.get_version(),
@@ -226,6 +220,8 @@ class MP2DHarness(ProgramHarness):
             'return_result': retres,
             'stdout': stdout,
         }  # yapf: disable
+        output_data["extras"]["local_keywords"] = input_model.extras['info']
+        output_data["extras"]["qcvars"] = calcinfo
 
         output_data['success'] = True
         return Result(**{**input_model.dict(), **output_data})

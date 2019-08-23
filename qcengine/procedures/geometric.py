@@ -13,9 +13,6 @@ class GeometricProcedure(ProcedureHarness):
     class Config(ProcedureHarness.Config):
         pass
 
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     def found(self, raise_error: bool=False) -> bool:
         return which_import('geometric', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install geometric -c conda-forge`.')
 
@@ -30,11 +27,13 @@ class GeometricProcedure(ProcedureHarness):
 
         geometric_input = input_data.dict()
 
-        # Older QCElemental compat, can be removed in v0.6
-        if "extras" not in geometric_input["input_specification"]:
-            geometric_input["input_specification"]["extras"] = {}
+        # Temporary patch for geomeTRIC
+        geometric_input["initial_molecule"]["symbols"] = list(geometric_input["initial_molecule"]["symbols"])
 
-        geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = config.dict()
+        # Set retries to two if zero while respecting local_config
+        local_config = config.dict()
+        local_config["retries"] = local_config.get("retries", 2) or 2
+        geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
         output_data = geometric.run_json.geometric_run_json(geometric_input)

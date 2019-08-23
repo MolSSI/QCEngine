@@ -4,11 +4,13 @@ Tests the DQM compute dispatch module
 
 import copy
 
+import numpy as np
 import pytest
 
 import qcengine as qcng
 from qcelemental.models import Molecule, ResultInput
 from qcengine import testing
+from qcengine.testing import failure_engine
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 
@@ -42,6 +44,7 @@ def test_psi4_task():
         assert key in ret["provenance"]
 
     assert ret["success"] is True
+    assert "retries" not in ret["provenance"]
 
 
 @testing.using_psi4
@@ -135,3 +138,65 @@ def test_torchani_task():
 
     assert ret.success is True
     assert ret.driver == "gradient"
+
+
+@testing.using_mopac
+def test_mopac_task():
+    json_data = copy.deepcopy(_base_json)
+    json_data["molecule"] = qcng.get_molecule("water")
+    json_data["driver"] = "gradient"
+    json_data["model"] = {"method": "PM6", "basis": None}
+    json_data["keywords"] = {}
+
+    ret = qcng.compute(json_data, "mopac", raise_error=True)
+    assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
+    energy = pytest.approx(-0.08474117913025125, rel=1.e-5)
+
+    # Check gradient
+    ret = qcng.compute(json_data, "mopac", raise_error=True)
+    assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
+    assert np.linalg.norm(ret.return_result) == pytest.approx(0.03543560156912385, rel=1.e-4)
+    assert ret.properties.return_energy == energy
+
+    # Check energy
+    json_data["driver"] = "energy"
+    ret = qcng.compute(json_data, "mopac", raise_error=True)
+    assert ret.return_result == energy
+    assert "== MOPAC DONE ==" in ret.stdout
+
+
+def test_random_failure_no_retries(failure_engine):
+
+    failure_engine.iter_modes = ["input_error"]
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False)
+    assert ret.error.error_type == "input_error"
+    assert "retries" not in ret.input_data["provenance"].keys()
+
+    failure_engine.iter_modes = ["random_error"]
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False)
+    assert ret.error.error_type == "random_error"
+    assert "retries" not in ret.input_data["provenance"].keys()
+
+
+def test_random_failure_with_retries(failure_engine):
+
+    failure_engine.iter_modes = ["random_error", "random_error", "random_error"]
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 2})
+    assert ret.input_data["provenance"]["retries"] == 2
+    assert ret.error.error_type == "random_error"
+
+    failure_engine.iter_modes = ["random_error", "input_error"]
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 4})
+    assert ret.input_data["provenance"]["retries"] == 1
+    assert ret.error.error_type == "input_error"
+
+
+def test_random_failure_with_success(failure_engine):
+
+    failure_engine.iter_modes = ["random_error", "pass"]
+    failure_engine.ncalls = 0
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 1})
+
+    assert ret.success, ret.error.error_message
+    assert ret.provenance.retries == 1
+    assert ret.extras["ncalls"] == 2

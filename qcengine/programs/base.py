@@ -11,6 +11,7 @@ from .entos import EntosHarness
 from .gamess import GAMESSHarness
 from .nwchem import NWChemHarness
 from .molpro import MolproHarness
+from .mopac import MopacHarness
 from .mp2d import MP2DHarness
 from .psi4 import Psi4Harness
 from .rdkit import RDKitHarness
@@ -32,6 +33,16 @@ def register_program(entry_point: 'ProgramHarness') -> None:
         raise ValueError('{} is already a registered program.'.format(name))
 
     programs[name.lower()] = entry_point
+
+
+def unregister_program(name: str) -> None:
+    """
+    Unregisters a given program.
+    """
+
+    ret = programs.pop(name.lower(), None)
+    if ret is None:
+        raise KeyError(f"Program {name} is not registered with QCEngine")
 
 
 def get_program(name: str, check: bool = True) -> 'ProgramHarness':
@@ -82,6 +93,7 @@ register_program(Psi4Harness())
 register_program(RDKitHarness())
 register_program(TorchANIHarness())
 register_program(MolproHarness())
+register_program(MopacHarness())
 register_program(DFTD3Harness())
 register_program(TeraChemHarness())
 register_program(MP2DHarness())

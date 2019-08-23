@@ -1,6 +1,6 @@
-"""Compute quantum chemistry using Mainz-Austin-Budapest-Gainesville's CFOUR executable."""
-
-import pprint
+"""
+Calls the NWChem executable.
+"""
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -8,53 +8,53 @@ import numpy as np
 
 import qcelemental as qcel
 from qcelemental.models import Provenance, Result
-from qcelemental.util import which, safe_version
+from qcelemental.util import safe_version, which
 
-from ...util import execute
 from ..model import ProgramHarness
+from ...util import execute
 from .harvester import harvest
 
-pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
-
-class CFOURHarness(ProgramHarness):
+class NWChemHarness(ProgramHarness):
 
     _defaults = {
-        "name": "CFOUR",
+        "name": "NWChem",
         "scratch": True,
         "thread_safe": False,
-        "thread_parallel": True,
-        "node_parallel": False,
+        "thread_parallel": False,  # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
+        "node_parallel": True,
         "managed_memory": True,
     }
-    version_cache: Dict[str, str] = {}
+    version_cache: Dict[str, str] ={}
 
     class Config(ProgramHarness.Config):
         pass
 
     @staticmethod
-    def found(raise_error: bool = False) -> bool:
-        return which('xcfour',
-                     return_bool=True,
-                     raise_error=raise_error,
-                     raise_msg='Please install via http://cfour.de/')
+    def found(raise_error: bool=False) -> bool:
+        return which('nwchem', return_bool=True, raise_error=raise_error, raise_msg='Please install via http://www.nwchem-sw.org/index.php/Download')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which('xcfour')
+        which_prog = which('nwchem')
         if which_prog not in self.version_cache:
-            success, output = execute([which_prog, "ZMAT"], {"ZMAT": "\nHe\n\n"})
+            success, output = execute([which_prog, "v.nw"], {"v.nw": ""})
 
             if success:
                 for line in output["stdout"].splitlines():
-                    if 'Version' in line:
-                        branch = ' '.join(line.strip().split()[1:])
-                self.version_cache[which_prog] = safe_version(branch)
+                    if 'nwchem branch' in line:
+                        branch = line.strip().split()[-1]
+                    if 'nwchem revision' in line:
+                        revision = line.strip().split()[-1]
+                self.version_cache[which_prog] = safe_version(branch + '+' + revision)
 
         return self.version_cache[which_prog]
 
     def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+        """
+        Runs NWChem in executable mode
+        """
         self.found(raise_error=True)
 
         job_inputs = self.fake_input(input_model, config)
@@ -73,7 +73,7 @@ class CFOURHarness(ProgramHarness):
                    template: Optional[str] = None) -> Dict[str, Any]:
 
         return {
-            "command": [which("xcfour")],
+            "command": [which("nwchem")],
             "infiles": input_model.extras['infiles'],
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
@@ -90,7 +90,7 @@ class CFOURHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["GRD", "FCMFINAL", "DIPOL"],
+            ["job.movecs", "job.hess", "job.db", "job.zmat"],
             scratch_messy=False,
             scratch_directory=inputs["scratch_directory"],
         )
@@ -100,14 +100,16 @@ class CFOURHarness(ProgramHarness):
 
         stdout = outfiles.pop("stdout")
 
-        # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
-        qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        # nwmol, if it exists, is dinky, just a clue to geometry of nwchem results
+#        qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        #ORIGpsivar, nwhess, nwgrad, nwmol, version, errorTMP = harvester.harvest(qmol, nwchemrec['stdout'], **nwfiles)
+        qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
-        if c4grad is not None:
-            qcvars['CURRENT GRADIENT'] = c4grad
+        if nwgrad is not None:
+            qcvars['CURRENT GRADIENT'] = nwgrad
 
-        if c4hess is not None:
-            qcvars['CURRENT HESSIAN'] = c4hess
+        if nwhess is not None:
+            qcvars['CURRENT HESSIAN'] = nwhess
 
         retres = qcvars[f'CURRENT {input_model.driver.upper()}']
         if isinstance(retres, Decimal):
@@ -122,7 +124,7 @@ class CFOURHarness(ProgramHarness):
                 'outfiles': outfiles,
             },
             'properties': {},
-            'provenance': Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour"),
+            'provenance': Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
             'return_result': retres,
             'stdout': stdout,
         }

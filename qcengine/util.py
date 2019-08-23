@@ -57,7 +57,7 @@ def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> D
     """Wraps compute for timing, output capturing, and raise protection
     """
 
-    metadata = {"stdout": None, "stderr": None, "success": True}
+    metadata = {"stdout": None, "stderr": None, "success": True, "retries": 0}
 
     # Start timer
     comp_time = time.time()
@@ -176,6 +176,9 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
         provenance_augments["version"] = provenance_augments["qcengine_version"]
         output_fusion["provenance"] = provenance_augments
 
+    if metadata["retries"] != 0:
+        output_fusion["provenance"]["retries"] = metadata["retries"]
+
     # Make sure pydantic sparsity is upheld
     for val in ["stdout", "stderr"]:
         if output_fusion[val] is None:
@@ -261,6 +264,44 @@ def popen(args: List[str], append_prefix: bool = False,
             output, error = ret["proc"].communicate()
             ret["stdout"] = output.decode()
             ret["stderr"] = error.decode()
+
+
+@contextmanager
+def environ_context(config: Optional['JobConfig'] = None, env: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+    """Temporarily set environment variables inside the context manager and
+    fully restore previous environment afterwards.
+
+    Parameters
+    ----------
+    config : Optional[JobConfig], optional
+        Automatically sets MKL/OMP num threads based off the input config.
+    env : Optional[Dict[str, str]], optional
+        A dictionary of environment variables to update.
+
+    Yields
+    ------
+    Dict[str, str]
+        The updated environment variables.
+    """
+
+    temporary_env = {}
+    if config:
+        temporary_env["OMP_NUM_THREADS"] = str(config.ncores)
+        temporary_env["MKL_NUM_THREADS"] = str(config.ncores)
+
+    if env:
+        temporary_env.update(env)
+
+    original_env = {key: os.getenv(key) for key in temporary_env}
+    os.environ.update(temporary_env)
+    try:
+        yield temporary_env
+    finally:
+        for key, value in original_env.items():
+            if value is None:
+                del os.environ[key]
+            else:
+                os.environ[key] = value
 
 
 def execute(command: List[str],

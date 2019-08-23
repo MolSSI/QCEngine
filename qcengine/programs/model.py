@@ -1,21 +1,26 @@
 import abc
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
 
 class ProgramHarness(BaseModel, abc.ABC):
 
+    _defaults: Dict[str, Any] = {}
     name: str
     scratch: bool
     thread_safe: bool
     thread_parallel: bool
     node_parallel: bool
     managed_memory: bool
+    extras: Optional[Dict[str, Any]]
 
     class Config:
         allow_mutation: False
         extra: "forbid"
+
+    def __init__(self, **kwargs):
+        super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
@@ -58,7 +63,12 @@ class ProgramHarness(BaseModel, abc.ABC):
                     template: Optional[str] = None) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+    def execute(self,
+                inputs: Dict[str, Any],
+                extra_outfiles: Optional[List[str]] = None,
+                extra_commands=None,
+                scratch_name=None,
+                timeout=None):
         raise ValueError("execute is not implemented for {}.", self.__class__)
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':

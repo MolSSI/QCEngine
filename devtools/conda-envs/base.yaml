@@ -2,10 +2,8 @@ name: test
 channels:
   - conda-forge
 dependencies:
-
     # Core
   - python
-  - pip
   - pyyaml
   - py-cpuinfo
   - psutil

@@ -30,10 +30,6 @@ class TeraChemHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-
-    def __init__(self, **kwargs):
-        super().__init__(**{**self._defaults, **kwargs})
-
     @staticmethod
     def found(raise_error: bool=False) -> bool:
         return which('terachem', return_bool=True, raise_error=raise_error, raise_msg='Please install via http://www.petachem.com/index.html')
@@ -64,7 +60,7 @@ class TeraChemHarness(ProgramHarness):
         # Setup the job
         job_inputs = self.build_input(input_data, config)
         # Run terachem
-        exe_outputs = self.execute(job_inputs)
+        exe_outputs = self.execute(job_inputs,extra_outfiles=input_data.extras)
         exe_success, proc = exe_outputs
         # Determine whether the calculation succeeded
         output_data = {}
@@ -89,9 +85,9 @@ class TeraChemHarness(ProgramHarness):
         input_file = []
         input_file.append("# molecule definition")
         input_file.append("units bohr")
-        input_file.append( "charge " + str(int(input_model.molecule.molecular_charge)))
-        input_file.append( "spinmult " + str(input_model.molecule.molecular_multiplicity))
-        input_file.append( "coordinates geometry.xyz")
+        input_file.append("charge " + str(int(input_model.molecule.molecular_charge)))
+        input_file.append("spinmult " + str(input_model.molecule.molecular_multiplicity))
+        input_file.append("coordinates geometry.xyz")
 
         input_file.append("\n# model")
         input_file.append("basis " + str(input_model.model.basis))
@@ -189,13 +185,21 @@ class TeraChemHarness(ProgramHarness):
         # TODO Should only return True if TeraChem calculation terminated properly
         output_data['success'] = True
 
+        # return extra files requested by user as extras
+        for extra in input_model.extras.keys():
+            input_model.extras[extra] = outfiles[extra]
+
         return Result(**{**input_model.dict(), **output_data})
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
-
+        binaries = []
+        for filename in extra_outfiles:
+            if filename in ['scr/ca0', 'scr/cb0','scr/c0']:
+                binaries.append(filename)
         exe_success, proc = uti.execute(inputs["commands"],
                           infiles = inputs["infiles"],
-                          outfiles = ["tc.out"],
+                          outfiles = extra_outfiles,
+                          as_binary = binaries,
                           scratch_directory=inputs["scratch_directory"],
                           timeout = timeout
                           )
