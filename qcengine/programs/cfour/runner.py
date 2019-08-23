@@ -103,9 +103,6 @@ class CFOURHarness(ProgramHarness):
         #   * reading a multi MB file into the inputs dict
         opts['basis'] = input_model.model.basis
 
-        print('JOB_OPTS')
-        pp.pprint(opts)
-
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 

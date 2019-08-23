@@ -29,13 +29,13 @@ def format_keywords(options):
     grouped_options = collections.defaultdict(dict)
     for group_key, val in options.items():
         group, key = group_key.split('__')
-        grouped_options[group][key] = val
+        grouped_options[group.lower()][key.lower()] = val
 
     grouped_lines = {}
     for group, opts in sorted(grouped_options.items()):
         line = []
         line.append(f'${group.lower()}')
-        for key, val in grouped_options[group].items():
+        for key, val in sorted(grouped_options[group].items()):
             line.append('='.join(format_keyword(key, val, lop_off=False)))
         line.append('$end\n')
         grouped_lines[group] = textwrap.fill(' '.join(line), initial_indent=' ', subsequent_indent='  ')

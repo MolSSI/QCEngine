@@ -8,6 +8,7 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
     """
     text = []
 
+    keywords = {k.upper(): v for k, v in keywords.items()}
     for key, val in sorted(keywords.items()):
         text.append('='.join(format_keyword(key, val)))
 
