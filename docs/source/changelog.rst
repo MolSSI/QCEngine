@@ -13,14 +13,22 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
-v0.X.Y / 2019-??-??
--------------------
+v0.10.0 / 2019-09-25
+--------------------
 
 New Features
 ++++++++++++
 
+- (:pr:`132`) Expands CLI for ``info``, ``run``, and ``run-procedure`` options.
 - (:pr:`137`) A new CI pipeline through Azure has been developed which uses custom, private Docker images
   to house non-public code which will enable us to test Engine through integrated CI on these codes securely.
+- (:pr:`140`) GAMESS, CFOUR, NWChem preliminary implementations.
+
+Enhancements
+++++++++++++
+- (:pr:`138`) Documentation on Azure triggers.
+- (:pr:`139`) Overhauls install documentation and clearly defines dev install vs production installs.
+
 
 
 v0.9.0 / 2019-08-14
@@ -215,7 +223,7 @@ Enhancements
   RTD theme. This allows all docs across QCA to appear consistent with each other.
 - (:pr:`43`) Added a base model for all ``Procedure`` objects to derive from. This allows
   procedures' interactions with compute programs to be more unified. This PR also ensured
-  GeomeTRIC provides Provenance information. 
+  GeomeTRIC provides Provenance information.
 
 Bug Fixes
 +++++++++
