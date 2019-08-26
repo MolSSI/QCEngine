@@ -699,10 +699,10 @@ def harvest(p4Mol, c4out, **largs):
     else:
         retHess = None
 
-    if oriCoord is not None:
-        retCoord = oriCoord
-    else:
-        retCoord = None
+    # if oriCoord is not None:
+    #     retCoord = oriCoord
+    # else:
+    #     retCoord = None
 
     return outPsivar, retHess, retGrad, retMol, version, error
 

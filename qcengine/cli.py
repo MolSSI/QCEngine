@@ -64,7 +64,7 @@ def info_cli(args):
         print(f"QCElemental version: {qcelemental.__version__}")
         print()
 
-    def info_programs():
+    def info_programs():  # lgtm: [py/similar-function]
         print(">>> Program information")
         all_progs = list_all_programs()
         avail_progs = list_available_programs()
@@ -80,7 +80,7 @@ def info_cli(args):
         print(" ".join(sorted(all_progs - avail_progs)))
         print()
 
-    def info_procedures():
+    def info_procedures():  # lgtm: [py/similar-function]
         print(">>> Procedure information")
         all_procs = list_all_procedures()
         avail_procs = list_available_procedures()

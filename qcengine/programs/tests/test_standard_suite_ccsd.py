@@ -1,5 +1,3 @@
-import copy
-
 import pytest
 
 import qcelemental as qcel
