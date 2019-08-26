@@ -13,8 +13,11 @@ class GeometricProcedure(ProcedureHarness):
     class Config(ProcedureHarness.Config):
         pass
 
-    def found(self, raise_error: bool=False) -> bool:
-        return which_import('geometric', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install geometric -c conda-forge`.')
+    def found(self, raise_error: bool = False) -> bool:
+        return which_import('geometric',
+                            return_bool=True,
+                            raise_error=raise_error,
+                            raise_msg='Please install via `conda install geometric -c conda-forge`.')
 
     def build_input_model(self, data: Union[Dict[str, Any], 'OptimizationInput']) -> 'OptimizationInput':
         return self._build_model(data, OptimizationInput)

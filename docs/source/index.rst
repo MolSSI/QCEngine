@@ -126,7 +126,6 @@ Index
 **Getting Started**
 
 * :doc:`install`
-* :doc:`community`
 
 .. toctree::
     :maxdepth: 1
@@ -134,7 +133,6 @@ Index
     :caption: Getting Started
 
     install
-    community
 
 
 **User Interface**
@@ -157,7 +155,6 @@ Index
 
 * :doc:`api`
 * :doc:`changelog`
-* :doc:`dev_guidelines`
 
 .. toctree::
     :maxdepth: 1
@@ -165,4 +162,3 @@ Index
 
     api
     changelog
-    dev_guidelines

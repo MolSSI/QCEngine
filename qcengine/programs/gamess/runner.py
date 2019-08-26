@@ -1,21 +1,35 @@
 """Compute quantum chemistry using Iowa State's GAMESS executable."""
 
+import copy
 import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
 import qcelemental as qcel
 from qcelemental.models import Result
-from qcelemental.util import which, safe_version, unnp
+from qcelemental.util import safe_version, unnp, which
 
+from ...exceptions import InputError
 from ...util import execute
 from ..model import ProgramHarness
 from .harvester import harvest
+from .keywords import format_keywords
+from .methods import muster_modelchem
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class GAMESSHarness(ProgramHarness):
+    """
+
+    Notes
+    -----
+    Required edits to the ``rungms`` script are as follows::
+        set SCR=./                                  # will be managed by QCEngine instead
+        set USERSCR=./                              # ditto
+        set GMSPATH=/home/psilocaluser/gits/gamess  # full path to installation
+
+    """
 
     _defaults = {
         "name": "GAMESS",
@@ -25,14 +39,17 @@ class GAMESSHarness(ProgramHarness):
         "node_parallel": True,
         "managed_memory": True,
     }
-    version_cache: Dict[str, str] ={}
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramHarness.Config):
         pass
 
     @staticmethod
-    def found(raise_error: bool=False) -> bool:
-        return which('rungms', return_bool=True, raise_error=raise_error, raise_msg='Please install via https://www.msg.chem.iastate.edu/GAMESS/GAMESS.html')
+    def found(raise_error: bool = False) -> bool:
+        return which('rungms',
+                     return_bool=True,
+                     raise_error=raise_error,
+                     raise_msg='Please install via https://www.msg.chem.iastate.edu/GAMESS/GAMESS.html')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -52,16 +69,11 @@ class GAMESSHarness(ProgramHarness):
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         self.found(raise_error=True)
 
-#        print("QCSCHEMA_INPUT")
-#        print(input_data)
-
-        #job_inputs = self.build_input(input_data, config)
-        job_inputs = self.fake_input(input_data, config)
-#        print('JOB_INPUTS')
-#        pp.pprint(job_inputs)
+        job_inputs = self.build_input(input_data, config)
         success, dexe = self.execute(job_inputs)
-#        print('SUCCESS', success)
-#        pp.pprint(dexe)
+
+        if 'INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE' in dexe["stdout"]:
+            raise InputError(dexe["stdout"])
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
@@ -70,61 +82,69 @@ class GAMESSHarness(ProgramHarness):
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
-        pass
+        gamessrec = {
+            'infiles': {},
+            'scratch_directory': config.scratch_directory,
+        }
 
-    def fake_input(self, input_model: 'ResultInput', config: 'JobConfig',
-                    template: Optional[str] = None) -> Dict[str, Any]:
+        opts = copy.deepcopy(input_model.keywords)
+
+        # Handle memory
+        # for gamess, [GiB] --> [MW]
+        opts['system__mwords'] = int(config.memory * (1024**3) / 8e6)
+
+        # Handle molecule
+        molcmd, moldata = input_model.molecule.to_string(dtype='gamess', units='Bohr', return_data=True)
+        opts.update(moldata['keywords'])
+
+        # Handle calc type and quantum chemical method
+        opts.update(muster_modelchem(input_model.model.method, input_model.driver.derivative_int()))
+
+        # Handle basis set
+        # * for gamess, usually insufficient b/c either ngauss or ispher needed
+        opts['basis__gbasis'] = input_model.model.basis
+
+        # Handle conversion from schema (flat key/value) keywords into local format
+        optcmd = format_keywords(opts)
+
+        gamessrec['infiles']['gamess.inp'] = optcmd + molcmd
+        gamessrec['command'] = [which("rungms"), "gamess"]  # rungms JOB VERNO NCPUS >& JOB.log &
+
+        return gamessrec
 
         # Note decr MEMORY=100000 to get
         # ***** ERROR: MEMORY REQUEST EXCEEDS AVAILABLE MEMORY
         # to test gms fail
-        infile = \
-""" $CONTRL SCFTYP=ROHF MULT=3 RUNTYP=GRADIENT COORD=CART $END
- $SYSTEM TIMLIM=1 MEMORY=800000 $END
- $SCF    DIRSCF=.TRUE. $END
- $BASIS  GBASIS=STO NGAUSS=2 $END
- $GUESS  GUESS=HUCKEL $END
- $DATA
-Methylene...3-B-1 state...ROHF/STO-2G
-Cnv  2
 
-Hydrogen   1.0    0.82884     0.7079   0.0
-Carbon     6.0
-Hydrogen   1.0   -0.82884     0.7079   0.0
- $END
-"""
-        # edits to rungms
-        # set SCR=./
-        # set USERSCR=./
-        # set GMSPATH=/home/psilocaluser/gits/gamess
-
-        return {
-            "commands": [which("rungms"), "gamess"],  # rungms JOB VERNO NCPUS >& JOB.log &
-            "infiles": {
-                "gamess.inp": infile
-            },
-            "scratch_directory": config.scratch_directory,
-            "input_result": input_model.copy(deep=True),
-        }
-
+        # $CONTRL SCFTYP=ROHF MULT=3 RUNTYP=GRADIENT COORD=CART $END
+        # $SYSTEM TIMLIM=1 MEMORY=800000 $END
+        # $SCF    DIRSCF=.TRUE. $END
+        # $BASIS  GBASIS=STO NGAUSS=2 $END
+        # $GUESS  GUESS=HUCKEL $END
+        # $DATA
+        #Methylene...3-B-1 state...ROHF/STO-2G
+        #Cnv  2
+        #
+        #Hydrogen   1.0    0.82884     0.7079   0.0
+        #Carbon     6.0
+        #Hydrogen   1.0   -0.82884     0.7079   0.0
+        # $END
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
-        success, dexe = execute(inputs["commands"],
-                                inputs["infiles"],
-                                [],
-                                scratch_messy=False,
-                                scratch_directory=inputs["scratch_directory"],
-                        )
+        success, dexe = execute(
+            inputs["command"],
+            inputs["infiles"],
+            [],
+            scratch_messy=False,
+            scratch_directory=inputs["scratch_directory"],
+        )
         return success, dexe
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 
-#        print('PARSE')
-#        pp.pprint(outfiles)
-
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
-        qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, outfiles["stdout"]) #**gamessfiles)
+        qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, outfiles["stdout"])
 
         if gamessgrad is not None:
             qcvars['CURRENT GRADIENT'] = gamessgrad
@@ -133,7 +153,7 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
 
         output_data = {
             'schema_name': 'qcschema_output',
-            'molecule' : gamessmol,
+            'molecule': gamessmol,
             'schema_version': 1,
             'extras': {},
             'properties': {
@@ -143,33 +163,12 @@ Hydrogen   1.0   -0.82884     0.7079   0.0
             'stdout': outfiles["stdout"],
         }
 
-#        # Absorb results into psi4 data structures
-#        for key in qcvars.keys():
-#            core.set_variable(key.upper(), float(qcvars[key]))
-
-#        if qcdbmolecule is None and gamessmol is not None:
-#            molecule = geometry(gamessmol.create_psi4_string_from_molecule(), name='blank_molecule_psi4_yo')
-#            molecule.update_geometry()
-#            # This case arises when no Molecule going into calc (cfour {} block) but want
-#            #   to know the orientation at which grad, properties, etc. are returned (c4mol).
-#            #   c4mol is dinky, w/o chg, mult, dummies and retains name
-#            #   blank_molecule_psi4_yo so as to not interfere with future cfour {} blocks
-
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
-        output_data['extras']['qcvars'] = {k.upper(): float(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()}
-
-#        # Quit if gamess threw error
-#        if core.get_variable('GAMESS ERROR CODE'):
-#            raise ValidationError("""gamess exited abnormally.""")
-#
-#        P4GAMESS_INFO.clear()
-#        P4GAMESS_INFO.update(internal_p4gamess_info)
-#
-#        optstash.restore()
+        output_data['extras']['qcvars'] = {
+            k.upper(): float(v) if isinstance(v, Decimal) else v
+            for k, v in qcel.util.unnp(qcvars, flat=True).items()
+        }
 
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
-
-#            return Result(**output_data)
-#        return FailedOperation(success=output_data.pop("success", False), error=output_data.pop("error"), input_data=output_data)

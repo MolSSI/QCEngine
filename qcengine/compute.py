@@ -92,7 +92,6 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
                 except:
                     raise
 
-
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
 

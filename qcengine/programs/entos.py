@@ -2,15 +2,15 @@
 Calls the entos executable.
 """
 
-from typing import Any, Dict, Optional, List
-
-from qcelemental.models import Result, FailedOperation
-from ..util import execute, popen
-from qcelemental.util import which, safe_version, parse_version
-from ..exceptions import UnknownError
-
-from .model import ProgramHarness
 import string
+from typing import Any, Dict, List, Optional
+
+from qcelemental.models import FailedOperation, Result
+from qcelemental.util import parse_version, safe_version, which
+
+from ..exceptions import UnknownError
+from ..util import execute, popen
+from .model import ProgramHarness
 
 
 class EntosHarness(ProgramHarness):
@@ -82,8 +82,7 @@ class EntosHarness(ProgramHarness):
                                     outfiles=outfiles,
                                     scratch_directory=inputs["scratch_directory"],
                                     scratch_name=scratch_name,
-                                    timeout=timeout
-                                    )
+                                    timeout=timeout)
         proc["outfiles"]["dispatch.out"] = proc["stdout"]
 
         # Determine whether the calculation succeeded
@@ -101,22 +100,19 @@ class EntosHarness(ProgramHarness):
         # Create input dictionary
         if template is None:
             structure = {'structure': {'file': 'geometry.xyz'}}
-            dft_info = {'xc': input_model.model.method,
-                        'ao': input_model.model.basis.upper(),
-                        'df_basis': input_model.keywords["df_basis"].upper(),
-                        'charge': input_model.molecule.molecular_charge
-                        }
+            dft_info = {
+                'xc': input_model.model.method,
+                'ao': input_model.model.basis.upper(),
+                'df_basis': input_model.keywords["df_basis"].upper(),
+                'charge': input_model.molecule.molecular_charge
+            }
             print_results = {'print': {'results': True}}
 
             if input_model.driver == 'energy':
-                input_dict = {'dft': {**structure, **dft_info},
-                              **print_results
-                              }
+                input_dict = {'dft': {**structure, **dft_info}, **print_results}
             # Write gradient call if asked for
             elif input_model.driver == 'gradient':
-                input_dict = {'gradient': {**structure, 'dft': {**dft_info}},
-                              **print_results
-                              }
+                input_dict = {'gradient': {**structure, 'dft': {**dft_info}}, **print_results}
             else:
                 raise NotImplementedError('Driver {} not implemented for entos.'.format(input_model.driver))
 
