@@ -110,10 +110,10 @@ class MolproHarness(ProgramHarness):
                 extra_infiles: Optional[List[str]] = None,
                 extra_outfiles: Optional[List[str]] = None,
                 as_binary: Optional[List[str]] = None,
-                extra_commands: bool = None,
+                extra_commands: Optional[List[str]] = None,
                 scratch_name: Optional[str] = None,
                 scratch_messy: bool = False,
-                timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
+                timeout: Optional[int] = None) -> Dict[str, Any]:
         """
         For option documentation go look at qcengine/util.execute
         """

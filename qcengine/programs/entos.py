@@ -69,10 +69,10 @@ class EntosHarness(ProgramHarness):
                 inputs: Dict[str, Any],
                 extra_infiles: Optional[List[str]] = None,
                 extra_outfiles: Optional[List[str]] = None,
-                extra_commands=None,
+                extra_commands: Optional[List[str]] = None,
                 scratch_name: Optional[str] = None,
                 scratch_messy: bool = False,
-                timeout: Optional[int] = None):
+                timeout: Optional[int] = None) -> Dict[str, Any]:
         """
         For option documentation go look at qcengine/util.execute
         """
