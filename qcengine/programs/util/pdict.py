@@ -1,4 +1,4 @@
-from decimal import Decimal, ROUND_FLOOR, ROUND_CEILING
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 import numpy as np
 

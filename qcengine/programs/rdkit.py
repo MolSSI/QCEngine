@@ -5,9 +5,9 @@ Calls the RDKit package.
 from qcelemental.models import Provenance, Result
 from qcelemental.util import which_import
 
-from .model import ProgramHarness
 from ..exceptions import InputError
 from ..units import ureg
+from .model import ProgramHarness
 
 
 class RDKitHarness(ProgramHarness):

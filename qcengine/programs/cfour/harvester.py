@@ -6,7 +6,7 @@ import numpy as np
 import qcelemental as qcel
 from qcelemental.models import Molecule
 
-from ..util import load_hessian, PreservingDict
+from ..util import PreservingDict, load_hessian
 
 
 def harvest_output(outtext):

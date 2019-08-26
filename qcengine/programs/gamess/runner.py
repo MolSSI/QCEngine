@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 
 import qcelemental as qcel
 from qcelemental.models import Result
-from qcelemental.util import which, safe_version, unnp
+from qcelemental.util import safe_version, unnp, which
 
 from ...exceptions import InputError
 from ...util import execute

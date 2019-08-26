@@ -7,9 +7,9 @@ from typing import Dict
 from qcelemental.models import Provenance, Result
 from qcelemental.util import parse_version, safe_version, which_import
 
-from .model import ProgramHarness
 from ..exceptions import InputError, ResourceError
 from ..units import ureg
+from .model import ProgramHarness
 
 
 class TorchANIHarness(ProgramHarness):

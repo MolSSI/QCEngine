@@ -7,14 +7,15 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
+
 import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
 
-from . import empirical_dispersion_resources
-from .model import ProgramHarness
 from ..exceptions import InputError, ResourceError, UnknownError
 from ..util import execute
+from . import empirical_dispersion_resources
+from .model import ProgramHarness
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 

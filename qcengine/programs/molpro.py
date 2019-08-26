@@ -4,7 +4,7 @@ Calls the Molpro executable.
 
 import string
 import xml.etree.ElementTree as ET
-from typing import Any, Dict, List, Set, Tuple, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which

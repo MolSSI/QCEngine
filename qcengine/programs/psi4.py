@@ -8,9 +8,9 @@ from typing import Dict
 from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
 
-from .model import ProgramHarness
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from ..util import execute, popen, temporary_directory
+from .model import ProgramHarness
 
 
 class Psi4Harness(ProgramHarness):

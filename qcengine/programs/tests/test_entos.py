@@ -1,9 +1,9 @@
 import pytest
+
 import qcelemental as qcel
+import qcengine as qcng
 from qcelemental.testing import compare_recursive
 from qcengine.testing import using_entos
-
-import qcengine as qcng
 
 # qcenginerecords not required, skips whole file
 qcer = pytest.importorskip("qcenginerecords")

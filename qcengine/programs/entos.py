@@ -2,15 +2,15 @@
 Calls the entos executable.
 """
 
-from typing import Any, Dict, Optional, List
-
-from qcelemental.models import Result, FailedOperation
-from ..util import execute, popen
-from qcelemental.util import which, safe_version, parse_version
-from ..exceptions import UnknownError
-
-from .model import ProgramHarness
 import string
+from typing import Any, Dict, List, Optional
+
+from qcelemental.models import FailedOperation, Result
+from qcelemental.util import parse_version, safe_version, which
+
+from ..exceptions import UnknownError
+from ..util import execute, popen
+from .model import ProgramHarness
 
 
 class EntosHarness(ProgramHarness):

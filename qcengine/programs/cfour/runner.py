@@ -10,7 +10,7 @@ import numpy as np
 
 import qcelemental as qcel
 from qcelemental.models import Provenance, Result
-from qcelemental.util import which, safe_version
+from qcelemental.util import safe_version, which
 
 from ...util import execute
 from ..model import ProgramHarness

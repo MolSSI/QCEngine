@@ -6,10 +6,10 @@ import argparse
 import os.path
 import sys
 
-from . import compute, compute_procedure  # run and run-procedure
 from qcelemental.models import ResultInput  # run and run-procedure
-from . import __version__, list_all_procedures, list_all_programs, list_available_procedures, \
-    list_available_programs, get_procedure, get_program  # info
+
+from . import (__version__, compute, compute_procedure, get_procedure, get_program,  # run and run-procedure; info
+               list_all_procedures, list_all_programs, list_available_procedures, list_available_programs)
 from .config import global_repr  # info
 
 __all__ = ["main"]

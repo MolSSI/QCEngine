@@ -7,12 +7,12 @@ from typing import Any, Dict, Optional
 
 import qcengine.util as uti
 from qcelemental.models import FailedOperation, Result
+from qcelemental.molparse.regex import DECIMAL, NUMBER
 from qcelemental.util import parse_version, safe_version, which
-from qcelemental.molparse.regex import NUMBER, DECIMAL
 
-from .model import ProgramHarness
 from ..exceptions import UnknownError
 from ..util import popen
+from .model import ProgramHarness
 
 
 class TeraChemHarness(ProgramHarness):
