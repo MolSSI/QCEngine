@@ -54,6 +54,7 @@ def format_keywords(options):
         if group == 'aaaglobal':
             grouped_lines[group] = '\n'.join(lines) + '\n'
         else:
-            grouped_lines[group] = f'{group.lower()} ' + ' '.join(group_level_lines) + '\n  ' + '\n  '.join(lines) + '\nend\n'
+            grouped_lines[group] = f'{group.lower()} ' + ' '.join(group_level_lines) + '\n  ' + '\n  '.join(
+                lines) + '\nend\n'
 
     return '\n'.join(grouped_lines.values()) + '\n'

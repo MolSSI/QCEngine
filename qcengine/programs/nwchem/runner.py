@@ -143,7 +143,9 @@ class NWChemHarness(ProgramHarness):
         )
         return success, dexe
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self,
+                     outfiles: Dict[str, str],
+                     input_model: 'ResultInput') -> 'Result':  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")
 

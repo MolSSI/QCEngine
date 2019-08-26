@@ -546,7 +546,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
         #    name_key = '***'
         #    disp_params = dashcoeff[dashlevel_candidate_2]['definitions'][name_key]['params']
         else:
-            dashlevel_candidate_2 = None
+            # dashlevel_candidate_2 = None
             raise InputError("""Can't guess -D correction level from ({})""".format(name_hint))
 
     disp_params = copy.deepcopy(disp_params)
@@ -557,7 +557,8 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     elif dashlevel_candidate_1 is not None and dashlevel_candidate_2 is not None:
         if dashlevel_candidate_1 != dashlevel_candidate_2:
             raise InputError(
-                f"""Inconsistent -D correction level ({dashlevel_candidate_2} != {dashlevel_candidate_1}) from name_hint ({name_hint}) and level_hint ({level_hint})""")
+                f"""Inconsistent -D correction level ({dashlevel_candidate_2} != {dashlevel_candidate_1}) from name_hint ({name_hint}) and level_hint ({level_hint})"""
+            )
     dashleveleff = dashlevel_candidate_1 or dashlevel_candidate_2
 
     allowed_params = dashcoeff[dashleveleff]['default'].keys()

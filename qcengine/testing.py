@@ -12,8 +12,8 @@ import numpy as np
 import pytest
 from pkg_resources import parse_version
 
-import qcengine as qcng
 import qcelemental as qcel
+import qcengine as qcng
 from qcelemental.util import which, which_import
 
 

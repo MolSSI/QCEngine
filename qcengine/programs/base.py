@@ -3,16 +3,16 @@ Imports the various compute backends
 """
 
 from typing import Set
-from ..exceptions import InputError, ResourceError
 
+from ..exceptions import InputError, ResourceError
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
 from .entos import EntosHarness
 from .gamess import GAMESSHarness
-from .nwchem import NWChemHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
+from .nwchem import NWChemHarness
 from .psi4 import Psi4Harness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness

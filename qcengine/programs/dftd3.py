@@ -15,10 +15,10 @@ import qcelemental as qcel
 from qcelemental.models import FailedOperation, Provenance, Result
 from qcelemental.util import safe_version, which
 
-from . import empirical_dispersion_resources
-from .model import ProgramHarness
 from ..exceptions import InputError, ResourceError, UnknownError
 from ..util import execute
+from . import empirical_dispersion_resources
+from .model import ProgramHarness
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -141,8 +141,10 @@ class DFTD3Harness(ProgramHarness):
             command.append('-abc')
 
         infiles = {
-            '.dftd3par.local': dftd3_coeff_formatter(input_model.extras['info']['dashlevel'], input_model.extras['info']['dashparams']),
-            'dftd3_geometry.xyz': qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format=''),
+            '.dftd3par.local':
+            dftd3_coeff_formatter(input_model.extras['info']['dashlevel'], input_model.extras['info']['dashparams']),
+            'dftd3_geometry.xyz':
+            qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format=''),
         }
 
         return {

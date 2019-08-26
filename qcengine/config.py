@@ -85,7 +85,7 @@ class JobConfig(pydantic.BaseModel):
     ncores: int  # Number of ncores per job
     memory: float  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
-    retries: int # Number of retries on random failures
+    retries: int  # Number of retries on random failures
 
     class Config:
         extra = "forbid"
