@@ -22,24 +22,31 @@ def parse_args():
     subparsers = parser.add_subparsers(dest="command")
 
     info = subparsers.add_parser('info', help="Print information about QCEngine setup, version, and environment.")
-    info.add_argument("category", nargs="*", default="all",
+    info.add_argument("category",
+                      nargs="*",
+                      default="all",
                       choices=["version", "programs", "procedures", "config", "all"],
                       help="The information categories to show.")
 
     run = subparsers.add_parser('run', help="Run a program on a given task. Output is printed as a JSON blob.")
     run.add_argument('program', type=str, help="The program to run.")
-    run.add_argument('data', type=str, help="Data describing the task to run. "
-                                            "One of: (i) A JSON blob, "
-                                            "(ii) A file name, "
-                                            "(iii) '-', indicating data will be read from STDIN.")
+    run.add_argument('data',
+                     type=str,
+                     help="Data describing the task to run. "
+                     "One of: (i) A JSON blob, "
+                     "(ii) A file name, "
+                     "(iii) '-', indicating data will be read from STDIN.")
 
-    run_procedure = subparsers.add_parser('run-procedure', help="Run a procedure on a given task. "
-                                                                "Output is printed as a JSON blob.")
+    run_procedure = subparsers.add_parser('run-procedure',
+                                          help="Run a procedure on a given task. "
+                                          "Output is printed as a JSON blob.")
     run_procedure.add_argument('procedure', type=str, help="The procedure to run.")
-    run_procedure.add_argument('data', type=str, help="Data describing the task to run. "
-                                                      "One of: (i) A JSON blob, "
-                                                      "(ii) A file name, "
-                                                      "(iii) '-', indicating data will be read from STDIN.")
+    run_procedure.add_argument('data',
+                               type=str,
+                               help="Data describing the task to run. "
+                               "One of: (i) A JSON blob, "
+                               "(ii) A file name, "
+                               "(iii) '-', indicating data will be read from STDIN.")
 
     args = vars(parser.parse_args())
     if args["command"] is None:
@@ -50,7 +57,6 @@ def parse_args():
 
 
 def info_cli(args):
-
     def info_version():
         import qcelemental
         print(">>> Version information")

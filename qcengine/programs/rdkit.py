@@ -25,8 +25,11 @@ class RDKitHarness(ProgramHarness):
         pass
 
     @staticmethod
-    def found(raise_error: bool=False) -> bool:
-        return which_import('rdkit', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install rdkit -c conda-forge`.')
+    def found(raise_error: bool = False) -> bool:
+        return which_import('rdkit',
+                            return_bool=True,
+                            raise_error=raise_error,
+                            raise_msg='Please install via `conda install rdkit -c conda-forge`.')
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """

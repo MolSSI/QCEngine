@@ -49,7 +49,7 @@ def test_entos_input_formatter_template(test_case):
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
-    input_file = qcng.get_program('entos',  check=False).build_input(inp, qcng.get_config(), template="Test template")
+    input_file = qcng.get_program('entos', check=False).build_input(inp, qcng.get_config(), template="Test template")
     assert input_file.keys() >= {"commands", "infiles"}
 
 

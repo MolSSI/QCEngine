@@ -30,8 +30,11 @@ class TorchANIHarness(ProgramHarness):
         pass
 
     @staticmethod
-    def found(raise_error: bool=False) -> bool:
-        return which_import('torchani', return_bool=True, raise_error=raise_error, raise_msg='Please install via `pip install torchani`.')
+    def found(raise_error: bool = False) -> bool:
+        return which_import('torchani',
+                            return_bool=True,
+                            raise_error=raise_error,
+                            raise_msg='Please install via `pip install torchani`.')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -105,13 +108,15 @@ class TorchANIHarness(ProgramHarness):
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
         elif input_data.driver == "gradient":
             derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
-            ret_data["return_result"] = np.asarray(
-                derivative * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
+            ret_data["return_result"] = np.asarray(derivative *
+                                                   ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
         else:
-            raise InputError(f"TorchANI can only compute energy and gradient driver methods. Found {input_data.driver}.")
+            raise InputError(
+                f"TorchANI can only compute energy and gradient driver methods. Found {input_data.driver}.")
 
-        ret_data["provenance"] = Provenance(
-            creator="torchani", version="unknown", routine='torchani.builtin.aev_computer')
+        ret_data["provenance"] = Provenance(creator="torchani",
+                                            version="unknown",
+                                            routine='torchani.builtin.aev_computer')
 
         ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True

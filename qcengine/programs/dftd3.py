@@ -141,8 +141,10 @@ class DFTD3Harness(ProgramHarness):
             command.append('-abc')
 
         infiles = {
-            '.dftd3par.local': dftd3_coeff_formatter(input_model.extras['info']['dashlevel'], input_model.extras['info']['dashparams']),
-            'dftd3_geometry.xyz': qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format=''),
+            '.dftd3par.local':
+            dftd3_coeff_formatter(input_model.extras['info']['dashlevel'], input_model.extras['info']['dashparams']),
+            'dftd3_geometry.xyz':
+            qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format=''),
         }
 
         return {
