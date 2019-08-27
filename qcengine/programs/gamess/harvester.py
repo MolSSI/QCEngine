@@ -81,6 +81,7 @@ def harvest_outfile_pass(outtext):
         if mobj:
             print('matched gamess_RHF energy')
             qcvar['HF TOTAL ENERGY'] = mobj.group(1)
+            qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
 
         # Process NRE
         mobj = re.search(
@@ -102,6 +103,19 @@ def harvest_outfile_pass(outtext):
             qcvar['MP2 CORRELATION ENERGY'] = mobj.group(3)
             qcvar['MP2 TOTAL ENERGY'] = mobj.group(4)
 
+        # Process MP2
+        mobj = re.search(
+            r'^\s+' + r'RESULTS OF 2ND-ORDER ZAPT CORRECTION' + r'\s*' +
+            r'^\s+' + r'E\(HF\)   ' + r'=\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(ZAPT\) ' + r'=\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'-----------------------------------' + r'\s*' +
+            r'^\s+' + r'E\(MP2\)  ' + r'=\s+' + NUMBER + r'\s*$'
+            ,outtext, re.MULTILINE)  # yapf: disable
+        if mobj:
+            print('matched mp2')
+            qcvar['MP2 CORRELATION ENERGY'] = mobj.group(2)
+            qcvar['MP2 TOTAL ENERGY'] = mobj.group(3)
+
         # Process CCSD
         mobj = re.search(
             r'^\s+' + r'SUMMARY OF RESULTS' +
@@ -112,6 +126,7 @@ def harvest_outfile_pass(outtext):
             outtext, re.MULTILINE)  # yapf: disable
         if mobj:
             print('matched rhf ccsd')
+            qcvar['HF TOTAL ENERGY'] = mobj.group(1)
             qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
             qcvar['MP2 CORRELATION ENERGY'] = mobj.group(3)
             qcvar['MP2 TOTAL ENERGY'] = mobj.group(2)
@@ -142,6 +157,7 @@ def harvest_outfile_pass(outtext):
             ,outtext, re.MULTILINE)  # yapf: disable
         if mobj:
             print('matched ccsd(t)')
+            qcvar['HF TOTAL ENERGY'] = mobj.group(1)
             qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
             qcvar['CCSD CORRELATION ENERGY'] = mobj.group(5)
             qcvar['CCSD TOTAL ENERGY'] = mobj.group(4)
@@ -194,6 +210,7 @@ def harvest_outfile_pass(outtext):
         if mobj:
             print('matched dft')
             qcvar['DFT TOTAL ENERGY'] = mobj.group(1)
+            qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
 
         # Process Geometry
         mobj = re.search(
