@@ -14,19 +14,21 @@ cov_cmds = []
 if cov:
     cov_cmds = [cov, "run", "--append", "--source=" + os.path.dirname(os.path.abspath(__file__))]
 
+qcengine = shutil.which("qcengine")  # qcengine is not in the path of `coverage run`
+
 
 def test_info():
     """Test for qcengine info"""
     outputs = []
     for arg in cli.info_choices:
-        args = ["qcengine", "info", arg]
+        args = [qcengine, "info", arg]
         res = util.execute(args)
         assert res[0] is True
         if arg not in {"all", "config"}:  # output of config changes call-to-call depending e.g. on mem available
             outputs.append(res[1]["stdout"])
         util.execute(cov_cmds + args)
 
-    args = ["qcengine", "info"]
+    args = [qcengine, "info"]
     res = util.execute(args)
     assert res[0] is True
 
@@ -48,11 +50,11 @@ def test_run_psi4():
                       driver="energy",
                       model={"method": "hf", "basis": "6-31G"})
 
-    args = ["qcengine", "run", "psi4", inp.json()]
+    args = [qcengine, "run", "psi4", inp.json()]
     check_result(util.execute(args))
     util.execute(cov_cmds + args)
 
-    args = ["qcengine", "run", "psi4", "input.json"]
+    args = [qcengine, "run", "psi4", "input.json"]
     check_result(util.execute(args, infiles={"input.json": inp.json()}))
     util.execute(cov_cmds + args)
 
@@ -85,11 +87,11 @@ def test_run_procedure():
            "initial_molecule": get_molecule("hydrogen")}
     inp = OptimizationInput(**inp)
 
-    args = ["qcengine", "run-procedure", "geometric", inp.json()]
+    args = [qcengine, "run-procedure", "geometric", inp.json()]
     check_result(util.execute(args))
     util.execute(cov_cmds + args)
 
-    args = ["qcengine", "run-procedure", "geometric", "input.json"]
+    args = [qcengine, "run-procedure", "geometric", "input.json"]
     check_result(util.execute(args, infiles={"input.json": inp.json()}))
     util.execute(cov_cmds + args)
 
