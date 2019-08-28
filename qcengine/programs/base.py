@@ -7,6 +7,7 @@ from typing import Set
 from ..exceptions import InputError, ResourceError
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
+from .pylibefp import PylibEFPHarness
 from .entos import EntosHarness
 from .gamess import GAMESSHarness
 from .molpro import MolproHarness
@@ -101,3 +102,4 @@ register_program(GAMESSHarness())
 register_program(NWChemHarness())
 register_program(CFOURHarness())
 register_program(EntosHarness())
+register_program(PylibEFPHarness())
