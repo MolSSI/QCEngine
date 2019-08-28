@@ -5,7 +5,7 @@ Calls the entos executable.
 import string
 from typing import Any, Dict, List, Optional, Tuple
 
-from qcelemental.models import FailedOperation, Result
+from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import UnknownError
@@ -84,7 +84,7 @@ class EntosHarness(ProgramHarness):
         if extra_infiles is not None:
             infiles.update(extra_infiles)
 
-        # Collect all input files and update with extra_infiles
+        # Collect all output files and extend with with extra_outfiles
         outfiles = ["dispatch.out"]
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
