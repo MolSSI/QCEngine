@@ -15,6 +15,8 @@ from .config import global_repr  # info
 
 __all__ = ["main"]
 
+info_choices = frozenset(["version", "programs", "procedures", "config", "all"])
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='A CLI for the QCEngine.')
@@ -26,7 +28,7 @@ def parse_args():
     info.add_argument("category",
                       nargs="*",
                       default="all",
-                      choices=["version", "programs", "procedures", "config", "all"],
+                      choices=info_choices,
                       help="The information categories to show.")
 
     run = subparsers.add_parser('run', help="Run a program on a given task. Output is printed as a JSON blob.")
