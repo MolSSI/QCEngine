@@ -2,6 +2,7 @@ import tempfile
 import os
 
 from qcengine import testing
+from qcengine import util
 from qcengine import cli
 from qcengine import get_molecule
 
@@ -12,10 +13,10 @@ def test_info():
     """Test for qcengine info"""
     for arg in cli.info_choices:
         args = ["qcengine", "info", arg]
-        assert testing.run_process(args)
+        assert util.execute(args)[0] is True
 
     args = ["qcengine", "info"]
-    assert testing.run_process(args)
+    assert util.execute(args)[0] is True
 
 
 @testing.using_psi4
@@ -24,17 +25,12 @@ def test_run_psi4():
     inp = ResultInput(molecule=get_molecule("hydrogen"),
                       driver="energy",
                       model={"method": "hf", "basis": "6-31G"})
-    args = ["qcengine", "run", "psi4", inp.json()]
-    assert testing.run_process(args)
 
-    f = tempfile.NamedTemporaryFile(mode='w', delete=False)
-    try:
-        f.write(inp.json())
-        f.close()
-        args = ["qcengine", "run", "psi4", f.name]
-        assert testing.run_process(args)
-    finally:
-        os.remove(f.name)
+    args = ["qcengine", "run", "psi4", inp.json()]
+    assert util.execute(args)[0] is True
+
+    args = ["qcengine", "run", "psi4", "input.json"]
+    assert util.execute(args, infiles={"input.json": inp.json()})[0] is True
 
 
 @testing.using_geometric
@@ -56,16 +52,11 @@ def test_run_procedure():
                "keywords": {},
            },
            "initial_molecule": get_molecule("hydrogen")}
-
     inp = OptimizationInput(**inp)
-    args = ["qcengine", "run-procedure", "geometric", inp.json()]
-    assert testing.run_process(args)
 
-    f = tempfile.NamedTemporaryFile(mode='w', delete=False)
-    try:
-        f.write(inp.json())
-        f.close()
-        args = ["qcengine", "run-procedure", "geometric", f.name]
-        assert testing.run_process(args)
-    finally:
-        os.remove(f.name)
+    args = ["qcengine", "run-procedure", "geometric", inp.json()]
+    assert util.execute(args)[0] is True
+
+    args = ["qcengine", "run-procedure", "geometric", "input.json"]
+    assert util.execute(args, infiles={"input.json": inp.json()})[0] is True
+
