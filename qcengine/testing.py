@@ -3,7 +3,9 @@ Utilities for the testing suite.
 """
 
 import os
-import shutil
+import signal
+import sys
+import time
 import subprocess
 from contextlib import contextmanager
 from typing import List
@@ -141,6 +143,110 @@ def has_program(name):
 def _build_pytest_skip(program):
     import_message = "Not detecting module {}. Install package if necessary to enable tests."
     return pytest.mark.skipif(has_program(program) is False, reason=import_message.format(program))
+
+
+def terminate_process(proc):
+    if proc.poll() is None:
+
+        # Sigint (keyboard interrupt)
+        if sys.platform.startswith('win'):
+            proc.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            proc.send_signal(signal.SIGINT)
+
+        try:
+            start = time.time()
+            while (proc.poll() is None) and (time.time() < (start + 15)):
+                time.sleep(0.02)
+        # Flat kill
+        finally:
+            proc.kill()
+
+
+@contextmanager
+def popen(args, **kwargs):
+    """
+    Opens a background task.
+
+    Code and idea from dask.distributed's testing suite
+    https://github.com/dask/distributed
+    """
+    args = list(args)
+
+    # Bin prefix
+    if sys.platform.startswith('win'):
+        bin_prefix = os.path.join(sys.prefix, 'Scripts')
+    else:
+        bin_prefix = os.path.join(sys.prefix, 'bin')
+
+    # Do we prefix with Python?
+    if kwargs.pop("append_prefix", True):
+        args[0] = os.path.join(bin_prefix, args[0])
+
+    # Add coverage testing
+    if kwargs.pop("coverage", False):
+        coverage_dir = os.path.join(bin_prefix, "coverage")
+        if not os.path.exists(coverage_dir):
+            print("Could not find Python coverage, skipping cov.")
+
+        else:
+            src_dir = os.path.dirname(os.path.abspath(__file__))
+            coverage_flags = [coverage_dir, "run", "--append", "--source=" + src_dir]
+
+            # If python script, skip the python bin
+            if args[0].endswith("python"):
+                args.pop(0)
+            args = coverage_flags + args
+
+    # Do we optionally dumpstdout?
+    dump_stdout = kwargs.pop("dump_stdout", False)
+
+    if sys.platform.startswith('win'):
+        # Allow using CTRL_C_EVENT / CTRL_BREAK_EVENT
+        kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+    kwargs['stdout'] = subprocess.PIPE
+    kwargs['stderr'] = subprocess.PIPE
+    proc = subprocess.Popen(args, **kwargs)
+    try:
+        yield proc
+    except Exception:
+        dump_stdout = True
+        raise
+
+    finally:
+        try:
+            terminate_process(proc)
+        finally:
+            output, error = proc.communicate()
+            if dump_stdout:
+                print('\n' + '-' * 30)
+                print("\n|| Process command: {}".format(" ".join(args)))
+                print('\n|| Process stderr: \n{}'.format(error.decode()))
+                print('-' * 30)
+                print('\n|| Process stdout: \n{}'.format(output.decode()))
+                print('-' * 30)
+
+
+def run_process(args, **kwargs):
+    """
+    Runs a process in the background until complete.
+
+    Returns True if exit code zero.
+    """
+
+    timeout = kwargs.pop("timeout", 30)
+    terminate_after = kwargs.pop("interupt_after", None)
+    with popen(args, **kwargs) as proc:
+        if terminate_after is None:
+            proc.wait(timeout=timeout)
+        else:
+            time.sleep(terminate_after)
+            terminate_process(proc)
+
+        retcode = proc.poll()
+
+    return retcode == 0
 
 
 # Add flags
