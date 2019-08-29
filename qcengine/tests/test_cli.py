@@ -16,13 +16,13 @@ def run_qcengine_cli(args: List[str]) -> str:
     """
     Runs qcengine via its CLI
 
-    This method was chosen over the more sophisticated util.excecute order to get pytest-cov to work.
+    This method was chosen over the more sophisticated util.execute in order to get pytest-cov to work.
     For the same reason, qcengine is invoked as "python -m qcengine.cli" rather than "qcengine".
 
     Parameters
     ----------
     args: List[str]
-        List of CLI arguments
+        List of CLI arguments.
 
     Returns
     -------
