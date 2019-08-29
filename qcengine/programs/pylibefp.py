@@ -8,7 +8,7 @@ import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which_import
 
-#from ..exceptions import InputError, RandomError, ResourceError, UnknownError
+from ..exceptions import InputError  #, RandomError, ResourceError, UnknownError
 from .model import ProgramHarness
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -71,11 +71,11 @@ class PylibEFPHarness(ProgramHarness):
         import pylibefp
         efpobj = pylibefp.core.efp()
 
+        # initialize EFP fragments
         efp_extras = input_model.molecule.extras['efp_molecule']['extras']
         efpobj.add_potential(efp_extras['fragment_files'])
         efpobj.add_fragment(efp_extras['fragment_files'])
         for ifr, (hint_type, geom_hint) in enumerate(zip(efp_extras['hint_types'], efp_extras['geom_hints'])):
-            print('SEt_frag_coordinates', ifr, hint_type, geom_hint)
             efpobj.set_frag_coordinates(ifr, hint_type, geom_hint)
         efpobj.prepare()
 
@@ -87,8 +87,14 @@ class PylibEFPHarness(ProgramHarness):
             raise InputError
 
         # set keywords
-        efpobj.set_opts(input_model.keywords)
-        #efpobj.set_opts(efpopts, label='psi', append='psi')
+        # * label changes the accepted names of the keywords (xr vs. exch)
+        # * append changes the defaults upon which they act (off for libefp vs. on for psi)
+        keywords_label = input_model.keywords.pop('keywords_label', 'libefp')
+        results_label = input_model.keywords.pop('results_label', 'libefp')
+        try:
+            efpobj.set_opts(input_model.keywords, label=keywords_label, append=keywords_label)
+        except pylibefp.EFPSyntaxError as e:
+            raise InputError(e.message)
 
         if input_model.driver == 'energy':
             do_gradient = False
@@ -99,9 +105,9 @@ class PylibEFPHarness(ProgramHarness):
 
         # compute and report
         efpobj.compute(do_gradient=do_gradient)
-        print(efpobj.energy_summary(label='psi'))
+        print(efpobj.energy_summary(label=results_label))
 
-        ene = efpobj.get_energy(label='psi')
+        ene = efpobj.get_energy(label=results_label)
 
         pp.pprint(ene)
         print('<<< get_opts():  ', efpobj.get_opts(), '>>>')
@@ -139,27 +145,19 @@ class PylibEFPHarness(ProgramHarness):
 
 #        elif input_model.driver == 'gradient':
 #            torq = efpobj.get_gradient()
-#            #torq = core.Matrix.from_array(np.asarray(torq).reshape(-1, 6))
-#            retres = torq
 
         output_data = {
             'schema_name': 'qcschema_output',
             'schema_version': 1,
-            # 'extras': {
-            #     'outfiles': outfiles,
-            # },
+            'extras': {
+                'local_properties': ene,
+                #     'outfiles': outfiles,
+            },
             'properties': {},
             'provenance': Provenance(creator="PylibEFP", version=self.get_version(), routine="pylibefp"),
             'return_result': retres,
-            # 'stdout': stdout,
+            #'stdout': stdout,
         }
-
-        #        # got to even out who needs plump/flat/Decimal/float/ndarray/list
-        #        # Decimal --> str preserves precision
-        #        output_data['extras']['qcvars'] = {
-        #            k.upper(): str(v) if isinstance(v, Decimal) else v
-        #            for k, v in qcel.util.unnp(qcvars, flat=True).items()
-        #        }
 
         output_data['success'] = True
         return Result(**{**input_model.dict(), **output_data})
