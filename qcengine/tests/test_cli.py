@@ -1,6 +1,8 @@
 import json
 import os
-import shutil
+import subprocess
+import sys
+from typing import List
 
 from qcengine import testing
 from qcengine import util
@@ -9,40 +11,45 @@ from qcengine import get_molecule
 
 from qcelemental.models import ResultInput, OptimizationInput
 
-cov = shutil.which('coverage')
-cov_cmds = []
-if cov:
-    cov_cmds = [cov, "run", "--append", "--source=" + os.path.dirname(os.path.abspath(__file__))]
 
-qcengine = shutil.which("qcengine")  # qcengine is not in the path of `coverage run`
+def run_qcengine_cli(args: List[str]) -> str:
+    """
+    Runs qcengine via its CLI
+
+    This method was chosen over the more sophisticated util.excecute order to get pytest-cov to work.
+    For the same reason, qcengine is invoked as "python -m qcengine.cli" rather than "qcengine".
+
+    Parameters
+    ----------
+    args: List[str]
+        List of CLI arguments
+
+    Returns
+    -------
+    str
+        QCEngine CLI STDOUT.
+    """
+    return subprocess.check_output([sys.executable, '-m', 'qcengine.cli'] + args)
 
 
 def test_info():
     """Test for qcengine info"""
     outputs = []
     for arg in cli.info_choices:
-        args = [qcengine, "info", arg]
-        res = util.execute(args)
-        assert res[0] is True
+        output = run_qcengine_cli(["info", arg])
         if arg not in {"all", "config"}:  # output of config changes call-to-call depending e.g. on mem available
-            outputs.append(res[1]["stdout"])
-        util.execute(cov_cmds + args)
+            outputs.append(output)
 
-    args = [qcengine, "info"]
-    res = util.execute(args)
-    assert res[0] is True
-
+    default_output = run_qcengine_cli(["info"])
     for output in outputs:
-        assert output in res[1]["stdout"]
-    util.execute(cov_cmds + args)
+        assert output in default_output
 
 
 @testing.using_psi4
-def test_run_psi4():
+def test_run_psi4(tmp_path):
     """Tests qcengine run with psi4 and JSON input"""
-    def check_result(result):
-        assert result[0] is True
-        output = json.loads(result[1]["stdout"])
+    def check_result(stdout):
+        output = json.loads(stdout)
         assert output["provenance"]["creator"].lower() == "psi4"
         assert output["success"] is True
 
@@ -50,23 +57,20 @@ def test_run_psi4():
                       driver="energy",
                       model={"method": "hf", "basis": "6-31G"})
 
-    args = [qcengine, "run", "psi4", inp.json()]
-    check_result(util.execute(args))
-    util.execute(cov_cmds + args)
+    args = ["run", "psi4", inp.json()]
+    check_result(run_qcengine_cli(args))
 
-    args = [qcengine, "run", "psi4", "input.json"]
-    check_result(util.execute(args, infiles={"input.json": inp.json()}))
-    util.execute(cov_cmds + args)
+    args = ["run", "psi4", os.path.join(tmp_path, "input.json")]
+    with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
+        check_result(run_qcengine_cli(args))
 
 
 @testing.using_geometric
 @testing.using_psi4
-def test_run_procedure():
+def test_run_procedure(tmp_path):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
-    def check_result(result):
-        assert result[0] is True
-        output = json.loads(result[1]["stdout"])
-        print(output)
+    def check_result(stdout):
+        output = json.loads(stdout)
         assert output["provenance"]["creator"].lower() == "geometric"
         assert output["success"] is True
 
@@ -87,11 +91,10 @@ def test_run_procedure():
            "initial_molecule": get_molecule("hydrogen")}
     inp = OptimizationInput(**inp)
 
-    args = [qcengine, "run-procedure", "geometric", inp.json()]
-    check_result(util.execute(args))
-    util.execute(cov_cmds + args)
+    args = ["run-procedure", "geometric", inp.json()]
+    check_result(run_qcengine_cli(args))
 
-    args = [qcengine, "run-procedure", "geometric", "input.json"]
-    check_result(util.execute(args, infiles={"input.json": inp.json()}))
-    util.execute(cov_cmds + args)
+    args = ["run-procedure", "geometric", os.path.join(tmp_path, "input.json")]
+    with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
+        check_result(run_qcengine_cli(args))
 
