@@ -3,9 +3,9 @@ Calls the entos executable.
 """
 
 import string
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from qcelemental.models import FailedOperation, Result
+from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import UnknownError
@@ -56,40 +56,56 @@ class EntosHarness(ProgramHarness):
         job_inputs = self.build_input(input_data, config)
 
         # Run entos
-        proc = self.execute(job_inputs)
+        exe_success, proc = self.execute(job_inputs)
 
-        if isinstance(proc, FailedOperation):
-            return proc
-        else:
+        # Determine whether the calculation succeeded
+        if exe_success:
             # If execution succeeded, collect results
             result = self.parse_output(proc["outfiles"], input_data)
             return result
-
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
-
-        if extra_outfiles is not None:
-            outfiles = ["dispatch.out"].extend(extra_outfiles)
         else:
-            outfiles = ["dispatch.out"]
-
-        if extra_commands is not None:
-            commands = extra_commands
-        else:
-            commands = inputs["commands"]
-
-        exe_success, proc = execute(commands,
-                                    infiles=inputs["infiles"],
-                                    outfiles=outfiles,
-                                    scratch_directory=inputs["scratch_directory"],
-                                    scratch_name=scratch_name,
-                                    timeout=timeout)
-        proc["outfiles"]["dispatch.out"] = proc["stdout"]
-
-        # Determine whether the calculation succeeded
-        if not exe_success:
+            # Return UnknownError for error propagation
             return UnknownError(proc["stderr"])
 
-        return proc
+    def execute(self,
+                inputs: Dict[str, Any],
+                extra_infiles: Optional[Dict[str, str]] = None,
+                extra_outfiles: Optional[List[str]] = None,
+                extra_commands: Optional[List[str]] = None,
+                scratch_name: Optional[str] = None,
+                scratch_messy: bool = False,
+                timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
+        """
+        For option documentation go look at qcengine/util.execute
+        """
+
+        # Collect all input files and update with extra_infiles
+        infiles = inputs["infiles"]
+        if extra_infiles is not None:
+            infiles.update(extra_infiles)
+
+        # Collect all output files and extend with with extra_outfiles
+        outfiles = ["dispatch.out"]
+        if extra_outfiles is not None:
+            outfiles.extend(extra_outfiles)
+
+        # Replace commands with extra_commands if present
+        commands = inputs["commands"]
+        if extra_commands is not None:
+            commands = extra_commands
+
+        # Run the entos program
+        exe_success, proc = execute(commands,
+                                    infiles=infiles,
+                                    outfiles=outfiles,
+                                    scratch_name=scratch_name,
+                                    scratch_directory=inputs["scratch_directory"],
+                                    scratch_messy=scratch_messy,
+                                    timeout=timeout)
+
+        # Entos does not create an output file and only prints to stdout
+        proc["outfiles"]["dispatch.out"] = proc["stdout"]
+        return exe_success, proc
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:

@@ -2,7 +2,7 @@
 Calls the Psi4 executable.
 """
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from qcelemental.models import Result
 from qcelemental.util import which
@@ -60,21 +60,25 @@ class MopacHarness(ProgramHarness):
 
         exec_command = self.build_input(input_model, config)
 
-        output = self.execute(exec_command)
+        success, output = self.execute(exec_command)
 
         ret = self.parse_output(output["outfiles"], input_model)
 
-        # raise Exception()
-        return ret
+        # Determine whether the calculation succeeded
+        if success:
+            # raise Exception()
+            return ret
+        else:
+            return UnknownError(ret["stderr"])
 
     def execute(self,
-                inputs,
-                extra_infiles=None,
-                extra_outfiles=None,
-                extra_commands=None,
-                scratch_name=None,
-                scratch_messy=False,
-                timeout=None):
+                inputs: Dict[str, Any],
+                extra_infiles: Optional[Dict[str, str]] = None,
+                extra_outfiles: Optional[List[str]] = None,
+                extra_commands: Optional[List[str]] = None,
+                scratch_name: Optional[str] = None,
+                scratch_messy: bool = False,
+                timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
         """
         For option documentation go look at qcengine/util.execute
         """
@@ -99,12 +103,7 @@ class MopacHarness(ProgramHarness):
                                     scratch_messy=scratch_messy,
                                     timeout=timeout,
                                     environment=inputs.get("environment", None))
-
-        # Determine whether the calculation succeeded
-        if not exe_success:
-            return UnknownError(proc["stderr"])
-
-        return proc
+        return exe_success, proc
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
