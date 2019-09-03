@@ -218,7 +218,8 @@ def test_total_1a(system_1, keywords_label, results_label):
         })
     elif keywords_label == 'psi':
         resi['keywords'].update({
-            'disp_damping': 'tt',
+            'DISP_DAMPING': 'TT',
+            'DISP': True,
         })
 
     res = qcng.compute(resi, 'pylibefp', raise_error=True, return_dict=False)
@@ -270,13 +271,3 @@ def test_opts_fail_1(keywords, errmsg, system_1):
         qcng.compute(resi, 'pylibefp', raise_error=True, return_dict=False)
 
     assert errmsg in str(e.value)
-
-
-"""
-start by generating various halogenated benzenes
-opt by b3lyp
-run makefp to generate those files
-run them in dimers in libefp
-run them in dimers in sapt for reference
-upload to qca
-"""

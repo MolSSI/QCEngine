@@ -68,31 +68,27 @@ class PylibEFPHarness(ProgramHarness):
         input_data["success"] = False
         input_data["return_output"] = True
 
-        import pylibefp
-        efpobj = pylibefp.core.efp()
-
         # initialize EFP fragments
-        efp_extras = input_model.molecule.extras['efp_molecule']['extras']
-        efpobj.add_potential(efp_extras['fragment_files'])
-        efpobj.add_fragment(efp_extras['fragment_files'])
-        for ifr, (hint_type, geom_hint) in enumerate(zip(efp_extras['hint_types'], efp_extras['geom_hints'])):
-            efpobj.set_frag_coordinates(ifr, hint_type, geom_hint)
-        efpobj.prepare()
+        import pylibefp
+        # fix units when parsing efp string
+        efpobj = pylibefp.from_dict({**input_model.molecule.extras['efp_molecule']['extras'], 'units':'Bohr'})
 
         # print efp geom in [A]
         print(efpobj.banner())
         print(efpobj.geometry_summary(units_to_bohr=qcel.constants.bohr2angstroms))
 
         if input_model.model.method != 'efpefp':
-            raise InputError
+            raise InputError(f"Method not efpefp: {input_model.model.method}")
 
         # set keywords
+        # * make keywords keys case insensitive
         # * label changes the accepted names of the keywords (xr vs. exch)
         # * append changes the defaults upon which they act (off for libefp vs. on for psi)
-        keywords_label = input_model.keywords.pop('keywords_label', 'libefp')
-        results_label = input_model.keywords.pop('results_label', 'libefp')
+        opts = {k.lower(): v for k, v in input_model.keywords.items()}
+        keywords_label = opts.pop('keywords_label', 'libefp').lower()
+        results_label = opts.pop('results_label', 'libefp').lower()
         try:
-            efpobj.set_opts(input_model.keywords, label=keywords_label, append=keywords_label)
+            efpobj.set_opts(opts, label=keywords_label, append=keywords_label)
         except pylibefp.EFPSyntaxError as e:
             raise InputError(e.message)
 
