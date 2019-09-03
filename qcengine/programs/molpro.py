@@ -15,7 +15,7 @@ from .model import ProgramHarness
 
 
 class MolproHarness(ProgramHarness):
-    _defaults = {
+    _defaults: Dict[str, Any] = {
         "name": "Molpro",
         "scratch": True,
         "thread_safe": False,
@@ -49,6 +49,7 @@ class MolproHarness(ProgramHarness):
     _scf_methods: Set[str] = {"HF", "RHF", "KS", "RKS"}
     _post_hf_methods: Set[str] = {'MP2', 'CCSD', 'CCSD(T)'}
     _supported_methods: Set[str] = {*_scf_methods, *_post_hf_methods}
+
 
     class Config(ProgramHarness.Config):
         pass
