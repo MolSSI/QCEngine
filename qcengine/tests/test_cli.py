@@ -12,7 +12,7 @@ from qcengine import get_molecule
 from qcelemental.models import ResultInput, OptimizationInput
 
 
-def run_qcengine_cli(args: List[str]) -> str:
+def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
     """
     Runs qcengine via its CLI
 
@@ -23,13 +23,26 @@ def run_qcengine_cli(args: List[str]) -> str:
     ----------
     args: List[str]
         List of CLI arguments.
+    stdin: Optional[str]
+        Standard input for the process.
 
     Returns
     -------
     str
-        QCEngine CLI STDOUT.
+        QCEngine CLI standard output.
     """
-    return subprocess.check_output([sys.executable, '-m', 'qcengine.cli'] + args)
+    if stdin is not None:
+        stdin = stdin.encode('utf-8')
+
+    return subprocess.check_output([sys.executable, '-m', 'qcengine'] + args, input=stdin)
+
+
+def test_no_args():
+    """ Test for qcengine with no arguments """
+    try:
+        run_qcengine_cli([])
+    except subprocess.CalledProcessError as e:
+        assert e.returncode == 1
 
 
 def test_info():
@@ -63,6 +76,9 @@ def test_run_psi4(tmp_path):
     args = ["run", "psi4", os.path.join(tmp_path, "input.json")]
     with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
+
+    args = ["run", "psi4", "-"]
+    check_result(run_qcengine_cli(args, stdin=inp.json()))
 
 
 @testing.using_geometric
@@ -98,3 +114,5 @@ def test_run_procedure(tmp_path):
     with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
 
+    args = ["run-procedure", "geometric", inp.json()]
+    check_result(run_qcengine_cli(args, stdin=inp.json()))

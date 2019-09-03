@@ -151,7 +151,3 @@ def main(args=None):
     elif command == "run-procedure":
         ret = compute_procedure(data_arg_helper(args["data"]), args["procedure"])
         print(ret.json())
-
-
-if __name__ == '__main__':
-    main()
