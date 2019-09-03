@@ -6,6 +6,7 @@ dependencies:
   - psi4
   - dftd3 3.2.1
   - mp2d >=1.1
+  - pylibefp
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
 
     # Core

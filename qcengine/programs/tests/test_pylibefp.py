@@ -253,6 +253,7 @@ def test_total_1a(system_1, keywords_label, results_label):
     assert compare_recursive(expected_ene, res.extras['local_properties'], atol=atol)
 
 
+@using_pylibefp
 @pytest.mark.parametrize("keywords,errmsg", [
     ({'nonsense_key': 'harmless', 'elec_damp': 'nonsense'}, "invalid value for [screen/overlap/off] elec_damp: nonsense"),
     ({'elec': 'yEs'}, "invalid value for [T/F] elec: yEs"),
