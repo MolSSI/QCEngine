@@ -15,7 +15,7 @@ from .model import ProgramHarness
 
 
 class MolproHarness(ProgramHarness):
-    _defaults: Set[str] = {
+    _defaults: Dict[str, Any] = {
         "name": "Molpro",
         "scratch": True,
         "thread_safe": False,
