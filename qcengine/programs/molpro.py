@@ -15,7 +15,7 @@ from .model import ProgramHarness
 
 
 class MolproHarness(ProgramHarness):
-    _dft_functionals: Set[str] = {
+    _defaults: Set[str] = {
         "name": "Molpro",
         "scratch": True,
         "thread_safe": False,
