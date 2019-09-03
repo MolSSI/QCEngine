@@ -18,7 +18,8 @@ _canonical_methods = [
     ("psi4", {"method": "hf", "basis": "6-31G"}),
     ("rdkit", {"method": "UFF"}),
     ("torchani", {"method": "ANI1x"}),
-] # yapf: disable
+]  # yapf: disable
+
 
 @pytest.mark.parametrize("program, model", _canonical_methods)
 def test_compute_energy(program, model):
@@ -58,7 +59,7 @@ def test_compute_gradient(program, model):
     ("psi4", {"method": "bad"}),
     ("rdkit", {"method": "bad"}),
     ("torchani", {"method": "bad"}),
-]) # yapf: disable
+])  # yapf: disable
 def test_compute_bad_models(program, model):
     if not testing.has_program(program):
         pytest.skip("Program '{}' not found.".format(program))

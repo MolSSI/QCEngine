@@ -5,14 +5,17 @@ Provides a CLI for QCEngine
 import argparse
 import os.path
 import sys
-
-from qcelemental.models import ResultInput  # run and run-procedure
+from typing import Any, Dict
+import json
 
 from . import (__version__, compute, compute_procedure, get_procedure, get_program,  # run and run-procedure; info
                list_all_procedures, list_all_programs, list_available_procedures, list_available_programs)
 from .config import global_repr  # info
 
+
 __all__ = ["main"]
+
+info_choices = frozenset(["version", "programs", "procedures", "config", "all"])
 
 
 def parse_args():
@@ -25,7 +28,7 @@ def parse_args():
     info.add_argument("category",
                       nargs="*",
                       default="all",
-                      choices=["version", "programs", "procedures", "config", "all"],
+                      choices=info_choices,
                       help="The information categories to show.")
 
     run = subparsers.add_parser('run', help="Run a program on a given task. Output is printed as a JSON blob.")
@@ -113,9 +116,9 @@ def info_cli(args):
         print(global_repr())
 
 
-def data_arg_helper(data_arg: str) -> 'ResultInput':
+def data_arg_helper(data_arg: str) -> Dict[str, Any]:
     """
-    Converts the data argument of run and run-procedure commands to a ResultInput for compute
+    Converts the data argument of run and run-procedure commands to a dict for compute or compute_procedure
 
     Parameters
     ----------
@@ -124,15 +127,15 @@ def data_arg_helper(data_arg: str) -> 'ResultInput':
 
     Returns
     -------
-    ResultInput
-        An input for compute.
+    Dict[str, Any]
+        An input for compute or compute_procedure.
     """
     if data_arg == "-":
-        return ResultInput.parse_raw(sys.stdin.read())
+        return json.load(sys.stdin)
     elif os.path.isfile(data_arg):
-        return ResultInput.parse_file(data_arg)
+        return json.load(open(data_arg))
     else:
-        return ResultInput.parse_raw(data_arg)
+        return json.loads(data_arg)
 
 
 def main(args=None):
