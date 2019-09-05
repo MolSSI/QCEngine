@@ -66,9 +66,9 @@ class ProgramHarness(BaseModel, abc.ABC):
     def execute(self,
                 inputs: Dict[str, Any],
                 extra_outfiles: Optional[List[str]] = None,
-                extra_commands=None,
-                scratch_name=None,
-                timeout=None):
+                extra_commands: Optional[List[str]] = None,
+                scratch_name: Optional[str] = None,
+                timeout: Optional[int] = None):
         raise ValueError("execute is not implemented for {}.", self.__class__)
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':

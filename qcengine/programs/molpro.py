@@ -15,7 +15,7 @@ from .model import ProgramHarness
 
 
 class MolproHarness(ProgramHarness):
-    _defaults = {
+    _defaults: Dict[str, Any] = {
         "name": "Molpro",
         "scratch": True,
         "thread_safe": False,
@@ -49,6 +49,7 @@ class MolproHarness(ProgramHarness):
     _scf_methods: Set[str] = {"HF", "RHF", "KS", "RKS"}
     _post_hf_methods: Set[str] = {'MP2', 'CCSD', 'CCSD(T)'}
     _supported_methods: Set[str] = {*_scf_methods, *_post_hf_methods}
+
 
     class Config(ProgramHarness.Config):
         pass
@@ -95,22 +96,23 @@ class MolproHarness(ProgramHarness):
         job_inputs = self.build_input(input_data, config)
 
         # Run Molpro
-        proc = self.execute(job_inputs)
+        exe_success, proc = self.execute(job_inputs)
 
-        # Return proc if it is type UnknownError for error propagation otherwise process the output
-        if isinstance(proc, UnknownError):
-            return proc
-        else:
+        # Determine whether the calculation succeeded
+        if exe_success:
             # If execution succeeded, collect results
             result = self.parse_output(proc["outfiles"], input_data)
             return result
+        else:
+            # Return UnknownError for error propagation
+            return UnknownError(proc["stderr"])
 
     def execute(self,
                 inputs: Dict[str, Any],
-                extra_infiles: Optional[List[str]] = None,
+                extra_infiles: Optional[Dict[str, str]] = None,
                 extra_outfiles: Optional[List[str]] = None,
                 as_binary: Optional[List[str]] = None,
-                extra_commands: bool = None,
+                extra_commands: Optional[List[str]] = None,
                 scratch_name: Optional[str] = None,
                 scratch_messy: bool = False,
                 timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
@@ -142,12 +144,7 @@ class MolproHarness(ProgramHarness):
                                     scratch_directory=inputs["scratch_directory"],
                                     scratch_messy=scratch_messy,
                                     timeout=timeout)
-
-        # Determine whether the calculation succeeded
-        if not exe_success:
-            return UnknownError(proc["stderr"])
-
-        return proc
+        return exe_success, proc
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
