@@ -145,6 +145,21 @@ def harvest_outfile_pass(outtext):
             qcvar['CCSD CORRELATION ENERGY'] = mobj.group(3)
             qcvar['CCSD TOTAL ENERGY'] = mobj.group(2)
 
+        # Process CR-CC(2,3)
+        mobj = re.search(
+            r'^\s+' + r'CCSD                       ENERGY:'       + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'CR-CC\(2,3\),A OR CCSD\(2\)_T  ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'CR-CC\(2,3\) OR CR-CCSD\(T\)_L ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*'
+            ,outtext, re.MULTILINE)  # yapf: disable
+        if mobj:
+            print('matched cc-cr(2,3)')
+            qcvar['CCSD TOTAL ENERGY'] = mobj.group(1)
+            qcvar['CCSD CORRELATION ENERGY'] = mobj.group(2)
+            qcvar['CR-CC(2,3),A TOTAL ENERGY'] = mobj.group(3)
+            qcvar['CR-CC(2,3),A CORRELATION ENERGY'] = mobj.group(4)
+            qcvar['CR-CC(2,3) TOTAL ENERGY'] = mobj.group(5)
+            qcvar['CR-CC(2,3) CORRELATION ENERGY'] = mobj.group(6)
+
         # Process CCSD(T)
         mobj = re.search(
             r'^\s+' + r'SUMMARY OF RESULTS' +
@@ -266,6 +281,10 @@ def harvest_outfile_pass(outtext):
     if 'CCSD TOTAL ENERGY' in qcvar and 'CCSD CORRELATION ENERGY' in qcvar:
         qcvar['CURRENT CORRELATION ENERGY'] = qcvar['CCSD CORRELATION ENERGY']
         qcvar['CURRENT ENERGY'] = qcvar['CCSD TOTAL ENERGY']
+
+    if 'CR-CC(2,3) TOTAL ENERGY' in qcvar and 'CR-CC(2,3) CORRELATION ENERGY' in qcvar:
+        qcvar['CURRENT CORRELATION ENERGY'] = qcvar['CR-CC(2,3) CORRELATION ENERGY']
+        qcvar['CURRENT ENERGY'] = qcvar['CR-CC(2,3) TOTAL ENERGY']
 
     if 'CCSD(T) TOTAL ENERGY' in qcvar and 'CCSD(T) CORRELATION ENERGY' in qcvar:
         qcvar['CURRENT CORRELATION ENERGY'] = qcvar['CCSD(T) CORRELATION ENERGY']
