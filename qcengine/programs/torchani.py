@@ -73,8 +73,8 @@ class TorchANIHarness(ProgramHarness):
 
         # Check if existings and version
         self.found(raise_error=True)
-        if parse_version(self.get_version()) < parse_version("0.5"):
-            raise ResourceError("QCEngine's TorchANI wrapper requires version 0.5 or greater.")
+        if parse_version(self.get_version()) < parse_version("0.9"):
+            raise ResourceError("QCEngine's TorchANI wrapper requires version 0.9 or greater.")
 
         import torch
         import numpy as np
@@ -110,9 +110,13 @@ class TorchANIHarness(ProgramHarness):
             derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
             ret_data["return_result"] = np.asarray(derivative *
                                                    ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
+        elif input_data.driver == "hessian":
+            import torchani
+            hessian = torchani.utils.hessian(coordinates, energies=energy)
+            ret_data["return_result"] = np.asarray(hessian)
         else:
             raise InputError(
-                f"TorchANI can only compute energy and gradient driver methods. Found {input_data.driver}.")
+                f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.driver}.")
 
         ret_data["provenance"] = Provenance(creator="torchani",
                                             version="unknown",
