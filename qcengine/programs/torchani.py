@@ -77,6 +77,7 @@ class TorchANIHarness(ProgramHarness):
             raise ResourceError("QCEngine's TorchANI wrapper requires version 0.9 or greater.")
 
         import torch
+        import torchani
         import numpy as np
 
         device = torch.device('cpu')
@@ -111,7 +112,6 @@ class TorchANIHarness(ProgramHarness):
             ret_data["return_result"] = np.asarray(derivative *
                                                    ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
         elif input_data.driver == "hessian":
-            import torchani
             hessian = torchani.utils.hessian(coordinates, energies=energy)
             ret_data["return_result"] = np.asarray(hessian)
         else:
