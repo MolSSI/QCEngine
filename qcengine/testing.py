@@ -118,7 +118,7 @@ _programs = {
     "psi4": is_program_new_enough("psi4", "1.2"),
     "rdkit": which_import("rdkit", return_bool=True),
     "qcdb": which_import("qcdb", return_bool=True),
-    "torchani": which_import("torchani", return_bool=True),
+    "torchani": is_program_new_enough("torchani", "0.9"),
     "mp2d": which('mp2d', return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
