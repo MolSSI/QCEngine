@@ -270,12 +270,14 @@ class MolproHarness(ProgramHarness):
         }
 
         # Molpro variables map used for quantities not found in the command map
-        molpro_var_map = {
+        molpro_variable_map = {
             "_ENUC": "nuclear_repulsion_energy",
-            "_DFTFUN": "scf_xc_energy"
+            "_DFTFUN": "scf_xc_energy",
+            "_NELEC": ["calcinfo_nalpha", "calcinfo_nbeta"]
             # "_EMP2_SCS": "scs_mp2_total_energy"
         }
 
+        # Process data in molpro_map
         # Loop through each jobstep
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
@@ -286,31 +288,20 @@ class MolproHarness(ProgramHarness):
             # Grab energies and dipole moment
             if command in self._supported_methods:
                 for child in jobstep.findall('molpro_uri:property', name_space):
-                    prop_name = child.attrib['name']
-                    prop_method = child.attrib['method']
+                    property_name = child.attrib['name']
+                    property_method = child.attrib['method']
                     value = child.attrib['value']
-                    if prop_name in molpro_map:
-                        if prop_method in molpro_map[prop_name]:
-                            if prop_name == "Dipole moment":
-                                properties[molpro_map[prop_name][prop_method]] = [float(x) for x in value.split()]
+                    if property_name in molpro_map:
+                        if property_method in molpro_map[property_name]:
+                            if property_name == "Dipole moment":
+                                properties[molpro_map[property_name][property_method]] = [float(x) for x in value.split()]
                             else:
-                                properties[molpro_map[prop_name][prop_method]] = float(value)
+                                properties[molpro_map[property_name][property_method]] = float(value)
             # Grab gradient
             elif 'FORCE' in command:
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
                     # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
                     output_data['return_result'] = [float(x) for x in child.text.split()]
-
-        # Look for final energy in the molecule tag in case it's needed
-        # Note: For the DFT case mol_method is the name of the functional plus R or U in front
-        molecule = root.find('molpro_uri:job/molpro_uri:molecule', name_space)
-        mol_method = molecule.attrib['method']
-        mol_final_energy = float(molecule.attrib['energy'])
-        # Loop over each variable under the variables tag to grab additional info from molpro_var_map
-        for variable in molecule.findall('molpro_uri:variables/molpro_uri:variable', name_space):
-            var_name = variable.attrib['name']
-            if var_name in molpro_var_map:
-                properties[molpro_var_map[var_name]] = float(variable[0].text)
 
         # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
         if 'mp2_singlet_pair_energy' in properties and 'mp2_triplet_pair_energy' in properties:
@@ -329,12 +320,37 @@ class MolproHarness(ProgramHarness):
             del properties['ccsd_singlet_pair_energy']
             del properties['ccsd_triplet_pair_energy']
 
+        # Process data in molpro_variable_map
+        # Note: For the DFT case molecule_method is the name of the functional plus R or U in front
+        molecule = root.find('molpro_uri:job/molpro_uri:molecule', name_space)
+        molecule_method = molecule.attrib['method']
+        molecule_final_energy = float(molecule.attrib['energy'])  # Energy from the molecule tag in case its needed
+        # Loop over each variable under the variables tag to grab additional info from molpro_variable_map
+        for variable in molecule.findall('molpro_uri:variables/molpro_uri:variable', name_space):
+            variable_name = variable.attrib['name']
+            if variable_name in molpro_variable_map:
+                if variable_name == "_NELEC":
+                    nelec = int(float(variable[0].text))
+                    nunpaired = (input_model.molecule.molecular_multiplicity - 1)
+                    nbeta = (nelec - nunpaired) // 2
+                    nalpha = nelec - nbeta
+                    properties[molpro_variable_map[variable_name][0]] = nalpha
+                    properties[molpro_variable_map[variable_name][1]] = nbeta
+                else:
+                    properties[molpro_variable_map[variable_name]] = float(variable[0].text)
+
+        # Process basis set data
+        basis_set = root.find('molpro_uri:job/molpro_uri:molecule/molpro_uri:basisSet', name_space)
+        nbasis = int(basis_set.attrib['length'])
+        angular_type = basis_set.attrib['angular']  # cartesian vs spherical
+        properties["calcinfo_nbasis"] = nbasis
+
         # Grab the method from input
         method = input_model.model.method
         if method.upper() in self._dft_functionals:  # Determine if method is a DFT functional
             method = "RKS"
 
-        # A slightly more robust way of determining the final energy.
+        # Determining the final energy
         # Throws an error if the energy isn't found for the method specified from the input_model.
         if method in self._post_hf_methods and molpro_map['total energy'][method] in properties:
             final_energy = properties[molpro_map['total energy'][method]]
@@ -343,18 +359,18 @@ class MolproHarness(ProgramHarness):
         else:
             # Back up method for determining final energy if not already present in properties
             # Use the total energy from the molecule tag if it matches the input method
-            if input_model.model.method in mol_method:
-                final_energy = mol_final_energy
+            if input_model.model.method in molecule_method:
+                final_energy = molecule_final_energy
                 if method in self._post_hf_methods:
-                    properties[molpro_map['total energy'][method]] = mol_final_energy
+                    properties[molpro_map['total energy'][method]] = molecule_final_energy
                     properties[molpro_map['correlation energy']
-                               [method]] = mol_final_energy - properties['scf_total_energy']
+                               [method]] = molecule_final_energy - properties['scf_total_energy']
                 elif method in self._scf_methods:
-                    properties[molpro_map['Energy'][method]] = mol_final_energy
+                    properties[molpro_map['Energy'][method]] = molecule_final_energy
             else:
                 raise KeyError(f"Could not find {method} total energy")
 
-        # Replace return_result with final_energy if gradient wasn't called
+        # Determining return_result
         if "return_result" not in output_data:
             output_data["return_result"] = final_energy
 
