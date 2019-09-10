@@ -164,7 +164,7 @@ class MolproHarness(ProgramHarness):
         if template is None:
             input_file = []
 
-            # TODO Resolve keywords
+            # Resolving keywords
             unrestricted = False
             if "reference" in input_model.keywords:
                 if input_model.keywords["reference"] == "unrestricted":
@@ -188,6 +188,13 @@ class MolproHarness(ProgramHarness):
             input_file.append('}')
             input_file.append('')
 
+            # Determine what SCF type (restricted vs. unrestricted)
+            hf_str = 'RHF'
+            dft_str = 'RKS'
+            if unrestricted:
+                hf_str = 'UHF'
+                dft_str = 'UKS'
+
             # TODO Rethink structure of this
             #      Perhaps use _supported_methods and _dft_functionals as top-level if statement
             #      Might consider taking out KS, RKS, UKS, UHF as supported methods (require HF or DFT functional?)
@@ -196,25 +203,14 @@ class MolproHarness(ProgramHarness):
             energy_call = []
             # If post-hf method is called then make sure to write a HF call first
             if input_model.model.method.upper() in self._post_hf_methods:  # post SCF case
-                if unrestricted:
-                    energy_call.append('{UHF}')
-                    energy_call.append('')
-                    energy_call.append(f'{{{input_model.model.method}}}')
-                else:
-                    energy_call.append('{RHF}')
-                    energy_call.append('')
-                    energy_call.append(f'{{{input_model.model.method}}}')
+                energy_call.append(f'{{{hf_str}}}')
+                energy_call.append('')
+                energy_call.append(f'{{{input_model.model.method}}}')
             # If DFT call make sure to write {rks,method}
             elif input_model.model.method.upper() in self._dft_functionals:  # DFT case
-                if unrestricted:
-                    energy_call.append(f'{{uks,{input_model.model.method}}}')
-                else:
-                    energy_call.append(f'{{rks,{input_model.model.method}}}')
+                energy_call.append(f'{{{dft_str},{input_model.model.method}}}')
             elif input_model.model.method.upper() in self._scf_methods:  # HF case
-                if unrestricted:
-                    energy_call.append('{UHF}')
-                else:
-                    energy_call.append('{RHF}')
+                energy_call.append(f'{{{hf_str}}}')
             else:
                 raise InputError(f'Method {input_model.model.method} not implemented for Molpro.')
 
