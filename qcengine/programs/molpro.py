@@ -164,6 +164,12 @@ class MolproHarness(ProgramHarness):
         if template is None:
             input_file = []
 
+            # TODO Resolve keywords
+            unrestricted = False
+            if "reference" in input_model.keywords:
+                if input_model.keywords["reference"] == "unrestricted":
+                    unrestricted = True
+
             # Memory is in megawords per core for Molpro
             memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
             input_file.append("memory,{},M".format(memory_mw_core))
@@ -190,7 +196,7 @@ class MolproHarness(ProgramHarness):
             energy_call = []
             # If post-hf method is called then make sure to write a HF call first
             if input_model.model.method.upper() in self._post_hf_methods:  # post SCF case
-                if input_model.keywords.reference == "unrestricted":
+                if unrestricted:
                     energy_call.append('{UHF}')
                     energy_call.append('')
                     energy_call.append(f'{{{input_model.model.method}}}')
@@ -200,12 +206,12 @@ class MolproHarness(ProgramHarness):
                     energy_call.append(f'{{{input_model.model.method}}}')
             # If DFT call make sure to write {rks,method}
             elif input_model.model.method.upper() in self._dft_functionals:  # DFT case
-                if input_model.keywords.reference == "unrestricted":
+                if unrestricted:
                     energy_call.append(f'{{uks,{input_model.model.method}}}')
                 else:
                     energy_call.append(f'{{rks,{input_model.model.method}}}')
             elif input_model.model.method.upper() in self._scf_methods:  # HF case
-                if input_model.keywords.reference == "unrestricted":
+                if unrestricted:
                     energy_call.append('{UHF}')
                 else:
                     energy_call.append('{RHF}')
