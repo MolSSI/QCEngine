@@ -45,11 +45,6 @@ class MolproHarness(ProgramHarness):
         "M12HFC", "HJSWPBE", "HJSWPBEH", "TCSWPBE", "PBESOL"
     }
 
-    # Currently supported methods in QCEngine for Molpro
-    _restricted_scf_methods: Set[str] = {"HF", "RHF", "KS", "RKS"}
-    _unrestricted_scf_methods: Set[str] = {"UHF", "UKS"}
-    _scf_methods: Set[str] = {*_restricted_scf_methods, *_unrestricted_scf_methods}
-    # TODO Open-shell scenario.
     # Different open-shell scenarios:
     # - Restricted references
     #       RHF-RMP2 (like RHF-UMP2 using Molpro's naming convention for CC methods)
@@ -59,10 +54,11 @@ class MolproHarness(ProgramHarness):
     #       RHF-RCCSD(T)
     # - Unrestricted references (Only supported up to UMP2, no CC support)
     #       UHF-UMP2
+    # NOTE: Unrestricted SCF methods must be specified by using keyword reference
+    _hf_methods: Set[str] = {"HF", "RHF"}
     _restricted_post_hf_methods = {"MP2", "CCSD", "CCSD(T)"}  # RMP2, RCCSD, RCCSD(T)}
-    _unrestricted_post_hf_methods = {"UCCSD", "UCCSD(T)"}  # UMP2}
+    _unrestricted_post_hf_methods = {"UMP2", "UCCSD", "UCCSD(T)"}
     _post_hf_methods: Set[str] = {*_restricted_post_hf_methods}  # *_unrestricted_post_scf_methods}
-    _supported_methods: Set[str] = {*_scf_methods, *_post_hf_methods}
 
     class Config(ProgramHarness.Config):
         pass
@@ -173,9 +169,6 @@ class MolproHarness(ProgramHarness):
             # Memory is in megawords per core for Molpro
             memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
             input_file.append("memory,{},M".format(memory_mw_core))
-            # TODO Decide how I want this keyword to look/work
-            # if input_model.keywords.get('wfu') is not None:
-            #     input_file.append('file,2,{}'.format(input_model.keywords.get('wfu')))
             input_file.append('')
 
             # Write the geom
@@ -189,28 +182,24 @@ class MolproHarness(ProgramHarness):
             input_file.append('')
 
             # Determine what SCF type (restricted vs. unrestricted)
-            hf_str = 'RHF'
-            dft_str = 'RKS'
+            hf_type = 'RHF'
+            dft_type = 'RKS'
             if unrestricted:
-                hf_str = 'UHF'
-                dft_str = 'UKS'
+                hf_type = 'UHF'
+                dft_type = 'UKS'
 
-            # TODO Rethink structure of this
-            #      Perhaps use _supported_methods and _dft_functionals as top-level if statement
-            #      Might consider taking out KS, RKS, UKS, UHF as supported methods (require HF or DFT functional?)
-            #      Or perform checks for RHF, UHF, (maybe ROHF), but definitely take out KS ones.
             # Write energy call
             energy_call = []
             # If post-hf method is called then make sure to write a HF call first
             if input_model.model.method.upper() in self._post_hf_methods:  # post SCF case
-                energy_call.append(f'{{{hf_str}}}')
+                energy_call.append(f'{{{hf_type}}}')
                 energy_call.append('')
                 energy_call.append(f'{{{input_model.model.method}}}')
             # If DFT call make sure to write {rks,method}
             elif input_model.model.method.upper() in self._dft_functionals:  # DFT case
-                energy_call.append(f'{{{dft_str},{input_model.model.method}}}')
-            elif input_model.model.method.upper() in self._scf_methods:  # HF case
-                energy_call.append(f'{{{hf_str}}}')
+                energy_call.append(f'{{{dft_type},{input_model.model.method}}}')
+            elif input_model.model.method.upper() in self._hf_methods:  # HF case
+                energy_call.append(f'{{{hf_type}}}')
             else:
                 raise InputError(f'Method {input_model.model.method} not implemented for Molpro.')
 
@@ -317,7 +306,7 @@ class MolproHarness(ProgramHarness):
 
         # Process data in molpro_map
         # Loop through each jobstep
-        # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
+        # The jobstep tag in Molpro contains output from commands (e.g. {HF}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
             command = jobstep.attrib['command']
             if 'FORCE' in command:  # Grab gradient
@@ -329,12 +318,11 @@ class MolproHarness(ProgramHarness):
                     property_name = child.attrib['name']
                     property_method = child.attrib['method']
                     value = child.attrib['value']
-                    if property_name in molpro_map:
-                        if property_method in molpro_map[property_name]:
-                            if property_name == "Dipole moment":
-                                properties[molpro_map[property_name][property_method]] = [float(x) for x in value.split()]
-                            else:
-                                properties[molpro_map[property_name][property_method]] = float(value)
+                    if property_name in molpro_map and property_method in molpro_map[property_name]:
+                        if property_name == "Dipole moment":
+                            properties[molpro_map[property_name][property_method]] = [float(x) for x in value.split()]
+                        else:
+                            properties[molpro_map[property_name][property_method]] = float(value)
 
         # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
         if 'mp2_singlet_pair_energy' in properties and 'mp2_triplet_pair_energy' in properties:
@@ -375,30 +363,31 @@ class MolproHarness(ProgramHarness):
         # Process basis set data
         basis_set = root.find('molpro_uri:job/molpro_uri:molecule/molpro_uri:basisSet', name_space)
         nbasis = int(basis_set.attrib['length'])
-        angular_type = basis_set.attrib['angular']  # cartesian vs spherical
+        # angular_type = basis_set.attrib['angular']  # cartesian vs spherical
         properties["calcinfo_nbasis"] = nbasis
 
         # Grab the method from input
-        method = input_model.model.method
-        if method.upper() in self._dft_functionals:  # Determine if method is a DFT functional
-            method = "RKS"
+        method = input_model.model.method.upper()
 
         # Determining the final energy
         # Throws an error if the energy isn't found for the method specified from the input_model.
-        if method in self._post_hf_methods and molpro_map['total energy'][method] in properties:
+        if method in molpro_map['total energy'].keys() and molpro_map['total energy'][method] in properties:
             final_energy = properties[molpro_map['total energy'][method]]
-        elif method in self._scf_methods and molpro_map['Energy'][method] in properties:
+        elif method in molpro_map['Energy'].keys() and molpro_map['Energy'][method] in properties:
             final_energy = properties[molpro_map['Energy'][method]]
         else:
             # Back up method for determining final energy if not already present in properties
             # Use the total energy from the molecule tag if it matches the input method
-            if input_model.model.method in molecule_method:
+            # if input_model.model.method.upper() in molecule_method:
+            if method in molecule_method:
                 final_energy = molecule_final_energy
                 if method in self._post_hf_methods:
                     properties[molpro_map['total energy'][method]] = molecule_final_energy
                     properties[molpro_map['correlation energy']
                                [method]] = molecule_final_energy - properties['scf_total_energy']
-                elif method in self._scf_methods:
+                elif method in self._dft_functionals:
+                    properties[molpro_map['Energy']["KS"]] = molecule_final_energy
+                elif method in self._hf_methods:
                     properties[molpro_map['Energy'][method]] = molecule_final_energy
             else:
                 raise KeyError(f"Could not find {method} total energy")
