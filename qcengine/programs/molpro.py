@@ -46,10 +46,23 @@ class MolproHarness(ProgramHarness):
     }
 
     # Currently supported methods in QCEngine for Molpro
-    _scf_methods: Set[str] = {"HF", "RHF", "KS", "RKS"}
-    _post_hf_methods: Set[str] = {'MP2', 'CCSD', 'CCSD(T)'}
+    _restricted_scf_methods: Set[str] = {"HF", "RHF", "KS", "RKS"}
+    _unrestricted_scf_methods: Set[str] = {"UHF", "UKS"}
+    _scf_methods: Set[str] = {*_restricted_scf_methods, *_unrestricted_scf_methods}
+    # TODO Open-shell scenario.
+    # Different open-shell scenarios:
+    # - Restricted references
+    #       RHF-RMP2 (like RHF-UMP2 using Molpro's naming convention for CC methods)
+    #       RHF-UCCSD
+    #       RHF-UCCSD(T)
+    #       RHF-RCCSD
+    #       RHF-RCCSD(T)
+    # - Unrestricted references (Only supported up to UMP2, no CC support)
+    #       UHF-UMP2
+    _restricted_post_hf_methods = {"MP2", "CCSD", "CCSD(T)"}  # RMP2, RCCSD, RCCSD(T)}
+    _unrestricted_post_hf_methods = {"UCCSD", "UCCSD(T)"}  # UMP2}
+    _post_hf_methods: Set[str] = {*_restricted_post_hf_methods}  # *_unrestricted_post_scf_methods}
     _supported_methods: Set[str] = {*_scf_methods, *_post_hf_methods}
-
 
     class Config(ProgramHarness.Config):
         pass
@@ -169,16 +182,35 @@ class MolproHarness(ProgramHarness):
             input_file.append('}')
             input_file.append('')
 
+            # TODO Rethink structure of this
+            #      Perhaps use _supported_methods and _dft_functionals as top-level if statement
+            #      Might consider taking out KS, RKS, UKS, UHF as supported methods (require HF or DFT functional?)
+            #      Or perform checks for RHF, UHF, (maybe ROHF), but definitely take out KS ones.
             # Write energy call
             energy_call = []
             # If post-hf method is called then make sure to write a HF call first
-            if input_model.model.method.upper() in self._post_hf_methods:
-                energy_call.append('{HF}')
+            if input_model.model.method.upper() in self._post_hf_methods:  # post SCF case
+                if input_model.keywords.reference == "unrestricted":
+                    energy_call.append('{UHF}')
+                    energy_call.append('')
+                    energy_call.append(f'{{{input_model.model.method}}}')
+                else:
+                    energy_call.append('{RHF}')
+                    energy_call.append('')
+                    energy_call.append(f'{{{input_model.model.method}}}')
             # If DFT call make sure to write {rks,method}
-            if input_model.model.method.upper() in self._dft_functionals:
-                energy_call.append(f'{{rks,{input_model.model.method}}}')
+            elif input_model.model.method.upper() in self._dft_functionals:  # DFT case
+                if input_model.keywords.reference == "unrestricted":
+                    energy_call.append(f'{{uks,{input_model.model.method}}}')
+                else:
+                    energy_call.append(f'{{rks,{input_model.model.method}}}')
+            elif input_model.model.method.upper() in self._scf_methods:  # HF case
+                if input_model.keywords.reference == "unrestricted":
+                    energy_call.append('{UHF}')
+                else:
+                    energy_call.append('{RHF}')
             else:
-                energy_call.append(f'{{{input_model.model.method}}}')
+                raise InputError(f'Method {input_model.model.method} not implemented for Molpro.')
 
             # Write appropriate driver call
             if input_model.driver == 'energy':
@@ -236,8 +268,10 @@ class MolproHarness(ProgramHarness):
             "Energy": {
                 "HF": "scf_total_energy",
                 "RHF": "scf_total_energy",
+                "UHF": "scf_total_energy",
                 "KS": "scf_total_energy",
-                "RKS": "scf_total_energy"
+                "RKS": "scf_total_energy",
+                "UKS": "scf_total_energy"
             },
             "total energy": {
                 "MP2": "mp2_total_energy",
@@ -261,8 +295,10 @@ class MolproHarness(ProgramHarness):
             "Dipole moment": {
                 "HF": "scf_dipole_moment",
                 "RHF": "scf_dipole_moment",
+                "UHF": "scf_dipole_moment",
                 "KS": "scf_dipole_moment",
                 "RKS": "scf_dipole_moment",
+                "UKS": "scf_dipole_moment",
                 "MP2": "mp2_dipole_moment",
                 "CCSD": "ccsd_dipole_moment",
                 "CCSD(T)": "ccsd_prt_pr_dipole_moment"
@@ -281,12 +317,12 @@ class MolproHarness(ProgramHarness):
         # Loop through each jobstep
         # The jobstep tag in Molpro contains output from commands (e.g. {hf}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
-            # Remove the -SCF part of the command string when Molpro calls HF or KS
             command = jobstep.attrib['command']
-            if '-SCF' in command:
-                command = command[:-4]
-            # Grab energies and dipole moment
-            if command in self._supported_methods:
+            if 'FORCE' in command:  # Grab gradient
+                for child in jobstep.findall('molpro_uri:gradient', name_space):
+                    # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
+                    output_data['return_result'] = [float(x) for x in child.text.split()]
+            else:  # Grab energies and dipole moment
                 for child in jobstep.findall('molpro_uri:property', name_space):
                     property_name = child.attrib['name']
                     property_method = child.attrib['method']
@@ -297,11 +333,6 @@ class MolproHarness(ProgramHarness):
                                 properties[molpro_map[property_name][property_method]] = [float(x) for x in value.split()]
                             else:
                                 properties[molpro_map[property_name][property_method]] = float(value)
-            # Grab gradient
-            elif 'FORCE' in command:
-                for child in jobstep.findall('molpro_uri:gradient', name_space):
-                    # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
-                    output_data['return_result'] = [float(x) for x in child.text.split()]
 
         # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
         if 'mp2_singlet_pair_energy' in properties and 'mp2_triplet_pair_energy' in properties:
