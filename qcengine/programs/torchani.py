@@ -55,6 +55,14 @@ class TorchANIHarness(ProgramHarness):
         import torch
         import torchani
 
+        # graft a custom forward pass to Ensemble class
+        def ensemble_forward(self, species_input):
+            outputs = torch.cat([x(species_input)[1] for x in self])
+            species, _ = species_input
+            return species, outputs
+
+        torchani.nn.Ensemble.forward = ensemble_forward
+
         if name == "ani1x":
             self._CACHE[name] = torchani.models.ANI1x()
 
@@ -96,17 +104,29 @@ class TorchANIHarness(ProgramHarness):
         if unknown_sym:
             raise InputError(f"TorchANI model '{input_data.model.method}' does not support symbols: {unknown_sym}.")
 
+        num_atoms = len(species)
         species = model.species_to_tensor(species).to(device).unsqueeze(0)
 
         # Build coord array
         geom_array = input_data.molecule.geometry.reshape(1, -1, 3) * ureg.conversion_factor("bohr", "angstrom")
         coordinates = torch.tensor(geom_array.tolist(), requires_grad=True, device=device)
 
-        _, energy = model((species, coordinates))
+        _, energy_array = model((species, coordinates))
+        energy = energy_array.mean()
+        ensemble_std = energy_array.std()
+        ensemble_scaled_std = ensemble_std / np.sqrt(num_atoms)
+
         ret_data["properties"] = {"return_energy": energy.item()}
 
         if input_data.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
+            ret_data["extras"] = {
+                "ensemble_energies": energy_array.detach().numpy(),
+                "ensemble_energy_avg": energy.item(),
+                "ensemble_energy_std": ensemble_std.item(),
+                "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item()
+            }
+
         elif input_data.driver == "gradient":
             derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
             ret_data["return_result"] = np.asarray(derivative *
