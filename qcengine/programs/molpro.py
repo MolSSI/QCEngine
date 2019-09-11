@@ -161,10 +161,10 @@ class MolproHarness(ProgramHarness):
             input_file = []
 
             # Resolving keywords
+            caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
             unrestricted = False
-            if "reference" in input_model.keywords:
-                if input_model.keywords["reference"] == "unrestricted":
-                    unrestricted = True
+            if "reference" in caseless_keywords and caseless_keywords["reference"] == "unrestricted":
+                unrestricted = True
 
             # Memory is in megawords per core for Molpro
             memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
@@ -252,6 +252,7 @@ class MolproHarness(ProgramHarness):
         #      - orbitals
         output_data = {}
         properties = {}
+        extras = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
 
         # Molpro commands map
@@ -296,6 +297,37 @@ class MolproHarness(ProgramHarness):
             }
         }
 
+        # Started adding basic support for local correlation methods in Molpro
+        molpro_extras_map = {
+            "total energy": {
+                "LMP2": "local_mp2_total_energy",
+                "LCCSD": "local_ccsd_total_energy",
+                "LCCSD(T0)": "local_ccsd_prt0_pr_total_energy",
+                "LCCSD(T)": "local_ccsd_prt_pr_total_energy"
+            },
+            "correlation energy": {
+                "LMP2": "local_mp2_correlation_energy",
+                "LCCSD": "local_ccsd_correlation_energy"
+            },
+            "singlet pair energy": {
+                "LMP2": "local_mp2_singlet_pair_energy",
+                "LCCSD": "local_ccsd_singlet_pair_energy"
+            },
+            "triplet pair energy": {
+                "LMP2": "local_mp2_triplet_pair_energy",
+                "LCCSD": "local_ccsd_triplet_pair_energy"
+            },
+            "singles energy": {
+                "LCCSD": "local_ccsd_singles_energy"
+            },
+            # "strong pair energy": {
+            #     "LCCSD": "local_ccsd_strong_pair_energy"
+            # },
+            # "weak pair energy": {
+            #     "LMP2": "local_mp2_weak_pair_energy"
+            # }
+        }
+
         # Molpro variables map used for quantities not found in the command map
         molpro_variable_map = {
             "_ENUC": "nuclear_repulsion_energy",
@@ -323,6 +355,8 @@ class MolproHarness(ProgramHarness):
                             properties[molpro_map[property_name][property_method]] = [float(x) for x in value.split()]
                         else:
                             properties[molpro_map[property_name][property_method]] = float(value)
+                    elif property_name in molpro_extras_map and property_method in molpro_extras_map[property_name]:
+                        extras[molpro_extras_map[property_name][property_method]] = float(value)
 
         # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
         if 'mp2_singlet_pair_energy' in properties and 'mp2_triplet_pair_energy' in properties:
@@ -398,6 +432,7 @@ class MolproHarness(ProgramHarness):
 
         # Final output_data assignments needed for the Result object
         output_data["properties"] = properties
+        output_data["extras"] = extras
         output_data['schema_name'] = 'qcschema_output'
         output_data['stdout'] = outfiles["dispatch.out"]
         output_data['success'] = True
