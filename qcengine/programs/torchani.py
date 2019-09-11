@@ -120,13 +120,6 @@ class TorchANIHarness(ProgramHarness):
 
         if input_data.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
-            ret_data["extras"] = {
-                "ensemble_energies": energy_array.detach().numpy(),
-                "ensemble_energy_avg": energy.item(),
-                "ensemble_energy_std": ensemble_std.item(),
-                "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item()
-            }
-
         elif input_data.driver == "gradient":
             derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
             ret_data["return_result"] = np.asarray(derivative *
@@ -137,6 +130,33 @@ class TorchANIHarness(ProgramHarness):
         else:
             raise InputError(
                 f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.driver}.")
+
+        #######################################################################
+        # Description of the quantities stored in `extras`
+        #
+        # ensemble_energies:
+        #   An energy array of all members (models) in an ensemble of models
+        #
+        # ensemble_energy_avg:
+        #   The average value of energy array which is also recorded with as
+        #   `energy` in QCEngine
+        #
+        # ensemble_energy_std:
+        #   The standard deviation of energy array
+        #
+        # ensemble_per_root_atom_disagreement:
+        #   The standard deviation scaled by the square root of N, with N being
+        #   the number of atoms in the molecule. This is the quantity used in
+        #   the query-by-committee (QBC) process in active learning to infer
+        #   the reliability of the models in an ensemble, and produce more data
+        #   points in the regions where this quantity is below a certain
+        #   threshold (inclusion criteria)
+        ret_data["extras"] = {
+            "ensemble_energies": energy_array.detach().numpy(),
+            "ensemble_energy_avg": energy.item(),
+            "ensemble_energy_std": ensemble_std.item(),
+            "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item()
+        }
 
         ret_data["provenance"] = Provenance(creator="torchani",
                                             version="unknown",
