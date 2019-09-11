@@ -24,6 +24,25 @@ class EntosHarness(ProgramHarness):
     }
     version_cache: Dict[str, str] = {}
 
+    # Energy commands that are currently supported
+    _energy_commands = {"dft", "xtb"}
+
+    # List of DFT functionals
+    _dft_functionals = {
+        "SLATER", "DIRAC", "SLATERD3", "DIRACD3", "VWN5", "VWN", "VWN1", "SVWN", "LDA", "BLYP", "BPW91",
+        "BLYPD3", "B88", "PBEX", "PBERX", "PBEC", "LYP", "PW91", "P86", "PBE", "PBER", "PBED3", "PBERD3",
+        "B3LYP3", "B3LYP", "B3LYP5", "PBE0", "PBE1PBE", "B3LYP3D3", "B3LYPD3", "B3LYP5D3", "PBE0D3",
+        "PBE1PBED3", "CAMB3LYP", "WB97X", "CAMB3LYPD3", "WB97XD3"
+    }
+
+    # Available keywords for each of the energy commands
+    _dft_keywords = {"df"}
+    _xtb_keywords = {}
+    _keyword_map = {
+        "dft": _dft_keywords,
+        "xtb": _xtb_keywords
+    }
+
     class Config(ProgramHarness.Config):
         pass
 
@@ -85,7 +104,7 @@ class EntosHarness(ProgramHarness):
             infiles.update(extra_infiles)
 
         # Collect all output files and extend with with extra_outfiles
-        outfiles = ["dispatch.out"]
+        outfiles = ["dispatch.out", "results.json"]
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
@@ -104,22 +123,11 @@ class EntosHarness(ProgramHarness):
                                     timeout=timeout)
 
         # Entos does not create an output file and only prints to stdout
-        proc["outfiles"]["dispatch.out"] = proc["stdout"]
+        proc["outfiles"]["results.json"] = proc["stdout"]
         return exe_success, proc
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
-
-        # TODO Move to the top
-        _energy_commands = {"dft", "xtb"}
-        _dft_functionals = {"LDA", "B3LYP", "PBE"}
-
-        _dft_keywords = {"df"}
-        _xtb_keywords = {}
-        _keyword_map = {
-            "dft": _dft_keywords,
-            "xtb": _xtb_keywords
-        }
 
         # Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
@@ -128,7 +136,7 @@ class EntosHarness(ProgramHarness):
         if template is None:
 
             # Determine the energy_command
-            if input_model.model.method.upper() in _dft_functionals:
+            if input_model.model.method.upper() in self._dft_functionals:
                 energy_command = "dft"
             # For now entos supports HF calculations through the dft energy_command with xc = HF
             elif input_model.model.method.upper() == "HF":
@@ -137,7 +145,7 @@ class EntosHarness(ProgramHarness):
                 energy_command = input_model.model.method.lower()
 
             # Check method is supported
-            if energy_command not in _energy_commands:
+            if energy_command not in self._energy_commands:
                 raise InputError(f'Energy method, {input_model.model.method}, not implemented for entos.')
 
             # Define base options for the energy command (options that can be taken directly from input_model)
@@ -146,6 +154,7 @@ class EntosHarness(ProgramHarness):
                     'xc': input_model.model.method.upper(),
                     'ao': input_model.model.basis,
                     'charge': input_model.molecule.molecular_charge,
+                    'spin': float(input_model.molecule.molecular_multiplicity - 1),
                 },
                 "xtb": {}
             }
@@ -154,29 +163,34 @@ class EntosHarness(ProgramHarness):
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
             energy_extra_options = {}
             for key in caseless_keywords.keys():
-                if key in _keyword_map[energy_command]:
+                if key in self._keyword_map[energy_command]:
                     energy_extra_options[key] = caseless_keywords[key]
 
             # Additional sub trees
             structure = {'structure': {'file': 'geometry.xyz'}}  # Structure sub tree
             print_results = {'print': {'results': True}}  # Print sub tree
+            name_results = {'name': 'json_results'}
 
+            # Create the input dictionary for a energy call
             if input_model.driver == 'energy':
                 input_dict = {
                     energy_command: {
-                        **structure, **energy_options[energy_command], **energy_extra_options
+                        **structure, **energy_options[energy_command], **energy_extra_options, **name_results
                     },
                     **print_results}
-            # Write gradient call if asked for
+            # Create the input dictionary for a gradient call
             elif input_model.driver == 'gradient':
                 input_dict = {
                     'gradient': {
                         **structure,
                         energy_command: {
                             **energy_options[energy_command], **energy_extra_options
-                        }
+                        },
+                        **name_results
                     },
                     **print_results}
+            # TODO Add support for hessians
+            # elif input_model.driver == 'hessian':
             else:
                 raise NotImplementedError('Driver {} not implemented for entos.'.format(input_model.driver))
 
@@ -202,7 +216,7 @@ class EntosHarness(ProgramHarness):
             input_file = str_template.substitute()
 
         return {
-            "commands": ["entos", "-n", str(config.ncores), "--json-results", "dispatch.in"],
+            "commands": ["entos", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
             "infiles": {
                 "dispatch.in": input_file,
                 "geometry.xyz": xyz_file
@@ -233,6 +247,8 @@ class EntosHarness(ProgramHarness):
 
         output_data = {}
         properties = {}
+
+        # TODO Parse the results.json outfile instead of text parsing
 
         # Parse the output file, collect properties and gradient
         output_lines = outfiles["dispatch.out"].split('\n')
