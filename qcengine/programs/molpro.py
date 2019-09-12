@@ -56,9 +56,10 @@ class MolproHarness(ProgramHarness):
     #       UHF-UMP2
     # NOTE: Unrestricted SCF methods must be specified by using keyword reference
     _hf_methods: Set[str] = {"HF", "RHF"}
-    _restricted_post_hf_methods = {"MP2", "CCSD", "CCSD(T)"}  # RMP2, RCCSD, RCCSD(T)}
-    _unrestricted_post_hf_methods = {"UMP2", "UCCSD", "UCCSD(T)"}
-    _post_hf_methods: Set[str] = {*_restricted_post_hf_methods}  # *_unrestricted_post_scf_methods}
+    _restricted_post_hf_methods: Set[str] = {"MP2", "CCSD", "CCSD(T)"}  # RMP2, RCCSD, RCCSD(T)}
+    # TODO Add keyword to specify unrestricted for WF method
+    # _unrestricted_post_hf_methods: Set[str] = {"UMP2", "UCCSD", "UCCSD(T)"}
+    _post_hf_methods: Set[str] = {*_restricted_post_hf_methods}
 
     class Config(ProgramHarness.Config):
         pass
@@ -163,6 +164,7 @@ class MolproHarness(ProgramHarness):
             # Resolving keywords
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
             unrestricted = False
+            # Following Molpro default that ROHF is done for open-shell calculations unless unrestricted is specified
             if "reference" in caseless_keywords and caseless_keywords["reference"] == "unrestricted":
                 unrestricted = True
 
