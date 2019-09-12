@@ -3,6 +3,7 @@ Calls the entos executable.
 """
 
 import string
+import json
 from typing import Any, Dict, List, Optional, Tuple
 
 from qcelemental.models import Result
@@ -177,7 +178,8 @@ class EntosHarness(ProgramHarness):
                     energy_command: {
                         **structure, **energy_options[energy_command], **energy_extra_options, **name_results
                     },
-                    **print_results}
+                    **print_results
+                }
             # Create the input dictionary for a gradient call
             elif input_model.driver == 'gradient':
                 input_dict = {
@@ -188,7 +190,8 @@ class EntosHarness(ProgramHarness):
                         },
                         **name_results
                     },
-                    **print_results}
+                    **print_results
+                }
             # TODO Add support for hessians
             # elif input_model.driver == 'hessian':
             else:
@@ -248,7 +251,14 @@ class EntosHarness(ProgramHarness):
         output_data = {}
         properties = {}
 
+        xtb_map = {}
+        dft_map = {"energy", "n_iter", "ao_basis", "density", "orbitals", "fock"}
+        gradient_map = {"energy", "gradient"}
+
         # TODO Parse the results.json outfile instead of text parsing
+        #      One issue is that depending on driver different levels of information is returned.
+        # tmp = json.load(outfiles["results.json"])
+        # entos_results = tmp["json_results"]
 
         # Parse the output file, collect properties and gradient
         output_lines = outfiles["dispatch.out"].split('\n')
