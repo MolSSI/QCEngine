@@ -40,6 +40,7 @@ def nh2():
         pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce'}, marks=testing.using_nwchem),
         pytest.param('psi4', 'aug-cc-pvdz', {'mp2_type': 'conv'}, marks=testing.using_psi4),
         pytest.param('gamess', 'accd', {'mp2__nacore': 0, 'contrl__ispher': 1}, marks=testing.using_gamess),
+        pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ])  # yapf: disable
 def test_sp_mp2_rhf_full(program, basis, keywords, h2o):
     """cfour/sp-rhf-ccsd/input.dat
@@ -78,6 +79,7 @@ def test_sp_mp2_rhf_full(program, basis, keywords, h2o):
         pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'scf__uhf': True, 'mp2__freeze':1}, marks=testing.using_nwchem),
         pytest.param('psi4', 'aug-cc-pvdz', {'reference': 'uhf', 'freeze_core': True, 'mp2_type': 'conv'}, marks=testing.using_psi4),
         pytest.param('gamess', 'accd', {'contrl__ispher': 1, 'contrl__scftyp': 'uhf'}, marks=testing.using_gamess),
+        pytest.param('molpro', 'aug-cc-pvdz', {"reference": "unrestricted"}, marks=testing.using_molpro),
     ])  # yapf: disable
 def test_sp_mp2_uhf_fc(program, basis, keywords, nh2):
     resi = {
@@ -105,6 +107,7 @@ def test_sp_mp2_uhf_fc(program, basis, keywords, nh2):
 
 @pytest.mark.parametrize('program,basis,keywords,errmsg', [
     pytest.param('nwchem', 'aug-cc-pvdz', {'scf__rohf': True}, 'unknown SCFTYPE', marks=testing.using_nwchem),
+    pytest.param('molpro', 'aug-cc-pvdz', {}, 'unknown SCFTYPE', marks=testing.using_molpro),
 ])  # yapf: disable
 def test_sp_mp2_rohf_full_error(program, basis, keywords, nh2, errmsg):
     resi = {
