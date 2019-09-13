@@ -70,6 +70,7 @@ class MolproHarness(ProgramHarness):
                      raise_error=raise_error,
                      raise_msg='Please install via https://www.molpro.net/')
 
+    # TODO Consider changing this to use molpro --version instead of performing a full execute
     def get_version(self) -> str:
         self.found(raise_error=True)
 
@@ -136,7 +137,7 @@ class MolproHarness(ProgramHarness):
             infiles.update(extra_infiles)
 
         # Collect all output files and update with extra_outfiles
-        outfiles = ["dispatch.out", "dispatch.xml", "dispatch.wfu"]
+        outfiles = ["dispatch.out", "dispatch.xml"]
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
@@ -251,8 +252,9 @@ class MolproHarness(ProgramHarness):
         # TODO Read information from molecule tag
         #      - cml:molecule, cml:atomArray (?)
         #      - basisSet
+        #       - Be aware of symmetry. Might only be able to support if symmetry,nosym
         #      - orbitals
-        output_data = {}
+        #       - Be aware of symmetry. Might only be able to support if symmetry,nosym
         properties = {}
         extras = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
@@ -338,15 +340,14 @@ class MolproHarness(ProgramHarness):
             # "_EMP2_SCS": "scs_mp2_total_energy"
         }
 
-        # Process data in molpro_map
-        # Loop through each jobstep
+        # Process data in molpro_map by looping through each jobstep
         # The jobstep tag in Molpro contains output from commands (e.g. {HF}, {force})
         for jobstep in root.findall('molpro_uri:job/molpro_uri:jobstep', name_space):
             command = jobstep.attrib['command']
             if 'FORCE' in command:  # Grab gradient
                 for child in jobstep.findall('molpro_uri:gradient', name_space):
                     # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
-                    output_data['return_result'] = [float(x) for x in child.text.split()]
+                    properties['gradient'] = [float(x) for x in child.text.split()]
             else:  # Grab energies and dipole moment
                 for child in jobstep.findall('molpro_uri:property', name_space):
                     property_name = child.attrib['name']
@@ -428,15 +429,21 @@ class MolproHarness(ProgramHarness):
             else:
                 raise KeyError(f"Could not find {method} total energy")
 
+        # Initialize output_data by copying over input_model.dict()
+        output_data = input_model.dict()
+
         # Determining return_result
-        if "return_result" not in output_data:
+        if input_model.driver == "energy":
             output_data["return_result"] = final_energy
+        elif input_model.driver == "gradient":
+            output_data["return_result"] = properties["gradient"]
+            del properties["gradient"]
 
         # Final output_data assignments needed for the Result object
         output_data["properties"] = properties
-        output_data["extras"] = extras
+        output_data["extras"].update(extras)
         output_data['schema_name'] = 'qcschema_output'
         output_data['stdout'] = outfiles["dispatch.out"]
         output_data['success'] = True
 
-        return Result(**{**input_model.dict(), **output_data})
+        return Result(**output_data)

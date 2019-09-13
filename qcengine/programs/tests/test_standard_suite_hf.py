@@ -40,6 +40,7 @@ def nh2():
         pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce'}, marks=testing.using_nwchem),
         pytest.param('psi4', 'aug-cc-pvdz', {'scf_type': 'direct'}, marks=testing.using_psi4),
         pytest.param('gamess', 'accd', {'contrl__ispher': 1}, marks=testing.using_gamess),
+        pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ])  # yapf: disable
 def test_sp_hf_rhf(program, basis, keywords, h2o):
     """cfour/sp-rhf-hf/input.dat

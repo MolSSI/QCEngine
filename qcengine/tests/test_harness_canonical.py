@@ -13,6 +13,7 @@ from qcengine import testing
 
 _canonical_methods = [
     ("dftd3", {"method": "b3lyp-d3"}),
+    ("molpro", {"method": "hf", "basis": "6-31G"}),
     ("mopac", {"method": "PM6"}),
     ("mp2d", {"method": "MP2-DMP2"}),
     ("psi4", {"method": "hf", "basis": "6-31G"}),
