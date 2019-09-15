@@ -203,34 +203,12 @@ def test_random_failure_with_success(failure_engine):
 
 @testing.using_openmm
 def test_openmm_task():
-    # might want a structure a bit more involved than a single eneyne for an MD engine
     json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("eneyne")
-
-    # what are the required fields?
-    # next review openmm requirements for inputs
-    json_data["platform"] = "CPU"
-    json_data["force_field"] = ["amber14-all.xml"]
-    json_data["water_model"] = ["amber14/tip3pfb.xml"]
-
-    json_data["constraints"] = {}
-    json_data["integrator"] = {"method": "Verlet",
-                               "params": {"timestep": 0.002}}
-
-    json_data["temperature_coupling"] = {"method": "Andersen",
-                                         "params": {"frequency": 1,
-                                                    "temperature": 300}}
-    json_data["pressure_coupling"] = {"method": "MonteCarloAnisotropic",
-                                      "params": {"pressure": [1, 1, 1],
-                                                 "temperature": 300}}
-
-    json_data["energy_minimization"] = {"tolerance" : 5,
-                                        "max_iterations": 1000}
-    json_data["steps"] = 10000
-    json_data["trajectory_output"] = {}
-
-    # consider whether we want to save checkpoints
-
+    json_data["molecule"] = qcng.get_molecule("water")
+    json_data["driver"] = "energy"
+    json_data["model"] = {"method": "smirnoff-1.1.0",
+                          "url": None,
+                          "offxml": "test_forcefields/smirnoff99Frosst.offxml"}
     json_data["keywords"] = {}
 
     ret = qcng.compute(json_data, "openmm", raise_error=True)
