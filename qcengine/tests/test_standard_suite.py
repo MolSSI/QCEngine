@@ -60,6 +60,7 @@ def test_compute_gradient(program, model):
     ("psi4", {"method": "bad"}),
     ("rdkit", {"method": "bad"}),
     ("torchani", {"method": "bad"}),
+    ("entos", {"method": "bad"}),
 ])  # yapf: disable
 def test_compute_bad_models(program, model):
     if not testing.has_program(program):
