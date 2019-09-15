@@ -26,7 +26,9 @@ class EntosHarness(ProgramHarness):
     version_cache: Dict[str, str] = {}
 
     # Energy commands that are currently supported
-    _energy_commands = {"dft", "xtb"}
+    _energy_commands = {"dft",
+                        # "xtb"
+                        }
 
     # List of DFT functionals
     _dft_functionals = {
@@ -38,10 +40,10 @@ class EntosHarness(ProgramHarness):
 
     # Available keywords for each of the energy commands
     _dft_keywords = {"df"}
-    _xtb_keywords = {}
+    # _xtb_keywords = {}
     _keyword_map = {
         "dft": _dft_keywords,
-        "xtb": _xtb_keywords
+        # "xtb": _xtb_keywords
     }
 
     class Config(ProgramHarness.Config):
@@ -157,7 +159,7 @@ class EntosHarness(ProgramHarness):
                     'charge': input_model.molecule.molecular_charge,
                     'spin': float(input_model.molecule.molecular_multiplicity - 1),
                 },
-                "xtb": {}
+                # "xtb": {}
             }
 
             # Resolve keywords (extra options) for the energy command
@@ -195,7 +197,7 @@ class EntosHarness(ProgramHarness):
             # TODO Add support for hessians
             # elif input_model.driver == 'hessian':
             else:
-                raise NotImplementedError('Driver {} not implemented for entos.'.format(input_model.driver))
+                raise NotImplementedError(f'Driver {input_model.driver} not implemented for entos.')
 
             # Write input file
             input_file = self.write_input_recursive(input_dict)
@@ -248,48 +250,72 @@ class EntosHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 
-        output_data = {}
+        dft_map = {
+            "energy": "scf_total_energy",
+            "n_iter": "scf_iterations",
+        }
+        dft_extras = {
+            "converged": "scf_converged",
+            "ao_basis": {
+                "basis": {"n_functions", "shells"}
+            },
+            "density": "scf_density",
+            "orbitals": "scf_orbitals",
+            "fock": "fock"
+        }
+
+        energy_command_map = {
+            "dft": dft_map,
+            # "xtb": xtb_map,
+        }
+
+        gradient_map = {
+            "energy": "scf_total_energy",
+            "gradient": "gradient"}
+
+        # Initialize properties dictionary
         properties = {}
 
-        xtb_map = {}
-        dft_map = {"energy", "n_iter", "ao_basis", "density", "orbitals", "fock"}
-        gradient_map = {"energy", "gradient"}
+        # TODO This is duplicated code from above (just make a separate function)
+        # Determine the energy_command
+        if input_model.model.method.upper() in self._dft_functionals:
+            energy_command = "dft"
+        # For now entos supports HF calculations through the dft energy_command with xc = HF
+        elif input_model.model.method.upper() == "HF":
+            energy_command = "dft"
+        else:
+            energy_command = input_model.model.method.lower()
 
-        # TODO Parse the results.json outfile instead of text parsing
-        #      One issue is that depending on driver different levels of information is returned.
-        # tmp = json.load(outfiles["results.json"])
-        # entos_results = tmp["json_results"]
+        # Determine whether to use the energy map or the gradient map
+        if input_model.driver == "energy":
+            entos_map = energy_command_map[energy_command]
+        elif input_model.driver == "gradient":
+            entos_map = gradient_map
+        else:
+            raise NotImplementedError(f'Driver {input_model.driver} not implemented for entos.')
 
-        # Parse the output file, collect properties and gradient
-        output_lines = outfiles["dispatch.out"].split('\n')
-        gradients = []
-        natom = len(input_model.molecule.symbols)
-        for idx, line in enumerate(output_lines):
-            fields = line.split()
-            if fields[:1] == ["energy:"]:
-                properties["scf_total_energy"] = float(fields[-1])
-            elif fields[:2] == ["Molecular", "Dipole:"]:
-                properties["scf_dipole_moment"] = [float(x) for x in fields[2:5]]
-            elif fields[:3] == ["SCF", "converged", "in"]:
-                properties["scf_iterations"] = int(fields[3])
-            elif fields == ["Gradient", "(hartree/bohr):"]:
-                # Gradient is stored as (dE/dx1,dE/dy1,dE/dz1,dE/dx2,dE/dy2,...)
-                for i in range(idx + 2, idx + 2 + natom):
-                    grad = output_lines[i].strip('\n').split()[1:]
-                    gradients.extend([float(x) for x in grad])
+        # Parse the results.json output from entos
+        load_results = json.loads(outfiles["results.json"])
+        entos_results = load_results["json_results"]
+        for key in entos_map.keys():
+            if key in entos_results:
+                properties[entos_map[key]] = entos_results[key]
 
-        if input_model.driver == 'gradient':
-            if len(gradients) == 0:
-                raise ValueError('Gradient not found.')
-            else:
-                output_data["return_result"] = gradients
-
-        # Replace return_result with final_energy if gradient wasn't called
-        if "return_result" not in output_data:
+        # Determine the correct return_result
+        output_data = {}
+        if input_model.driver == 'energy':
             if "scf_total_energy" in properties:
                 output_data["return_result"] = properties["scf_total_energy"]
             else:
-                raise KeyError("Could not find SCF total energy")
+                raise KeyError(f"Could not find {input_model.model} total energy")
+        elif input_model.driver == 'gradient':
+            if "gradient" in properties:
+                output_data["return_result"] = properties["gradient"]
+                properties.pop("gradient")
+            else:
+                raise KeyError('Gradient not found.')
+        else:
+            raise NotImplementedError(f'Driver {input_model.driver} not implemented for entos.')
 
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'

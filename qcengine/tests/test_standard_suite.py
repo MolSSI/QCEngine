@@ -18,6 +18,7 @@ _canonical_methods = [
     ("psi4", {"method": "hf", "basis": "6-31G"}),
     ("rdkit", {"method": "UFF"}),
     ("torchani", {"method": "ANI1x"}),
+    ("entos", {"method": "pbe", "basis": "6-31G"}),
 ]  # yapf: disable
 
 
