@@ -6,6 +6,7 @@ dependencies:
   - psi4=1.3
   - dftd3
   - geometric
+  - intel-openmp!=2019.5-281
 
     # Core
   - python
