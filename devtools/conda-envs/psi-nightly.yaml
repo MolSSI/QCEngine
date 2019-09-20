@@ -7,8 +7,9 @@ dependencies:
   - dftd3 3.2.1
   - mp2d >=1.1
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
+  - intel-openmp!=2019.5
 
-    # Core
+  # Core
   - python
   - pyyaml
   - py-cpuinfo
