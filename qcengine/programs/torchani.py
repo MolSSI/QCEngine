@@ -151,12 +151,12 @@ class TorchANIHarness(ProgramHarness):
         #   the reliability of the models in an ensemble, and produce more data
         #   points in the regions where this quantity is below a certain
         #   threshold (inclusion criteria)
-        ret_data["extras"] = {
+        ret_data["extras"].update({
             "ensemble_energies": energy_array.detach().numpy(),
             "ensemble_energy_avg": energy.item(),
             "ensemble_energy_std": ensemble_std.item(),
             "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item()
-        }
+        })
 
         ret_data["provenance"] = Provenance(creator="torchani",
                                             version="unknown",
