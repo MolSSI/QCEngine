@@ -151,6 +151,7 @@ class TorchANIHarness(ProgramHarness):
         #   the reliability of the models in an ensemble, and produce more data
         #   points in the regions where this quantity is below a certain
         #   threshold (inclusion criteria)
+        ret_data["extras"] = input_data.extras.copy()
         ret_data["extras"].update({
             "ensemble_energies": energy_array.detach().numpy(),
             "ensemble_energy_avg": energy.item(),
