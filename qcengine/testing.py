@@ -144,7 +144,8 @@ _programs = {
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
-    "entos": is_program_new_enough("entos", "0.5")
+    "entos": is_program_new_enough("entos", "0.5"),
+    "mdi": which_import("mdi", return_bool=True)
 }
 
 
@@ -169,6 +170,7 @@ using_qcdb = _build_pytest_skip("qcdb")
 using_rdkit = _build_pytest_skip("rdkit")
 using_torchani = _build_pytest_skip("torchani")
 using_terachem = _build_pytest_skip("terachem")
+using_mdi = _build_pytest_skip("mdi")
 
 using_dftd3_321 = pytest.mark.skipif(is_program_new_enough("dftd3", "3.2.1") is False,
                                      reason='DFTD3 does not include 3.2.1 features. Update package and add to PATH')

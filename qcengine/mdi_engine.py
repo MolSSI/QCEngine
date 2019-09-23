@@ -11,7 +11,7 @@ from .compute import compute
 try:
     from mdi import MDI_Init, MDI_Accept_Communicator, MDI_Recv_Command
     from mdi import MDI_Recv, MDI_Send
-    from mdi import MDI_DOUBLE, MDI_INT
+    from mdi import MDI_DOUBLE, MDI_CHAR, MDI_INT, MDI_COMMAND_LENGTH
     from mdi import MDI_Get_Intra_Code_MPI_Comm
     use_mdi = True
 except ImportError:
@@ -26,8 +26,10 @@ except ImportError:
 
 class MDIServer():
     def __init__(self, mdi_options: str, 
-            input_data: Union[Dict[str, Any], 'ResultInput'],
             program: str,
+            molecule,
+            model,
+            keywords,
             raise_error: bool = False,
             local_options: Optional[Dict[str, Any]] = None):
         """ Initialize an MDIServer object for communication with MDI
@@ -35,11 +37,15 @@ class MDIServer():
         Parameters
         ----------
         mdi_options: str
-            Options used during MDI initialization
-        input_data : Union[Dict[str, Any], 'ResultInput']
-            A QCSchema input specification in dictionary or model from QCElemental.models
+            Options used during MDI initialization.
         program : str
             The program to execute the input with.
+        molecule
+            The initial state of the molecule.
+        model
+            The simulation model to use.
+        keywords
+            Program-specific keywords.
         raise_error : bool, optional
             Determines if compute should raise an error or not.
         local_options : Optional[Dict[str, Any]], optional
@@ -57,10 +63,23 @@ class MDIServer():
         MDI_Init(mdi_options, mpi_world)
 
         # Input variables
-        self.input_data = input_data
+        self.molecule = molecule
+        self.model = model
+        self.keywords = keywords
         self.program = program
         self.raise_error = raise_error
         self.local_options = local_options
+
+        # The MDI interface does not currently support multiple fragments
+        if len(self.molecule.fragments) != 1:
+            raise Exception('The MDI interface does not support multiple fragments')
+
+        # Molecule charge and multiplicity
+        self.total_charge = self.molecule.molecular_charge
+        self.multiplicity = self.molecule.molecular_multiplicity
+
+        # Flag to track whether the latest molecule specification has been validated
+        self.molecule_validated = True
 
         # Output of most recent compute call
         self.compute_return = None
@@ -81,10 +100,6 @@ class MDIServer():
         # Flag to stop listening for MDI commands
         self.stop_listening = False
 
-        print( "========================================================" )
-        print( self.input_data )
-        print( "========================================================" )
-
         # Dictionary of all supported MDI commands
         self.commands = {
             "<NATOMS": self.send_natoms,
@@ -98,17 +113,46 @@ class MDIServer():
             "<ELEMENTS": self.send_elements,
             ">ELEMENTS": self.recv_elements,
             "<MASSES": self.send_masses,
-            ">MASSES": self.recv_masses,
             "<TOTCHARGE": self.send_total_charge,
             ">TOTCHARGE": self.recv_total_charge,
             "<ELEC_MULT": self.send_multiplicity,
             ">ELEC_MULT": self.recv_multiplicity,
             "EXIT": self.exit
         }
-        # <CHARGES
 
         # Accept a communicator to the driver code
         self.comm = MDI_Accept_Communicator()
+
+    def update_molecule(self, key, value):
+        """ Update the molecule
+
+        Parameters
+        ----------
+        key: Key of the molecular element to update
+        value: Update value
+        """
+        if key == "molecular_charge" or key == "molecular_multiplicity":
+            # In order to validate correctly, the charges and multiplicities must be set simultaneously
+            try:
+                self.molecule = qcel.models.Molecule(**{**self.molecule.dict(),
+                                      **{"molecular_charge": self.total_charge},
+                                      **{"fragment_charges": [self.total_charge]},
+                                      **{"molecular_multiplicity": self.multiplicity},
+                                      **{"fragment_multiplicities": [self.multiplicity]}})
+                self.molecule_validated = True
+            except qcel.exceptions.ValidationError:
+                # The molecule didn't validate correctly, but a future >TOTCHARGE or >ELEC_MULT command might fix it
+                self.molecule_validated = False
+        else:
+            try:
+                self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{key: value}})
+                self.molecule_validated = True
+            except qcel.exceptions.ValidationError:
+                if self.molecule_validated:
+                    # This update caused the validation error
+                    raise Exception('MDI command caused a validation error')
+
+                    
 
     # Respond to the <NATOMS command
     def send_natoms(self):
@@ -116,7 +160,7 @@ class MDIServer():
 
         :returns: *natom* Number of atoms
         """
-        natom = len(self.input_data.molecule.geometry)
+        natom = len(self.molecule.geometry)
         MDI_Send(natom, 1, MDI_INT, self.comm)
         return natom
 
@@ -126,15 +170,29 @@ class MDIServer():
 
         :returns: *coords* Nuclear coordinates
         """
-        natom = len(self.input_data.molecule.geometry)
+        natom = len(self.molecule.geometry)
 
-        coords = [ 0.0 in range(3 * natom) ]
+        coords = [ 0.0 for i in range(3 * natom) ]
         for iatom in range(natom):
             for icoord in range(3):
-                coords[3 * iatom + icoord] = self.input_data.molecule.geometry[iatom][icoord]
+                coords[3 * iatom + icoord] = self.molecule.geometry[iatom][icoord]
 
         return coords
 
+    # Respond to the >COORDS command
+    def recv_coords(self, coords=None):
+        """ Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule
+
+        Parameters
+        ----------
+        coords: New nuclear coordinates. If None, receive through MDI.
+        """
+        natom = len(self.molecule.geometry)
+        if coords is None:
+            coords = MDI_Recv(3 * natom, MDI_DOUBLE, self.comm)
+        for iatom in range(natom):
+            for icoord in range(3):
+                self.molecule.geometry[iatom][icoord] = coords[3*iatom + icoord]
 
     # Respond to the <ENERGY command
     def send_energy(self):
@@ -142,6 +200,9 @@ class MDIServer():
 
         :returns: *energy* Energy of the system
         """
+        # Ensure that the molecule currently passes validation
+        if not self.molecule_validated:
+            raise Exception('MDI attempting to compute energy on an unvalidated molecule')
         self.run_scf()
         energy = self.compute_return.return_result
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
@@ -153,12 +214,15 @@ class MDIServer():
 
         :returns: *forces* Atomic forces
         """
+        # Ensure that the molecule currently passes validation
+        if not self.molecule_validated:
+            raise Exception('MDI attempting to compute gradients on an unvalidated molecule')
+
         input = qcel.models.ResultInput(
-            molecule = self.input_data.molecule, 
+            molecule = self.molecule, 
             driver = "gradient", 
-            model = self.input_data.model, 
-            keywords = self.input_data.keywords, 
-            extras = self.input_data.extras
+            model = self.model, 
+            keywords = self.keywords
             )
         self.compute_return = compute(input, self.program, self.raise_error, self.local_options)
 
@@ -171,28 +235,12 @@ class MDIServer():
         """ Run an energy calculation
         """
         input = qcel.models.ResultInput(
-            molecule = self.input_data.molecule, 
+            molecule = self.molecule, 
             driver = "energy", 
-            model = self.input_data.model, 
-            keywords = self.input_data.keywords, 
-            extras = self.input_data.extras
+            model = self.model, 
+            keywords = self.keywords
             )
         self.compute_return = compute(input, self.program, self.raise_error, self.local_options)
-
-    # Respond to the >COORDS command
-    def recv_coords(self, coords=None):
-        """ Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule
-
-        Parameters
-        ----------
-        coords: New nuclear coordinates. If None, receive through MDI.
-        """
-        natom = len(self.input_data.molecule.geometry)
-        if coords is None:
-            coords = MDI_Recv(3 * natom, MDI_DOUBLE, self.comm)
-        for iatom in range(natom):
-            for icoord in range(3):
-                self.input_data.molecule.geometry[iatom][icoord] = coords[3*iatom + icoord]
 
     # Respond to the <NCOMMANDS command
     def send_ncommands(self):
@@ -225,8 +273,8 @@ class MDIServer():
 
         :returns: *elements* Element of each atom
         """
-        natom = len(self.input_data.molecule.geometry)
-        elements = [ qcel.periodictable.to_atomic_number(self.input_data.molecule.symbol[iatom]) for iatom in range(natom) ]
+        natom = len(self.molecule.geometry)
+        elements = [ qcel.periodictable.to_atomic_number(self.molecule.symbols[iatom]) for iatom in range(natom) ]
         MDI_Send(elements, natom, MDI_INT, self.comm)
         return elements
 
@@ -237,12 +285,12 @@ class MDIServer():
         Arguments:
             elements: New element numbers. If None, receive through MDI.
         """
-        natom = len(self.input_data.molecule.geometry)
+        natom = len(self.molecule.geometry)
         if elements is None:
             elements = MDI_Recv(natom, MDI_DOUBLE, self.comm)
 
         for iatom in range(natom):
-            self.input_data.molecule.symbol[iatom] = qcel.to_symbol(elements[iatom])
+            self.molecule.symbols[iatom] = qcel.to_symbol(elements[iatom])
 
         return elements
 
@@ -252,9 +300,9 @@ class MDIServer():
 
         :returns: *masses* Atomic masses
         """
-        natom = len(self.input_data.molecule.geometry)
-        masses = self.input_data.molecule.masses
-        MDI_Send(masses, natom, MDI_DOUBLE_NUMPY, self.comm)
+        natom = len(self.molecule.geometry)
+        masses = self.molecule.masses
+        MDI_Send(masses, natom, MDI_DOUBLE, self.comm)
         return masses
 
     # Respond to the >MASSES command
@@ -264,10 +312,10 @@ class MDIServer():
         Arguments:
             masses: New nuclear masses. If None, receive through MDI.
         """
-        natom = len(self.input_data.molecule.geometry)
+        natom = len(self.molecule.geometry)
         if masses is None:
             masses = MDI_Recv(natom, MDI_DOUBLE, self.comm)
-        self.input_data.molecule.masses = masses
+        self.update_molecule("masses", masses)
 
     # Respond to the <TOTCHARGE command
     def send_total_charge(self):
@@ -275,7 +323,7 @@ class MDIServer():
 
         :returns: *charge* Total charge of the system
         """
-        charge = self.input_data.molecule.molecular_charge
+        charge = self.molecule.molecular_charge
         MDI_Send(charge, 1, MDI_DOUBLE, self.comm)
         return charge
 
@@ -288,7 +336,13 @@ class MDIServer():
         """
         if charge is None:
             charge = MDI_Recv(1, MDI_DOUBLE, self.comm)
-        self.input_data.molecule.molecular_charge = charge
+        self.total_charge = charge
+
+        # Allow a validation error here, because a future >ELEC_MULT command might resolve it
+        try:
+            self.update_molecule("molecular_charge", self.total_charge)
+        except qcel.exceptions.ValidationError:
+            pass
 
     # Respond to the <ELEC_MULT command
     def send_multiplicity(self):
@@ -296,7 +350,7 @@ class MDIServer():
 
         :returns: *multiplicity* Multiplicity of the system
         """
-        multiplicity = self.input_data.molecule.molecular_multiplicity
+        multiplicity = self.molecule.molecular_multiplicity
         MDI_Send(multiplicity, 1, MDI_INT, self.comm)
         return multiplicity
 
@@ -309,7 +363,13 @@ class MDIServer():
         """
         if multiplicity is None:
             multiplicity = MDI_Recv(1, MDI_INT, self.comm)
-        self.input_data.molecule.molecular_multiplicity = multiplicity
+        self.multiplicity = multiplicity
+
+        # Allow a validation error here, because a future >TOTCHARGE command might resolve it
+        try:
+            self.update_molecule("molecular_multiplicity", self.multiplicity)
+        except qcel.exceptions.ValidationError:
+            pass
 
     # Respond to the EXIT command 
     def exit(self):
