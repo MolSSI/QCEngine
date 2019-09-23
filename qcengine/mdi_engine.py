@@ -25,13 +25,14 @@ except ImportError:
 
 
 class MDIServer():
-    def __init__(self, mdi_options: str, 
-            program: str,
-            molecule,
-            model,
-            keywords,
-            raise_error: bool = False,
-            local_options: Optional[Dict[str, Any]] = None):
+    def __init__(self,
+                 mdi_options: str,
+                 program: str,
+                 molecule,
+                 model,
+                 keywords,
+                 raise_error: bool = False,
+                 local_options: Optional[Dict[str, Any]] = None):
         """ Initialize an MDIServer object for communication with MDI
 
         Parameters
@@ -134,11 +135,22 @@ class MDIServer():
         if key == "molecular_charge" or key == "molecular_multiplicity":
             # In order to validate correctly, the charges and multiplicities must be set simultaneously
             try:
-                self.molecule = qcel.models.Molecule(**{**self.molecule.dict(),
-                                      **{"molecular_charge": self.total_charge},
-                                      **{"fragment_charges": [self.total_charge]},
-                                      **{"molecular_multiplicity": self.multiplicity},
-                                      **{"fragment_multiplicities": [self.multiplicity]}})
+                self.molecule = qcel.models.Molecule(
+                    **{
+                        **self.molecule.dict(),
+                        **{
+                            "molecular_charge": self.total_charge
+                        },
+                        **{
+                            "fragment_charges": [self.total_charge]
+                        },
+                        **{
+                            "molecular_multiplicity": self.multiplicity
+                        },
+                        **{
+                            "fragment_multiplicities": [self.multiplicity]
+                        }
+                    })
                 self.molecule_validated = True
             except qcel.exceptions.ValidationError:
                 # The molecule didn't validate correctly, but a future >TOTCHARGE or >ELEC_MULT command might fix it
@@ -151,8 +163,6 @@ class MDIServer():
                 if self.molecule_validated:
                     # This update caused the validation error
                     raise Exception('MDI command caused a validation error')
-
-                    
 
     # Respond to the <NATOMS command
     def send_natoms(self):
@@ -172,7 +182,7 @@ class MDIServer():
         """
         natom = len(self.molecule.geometry)
 
-        coords = [ 0.0 for i in range(3 * natom) ]
+        coords = [0.0 for i in range(3 * natom)]
         for iatom in range(natom):
             for icoord in range(3):
                 coords[3 * iatom + icoord] = self.molecule.geometry[iatom][icoord]
@@ -192,7 +202,7 @@ class MDIServer():
             coords = MDI_Recv(3 * natom, MDI_DOUBLE, self.comm)
         for iatom in range(natom):
             for icoord in range(3):
-                self.molecule.geometry[iatom][icoord] = coords[3*iatom + icoord]
+                self.molecule.geometry[iatom][icoord] = coords[3 * iatom + icoord]
 
     # Respond to the <ENERGY command
     def send_energy(self):
@@ -218,12 +228,10 @@ class MDIServer():
         if not self.molecule_validated:
             raise Exception('MDI attempting to compute gradients on an unvalidated molecule')
 
-        input = qcel.models.ResultInput(
-            molecule = self.molecule, 
-            driver = "gradient", 
-            model = self.model, 
-            keywords = self.keywords
-            )
+        input = qcel.models.ResultInput(molecule=self.molecule,
+                                        driver="gradient",
+                                        model=self.model,
+                                        keywords=self.keywords)
         self.compute_return = compute(input, self.program, self.raise_error, self.local_options)
 
         forces = self.compute_return.return_result
@@ -234,12 +242,10 @@ class MDIServer():
     def run_scf(self):
         """ Run an energy calculation
         """
-        input = qcel.models.ResultInput(
-            molecule = self.molecule, 
-            driver = "energy", 
-            model = self.model, 
-            keywords = self.keywords
-            )
+        input = qcel.models.ResultInput(molecule=self.molecule,
+                                        driver="energy",
+                                        model=self.model,
+                                        keywords=self.keywords)
         self.compute_return = compute(input, self.program, self.raise_error, self.local_options)
 
     # Respond to the <NCOMMANDS command
@@ -274,7 +280,7 @@ class MDIServer():
         :returns: *elements* Element of each atom
         """
         natom = len(self.molecule.geometry)
-        elements = [ qcel.periodictable.to_atomic_number(self.molecule.symbols[iatom]) for iatom in range(natom) ]
+        elements = [qcel.periodictable.to_atomic_number(self.molecule.symbols[iatom]) for iatom in range(natom)]
         MDI_Send(elements, natom, MDI_INT, self.comm)
         return elements
 
@@ -371,7 +377,7 @@ class MDIServer():
         except qcel.exceptions.ValidationError:
             pass
 
-    # Respond to the EXIT command 
+    # Respond to the EXIT command
     def exit(self):
         """ Stop listening for MDI commands
         """

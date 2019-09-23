@@ -15,6 +15,7 @@ from qcelemental.testing import compare_values
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 
+
 @testing.using_psi4
 @testing.using_mdi
 def test_mdi_water():
@@ -24,10 +25,10 @@ def test_mdi_water():
     json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
     json_data["keywords"] = {"scf_type": "df"}
 
-    engine = qcng.MDIServer("-role DRIVER -name QCEngine -method TEST", "psi4", 
-                            qcng.get_molecule("water"),
-                            {"method": "SCF", "basis": "sto-3g"},
-                            {"scf_type": "df"})
+    engine = qcng.MDIServer("-role DRIVER -name QCEngine -method TEST", "psi4", qcng.get_molecule("water"), {
+        "method": "SCF",
+        "basis": "sto-3g"
+    }, {"scf_type": "df"})
 
     # Test the <NATOMS command
     natom = engine.send_natoms()
@@ -35,11 +36,11 @@ def test_mdi_water():
 
     # Test the <COORDS command
     coords = engine.send_coords()
-    expected = [ 0.0, 0.0, -0.12947694, 0.0, -1.49418734, 1.02744651, 0.0, 1.49418734, 1.02744651]
+    expected = [0.0, 0.0, -0.12947694, 0.0, -1.49418734, 1.02744651, 0.0, 1.49418734, 1.02744651]
     assert compare_values(expected, coords, atol=1.e-7)
 
     # Test the >COORDS command
-    expected = [ 0.1, 0.0, -0.12947694, 0.0, -1.49418734, 1.02744651, 0.0, 1.49418734, 1.02744651]
+    expected = [0.1, 0.0, -0.12947694, 0.0, -1.49418734, 1.02744651, 0.0, 1.49418734, 1.02744651]
     engine.recv_coords(expected)
     coords = engine.send_coords()
     assert compare_values(expected, coords, atol=1.e-7)
@@ -61,8 +62,7 @@ def test_mdi_water():
 
     # Test the <FORCES command
     forces = engine.send_forces()
-    expected = [
-        0.0, 0.0, -0.00073827952, 0.0, -0.020208584243, 0.00036913976, -0.0, 0.020208584243, 0.00036913976 ]
+    expected = [0.0, 0.0, -0.00073827952, 0.0, -0.020208584243, 0.00036913976, -0.0, 0.020208584243, 0.00036913976]
     assert compare_values(expected, forces, atol=1.e-6)
 
     # Test the >MASSES command
