@@ -9,7 +9,7 @@ from .extras import get_information
 from .procedures import get_procedure, list_all_procedures, list_available_procedures
 from .programs import get_program, list_all_programs, list_available_programs, register_program, unregister_program
 from .stock_mols import get_molecule
-from .mdi_engine import mdi, mdi_init
+from .mdi_engine import MDIServer
 
 # Handle versioneer
 __version__ = get_information('version')
