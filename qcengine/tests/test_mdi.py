@@ -10,7 +10,6 @@ import pytest
 
 import qcengine as qcng
 from qcengine import testing
-from qcengine.testing import environ_context
 from qcelemental.testing import compare_values
 
 _base_json = {"schema_name": "qcschema_input", "schema_version": 1}
