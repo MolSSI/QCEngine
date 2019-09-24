@@ -119,10 +119,9 @@ class TurbomoleHarness(ProgramHarness):
             "init_guess": occ_num_mo_data(charge, mult, unrestricted),
             "ref_wavefunction": ref_wavefunction(method),
             "title": "QCEngine Turbomole",
-            "xcfunc": "pbe0",
-            "grid": "m4",
             "scf_conv": 8,
             "scf_iters": 150,
+            "basis": basis,
         }
 
         # stdin = """
@@ -131,7 +130,7 @@ class TurbomoleHarness(ProgramHarness):
         # *
         # no
         # b
-        # all def2-SVP
+        # all {basis}
         # *
         # {init_guess}
         # dft
@@ -156,7 +155,7 @@ class TurbomoleHarness(ProgramHarness):
         *
         no
         b
-        all def2-SVP
+        all {basis}
         *
         {init_guess}
         {ref_wavefunction}
