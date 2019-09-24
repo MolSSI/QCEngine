@@ -2,7 +2,7 @@
 For details regarding MDI, see https://molssi.github.io/MDI_Library/html/index.html.
 
 """
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 import qcelemental as qcel
 
