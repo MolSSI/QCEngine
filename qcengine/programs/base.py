@@ -17,6 +17,7 @@ from .psi4 import Psi4Harness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
 from .torchani import TorchANIHarness
+from .turbomole import TurbomoleHarness
 
 __all__ = ["register_program", "get_program", "list_all_programs", "list_available_programs"]
 
@@ -101,3 +102,4 @@ register_program(GAMESSHarness())
 register_program(NWChemHarness())
 register_program(CFOURHarness())
 register_program(EntosHarness())
+register_program(TurbomoleHarness())
