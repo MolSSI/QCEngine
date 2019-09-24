@@ -71,7 +71,7 @@ class EntosHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Check entos version
-        if parse_version(self.get_version()) < parse_version("0.5"):
+        if parse_version(self.get_version()) < parse_version("0.6"):
             raise TypeError("entos version '{}' not supported".format(self.get_version()))
 
         # Setup the job
@@ -175,6 +175,7 @@ class EntosHarness(ProgramHarness):
                         **energy_extra_options,
                         **name_results
                     },
+                    **print_results,
                 }
             # Create the input dictionary for a gradient call
             elif input_model.driver == 'gradient':
@@ -187,6 +188,7 @@ class EntosHarness(ProgramHarness):
                         },
                         **name_results
                     },
+                    **print_results,
                 }
             # TODO Add support for hessians
             # elif input_model.driver == 'hessian':
