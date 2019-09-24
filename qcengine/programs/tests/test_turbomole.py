@@ -31,6 +31,14 @@ def test_turbomole():
     print(res)
 
 
+def test_harvest():
+    from qcengine.programs.turbomole.harvester import harvest
+    with open("dscf.out") as handle:
+        text = handle.read()
+    res = harvest(None, text)
+    print(res)
+
+
 def wrap_define():
     charge = 0
     mult = 1
@@ -139,4 +147,5 @@ def wrap_define():
 
 if __name__ == "__main__":
     test_turbomole()
+    # test_harvest()
     # wrap_define()
