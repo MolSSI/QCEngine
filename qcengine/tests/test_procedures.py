@@ -6,9 +6,9 @@ import copy
 
 import numpy as np
 import pytest
-from qcelemental.models import OptimizationInput
 
 import qcengine as qcng
+from qcelemental.models import OptimizationInput
 from qcengine import testing
 from qcengine.testing import failure_engine
 
@@ -162,6 +162,7 @@ def test_geometric_generic(program, model, bench):
     inp["initial_molecule"] = qcng.get_molecule("water")
     inp["input_specification"]["model"] = model
     inp["keywords"]["program"] = program
+    inp["input_specification"]["extras"] = {"_secret_tags": {"mysecret_tag": "data1"}}
 
     ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
     assert ret.success is True
@@ -173,3 +174,6 @@ def test_geometric_generic(program, model, bench):
     assert pytest.approx(r02, 1.e-4) == bench[0]
     assert pytest.approx(r12, 1.e-4) == bench[1]
     assert pytest.approx(a102, 1.e-4) == bench[2]
+
+    assert "_secret_tags" in ret.trajectory[0].extras
+    assert "data1" == ret.trajectory[0].extras["_secret_tags"]["mysecret_tag"]

@@ -14,6 +14,6 @@ comment:
   layout: "header"
   require_changes: false
   branches: null
-  behavior: default
+  behavior: once
   flags: null
   paths: null

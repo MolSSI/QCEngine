@@ -19,7 +19,7 @@ class ProcedureHarness(BaseModel, abc.ABC):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def build_input_model(self, data: Union[Dict[str, Any], 'BaseModel'], raise_error: bool=True) -> 'BaseModel':
+    def build_input_model(self, data: Union[Dict[str, Any], 'BaseModel'], raise_error: bool = True) -> 'BaseModel':
         """
         Build and validate the input model, passes if the data was a normal BaseModel input.
 
@@ -35,13 +35,12 @@ class ProcedureHarness(BaseModel, abc.ABC):
         BaseModel
             The input model for the procedure.
         """
-
     @abc.abstractmethod
     def compute(self, input_data: 'BaseModel', config: 'JobConfig') -> 'BaseModel':
         pass
 
     @abc.abstractmethod
-    def found(self, raise_error: bool=False) -> bool:
+    def found(self, raise_error: bool = False) -> bool:
         """
         Checks if the program can be found.
 
@@ -58,3 +57,12 @@ class ProcedureHarness(BaseModel, abc.ABC):
         """
 
         return model_wrapper(data, model)
+
+    def get_version(self) -> str:
+        """Finds procedure, extracts version, returns normalized version string.
+        Returns
+        -------
+        str
+            Return a valid, safe python version string.
+        """
+        pass

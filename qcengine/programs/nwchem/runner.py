@@ -1,6 +1,8 @@
 """
 Calls the NWChem executable.
 """
+import copy
+import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -10,29 +12,45 @@ import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
 
-from ..model import ProgramHarness
+from ...exceptions import InputError
 from ...util import execute
+from ..model import ProgramHarness
 from .harvester import harvest
+from .keywords import format_keywords
+from .methods import muster_modelchem
+
+pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class NWChemHarness(ProgramHarness):
+    """
+
+    Notes
+    -----
+    * To use the TCE, specify ``ResultInput.model.method`` as usual, then also include ``qc_module = True`` in ``ResultInput.keywords``.
+
+    """
 
     _defaults = {
         "name": "NWChem",
         "scratch": True,
         "thread_safe": False,
-        "thread_parallel": False,  # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
+        "thread_parallel": False,
         "node_parallel": True,
         "managed_memory": True,
     }
-    version_cache: Dict[str, str] ={}
+    # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramHarness.Config):
         pass
 
     @staticmethod
-    def found(raise_error: bool=False) -> bool:
-        return which('nwchem', return_bool=True, raise_error=raise_error, raise_msg='Please install via http://www.nwchem-sw.org/index.php/Download')
+    def found(raise_error: bool = False) -> bool:
+        return which('nwchem',
+                     return_bool=True,
+                     raise_error=raise_error,
+                     raise_msg='Please install via http://www.nwchem-sw.org/index.php/Download')
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -57,8 +75,11 @@ class NWChemHarness(ProgramHarness):
         """
         self.found(raise_error=True)
 
-        job_inputs = self.fake_input(input_model, config)
+        job_inputs = self.build_input(input_model, config)
         success, dexe = self.execute(job_inputs)
+
+        if 'There is an error in the input file' in dexe["stdout"]:
+            raise InputError(dexe["stdout"])
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
@@ -67,17 +88,43 @@ class NWChemHarness(ProgramHarness):
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
-        pass
-
-    def fake_input(self, input_model: 'ResultInput', config: 'JobConfig',
-                   template: Optional[str] = None) -> Dict[str, Any]:
-
-        return {
-            "command": [which("nwchem")],
-            "infiles": input_model.extras['infiles'],
-            "scratch_directory": config.scratch_directory,
-            "input_result": input_model.copy(deep=True),
+        nwchemrec = {
+            'infiles': {},
+            'scratch_directory': config.scratch_directory,
         }
+
+        opts = copy.deepcopy(input_model.keywords)
+        opts = {k.lower(): v for k, v in opts.items()}
+
+        # Handle memory
+        # for nwchem, [GiB] --> [B]
+        # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
+        opts['memory'] = int(config.memory * (1024**3))
+
+        # Handle molecule
+        molcmd, moldata = input_model.molecule.to_string(dtype='nwchem', units='Bohr', return_data=True)
+        opts.update(moldata['keywords'])
+
+        # Handle calc type and quantum chemical method
+        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver.derivative_int(),
+                                           opts.pop('qc_module', False))
+        opts.update(mdcopts)
+
+        # Handle basis set
+        # * for nwchem, still needs sph and ghost
+        for el in set(input_model.molecule.symbols):
+            opts[f'basis__{el}'] = f'library {input_model.model.basis}'
+
+        print('JOB_OPTS')
+        pp.pprint(opts)
+
+        # Handle conversion from schema (flat key/value) keywords into local format
+        optcmd = format_keywords(opts)
+
+        nwchemrec['infiles']['nwchem.nw'] = 'echo\n' + molcmd + optcmd + mdccmd
+        nwchemrec['command'] = [which("nwchem")]
+
+        return nwchemrec
 
     def execute(self,
                 inputs: Dict[str, Any],
@@ -96,13 +143,13 @@ class NWChemHarness(ProgramHarness):
         )
         return success, dexe
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self,
+                     outfiles: Dict[str, str],
+                     input_model: 'ResultInput') -> 'Result':  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")
 
         # nwmol, if it exists, is dinky, just a clue to geometry of nwchem results
-#        qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
-        #ORIGpsivar, nwhess, nwgrad, nwmol, version, errorTMP = harvester.harvest(qmol, nwchemrec['stdout'], **nwfiles)
         qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
         if nwgrad is not None:

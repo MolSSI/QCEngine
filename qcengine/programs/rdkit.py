@@ -5,9 +5,9 @@ Calls the RDKit package.
 from qcelemental.models import Provenance, Result
 from qcelemental.util import which_import
 
-from .model import ProgramHarness
 from ..exceptions import InputError
 from ..units import ureg
+from .model import ProgramHarness
 
 
 class RDKitHarness(ProgramHarness):
@@ -25,8 +25,11 @@ class RDKitHarness(ProgramHarness):
         pass
 
     @staticmethod
-    def found(raise_error: bool=False) -> bool:
-        return which_import('rdkit', return_bool=True, raise_error=raise_error, raise_msg='Please install via `conda install rdkit -c conda-forge`.')
+    def found(raise_error: bool = False) -> bool:
+        return which_import('rdkit',
+                            return_bool=True,
+                            raise_error=raise_error,
+                            raise_msg='Please install via `conda install rdkit -c conda-forge`.')
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """

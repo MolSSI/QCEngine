@@ -8,6 +8,7 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
     """
     text = []
 
+    keywords = {k.upper(): v for k, v in keywords.items()}
     for key, val in sorted(keywords.items()):
         text.append('='.join(format_keyword(key, val)))
 
@@ -19,7 +20,7 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
 
 def format_keyword(keyword: str, val: Any) -> Tuple[str, str]:
     """Reformat keyword's value from Python into CFOUR-speak. Arrays are the primary target."""
-    text = ''
+    keyword = keyword.upper()
 
     # Transform booleans into integers
     if val is True:

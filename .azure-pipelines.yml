@@ -1,0 +1,53 @@
+# Based on a Starter pipeline
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+# Optional to only trigger on Master branch changes
+# trigger:
+# - master
+
+# Define the continaers we want access to
+resources:
+  containers:
+    -   container: 'qcengineci' # Arbitrary name for reference in pipelines
+        image: qcarchive.azurecr.io/qcengineci:latest # pointer to the Image in our Azure CR
+        endpoint: "QCArchive Azure Container Registry" # Name of the Service Connection the pipeline is configured with
+
+variables:
+  conda_source: /opt/conda/etc/profile.d/conda.sh # Helper variable 
+
+jobs:
+- job: proprietary_ci
+  displayName: 'CI with Proprietary Code'
+  pool:
+    vmImage: 'ubuntu-latest'
+  # The ENTRYPOINT in these images are ignored, so we need to use the variable above to source out the conda environment each time.
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/container-phases?view=azure-devops&tabs=yaml#linux-based-containers
+  # And this is not really a Service Container either since the CMD/ENTRYPOINT does not provide a service to run along side everything else
+  # and because we want to actually run inside this(the) container(s).
+  container: qcengineci
+
+  steps:
+  - script: |
+      uname -a
+      free -m
+      df -h
+      ulimit -a
+    displayName: 'Diagnostics'
+    
+  - script: |
+      source $(conda_source)
+      conda env create -n test -f devtools/conda-envs/base.yaml
+    displayName: 'Create the conda environment'
+
+  - script: |
+      source $(conda_source)
+      conda activate test
+      python setup.py develop
+    displayName: 'Install QCEngine'
+
+  - script: |
+      source $(conda_source)
+      conda activate test
+      pytest -rsv .
+    displayName: 'Run the Tests'

@@ -3,16 +3,16 @@ Imports the various compute backends
 """
 
 from typing import Set
-from ..exceptions import InputError, ResourceError
 
+from ..exceptions import InputError, ResourceError
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
 from .entos import EntosHarness
 from .gamess import GAMESSHarness
-from .nwchem import NWChemHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
+from .nwchem import NWChemHarness
 from .psi4 import Psi4Harness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
@@ -97,7 +97,7 @@ register_program(MopacHarness())
 register_program(DFTD3Harness())
 register_program(TeraChemHarness())
 register_program(MP2DHarness())
-#register_program(GAMESSHarness())
-#register_program(NWChemHarness())
-#register_program(CFOURHarness())
+register_program(GAMESSHarness())
+register_program(NWChemHarness())
+register_program(CFOURHarness())
 register_program(EntosHarness())

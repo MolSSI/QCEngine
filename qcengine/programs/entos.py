@@ -2,15 +2,15 @@
 Calls the entos executable.
 """
 
-from typing import Any, Dict, Optional, List
-
-from qcelemental.models import Result, FailedOperation
-from ..util import execute, popen
-from qcelemental.util import which, safe_version, parse_version
-from ..exceptions import UnknownError
-
-from .model import ProgramHarness
 import string
+from typing import Any, Dict, List, Optional, Tuple
+
+from qcelemental.models import Result
+from qcelemental.util import parse_version, safe_version, which
+
+from ..exceptions import UnknownError
+from ..util import execute, popen
+from .model import ProgramHarness
 
 
 class EntosHarness(ProgramHarness):
@@ -56,41 +56,56 @@ class EntosHarness(ProgramHarness):
         job_inputs = self.build_input(input_data, config)
 
         # Run entos
-        proc = self.execute(job_inputs)
+        exe_success, proc = self.execute(job_inputs)
 
-        if isinstance(proc, FailedOperation):
-            return proc
-        else:
+        # Determine whether the calculation succeeded
+        if exe_success:
             # If execution succeeded, collect results
             result = self.parse_output(proc["outfiles"], input_data)
             return result
-
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
-
-        if extra_outfiles is not None:
-            outfiles = ["dispatch.out"].extend(extra_outfiles)
         else:
-            outfiles = ["dispatch.out"]
-
-        if extra_commands is not None:
-            commands = extra_commands
-        else:
-            commands = inputs["commands"]
-
-        exe_success, proc = execute(commands,
-                                    infiles=inputs["infiles"],
-                                    outfiles=outfiles,
-                                    scratch_directory=inputs["scratch_directory"],
-                                    scratch_name=scratch_name,
-                                    timeout=timeout
-                                    )
-        proc["outfiles"]["dispatch.out"] = proc["stdout"]
-
-        # Determine whether the calculation succeeded
-        if not exe_success:
+            # Return UnknownError for error propagation
             return UnknownError(proc["stderr"])
 
-        return proc
+    def execute(self,
+                inputs: Dict[str, Any],
+                extra_infiles: Optional[Dict[str, str]] = None,
+                extra_outfiles: Optional[List[str]] = None,
+                extra_commands: Optional[List[str]] = None,
+                scratch_name: Optional[str] = None,
+                scratch_messy: bool = False,
+                timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
+        """
+        For option documentation go look at qcengine/util.execute
+        """
+
+        # Collect all input files and update with extra_infiles
+        infiles = inputs["infiles"]
+        if extra_infiles is not None:
+            infiles.update(extra_infiles)
+
+        # Collect all output files and extend with with extra_outfiles
+        outfiles = ["dispatch.out"]
+        if extra_outfiles is not None:
+            outfiles.extend(extra_outfiles)
+
+        # Replace commands with extra_commands if present
+        commands = inputs["commands"]
+        if extra_commands is not None:
+            commands = extra_commands
+
+        # Run the entos program
+        exe_success, proc = execute(commands,
+                                    infiles=infiles,
+                                    outfiles=outfiles,
+                                    scratch_name=scratch_name,
+                                    scratch_directory=inputs["scratch_directory"],
+                                    scratch_messy=scratch_messy,
+                                    timeout=timeout)
+
+        # Entos does not create an output file and only prints to stdout
+        proc["outfiles"]["dispatch.out"] = proc["stdout"]
+        return exe_success, proc
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
@@ -101,22 +116,19 @@ class EntosHarness(ProgramHarness):
         # Create input dictionary
         if template is None:
             structure = {'structure': {'file': 'geometry.xyz'}}
-            dft_info = {'xc': input_model.model.method,
-                        'ao': input_model.model.basis.upper(),
-                        'df_basis': input_model.keywords["df_basis"].upper(),
-                        'charge': input_model.molecule.molecular_charge
-                        }
+            dft_info = {
+                'xc': input_model.model.method,
+                'ao': input_model.model.basis.upper(),
+                'df_basis': input_model.keywords["df_basis"].upper(),
+                'charge': input_model.molecule.molecular_charge
+            }
             print_results = {'print': {'results': True}}
 
             if input_model.driver == 'energy':
-                input_dict = {'dft': {**structure, **dft_info},
-                              **print_results
-                              }
+                input_dict = {'dft': {**structure, **dft_info}, **print_results}
             # Write gradient call if asked for
             elif input_model.driver == 'gradient':
-                input_dict = {'gradient': {**structure, 'dft': {**dft_info}},
-                              **print_results
-                              }
+                input_dict = {'gradient': {**structure, 'dft': {**dft_info}}, **print_results}
             else:
                 raise NotImplementedError('Driver {} not implemented for entos.'.format(input_model.driver))
 

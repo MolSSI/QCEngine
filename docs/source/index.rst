@@ -76,6 +76,10 @@ In addition, several procedures are available:
 
   - `geomeTRIC <https://github.com/leeping/geomeTRIC>`_
 
+Information about detected compute backends and procedures may be printed using the :doc:`CLI <cli>`::
+
+    qcengine info --programs
+    qcengine info --procedures
 
 Configuration Determination
 ---------------------------
@@ -102,6 +106,10 @@ Each of these options can be specified by the user as well.
     >>> qcng.get_config(local_options={"scratch_directory": "$SCRATCH"})
     <JobConfig ncores=2 memory=2.506 scratch_directory='/my_scratch'>
 
+Configuration information may be printed using the :doc:`CLI <cli>`::
+
+   qcengine info --config
+
 ========
 
 .. toctree::
@@ -118,7 +126,6 @@ Index
 **Getting Started**
 
 * :doc:`install`
-* :doc:`community`
 
 .. toctree::
     :maxdepth: 1
@@ -126,13 +133,13 @@ Index
     :caption: Getting Started
 
     install
-    community
 
 
 **User Interface**
 
 * :doc:`single_compute`
 * :doc:`environment`
+* :doc:`cli`
 
 .. toctree::
     :maxdepth: 1
@@ -141,13 +148,13 @@ Index
 
     single_compute
     environment
+    cli
 
 
 **Developer Documentation**
 
 * :doc:`api`
 * :doc:`changelog`
-* :doc:`dev_guidelines`
 
 .. toctree::
     :maxdepth: 1
@@ -155,4 +162,3 @@ Index
 
     api
     changelog
-    dev_guidelines
