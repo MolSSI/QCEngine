@@ -1,10 +1,8 @@
 """
-Calls the NWChem executable.
+Calls the Turbomole executable.
 """
-import copy
 from decimal import Decimal
 from pathlib import Path
-import pprint
 import re
 from subprocess import Popen, PIPE
 from typing import Any, Dict, Optional, Tuple
@@ -15,9 +13,10 @@ import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
 
-from ...exceptions import InputError
 from ...util import execute, temporary_directory
 from ..model import ProgramHarness
+from .harvester import harvest
+
 
 class TurbomoleHarness(ProgramHarness):
     
@@ -45,24 +44,27 @@ class TurbomoleHarness(ProgramHarness):
             # We use basically a dummy stdin as we dont want to pipe any real
             # input into define. We only want to parse the version number from
             # the string.
-            stdout = self.execute_define("\n")
-            version_re  = re.compile("TURBOMOLE V([\d\.]+)")
+            with temporary_directory(suffix="_define_scratch") as tmpdir:
+                tmpdir = Path(tmpdir)
+                stdout = self.execute_define("\n", cwd=tmpdir)
+            # Tested with V7.3 and V7.4.0
+            version_re  = re.compile("TURBOMOLE (?:rev\. )?(V.+?)\s+")
             mobj = version_re.search(stdout)
             version = mobj[1]
             self.version_cache[which_prog] = safe_version(version)
         return self.version_cache[which_prog]
 
     def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
-        """
-        Runs NWChem in executable mode
-        """
+        # TODO: add comment
         self.found(raise_error=True)
 
+        import pdb; pdb.set_trace()
         job_inputs = self.build_input(input_model, config)
         success, dexe = self.execute(job_inputs)
 
-        if 'There is an error in the input file' in dexe["stdout"]:
-            raise InputError(dexe["stdout"])
+        # TODO: handle input errors?!
+        # if 'There is an error in the input file' in dexe["stdout"]:
+            # raise InputError(dexe["stdout"])
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
@@ -100,14 +102,53 @@ class TurbomoleHarness(ProgramHarness):
                 """
             return occ_num_mo_data_stdin
 
+        def ref_wavefunction(method, xfunc="b-p", grid="m3"):
+            ref_wavefunction_stdin = """"""
+            if method.endswith == "KS":
+                ref_wavefunction_stdin = """dft
+                                        on
+                                        func
+                                        {xcfunc}
+                                        grid
+                                        {grid}
+
+                                        """
+            return ref_wavefunction
+
         kwargs = {
             "init_guess": occ_num_mo_data(charge, mult, unrestricted),
+            "ref_wavefunction": ref_wavefunction(method),
             "title": "QCEngine Turbomole",
             "xcfunc": "pbe0",
             "grid": "m4",
             "scf_conv": 8,
             "scf_iters": 150,
         }
+
+        # stdin = """
+        # {title}
+        # a coord
+        # *
+        # no
+        # b
+        # all def2-SVP
+        # *
+        # {init_guess}
+        # dft
+        # on
+        # func
+        # {xcfunc}
+        # grid
+        # {grid}
+
+        # scf
+        # conv
+        # {scf_conv}
+        # iter
+        # {scf_iters}
+
+        # *
+        # """.format(**kwargs)
 
         stdin = """
         {title}
@@ -118,13 +159,7 @@ class TurbomoleHarness(ProgramHarness):
         all def2-SVP
         *
         {init_guess}
-        dft
-        on
-        func
-        {xcfunc}
-        grid
-        {grid}
-
+        {ref_wavefunction}
         scf
         conv
         {scf_conv}
@@ -152,8 +187,6 @@ class TurbomoleHarness(ProgramHarness):
         stdin = self.prepare_define_stdin(model.method, model.basis,
                                           input_model.molecule,
         )
-        # TODO: I would probably like to use temporary_directory but the
-        # context manager seems to return a str instead of a Path?!
         with temporary_directory(suffix="_define_scratch") as tmpdir:
             tmpdir = Path(tmpdir)
             with open(tmpdir / "coord", "w") as handle:
@@ -191,7 +224,6 @@ class TurbomoleHarness(ProgramHarness):
                 scratch_name=None,
                 timeout=None) -> Tuple[bool, Dict]:
 
-        import pdb; pdb.set_trace()
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
@@ -207,12 +239,12 @@ class TurbomoleHarness(ProgramHarness):
         stdout = outfiles.pop("stdout")
 
         # nwmol, if it exists, is dinky, just a clue to geometry of nwchem results
-        qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        qcvars, gradient, hessian = harvest(input_model.molecule, stdout, **outfiles)
 
-        if nwgrad is not None:
+        if gradient is not None:
             qcvars['CURRENT GRADIENT'] = nwgrad
 
-        if nwhess is not None:
+        if hessian is not None:
             qcvars['CURRENT HESSIAN'] = nwhess
 
         retres = qcvars[f'CURRENT {input_model.driver.upper()}']
