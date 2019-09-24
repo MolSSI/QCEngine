@@ -546,7 +546,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
         #    name_key = '***'
         #    disp_params = dashcoeff[dashlevel_candidate_2]['definitions'][name_key]['params']
         else:
-            dashlevel_candidate_2 = None
+            # dashlevel_candidate_2 = None
             raise InputError("""Can't guess -D correction level from ({})""".format(name_hint))
 
     disp_params = copy.deepcopy(disp_params)

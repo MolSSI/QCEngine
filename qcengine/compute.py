@@ -9,7 +9,7 @@ from .config import get_config
 from .exceptions import InputError, RandomError
 from .procedures import get_procedure
 from .programs import get_program
-from .util import compute_wrapper, handle_output_metadata, model_wrapper
+from .util import compute_wrapper, environ_context, handle_output_metadata, model_wrapper
 
 __all__ = ["compute", "compute_procedure"]
 
@@ -75,19 +75,22 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
         local_options = {**local_options, **input_engine_options}
         config = get_config(local_options=local_options)
 
-        for x in range(config.retries + 1):
-            try:
-                output_data = executor.compute(input_data, config)
-                break
-            except RandomError as e:
+        # Set environment parameters and execute
+        with environ_context(config=config):
 
-                if x == config.retries:
-                    raise e
-                else:
-                    metadata["retries"] += 1
-            except:
-                raise
+            # Handle optional retries
+            for x in range(config.retries + 1):
+                try:
+                    output_data = executor.compute(input_data, config)
+                    break
+                except RandomError as e:
 
+                    if x == config.retries:
+                        raise e
+                    else:
+                        metadata["retries"] += 1
+                except:
+                    raise
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
@@ -129,6 +132,9 @@ def compute_procedure(input_data: Union[Dict[str, Any], 'BaseModel'],
 
         # Create a base output data in case of errors
         output_data = input_data.copy()  # lgtm [py/multiple-definition]
-        output_data = executor.compute(input_data, config)
+
+        # Set environment parameters and execute
+        with environ_context(config=config):
+            output_data = executor.compute(input_data, config)
 
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)

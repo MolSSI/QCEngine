@@ -1,8 +1,9 @@
-from decimal import Decimal, ROUND_FLOOR, ROUND_CEILING
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 import numpy as np
 
 # This file has considerable history in the quantum chemistry package Psi4
+
 
 class PreservingDict(dict):
     """Class to store quantum chemical quantities extracted from output
@@ -15,7 +16,6 @@ class PreservingDict(dict):
     works in decimal.Decimal (scalar) and np.ndarray (non-scalar)
 
     """
-
     def __init__(self, *args, **kwargs):
         self.update(*args, **kwargs)
 
@@ -33,9 +33,8 @@ class PreservingDict(dict):
                 if np.allclose(self[key], value, atol=1.e-5, rtol=1e-3):
                     best_value = value  # no way to choose, really
                 else:
-                    raise ValueError(
-                        """Output file yielded both {} and {} as values for quantity {}.""".
-                            format(self[key], value, key))
+                    raise ValueError("""Output file yielded both {} and {} as values for quantity {}.""".format(
+                        self[key], value, key))
                 # print("""Resetting array {} to {}""".format(key, best_value))
             else:
                 best_value = value
@@ -52,10 +51,10 @@ class PreservingDict(dict):
                 existing_exp = self[key].as_tuple().exponent  # 0.1111 --> -4
                 candidate_exp = value.as_tuple().exponent
                 if existing_exp > candidate_exp:  # candidate has more digits
-                    places = Decimal(10) ** (existing_exp + 1)  # exp+1 permits slack in rounding
+                    places = Decimal(10)**(existing_exp + 1)  # exp+1 permits slack in rounding
                     best_value = value
-                else:                             # existing has more digits
-                    places = Decimal(10) ** (candidate_exp + 1)
+                else:  # existing has more digits
+                    places = Decimal(10)**(candidate_exp + 1)
                     best_value = self[key]
                 # Validate values are the same
                 #places = max(places, Decimal('1E-11'))  # for computed psivars
@@ -63,12 +62,11 @@ class PreservingDict(dict):
                 #print('FLOOR: ', self[key].quantize(places, rounding=ROUND_FLOOR) - value.quantize(places, rounding=ROUND_FLOOR))
                 #print('CEIL:  ', self[key].quantize(places, rounding=ROUND_CEILING) - value.quantize(places, rounding=ROUND_CEILING))
                 if ((self[key].quantize(places, rounding=ROUND_CEILING).compare(
-                         value.quantize(places, rounding=ROUND_CEILING)) != 0) and
-                    (self[key].quantize(places, rounding=ROUND_FLOOR).compare(
-                         value.quantize(places, rounding=ROUND_FLOOR)) != 0)):
-                    raise ValueError(
-                        """Output file yielded both %s and %s as values for quantity %s.""" %
-                        (self[key].to_eng_string(), value.to_eng_string(), key))
+                        value.quantize(places, rounding=ROUND_CEILING)) != 0)
+                        and (self[key].quantize(places, rounding=ROUND_FLOOR).compare(
+                            value.quantize(places, rounding=ROUND_FLOOR)) != 0)):
+                    raise ValueError("""Output file yielded both %s and %s as values for quantity %s.""" %
+                                     (self[key].to_eng_string(), value.to_eng_string(), key))
                 # print("""Resetting variable {} to {}""".format(key, best_value.to_eng_string()))
             else:
                 best_value = value
@@ -79,8 +77,7 @@ class PreservingDict(dict):
     def update(self, *args, **kwargs):
         if args:
             if len(args) > 1:
-                raise TypeError("update expected at most 1 arguments, "
-                                "got %d" % len(args))
+                raise TypeError("update expected at most 1 arguments, " "got %d" % len(args))
             other = dict(args[0])
             for key in other:
                 self[key] = other[key]

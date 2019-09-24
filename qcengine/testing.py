@@ -2,36 +2,15 @@
 Utilities for the testing suite.
 """
 
-import os
-import shutil
-import subprocess
-from contextlib import contextmanager
 from typing import List
 
 import numpy as np
 import pytest
 from pkg_resources import parse_version
 
-import qcengine as qcng
 import qcelemental as qcel
+import qcengine as qcng
 from qcelemental.util import which, which_import
-
-
-@contextmanager
-def environ_context(env):
-    """Temporarily set environment variables inside the context manager and
-    fully restore previous environment afterwards
-    """
-    original_env = {key: os.getenv(key) for key in env}
-    os.environ.update(env)
-    try:
-        yield
-    finally:
-        for key, value in original_env.items():
-            if value is None:
-                del os.environ[key]
-            else:
-                os.environ[key] = value
 
 
 def is_program_new_enough(program, version_feature_introduced):
@@ -139,12 +118,15 @@ _programs = {
     "psi4": is_program_new_enough("psi4", "1.2"),
     "rdkit": which_import("rdkit", return_bool=True),
     "qcdb": which_import("qcdb", return_bool=True),
-    "torchani": which_import("torchani", return_bool=True),
+    "torchani": is_program_new_enough("torchani", "0.9"),
     "mp2d": which('mp2d', return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
     "entos": is_program_new_enough("entos", "0.5"),
+    "cfour": which('xcfour', return_bool=True),
+    "gamess": which('rungms', return_bool=True),
+    "nwchem": which('nwchem', return_bool=True),
     "mdi": which_import("mdi", return_bool=True)
 }
 
@@ -170,6 +152,9 @@ using_qcdb = _build_pytest_skip("qcdb")
 using_rdkit = _build_pytest_skip("rdkit")
 using_torchani = _build_pytest_skip("torchani")
 using_terachem = _build_pytest_skip("terachem")
+using_cfour = _build_pytest_skip("cfour")
+using_gamess = _build_pytest_skip("gamess")
+using_nwchem = _build_pytest_skip("nwchem")
 using_mdi = _build_pytest_skip("mdi")
 
 using_dftd3_321 = pytest.mark.skipif(is_program_new_enough("dftd3", "3.2.1") is False,

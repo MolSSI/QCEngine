@@ -2,6 +2,7 @@ import numpy as np
 
 from qcelemental.util import filter_comments
 
+
 def load_hessian(shess: str, dtype: str) -> np.ndarray:
     """Construct a Hessian array from any recognized string format.
 

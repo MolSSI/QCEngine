@@ -15,10 +15,10 @@ import qcelemental as qcel
 from qcelemental.models import FailedOperation, Provenance, Result
 from qcelemental.util import safe_version, which
 
-from . import empirical_dispersion_resources
-from .model import ProgramHarness
 from ..exceptions import InputError, ResourceError, UnknownError
 from ..util import execute
+from . import empirical_dispersion_resources
+from .model import ProgramHarness
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -141,8 +141,10 @@ class DFTD3Harness(ProgramHarness):
             command.append('-abc')
 
         infiles = {
-            '.dftd3par.local': dftd3_coeff_formatter(input_model.extras['info']['dashlevel'], input_model.extras['info']['dashparams']),
-            'dftd3_geometry.xyz': qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format=''),
+            '.dftd3par.local':
+            dftd3_coeff_formatter(input_model.extras['info']['dashlevel'], input_model.extras['info']['dashparams']),
+            'dftd3_geometry.xyz':
+            qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format=''),
         }
 
         return {
@@ -263,10 +265,7 @@ class DFTD3Harness(ProgramHarness):
             retres = retres.ravel().tolist()
 
         output_data = {
-            'extras': {
-                'local_keywords': input_model.extras['info'],
-                'qcvars': calcinfo,
-            },
+            'extras': input_model.extras,
             'properties': {},
             'provenance': Provenance(creator="DFTD3",
                                      version=self.get_version(),
@@ -274,6 +273,8 @@ class DFTD3Harness(ProgramHarness):
             'return_result': retres,
             'stdout': stdout,
         }  # yapf: disable
+        output_data["extras"]['local_keywords'] = input_model.extras['info']
+        output_data["extras"]['qcvars'] = calcinfo
 
         output_data['success'] = True
         return Result(**{**input_model.dict(), **output_data})

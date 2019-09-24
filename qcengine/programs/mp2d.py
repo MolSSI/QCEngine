@@ -7,14 +7,15 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
+
 import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
 
-from . import empirical_dispersion_resources
-from .model import ProgramHarness
 from ..exceptions import InputError, ResourceError, UnknownError
 from ..util import execute
+from . import empirical_dispersion_resources
+from .model import ProgramHarness
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -212,10 +213,7 @@ class MP2DHarness(ProgramHarness):
             retres = retres.ravel().tolist()
 
         output_data = {
-            'extras': {
-                'local_keywords': input_model.extras['info'],
-                'qcvars': calcinfo,
-            },
+            'extras': input_model.extras,
             'properties': {},
             'provenance': Provenance(creator="MP2D",
                                      version=self.get_version(),
@@ -223,6 +221,8 @@ class MP2DHarness(ProgramHarness):
             'return_result': retres,
             'stdout': stdout,
         }  # yapf: disable
+        output_data["extras"]["local_keywords"] = input_model.extras['info']
+        output_data["extras"]["qcvars"] = calcinfo
 
         output_data['success'] = True
         return Result(**{**input_model.dict(), **output_data})
