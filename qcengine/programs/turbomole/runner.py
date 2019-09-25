@@ -201,6 +201,12 @@ class TurbomoleHarness(ProgramHarness):
                 with open(full_fn) as handle:
                     turbomolrec['infiles'][fn] = handle.read()
 
+        env = os.environ.copy()
+        env["PARA_ARCH"] = "SMP"
+        env["PARNODES"] = str(config.ncores)
+        env["SMPCPUS"] = str(config.ncores)
+
+        turbomolrec['environment'] = env
         turbomolrec['command'] = ["dscf"]
 
         return turbomolrec
