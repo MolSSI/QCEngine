@@ -2,9 +2,10 @@
 Calls the Turbomole executable.
 """
 from decimal import Decimal
+import os
 from pathlib import Path
 import re
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, TimeoutExpired
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
@@ -30,7 +31,8 @@ class TurbomoleHarness(ProgramHarness):
     }
 
     version_cache: Dict[str, str] = {}
-    
+    ricc2_methods = "rimp2 rimp3 rimp4 ricc2 riccsd riccsd(t)".split()
+
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         return which('define',
@@ -58,7 +60,6 @@ class TurbomoleHarness(ProgramHarness):
         # TODO: add comment
         self.found(raise_error=True)
 
-        import pdb; pdb.set_trace()
         job_inputs = self.build_input(input_model, config)
         success, dexe = self.execute(job_inputs)
 
@@ -71,10 +72,14 @@ class TurbomoleHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
-    def prepare_define_stdin(self, method: str, basis: str, molecule: 'Molecule') -> str:
+    def prepare_define_stdin(self, method: str, basis: str, keywords: Dict[str, Any],
+                             molecule: 'Molecule') -> str:
         charge = molecule.molecular_charge
         mult = molecule.molecular_multiplicity
-        unrestricted = False
+
+        # Load data from keywords
+        unrestricted = keywords.get("unrestricted", False)
+        grid = keywords.get("grid", "m3")
 
         def occ_num_mo_data(charge: int, mult: int,
                             unrestricted: Optional[bool] = False) -> str:
@@ -102,52 +107,46 @@ class TurbomoleHarness(ProgramHarness):
                 """
             return occ_num_mo_data_stdin
 
-        def ref_wavefunction(method, xfunc="b-p", grid="m3"):
-            ref_wavefunction_stdin = """"""
-            if method.endswith == "KS":
-                ref_wavefunction_stdin = """dft
-                                        on
-                                        func
-                                        {xcfunc}
-                                        grid
-                                        {grid}
+        def set_method(method, grid):
+            if method == "hf":
+                method_stdin = ""
+            elif method in self.ricc2_methods:
+                method_stdin = f"""cc
+                                   freeze
+                                   *
+                                   cbas
+                                   *
+                                   ricc2
+                                   {method}
+                                   list models
 
-                                        """
-            return ref_wavefunction
+                                   *
+                                   *
+                                """
+            # Fallback: assume method corresponds to a DFT functional
+            else:
+                method_stdin = f"""dft
+                                   on
+                                   func
+                                   {method}
+                                   grid
+                                   {grid}
+
+                                """
+            return method_stdin
+
+        def set_ri():
+            ri_stdin = ""
+            return ri_stdin
 
         kwargs = {
             "init_guess": occ_num_mo_data(charge, mult, unrestricted),
-            "ref_wavefunction": ref_wavefunction(method),
+            "set_method": set_method(method, grid),
             "title": "QCEngine Turbomole",
             "scf_conv": 8,
             "scf_iters": 150,
             "basis": basis,
         }
-
-        # stdin = """
-        # {title}
-        # a coord
-        # *
-        # no
-        # b
-        # all {basis}
-        # *
-        # {init_guess}
-        # dft
-        # on
-        # func
-        # {xcfunc}
-        # grid
-        # {grid}
-
-        # scf
-        # conv
-        # {scf_conv}
-        # iter
-        # {scf_iters}
-
-        # *
-        # """.format(**kwargs)
 
         stdin = """
         {title}
@@ -158,7 +157,7 @@ class TurbomoleHarness(ProgramHarness):
         all {basis}
         *
         {init_guess}
-        {ref_wavefunction}
+        {set_method}
         scf
         conv
         {scf_conv}
@@ -183,7 +182,7 @@ class TurbomoleHarness(ProgramHarness):
 
         # Prepare stdin for define call
         model = input_model.model
-        stdin = self.prepare_define_stdin(model.method, model.basis,
+        stdin = self.prepare_define_stdin(model.method, model.basis, input_model.keywords,
                                           input_model.molecule,
         )
         with temporary_directory(suffix="_define_scratch") as tmpdir:
@@ -207,18 +206,44 @@ class TurbomoleHarness(ProgramHarness):
         env["SMPCPUS"] = str(config.ncores)
 
         turbomolrec['environment'] = env
-        turbomolrec['command'] = ["dscf"]
+
+        # Set appropriate commands
+        command = "dscf"
+        if model.method in self.ricc2_methods:
+            command = "dscf; ricc2"
+        turbomolrec['command'] = [command]
 
         return turbomolrec
 
     def execute_define(self, stdin: str, cwd: Optional["Path"] = None) -> str:
         # TODO: replace this with a call to the default execute provided by QCEngine
-        proc = Popen("define", universal_newlines=True,
+
+        # We cant use univeral_newlines=True or text=True in Popen as some of the
+        # data that define returns isn't proper UTF-8, so the decoding will crash.
+        # We will decode it later on manually.
+        proc = Popen("define",
                      stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd,
+                     # stdin=PIPE, stderr=PIPE, cwd=cwd,
         )
         # TODO: add timeout? Unless the disk hangs this should never take long...
-        stdout, _ = proc.communicate(stdin)#, timeout=3)
+        # TODO: how to get the stdout when the process hangs? Maybe write it to a file?
+        stdout, _ = proc.communicate(str.encode(stdin))
         proc.terminate()
+        try:
+            stdout = stdout.decode("utf-8")
+        except UnicodeDecodeError:
+            # Some of the basis files (cbas, I'm looking at you ...) are saved
+            # in ISO-8859-15 but most of them are in UTF-8. Decoding will
+            # crash in the former cases so here we try the correct decoding.
+            stdout = stdout.decode("latin-1")
+
+        # try:
+            # stdout, _ = proc.communicate(str.encode(stdin), timeout=5)
+            # proc.terminate()
+        # except TimeoutExpired as err:
+            # print(err)
+            # import pdb; pdb.set_trace()
+
         return stdout
 
     def execute(self,
@@ -247,10 +272,10 @@ class TurbomoleHarness(ProgramHarness):
         qcvars, gradient, hessian = harvest(input_model.molecule, stdout, **outfiles)
 
         if gradient is not None:
-            qcvars['CURRENT GRADIENT'] = nwgrad
+            qcvars['CURRENT GRADIENT'] = gradient
 
         if hessian is not None:
-            qcvars['CURRENT HESSIAN'] = nwhess
+            qcvars['CURRENT HESSIAN'] = hessian
 
         retres = qcvars[f'CURRENT {input_model.driver.upper()}']
         if isinstance(retres, Decimal):
