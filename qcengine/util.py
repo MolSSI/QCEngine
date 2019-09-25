@@ -393,6 +393,7 @@ def execute(command: List[str],
                              exist_ok=scratch_exist_ok,
                              suffix=scratch_suffix) as scrdir:
         popen_kwargs["cwd"] = scrdir
+        popen_kwargs["shell"] = True
         with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
 
