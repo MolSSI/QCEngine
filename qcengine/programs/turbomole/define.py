@@ -92,6 +92,8 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
                                *
                             """
         # Fallback: assume method corresponds to a DFT functional
+        # TODO: handle xcfuncs that aren't defined in define, e.g.
+        # new functionals introduced in 7.4 from libxc. ...
         else:
             method_stdin = f"""dft
                                on
