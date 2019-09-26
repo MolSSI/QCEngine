@@ -6,6 +6,8 @@ from .methods import ricc2_methods
 
 def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
     # TODO: replace this with a call to the default execute provided by QCEngine
+    # if possible. May be difficult though, as we have to pipe in stdin and
+    # be careful with the encoding.
 
     # We cant use univeral_newlines=True or text=True in Popen as some of the
     # data that define returns isn't proper UTF-8, so the decoding will crash.
@@ -37,7 +39,7 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
 
 
 def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
-                  charge: int, mult: int)  -> str:
+                  charge: int, mult: int, geoopt: Optional[str] = "")  -> str:
     # Load data from keywords
     unrestricted = keywords.get("unrestricted", False)
     grid = keywords.get("grid", "m3")
@@ -72,6 +74,8 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
         if method == "hf":
             method_stdin = ""
         elif method in ricc2_methods:
+            # Drop the 'ri'-prefix of the method string.
+            geoopt_stdin = f"geoopt {method[2:]} ({geoopt})" if geoopt else ""
             method_stdin = f"""cc
                                freeze
                                *
@@ -80,6 +84,9 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
                                ricc2
                                {method}
                                list models
+
+                               {geoopt_stdin}
+                               list geoopt
 
                                *
                                *

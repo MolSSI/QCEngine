@@ -11,7 +11,10 @@ def parse_decimal(regex, text, method="search"):
     matches = getattr(with_float, method)(text)
 
     if method == "search":
-        matches = [mobj.groups()]
+        groups = matches.groups()
+        if len(groups) == 1:
+            groups = ("", groups[0])
+        matches = [matches.groups()]
         # remaining_groups = list(mobj.groups())
         # energy = remaining_groups.pop()
         # return Decimal(energy), remaining_groups
@@ -45,9 +48,12 @@ def parse_ricc2(stdout):
     ricc2_dict = PreservingDict()
 
     # As CC2 starts from a MP2 guess that is also reported there may be
-    # multiple matches for the following regex. Thats why we caputre all
+    # multiple matches for the following regex. Thats why we capture all
     # matches with 'findall'.
     matches = parse_decimal("Final (.+?) energy\s+:\s+", stdout, "findall")
+    if len(matches) == 0:
+        matches = parse_decimal("E(MP2)\s+:\s+", stdout, "search")
+
     ricc2_dict['CURRENT ENERGY'] = matches[-1][1]
 
     return ricc2_dict

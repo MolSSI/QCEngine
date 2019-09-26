@@ -76,7 +76,7 @@ class TurbomoleHarness(ProgramHarness):
                     template: Optional[str] = None) -> Dict[str, Any]:
         turbomolrec = {
             'infiles': {},
-            'outfiles': {},
+            'outfiles': {"control": "control", },
             'scratch_directory': config.scratch_directory,
         }
 
@@ -86,9 +86,15 @@ class TurbomoleHarness(ProgramHarness):
 
         # Prepare stdin for define call
         model = input_model.model
+        # geeopt will hold the for which to calculate the gradient.
+        # 'x' corresponds to the ground state, 'a 1' would be the GS too.
+        # 'a1 2' would be the 1st excited state of the irreducible group A1.
+        # Right now only GS are supported, so this is hardcoded as 'x'.
+        geoopt = "x" if input_model.driver.derivative_int() > 0 else ""
         stdin = prepare_stdin(model.method, model.basis, input_model.keywords,
                               input_model.molecule.molecular_charge,
                               input_model.molecule.molecular_multiplicity,
+                              geoopt,
         )
         with temporary_directory(suffix="_define_scratch") as tmpdir:
             tmpdir = Path(tmpdir)
@@ -125,11 +131,17 @@ class TurbomoleHarness(ProgramHarness):
         elif input_model.driver.derivative_int() == 1:
             grad_command = "rdgrad" if ri_calculation else "grad"
             commands.append(grad_command)
-            turbomolrec["outfiles"]["gradient"] = "gradient"
         elif input_model.driver.derivative_int() == 2:
             freq_command = "aoforce"
             commands.append(freq_command)
-            turbomolrec["outfiles"]["hessian"] = "hessian"
+            # Add
+            #   $noproj
+            #   $nprhessian file=nprhessian
+            # to control file.
+            turbomolrec["outfiles"]["hessian"] = "nprhessian"
+
+        if input_model.driver.derivative_int() == 1:
+            turbomolrec["outfiles"]["gradient"] = "gradient"
         command = ["; ".join(commands)]
         turbomolrec['command'] = command
 

@@ -25,7 +25,7 @@ def h2o():
         pytest.param('ricc2', {}, -76.1603807755, marks=testing.using_turbomole),
         pytest.param('rimp2', {}, -76.1593614075, marks=testing.using_turbomole),
     ])  # yapf: disable
-def test_turbomole_energies(method, keywords, ref_energy, h2o):
+def test_turbomole_energy(method, keywords, ref_energy, h2o):
     resi = {
         "molecule": h2o,
         "driver": "energy",
@@ -49,8 +49,8 @@ def test_turbomole_energies(method, keywords, ref_energy, h2o):
     [
         pytest.param('hf', {}, 0.099340, marks=testing.using_turbomole),
         pytest.param('pbe0', {"grid": "m5"}, 0.060631, marks=testing.using_turbomole),
-        # pytest.param('ricc2', {}, -76.1603807755, marks=testing.using_turbomole),
-        # pytest.param('rimp2', {}, -76.1593614075, marks=testing.using_turbomole),
+        pytest.param('ricc2', {}, 0.059378, marks=testing.using_turbomole),
+        pytest.param('rimp2', {}, 0.061576, marks=testing.using_turbomole),
     ])  # yapf: disable
 def test_turbomole_gradient(method, keywords, ref_norm, h2o):
     # from qcengine.programs.turbomole.harvester import parse_gradient
