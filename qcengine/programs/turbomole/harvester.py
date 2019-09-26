@@ -1,6 +1,8 @@
 from decimal import Decimal
 import re
 
+import numpy as np
+
 from ..util import PreservingDict
 
 
@@ -51,6 +53,32 @@ def parse_ricc2(stdout):
     return ricc2_dict
 
 
+def parse_gradient(gradient):
+    # fn = "/scratch/programme/QCEngine_fork/qcengine/programs/tests/gradient"
+    # with open(fn) as handle:
+        # gradient = handle.read()
+    grad_re = re.compile(
+                "\$grad.+" \
+                "cycle =\s+(?P<cycle>\d+)\s+" \
+                "(?P<energy_type>.+?) energy =\s+(?P<energy>[\d\.\-]+)\s+" \
+                "\|dE/dxyz\| =\s+(?P<grad_norm>[\d\.]+)" \
+                "(?P<coords_gradients>.+)\$end",
+                re.DOTALL,
+    )
+    mobj = grad_re.match(gradient)
+
+    energy_type = mobj.group("energy_type")
+    grad_norm = Decimal(mobj.group("grad_norm"))
+    energy = Decimal(mobj.group("energy"))
+    coords_grad = mobj.group("coords_gradients")
+    cycle = int(mobj.group("cycle"))
+
+    *_, grad = re.split("[a-z]{1,3}", coords_grad.strip())
+    grad = np.array(grad.strip().replace("D", "E").split(), dtype=float)
+
+    return grad
+
+
 def harvest(input_model, stdout, **outfiles):
     qcvars = PreservingDict()
 
@@ -62,5 +90,8 @@ def harvest(input_model, stdout, **outfiles):
         qcvars.update(ricc2_dict)
 
     gradient = None
+    if "gradient" in outfiles:
+        gradient = parse_gradient(outfiles["gradient"])
+
     hessian = None
     return qcvars, gradient, hessian

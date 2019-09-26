@@ -1,8 +1,10 @@
+import numpy as np
+import pytest
+
 import qcelemental
 from qcelemental.testing import compare_values
 import qcengine
 from qcengine import testing
-import pytest
 
 
 @pytest.fixture
@@ -40,3 +42,34 @@ def test_turbomole_energies(method, keywords, ref_energy, h2o):
     assert res["success"] is True
 
     assert compare_values(ref_energy, res["return_result"])
+
+
+@pytest.mark.parametrize(
+    "method, keywords, ref_norm",
+    [
+        pytest.param('hf', {}, 0.099340, marks=testing.using_turbomole),
+        pytest.param('pbe0', {"grid": "m5"}, 0.060631, marks=testing.using_turbomole),
+        # pytest.param('ricc2', {}, -76.1603807755, marks=testing.using_turbomole),
+        # pytest.param('rimp2', {}, -76.1593614075, marks=testing.using_turbomole),
+    ])  # yapf: disable
+def test_turbomole_gradient(method, keywords, ref_norm, h2o):
+    # from qcengine.programs.turbomole.harvester import parse_gradient
+    # parse_gradient("")
+    resi = {
+        "molecule": h2o,
+        "driver": "gradient",
+        "model": {
+            "method": method,
+            "basis": "def2-SVP",
+        },
+        "keywords": keywords,
+    }
+
+    res = qcengine.compute(resi, "turbomole", raise_error=True)
+
+    assert res.driver == "gradient"
+    assert res.success is True
+
+    grad = res.return_result
+    grad_norm = np.linalg.norm(grad)
+    assert compare_values(ref_norm, grad_norm)

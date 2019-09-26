@@ -76,6 +76,7 @@ class TurbomoleHarness(ProgramHarness):
                     template: Optional[str] = None) -> Dict[str, Any]:
         turbomolrec = {
             'infiles': {},
+            'outfiles': {},
             'scratch_directory': config.scratch_directory,
         }
 
@@ -111,11 +112,26 @@ class TurbomoleHarness(ProgramHarness):
 
         turbomolrec['environment'] = env
 
-        # Set appropriate commands
-        command = "dscf"
+        keywords = input_model.keywords
+        ri_calculation = keywords.get("scf_type", "")
+
+        # Set appropriate commands. We always need a reference wavefunction
+        # so the first command will be dscf or ridft.
+        commands = ["ridft"] if ri_calculation else ["dscf"]
+        # ricc2 will also calculate the gradient
         if model.method in ricc2_methods:
-            command = "dscf; ricc2"
-        turbomolrec['command'] = [command]
+            commands.append("ricc2")
+        # Gradient calculation for DFT/HF
+        elif input_model.driver.derivative_int() == 1:
+            grad_command = "rdgrad" if ri_calculation else "grad"
+            commands.append(grad_command)
+            turbomolrec["outfiles"]["gradient"] = "gradient"
+        elif input_model.driver.derivative_int() == 2:
+            freq_command = "aoforce"
+            commands.append(freq_command)
+            turbomolrec["outfiles"]["hessian"] = "hessian"
+        command = ["; ".join(commands)]
+        turbomolrec['command'] = command
 
         return turbomolrec
 
@@ -130,6 +146,7 @@ class TurbomoleHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
+            inputs["outfiles"],
             # TODO: scratch_messy?
             # scratch_messy=False,
         )
