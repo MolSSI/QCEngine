@@ -5,7 +5,6 @@ from decimal import Decimal
 import os
 from pathlib import Path
 import re
-from subprocess import Popen, PIPE, TimeoutExpired
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
@@ -17,6 +16,8 @@ from qcelemental.util import safe_version, which
 from ...util import execute, temporary_directory
 from ..model import ProgramHarness
 from .harvester import harvest
+from .define import prepare_stdin, execute_define
+from .methods import ricc2_methods
 
 
 class TurbomoleHarness(ProgramHarness):
@@ -31,7 +32,6 @@ class TurbomoleHarness(ProgramHarness):
     }
 
     version_cache: Dict[str, str] = {}
-    ricc2_methods = "rimp2 rimp3 rimp4 ricc2 riccsd riccsd(t)".split()
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -48,7 +48,7 @@ class TurbomoleHarness(ProgramHarness):
             # the string.
             with temporary_directory(suffix="_define_scratch") as tmpdir:
                 tmpdir = Path(tmpdir)
-                stdout = self.execute_define("\n", cwd=tmpdir)
+                stdout = execute_define("\n", cwd=tmpdir)
             # Tested with V7.3 and V7.4.0
             version_re  = re.compile("TURBOMOLE (?:rev\. )?(V.+?)\s+")
             mobj = version_re.search(stdout)
@@ -72,103 +72,6 @@ class TurbomoleHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
-    def prepare_define_stdin(self, method: str, basis: str, keywords: Dict[str, Any],
-                             molecule: 'Molecule') -> str:
-        charge = molecule.molecular_charge
-        mult = molecule.molecular_multiplicity
-
-        # Load data from keywords
-        unrestricted = keywords.get("unrestricted", False)
-        grid = keywords.get("grid", "m3")
-
-        def occ_num_mo_data(charge: int, mult: int,
-                            unrestricted: Optional[bool] = False) -> str:
-            """Handles the 'Occupation Number & Molecular Orbital' section
-            of define."""
-            unrestricted = unrestricted or (mult != 1)
-            unpaired = mult - 1
-            charge = int(charge)
-
-            occ_num_mo_data_stdin = f"""eht
-            y
-            {charge}
-            y
-            """
-            if unrestricted:
-                # Somehow Turbomole/define asks us if we want to write
-                # natural orbitals... we don't want to.
-                occ_num_mo_data_stdin = f"""eht
-                y
-                {charge}
-                n
-                u {unpaired}
-                *
-                n
-                """
-            return occ_num_mo_data_stdin
-
-        def set_method(method, grid):
-            if method == "hf":
-                method_stdin = ""
-            elif method in self.ricc2_methods:
-                method_stdin = f"""cc
-                                   freeze
-                                   *
-                                   cbas
-                                   *
-                                   ricc2
-                                   {method}
-                                   list models
-
-                                   *
-                                   *
-                                """
-            # Fallback: assume method corresponds to a DFT functional
-            else:
-                method_stdin = f"""dft
-                                   on
-                                   func
-                                   {method}
-                                   grid
-                                   {grid}
-
-                                """
-            return method_stdin
-
-        def set_ri():
-            ri_stdin = ""
-            return ri_stdin
-
-        kwargs = {
-            "init_guess": occ_num_mo_data(charge, mult, unrestricted),
-            "set_method": set_method(method, grid),
-            "title": "QCEngine Turbomole",
-            "scf_conv": 8,
-            "scf_iters": 150,
-            "basis": basis,
-        }
-
-        stdin = """
-        {title}
-        a coord
-        *
-        no
-        b
-        all {basis}
-        *
-        {init_guess}
-        {set_method}
-        scf
-        conv
-        {scf_conv}
-        iter
-        {scf_iters}
-
-        *
-        """.format(**kwargs)
-
-        return stdin
-
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         turbomolrec = {
@@ -182,14 +85,15 @@ class TurbomoleHarness(ProgramHarness):
 
         # Prepare stdin for define call
         model = input_model.model
-        stdin = self.prepare_define_stdin(model.method, model.basis, input_model.keywords,
-                                          input_model.molecule,
+        stdin = prepare_stdin(model.method, model.basis, input_model.keywords,
+                              input_model.molecule.molecular_charge,
+                              input_model.molecule.molecular_multiplicity,
         )
         with temporary_directory(suffix="_define_scratch") as tmpdir:
             tmpdir = Path(tmpdir)
             with open(tmpdir / "coord", "w") as handle:
                 handle.write(coord_str)
-            stdout = self.execute_define(stdin, cwd=tmpdir)
+            stdout = execute_define(stdin, cwd=tmpdir)
             # The define scratch will be populated by some files that we want to keep
             to_keep = "basis auxbasis coord control alpha beta mos".split()
 
@@ -209,42 +113,11 @@ class TurbomoleHarness(ProgramHarness):
 
         # Set appropriate commands
         command = "dscf"
-        if model.method in self.ricc2_methods:
+        if model.method in ricc2_methods:
             command = "dscf; ricc2"
         turbomolrec['command'] = [command]
 
         return turbomolrec
-
-    def execute_define(self, stdin: str, cwd: Optional["Path"] = None) -> str:
-        # TODO: replace this with a call to the default execute provided by QCEngine
-
-        # We cant use univeral_newlines=True or text=True in Popen as some of the
-        # data that define returns isn't proper UTF-8, so the decoding will crash.
-        # We will decode it later on manually.
-        proc = Popen("define",
-                     stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd,
-                     # stdin=PIPE, stderr=PIPE, cwd=cwd,
-        )
-        # TODO: add timeout? Unless the disk hangs this should never take long...
-        # TODO: how to get the stdout when the process hangs? Maybe write it to a file?
-        stdout, _ = proc.communicate(str.encode(stdin))
-        proc.terminate()
-        try:
-            stdout = stdout.decode("utf-8")
-        except UnicodeDecodeError:
-            # Some of the basis files (cbas, I'm looking at you ...) are saved
-            # in ISO-8859-15 but most of them are in UTF-8. Decoding will
-            # crash in the former cases so here we try the correct decoding.
-            stdout = stdout.decode("latin-1")
-
-        # try:
-            # stdout, _ = proc.communicate(str.encode(stdin), timeout=5)
-            # proc.terminate()
-        # except TimeoutExpired as err:
-            # print(err)
-            # import pdb; pdb.set_trace()
-
-        return stdout
 
     def execute(self,
                 inputs: Dict[str, Any],
