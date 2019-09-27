@@ -114,6 +114,7 @@ class TurbomoleHarness(ProgramHarness):
         env["PARA_ARCH"] = "SMP"
         env["PARNODES"] = str(config.ncores)
         env["SMPCPUS"] = str(config.ncores)
+        # TODO: set memory
 
         turbomolrec['environment'] = env
 
@@ -145,6 +146,8 @@ class TurbomoleHarness(ProgramHarness):
             turbomolrec["outfiles"]["gradient"] = "gradient"
         command = ["; ".join(commands)]
         turbomolrec['command'] = command
+
+        # TODO: check if the chosen commands are available with which()?
 
         return turbomolrec
 

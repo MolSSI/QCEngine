@@ -58,9 +58,6 @@ def parse_ricc2(stdout: str):
 
 
 def parse_gradient(gradient):
-    # fn = "/scratch/programme/QCEngine_fork/qcengine/programs/tests/gradient"
-    # with open(fn) as handle:
-        # gradient = handle.read()
     grad_re = re.compile(
                 "\$grad.+" \
                 "cycle =\s+(?P<cycle>\d+)\s+" \
