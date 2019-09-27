@@ -53,8 +53,6 @@ def test_turbomole_energy(method, keywords, ref_energy, h2o):
         pytest.param('rimp2', {}, 0.061576, marks=testing.using_turbomole),
     ])  # yapf: disable
 def test_turbomole_gradient(method, keywords, ref_norm, h2o):
-    # from qcengine.programs.turbomole.harvester import parse_gradient
-    # parse_gradient("")
     resi = {
         "molecule": h2o,
         "driver": "gradient",
@@ -93,4 +91,4 @@ def test_turbomole_ri_dsp(h2o):
 
     energy = res.return_result
     ref_energy = -76.36275642866
-    assert compare_values(ref_energy, -76.36275642866)
+    assert compare_values(ref_energy, energy)
