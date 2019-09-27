@@ -123,7 +123,7 @@ _programs = {
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
-    "entos": is_program_new_enough("entos", "0.5"),
+    "entos": is_program_new_enough("entos", "0.6"),
     "cfour": which('xcfour', return_bool=True),
     "gamess": which('rungms', return_bool=True),
     "nwchem": which('nwchem', return_bool=True),
