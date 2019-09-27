@@ -57,13 +57,12 @@ class TurbomoleHarness(ProgramHarness):
         return self.version_cache[which_prog]
 
     def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
-        # TODO: add comment
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
         success, dexe = self.execute(job_inputs)
 
-        # TODO: handle input errors?!
+        # TODO: handle input errors?! But then define probably already crashed...
         # if 'There is an error in the input file' in dexe["stdout"]:
             # raise InputError(dexe["stdout"])
 
@@ -159,6 +158,7 @@ class TurbomoleHarness(ProgramHarness):
             inputs["command"],
             inputs["infiles"],
             inputs["outfiles"],
+            shell=True,
             # TODO: scratch_messy?
             # scratch_messy=False,
         )
