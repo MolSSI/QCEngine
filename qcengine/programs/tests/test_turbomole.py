@@ -73,3 +73,24 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o):
     grad = res.return_result
     grad_norm = np.linalg.norm(grad)
     assert compare_values(ref_norm, grad_norm)
+
+
+def test_turbomole_ri_dsp(h2o):
+    resi = {
+        "molecule": h2o,
+        "driver": "energy",
+        "model": {
+            "method": "b-p",
+            "basis": "def2-SVP",
+        },
+        "keywords": {"ri": True, "d3bj": True,}
+    }
+
+    res = qcengine.compute(resi, "turbomole", raise_error=True)
+
+    assert res.driver == "energy"
+    assert res.success is True
+
+    energy = res.return_result
+    ref_energy = -76.36275642866
+    assert compare_values(ref_energy, -76.36275642866)

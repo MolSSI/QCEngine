@@ -15,13 +15,11 @@ def parse_decimal(regex, text, method="search"):
         if len(groups) == 1:
             groups = ("", groups[0])
         matches = [matches.groups()]
-        # remaining_groups = list(mobj.groups())
-        # energy = remaining_groups.pop()
-        # return Decimal(energy), remaining_groups
     return [(method, Decimal(energy)) for method, energy in matches]
 
 
-def parse_reference_energy(stdout):
+def parse_reference_energy(stdout: str):
+    """Parse stdout and return the energy of the reference wavefunction."""
     energy_dict = PreservingDict()
 
     # Total energy from dscf or ridft
@@ -44,7 +42,7 @@ def parse_reference_energy(stdout):
     return energy_dict
 
 
-def parse_ricc2(stdout):
+def parse_ricc2(stdout: str):
     ricc2_dict = PreservingDict()
 
     # As CC2 starts from a MP2 guess that is also reported there may be

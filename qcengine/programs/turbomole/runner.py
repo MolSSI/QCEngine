@@ -17,7 +17,7 @@ from ...util import execute, temporary_directory
 from ..model import ProgramHarness
 from .harvester import harvest
 from .define import prepare_stdin, execute_define
-from .methods import ricc2_methods
+from .methods import METHODS, KEYWORDS
 
 
 class TurbomoleHarness(ProgramHarness):
@@ -118,13 +118,15 @@ class TurbomoleHarness(ProgramHarness):
         turbomolrec['environment'] = env
 
         keywords = input_model.keywords
-        ri_calculation = keywords.get("scf_type", "")
+        ri_calculation = any([keywords.get(ri_kw, False)
+                              for ri_kw in KEYWORDS["ri"]
+        ])
 
         # Set appropriate commands. We always need a reference wavefunction
         # so the first command will be dscf or ridft.
         commands = ["ridft"] if ri_calculation else ["dscf"]
         # ricc2 will also calculate the gradient
-        if model.method in ricc2_methods:
+        if model.method in METHODS["ricc2"]:
             commands.append("ricc2")
         # Gradient calculation for DFT/HF
         elif input_model.driver.derivative_int() == 1:
