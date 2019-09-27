@@ -40,6 +40,9 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
 
 def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
                   charge: int, mult: int, geoopt: Optional[str] = "")  -> str:
+    """Prepares a str that can be sent to define to produce the desired
+    input for Turbomole."""
+
     # Load data from keywords
     unrestricted = keywords.get("unrestricted", False)
     grid = keywords.get("grid", "m3")
@@ -47,7 +50,16 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
     def occ_num_mo_data(charge: int, mult: int,
                         unrestricted: Optional[bool] = False) -> str:
         """Handles the 'Occupation Number & Molecular Orbital' section
-        of define."""
+        of define. Sets appropriate charge and multiplicity in the
+        system and decided between restricted and unrestricted calculation.
+
+        RHF and UHF are supported. ROHF could be implemented later on
+        by using the 's' command to list the available MOs and then
+        close the appropriate number of MOs to doubly occupied MOs
+        by 'c' by comparing the number of total MOs and the desired
+        multiplicity."""
+
+        # Do unrestricted calculation if explicitly requested or mandatory
         unrestricted = unrestricted or (mult != 1)
         unpaired = mult - 1
         charge = int(charge)
@@ -74,6 +86,8 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
         if method == "hf":
             method_stdin = ""
         elif method in ricc2_methods:
+            # Setting geoopt in $ricc2 will make the ricc2 module to produce
+            # a gradient.
             # Drop the 'ri'-prefix of the method string.
             geoopt_stdin = f"geoopt {method[2:]} ({geoopt})" if geoopt else ""
             method_stdin = f"""cc
@@ -92,8 +106,11 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
                                *
                             """
         # Fallback: assume method corresponds to a DFT functional
+        #
         # TODO: handle xcfuncs that aren't defined in define, e.g.
         # new functionals introduced in 7.4 from libxc. ...
+        # Maybe the best idea would be to not set the functional here
+        # but just turn on DFT and add it to the control file later on.
         else:
             method_stdin = f"""dft
                                on
