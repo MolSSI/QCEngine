@@ -123,11 +123,26 @@ class MopacHarness(ProgramHarness):
 
         input_file = []
 
+        keywords = {"ITER": 100, "PULAY": True}
+        keywords.update({k.upper(): v for k, v in input_model.keywords.items()})
+
+        if keywords["PULAY"]:
+            pulay = " PULAY"
+        else:
+            pulay = " "
+
+        unknown_keywords = keywords.keys() - {"ITER", "PULAY"}
+        if unknown_keywords:
+            raise InputError(f"Unknown keywords given to MOPAC: {unknown_keywords}")
+
+
         # 1SCF says not to compute a geometry optimization, always compute a gradient (free), and dump the aux file
         input_file.append(f"{method.upper()} "
                           f"CHARGE={input_model.molecule.molecular_charge} "
                           f"MS={(input_model.molecule.molecular_multiplicity-1)/2}&")
-        input_file.append("1SCF GRADIENTS AUX(PRECISION=9, XP, XS, XW) A0")
+        input_file.append(f"1SCF GRADIENTS AUX(PRECISION=9, XP, XS, XW) A0{pulay} ITER={keywords['ITER']}&")
+
+        # input_file[-1] = input_file[-1][:-1]
         input_file.append("")
 
         mol = input_model.molecule
@@ -176,6 +191,12 @@ class MopacHarness(ProgramHarness):
         last_key = None
 
         # Parse the weird structure
+        if outfiles["dispatch.aux"] is None:
+            error = "An unknown error occured and no results were captured."
+            if outfiles["dispatch.out"] is not None:
+                error = outfiles["dispatch.out"]
+            raise UnknownError(error)
+
         for line in outfiles["dispatch.aux"].splitlines():
             if ("START" in line) or ("END" in line) or ("#" in line):
                 continue
@@ -231,8 +252,8 @@ class MopacHarness(ProgramHarness):
                 data[last_key][1].extend([float(x) * cf for x in line.split()])
 
         data = {k: v[1] for k, v in data.items()}
-        # for k, v in data.items():
-        #     print(k, v)
+        if ("gradients" not in data) or ("mopac_version" not in data):
+            raise UnknownError("Could not correctly parse the MOPAC output file.")
 
         gradient = data.pop("gradients")
 

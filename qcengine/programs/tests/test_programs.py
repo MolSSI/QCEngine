@@ -146,7 +146,7 @@ def test_mopac_task():
     json_data["molecule"] = qcng.get_molecule("water")
     json_data["driver"] = "gradient"
     json_data["model"] = {"method": "PM6", "basis": None}
-    json_data["keywords"] = {}
+    json_data["keywords"] = {"pulay": False}
 
     ret = qcng.compute(json_data, "mopac", raise_error=True)
     assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
