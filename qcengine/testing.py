@@ -127,6 +127,7 @@ _programs = {
     "cfour": which('xcfour', return_bool=True),
     "gamess": which('rungms', return_bool=True),
     "nwchem": which('nwchem', return_bool=True),
+    "pylibefp": which_import("pylibefp", return_bool=True),
 }
 
 
@@ -154,6 +155,7 @@ using_terachem = _build_pytest_skip("terachem")
 using_cfour = _build_pytest_skip("cfour")
 using_gamess = _build_pytest_skip("gamess")
 using_nwchem = _build_pytest_skip("nwchem")
+using_pylibefp = _build_pytest_skip("pylibefp")
 
 using_dftd3_321 = pytest.mark.skipif(is_program_new_enough("dftd3", "3.2.1") is False,
                                      reason='DFTD3 does not include 3.2.1 features. Update package and add to PATH')
