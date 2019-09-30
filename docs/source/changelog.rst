@@ -13,7 +13,7 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
-v0.11.0 / 2019-09-30
+v0.11.0 / 2019-10-01
 --------------------
 
 New Features
@@ -39,11 +39,13 @@ Enhancements
   calculations, and the initial support for parsing local correlation calculations.
 - (:pr:`158`) Entos' output parsing has been improved to read the json dictionary produced by the program
   directly. Also updates the input file generation.
+- (:pr:`161`) Updates MOPAC to have more sensible quantum-chemistry like keywords by default.
 
 Bug Fixes
 +++++++++
 - (:pr:`156`) Fixed a compatibility bug in specific version of Intel-OpenMP by skipping version
   2019.5-281.
+- (:pr:`161`) Improved error handling in MOPAC if the execution was incorrect.
 
 
 v0.10.0 / 2019-08-25
