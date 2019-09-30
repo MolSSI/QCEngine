@@ -123,16 +123,26 @@ class MopacHarness(ProgramHarness):
 
         input_file = []
 
-        default_keywords = {"PULAY": None, "ITER": 100}
-        keywords = {**default_keywords, **input_model.keywords}
+        keywords = {"ITER": 100, "PULAY": True}
+        keywords.update({k.upper(): v for k, v in input_model.keywords.items()})
+
+        if keywords["PULAY"]:
+            pulay = " PULAY"
+        else:
+            pulay = " "
+
+        unknown_keywords = keywords.keys() - {"ITER", "PULAY"}
+        if unknown_keywords:
+            raise InputError(f"Unknown keywords given to MOPAC: {unknown_keywords}")
+
 
         # 1SCF says not to compute a geometry optimization, always compute a gradient (free), and dump the aux file
         input_file.append(f"{method.upper()} "
                           f"CHARGE={input_model.molecule.molecular_charge} "
                           f"MS={(input_model.molecule.molecular_multiplicity-1)/2}&")
-        input_file.append("1SCF GRADIENTS AUX(PRECISION=9, XP, XS, XW) A0&")
+        input_file.append(f"1SCF GRADIENTS AUX(PRECISION=9, XP, XS, XW) A0{pulay} ITER={keywords['ITER']}&")
 
-        input_file[-1] = input_file[-1][:-1]
+        # input_file[-1] = input_file[-1][:-1]
         input_file.append("")
 
         mol = input_model.molecule
@@ -145,7 +155,6 @@ class MopacHarness(ProgramHarness):
         env = os.environ.copy()
         env["MKL_NUM_THREADS"] = str(config.ncores)
         env["OMP_NUM_THREADS"] = str(config.ncores)
-        print("\n".join(input_file))
 
         return {
             "command": ["mopac", "dispatch.mop"],

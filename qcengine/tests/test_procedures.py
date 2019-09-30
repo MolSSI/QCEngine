@@ -153,7 +153,7 @@ def test_geometric_retries(failure_engine):
                  [1.82581873750194, 2.866376526793269, 103.4332610730292],
                  marks=testing.using_torchani),
     pytest.param("mopac", {"method": "PM6"},
-                 [1.79305406665072, 2.893333237502448, 107.5722111735350],
+                 [1.7927843431811934, 2.893333237502448, 107.60441967992045],
                  marks=testing.using_mopac),
 ]) # yapf: disable
 def test_geometric_generic(program, model, bench):
