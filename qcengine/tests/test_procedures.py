@@ -108,6 +108,26 @@ def test_geometric_rdkit_error():
     assert isinstance(ret.error.error_message, str)
 
 
+@testing.using_rdkit
+@testing.using_geometric
+def test_optimization_protocols():
+    inp = copy.deepcopy(_base_json)
+
+    inp["initial_molecule"] = qcng.get_molecule("water")
+    inp["input_specification"]["model"] = {"method": "UFF"}
+    inp["keywords"]["program"] = "rdkit"
+    inp["protocols"] = {"trajectory": "initial_and_final"}
+
+    inp = OptimizationInput(**inp)
+
+    ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
+    assert ret.success, ret.error.error_message
+
+    assert len(ret.trajectory) == 2
+    assert ret.initial_molecule.get_hash() == ret.trajectory[0].molecule.get_hash()
+    assert ret.final_molecule.get_hash() == ret.trajectory[1].molecule.get_hash()
+
+
 @testing.using_geometric
 @testing.using_rdkit
 def test_geometric_retries(failure_engine):
