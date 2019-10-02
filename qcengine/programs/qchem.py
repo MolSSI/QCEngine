@@ -128,6 +128,35 @@ class QChemHarness(ProgramHarness):
         # Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
 
+        # Build keywords
+        keywords = {k.upper(): v for k, v in input_model.keywords.items()}
+        keywords["INPUT_BOHR"] = "TRUE"
+
+        if input_model.driver == "energy":
+            keywords["JOBTYPE"] = "sp"
+        elif input_model.driver == "gradient":
+            keywords["JOBTYPE"] = "force"
+        elif input_model.driver == "hessian":
+            keywords["JOBTYPE"] = "freq"
+        else:
+            raise InputError(f"Driver of type {input_model.driver} is not yet supported.")
+
+        if input_model.molecule.fix_com or input_model.molecule.fix_orientation:
+            keywords["NO_REORIENT"] = "TRUE"
+
+        keywords["METHOD"] = input_model.model.method
+        if input_model.model.basis:
+            keywords["BASIS"] = input_model.model.basis
+
+        input_file = []
+        input_file.append(f"""
+$comment
+Automatically generated QCEngine input file
+$end
+            """)
+        input_file.append("$molecule")
+        input_file.append(input_model.molecule.to_string("psi4"))
+        input_file.append("$end")
 
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
