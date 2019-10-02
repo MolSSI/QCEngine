@@ -14,6 +14,7 @@ from .mopac import MopacHarness
 from .mp2d import MP2DHarness
 from .nwchem import NWChemHarness
 from .psi4 import Psi4Harness
+from .qchem import QChemHarness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
 from .torchani import TorchANIHarness
@@ -96,6 +97,7 @@ register_program(GAMESSHarness())
 register_program(MolproHarness())
 register_program(NWChemHarness())
 register_program(Psi4Harness())
+register_program(QChemHarness())
 register_program(TeraChemHarness())
 
 # Semi-emperical
