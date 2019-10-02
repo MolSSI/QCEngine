@@ -46,7 +46,7 @@ def test_mdi_water():
 
     # Test the >ELEMENTS and <ELEMENTS commands
     expected = [8, 1, 1]
-    engine.recv_coords(expected)
+    engine.recv_elements(expected)
     elements = engine.send_elements()
     assert compare_values(expected, elements, atol=1.e-7)
 
