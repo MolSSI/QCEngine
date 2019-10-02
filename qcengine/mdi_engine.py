@@ -10,9 +10,9 @@ from .compute import compute
 
 try:
     from mdi import MDI_Init, MDI_Accept_Communicator, MDI_Recv_Command
-    from mdi import MDI_Recv, MDI_Send
-    from mdi import MDI_DOUBLE, MDI_CHAR, MDI_INT, MDI_COMMAND_LENGTH
-    from mdi import MDI_Get_Intra_Code_MPI_Comm
+    from mdi import MDI_Recv, MDI_Send, MDI_Get_Intra_Code_MPI_Comm
+    from mdi import MDI_DOUBLE, MDI_CHAR, MDI_INT, MDI_DOUBLE_NUMPY
+    from mdi import MDI_COMMAND_LENGTH
     use_mdi = True
 except ImportError:
     use_mdi = False
@@ -308,7 +308,7 @@ class MDIServer():
         """
         natom = len(self.molecule.geometry)
         masses = self.molecule.masses
-        MDI_Send(masses, natom, MDI_DOUBLE, self.comm)
+        MDI_Send(masses, natom, MDI_DOUBLE_NUMPY, self.comm)
         return masses
 
     # Respond to the >MASSES command
