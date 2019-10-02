@@ -44,9 +44,10 @@ def test_mdi_water():
     coords = engine.send_coords()
     assert compare_values(expected, coords, atol=1.e-7)
 
-    # Test the <ELEMENTS command
+    # Test the >ELEMENTS and <ELEMENTS commands
+    expected = [8, 1, 1]
+    engine.recv_coords(expected)
     elements = engine.send_elements()
-    expected = [8.0, 1.0, 1.0]
     assert compare_values(expected, elements, atol=1.e-7)
 
     # Test the <MASSES command
@@ -101,6 +102,6 @@ def test_mdi_water():
     assert compare_values(expected, energy, atol=1.e-6)
 
     # Test the EXIT command
-    engine.exit()
+    engine.stop()
 
     return 0

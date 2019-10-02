@@ -4,7 +4,10 @@ For details regarding MDI, see https://molssi.github.io/MDI_Library/html/index.h
 """
 from typing import Any, Dict, Optional
 
+import numpy as np
+
 import qcelemental as qcel
+from qcelemental.util import which_import
 
 from .compute import compute
 
@@ -54,8 +57,7 @@ class MDIServer():
         """
 
         # Confirm that the MDI library has been located
-        if not use_mdi:
-            raise Exception("Unable to find MDI package")
+        which_import('mdi', raise_error=True, raise_msg="Please install via 'conda install pymdi -c conda-forge'")
 
         # Initialize MDI
         mpi_world = None
@@ -108,7 +110,7 @@ class MDIServer():
             "<ENERGY": self.send_energy,
             "<FORCES": self.send_forces,
             ">COORDS": self.recv_coords,
-            "SCF": self.run_scf,
+            "SCF": self.run_energy,
             "<NCOMMANDS": self.send_ncommands,
             "<COMMANDS": self.send_commands,
             "<ELEMENTS": self.send_elements,
@@ -118,7 +120,7 @@ class MDIServer():
             ">TOTCHARGE": self.recv_total_charge,
             "<ELEC_MULT": self.send_multiplicity,
             ">ELEC_MULT": self.recv_multiplicity,
-            "EXIT": self.exit
+            "EXIT": self.stop
         }
 
         # Accept a communicator to the driver code
@@ -139,15 +141,9 @@ class MDIServer():
                     **{
                         **self.molecule.dict(),
                         **{
-                            "molecular_charge": self.total_charge
-                        },
-                        **{
-                            "fragment_charges": [self.total_charge]
-                        },
-                        **{
-                            "molecular_multiplicity": self.multiplicity
-                        },
-                        **{
+                            "molecular_charge": self.total_charge,
+                            "fragment_charges": [self.total_charge],
+                            "molecular_multiplicity": self.multiplicity,
                             "fragment_multiplicities": [self.multiplicity]
                         }
                     })
@@ -175,17 +171,15 @@ class MDIServer():
         return natom
 
     # Respond to the <COORDS command
-    def send_coords(self, coords=None):
+    def send_coords(self):
         """ Send the nuclear coordinates through MDI
 
         :returns: *coords* Nuclear coordinates
         """
         natom = len(self.molecule.geometry)
 
-        coords = [0.0 for i in range(3 * natom)]
-        for iatom in range(natom):
-            for icoord in range(3):
-                coords[3 * iatom + icoord] = self.molecule.geometry[iatom][icoord]
+        coords = np.reshape(self.molecule.geometry, (3 * natom))
+        MDI_Send(coords, 3 * natom, MDI_DOUBLE_NUMPY, self.comm)
 
         return coords
 
@@ -199,10 +193,9 @@ class MDIServer():
         """
         natom = len(self.molecule.geometry)
         if coords is None:
-            coords = MDI_Recv(3 * natom, MDI_DOUBLE, self.comm)
-        for iatom in range(natom):
-            for icoord in range(3):
-                self.molecule.geometry[iatom][icoord] = coords[3 * iatom + icoord]
+            coords = MDI_Recv(3 * natom, MDI_DOUBLE_NUMPY, self.comm)
+        new_geometry = np.reshape(coords, (-1, 3))
+        self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{"geometry": new_geometry}})
 
     # Respond to the <ENERGY command
     def send_energy(self):
@@ -213,7 +206,7 @@ class MDIServer():
         # Ensure that the molecule currently passes validation
         if not self.molecule_validated:
             raise Exception('MDI attempting to compute energy on an unvalidated molecule')
-        self.run_scf()
+        self.run_energy()
         energy = self.compute_return.return_result
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
         return energy
@@ -232,21 +225,27 @@ class MDIServer():
                                         driver="gradient",
                                         model=self.model,
                                         keywords=self.keywords)
-        self.compute_return = compute(input, self.program, self.raise_error, self.local_options)
+        self.compute_return = compute(input_data=input,
+                                      program=self.program,
+                                      raise_error=self.raise_error,
+                                      local_options=self.local_options)
 
         forces = self.compute_return.return_result
         MDI_Send(forces, len(forces), MDI_DOUBLE_NUMPY, self.comm)
         return forces
 
     # Respond to the SCF command
-    def run_scf(self):
+    def run_energy(self):
         """ Run an energy calculation
         """
         input = qcel.models.ResultInput(molecule=self.molecule,
                                         driver="energy",
                                         model=self.model,
                                         keywords=self.keywords)
-        self.compute_return = compute(input, self.program, self.raise_error, self.local_options)
+        self.compute_return = compute(input_data=input,
+                                      program=self.program,
+                                      raise_error=self.raise_error,
+                                      local_options=self.local_options)
 
     # Respond to the <NCOMMANDS command
     def send_ncommands(self):
@@ -285,7 +284,7 @@ class MDIServer():
         return elements
 
     # Respond to the >ELEMENTS command
-    def recv_elements(self):
+    def recv_elements(self, elements=None):
         """ Receive a set of atomic numbers through MDI and assign them to the atoms in the current molecule
 
         Arguments:
@@ -293,10 +292,10 @@ class MDIServer():
         """
         natom = len(self.molecule.geometry)
         if elements is None:
-            elements = MDI_Recv(natom, MDI_DOUBLE, self.comm)
+            elements = MDI_Recv(natom, MDI_INT, self.comm)
 
         for iatom in range(natom):
-            self.molecule.symbols[iatom] = qcel.to_symbol(elements[iatom])
+            self.molecule.symbols[iatom] = qcel.periodictable.to_symbol(elements[iatom])
 
         return elements
 
@@ -378,7 +377,7 @@ class MDIServer():
             pass
 
     # Respond to the EXIT command
-    def exit(self):
+    def stop(self):
         """ Stop listening for MDI commands
         """
         self.stop_listening = True
