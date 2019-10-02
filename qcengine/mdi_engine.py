@@ -235,7 +235,7 @@ class MDIServer():
         self.compute_return = compute(input, self.program, self.raise_error, self.local_options)
 
         forces = self.compute_return.return_result
-        MDI_Send(forces, len(forces), MDI_DOUBLE, self.comm)
+        MDI_Send(forces, len(forces), MDI_DOUBLE_NUMPY, self.comm)
         return forces
 
     # Respond to the SCF command
