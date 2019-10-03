@@ -11,13 +11,13 @@ from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
-from ..util import execute, popen
+from ..util import execute, popen, temporary_directory
 from .model import ProgramHarness
 
 
 class QChemHarness(ProgramHarness):
     _defaults: Dict[str, Any] = {
-        "name": "entos",
+        "name": "qchem",
         "scratch": True,
         "thread_safe": False,
         "thread_parallel": True,
@@ -27,10 +27,14 @@ class QChemHarness(ProgramHarness):
     version_cache: Dict[str, str] = {}
 
     def found(self, raise_error: bool = False) -> bool:
-        return which('entos', return_bool=True, raise_error=raise_error, raise_msg='Please install by visiting the Q-Chem website.')
+        return which('qchem',
+                     return_bool=True,
+                     raise_error=raise_error,
+                     raise_msg='Please install by visiting the Q-Chem website.')
 
-    def _get_qc_path(self, config: Optional['JobConfig']=None):
-        paths = {"QCSCRATCH": "/tmp"}
+    def _get_qc_path(self, config: Optional['JobConfig'] = None):
+        paths = os.environ.copy()
+        paths["QCSCRATCH"] = "/tmp"
         if config and config.scratch_directory:
             paths["QCSCRATCH"] = config.scratch_directory
 
@@ -39,38 +43,42 @@ class QChemHarness(ProgramHarness):
             return paths
 
         # Assume QC path is
-        entos_path = which('entos')
-        if entos_path:
-            paths["QC"] = os.path.dirname(os.path.dirname(entos_path))
+        qchem_path = which('qchem')
+        if qchem_path:
+            paths["QC"] = os.path.dirname(os.path.dirname(qchem_path))
 
         return paths
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which('entos')
+        which_prog = which('qchem')
         if which_prog not in self.version_cache:
             with popen([which_prog, '-h'], popen_kwargs={"env": self._get_qc_path()}) as exc:
                 exc["proc"].wait(timeout=15)
+
+            if "QC not defined" in exc["stdout"]:
+                return safe_version("0.0.0")
+
             self.version_cache[which_prog] = safe_version(exc["stdout"].splitlines()[0].split()[-1])
 
         return self.version_cache[which_prog]
 
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
-        Run entos
+        Run qchem
         """
-        # Check if entos executable is found
+        # Check if qchem executable is found
         self.found(raise_error=True)
 
-        # Check entos version
+        # Check qchem version
         if parse_version(self.get_version()) < parse_version("5.2"):
             raise TypeError("Q-Chem version '{}' not supported".format(self.get_version()))
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
 
-        # Run entos
+        # Run qchem
         exe_success, proc = self.execute(job_inputs)
 
         # Determine whether the calculation succeeded
@@ -100,7 +108,7 @@ class QChemHarness(ProgramHarness):
             infiles.update(extra_infiles)
 
         # Collect all output files and extend with with extra_outfiles
-        outfiles = ["dispatch.out", "results.json"]
+        outfiles = ["dispatch.out"]
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
@@ -109,28 +117,29 @@ class QChemHarness(ProgramHarness):
         if extra_commands is not None:
             commands = extra_commands
 
-        # Run the entos program
-        exe_success, proc = execute(commands,
-                                    infiles=infiles,
-                                    outfiles=outfiles,
-                                    scratch_name=scratch_name,
-                                    scratch_directory=inputs["scratch_directory"],
-                                    scratch_messy=scratch_messy,
-                                    timeout=timeout)
+        envs = self._get_qc_path()
+
+        with temporary_directory(parent=inputs["scratch_directory"], suffix="_qchem_scratch") as tmpdir:
+            envs["QCSCRATCH"] = os.path.join(tmpdir, "scratch").replace("//", "/")
+            exe_success, proc = execute(commands,
+                                        infiles=infiles,
+                                        outfiles=outfiles,
+                                        scratch_name=scratch_name,
+                                        scratch_directory=tmpdir,
+                                        scratch_messy=scratch_messy,
+                                        timeout=timeout,
+                                        environment=envs)
 
         # QChem does not create an output file and only prints to stdout
-        proc["outfiles"]["results.json"] = proc["stdout"]
         return exe_success, proc
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
-        # Write the geom xyz file with unit au
-        xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
-
         # Build keywords
         keywords = {k.upper(): v for k, v in input_model.keywords.items()}
         keywords["INPUT_BOHR"] = "TRUE"
+        keywords["MEM_TOTAL"] = str(int(config.memory * 1024))  # In MB
 
         if input_model.driver == "energy":
             keywords["JOBTYPE"] = "sp"
@@ -148,17 +157,56 @@ class QChemHarness(ProgramHarness):
         if input_model.model.basis:
             keywords["BASIS"] = input_model.model.basis
 
+        # Begin the input file
         input_file = []
-        input_file.append(f"""
-$comment
-Automatically generated QCEngine input file
-$end
-            """)
-        input_file.append("$molecule")
-        input_file.append(input_model.molecule.to_string("psi4"))
-        input_file.append("$end")
+#         input_file.append(f"""$comment
+# Automatically generated Q-Chem input file by QCEngine
+# $end
+#             """)
 
+        # Add Molecule, TODO: Add to QCElemental
+        mol = input_model.molecule
+        input_file.append("$molecule")
+        input_file.append(f"""{int(mol.molecular_charge)} {mol.molecular_multiplicity}""")
+
+        for real, sym, geom in zip(mol.real, mol.symbols, mol.geometry):
+            if real is False:
+                raise InputError("Cannot handle ghost atoms yet.")
+            input_file.append(f"{sym} {geom[0]:14.8f} {geom[1]:14.8f} {geom[2]:14.8f}")
+
+        input_file.append("$end\n")
+
+        # Write out the keywords
+        input_file.append("$rem")
+        for k, v in keywords.items():
+            input_file.append(f"{k:20s}  {v}")
+        input_file.append("$end\n")
+
+        ret = {
+            "infiles": {
+                "dispatch.in": "\n".join(input_file)
+            },
+            "commands": [which("qchem"), "-nt", str(config.ncores), "dispatch.in", "dispatch.out"],
+            "scratch_directory": config.scratch_directory,
+        }
+
+        return ret
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 
-        pass
+        output_data = {}
+
+        outfile = outfiles["dispatch.out"]
+        print(outfile)
+
+
+
+        output_data["return_result"] = 5
+        output_data["properties"] = {}
+        output_data['stdout'] = outfiles["dispatch.out"]
+        output_data['success'] = True
+
+
+        return Result(**{**input_model.dict(), **output_data})
+
+
