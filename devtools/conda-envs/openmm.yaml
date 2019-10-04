@@ -1,0 +1,21 @@
+name: test
+channels:
+  - conda-forge
+  - rdkit
+  - omnia
+dependencies:
+  - rdkit
+  - openmm
+
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental >=0.7.0
+  - pydantic >=0.30.1
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
