@@ -6,6 +6,7 @@ channels:
 dependencies:
   - rdkit
   - openmm
+  - openforcefield
 
     # Core
   - python
