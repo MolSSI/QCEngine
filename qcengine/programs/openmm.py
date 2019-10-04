@@ -37,7 +37,7 @@ class OpenMMHarness(ProgramHarness):
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         # this harness requires RDKit as well, so this needs checking too
-        rdkit_found = RDKitHarness.found(raise_error=True)
+        rdkit_found = RDKitHarness.found(raise_error=raise_error)
 
         openmm_found = which_import('simtk.openmm',
                             return_bool=True,
@@ -98,10 +98,11 @@ class OpenMMHarness(ProgramHarness):
         from openforcefield.topology import Molecule
         from openforcefield.typing.engines.smirnoff import ForceField
         
-        ret_data["success"] = False
+        # Failure flag
+        ret_data = {"success": False}
 
-        # get number of threads to use from `JobConfig; otherwise, try environment variable
-        nthreads = config.nthreads
+        # get number of threads to use from `JobConfig.ncores`; otherwise, try environment variable
+        nthreads = config.ncores
         if nthreads is None:
             nthreads = os.environ.get('OPENMM_CPU_THREADS')
 
@@ -118,7 +119,7 @@ class OpenMMHarness(ProgramHarness):
             # can eliminate the `offxml` and `url` distinction
             # URL processing can happen there
             if input_data.model.offxml:
-                offxml = input_data.offxml
+                offxml = input_data.model.offxml
             elif input_data.model.url:
                 # TODO: add pull of offxml data from a url
                 pass
@@ -149,7 +150,7 @@ class OpenMMHarness(ProgramHarness):
 
             # set number of threads
             if nthreads:
-                platform.setPropertyValue(context, 'Threads', nthreads)
+                platform.setPropertyValue(context, 'Threads', str(nthreads))
 
             # Set positions from our Open Force Field `Molecule`
             context.setPositions(off_mol.conformers[0])
