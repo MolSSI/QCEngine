@@ -13,6 +13,7 @@ from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
 from .nwchem import NWChemHarness
+from .openmm import OpenMMHarness 
 from .psi4 import Psi4Harness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
@@ -101,3 +102,4 @@ register_program(GAMESSHarness())
 register_program(NWChemHarness())
 register_program(CFOURHarness())
 register_program(EntosHarness())
+register_program(OpenMMHarness())
