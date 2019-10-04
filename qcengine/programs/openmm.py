@@ -8,6 +8,7 @@ import os
 from typing import Dict
 
 from qcelemental.models import Provenance, Result
+from qcelemental.util import which_import
 
 from .model import ProgramHarness
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
