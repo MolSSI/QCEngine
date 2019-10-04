@@ -7,12 +7,14 @@ import json
 import os
 from typing import Dict
 
-from qcelemental.models import Result
+from qcelemental.models import Provenance, Result
 
 from .model import ProgramHarness
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from ..util import execute, popen, temporary_directory
 from ..units import ureg
+
+from .rdkit import RDKitHarness
 
 
 class OpenMMHarness(ProgramHarness):
@@ -33,11 +35,16 @@ class OpenMMHarness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        # TODO: this harness requires RDKit as well, so this needs checking too
-        return which_import('simtk.openmm',
-                     return_bool=True,
-                     raise_error=raise_error,
-                     raise_msg='Please install via `conda install openmm -c omnia`.')
+        # this harness requires RDKit as well, so this needs checking too
+        rdkit_found = RDKitHarness.found(raise_error=True)
+
+        openmm_found = which_import('simtk.openmm',
+                            return_bool=True,
+                            raise_error=raise_error,
+                            raise_msg='Please install via `conda install openmm -c omnia`.')
+
+
+        return (rdkit_found and openmm_found)
 
     @staticmethod
     def _process_molecule_rdkit(jmol):
@@ -84,13 +91,18 @@ class OpenMMHarness(ProgramHarness):
         """
         self.found(raise_error=True)
 
-        from simtk.openmm.app import Simulation
-        from simtk.openmm import units
+        from simtk import openmm
+        from simtk import unit
 
         from openforcefield.topology import Molecule
         from openforcefield.typing.engines.smirnoff import ForceField
         
         ret_data["success"] = False
+
+        # get number of threads to use from `JobConfig; otherwise, try environment variable
+        nthreads = config.nthreads
+        if nthreads is None:
+            nthreads = os.environ.get('OPENMM_CPU_THREADS')
 
         # Set workdir to scratch
         # Location resolution order config.scratch_dir, /tmp
@@ -123,60 +135,58 @@ class OpenMMHarness(ProgramHarness):
 
             # Create OpenMM system in vacuum from forcefield, molecule
             off_top = off_mol.to_topology()
-            openmm_top = off_top.to_openmm()
             openmm_system = off_forcefield.create_openmm_system(off_top)
             
             # Need an integrator for simulation even if we don't end up using it really
-            integrator = LangevinIntegrator(300*units.kelvin, 1/units.picosecond, 0.002*units.picoseconds)
+            integrator = openmm.LangevinIntegrator(1.0*unit.femtoseconds)
 
             # Set platform to CPU explicitly
             platform = openmm.Platform.getPlatformByName('CPU')
 
-            # Initialize simulation
-            simulation = Simulation(openmm_top, openmm_system, integrator, platform)
+            # Initialize context
+            context = openmm.Context(openmm_system, integrator, platform)
 
-            # TODO: need a way to generate positions from the topology
-            # likely an existing tool in the modules we're using since this is
-            # just a molecule floating in space with no solvent
-            simulation.context.setPositions(pdb.positions)
+            # set number of threads
+            if nthreads:
+                platform.setPropertyValue(context, 'Threads', nthreads)
+
+            # Set positions from our Open Force Field `Molecule`
+            context.setPositions(off_mol.conformers[0])
 
             # Execute driver
             try:
                 if input_data.driver == "energy":
-                    simulation.context.setPositions(pdb.positions)
+
+                    # Compute the energy of the configuration
                     state = simulation.context.getState(getEnergy=True)
-                    ret_data["return_result"] = state.getPotentialEnergy()
+
+                    # Get the potential as a simtk.unit.Quantity, put into units of hartree
+                    ret_data["return_result"] = state.getPotentialEnergy() / unit.hartree
+
                 elif input_data.driver == "gradient":
-                    # TODO: calculate forces with OpenMM
-                    pass
+
+                    # Get number of atoms
+                    n_atoms = len(jmol.symbols)
+
+                    # Compute the forces
+                    state = simulation.context.getState(getForces=True)
+
+                    # Get the gradient as a simtk.unit.Quantity with shape (n_atoms, 3)
+                    gradient = state.getForces(asNumpy=True)
+
+                    # Convert to hartree/bohr and reformat as 1D array
+                    ret_data["return_result"] = (gradient / (unit.hartree/unit.bohr)).reshape([n_atoms * 3])
+
                 else:
                     raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
             except:
                 raise
             else:
-                success = True
-
-            # GET OUTPUT, PUT INTO FORM WE NEED
-            # FINAL STRUCTURE?
-            # PROBABLY IN AN XML FILE
-            if success:
-                # PROCESS OUTPUT
-                output_data = dict()
-
-        # Dispatch errors
-        if output_data["success"] is False:
-            error_message = output_data["error"]["error_message"]
-
-            if ("SIGSEV" in error_message) or ("SIGSEGV" in error_message) or ("segmentation fault" in error_message):
-                raise RandomError(error_message)
-            elif "TypeError: set_global_option" in error_message:
-                raise InputError(error_message)
-            else:
-                raise UnknownError(error_message)
-
-        ## FINALIZE OUTPUT DATA
+                ret_data["success"] = True
 
         # Move several pieces up a level
-        output_data["provenance"]["nthreads"] = output_data.pop("nthreads")
+        ret_data["provenance"] = Provenance(creator="openmm",
+                                            version=openmm.__version__,
+                                            nthreads=nthreads)
 
-        return Result(**output_data)
+        return Result(**{**input_data.dict(), **ret_data})
