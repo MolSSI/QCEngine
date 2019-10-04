@@ -138,7 +138,7 @@ class OpenMMHarness(ProgramHarness):
             openmm_system = off_forcefield.create_openmm_system(off_top)
             
             # Need an integrator for simulation even if we don't end up using it really
-            integrator = openmm.LangevinIntegrator(1.0*unit.femtoseconds)
+            integrator = openmm.VerletIntegrator(1.0*unit.femtoseconds)
 
             # Set platform to CPU explicitly
             platform = openmm.Platform.getPlatformByName('CPU')
