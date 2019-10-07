@@ -39,7 +39,7 @@ class OpenMMHarness(ProgramHarness):
         # this harness requires RDKit as well, so this needs checking too
         rdkit_found = RDKitHarness.found(raise_error=raise_error)
 
-        openmm_found = which_import('simtk',
+        openmm_found = which_import('simtk.openmm',
                             return_bool=True,
                             raise_error=raise_error,
                             raise_msg='Please install via `conda install openmm -c omnia`.')
@@ -148,9 +148,9 @@ class OpenMMHarness(ProgramHarness):
             # Initialize context
             context = openmm.Context(openmm_system, integrator, platform)
 
-            # set number of threads
-            if nthreads:
-                platform.setPropertyValue(context, 'Threads', str(nthreads))
+            # TODO: FIXME set number of threads
+            #if nthreads:
+            #    platform.setPropertyValue(context, 'Threads', str(nthreads))
 
             # Set positions from our Open Force Field `Molecule`
             context.setPositions(off_mol.conformers[0])
@@ -160,7 +160,7 @@ class OpenMMHarness(ProgramHarness):
                 if input_data.driver == "energy":
 
                     # Compute the energy of the configuration
-                    state = simulation.context.getState(getEnergy=True)
+                    state = context.getState(getEnergy=True)
 
                     # Get the potential as a simtk.unit.Quantity, put into units of hartree
                     ret_data["return_result"] = state.getPotentialEnergy() / unit.hartree
@@ -171,7 +171,7 @@ class OpenMMHarness(ProgramHarness):
                     n_atoms = len(jmol.symbols)
 
                     # Compute the forces
-                    state = simulation.context.getState(getForces=True)
+                    state = context.getState(getForces=True)
 
                     # Get the gradient as a simtk.unit.Quantity with shape (n_atoms, 3)
                     gradient = state.getForces(asNumpy=True)
