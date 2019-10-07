@@ -5,13 +5,14 @@ Calls the Q-Chem executable.
 import os
 import string
 import json
+import numpy as np
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
-from ..util import execute, popen, temporary_directory
+from ..util import disk_files, execute, popen, temporary_directory
 from .model import ProgramHarness
 
 
@@ -107,28 +108,35 @@ class QChemHarness(ProgramHarness):
         if extra_infiles is not None:
             infiles.update(extra_infiles)
 
+        binary_files = [os.path.join("savepath", x) for x in ["99.0", "131.0", "132.0"]]
+
         # Collect all output files and extend with with extra_outfiles
         outfiles = ["dispatch.out"]
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
         # Replace commands with extra_commands if present
-        commands = inputs["commands"]
+        commands = inputs["commands"] + ["savepath"]
         if extra_commands is not None:
             commands = extra_commands
 
         envs = self._get_qc_path()
 
         with temporary_directory(parent=inputs["scratch_directory"], suffix="_qchem_scratch") as tmpdir:
-            envs["QCSCRATCH"] = os.path.join(tmpdir, "scratch").replace("//", "/")
-            exe_success, proc = execute(commands,
-                                        infiles=infiles,
-                                        outfiles=outfiles,
-                                        scratch_name=scratch_name,
-                                        scratch_directory=tmpdir,
-                                        scratch_messy=scratch_messy,
-                                        timeout=timeout,
-                                        environment=envs)
+            envs["QCSCRATCH"] = tmpdir
+            bdict = {x: None for x in binary_files}
+
+            with disk_files({}, bdict, cwd=tmpdir, as_binary=binary_files):
+                exe_success, proc = execute(commands,
+                                            infiles=infiles,
+                                            outfiles=outfiles,
+                                            scratch_name=scratch_name,
+                                            scratch_directory=tmpdir,
+                                            scratch_messy=scratch_messy,
+                                            timeout=timeout,
+                                            environment=envs)
+
+            proc["outfiles"].update({os.path.split(k)[-1]: v for k, v in bdict.items()})
 
         # QChem does not create an output file and only prints to stdout
         return exe_success, proc
@@ -159,10 +167,10 @@ class QChemHarness(ProgramHarness):
 
         # Begin the input file
         input_file = []
-#         input_file.append(f"""$comment
-# Automatically generated Q-Chem input file by QCEngine
-# $end
-#             """)
+        input_file.append(f"""$comment
+Automatically generated Q-Chem input file by QCEngine
+$end
+            """)
 
         # Add Molecule, TODO: Add to QCElemental
         mol = input_model.molecule
@@ -186,7 +194,8 @@ class QChemHarness(ProgramHarness):
             "infiles": {
                 "dispatch.in": "\n".join(input_file)
             },
-            "commands": [which("qchem"), "-nt", str(config.ncores), "dispatch.in", "dispatch.out"],
+            "commands": [which("qchem"), "-nt",
+                         str(config.ncores), "dispatch.in", "dispatch.out"],
             "scratch_directory": config.scratch_directory,
         }
 
@@ -195,18 +204,34 @@ class QChemHarness(ProgramHarness):
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 
         output_data = {}
-
         outfile = outfiles["dispatch.out"]
-        print(outfile)
 
+        bdata = {}
+        for k, v in outfiles.items():
+            if k == "dispatch.out":
+                continue
+            if v is None:
+                continue
+            bdata[k] = np.frombuffer(v)
 
+        if input_model.driver == "energy":
+            # TODO: This seems to work for SCF/MP2, but *not* CCSD(T)
+            output_data["return_result"] = bdata["99.0"][-1]
+        elif input_model.driver == "gradient":
+            output_data["return_result"] = bdata["131.0"]
+        elif input_model.driver == "hessian":
+            output_data["return_result"] = bdata["132.0"]
+        else:
+            raise ValueError(f"Could not parse drive of type {driver}.")
 
-        output_data["return_result"] = 5
-        output_data["properties"] = {}
+        properties = {
+            "nuclear_repulsion_energy": bdata["99.0"][0],
+            "scf_total_energy": bdata["99.0"][1],
+            "return_energy": bdata["99.0"][-1],  # TODO: This isn't correct for *some* invocations of CCSD(T)
+        }
+
+        output_data["properties"] = properties
         output_data['stdout'] = outfiles["dispatch.out"]
         output_data['success'] = True
 
-
         return Result(**{**input_model.dict(), **output_data})
-
-
