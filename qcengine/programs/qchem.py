@@ -88,8 +88,12 @@ class QChemHarness(ProgramHarness):
             result = self.parse_output(proc["outfiles"], input_data)
             return result
         else:
-            # Return UnknownError for error propagation
-            return UnknownError(proc["stderr"])
+            outfile = proc["outfiles"]["dispatch.out"]
+            if "fatal error occurred in module qparser" in outfile:
+                raise InputError(proc["outfiles"]["dispatch.out"])
+            else:
+                # Return UnknownError for error propagation
+                raise UnknownError(proc["outfiles"]["dispatch.out"])
 
     def execute(self,
                 inputs: Dict[str, Any],
@@ -137,6 +141,9 @@ class QChemHarness(ProgramHarness):
                                             environment=envs)
 
             proc["outfiles"].update({os.path.split(k)[-1]: v for k, v in bdict.items()})
+
+        if "Thank you very much for using Q-Chem" not in proc["outfiles"]["dispatch.out"]:
+            exe_success = False
 
         # QChem does not create an output file and only prints to stdout
         return exe_success, proc
