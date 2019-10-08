@@ -132,18 +132,27 @@ class Psi4Harness(ProgramHarness):
 
             else:
 
-                run_cmd = [
-                    which("psi4"), "--scratch", tmpdir, "--nthread",
-                    str(config.ncores), "--memory", f"{config.memory}GB", "--qcschema", "data.msgpack"
-                ]
-                input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
-                success, output = execute(run_cmd,
-                                          input_files, ["data.msgpack"],
-                                          as_binary=["data.msgpack"],
-                                          scratch_directory=tmpdir)
+                if ("interactive" in input_model.extras) and input_model.extras["interactive"]:
+                    import psi4
+                    psi4.core.set_num_threads(config.ncores, quiet=True)
+                    psi4.set_memory(f"{config.memory}GB", quiet=True)
+                    output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
+                    output_data["extras"]["interactively_executed"] = True
+                    success = True
+                else:
+                    run_cmd = [
+                        which("psi4"), "--scratch", tmpdir, "--nthread",
+                        str(config.ncores), "--memory", f"{config.memory}GB", "--qcschema", "data.msgpack"
+                    ]
+                    input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
+                    success, output = execute(run_cmd,
+                                              input_files, ["data.msgpack"],
+                                              as_binary=["data.msgpack"],
+                                              scratch_directory=tmpdir)
+                    if success:
+                        output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
 
                 if success:
-                    output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
                     if output_data["success"] is False:
                         error_message = output_data["error"]["error_message"]
                         error_type = output_data["error"]["error_type"]

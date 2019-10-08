@@ -50,6 +50,27 @@ def test_psi4_task():
     assert ret["success"] is True
     assert "retries" not in ret["provenance"]
 
+@testing.using_psi4_14
+def test_psi4_interactive_task():
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {
+            "method": "SCF",
+            "basis": "sto-3g"
+        },
+        "keywords": {
+            "scf_type": "df"
+        },
+        "extras": {"interactive": True}
+    }
+
+    ret = qcng.compute(input_data, "psi4", raise_error=True)
+
+    assert "Final Energy" in ret.stdout
+    assert ret.success
+    assert ret.extras.pop("interactively_executed", False)
+
 
 @testing.using_psi4
 def test_psi4_internal_failure():
@@ -57,6 +78,7 @@ def test_psi4_internal_failure():
     mol = Molecule.from_data("""0 3
      O    0.000000000000     0.000000000000    -0.068516245955
     """)
+
     psi4_task = {
         "molecule": mol,
         "driver": "energy",
@@ -119,7 +141,7 @@ def test_rdkit_task():
 @testing.using_rdkit
 def test_rdkit_connectivity_error():
     input_data = {
-        "molecule": qcng.get_molecule("water").dict(),
+        "molecule": qcng.get_molecule("water"),
         "driver": "gradient",
         "model": {
             "method": "UFF",
