@@ -50,6 +50,7 @@ def test_psi4_task():
     assert ret["success"] is True
     assert "retries" not in ret["provenance"]
 
+
 @testing.using_psi4_14
 def test_psi4_interactive_task():
     input_data = {
@@ -62,14 +63,38 @@ def test_psi4_interactive_task():
         "keywords": {
             "scf_type": "df"
         },
-        "extras": {"interactive": True}
+        "extras": {
+            "psiapi": True
+        }
     }
 
     ret = qcng.compute(input_data, "psi4", raise_error=True)
 
     assert "Final Energy" in ret.stdout
     assert ret.success
-    assert ret.extras.pop("interactively_executed", False)
+    assert ret.extras.pop("psiapi_evaluated", False)
+
+
+@testing.using_psi4_14
+def test_psi4_wavefunction_task():
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {
+            "method": "SCF",
+            "basis": "sto-3g"
+        },
+        "keywords": {
+            "scf_type": "df"
+        },
+        "protocols": {
+            "wavefunction": "orbitals_and_eigenvalues"
+        }
+    }
+
+    ret = qcng.compute(input_data, "psi4", raise_error=True)
+    assert ret.success, ret.error.error_message
+    assert ret.wavefunction.scf_orbitals_a.shape == (7, 7)
 
 
 @testing.using_psi4

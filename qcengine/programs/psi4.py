@@ -132,12 +132,12 @@ class Psi4Harness(ProgramHarness):
 
             else:
 
-                if ("interactive" in input_model.extras) and input_model.extras["interactive"]:
+                if ("psiapi" in input_model.extras) and input_model.extras["psiapi"]:
                     import psi4
                     psi4.core.set_num_threads(config.ncores, quiet=True)
                     psi4.set_memory(f"{config.memory}GB", quiet=True)
                     output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
-                    output_data["extras"]["interactively_executed"] = True
+                    output_data["extras"]["psiapi_evaluated"] = True
                     success = True
                 else:
                     run_cmd = [
