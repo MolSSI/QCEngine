@@ -166,7 +166,7 @@ def test_rdkit_task():
 @testing.using_rdkit
 def test_rdkit_connectivity_error():
     input_data = {
-        "molecule": qcng.get_molecule("water"),
+        "molecule": qcng.get_molecule("water").dict(exclude={"connectivity"}),
         "driver": "gradient",
         "model": {
             "method": "UFF",
@@ -174,7 +174,6 @@ def test_rdkit_connectivity_error():
         },
         "keywords": {}
     }
-    del input_data["molecule"]["connectivity"]
 
     ret = qcng.compute(input_data, "rdkit")
     assert ret.success is False
