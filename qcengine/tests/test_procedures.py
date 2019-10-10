@@ -31,24 +31,26 @@ _base_json = {
 }
 
 
-@testing.using_psi4
-@testing.using_geometric
-def test_geometric_psi4():
+@pytest.mark.parametrize("program,optizer", [
+    pytest.param("psi4", "geometric", marks=[testing.using_psi4, testing.using_geometric]),
+    pytest.param("psi4", "optking", marks=[testing.using_psi4, testing.using_optking]),
+])
+def test_geometric_psi4(program, optizer):
     inp = copy.deepcopy(_base_json)
 
     inp["initial_molecule"] = qcng.get_molecule("hydrogen")
     inp["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
     inp["input_specification"]["keywords"] = {"scf_properties": ["wiberg_lowdin_indices"]}
-    inp["keywords"]["program"] = "psi4"
+    inp["keywords"]["program"] = program
 
     inp = OptimizationInput(**inp)
 
-    ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
+    ret = qcng.compute_procedure(inp, optizer, raise_error=True)
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.e-4) == 1.3459150737
-    assert ret.provenance.creator.lower() == "geometric"
-    assert ret.trajectory[0].provenance.creator.lower() == "psi4"
+    assert ret.provenance.creator.lower() == optizer
+    assert ret.trajectory[0].provenance.creator.lower() == program
 
     # Check keywords passing
     for single in ret.trajectory:
