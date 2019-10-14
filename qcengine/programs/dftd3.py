@@ -143,6 +143,9 @@ class DFTD3Harness(ProgramHarness):
         if input_model.extras["info"]["dashlevel"] == "atmgr":
             command.append("-abc")
 
+        # Append `-anal` for pairwise atomic analysis
+        command.append('-anal')
+
         infiles = {
             ".dftd3par.local": dftd3_coeff_formatter(
                 input_model.extras["info"]["dashlevel"], input_model.extras["info"]["dashparams"]
@@ -187,6 +190,19 @@ class DFTD3Harness(ProgramHarness):
                 raise ResourceError("Cannot process ATM results from DFTD3 prior to v3.2.1.")
             elif re.match(r""" E6\(ABC\) /kcal,au:""", ln):
                 atm = Decimal(ln.split()[-1])
+            elif re.match(" analysis of pair-wise terms", ln):
+                pairwise = {}
+                # Iterate over block
+                start = stdout.splitlines().index(ln) + 2
+                for l in out.split('\n')[start:]:
+                    data = l.split()
+                    if len(data) == 0:
+                        break
+                    atom1 = int(data[0])
+                    atom2 = int(data[1])
+                    Edisp = Decimal(data[-1])
+                    pairwise[(atom1, atom2)] = Edisp
+                    
             elif re.match(" normal termination of dftd3", ln):
                 break
         else:
@@ -279,6 +295,7 @@ class DFTD3Harness(ProgramHarness):
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
+        output_data["extras"]["pairwiseD3"] = pairwise
 
         output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})
