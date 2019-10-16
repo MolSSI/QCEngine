@@ -2,7 +2,7 @@
 For details regarding MDI, see https://molssi.github.io/MDI_Library/html/index.html.
 
 """
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -126,13 +126,15 @@ class MDIServer():
         # Accept a communicator to the driver code
         self.comm = MDI_Accept_Communicator()
 
-    def update_molecule(self, key, value):
+    def update_molecule(self, key: str, value):
         """ Update the molecule
 
         Parameters
         ----------
-        key: Key of the molecular element to update
-        value: Update value
+        key : str
+            Key of the molecular element to update
+        value
+            Update value
         """
         if key == "molecular_charge" or key == "molecular_multiplicity":
             # In order to validate correctly, the charges and multiplicities must be set simultaneously
@@ -161,20 +163,26 @@ class MDIServer():
                     raise Exception('MDI command caused a validation error')
 
     # Respond to the <NATOMS command
-    def send_natoms(self):
+    def send_natoms(self) -> int:
         """ Send the number of atoms through MDI
 
-        :returns: *natom* Number of atoms
+        Returns
+        -------
+        natom : int
+            Number of atoms
         """
         natom = len(self.molecule.geometry)
         MDI_Send(natom, 1, MDI_INT, self.comm)
         return natom
 
     # Respond to the <COORDS command
-    def send_coords(self):
+    def send_coords(self) -> np.ndarray:
         """ Send the nuclear coordinates through MDI
 
-        :returns: *coords* Nuclear coordinates
+        Returns
+        -------
+        coords : np.ndarray
+            Nuclear coordinates
         """
         natom = len(self.molecule.geometry)
 
@@ -184,12 +192,13 @@ class MDIServer():
         return coords
 
     # Respond to the >COORDS command
-    def recv_coords(self, coords=None):
+    def recv_coords(self, coords: Optional[np.ndarray] = None) -> None:
         """ Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule
 
         Parameters
         ----------
-        coords: New nuclear coordinates. If None, receive through MDI.
+        coords : np.ndarray, optional
+            New nuclear coordinates. If None, receive through MDI.
         """
         natom = len(self.molecule.geometry)
         if coords is None:
@@ -198,10 +207,13 @@ class MDIServer():
         self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{"geometry": new_geometry}})
 
     # Respond to the <ENERGY command
-    def send_energy(self):
+    def send_energy(self) -> float:
         """ Send the total energy through MDI
 
-        :returns: *energy* Energy of the system
+        Returns
+        -------
+        energy : float
+            Energy of the system
         """
         # Ensure that the molecule currently passes validation
         if not self.molecule_validated:
@@ -212,10 +224,13 @@ class MDIServer():
         return energy
 
     # Respond to the <FORCES command
-    def send_forces(self):
+    def send_forces(self) -> np.ndarray:
         """ Send the nuclear forces through MDI
 
-        :returns: *forces* Atomic forces
+        Returns
+        -------
+        forces : np.ndarray
+            Forces on the nuclei
         """
         # Ensure that the molecule currently passes validation
         if not self.molecule_validated:
@@ -235,7 +250,7 @@ class MDIServer():
         return forces
 
     # Respond to the SCF command
-    def run_energy(self):
+    def run_energy(self) -> None:
         """ Run an energy calculation
         """
         input = qcel.models.ResultInput(molecule=self.molecule,
@@ -248,20 +263,26 @@ class MDIServer():
                                       local_options=self.local_options)
 
     # Respond to the <NCOMMANDS command
-    def send_ncommands(self):
+    def send_ncommands(self) -> int:
         """ Send the number of supported MDI commands through MDI
 
-        :returns: *ncommands* Number of supported commands
+        Returns
+        -------
+        ncommands : int
+            Number of supported commands
         """
         ncommands = len(self.commands)
         MDI_Send(ncommands, 1, MDI_INT, self.comm)
         return ncommands
 
     # Respond to the <COMMANDS command
-    def send_commands(self):
+    def send_commands(self) -> str:
         """ Send the supported MDI commands through MDI
 
-        :returns: *command_string* String containing the name of each supported command
+        Returns
+        -------
+        command_string : str
+            String containing the name of each supported command
         """
         command_string = "".join([f"{c:{MDI_COMMAND_LENGTH}}" for c in self.commands.keys()])
 
@@ -276,7 +297,10 @@ class MDIServer():
     def send_elements(self):
         """ Send the atomic number of each nucleus through MDI
 
-        :returns: *elements* Element of each atom
+        Returns
+        -------
+        elements : :obj:`list` of :obj:`int`
+            Element of each atom
         """
         natom = len(self.molecule.geometry)
         elements = [qcel.periodictable.to_atomic_number(self.molecule.symbols[iatom]) for iatom in range(natom)]
@@ -284,11 +308,13 @@ class MDIServer():
         return elements
 
     # Respond to the >ELEMENTS command
-    def recv_elements(self, elements=None):
+    def recv_elements(self, elements: Optional[List[int]] = None):
         """ Receive a set of atomic numbers through MDI and assign them to the atoms in the current molecule
 
-        Arguments:
-            elements: New element numbers. If None, receive through MDI.
+        Parameters
+        ----------
+        elements : :obj:`list` of :obj:`int`, optional
+            New element numbers. If None, receive through MDI.
         """
         natom = len(self.molecule.geometry)
         if elements is None:
@@ -300,10 +326,13 @@ class MDIServer():
         return elements
 
     # Respond to the <MASSES command
-    def send_masses(self):
+    def send_masses(self) -> np.ndarray:
         """ Send the nuclear masses through MDI
 
-        :returns: *masses* Atomic masses
+        Returns
+        -------
+        masses : np.ndarray
+            Atomic masses
         """
         natom = len(self.molecule.geometry)
         masses = self.molecule.masses
@@ -311,11 +340,13 @@ class MDIServer():
         return masses
 
     # Respond to the >MASSES command
-    def recv_masses(self, masses=None):
+    def recv_masses(self, masses: Optional[List[float]] = None) -> None:
         """ Receive a set of nuclear masses through MDI and assign them to the atoms in the current molecule
 
-        Arguments:
-            masses: New nuclear masses. If None, receive through MDI.
+        Parameters
+        ----------
+        masses : :obj:`list` of :obj:`float`, optional
+            New nuclear masses. If None, receive through MDI.
         """
         natom = len(self.molecule.geometry)
         if masses is None:
@@ -323,21 +354,26 @@ class MDIServer():
         self.update_molecule("masses", masses)
 
     # Respond to the <TOTCHARGE command
-    def send_total_charge(self):
+    def send_total_charge(self) -> float:
         """ Send the total system charge through MDI
 
-        :returns: *charge* Total charge of the system
+        Returns
+        -------
+        charge : float
+            Total charge of the system
         """
         charge = self.molecule.molecular_charge
         MDI_Send(charge, 1, MDI_DOUBLE, self.comm)
         return charge
 
     # Respond to the >TOTCHARGE command
-    def recv_total_charge(self, charge=None):
+    def recv_total_charge(self, charge: Optional[float] = None) -> None:
         """ Receive the total system charge through MDI
 
-        Arguments:
-            charge: New charge of the system. If None, receive through MDI.
+        Parameters
+        ----------
+        charge : float, optional
+            New charge of the system. If None, receive through MDI.
         """
         if charge is None:
             charge = MDI_Recv(1, MDI_DOUBLE, self.comm)
@@ -350,21 +386,26 @@ class MDIServer():
             pass
 
     # Respond to the <ELEC_MULT command
-    def send_multiplicity(self):
+    def send_multiplicity(self) -> int:
         """ Send the electronic multiplicity through MDI
 
-        :returns: *multiplicity* Multiplicity of the system
+        Returns
+        -------
+        multiplicity : int
+            Multiplicity of the system
         """
         multiplicity = self.molecule.molecular_multiplicity
         MDI_Send(multiplicity, 1, MDI_INT, self.comm)
         return multiplicity
 
     # Respond to the >ELEC_MULT command
-    def recv_multiplicity(self, multiplicity=None):
+    def recv_multiplicity(self, multiplicity: Optional[int] = None) -> None:
         """ Receive the electronic multiplicity through MDI
 
-        Arguments:
-            multiplicity: New multiplicity of the system. If None, receive through MDI.
+        Parameters
+        ----------
+        multiplicity : int, optional
+            New multiplicity of the system. If None, receive through MDI.
         """
         if multiplicity is None:
             multiplicity = MDI_Recv(1, MDI_INT, self.comm)
@@ -377,13 +418,13 @@ class MDIServer():
             pass
 
     # Respond to the EXIT command
-    def stop(self):
+    def stop(self) -> None:
         """ Stop listening for MDI commands
         """
         self.stop_listening = True
 
     # Enter server mode, listening for commands from the driver
-    def start(self):
+    def start(self) -> None:
         """ Receive commands through MDI and respond to them as defined by the MDI Standard
         """
 
