@@ -395,6 +395,15 @@ def harvest_outfile_pass(outtext):
         psivar['[T] CORRECTION ENERGY'] = mobj.group('bkttcorr')
         psivar['CCSD(T) TOTAL ENERGY'] = mobj.group('ttot')
 
+    mobj = re.search(
+        r'^\s*' + r'(?:CCSD\[T\] correlation energy:)\s+' + r'(?P<bkttcorr>' + NUMBER + ')' + r'\s*'
+        r'^\s*' + r'(?:CCSD\(T\) correlation energy:)\s+' + r'(?P<tcorr>' + NUMBER + ')' + r'\s*$',
+        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+    if mobj:
+        print('matched ccsd(t) ncc v2')
+        psivar['(T) CORRECTION ENERGY'] = mobj.group('tcorr')
+        psivar['[T] CORRECTION ENERGY'] = mobj.group('bkttcorr')
+
     # Process DBOC
     mobj = re.search(
         r'^\s*' + r'(?:The total diagonal Born-Oppenheimer correction \(DBOC\) is:)\s+' +
