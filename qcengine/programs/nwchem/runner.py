@@ -115,7 +115,10 @@ class NWChemHarness(ProgramHarness):
         # Handle basis set
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
-            opts[f'basis__{el}'] = f'library {input_model.model.basis}'
+            if ropts.scrolls['QCDB']['BASIS'] == "nwchem-{el}":
+                opts[f'basis_nwchem-{el}'] = f'library {input_model.model.basis}'
+            else:
+                opts[f'basis__{el}'] = f'library {input_model.model.basis}'
 
         print('JOB_OPTS')
         pp.pprint(opts)
@@ -139,7 +142,7 @@ class NWChemHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["job.movecs", "job.hess", "job.db", "job.zmat"],
+            ["job.movecs", "job.hess", "job.db", "job.zmat", "job.fd_dipole"],
             scratch_messy=False,
             scratch_directory=inputs["scratch_directory"],
         )

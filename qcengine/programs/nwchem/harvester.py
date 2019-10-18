@@ -199,7 +199,7 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{mbpt_plain} TOTAL ENERGY'] = mobj.group(2)
             #TCE dipole- MBPT(n)
             mobj2 = re.search(
-                    r'^\s+' + cc_name + r'dipole moments / hartree & Debye' + r'\s*' +
+                    r'^\s+' +  r'dipole moments / hartree & Debye' + r'\s*' +
                     r'^\s+' + r'X' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
                     r'^\s+' + r'Y' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
                     r'^\s+' + r'Z' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
@@ -264,19 +264,19 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_name} TOTAL ENERGY'] = mobj.group(2)
         #TCE dipole
             mobj2 = re.search(
-                    r'^\s+' + cc_name + r'dipole moments / hartree & Debye' + r'\s*' +
+                    r'^\s+' + r'dipole moments / hartree & Debye' + r'\s*' +
                     r'^\s+' + r'X' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
                     r'^\s+' + r'Y' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
                     r'^\s+' + r'Z' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
                     r'^\s+' + r'Total' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
                     outtext, re.MULTILINE)
             if mobj2:
-                print(f'matched tce {cc_name} dipole moment')
+                print(f'matched tce dipole moment')
 
                 #only pulling Debye
-                psivar[f'{cc_name} DIPOLE X'] = mobj2.group(2)
-                psivar[f'{cc_name} DIPOLE Y'] = mobj2.group(4)
-                psivar[f'{cc_name} DIPOLE Z'] = mobj2.group(6)
+                psivar[f'CURRENT DIPOLE X'] = mobj2.group(2)
+                psivar[f'CURRENT DIPOLE Y'] = mobj2.group(4)
+                psivar[f'CURRENT DIPOLE Z'] = mobj2.group(6)
 
         # Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
         mobj = re.search(
@@ -542,7 +542,7 @@ def harvest_outfile_pass(outtext):
                     atoms.append(lline[1])  # Tag
                     psivar_grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
 
-        # Process dipole
+        # Process dipole (Properties)
         mobj = re.search(
             r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s+' + r'A\.U\.' + r'\s*' + 
             r'^\s+' + r'DMX' + r'\s+' + NUMBER + r'.*' +
