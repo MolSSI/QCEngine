@@ -151,7 +151,7 @@ class NWChemHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["job.movecs", "job.hess", "job.db", "job.zmat"],
+            ["job.movecs", "job.hess", "job.db", "job.zmat", "job.fd_dipole"],
             scratch_messy=False,
             scratch_directory=inputs["scratch_directory"],
         )
