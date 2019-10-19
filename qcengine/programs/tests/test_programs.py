@@ -208,6 +208,7 @@ def test_openmm_task():
     json_data["driver"] = "energy"
     json_data["model"] = {"method": "smirnoff-1.1.0",
                           "url": None,
+                          "filename": None,
                           "offxml": "test_forcefields/smirnoff99Frosst.offxml"}
     json_data["keywords"] = {}
 

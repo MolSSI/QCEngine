@@ -95,8 +95,13 @@ class OpenMMHarness(ProgramHarness):
         from simtk import openmm
         from simtk import unit
 
-        from openforcefield.topology import Molecule
-        from openforcefield.typing.engines.smirnoff import ForceField
+        import openforcefield.topology as offtop
+        from openforcefield.typing.engines import smirnoff
+
+        # temporary shim for making hartree available in `simtk.unit`
+        if not hasattr(unit, 'hartree'):
+            unit.hartree_base_unit = unit.ScaledUnit(4.3597447222071e-18, unit.joule, "hartree", "Ha")
+            unit.hartree = unit.hartrees = unit.Unit({unit.hartree_base_unit: 1.0})
         
         # Failure flag
         ret_data = {"success": False}
@@ -129,11 +134,11 @@ class OpenMMHarness(ProgramHarness):
             # Process molecule with RDKit
             rdkit_mol = self._process_molecule_rdkit(jmol)
 
-            # Create an OFF Molecule from the RDKit Molecule
-            off_mol = Molecule(rdkit_mol)
+            # Create an Open Force Field `Molecule` from the RDKit Molecule
+            off_mol = offtop.Molecule(rdkit_mol)
 
-            # Load an OFF Force Field
-            off_forcefield = ForceField(offxml)
+            # Load an Open Force Field `ForceField`
+            off_forcefield = smirnoff.ForceField(offxml)
 
             # Create OpenMM system in vacuum from forcefield, molecule
             off_top = off_mol.to_topology()
@@ -148,7 +153,8 @@ class OpenMMHarness(ProgramHarness):
             # Initialize context
             context = openmm.Context(openmm_system, integrator, platform)
 
-            # TODO: FIXME set number of threads
+            # TODO: FIXME set number of threads;
+            # this line currently throws an exception
             #if nthreads:
             #    platform.setPropertyValue(context, 'Threads', str(nthreads))
 
