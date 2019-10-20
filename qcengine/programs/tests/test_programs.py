@@ -270,14 +270,18 @@ def test_random_failure_with_success(failure_engine):
 
 @testing.using_openmm
 def test_openmm_task():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("water")
-    json_data["driver"] = "energy"
-    json_data["model"] = {"method": "smirnoff-1.1.0",
-                          "url": None,
-                          "filename": None,
-                          "offxml": "test_forcefields/smirnoff99Frosst.offxml"}
-    json_data["keywords"] = {}
+
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {
+            "method": "smirnoff",
+            "url": None,
+            "filename": None,
+            "offxml": "test_forcefields/smirnoff99Frosst.offxml",
+        },
+        "keywords": {}
+    }
 
     ret = qcng.compute(json_data, "openmm", raise_error=True)
 
