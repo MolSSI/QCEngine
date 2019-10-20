@@ -128,7 +128,7 @@ _programs = {
     "cfour": which('xcfour', return_bool=True),
     "gamess": which('rungms', return_bool=True),
     "nwchem": which('nwchem', return_bool=True),
-    "openmm": which_import("simtk.openmm", return_bool=True),
+    "openmm": which_import(".openmm", package='simtk', return_bool=True),
     "mdi": which_import("mdi", return_bool=True)
 }
 

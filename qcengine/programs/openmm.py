@@ -39,9 +39,10 @@ class OpenMMHarness(ProgramHarness):
         # this harness requires RDKit as well, so this needs checking too
         rdkit_found = RDKitHarness.found(raise_error=raise_error)
 
-        openmm_found = which_import('simtk.openmm',
+        openmm_found = which_import('.openmm',
                             return_bool=True,
                             raise_error=raise_error,
+                            package='simtk',
                             raise_msg='Please install via `conda install openmm -c omnia`.')
 
 
