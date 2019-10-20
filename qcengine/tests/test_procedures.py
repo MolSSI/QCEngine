@@ -108,6 +108,26 @@ def test_geometric_rdkit_error():
     assert isinstance(ret.error.error_message, str)
 
 
+@testing.using_rdkit
+@testing.using_geometric
+def test_optimization_protocols():
+    inp = copy.deepcopy(_base_json)
+
+    inp["initial_molecule"] = qcng.get_molecule("water")
+    inp["input_specification"]["model"] = {"method": "UFF"}
+    inp["keywords"]["program"] = "rdkit"
+    inp["protocols"] = {"trajectory": "initial_and_final"}
+
+    inp = OptimizationInput(**inp)
+
+    ret = qcng.compute_procedure(inp, "geometric", raise_error=True)
+    assert ret.success, ret.error.error_message
+
+    assert len(ret.trajectory) == 2
+    assert ret.initial_molecule.get_hash() == ret.trajectory[0].molecule.get_hash()
+    assert ret.final_molecule.get_hash() == ret.trajectory[1].molecule.get_hash()
+
+
 @testing.using_geometric
 @testing.using_rdkit
 def test_geometric_retries(failure_engine):
@@ -153,7 +173,7 @@ def test_geometric_retries(failure_engine):
                  [1.82581873750194, 2.866376526793269, 103.4332610730292],
                  marks=testing.using_torchani),
     pytest.param("mopac", {"method": "PM6"},
-                 [1.79305406665072, 2.893333237502448, 107.5722111735350],
+                 [1.7927843431811934, 2.893333237502448, 107.60441967992045],
                  marks=testing.using_mopac),
 ]) # yapf: disable
 def test_geometric_generic(program, model, bench):

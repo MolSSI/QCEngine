@@ -55,6 +55,14 @@ class TorchANIHarness(ProgramHarness):
         import torch
         import torchani
 
+        # graft a custom forward pass to Ensemble class
+        def ensemble_forward(self, species_input):
+            outputs = torch.cat([x(species_input)[1] for x in self])
+            species, _ = species_input
+            return species, outputs
+
+        torchani.nn.Ensemble.forward = ensemble_forward
+
         if name == "ani1x":
             self._CACHE[name] = torchani.models.ANI1x()
 
@@ -96,13 +104,18 @@ class TorchANIHarness(ProgramHarness):
         if unknown_sym:
             raise InputError(f"TorchANI model '{input_data.model.method}' does not support symbols: {unknown_sym}.")
 
+        num_atoms = len(species)
         species = model.species_to_tensor(species).to(device).unsqueeze(0)
 
         # Build coord array
         geom_array = input_data.molecule.geometry.reshape(1, -1, 3) * ureg.conversion_factor("bohr", "angstrom")
         coordinates = torch.tensor(geom_array.tolist(), requires_grad=True, device=device)
 
-        _, energy = model((species, coordinates))
+        _, energy_array = model((species, coordinates))
+        energy = energy_array.mean()
+        ensemble_std = energy_array.std()
+        ensemble_scaled_std = ensemble_std / np.sqrt(num_atoms)
+
         ret_data["properties"] = {"return_energy": energy.item()}
 
         if input_data.driver == "energy":
@@ -117,6 +130,34 @@ class TorchANIHarness(ProgramHarness):
         else:
             raise InputError(
                 f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.driver}.")
+
+        #######################################################################
+        # Description of the quantities stored in `extras`
+        #
+        # ensemble_energies:
+        #   An energy array of all members (models) in an ensemble of models
+        #
+        # ensemble_energy_avg:
+        #   The average value of energy array which is also recorded with as
+        #   `energy` in QCEngine
+        #
+        # ensemble_energy_std:
+        #   The standard deviation of energy array
+        #
+        # ensemble_per_root_atom_disagreement:
+        #   The standard deviation scaled by the square root of N, with N being
+        #   the number of atoms in the molecule. This is the quantity used in
+        #   the query-by-committee (QBC) process in active learning to infer
+        #   the reliability of the models in an ensemble, and produce more data
+        #   points in the regions where this quantity is below a certain
+        #   threshold (inclusion criteria)
+        ret_data["extras"] = input_data.extras.copy()
+        ret_data["extras"].update({
+            "ensemble_energies": energy_array.detach().numpy(),
+            "ensemble_energy_avg": energy.item(),
+            "ensemble_energy_std": ensemble_std.item(),
+            "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item()
+        })
 
         ret_data["provenance"] = Provenance(creator="torchani",
                                             version="unknown",

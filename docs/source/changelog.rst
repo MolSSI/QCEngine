@@ -13,7 +13,42 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
-v0.10.0 / 2019-09-25
+v0.11.0 / 2019-10-01
+--------------------
+
+New Features
+++++++++++++
+
+- (:pr:`162`) Adds a test to take advantage of Elemental's `Protocols <https://github.com/MolSSI/QCElemental/pull/140>`_.
+  Although this PR does not technically change anything in Engine, bumping the minor version here allows
+  upstream programs to note when this feature was available because the minimum version dependency on Elemental
+  has been bumped as well.
+
+
+Enhancements
+++++++++++++
+
+- (:pr:`143`) Updates to Entos and Molpro to allow Entos to execute functions from the Molpro Harness. Also helps
+  the two drivers to conform to :pr:`86`.
+- (:pr:`145`, :pr:`148`) Initial CLI tests have been added to help further ensure Engine is running proper.
+- (:pr:`149`) The GAMESS Harness has been improved by adding testing.
+- (:pr:`150`, :pr:`153`) TorchANI has been improved by adding a Hessian driver to it and additional information
+  is returned in the ``extra`` field when ``energy`` is the driver.
+  This also bumped the minimum version of TorchANI Engine supports from 0.5 to 0.9.
+- (:pr:`154`) Molpro's harness has been improved to support ``callinfo_X`` properties, unrestricted HF and DFT
+  calculations, and the initial support for parsing local correlation calculations.
+- (:pr:`158`) Entos' output parsing has been improved to read the json dictionary produced by the program
+  directly. Also updates the input file generation.
+- (:pr:`161`) Updates MOPAC to have more sensible quantum-chemistry like keywords by default.
+
+Bug Fixes
++++++++++
+- (:pr:`156`) Fixed a compatibility bug in specific version of Intel-OpenMP by skipping version
+  2019.5-281.
+- (:pr:`161`) Improved error handling in MOPAC if the execution was incorrect.
+
+
+v0.10.0 / 2019-08-25
 --------------------
 
 New Features
@@ -26,6 +61,7 @@ New Features
 
 Enhancements
 ++++++++++++
+
 - (:pr:`138`) Documentation on Azure triggers.
 - (:pr:`139`) Overhauls install documentation and clearly defines dev install vs production installs.
 

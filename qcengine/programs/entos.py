@@ -3,18 +3,19 @@ Calls the entos executable.
 """
 
 import string
-from typing import Any, Dict, List, Optional, Tuple
+import json
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
 
-from ..exceptions import UnknownError
+from ..exceptions import InputError, UnknownError
 from ..util import execute, popen
 from .model import ProgramHarness
 
 
 class EntosHarness(ProgramHarness):
-    _defaults = {
+    _defaults: Dict[str, Any] = {
         "name": "entos",
         "scratch": True,
         "thread_safe": False,
@@ -23,6 +24,27 @@ class EntosHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
+
+    # Energy commands that are currently supported
+    _energy_commands: Set[str] = {"dft",
+                                  # "xtb"
+                                  }
+
+    # List of DFT functionals
+    _dft_functionals: Set[str] = {
+        "SLATER", "DIRAC", "SLATERD3", "DIRACD3", "VWN5", "VWN", "VWN1", "SVWN", "LDA", "BLYP", "BPW91",
+        "BLYPD3", "B88", "PBEX", "PBERX", "PBEC", "LYP", "PW91", "P86", "PBE", "PBER", "PBED3", "PBERD3",
+        "B3LYP3", "B3LYP", "B3LYP5", "PBE0", "PBE1PBE", "B3LYP3D3", "B3LYPD3", "B3LYP5D3", "PBE0D3",
+        "PBE1PBED3", "CAMB3LYP", "WB97X", "CAMB3LYPD3", "WB97XD3"
+    }
+
+    # Available keywords for each of the energy commands
+    _dft_keywords: Set[str] = {"df"}
+    # _xtb_keywords = {}
+    _keyword_map: Dict[str, Any] = {
+        "dft": _dft_keywords,
+        # "xtb": _xtb_keywords
+    }
 
     class Config(ProgramHarness.Config):
         pass
@@ -49,7 +71,7 @@ class EntosHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Check entos version
-        if parse_version(self.get_version()) < parse_version("0.5"):
+        if parse_version(self.get_version()) < parse_version("0.6"):
             raise TypeError("entos version '{}' not supported".format(self.get_version()))
 
         # Setup the job
@@ -85,7 +107,7 @@ class EntosHarness(ProgramHarness):
             infiles.update(extra_infiles)
 
         # Collect all output files and extend with with extra_outfiles
-        outfiles = ["dispatch.out"]
+        outfiles = ["dispatch.out", "results.json"]
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
@@ -104,7 +126,7 @@ class EntosHarness(ProgramHarness):
                                     timeout=timeout)
 
         # Entos does not create an output file and only prints to stdout
-        proc["outfiles"]["dispatch.out"] = proc["stdout"]
+        proc["outfiles"]["results.json"] = proc["stdout"]
         return exe_success, proc
 
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
@@ -113,28 +135,71 @@ class EntosHarness(ProgramHarness):
         # Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='xyz', units='Angstrom')
 
-        # Create input dictionary
+        # Create input file
         if template is None:
-            structure = {'structure': {'file': 'geometry.xyz'}}
-            dft_info = {
-                'xc': input_model.model.method,
-                'ao': input_model.model.basis.upper(),
-                'df_basis': input_model.keywords["df_basis"].upper(),
-                'charge': input_model.molecule.molecular_charge
-            }
-            print_results = {'print': {'results': True}}
 
+            # Determine the energy_command
+            energy_command = self.determine_energy_command(input_model.model.method)
+
+            # Define base options for the energy command (options that can be taken directly from input_model)
+            # TODO Perhaps create a new function that takes as input the energy command and
+            #      returns the Dict energy_options
+            energy_options = {
+                "dft": {
+                    'xc': input_model.model.method.upper(),
+                    'ao': input_model.model.basis,
+                    'charge': input_model.molecule.molecular_charge,
+                    'spin': float(input_model.molecule.molecular_multiplicity - 1),
+                },
+                # "xtb": {}
+            }
+
+            # Resolve keywords (extra options) for the energy command
+            caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
+            energy_extra_options = {}
+            for key in caseless_keywords.keys():
+                if key in self._keyword_map[energy_command]:
+                    energy_extra_options[key] = caseless_keywords[key]
+
+            # Additional sub trees
+            structure = {'structure': {'file': 'geometry.xyz'}}  # Structure sub tree
+            print_results = {'print': {'results': True}}  # Print sub tree
+            name_results = {'name': 'json_results'}
+
+            # Create the input dictionary for a energy call
             if input_model.driver == 'energy':
-                input_dict = {'dft': {**structure, **dft_info}, **print_results}
-            # Write gradient call if asked for
+                input_dict = {
+                    energy_command: {
+                        **structure,
+                        **energy_options[energy_command],
+                        **energy_extra_options,
+                        **name_results
+                    },
+                    **print_results,
+                }
+            # Create the input dictionary for a gradient call
             elif input_model.driver == 'gradient':
-                input_dict = {'gradient': {**structure, 'dft': {**dft_info}}, **print_results}
+                input_dict = {
+                    'gradient': {
+                        **structure,
+                        energy_command: {
+                            **energy_options[energy_command],
+                            **energy_extra_options
+                        },
+                        **name_results
+                    },
+                    **print_results,
+                }
+            # TODO Add support for hessians
+            # elif input_model.driver == 'hessian':
             else:
-                raise NotImplementedError('Driver {} not implemented for entos.'.format(input_model.driver))
+                raise NotImplementedError(f'Driver {input_model.driver} not implemented for entos.')
 
             # Write input file
             input_file = self.write_input_recursive(input_dict)
             input_file = "\n".join(input_file)
+
+        # Use the template input file if present
         else:
             # Some of the potential different template options
             # (A) ordinary build_input (need to define a base template)
@@ -154,7 +219,7 @@ class EntosHarness(ProgramHarness):
             input_file = str_template.substitute()
 
         return {
-            "commands": ["entos", "-n", str(config.ncores), "dispatch.in"],
+            "commands": ["entos", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
             "infiles": {
                 "dispatch.in": input_file,
                 "geometry.xyz": xyz_file
@@ -183,42 +248,88 @@ class EntosHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 
-        output_data = {}
+        dft_map = {
+            "energy": "scf_total_energy",
+            "n_iter": "scf_iterations",
+        }
+        dft_extras = {
+            "converged": "scf_converged",
+            "ao_basis": {
+                "basis": {"n_functions", "shells"}
+            },
+            "density": "scf_density",
+            "orbitals": "scf_orbitals",
+            "fock": "fock"
+        }
+
+        energy_command_map = {
+            "dft": dft_map,
+            # "xtb": xtb_map,
+        }
+
+        gradient_map = {
+            "energy": "scf_total_energy",
+            "gradient": "gradient"}
+
+        # Initialize properties dictionary
         properties = {}
 
-        # Parse the output file, collect properties and gradient
-        output_lines = outfiles["dispatch.out"].split('\n')
-        gradients = []
-        natom = len(input_model.molecule.symbols)
-        for idx, line in enumerate(output_lines):
-            fields = line.split()
-            if fields[:1] == ["energy:"]:
-                properties["scf_total_energy"] = float(fields[-1])
-            elif fields[:2] == ["Molecular", "Dipole:"]:
-                properties["scf_dipole_moment"] = [float(x) for x in fields[2:5]]
-            elif fields[:3] == ["SCF", "converged", "in"]:
-                properties["scf_iterations"] = int(fields[3])
-            elif fields == ["Gradient", "(hartree/bohr):"]:
-                # Gradient is stored as (dE/dx1,dE/dy1,dE/dz1,dE/dx2,dE/dy2,...)
-                for i in range(idx + 2, idx + 2 + natom):
-                    grad = output_lines[i].strip('\n').split()[1:]
-                    gradients.extend([float(x) for x in grad])
+        # Determine the energy_command
+        energy_command = self.determine_energy_command(input_model.model.method)
 
-        if input_model.driver == 'gradient':
-            if len(gradients) == 0:
-                raise ValueError('Gradient not found.')
-            else:
-                output_data["return_result"] = gradients
+        # Determine whether to use the energy map or the gradient map
+        if input_model.driver == "energy":
+            entos_map = energy_command_map[energy_command]
+        elif input_model.driver == "gradient":
+            entos_map = gradient_map
+        else:
+            raise NotImplementedError(f'Driver {input_model.driver} not implemented for entos.')
 
-        # Replace return_result with final_energy if gradient wasn't called
-        if "return_result" not in output_data:
+        # Parse the results.json output from entos
+        load_results = json.loads(outfiles["results.json"])
+        entos_results = load_results["json_results"]
+        for key in entos_map.keys():
+            if key in entos_results:
+                properties[entos_map[key]] = entos_results[key]
+
+        # Determine the correct return_result
+        output_data = {}
+        if input_model.driver == 'energy':
             if "scf_total_energy" in properties:
                 output_data["return_result"] = properties["scf_total_energy"]
             else:
-                raise KeyError("Could not find SCF total energy")
+                raise KeyError(f"Could not find {input_model.model} total energy")
+        elif input_model.driver == 'gradient':
+            if "gradient" in properties:
+                output_data["return_result"] = properties["gradient"]
+                properties.pop("gradient")
+            else:
+                raise KeyError('Gradient not found.')
+        else:
+            raise NotImplementedError(f'Driver {input_model.driver} not implemented for entos.')
 
         output_data["properties"] = properties
         output_data['schema_name'] = 'qcschema_output'
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})
+
+    # Determine the energy_command
+    def determine_energy_command(self, method):
+        """
+        Determine the energy command in entos
+        """
+
+        if method.upper() in self._dft_functionals:
+            energy_command = "dft"
+        # For now entos supports HF calculations through the dft energy_command with xc = HF
+        elif method.upper() == "HF":
+            energy_command = "dft"
+        else:
+            energy_command = method.lower()
+
+        # Check method is supported
+        if energy_command not in self._energy_commands:
+            raise InputError(f'Energy method, {method}, not implemented for entos.')
+
+        return energy_command
