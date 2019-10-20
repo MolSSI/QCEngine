@@ -283,6 +283,6 @@ def test_openmm_task():
         "keywords": {}
     }
 
-    ret = qcng.compute(json_data, "openmm", raise_error=True)
+    ret = qcng.compute(input_data, "openmm", raise_error=True)
 
     assert ret.success is True
