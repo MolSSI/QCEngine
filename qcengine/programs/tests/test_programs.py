@@ -6,9 +6,9 @@ import copy
 
 import numpy as np
 import pytest
+from qcelemental.models import Molecule, ResultInput
 
 import qcengine as qcng
-from qcelemental.models import Molecule, ResultInput
 from qcengine import testing
 from qcengine.testing import failure_engine
 

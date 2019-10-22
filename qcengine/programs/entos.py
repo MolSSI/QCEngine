@@ -2,8 +2,8 @@
 Calls the entos executable.
 """
 
-import string
 import json
+import string
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from qcelemental.models import Result

@@ -1,4 +1,9 @@
-def muster_modelchem(method, derint):
+from typing import Any, Dict
+
+
+def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
+    """Converts the QC method into GAMESS keywords."""
+
     method = method.lower()
     opts = {}
 
