@@ -10,7 +10,6 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import FailedOperation, Provenance, Result
 from qcelemental.util import safe_version, which

@@ -1,18 +1,19 @@
 import collections
+from typing import Any, Dict, Tuple
 
 
-def format_keyword(opt, val, lop_off=True):
-    """Function to reformat value *val* for option *opt* from python into nwchem-speak."""
+def format_keyword(keyword: str, val: Any, lop_off: bool = True) -> Tuple[str, str]:
+    """Function to reformat value `val` for `keyword` from python into nwchem-speak."""
 
     # Transform string booleans into " "
     if val is True:
-        return opt.lower(), ''
+        return keyword.lower(), ''
     elif val is False:
         return '', ''
 
     # complete hack
-    if opt.upper() == 'MEMORY':
-        return opt.lower(), f'{val} byte'
+    if keyword.upper() == 'MEMORY':
+        return keyword.lower(), f'{val} byte'
 
     elif isinstance(val, list):
         text = ' '.join([str(v) for v in val])
@@ -20,26 +21,26 @@ def format_keyword(opt, val, lop_off=True):
         text = []
         for k, v in val.items():
             merge = [k]
-            merge.extend(str(v) if isinstance(v, (int, float)) else list(map(str,v)))
+            merge.extend(str(v) if isinstance(v, (int, float)) else list(map(str, v)))
             text.append(' '.join(merge))
         text = ' '.join(text)
     else:
         text = str(val)
 
     if lop_off:
-        return opt[7:].lower(), text
+        return keyword[7:].lower(), text
     else:
-        return opt.lower(), text
+        return keyword.lower(), text
 
 
-def format_keywords(options):
-    """From NWCHEM-directed, non-default options dictionary `options`, write a NWCHEM deck."""
-
+def format_keywords(keywords: Dict[str, Any]) -> str:
+    """From NWCHEM-directed, non-default `keywords` dictionary, write a NWCHEM deck."""
     def rec_dd():
         return collections.defaultdict(rec_dd)
+
     grouped_options = rec_dd()
 
-    for group_key, val in options.items():
+    for group_key, val in keywords.items():
         nesting = group_key.split('__')
         if len(nesting) == 1:
             key = nesting[0]

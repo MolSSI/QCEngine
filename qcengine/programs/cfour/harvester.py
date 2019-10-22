@@ -2,7 +2,6 @@ import re
 from decimal import Decimal
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import Molecule
 
@@ -25,11 +24,10 @@ def harvest_output(outtext):
         pass_coord.append(c4coord)
         pass_grad.append(c4grad)
 
-        # print '\n\nXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n'
-        # print outpass
-        # print psivar, c4coord, c4grad
-        # print psivar, c4grad
-        # print '\n\nxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n'
+        # print('\n\nXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n')
+        # print(outpass)
+        # print(psivar, c4coord, c4grad, version, error)
+        # print('\n\nxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n')
 
     retindx = -1 if pass_coord[-1] else -2
 
@@ -494,6 +492,21 @@ def harvest_outfile_pass(outtext):
                                                           dtype=2))
 
     # Process atom geometry
+    mobj = re.search(r'^\s+' + r'@GETXYZ-I,     1 atoms read from ZMAT.' + r'\s*$', outtext, re.MULTILINE)
+    mobj2 = re.search(
+        r'^([A-Z]+)#1' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
+        outtext, re.MULTILINE)  # yapf: disable
+    if mobj and mobj2:
+        print('matched atom2')  # unsavory for when atom never printed except for basis file
+        # Dinky Molecule
+        molxyz = '1 bohr\n\n%s 0.0 0.0 0.0\n' % (mobj2.group(1))
+        psivar_coord = Molecule(validate=False,
+                                **qcel.molparse.to_schema(qcel.molparse.from_string(molxyz,
+                                                                                    dtype='xyz+',
+                                                                                    fix_com=True,
+                                                                                    fix_orientation=True)["qm"],
+                                                          dtype=2))
+
     mobj = re.search(
         r'^\s+' + r'@GETXYZ-I,     1 atoms read from ZMAT.' + r'\s*' +
         r'^\s+' + r'[0-9]+\s+([A-Z]+)\s+[0-9]+\s+' + NUMBER + r'\s*',

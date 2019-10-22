@@ -1,9 +1,10 @@
 import collections
 import textwrap
+from typing import Any, Dict, Tuple
 
 
-def format_keyword(opt, val, lop_off=True):
-    """Reformat `val` for option `opt` from python into GAMESS-speak."""
+def format_keyword(keyword: str, val: Any, lop_off: bool = True) -> Tuple[str, str]:
+    """Reformat value `val` for `keyword` from python into GAMESS-speak."""
 
     text = ''
 
@@ -18,16 +19,16 @@ def format_keyword(opt, val, lop_off=True):
         text += str(val).lower()
 
     if lop_off:
-        return opt[7:].lower(), text
+        return keyword[7:].lower(), text
     else:
-        return opt.lower(), text
+        return keyword.lower(), text
 
 
-def format_keywords(options):
-    """From GAMESS-directed, non-default options dictionary `options`, write a GAMESS deck."""
+def format_keywords(keywords: Dict[str, Any]) -> str:
+    """From GAMESS-directed, non-default `keywords` dictionary, write a GAMESS deck."""
 
     grouped_options = collections.defaultdict(dict)
-    for group_key, val in options.items():
+    for group_key, val in keywords.items():
         group, key = group_key.split('__')
         grouped_options[group.lower()][key.lower()] = val
 

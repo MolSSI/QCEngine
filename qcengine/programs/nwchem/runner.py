@@ -7,7 +7,6 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
@@ -15,9 +14,9 @@ from qcelemental.util import safe_version, which
 from ...exceptions import InputError
 from ...util import execute
 from ..model import ProgramHarness
+from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
-from .methods import muster_modelchem
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -79,6 +78,9 @@ class NWChemHarness(ProgramHarness):
         success, dexe = self.execute(job_inputs)
 
         if 'There is an error in the input file' in dexe["stdout"]:
+            raise InputError(dexe["stdout"])
+        if 'not compiled' in dexe["stdout"]:
+            # recoverable with a different compilation with optional modules
             raise InputError(dexe["stdout"])
 
         if success:
@@ -143,8 +145,7 @@ class NWChemHarness(ProgramHarness):
         )
         return success, dexe
 
-    def parse_output(self,
-                     outfiles: Dict[str, str],
+    def parse_output(self, outfiles: Dict[str, str],
                      input_model: 'ResultInput') -> 'Result':  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")

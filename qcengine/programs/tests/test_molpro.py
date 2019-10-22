@@ -2,10 +2,10 @@ import copy
 
 import numpy as np
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_recursive
+
+import qcengine as qcng
 from qcengine.testing import using_molpro
 
 # qcenginerecords not required, skips whole file

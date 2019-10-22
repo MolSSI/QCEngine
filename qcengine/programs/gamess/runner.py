@@ -12,9 +12,9 @@ from qcelemental.util import safe_version, unnp, which
 from ...exceptions import InputError
 from ...util import execute
 from ..model import ProgramHarness
+from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
-from .methods import muster_modelchem
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
