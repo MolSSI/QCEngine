@@ -48,45 +48,6 @@ class OpenMMHarness(ProgramHarness):
 
         return (rdkit_found and openmm_found)
 
-    @staticmethod
-    def _process_molecule_rdkit(jmol):
-        from rdkit import Chem
-        from rdkit.Chem import AllChem
-
-        # Handle errors
-        if abs(jmol.molecular_charge) > 1.e-6:
-            raise InputError("RDKit does not currently support charged molecules.")
-
-        if not jmol.connectivity:  # Check for empty list
-            raise InputError("RDKit requires molecules to have a connectivity graph.")
-
-        # Build out the base molecule
-        base_mol = Chem.Mol()
-        rw_mol = Chem.RWMol(base_mol)
-        for sym in jmol.symbols:
-            rw_mol.AddAtom(Chem.Atom(sym.title()))
-
-        # Add in connectivity
-        bond_types = {1: Chem.BondType.SINGLE, 2: Chem.BondType.DOUBLE, 3: Chem.BondType.TRIPLE}
-        for atom1, atom2, bo in jmol.connectivity:
-            rw_mol.AddBond(atom1, atom2, bond_types[bo])
-
-        mol = rw_mol.GetMol()
-
-        # Write out the conformer
-        natom = len(jmol.symbols)
-        conf = Chem.Conformer(natom)
-        bohr2ang = ureg.conversion_factor("bohr", "angstrom")
-        for line in range(natom):
-            conf.SetAtomPosition(line, (bohr2ang * jmol.geometry[line, 0],
-                                        bohr2ang * jmol.geometry[line, 1],
-                                        bohr2ang * jmol.geometry[line, 2]))  # yapf: disable
-
-        mol.AddConformer(conf)
-        Chem.rdmolops.SanitizeMol(mol)
-
-        return mol
-
     def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Runs OpenMM on given structure, inputs, in vacuum.
@@ -133,7 +94,7 @@ class OpenMMHarness(ProgramHarness):
                 raise InputError("OpenMM requires either `model.offxml` or `model.url` to be set")
 
             # Process molecule with RDKit
-            rdkit_mol = self._process_molecule_rdkit(jmol)
+            rdkit_mol = RDKitHarness._process_molecule_rdkit(jmol)
 
             # Create an Open Force Field `Molecule` from the RDKit Molecule
             off_mol = offtop.Molecule(rdkit_mol)
