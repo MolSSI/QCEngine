@@ -37,7 +37,8 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
             stdout, stderr = proc.communicate()
             stdout = decode_define(stdout)
             stderr = decode_define(stderr)
-            # Attach stdout & stderr to error, so they can be accessed later on.
+            # Attach stdout and stderr of proc to error, so they can be
+            # accessed later on.
             error.stdout = stdout
             error.stderr = stdout
             raise error
