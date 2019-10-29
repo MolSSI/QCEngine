@@ -16,12 +16,11 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
                  stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd,
                  # stdin=PIPE, stderr=PIPE, cwd=cwd,
     )
-    # TODO: Add timeout? Unless the disk hangs this should never take long...
     # TODO: If used with timeout an exception will be thrown. Then how do we
     # propagate the stdout produced until then to the user so he can see what
     # is going on?
     # TODO: How to get the stdout when the process hangs? Maybe write it to a file?
-    stdout, _ = proc.communicate(str.encode(stdin))
+    stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
     proc.terminate()
     try:
         stdout = stdout.decode("utf-8")
