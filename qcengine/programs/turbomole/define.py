@@ -12,30 +12,20 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
     # We cant use univeral_newlines=True or text=True in Popen as some of the
     # data that define returns isn't proper UTF-8, so the decoding will crash.
     # We will decode it later on manually.
-    proc = Popen("define",
-                 stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd,
-                 # stdin=PIPE, stderr=PIPE, cwd=cwd,
-    )
-    # TODO: If used with timeout an exception will be thrown. Then how do we
-    # propagate the stdout produced until then to the user so he can see what
-    # is going on?
-    # TODO: How to get the stdout when the process hangs? Maybe write it to a file?
-    stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
-    proc.terminate()
-    try:
-        stdout = stdout.decode("utf-8")
-    except UnicodeDecodeError:
-        # Some of the basis files (cbas, I'm looking at you ...) are saved
-        # in ISO-8859-15 but most of them are in UTF-8. Decoding will
-        # crash in the former cases so here we try the correct decoding.
-        stdout = stdout.decode("latin-1")
-
-    # try:
-        # stdout, _ = proc.communicate(str.encode(stdin), timeout=5)
-        # proc.terminate()
-    # except TimeoutExpired as err:
-        # print(err)
-        # import pdb; pdb.set_trace()
+    with Popen("define", stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd) as proc:
+        # TODO: If used with timeout an exception will be thrown. Then how do we
+        # propagate the stdout produced until then to the user so he can see what
+        # is going on?
+        # TODO: How to get the stdout when the process hangs? Maybe write it to a file?
+        stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
+        proc.terminate()
+        try:
+            stdout = stdout.decode("utf-8")
+        except UnicodeDecodeError:
+            # Some of the basis files (cbas, I'm looking at you ...) are saved
+            # in ISO-8859-15 but most of them are in UTF-8. Decoding will
+            # crash in the former cases so here we try the correct decoding.
+            stdout = stdout.decode("latin-1")
 
     return stdout
 
