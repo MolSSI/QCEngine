@@ -4,7 +4,23 @@ from typing import Any, Dict, Optional
 from .methods import METHODS, KEYWORDS
 
 
+def decode_define(str_: str) -> str:
+    """Decode define output.
+
+    Depending on the employed basis set the encoding may differ.
+    """
+    try:
+        str_ = str_.decode("utf-8")
+    except UnicodeDecodeError:
+        # Some of the basis files (cbas, I'm looking at you ...) are saved
+        # in ISO-8859-15 but most of them are in UTF-8. Decoding will
+        # crash in the former cases so here we try the correct decoding.
+        str_ = str_.decode("latin-1")
+    return str_
+
 def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
+    """Call define with the input define in stdin."""
+
     # TODO: replace this with a call to the default execute provided by QCEngine
     # if possible. May be difficult though, as we have to pipe in stdin and
     # be careful with the encoding.
@@ -13,19 +29,19 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
     # data that define returns isn't proper UTF-8, so the decoding will crash.
     # We will decode it later on manually.
     with Popen("define", stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd) as proc:
-        # TODO: If used with timeout an exception will be thrown. Then how do we
-        # propagate the stdout produced until then to the user so he can see what
-        # is going on?
-        # TODO: How to get the stdout when the process hangs? Maybe write it to a file?
-        stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
-        proc.terminate()
         try:
-            stdout = stdout.decode("utf-8")
-        except UnicodeDecodeError:
-            # Some of the basis files (cbas, I'm looking at you ...) are saved
-            # in ISO-8859-15 but most of them are in UTF-8. Decoding will
-            # crash in the former cases so here we try the correct decoding.
-            stdout = stdout.decode("latin-1")
+            stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
+            stdout = decode_define(stdout)
+        except TimeoutExpired as error:
+            # Retrieve output of timed out define call
+            stdout, stderr = proc.communicate()
+            stdout = decode_define(stdout)
+            stderr = decode_define(stderr)
+            # Attach stdout & stderr to error, so they can be accessed later on.
+            error.stdout = stdout
+            error.stderr = stdout
+            raise error
+        proc.terminate()
 
     return stdout
 
