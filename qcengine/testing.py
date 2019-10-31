@@ -20,8 +20,6 @@ def _check_qcenginerecords(return_data=False):
     skip = True
     try:
         import qcenginerecords
-        msg = "Could not find QCEngineRecords in PYTHONPATH"
-        qcer_hash = qcenginerecords.__git_revision__[:7]
 
         if qcer_hash != QCENGINE_RECORDS_COMMIT[:7]:
             msg = f"Incorrect QCEngineRecord Git Revsion, found {qcer_hash} need {QCENGINE_RECORDS_COMMIT[:7]}."
@@ -29,7 +27,7 @@ def _check_qcenginerecords(return_data=False):
             skip = False
             msg = "Works!"
 
-    except:
+    except ModuleNotFoundError:
         msg = "Could not find QCEngineRecords in PYTHONPATH"
 
     if return_data:

@@ -2,10 +2,8 @@
 Several import utilities
 """
 
-import importlib
 import io
 import json
-import operator
 import os
 import shutil
 import signal
@@ -16,7 +14,7 @@ import time
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import ValidationError
 from qcelemental.models import FailedOperation
@@ -24,7 +22,7 @@ from qcelemental.models import FailedOperation
 from .config import LOGGER, get_provenance_augments
 from .exceptions import InputError, QCEngineException
 
-__all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
+__all__ = ["compute_wrapper", "model_wrapper", "handle_output_metadata"]
 
 
 def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel':
