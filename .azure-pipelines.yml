@@ -6,7 +6,7 @@
 # trigger:
 # - master
 
-# Define the continaers we want access to
+# Define the containers we want access to
 resources:
   containers:
     -   container: 'qcengineci' # Arbitrary name for reference in pipelines
@@ -49,5 +49,11 @@ jobs:
   - script: |
       source $(conda_source)
       conda activate test
-      pytest -rsv .
+      pytest -rsv --cov=qcengine/ qcengine/
     displayName: 'Run the Tests'
+
+  - script: |
+      codecov
+    displayName: 'Codecov Upload'
+
+ 
