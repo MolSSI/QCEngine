@@ -14,18 +14,16 @@ qcer = pytest.importorskip("qcenginerecords")
 terachem_info = qcer.get_info('terachem')
 
 
-@pytest.mark.skipif(qcel.__version__ > "v.0.3.3", reason="qcelemental version is too new")
 @pytest.mark.parametrize('test_case', terachem_info.list_test_cases())
 def test_terachem_output_parser(test_case):
     # Get output file data
     data = terachem_info.get_test_data(test_case)
     inp = qcel.models.ResultInput.parse_raw(data["input.json"])
 
-    output = qcng.get_program('terachem', check=False).parse_output(data, inp)
+    output = qcng.get_program('terachem', check=False).parse_output(data, inp).dict()
+    output_ref = qcel.models.Result.parse_raw(data["output.json"]).dict()
 
-    output_ref = qcel.models.Result.parse_raw(data["output.json"])
-
-    assert compare_recursive(output_ref.dict(), output.dict())
+    assert compare_recursive(output_ref, output, forgive={"stdout", "provenance"})
 
 
 @pytest.mark.parametrize('test_case', terachem_info.list_test_cases())
