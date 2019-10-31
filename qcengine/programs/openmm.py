@@ -20,12 +20,10 @@ from .rdkit import RDKitHarness
 
 class OpenMMHarness(ProgramHarness):
 
-    # TODO: verify correctness of these default params
-    # where are these used? By QCFractal?
     _defaults = {
         "name": "OpenMM",
         "scratch": True,
-        "thread_safe": False,
+        "thread_safe": True, # true if we use separate `openmm.Context` objects per thread
         "thread_parallel": True,
         "node_parallel": False,
         "managed_memory": True,
