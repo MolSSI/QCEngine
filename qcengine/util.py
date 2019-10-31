@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pydantic import ValidationError
-
 from qcelemental.models import FailedOperation
 
 from .config import LOGGER, get_provenance_augments
@@ -100,37 +99,6 @@ def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> D
         # Pull over values
         metadata["stdout"] = new_stdout.getvalue() or None
         metadata["stderr"] = new_stderr.getvalue() or None
-
-
-def get_module_function(module: str, func_name: str, subpackage=None) -> Callable[..., Any]:
-    """Obtains a function from a given string
-
-    Parameters
-    ----------
-    module : str
-        The module to pull the function from
-    func_name : str
-        The name of the function to acquire, can be in a subpackage
-    subpackage : None, optional
-        Explicitly import a subpackage if required
-
-    Returns
-    -------
-    ret : function
-        The requested functions
-
-    Example
-    -------
-
-    # Import numpy.linalg.eigh
-    f = get_module_function("numpy", "linalg.eigh")
-    f(np.ones((2, 2)))
-
-    """
-    # Will throw import error if we fail
-    pkg = importlib.import_module(module, subpackage)
-
-    return operator.attrgetter(func_name)(pkg)
 
 
 def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
@@ -467,7 +435,7 @@ def temporary_directory(child: str = None,
 
     """
     if child is None:
-        tmpdir = tempfile.mkdtemp(dir=parent, suffix=suffix)
+        tmpdir = Path(tempfile.mkdtemp(dir=parent, suffix=suffix))
     else:
         if parent is None:
             parent = Path(tempfile.gettempdir())
