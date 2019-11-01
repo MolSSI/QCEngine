@@ -1,15 +1,11 @@
 import pytest
+
 import qcelemental as qcel
-from qcelemental.testing import compare_recursive
-
 import qcengine as qcng
-from qcengine.testing import using_entos
+from qcelemental.testing import compare_recursive
+from qcengine.testing import qcengine_records, using_entos
 
-# qcenginerecords not required, skips whole file
-qcer = pytest.importorskip("qcenginerecords")
-
-# Prep globals
-entos_info = qcer.get_info('entos')
+entos_info = qcengine_records('entos')
 
 
 @pytest.mark.parametrize('test_case', entos_info.list_test_cases())

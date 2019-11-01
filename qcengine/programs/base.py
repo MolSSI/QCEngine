@@ -89,15 +89,25 @@ def list_available_programs() -> Set[str]:
     return ret
 
 
-register_program(Psi4Harness())
-register_program(RDKitHarness())
-register_program(TorchANIHarness())
-register_program(MolproHarness())
-register_program(MopacHarness())
-register_program(DFTD3Harness())
-register_program(TeraChemHarness())
-register_program(MP2DHarness())
-register_program(GAMESSHarness())
-register_program(NWChemHarness())
+# Quantum
 register_program(CFOURHarness())
 register_program(EntosHarness())
+register_program(GAMESSHarness())
+register_program(MolproHarness())
+register_program(NWChemHarness())
+register_program(Psi4Harness())
+register_program(TeraChemHarness())
+
+# Semi-emperical
+register_program(MopacHarness())
+
+# AI
+register_program(TorchANIHarness())
+
+# Molecular Mechanics
+register_program(RDKitHarness())
+
+# Analytical Corrections
+register_program(DFTD3Harness())
+register_program(MP2DHarness())
+
