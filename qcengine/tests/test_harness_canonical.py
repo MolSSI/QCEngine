@@ -18,6 +18,7 @@ _canonical_methods = [
     ("psi4", {"method": "hf", "basis": "6-31G"}),
     ("rdkit", {"method": "UFF"}),
     ("torchani", {"method": "ANI1x"}),
+    ("entos", {"method": "pbe", "basis": "6-31G"}),
 ]  # yapf: disable
 
 
@@ -59,6 +60,7 @@ def test_compute_gradient(program, model):
     ("psi4", {"method": "bad"}),
     ("rdkit", {"method": "bad"}),
     ("torchani", {"method": "bad"}),
+    ("entos", {"method": "bad"}),
 ])  # yapf: disable
 def test_compute_bad_models(program, model):
     if not testing.has_program(program):

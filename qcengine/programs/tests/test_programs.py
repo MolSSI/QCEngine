@@ -6,13 +6,11 @@ import copy
 
 import numpy as np
 import pytest
+from qcelemental.models import Molecule, ResultInput
 
 import qcengine as qcng
-from qcelemental.models import Molecule, ResultInput
 from qcengine import testing
 from qcengine.testing import failure_engine
-
-_base_json = {"schema_name": "qcschema_input", "schema_version": 1}
 
 
 def test_missing_key():
@@ -28,13 +26,19 @@ def test_missing_key_raises():
 
 @testing.using_psi4
 def test_psi4_task():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("water")
-    json_data["driver"] = "energy"
-    json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
-    json_data["keywords"] = {"scf_type": "df"}
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {
+            "method": "SCF",
+            "basis": "sto-3g"
+        },
+        "keywords": {
+            "scf_type": "df"
+        }
+    }
 
-    ret = qcng.compute(json_data, "psi4", raise_error=True, return_dict=True)
+    ret = qcng.compute(input_data, "psi4", raise_error=True, return_dict=True)
 
     assert ret["driver"] == "energy"
     assert "provenance" in ret
@@ -47,12 +51,59 @@ def test_psi4_task():
     assert "retries" not in ret["provenance"]
 
 
+@testing.using_psi4_14
+def test_psi4_interactive_task():
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {
+            "method": "SCF",
+            "basis": "sto-3g"
+        },
+        "keywords": {
+            "scf_type": "df"
+        },
+        "extras": {
+            "psiapi": True
+        }
+    }
+
+    ret = qcng.compute(input_data, "psi4", raise_error=True)
+
+    assert "Final Energy" in ret.stdout
+    assert ret.success
+    assert ret.extras.pop("psiapi_evaluated", False)
+
+
+@testing.using_psi4_14
+def test_psi4_wavefunction_task():
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {
+            "method": "SCF",
+            "basis": "sto-3g"
+        },
+        "keywords": {
+            "scf_type": "df"
+        },
+        "protocols": {
+            "wavefunction": "orbitals_and_eigenvalues"
+        }
+    }
+
+    ret = qcng.compute(input_data, "psi4", raise_error=True)
+    assert ret.success, ret.error.error_message
+    assert ret.wavefunction.scf_orbitals_a.shape == (7, 7)
+
+
 @testing.using_psi4
 def test_psi4_internal_failure():
 
     mol = Molecule.from_data("""0 3
      O    0.000000000000     0.000000000000    -0.068516245955
     """)
+
     psi4_task = {
         "molecule": mol,
         "driver": "energy",
@@ -98,43 +149,53 @@ def test_psi4_ref_switch():
 
 @testing.using_rdkit
 def test_rdkit_task():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("water")
-    json_data["driver"] = "gradient"
-    json_data["model"] = {"method": "UFF"}
-    json_data["keywords"] = {}
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "gradient",
+        "model": {
+            "method": "UFF"
+        },
+        "keywords": {}
+    }
 
-    ret = qcng.compute(json_data, "rdkit", raise_error=True)
+    ret = qcng.compute(input_data, "rdkit", raise_error=True)
 
     assert ret.success is True
 
 
 @testing.using_rdkit
 def test_rdkit_connectivity_error():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("water").dict()
-    json_data["driver"] = "gradient"
-    json_data["model"] = {"method": "UFF", "basis": ""}
-    json_data["keywords"] = {}
-    del json_data["molecule"]["connectivity"]
+    input_data = {
+        "molecule": qcng.get_molecule("water").dict(exclude={"connectivity"}),
+        "driver": "gradient",
+        "model": {
+            "method": "UFF",
+            "basis": ""
+        },
+        "keywords": {}
+    }
 
-    ret = qcng.compute(json_data, "rdkit")
+    ret = qcng.compute(input_data, "rdkit")
     assert ret.success is False
     assert "connectivity" in ret.error.error_message
 
     with pytest.raises(qcng.exceptions.InputError):
-        qcng.compute(json_data, "rdkit", raise_error=True)
+        qcng.compute(input_data, "rdkit", raise_error=True)
 
 
 @testing.using_torchani
 def test_torchani_task():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("water")
-    json_data["driver"] = "gradient"
-    json_data["model"] = {"method": "ANI1x", "basis": None}
-    json_data["keywords"] = {}
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "gradient",
+        "model": {
+            "method": "ANI1x",
+            "basis": None
+        },
+        "keywords": {}
+    }
 
-    ret = qcng.compute(json_data, "torchani", raise_error=True)
+    ret = qcng.compute(input_data, "torchani", raise_error=True)
 
     assert ret.success is True
     assert ret.driver == "gradient"
@@ -142,25 +203,31 @@ def test_torchani_task():
 
 @testing.using_mopac
 def test_mopac_task():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("water")
-    json_data["driver"] = "gradient"
-    json_data["model"] = {"method": "PM6", "basis": None}
-    json_data["keywords"] = {}
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "gradient",
+        "model": {
+            "method": "PM6",
+            "basis": None
+        },
+        "keywords": {
+            "pulay": False
+        }
+    }
 
-    ret = qcng.compute(json_data, "mopac", raise_error=True)
+    ret = qcng.compute(input_data, "mopac", raise_error=True)
     assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
     energy = pytest.approx(-0.08474117913025125, rel=1.e-5)
 
     # Check gradient
-    ret = qcng.compute(json_data, "mopac", raise_error=True)
+    ret = qcng.compute(input_data, "mopac", raise_error=True)
     assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
     assert np.linalg.norm(ret.return_result) == pytest.approx(0.03543560156912385, rel=1.e-4)
     assert ret.properties.return_energy == energy
 
     # Check energy
-    json_data["driver"] = "energy"
-    ret = qcng.compute(json_data, "mopac", raise_error=True)
+    input_data["driver"] = "energy"
+    ret = qcng.compute(input_data, "mopac", raise_error=True)
     assert ret.return_result == energy
     assert "== MOPAC DONE ==" in ret.stdout
 

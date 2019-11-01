@@ -116,6 +116,7 @@ _programs = {
     "dftd3": which('dftd3', return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
+    "psi4_14": is_program_new_enough("psi4", "1.4a2.dev250"),
     "rdkit": which_import("rdkit", return_bool=True),
     "qcdb": which_import("qcdb", return_bool=True),
     "torchani": is_program_new_enough("torchani", "0.9"),
@@ -123,11 +124,12 @@ _programs = {
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
-    "entos": is_program_new_enough("entos", "0.5"),
+    "entos": is_program_new_enough("entos", "0.6"),
     "cfour": which('xcfour', return_bool=True),
     "gamess": which('rungms', return_bool=True),
     "nwchem": which('nwchem', return_bool=True),
     "turbomole": which('define', return_bool=True),
+    "mdi": which_import("mdi", return_bool=True)
 }
 
 
@@ -148,6 +150,7 @@ using_mopac = _build_pytest_skip("mopac")
 using_molpro = _build_pytest_skip("molpro")
 using_mp2d = _build_pytest_skip("mp2d")
 using_psi4 = _build_pytest_skip("psi4")
+using_psi4_14 = _build_pytest_skip("psi4_14")
 using_qcdb = _build_pytest_skip("qcdb")
 using_rdkit = _build_pytest_skip("rdkit")
 using_torchani = _build_pytest_skip("torchani")
@@ -156,6 +159,7 @@ using_cfour = _build_pytest_skip("cfour")
 using_gamess = _build_pytest_skip("gamess")
 using_nwchem = _build_pytest_skip("nwchem")
 using_turbomole = _build_pytest_skip("turbomole")
+using_mdi = _build_pytest_skip("mdi")
 
 using_dftd3_321 = pytest.mark.skipif(is_program_new_enough("dftd3", "3.2.1") is False,
                                      reason='DFTD3 does not include 3.2.1 features. Update package and add to PATH')

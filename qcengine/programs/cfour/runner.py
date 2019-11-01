@@ -7,16 +7,15 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
 
 from ...util import execute
 from ..model import ProgramHarness
+from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
-from .methods import muster_modelchem
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
@@ -94,7 +93,7 @@ class CFOURHarness(ProgramHarness):
         opts.update(moldata['keywords'])
 
         # Handle calc type and quantum chemical method
-        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver.derivative_int())
+        mdcopts = muster_modelchem(input_model.model.method, input_model.driver.derivative_int())
         opts.update(mdcopts)
 
         # Handle basis set
@@ -131,8 +130,7 @@ class CFOURHarness(ProgramHarness):
         )
         return success, dexe
 
-    def parse_output(self,
-                     outfiles: Dict[str, str],
+    def parse_output(self, outfiles: Dict[str, str],
                      input_model: 'ResultInput') -> 'Result':  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")

@@ -1,10 +1,10 @@
 import os
 
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_recursive
+
+import qcengine as qcng
 from qcengine.testing import using_terachem
 
 # qcenginerecords not required, skips whole file
