@@ -255,6 +255,14 @@ class MolproHarness(ProgramHarness):
         #       - Be aware of symmetry. Might only be able to support if symmetry,nosym
         #      - orbitals
         #       - Be aware of symmetry. Might only be able to support if symmetry,nosym
+        # NOTE: Spherical basis set ordering in Molpro (with no symmetry)
+        # S -->  0
+        # P --> +1, -1, 0
+        # D -->  0, -2, +1, +2, -1
+        # F --> +1, -1, 0, +3, -2, -3, +2
+        # G -->  0, -2, +1, +4, -1, +2, -4, +3, -3
+        # H --> +1, -1, +2, +3, -4, -3, +4, -5, 0, +5, -2
+        # I --> +6, -2, +5, +4, -5, +2, -6, +3, -4, 0, -3, -1, +1
         properties = {}
         extras = {}
         name_space = {'molpro_uri': 'http://www.molpro.net/schema/molpro-output'}
@@ -436,8 +444,7 @@ class MolproHarness(ProgramHarness):
         if input_model.driver == "energy":
             output_data["return_result"] = final_energy
         elif input_model.driver == "gradient":
-            output_data["return_result"] = properties["gradient"]
-            del properties["gradient"]
+            output_data["return_result"] = properties.pop("gradient")
 
         # Final output_data assignments needed for the Result object
         output_data["properties"] = properties
