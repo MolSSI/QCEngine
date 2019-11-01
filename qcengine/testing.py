@@ -21,6 +21,7 @@ def _check_qcenginerecords(return_data=False):
     try:
         import qcenginerecords
 
+        qcer_hash = qcenginerecords.__git_revision__
         if qcer_hash != QCENGINE_RECORDS_COMMIT[:7]:
             msg = f"Incorrect QCEngineRecord Git Revsion, found {qcer_hash} need {QCENGINE_RECORDS_COMMIT[:7]}."
         else:
