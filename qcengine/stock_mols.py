@@ -51,4 +51,4 @@ def get_molecule(name):
     if name not in _test_mols:
         raise KeyError("Molecule name '{}' not found".format(name))
 
-    return copy.deepcopy(Molecule(**_test_mols[name]))
+    return Molecule(**copy.deepcopy(_test_mols[name]))

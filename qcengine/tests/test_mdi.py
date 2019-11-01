@@ -12,17 +12,21 @@ import qcengine as qcng
 from qcengine import testing
 from qcelemental.testing import compare_values
 
-_base_json = {"schema_name": "qcschema_input", "schema_version": 1}
-
 
 @testing.using_psi4
 @testing.using_mdi
 def test_mdi_water():
-    json_data = copy.deepcopy(_base_json)
-    json_data["molecule"] = qcng.get_molecule("water")
-    json_data["driver"] = "energy"
-    json_data["model"] = {"method": "SCF", "basis": "sto-3g"}
-    json_data["keywords"] = {"scf_type": "df"}
+    json_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {
+            "method": "SCF",
+            "basis": "sto-3g"
+        },
+        "keywords": {
+            "scf_type": "df"
+        },
+    }
 
     engine = qcng.MDIServer("-role DRIVER -name QCEngine -method TEST", "psi4", qcng.get_molecule("water"), {
         "method": "SCF",
@@ -103,5 +107,3 @@ def test_mdi_water():
 
     # Test the EXIT command
     engine.stop()
-
-    return 0
