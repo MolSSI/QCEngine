@@ -3,10 +3,9 @@ Calls the Q-Chem executable.
 """
 
 import os
-import string
-import json
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
-from typing import Any, Dict, List, Optional, Set, Tuple
 
 from qcelemental.models import Result
 from qcelemental.util import parse_version, safe_version, which
@@ -151,6 +150,10 @@ class QChemHarness(ProgramHarness):
     def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
+        # Check some bounds on what cannot be parsed
+        if "ccsd" in input_model.method.lower() or "ccd" in input_model.method.lower():
+            raise InputError("Cannot handle CC* methods currently.")
+
         # Build keywords
         keywords = {k.upper(): v for k, v in input_model.keywords.items()}
         keywords["INPUT_BOHR"] = "TRUE"
@@ -211,7 +214,7 @@ $end
     def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
 
         output_data = {}
-        outfile = outfiles["dispatch.out"]
+        outfiles["dispatch.out"]
 
         bdata = {}
         for k, v in outfiles.items():
@@ -222,7 +225,6 @@ $end
             bdata[k] = np.frombuffer(v)
 
         if input_model.driver == "energy":
-            # TODO: This seems to work for SCF/MP2, but *not* CCSD(T)
             output_data["return_result"] = bdata["99.0"][-1]
         elif input_model.driver == "gradient":
             output_data["return_result"] = bdata["131.0"]
@@ -234,8 +236,13 @@ $end
         properties = {
             "nuclear_repulsion_energy": bdata["99.0"][0],
             "scf_total_energy": bdata["99.0"][1],
-            "return_energy": bdata["99.0"][-1],  # TODO: This isn't correct for *some* invocations of CCSD(T)
+            "return_energy": bdata["99.0"][-1],
         }
+
+        # Correct CCSD because its odd?
+        # if input_model.model.method.lower() == "ccsd":
+        #     m1 = re.findall(" CCSD correlation energy.+=.+\d+\.\d+", outfiles["dispatch.out"])
+        #     m2 = re.findall(" CCSD total energy.+=.+\d+\.\d+", outfiles["dispatch.out"])
 
         output_data["properties"] = properties
         output_data['stdout'] = outfiles["dispatch.out"]
