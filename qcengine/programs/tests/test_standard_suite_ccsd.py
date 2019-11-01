@@ -41,6 +41,8 @@ def nh2():
         pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce'}, marks=testing.using_nwchem),
         pytest.param('psi4', 'aug-cc-pvdz', {}, marks=testing.using_psi4),
         pytest.param('gamess', 'accd', {'ccinp__ncore': 0, 'contrl__ispher': 1}, marks=testing.using_gamess),
+        # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
+        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ])  # yapf: disable
 def test_sp_ccsd_rhf_full(program, basis, keywords, h2o):
     """cfour/sp-rhf-ccsd/input.dat
@@ -107,6 +109,8 @@ def test_sp_ccsd_uhf_fc_error(program, basis, keywords, nh2, errmsg):
         pytest.param('nwchem', 'AUG-CC-PVDZ', {'BASIS__SPHERICAL': True, 'QC_MODULE': 'TCE', 'SCF__ROHF': True}, marks=testing.using_nwchem),
         pytest.param('psi4', 'AUG-CC-PVDZ', {'REFERENCE': 'ROHF'}, marks=testing.using_psi4),
         pytest.param('gamess', 'ACCD', {'CONTRL__ISPHER': 1, 'CONTRL__SCFTYP': 'ROHF', 'CCINP__NCORE': 0}, marks=testing.using_gamess),
+        # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
+        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ])  # yapf: disable
 def test_sp_ccsd_rohf_full(program, basis, keywords, nh2):
     resi = {
