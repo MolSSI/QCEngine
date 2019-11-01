@@ -53,6 +53,8 @@ jobs:
     displayName: 'Run the Tests'
 
   - script: |
+      source $(conda_source)
+      conda activate test
       codecov
     displayName: 'Codecov Upload'
 
