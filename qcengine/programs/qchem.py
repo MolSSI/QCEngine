@@ -17,7 +17,7 @@ from .model import ProgramHarness
 
 class QChemHarness(ProgramHarness):
     _defaults: Dict[str, Any] = {
-        "name": "qchem",
+        "name": "QChem",
         "scratch": True,
         "thread_safe": False,
         "thread_parallel": True,
@@ -64,7 +64,7 @@ class QChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
         """
         Run qchem
         """
@@ -72,11 +72,13 @@ class QChemHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Check qchem version
-        if parse_version(self.get_version()) < parse_version("5.2"):
+        qceng_ver = "5.2"
+        if parse_version(self.get_version()) < parse_version(qceng_ver):
+            raise TypeError(f"Q-Chem version <{qceng_ver} not supported (found version {self.get_version()})")
             raise TypeError("Q-Chem version '{}' not supported".format(self.get_version()))
 
         # Setup the job
-        job_inputs = self.build_input(input_data, config)
+        job_inputs = self.build_input(input_model, config)
 
         # Run qchem
         exe_success, proc = self.execute(job_inputs)
@@ -84,7 +86,7 @@ class QChemHarness(ProgramHarness):
         # Determine whether the calculation succeeded
         if exe_success:
             # If execution succeeded, collect results
-            result = self.parse_output(proc["outfiles"], input_data)
+            result = self.parse_output(proc["outfiles"], input_model)
             return result
         else:
             outfile = proc["outfiles"]["dispatch.out"]
@@ -96,6 +98,7 @@ class QChemHarness(ProgramHarness):
 
     def execute(self,
                 inputs: Dict[str, Any],
+                *,
                 extra_infiles: Optional[Dict[str, str]] = None,
                 extra_outfiles: Optional[List[str]] = None,
                 extra_commands: Optional[List[str]] = None,

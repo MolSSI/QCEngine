@@ -12,7 +12,7 @@ import qcelemental as qcel
 import qcengine as qcng
 from qcelemental.util import which, which_import
 
-QCENGINE_RECORDS_COMMIT = "f4f3cb5255b488c4300fd6840470ae3747a296c3"
+QCENGINE_RECORDS_COMMIT = "fe14d77"
 
 
 def _check_qcenginerecords(return_data=False):
@@ -155,7 +155,7 @@ _programs = {
     "geometric": which_import("geometric", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_14": is_program_new_enough("psi4", "1.4a2.dev250"),
-    "qchem": is_program_new_enough("qchem", "5.0"),
+    "qchem": is_program_new_enough("qchem", "5.2"),
     "rdkit": which_import("rdkit", return_bool=True),
     "qcdb": which_import("qcdb", return_bool=True),
     "torchani": is_program_new_enough("torchani", "0.9"),
