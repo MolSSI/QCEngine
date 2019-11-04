@@ -199,12 +199,13 @@ class TurbomoleHarness(ProgramHarness):
             'stdout': stdout,
         }
 
+        # TODO: remove this?!
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
-        output_data['extras']['qcvars'] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v
-            for k, v in qcel.util.unnp(qcvars, flat=True).items()
-        }
+        # output_data['extras']['qcvars'] = {
+            # k.upper(): str(v) if isinstance(v, Decimal) else v
+            # for k, v in qcel.util.unnp(qcvars, flat=True).items()
+        # }
 
         output_data['success'] = True
         return Result(**{**input_model.dict(), **output_data})
