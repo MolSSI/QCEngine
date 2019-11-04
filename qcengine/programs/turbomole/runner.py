@@ -187,8 +187,6 @@ class TurbomoleHarness(ProgramHarness):
         retres = qcvars[f'CURRENT {input_model.driver.upper()}']
         if isinstance(retres, Decimal):
             retres = float(retres)
-        elif isinstance(retres, np.ndarray):
-            retres = retres.ravel().tolist()
 
         output_data = {
             'extras': {
