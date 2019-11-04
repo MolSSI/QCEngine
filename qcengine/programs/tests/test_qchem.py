@@ -1,8 +1,9 @@
 import pytest
+import numpy as np
 
 import qcelemental as qcel
 import qcengine as qcng
-from qcelemental.testing import compare_recursive
+from qcelemental.testing import compare_recursive, compare_values
 from qcengine.testing import qcengine_records, using_qchem
 
 qchem_info = qcengine_records('qchem')
@@ -66,3 +67,24 @@ def test_qchem_executor(test_case):
 
     atol = 1e-6
     assert compare_recursive(output_ref.return_result, result.return_result, atol=atol)
+
+
+@using_qchem
+def test_qchem_orientation():
+
+    mol = qcel.models.Molecule.from_data("""
+        He 0.0  0.7  0.7
+        He 0.0 -0.7 -0.7
+        """)
+
+    # Compare with rotation
+    inp = {"molecule": mol, "driver": "gradient", "model": {"method": "HF", "basis": "6-31g"}}
+    ret = qcng.compute(inp, "qchem", raise_error=True)
+    assert compare_values(np.linalg.norm(ret.return_result, axis=0), [0, 0, 0.00791539])
+
+    # Compare without rotations
+    mol_noorient = mol.copy(update={"fix_orientation": True})
+    inp = {"molecule": mol_noorient, "driver": "gradient", "model": {"method": "HF", "basis": "6-31g"}}
+    ret = qcng.compute(inp, "qchem", raise_error=True)
+
+    assert compare_values(np.linalg.norm(ret.return_result, axis=0), [0, 0.00559696541, 0.00559696541])

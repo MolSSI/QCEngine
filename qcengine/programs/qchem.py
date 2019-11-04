@@ -154,7 +154,7 @@ class QChemHarness(ProgramHarness):
                     template: Optional[str] = None) -> Dict[str, Any]:
 
         # Check some bounds on what cannot be parsed
-        if "ccsd" in input_model.method.lower() or "ccd" in input_model.method.lower():
+        if "ccsd" in input_model.model.method.lower() or "ccd" in input_model.model.method.lower():
             raise InputError("Cannot handle CC* methods currently.")
 
         # Build keywords
@@ -172,7 +172,7 @@ class QChemHarness(ProgramHarness):
             raise InputError(f"Driver of type {input_model.driver} is not yet supported.")
 
         if input_model.molecule.fix_com or input_model.molecule.fix_orientation:
-            keywords["NO_REORIENT"] = "TRUE"
+            keywords["SYM_IGNORE"] = "TRUE"
 
         keywords["METHOD"] = input_model.model.method
         if input_model.model.basis:
