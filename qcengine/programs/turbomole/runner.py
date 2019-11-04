@@ -191,8 +191,6 @@ class TurbomoleHarness(ProgramHarness):
             retres = retres.ravel().tolist()
 
         output_data = {
-            'schema_name': 'qcschema_output',
-            'schema_version': 1,
             'extras': {
                 'outfiles': outfiles,
             },
