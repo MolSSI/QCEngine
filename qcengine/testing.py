@@ -12,6 +12,44 @@ import qcelemental as qcel
 import qcengine as qcng
 from qcelemental.util import which, which_import
 
+QCENGINE_RECORDS_COMMIT = "d754bc9"
+
+
+def _check_qcenginerecords(return_data=False):
+
+    skip = True
+    try:
+        import qcenginerecords
+
+        qcer_hash = qcenginerecords.__git_revision__
+        if qcer_hash != QCENGINE_RECORDS_COMMIT[:7]:
+            msg = f"Incorrect QCEngineRecord Git Revsion, found {qcer_hash} need {QCENGINE_RECORDS_COMMIT[:7]}."
+        else:
+            skip = False
+            msg = "Works!"
+
+    except ModuleNotFoundError:
+        msg = "Could not find QCEngineRecords in PYTHONPATH"
+
+    if return_data:
+        return skip, msg
+    else:
+        return pytest.mark.skipif(skip, reason=msg)
+
+
+using_qcenginerecords = _check_qcenginerecords()
+
+
+def qcengine_records(program):
+
+    skip, msg = _check_qcenginerecords(return_data=True)
+    if skip:
+        pytest.skip(msg, allow_module_level=True)
+
+    import qcenginerecords
+
+    return qcenginerecords.get_info(program)
+
 
 def is_program_new_enough(program, version_feature_introduced):
     """Returns True if `program` registered in QCEngine, locatable in

@@ -27,6 +27,7 @@ def nh2():
  H   0.000000000000000  -1.511214298139000   1.013682596946108
  H   0.000000000000000   1.511214298139000   1.013682596946108
  units au
+ symmetry c1
 """
     return qcel.models.Molecule.from_data(smol)
 
@@ -41,6 +42,7 @@ def nh2():
         pytest.param('psi4', 'aug-cc-pvdz', {'scf_type': 'direct'}, marks=testing.using_psi4),
         pytest.param('gamess', 'accd', {'contrl__ispher': 1}, marks=testing.using_gamess),
         pytest.param('turbomole', 'aug-cc-pVDZ', {}, marks=testing.using_turbomole),
+        pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ])  # yapf: disable
 def test_sp_hf_rhf(program, basis, keywords, h2o):
     """cfour/sp-rhf-hf/input.dat
@@ -80,6 +82,7 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
         pytest.param('psi4', 'aug-cc-pvdz', {'reference': 'uhf', 'scf_type': 'direct'}, marks=testing.using_psi4),
         pytest.param('gamess', 'accd', {'contrl__ispher': 1, 'contrl__scftyp': 'uhf'}, marks=testing.using_gamess),
         pytest.param('turbomole', 'aug-cc-pVDZ', {}, marks=testing.using_turbomole),
+        pytest.param('molpro', 'aug-cc-pvdz', {'reference': 'unrestricted'}, marks=testing.using_molpro),
     ])  # yapf: disable
 def test_sp_hf_uhf(program, basis, keywords, nh2):
     resi = {
@@ -113,6 +116,7 @@ def test_sp_hf_uhf(program, basis, keywords, nh2):
         pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce', 'scf__rohf': True}, marks=testing.using_nwchem),
         pytest.param('psi4', 'aug-cc-pvdz', {'reference': 'rohf', 'scf_type': 'direct'}, marks=testing.using_psi4),
         pytest.param('gamess', 'accd', {'contrl__ispher': 1, 'contrl__scftyp': 'rohf'}, marks=testing.using_gamess),
+        pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ])  # yapf: disable
 def test_sp_hf_rohf(program, basis, keywords, nh2):
     resi = {
