@@ -73,6 +73,7 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o):
     assert compare_values(ref_norm, grad_norm)
 
 
+@testing.using_turbomole
 def test_turbomole_ri_dsp(h2o):
     resi = {
         "molecule": h2o,
