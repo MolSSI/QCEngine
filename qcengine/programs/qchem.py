@@ -3,6 +3,7 @@ Calls the Q-Chem executable.
 """
 
 import os
+import tempfile
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
@@ -34,7 +35,7 @@ class QChemHarness(ProgramHarness):
 
     def _get_qc_path(self, config: Optional['JobConfig'] = None):
         paths = os.environ.copy()
-        paths["QCSCRATCH"] = "/tmp"
+        paths["QCSCRATCH"] = tempfile.gettempdir()
         if config and config.scratch_directory:
             paths["QCSCRATCH"] = config.scratch_directory
 
@@ -75,7 +76,6 @@ class QChemHarness(ProgramHarness):
         qceng_ver = "5.2"
         if parse_version(self.get_version()) < parse_version(qceng_ver):
             raise TypeError(f"Q-Chem version <{qceng_ver} not supported (found version {self.get_version()})")
-            raise TypeError("Q-Chem version '{}' not supported".format(self.get_version()))
 
         # Setup the job
         job_inputs = self.build_input(input_model, config)
@@ -144,7 +144,8 @@ class QChemHarness(ProgramHarness):
 
             proc["outfiles"].update({os.path.split(k)[-1]: v for k, v in bdict.items()})
 
-        if "Thank you very much for using Q-Chem" not in proc["outfiles"]["dispatch.out"]:
+        if (proc["outfiles"]["dispatch.out"] is
+                None) or ("Thank you very much for using Q-Chem" not in proc["outfiles"]["dispatch.out"]):
             exe_success = False
 
         # QChem does not create an output file and only prints to stdout

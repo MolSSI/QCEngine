@@ -77,7 +77,7 @@ def test_sp_mp2_rhf_full(program, basis, keywords, h2o):
     pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce', 'scf__uhf': True, 'tce__freeze':1}, marks=testing.using_nwchem),
     pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'scf__uhf': True, 'mp2__freeze':1}, marks=testing.using_nwchem),
     pytest.param('psi4', 'aug-cc-pvdz', {'reference': 'uhf', 'freeze_core': True, 'mp2_type': 'conv'}, marks=testing.using_psi4),
-    pytest.param('qchem', 'aug-cc-pvdz', {"N_FROZEN_CORE": "fc"}, marks=testing.using_qchem),
+    pytest.param('qchem', 'aug-cc-pvdz', {"N_frozen_CORE": "fC"}, marks=testing.using_qchem),
     # TODO Molpro needs a new keyword for unrestricted MP2 (otherwise RMP2 by default) and needs symmetry c1
     # pytest.param('molpro', 'aug-cc-pvdz', {"reference": "unrestricted"}, marks=testing.using_molpro),
 ])  # yapf: disable
