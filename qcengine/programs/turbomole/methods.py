@@ -1,14 +1,18 @@
 # Available methods
 METHODS = {
+    # Dummy for HF
+    "hf": [
+        "hf",
+    ],
     "ricc2": [
         "rimp2",
         "rimp3",
         "rimp4",
         "ricc2"
     ],
-    # Set some appropriate predefined functionals that can be directly
-    # substituted into the control file.
-    "dft": [
+    # Hardcoded XC-functionals that can be selected from the dft submenu
+    # of define.
+    "dft_hardcoded": [
         # Hardcoded in V7.3
         "s-vwn"
         "s-vwn_Gaussian",

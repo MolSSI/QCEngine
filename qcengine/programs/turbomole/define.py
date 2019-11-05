@@ -68,6 +68,11 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
         raise InputError(f"Method {method} not in supported methods "
                          f"{methods_flat}!")
 
+    # This variable may contain substitutions that will be made to
+    # the control file after it was created from a define call, e.g.
+    # setting XC functionals that aren't hardcoded in define etc.
+    subs = None
+
     def occ_num_mo_data(charge: int, mult: int,
                         unrestricted: Optional[bool] = False) -> str:
         """Handles the 'Occupation Number & Molecular Orbital' section
@@ -126,13 +131,7 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
                                *
                                *
                             """
-        # Fallback: assume method corresponds to a DFT functional
-        #
-        # TODO: handle xcfuncs that aren't defined in define, e.g.
-        # new functionals introduced in 7.4 from libxc. ...
-        # Maybe the best idea would be to not set the functional here
-        # but just turn on DFT and add it to the control file later on.
-        else:
+        elif method in METHODS["dft_hardcoded"]:
             method_stdin = f"""dft
                                on
                                func
@@ -141,6 +140,12 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
                                {grid}
 
                             """
+        # TODO: Handle xcfuncs that aren't defined in define, e.g.
+        # new functionals introduced in 7.4 from libxc. ...
+        # Maybe the best idea would be to not set the functional here
+        # but just turn on DFT and add it to the control file later on.
+        elif method in METHODS["dft_libxc"]:
+            raise InputError("libxc functionals are not supported right now.")
         return method_stdin
 
     # Resolution of identity
@@ -224,4 +229,4 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
     *
     """.format(**kwargs)
 
-    return stdin
+    return stdin, subs

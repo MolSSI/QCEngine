@@ -90,10 +90,10 @@ class TurbomoleHarness(ProgramHarness):
         # 'a1 2' would be the 1st excited state of the irreducible group A1.
         # Right now only GS are supported, so this is hardcoded as 'x'.
         geoopt = "x" if input_model.driver.derivative_int() > 0 else ""
-        stdin = prepare_stdin(model.method, model.basis, input_model.keywords,
-                              input_model.molecule.molecular_charge,
-                              input_model.molecule.molecular_multiplicity,
-                              geoopt,
+        stdin, subs = prepare_stdin(model.method, model.basis, input_model.keywords,
+                                    input_model.molecule.molecular_charge,
+                                    input_model.molecule.molecular_multiplicity,
+                                    geoopt,
         )
         with temporary_directory(suffix="_define_scratch") as tmpdir:
             tmpdir = Path(tmpdir)
