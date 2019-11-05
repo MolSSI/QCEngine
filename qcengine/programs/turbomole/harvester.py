@@ -11,9 +11,9 @@ def parse_decimal(regex, text, method="search"):
     matches = getattr(with_float, method)(text)
 
     if method == "search":
-        groups = matches.groups()
-        if len(groups) == 1:
-            groups = ("", groups[0])
+        # groups = matches.groups()
+        # if len(groups) == 1:
+            # groups = ("", groups[0])
         matches = [matches.groups()]
     return [(method, Decimal(energy)) for method, energy in matches]
 
@@ -68,11 +68,13 @@ def parse_gradient(gradient):
     )
     mobj = grad_re.match(gradient)
 
-    energy_type = mobj.group("energy_type")
-    grad_norm = Decimal(mobj.group("grad_norm"))
-    energy = Decimal(mobj.group("energy"))
+    # Commented out the variables that aren't returned so LGTM doesn't
+    # complain.
+    # energy_type = mobj.group("energy_type")
+    # grad_norm = Decimal(mobj.group("grad_norm"))
+    # energy = Decimal(mobj.group("energy"))
     coords_grad = mobj.group("coords_gradients")
-    cycle = int(mobj.group("cycle"))
+    # cycle = int(mobj.group("cycle"))
 
     *_, grad = re.split("[a-z]{1,3}", coords_grad.strip())
     grad = np.array(grad.strip().replace("D", "E").split(), dtype=float)

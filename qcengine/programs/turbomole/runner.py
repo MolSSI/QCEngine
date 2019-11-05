@@ -7,9 +7,6 @@ from pathlib import Path
 import re
 from typing import Any, Dict, Optional, Tuple
 
-import numpy as np
-
-import qcelemental as qcel
 from qcelemental.models import Provenance, Result
 from qcelemental.util import safe_version, which
 
@@ -197,13 +194,5 @@ class TurbomoleHarness(ProgramHarness):
         output_data["return_result"] = retres
         output_data["stdout"] = stdout
         output_data['success'] = True
-
-        # TODO: remove this?!
-        # got to even out who needs plump/flat/Decimal/float/ndarray/list
-        # Decimal --> str preserves precision
-        # output_data['extras']['qcvars'] = {
-            # k.upper(): str(v) if isinstance(v, Decimal) else v
-            # for k, v in qcel.util.unnp(qcvars, flat=True).items()
-        # }
 
         return Result(**output_data)
