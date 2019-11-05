@@ -14,7 +14,7 @@ METHODS = {
     # of define.
     "dft_hardcoded": [
         # Hardcoded in V7.3
-        "s-vwn"
+        "s-vwn",
         "s-vwn_Gaussian",
         "pwlda",
         "b-lyp",
