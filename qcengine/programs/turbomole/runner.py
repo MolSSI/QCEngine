@@ -188,16 +188,15 @@ class TurbomoleHarness(ProgramHarness):
         if isinstance(retres, Decimal):
             retres = float(retres)
 
-        output_data = {
-            'extras': {
-                'outfiles': outfiles,
-            },
-            'properties': {},
-            'provenance': Provenance(creator="Turbomole", version=self.get_version(),
-                                     routine="turbomole"),
-            'return_result': retres,
-            'stdout': stdout,
-        }
+        output_data = input_model.dict()
+        output_data["extras"]["outfiles"] = outfiles
+        output_data["properties"] = {}
+        output_data["provenance"] = Provenance(creator="Turbomole",
+                                               version=self.get_version(),
+                                               routine="turbomole")
+        output_data["return_result"] = retres
+        output_data["stdout"] = stdout
+        output_data['success'] = True
 
         # TODO: remove this?!
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
@@ -207,5 +206,4 @@ class TurbomoleHarness(ProgramHarness):
             # for k, v in qcel.util.unnp(qcvars, flat=True).items()
         # }
 
-        output_data['success'] = True
-        return Result(**{**input_model.dict(), **output_data})
+        return Result(**output_data)
