@@ -32,18 +32,17 @@ def nh2():
     return qcel.models.Molecule.from_data(smol)
 
 
-@pytest.mark.parametrize(
-    'program,basis,keywords',
-    [
-        pytest.param('cfour', 'aug-pvdz', {'SCF_CONV': 12, 'CC_CONV': 12}, marks=testing.using_cfour),
-        pytest.param('cfour', 'aug-pvdz', {}, marks=testing.using_cfour),
-        pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True}, marks=testing.using_nwchem),
-        pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce'}, marks=testing.using_nwchem),
-        pytest.param('psi4', 'aug-cc-pvdz', {}, marks=testing.using_psi4),
-        pytest.param('gamess', 'accd', {'ccinp__ncore': 0, 'contrl__ispher': 1}, marks=testing.using_gamess),
-        # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
-        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
-    ])  # yapf: disable
+@pytest.mark.parametrize('program,basis,keywords', [
+    pytest.param('cfour', 'aug-pvdz', {'SCF_CONV': 12, 'CC_CONV': 12}, marks=testing.using_cfour),
+    pytest.param('cfour', 'aug-pvdz', {}, marks=testing.using_cfour),
+    pytest.param('gamess', 'accd', {'ccinp__ncore': 0, 'contrl__ispher': 1}, marks=testing.using_gamess),
+    pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True}, marks=testing.using_nwchem),
+    pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce'}, marks=testing.using_nwchem),
+    pytest.param('psi4', 'aug-cc-pvdz', {}, marks=testing.using_psi4),
+    pytest.param('qchem', 'aug-cc-pvdz', {"N_FROZEN_CORE": 0}, marks=testing.using_qchem),
+    # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
+    # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
+])  # yapf: disable
 def test_sp_ccsd_rhf_full(program, basis, keywords, h2o):
     """cfour/sp-rhf-ccsd/input.dat
     #! single point CCSD/qz2p on water
@@ -101,17 +100,16 @@ def test_sp_ccsd_uhf_fc_error(program, basis, keywords, nh2, errmsg):
     assert errmsg in str(e.value)
 
 
-@pytest.mark.parametrize(
-    'program,basis,keywords',
-    [
-        pytest.param('cfour', 'AUG-PVDZ', {'refERENCE': 'ROhf', 'OCCUPATION': [[3,1,1,0],[3,0,1,0]], 'SCF_CONV': 12, 'CC_CONV': 12}, marks=testing.using_cfour),
-        pytest.param('cfour', 'AUG-PVDZ', {'REFERENCE': 'ROHF'}, marks=testing.using_cfour),
-        pytest.param('nwchem', 'AUG-CC-PVDZ', {'BASIS__SPHERICAL': True, 'QC_MODULE': 'TCE', 'SCF__ROHF': True}, marks=testing.using_nwchem),
-        pytest.param('psi4', 'AUG-CC-PVDZ', {'REFERENCE': 'ROHF'}, marks=testing.using_psi4),
-        pytest.param('gamess', 'ACCD', {'CONTRL__ISPHER': 1, 'CONTRL__SCFTYP': 'ROHF', 'CCINP__NCORE': 0}, marks=testing.using_gamess),
-        # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
-        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
-    ])  # yapf: disable
+@pytest.mark.parametrize('program,basis,keywords', [
+    pytest.param('cfour', 'AUG-PVDZ', {'refERENCE': 'ROhf', 'OCCUPATION': [[3,1,1,0],[3,0,1,0]], 'SCF_CONV': 12, 'CC_CONV': 12}, marks=testing.using_cfour),
+    pytest.param('cfour', 'AUG-PVDZ', {'REFERENCE': 'ROHF'}, marks=testing.using_cfour),
+    pytest.param('gamess', 'ACCD', {'CONTRL__ISPHER': 1, 'CONTRL__SCFTYP': 'ROHF', 'CCINP__NCORE': 0}, marks=testing.using_gamess),
+    pytest.param('nwchem', 'AUG-CC-PVDZ', {'BASIS__SPHERICAL': True, 'QC_MODULE': 'TCE', 'SCF__ROHF': True}, marks=testing.using_nwchem),
+    pytest.param('psi4', 'AUG-CC-PVDZ', {'REFERENCE': 'ROHF'}, marks=testing.using_psi4),
+    pytest.param('qchem', 'AUG-CC-PVDZ', {"UNRESTRICTED": False}, marks=testing.using_qchem),
+    # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
+    # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
+])  # yapf: disable
 def test_sp_ccsd_rohf_full(program, basis, keywords, nh2):
     resi = {
         "molecule": nh2,
