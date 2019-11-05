@@ -90,16 +90,12 @@ def test_run_procedure(tmp_path):
         assert output["provenance"]["creator"].lower() == "geometric"
         assert output["success"] is True
 
-    inp = {"schema_name": "qcschema_optimization_input",
-           "schema_version": 1,
-           "keywords": {
+    inp = {"keywords": {
                "coordsys": "tric",
                "maxiter": 100,
                "program": "psi4"
            },
            "input_specification": {
-               "schema_name": "qcschema_input",
-               "schema_version": 1,
                "driver": "gradient",
                "model": {"method": "HF", "basis": "sto-3g"},
                "keywords": {},

@@ -12,7 +12,7 @@ import qcelemental as qcel
 import qcengine as qcng
 from qcelemental.util import which, which_import
 
-QCENGINE_RECORDS_COMMIT = "d754bc9"
+QCENGINE_RECORDS_COMMIT = "fe14d77"
 
 
 def _check_qcenginerecords(return_data=False):
@@ -21,7 +21,7 @@ def _check_qcenginerecords(return_data=False):
     try:
         import qcenginerecords
 
-        qcer_hash = qcenginerecords.__git_revision__
+        qcer_hash = qcenginerecords.__git_revision__[:7]
         if qcer_hash != QCENGINE_RECORDS_COMMIT[:7]:
             msg = f"Incorrect QCEngineRecord Git Revsion, found {qcer_hash} need {QCENGINE_RECORDS_COMMIT[:7]}."
         else:
@@ -155,6 +155,7 @@ _programs = {
     "geometric": which_import("geometric", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_14": is_program_new_enough("psi4", "1.4a2.dev250"),
+    "qchem": is_program_new_enough("qchem", "5.2"),
     "rdkit": which_import("rdkit", return_bool=True),
     "qcdb": which_import("qcdb", return_bool=True),
     "torchani": is_program_new_enough("torchani", "0.9"),
@@ -190,6 +191,7 @@ using_mp2d = _build_pytest_skip("mp2d")
 using_psi4 = _build_pytest_skip("psi4")
 using_psi4_14 = _build_pytest_skip("psi4_14")
 using_qcdb = _build_pytest_skip("qcdb")
+using_qchem = _build_pytest_skip("qchem")
 using_rdkit = _build_pytest_skip("rdkit")
 using_torchani = _build_pytest_skip("torchani")
 using_terachem = _build_pytest_skip("terachem")
