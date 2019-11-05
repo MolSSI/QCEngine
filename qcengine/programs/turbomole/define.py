@@ -1,7 +1,9 @@
+import itertools as it
 from subprocess import Popen, PIPE, TimeoutExpired
 from typing import Any, Dict, Optional
 
 from .methods import METHODS, KEYWORDS
+from qcengine.exceptions import InputError
 
 
 def decode_define(str_: str) -> str:
@@ -30,18 +32,23 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
     # We will decode it later on manually.
     with Popen("define", stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=cwd) as proc:
         try:
-            stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
+            # stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
+            stdout, _ = proc.communicate(str.encode(stdin), timeout=15)
             stdout = decode_define(stdout)
         except TimeoutExpired as error:
-            # Retrieve output of timed out define call
-            stdout, stderr = proc.communicate()
-            stdout = decode_define(stdout)
-            stderr = decode_define(stderr)
-            # Attach stdout and stderr of proc to error, so they can be
-            # accessed later on.
-            error.stdout = stdout
-            error.stderr = stdout
-            raise error
+            raise InputError(f"define call timed out!")
+            # TODO: How to get the stdout when define times out? Calling
+            # communiate may also result in an indefinite hang so I disabled it
+            # for now...
+            # # Retrieve output of timed out define call
+            # stdout, stderr = proc.communicate()
+            # stdout = decode_define(stdout)
+            # stderr = decode_define(stderr)
+            # # Attach stdout and stderr of proc to error, so they can be
+            # # accessed later on.
+            # error.stdout = stdout
+            # error.stderr = stdout
+            # raise error
         proc.terminate()
 
     return stdout
@@ -55,6 +62,11 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
     # Load data from keywords
     unrestricted = keywords.get("unrestricted", False)
     grid = keywords.get("grid", "m3")
+
+    methods_flat = list(it.chain(*[m for m in METHODS.values()]))
+    if method not in methods_flat:
+        raise InputError(f"Method {method} not in supported methods "
+                         f"{methods_flat}!")
 
     def occ_num_mo_data(charge: int, mult: int,
                         unrestricted: Optional[bool] = False) -> str:
