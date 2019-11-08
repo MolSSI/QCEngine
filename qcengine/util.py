@@ -284,7 +284,8 @@ def execute(command: List[str],
             blocking_files: Optional[List[str]] = None,
             timeout: Optional[int] = None,
             interupt_after: Optional[int] = None,
-            environment: Optional[Dict[str, str]] = None) -> Tuple[bool, Dict[str, Any]]:
+            environment: Optional[Dict[str, str]] = None,
+            shell: Optional[bool] = False) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
 
@@ -319,6 +320,8 @@ def execute(command: List[str],
         Interupt the process (not hard kill) after n seconds.
     environment : dict, optional
         The environment to run in
+    shell : bool, optional
+        Run command through the shell.
 
     Raises
     ------
@@ -359,6 +362,7 @@ def execute(command: List[str],
                              exist_ok=scratch_exist_ok,
                              suffix=scratch_suffix) as scrdir:
         popen_kwargs["cwd"] = scrdir
+        popen_kwargs["shell"] = shell
         with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
 

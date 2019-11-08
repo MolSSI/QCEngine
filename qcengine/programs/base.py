@@ -18,6 +18,7 @@ from .qchem import QChemHarness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
 from .torchani import TorchANIHarness
+from .turbomole import TurbomoleHarness
 
 __all__ = ["register_program", "get_program", "list_all_programs", "list_available_programs"]
 
@@ -99,6 +100,7 @@ register_program(NWChemHarness())
 register_program(Psi4Harness())
 register_program(QChemHarness())
 register_program(TeraChemHarness())
+register_program(TurbomoleHarness())
 
 # Semi-emperical
 register_program(MopacHarness())
@@ -112,4 +114,3 @@ register_program(RDKitHarness())
 # Analytical Corrections
 register_program(DFTD3Harness())
 register_program(MP2DHarness())
-
