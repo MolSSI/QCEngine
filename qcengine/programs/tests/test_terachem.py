@@ -1,10 +1,10 @@
 import os
 
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_recursive
+
+import qcengine as qcng
 from qcengine.testing import qcengine_records, using_terachem
 
 # Prep globals
@@ -15,10 +15,10 @@ terachem_info = qcengine_records('terachem')
 def test_terachem_output_parser(test_case):
     # Get output file data
     data = terachem_info.get_test_data(test_case)
-    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
 
     output = qcng.get_program('terachem', check=False).parse_output(data, inp).dict()
-    output_ref = qcel.models.Result.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
 
     assert compare_recursive(output_ref, output, forgive={"stdout", "provenance"})
 
@@ -27,7 +27,7 @@ def test_terachem_output_parser(test_case):
 def test_terachem_input_formatter(test_case):
     # Get input file data
     data = terachem_info.get_test_data(test_case)
-    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program('terachem', check=False).build_input(inp, qcng.get_config())
@@ -39,7 +39,7 @@ def test_terachem_input_formatter(test_case):
 def test_terachem_executor(test_case):
     # Get input file data
     data = terachem_info.get_test_data(test_case)
-    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
 
     # Run Terachem
     result = qcng.compute(inp, 'terachem')
@@ -47,7 +47,7 @@ def test_terachem_executor(test_case):
     assert result.success is True
 
     # Get output file data
-    output_ref = qcel.models.Result.parse_raw(data["output.json"])
+    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"])
 
     atol = 1e-6
     if result.driver == "gradient":

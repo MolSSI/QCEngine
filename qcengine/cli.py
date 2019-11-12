@@ -3,14 +3,15 @@ Provides a CLI for QCEngine
 """
 
 import argparse
+import json
 import os.path
 import sys
 from typing import Any, Dict
-import json
+
+from .config import global_repr  # info
 
 from . import (__version__, compute, compute_procedure, get_procedure, get_program,  # run and run-procedure; info
                list_all_procedures, list_all_programs, list_available_procedures, list_available_programs)
-from .config import global_repr  # info
 
 
 __all__ = ["main"]

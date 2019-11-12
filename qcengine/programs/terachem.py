@@ -5,10 +5,11 @@ Calls the TeraChem executable.
 import re
 from typing import Any, Dict, Optional
 
-import qcengine.util as uti
-from qcelemental.models import FailedOperation, Result
+from qcelemental.models import AtomicResult, FailedOperation
 from qcelemental.molparse.regex import DECIMAL, NUMBER
 from qcelemental.util import parse_version, safe_version, which
+
+import qcengine.util as uti
 
 from ..exceptions import UnknownError
 from ..util import popen
@@ -50,7 +51,7 @@ class TeraChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Run TeraChem
         """
@@ -75,10 +76,10 @@ class TeraChemHarness(ProgramHarness):
                                    input_data=output_data)
 
         # If execution succeeded, collect results
-        Result = self.parse_output(proc["outfiles"], input_data)
-        return Result
+        result = self.parse_output(proc["outfiles"], input_data)
+        return result
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         #Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype='terachem', units='Bohr')
@@ -113,7 +114,7 @@ class TeraChemHarness(ProgramHarness):
             "input_result": input_model.copy(deep=True)
         }
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
         output_data = {}
         properties = {}
 
@@ -188,7 +189,7 @@ class TeraChemHarness(ProgramHarness):
         for extra in input_model.extras.keys():
             input_model.extras[extra] = outfiles[extra]
 
-        return Result(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.dict(), **output_data})
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
         binaries = []

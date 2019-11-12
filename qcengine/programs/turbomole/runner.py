@@ -1,20 +1,20 @@
 """
 Calls the Turbomole executable.
 """
-from decimal import Decimal
 import os
-from pathlib import Path
 import re
+from decimal import Decimal
+from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from qcelemental.models import Provenance, Result
+from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
 from ...util import execute, temporary_directory
 from ..model import ProgramHarness
+from .define import execute_define, prepare_stdin
 from .harvester import harvest
-from .define import prepare_stdin, execute_define
-from .methods import METHODS, KEYWORDS
+from .methods import KEYWORDS, METHODS
 
 
 class TurbomoleHarness(ProgramHarness):
@@ -53,7 +53,7 @@ class TurbomoleHarness(ProgramHarness):
             self.version_cache[which_prog] = safe_version(version)
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
@@ -68,7 +68,7 @@ class TurbomoleHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         turbomolrec = {
             'infiles': {},
@@ -168,7 +168,7 @@ class TurbomoleHarness(ProgramHarness):
 
     def parse_output(self,
                      outfiles: Dict[str, str],
-                     input_model: 'ResultInput') -> 'Result':  # lgtm: [py/similar-function]
+                     input_model: 'AtomicInput') -> 'AtomicResult':  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")
 
@@ -195,4 +195,4 @@ class TurbomoleHarness(ProgramHarness):
         output_data["stdout"] = stdout
         output_data['success'] = True
 
-        return Result(**output_data)
+        return AtomicResult(**output_data)

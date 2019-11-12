@@ -4,12 +4,9 @@ import subprocess
 import sys
 from typing import List
 
-from qcengine import testing
-from qcengine import util
-from qcengine import cli
-from qcengine import get_molecule
+from qcelemental.models import OptimizationInput, ResultInput
 
-from qcelemental.models import ResultInput, OptimizationInput
+from qcengine import cli, get_molecule, testing, util
 
 
 def run_qcengine_cli(args: List[str], stdin: str = None) -> str:

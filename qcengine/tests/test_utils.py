@@ -3,8 +3,8 @@ import sys
 import time
 
 import pytest
+from qcelemental.models import AtomicInput, OptimizationInput
 
-from qcelemental.models import OptimizationInput, ResultInput
 from qcengine import util
 from qcengine.exceptions import InputError, QCEngineException
 
@@ -12,7 +12,7 @@ from qcengine.exceptions import InputError, QCEngineException
 def test_model_wrapper():
 
     with pytest.raises(InputError):
-        util.model_wrapper({"bad": "yup"}, ResultInput)
+        util.model_wrapper({"bad": "yup"}, AtomicInput)
 
 
 def test_compute_wrapper_capture():

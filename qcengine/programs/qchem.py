@@ -7,8 +7,7 @@ import tempfile
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-
-from qcelemental.models import Result
+from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
@@ -65,7 +64,7 @@ class QChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Run qchem
         """
@@ -151,7 +150,7 @@ class QChemHarness(ProgramHarness):
         # QChem does not create an output file and only prints to stdout
         return exe_success, proc
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
         # Check some bounds on what cannot be parsed
@@ -215,7 +214,7 @@ $end
 
         return ret
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
 
         output_data = {}
         outfiles["dispatch.out"]
@@ -252,4 +251,4 @@ $end
         output_data['stdout'] = outfiles["dispatch.out"]
         output_data['success'] = True
 
-        return Result(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.dict(), **output_data})

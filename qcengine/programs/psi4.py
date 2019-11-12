@@ -5,7 +5,7 @@ import json
 import os
 from typing import Dict
 
-from qcelemental.models import Result
+from qcelemental.models import AtomicResult
 from qcelemental.util import deserialize, parse_version, safe_version, which
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
@@ -52,7 +52,7 @@ class Psi4Harness(ProgramHarness):
 
         return candidate_version
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Runs Psi4 in API mode
         """
@@ -189,4 +189,4 @@ class Psi4Harness(ProgramHarness):
         # Delete keys
         output_data.pop("return_output", None)
 
-        return Result(**output_data)
+        return AtomicResult(**output_data)

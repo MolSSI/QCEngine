@@ -108,7 +108,7 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
 
     Returns
     -------
-    result : dict or pydantic.models.Result
+    result : dict or pydantic.models.AtomicResult
         Output type depends on return_dict or a dict if an error was generated in model construction
     """
 

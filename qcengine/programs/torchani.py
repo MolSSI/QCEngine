@@ -4,7 +4,7 @@ Calls the TorchANI package.
 
 from typing import Dict
 
-from qcelemental.models import Provenance, Result
+from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError, ResourceError
@@ -74,7 +74,7 @@ class TorchANIHarness(ProgramHarness):
 
         return self._CACHE[name]
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Runs TorchANI in FF typing
         """
@@ -167,4 +167,4 @@ class TorchANIHarness(ProgramHarness):
         ret_data["success"] = True
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
-        return Result(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**{**input_data.dict(), **ret_data})

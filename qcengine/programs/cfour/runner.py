@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import Provenance, Result
+from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
 from ...util import execute
@@ -63,7 +63,7 @@ class CFOURHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
@@ -74,7 +74,7 @@ class CFOURHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         cfourrec = {
             'infiles': {},
@@ -131,7 +131,7 @@ class CFOURHarness(ProgramHarness):
         return success, dexe
 
     def parse_output(self, outfiles: Dict[str, str],
-                     input_model: 'ResultInput') -> 'Result':  # lgtm: [py/similar-function]
+                     input_model: 'AtomicInput') -> 'AtomicResult':  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")
 
@@ -170,4 +170,4 @@ class CFOURHarness(ProgramHarness):
         }
 
         output_data['success'] = True
-        return Result(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.dict(), **output_data})

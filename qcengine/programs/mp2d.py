@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import Provenance, Result
+from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, ResourceError, UnknownError
@@ -54,7 +54,7 @@ class MP2DHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         from ..testing import is_program_new_enough
 
         self.found(raise_error=True)
@@ -94,7 +94,7 @@ class MP2DHarness(ProgramHarness):
         )
         return success, dexe
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
         # strip engine hint
@@ -140,7 +140,7 @@ class MP2DHarness(ProgramHarness):
             "input_result": input_model.copy(deep=True),
         }
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
         stdout = outfiles.pop("stdout")
 
         for fl, contents in outfiles.items():
@@ -224,4 +224,4 @@ class MP2DHarness(ProgramHarness):
         output_data["extras"]["qcvars"] = calcinfo
 
         output_data['success'] = True
-        return Result(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.dict(), **output_data})

@@ -6,7 +6,7 @@ import string
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from qcelemental.models import Result
+from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
@@ -92,7 +92,7 @@ class MolproHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Run Molpro
         """
@@ -157,7 +157,7 @@ class MolproHarness(ProgramHarness):
                                     timeout=timeout)
         return exe_success, proc
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         if template is None:
             input_file = []
@@ -244,7 +244,7 @@ class MolproHarness(ProgramHarness):
             "input_result": input_model.copy(deep=True)
         }
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
         tree = ET.ElementTree(ET.fromstring(outfiles["dispatch.xml"]))
         root = tree.getroot()
         # print(root.tag)
@@ -446,11 +446,11 @@ class MolproHarness(ProgramHarness):
         elif input_model.driver == "gradient":
             output_data["return_result"] = properties.pop("gradient")
 
-        # Final output_data assignments needed for the Result object
+        # Final output_data assignments needed for the AtomicResult object
         output_data["properties"] = properties
         output_data["extras"].update(extras)
         output_data['schema_name'] = 'qcschema_output'
         output_data['stdout'] = outfiles["dispatch.out"]
         output_data['success'] = True
 
-        return Result(**output_data)
+        return AtomicResult(**output_data)

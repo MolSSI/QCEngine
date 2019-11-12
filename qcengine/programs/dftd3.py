@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import FailedOperation, Provenance, Result
+from qcelemental.models import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, ResourceError, UnknownError
@@ -57,7 +57,7 @@ class DFTD3Harness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
@@ -98,7 +98,7 @@ class DFTD3Harness(ProgramHarness):
         )
         return success, dexe
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
         # strip engine hint
@@ -164,7 +164,7 @@ class DFTD3Harness(ProgramHarness):
 #   schemes can give wrong answers for 3-body. And because 3-body is
 #   set to run with some dummy values, the 2-body values are no good.
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
         stdout = outfiles.pop("stdout")
 
         for fl, contents in outfiles.items():
@@ -276,7 +276,7 @@ class DFTD3Harness(ProgramHarness):
         output_data["extras"]['qcvars'] = calcinfo
 
         output_data['success'] = True
-        return Result(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.dict(), **output_data})
 
 
 def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:

@@ -30,8 +30,8 @@ if __name__ == "__main__":
             'pyyaml',
             'py-cpuinfo',
             'psutil',
-            'qcelemental>=0.9.0',
-            'pydantic>=0.30.1'
+            #'qcelemental>=0.12.0',
+            'pydantic>=1.0.0'
         ],
         entry_points={"console_scripts": [
             "qcengine=qcengine.cli:main",

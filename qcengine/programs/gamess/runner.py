@@ -6,7 +6,7 @@ from decimal import Decimal
 from typing import Any, Dict, Optional
 
 import qcelemental as qcel
-from qcelemental.models import Result
+from qcelemental.models import AtomicResult
 from qcelemental.util import safe_version, unnp, which
 
 from ...exceptions import InputError
@@ -66,7 +66,7 @@ class GAMESSHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_data, config)
@@ -80,7 +80,7 @@ class GAMESSHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_data)
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         gamessrec = {
             'infiles': {},
@@ -141,7 +141,7 @@ class GAMESSHarness(ProgramHarness):
         )
         return success, dexe
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, outfiles["stdout"])
@@ -171,4 +171,4 @@ class GAMESSHarness(ProgramHarness):
 
         output_data['success'] = True
 
-        return Result(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.dict(), **output_data})
