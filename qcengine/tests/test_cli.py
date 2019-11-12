@@ -4,7 +4,7 @@ import subprocess
 import sys
 from typing import List
 
-from qcelemental.models import OptimizationInput, ResultInput
+from qcelemental.models import AtomicInput, OptimizationInput
 
 from qcengine import cli, get_molecule, testing, util
 
@@ -63,7 +63,7 @@ def test_run_psi4(tmp_path):
         assert output["provenance"]["creator"].lower() == "psi4"
         assert output["success"] is True
 
-    inp = ResultInput(molecule=get_molecule("hydrogen"),
+    inp = AtomicInput(molecule=get_molecule("hydrogen"),
                       driver="energy",
                       model={"method": "hf", "basis": "6-31G"})
 

@@ -90,7 +90,7 @@ def failure_engine():
         def found(raise_error: bool = False) -> bool:
             return True
 
-        def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+        def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
             self.ncalls += 1
             mode = self.iter_modes.pop(0)
 
@@ -102,7 +102,7 @@ def failure_engine():
             grad = [0, 0, -grad_value, 0, 0, grad_value]
 
             if mode == "pass":
-                return qcel.models.Result(
+                return qcel.models.AtomicResult(
                     **{
                         **input_data.dict(),
                         **{
