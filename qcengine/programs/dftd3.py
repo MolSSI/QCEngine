@@ -191,17 +191,17 @@ class DFTD3Harness(ProgramHarness):
             elif re.match(r""" E6\(ABC\) /kcal,au:""", ln):
                 atm = Decimal(ln.split()[-1])
             elif re.match(" analysis of pair-wise terms", ln):
-                pairwise = {}
+                D3pairs = {}
                 # Iterate over block
                 start = stdout.splitlines().index(ln) + 2
-                for l in out.split('\n')[start:]:
+                for l in stdout.splitlines()[start:]:
                     data = l.split()
                     if len(data) == 0:
                         break
                     atom1 = int(data[0])
                     atom2 = int(data[1])
                     Edisp = Decimal(data[-1])
-                    pairwise[(atom1, atom2)] = Edisp
+                    D3pairs[(atom1, atom2)] = Edisp
                     
             elif re.match(" normal termination of dftd3", ln):
                 break
@@ -242,6 +242,7 @@ class DFTD3Harness(ProgramHarness):
             calcinfo.append(qcel.Datum("DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
+            calcinfo.append(qcel.Datum("PAIRWISE DISPERSION CORRECTION ANALYSIS", "kcal/mol", D3pairs))
 
             if input_model.driver == "gradient":
                 calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
@@ -257,6 +258,7 @@ class DFTD3Harness(ProgramHarness):
             calcinfo.append(qcel.Datum("2-BODY DISPERSION CORRECTION ENERGY", "Eh", ene))
             if qcvkey:
                 calcinfo.append(qcel.Datum(f"{qcvkey} DISPERSION CORRECTION ENERGY", "Eh", ene))
+                calcinfo.append(qcel.Datum(f"{qcvkey} PAIRWISE DISPERSION CORRECTION ANALYSIS", "kcal/mol", D3pairs))
 
             if input_model.driver == "gradient":
                 calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
@@ -295,11 +297,11 @@ class DFTD3Harness(ProgramHarness):
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
+        output_data["extras"]["D3pairs"] = D3pairs
         output_data["extras"]["pairwiseD3"] = pairwise
 
         output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})
-
 
 def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:
     """Return strings for DFTD3 program parameter file.
