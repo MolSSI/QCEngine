@@ -23,7 +23,7 @@ class ProgramHarness(BaseModel, abc.ABC):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         pass
 
     @staticmethod
@@ -59,7 +59,7 @@ class ProgramHarness(BaseModel, abc.ABC):
 
 ## Computers
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
@@ -71,5 +71,5 @@ class ProgramHarness(BaseModel, abc.ABC):
                 timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
         raise ValueError("execute is not implemented for {}.", self.__class__)
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
         raise ValueError("parse_output is not implemented for {}.", self.__class__)

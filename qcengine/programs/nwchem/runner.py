@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import Provenance, Result
+from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
 from ...exceptions import InputError
@@ -26,7 +26,7 @@ class NWChemHarness(ProgramHarness):
 
     Notes
     -----
-    * To use the TCE, specify ``ResultInput.model.method`` as usual, then also include ``qc_module = True`` in ``ResultInput.keywords``.
+    * To use the TCE, specify ``AtomicInput.model.method`` as usual, then also include ``qc_module = True`` in ``AtomicInput.keywords``.
 
     """
 
@@ -68,7 +68,7 @@ class NWChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Runs NWChem in executable mode
         """
@@ -88,7 +88,7 @@ class NWChemHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
         nwchemrec = {
             'infiles': {},
@@ -146,7 +146,7 @@ class NWChemHarness(ProgramHarness):
         return success, dexe
 
     def parse_output(self, outfiles: Dict[str, str],
-                     input_model: 'ResultInput') -> 'Result':  # lgtm: [py/similar-function]
+                     input_model: 'AtomicInput') -> 'AtomicResult':  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")
 
@@ -185,4 +185,4 @@ class NWChemHarness(ProgramHarness):
         }
 
         output_data['success'] = True
-        return Result(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.dict(), **output_data})

@@ -4,7 +4,7 @@ Calls the Psi4 executable.
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
-from qcelemental.models import Result
+from qcelemental.models import AtomicResult
 from qcelemental.util import which
 
 from ..exceptions import InputError, UnknownError
@@ -52,7 +52,7 @@ class MopacHarness(ProgramHarness):
         # Not really possible to pull at the moment, MolSSI will add a version ability
         return "2016"
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Runs Psi4 in API mode
         """
@@ -105,7 +105,7 @@ class MopacHarness(ProgramHarness):
                                     environment=inputs.get("environment", None))
         return exe_success, proc
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
         if template is not None:
@@ -169,7 +169,7 @@ class MopacHarness(ProgramHarness):
             "environment": env,
         }
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
 
         keep_keys = {
             "heat_of_formation", "energy_electronic", "energy_nuclear", "gradient_norm", "dip_vec", "spin_component",
@@ -273,4 +273,4 @@ class MopacHarness(ProgramHarness):
         output['stdout'] = outfiles["dispatch.out"]
         output["success"] = True
 
-        return Result(**output)
+        return AtomicResult(**output)

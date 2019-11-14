@@ -2,7 +2,7 @@
 Calls the RDKit package.
 """
 
-from qcelemental.models import Provenance, Result
+from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import which_import
 
 from ..exceptions import InputError
@@ -31,7 +31,7 @@ class RDKitHarness(ProgramHarness):
                             raise_error=raise_error,
                             raise_msg='Please install via `conda install rdkit -c conda-forge`.')
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Runs RDKit in FF typing
         """
@@ -108,4 +108,4 @@ class RDKitHarness(ProgramHarness):
         ret_data["success"] = True
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
-        return Result(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**{**input_data.dict(), **ret_data})

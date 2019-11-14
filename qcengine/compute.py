@@ -3,7 +3,7 @@ Integrates the computes together
 """
 from typing import Any, Dict, Optional, Union
 
-from qcelemental.models import FailedOperation, ResultInput
+from qcelemental.models import AtomicInput, FailedOperation
 
 from .config import get_config
 from .exceptions import InputError, RandomError
@@ -26,11 +26,11 @@ def _process_failure_and_return(model, return_dict, raise_error):
         return False
 
 
-def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
+def compute(input_data: Union[Dict[str, Any], 'AtomicInput'],
             program: str,
             raise_error: bool = False,
             local_options: Optional[Dict[str, Any]] = None,
-            return_dict: bool = False) -> 'Result':
+            return_dict: bool = False) -> 'AtomicResult':
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -38,7 +38,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
 
     Parameters
     ----------
-    input_data : Union[Dict[str, Any], 'ResultInput']
+    input_data : Union[Dict[str, Any], 'AtomicInput']
         A QCSchema input specification in dictionary or model from QCElemental.models
     program : str
         The program to execute the input with.
@@ -49,12 +49,12 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
     local_options : Optional[Dict[str, Any]], optional
         A dictionary of local configuration options
     return_dict : bool, optional
-        Returns a dict instead of qcelemental.models.ResultInput
+        Returns a dict instead of qcelemental.models.AtomicInput
 
     Returns
     -------
-    Result
-        A computed Result object.
+    result
+        A computed AtomicResult object.
     """
 
     output_data = input_data.copy()  # lgtm [py/multiple-definition]
@@ -64,7 +64,7 @@ def compute(input_data: Union[Dict[str, Any], 'ResultInput'],
         executor = get_program(program)
 
         # Build the model and validate
-        input_data = model_wrapper(input_data, ResultInput)
+        input_data = model_wrapper(input_data, AtomicInput)
 
         # Build out local options
         if local_options is None:
@@ -113,11 +113,11 @@ def compute_procedure(input_data: Union[Dict[str, Any], 'BaseModel'],
     local_options : dict, optional
         A dictionary of local configuration options
     return_dict : bool, optional, default True
-        Returns a dict instead of qcelemental.models.ResultInput
+        Returns a dict instead of qcelemental.models.AtomicInput
 
     Returns
     ------
-    dict, Optimization, FailedOperation
+    dict, OptimizationResult, FailedOperation
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
 

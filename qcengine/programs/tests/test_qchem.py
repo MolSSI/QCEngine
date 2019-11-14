@@ -1,9 +1,9 @@
-import pytest
 import numpy as np
-
+import pytest
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_recursive, compare_values
+
+import qcengine as qcng
 from qcengine.testing import qcengine_records, using_qchem
 
 qchem_info = qcengine_records('qchem')
@@ -14,13 +14,13 @@ def test_qchem_output_parser(test_case):
 
     # Get output file data
     data = qchem_info.get_test_data(test_case)
-    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
 
     outfiles = qcel.util.deserialize(data["outfiles.msgpack"], "msgpack-ext")
     output = qcng.get_program('qchem', check=False).parse_output(outfiles, inp).dict()
     output.pop("provenance", None)
 
-    output_ref = qcel.models.Result.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
     output_ref.pop("provenance", None)
 
     check = compare_recursive(output_ref, output)
@@ -32,7 +32,7 @@ def test_qchem_input_formatter(test_case):
 
     # Get input file data
     data = qchem_info.get_test_data(test_case)
-    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program('qchem', check=False).build_input(inp, qcng.get_config())
@@ -44,7 +44,7 @@ def test_qchem_input_formatter_template(test_case):
 
     # Get input file data
     data = qchem_info.get_test_data(test_case)
-    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program('qchem', check=False).build_input(inp, qcng.get_config(), template="Test template")
@@ -56,14 +56,14 @@ def test_qchem_input_formatter_template(test_case):
 def test_qchem_executor(test_case):
     # Get input file data
     data = qchem_info.get_test_data(test_case)
-    inp = qcel.models.ResultInput.parse_raw(data["input.json"])
+    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
 
     # Run qchem
     result = qcng.compute(inp, 'qchem')
     assert result.success is True
 
     # Get output file data
-    output_ref = qcel.models.Result.parse_raw(data["output.json"])
+    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"])
 
     atol = 1e-6
     assert compare_recursive(output_ref.return_result, result.return_result, atol=atol)

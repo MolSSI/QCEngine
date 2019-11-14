@@ -1,9 +1,10 @@
 import itertools as it
-from subprocess import Popen, PIPE, TimeoutExpired
+from subprocess import PIPE, Popen, TimeoutExpired
 from typing import Any, Dict, Optional
 
-from .methods import METHODS, KEYWORDS
 from qcengine.exceptions import InputError
+
+from .methods import KEYWORDS, METHODS
 
 
 def decode_define(str_: str) -> str:

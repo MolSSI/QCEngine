@@ -13,6 +13,22 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.12.0 / 2019-11-DD
+-------------------
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+
+- (:pr:`172`) Models renamed according to https://github.com/MolSSI/QCElemental/issues/155, particularly
+  ``ResultInput`` -> ``AtomicInput``, ``Result`` -> ``AtomicResult``, ``Optimization`` -> ``OptimizationResult``.
+
+Bug Fixes
++++++++++
+
+
 v0.11.0 / 2019-10-01
 --------------------
 

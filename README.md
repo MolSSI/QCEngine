@@ -25,7 +25,7 @@ H  0.0 -1.494  1.027
 H  0.0  1.494  1.027
 """)
 
->>> inp = qcel.models.ResultInput(
+>>> inp = qcel.models.AtomicInput(
     molecule=mol,
     driver="energy",
     model={"method": "SCF", "basis": "sto-3g"},

@@ -7,8 +7,8 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.9.0
-  - pydantic >=0.30.1
+  - qcelemental >=0.12.0
+  - pydantic>=1.0.0
 
     # Testing
   - pytest

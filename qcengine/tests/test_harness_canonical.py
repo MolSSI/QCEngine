@@ -6,9 +6,9 @@ import copy
 
 import numpy as np
 import pytest
+from qcelemental.models import AtomicInput, Molecule
 
 import qcengine as qcng
-from qcelemental.models import Molecule, ResultInput
 from qcengine import testing
 
 _canonical_methods = [
@@ -30,7 +30,7 @@ def test_compute_energy(program, model):
     if not testing.has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
-    inp = ResultInput(molecule=qcng.get_molecule("hydrogen"), driver="energy", model=model)
+    inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"), driver="energy", model=model)
     ret = qcng.compute(inp, program, raise_error=True)
 
     assert ret.success is True
@@ -42,7 +42,7 @@ def test_compute_gradient(program, model):
     if not testing.has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
-    inp = ResultInput(molecule=qcng.get_molecule("hydrogen"),
+    inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"),
                       driver="gradient",
                       model=model,
                       extras={"mytag": "something"})
@@ -73,7 +73,7 @@ def test_compute_bad_models(program, model):
 
     adriver = model.pop("driver", "energy")
     amodel = model
-    inp = ResultInput(molecule=qcng.get_molecule("hydrogen"), driver=adriver, model=amodel)
+    inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"), driver=adriver, model=amodel)
 
     with pytest.raises(qcng.exceptions.InputError) as exc:
         ret = qcng.compute(inp, program, raise_error=True)

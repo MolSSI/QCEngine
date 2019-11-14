@@ -6,7 +6,7 @@ import copy
 
 import numpy as np
 import pytest
-from qcelemental.models import Molecule, ResultInput
+from qcelemental.models import AtomicInput, Molecule
 
 import qcengine as qcng
 from qcengine import testing
@@ -123,7 +123,7 @@ def test_psi4_internal_failure():
 
 @testing.using_psi4
 def test_psi4_ref_switch():
-    inp = ResultInput(
+    inp = AtomicInput(
         **{
             "molecule": {
                 "symbols": ["Li"],

@@ -6,7 +6,7 @@ import json
 import string
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from qcelemental.models import Result
+from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
@@ -63,7 +63,7 @@ class EntosHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Run entos
         """
@@ -129,7 +129,7 @@ class EntosHarness(ProgramHarness):
         proc["outfiles"]["results.json"] = proc["stdout"]
         return exe_success, proc
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
+    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
                     template: Optional[str] = None) -> Dict[str, Any]:
 
         # Write the geom xyz file with unit au
@@ -246,7 +246,7 @@ class EntosHarness(ProgramHarness):
                     input_file.append("{0} = {1}".format(key, value))
         return input_file
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
 
         dft_map = {
             "energy": "scf_total_energy",
@@ -312,7 +312,7 @@ class EntosHarness(ProgramHarness):
         output_data['schema_name'] = 'qcschema_output'
         output_data['success'] = True
 
-        return Result(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.dict(), **output_data})
 
     # Determine the energy_command
     def determine_energy_command(self, method):
