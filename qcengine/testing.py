@@ -6,11 +6,11 @@ from typing import List
 
 import numpy as np
 import pytest
-import qcelemental as qcel
 from pkg_resources import parse_version
-from qcelemental.util import which, which_import
 
+import qcelemental as qcel
 import qcengine as qcng
+from qcelemental.util import which, which_import
 
 QCENGINE_RECORDS_COMMIT = "fe14d77"
 
@@ -90,7 +90,7 @@ def failure_engine():
         def found(raise_error: bool = False) -> bool:
             return True
 
-        def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
+        def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
             self.ncalls += 1
             mode = self.iter_modes.pop(0)
 
@@ -106,20 +106,14 @@ def failure_engine():
                     **{
                         **input_data.dict(),
                         **{
-                            "properties": {
-                                "return_energy": grad_value
-                            },
+                            "properties": {"return_energy": grad_value},
                             "return_result": grad,
                             "success": True,
-                            "extras": {
-                                "ncalls": self.ncalls
-                            },
-                            "provenance": {
-                                "creator": "failure_engine",
-                                "ncores": config.ncores
-                            }
-                        }
-                    })
+                            "extras": {"ncalls": self.ncalls},
+                            "provenance": {"creator": "failure_engine", "ncores": config.ncores},
+                        },
+                    }
+                )
             elif mode == "random_error":
                 raise qcng.exceptions.RandomError("Whoops!")
             elif mode == "input_error":
@@ -129,14 +123,9 @@ def failure_engine():
 
         def get_job(self):
             json_data = {
-                "molecule": {
-                    "symbols": ["He", "He"],
-                    "geometry": [0, 0, 0, 0, 0, self.start_distance]
-                },
+                "molecule": {"symbols": ["He", "He"], "geometry": [0, 0, 0, 0, 0, self.start_distance]},
                 "driver": "gradient",
-                "model": {
-                    "method": "something"
-                }
+                "model": {"method": "something"},
             }
 
             return json_data
@@ -151,7 +140,7 @@ def failure_engine():
 
 # Figure out what is imported
 _programs = {
-    "dftd3": which('dftd3', return_bool=True),
+    "dftd3": which("dftd3", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_14": is_program_new_enough("psi4", "1.4a2.dev250"),
@@ -159,16 +148,16 @@ _programs = {
     "rdkit": which_import("rdkit", return_bool=True),
     "qcdb": which_import("qcdb", return_bool=True),
     "torchani": is_program_new_enough("torchani", "0.9"),
-    "mp2d": which('mp2d', return_bool=True),
+    "mp2d": which("mp2d", return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
     "entos": is_program_new_enough("entos", "0.6"),
-    "cfour": which('xcfour', return_bool=True),
-    "gamess": which('rungms', return_bool=True),
-    "nwchem": which('nwchem', return_bool=True),
-    "turbomole": which('define', return_bool=True),
-    "mdi": which_import("mdi", return_bool=True)
+    "cfour": which("xcfour", return_bool=True),
+    "gamess": which("rungms", return_bool=True),
+    "nwchem": which("nwchem", return_bool=True),
+    "turbomole": which("define", return_bool=True),
+    "mdi": which_import("mdi", return_bool=True),
 }
 
 
@@ -201,5 +190,7 @@ using_nwchem = _build_pytest_skip("nwchem")
 using_turbomole = _build_pytest_skip("turbomole")
 using_mdi = _build_pytest_skip("mdi")
 
-using_dftd3_321 = pytest.mark.skipif(is_program_new_enough("dftd3", "3.2.1") is False,
-                                     reason='DFTD3 does not include 3.2.1 features. Update package and add to PATH')
+using_dftd3_321 = pytest.mark.skipif(
+    is_program_new_enough("dftd3", "3.2.1") is False,
+    reason="DFTD3 does not include 3.2.1 features. Update package and add to PATH",
+)

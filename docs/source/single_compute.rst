@@ -29,7 +29,7 @@ An example input is as follows:
     >>>     H  0.0  1.494  1.027
     >>>     """)
 
-    >>> inp = qcel.models.ResultInput(
+    >>> inp = qcel.models.AtomicInput(
     >>>     molecule=mol,
     >>>     driver="energy",
     >>>     model={"method": "SCF", "basis": "sto-3g"},
@@ -74,10 +74,10 @@ The results contain a complete record of the computation:
 Input Fields
 -------------
 
-.. autoclass:: qcelemental.models.ResultInput
+.. autoclass:: qcelemental.models.AtomicInput
 
 Returned Fields
 ---------------
 
-.. autoclass:: qcelemental.models.Result
+.. autoclass:: qcelemental.models.AtomicResult
 

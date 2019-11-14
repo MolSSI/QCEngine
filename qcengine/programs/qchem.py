@@ -7,6 +7,7 @@ import tempfile
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+
 from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
 
@@ -27,12 +28,14 @@ class QChemHarness(ProgramHarness):
     version_cache: Dict[str, str] = {}
 
     def found(self, raise_error: bool = False) -> bool:
-        return which('qchem',
-                     return_bool=True,
-                     raise_error=raise_error,
-                     raise_msg='Please install by visiting the Q-Chem website.')
+        return which(
+            "qchem",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install by visiting the Q-Chem website.",
+        )
 
-    def _get_qc_path(self, config: Optional['JobConfig'] = None):
+    def _get_qc_path(self, config: Optional["JobConfig"] = None):
         paths = os.environ.copy()
         paths["QCSCRATCH"] = tempfile.gettempdir()
         if config and config.scratch_directory:
@@ -43,7 +46,7 @@ class QChemHarness(ProgramHarness):
             return paths
 
         # Assume QC path is
-        qchem_path = which('qchem')
+        qchem_path = which("qchem")
         if qchem_path:
             paths["QC"] = os.path.dirname(os.path.dirname(qchem_path))
 
@@ -52,9 +55,9 @@ class QChemHarness(ProgramHarness):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which('qchem')
+        which_prog = which("qchem")
         if which_prog not in self.version_cache:
-            with popen([which_prog, '-h'], popen_kwargs={"env": self._get_qc_path()}) as exc:
+            with popen([which_prog, "-h"], popen_kwargs={"env": self._get_qc_path()}) as exc:
                 exc["proc"].wait(timeout=15)
 
             if "QC not defined" in exc["stdout"]:
@@ -64,7 +67,7 @@ class QChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
+    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
         """
         Run qchem
         """
@@ -95,15 +98,17 @@ class QChemHarness(ProgramHarness):
                 # Return UnknownError for error propagation
                 raise UnknownError(proc["outfiles"]["dispatch.out"])
 
-    def execute(self,
-                inputs: Dict[str, Any],
-                *,
-                extra_infiles: Optional[Dict[str, str]] = None,
-                extra_outfiles: Optional[List[str]] = None,
-                extra_commands: Optional[List[str]] = None,
-                scratch_name: Optional[str] = None,
-                scratch_messy: bool = False,
-                timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
+    def execute(
+        self,
+        inputs: Dict[str, Any],
+        *,
+        extra_infiles: Optional[Dict[str, str]] = None,
+        extra_outfiles: Optional[List[str]] = None,
+        extra_commands: Optional[List[str]] = None,
+        scratch_name: Optional[str] = None,
+        scratch_messy: bool = False,
+        timeout: Optional[int] = None,
+    ) -> Tuple[bool, Dict[str, Any]]:
         """
         For option documentation go look at qcengine/util.execute
         """
@@ -132,26 +137,30 @@ class QChemHarness(ProgramHarness):
             bdict = {x: None for x in binary_files}
 
             with disk_files({}, bdict, cwd=tmpdir, as_binary=binary_files):
-                exe_success, proc = execute(commands,
-                                            infiles=infiles,
-                                            outfiles=outfiles,
-                                            scratch_name=scratch_name,
-                                            scratch_directory=tmpdir,
-                                            scratch_messy=scratch_messy,
-                                            timeout=timeout,
-                                            environment=envs)
+                exe_success, proc = execute(
+                    commands,
+                    infiles=infiles,
+                    outfiles=outfiles,
+                    scratch_name=scratch_name,
+                    scratch_directory=tmpdir,
+                    scratch_messy=scratch_messy,
+                    timeout=timeout,
+                    environment=envs,
+                )
 
             proc["outfiles"].update({os.path.split(k)[-1]: v for k, v in bdict.items()})
 
-        if (proc["outfiles"]["dispatch.out"] is
-                None) or ("Thank you very much for using Q-Chem" not in proc["outfiles"]["dispatch.out"]):
+        if (proc["outfiles"]["dispatch.out"] is None) or (
+            "Thank you very much for using Q-Chem" not in proc["outfiles"]["dispatch.out"]
+        ):
             exe_success = False
 
         # QChem does not create an output file and only prints to stdout
         return exe_success, proc
 
-    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
-                    template: Optional[str] = None) -> Dict[str, Any]:
+    def build_input(
+        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+    ) -> Dict[str, Any]:
 
         # Check some bounds on what cannot be parsed
         if "ccsd" in input_model.model.method.lower() or "ccd" in input_model.model.method.lower():
@@ -180,10 +189,12 @@ class QChemHarness(ProgramHarness):
 
         # Begin the input file
         input_file = []
-        input_file.append(f"""$comment
+        input_file.append(
+            f"""$comment
 Automatically generated Q-Chem input file by QCEngine
 $end
-            """)
+            """
+        )
 
         # Add Molecule, TODO: Add to QCElemental
         mol = input_model.molecule
@@ -204,17 +215,14 @@ $end
         input_file.append("$end\n")
 
         ret = {
-            "infiles": {
-                "dispatch.in": "\n".join(input_file)
-            },
-            "commands": [which("qchem"), "-nt",
-                         str(config.ncores), "dispatch.in", "dispatch.out"],
+            "infiles": {"dispatch.in": "\n".join(input_file)},
+            "commands": [which("qchem"), "-nt", str(config.ncores), "dispatch.in", "dispatch.out"],
             "scratch_directory": config.scratch_directory,
         }
 
         return ret
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
+    def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
         output_data = {}
         outfiles["dispatch.out"]
@@ -248,7 +256,7 @@ $end
         #     m2 = re.findall(" CCSD total energy.+=.+\d+\.\d+", outfiles["dispatch.out"])
 
         output_data["properties"] = properties
-        output_data['stdout'] = outfiles["dispatch.out"]
-        output_data['success'] = True
+        output_data["stdout"] = outfiles["dispatch.out"]
+        output_data["success"] = True
 
         return AtomicResult(**{**input_model.dict(), **output_data})

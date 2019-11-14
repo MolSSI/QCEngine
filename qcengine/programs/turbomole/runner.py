@@ -18,7 +18,7 @@ from .methods import KEYWORDS, METHODS
 
 
 class TurbomoleHarness(ProgramHarness):
-    
+
     _defaults = {
         "name": "Turbomole",
         "scratch": True,
@@ -32,13 +32,15 @@ class TurbomoleHarness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        return which('define',
-                     return_bool=True,
-                     raise_error=raise_error,
-                     raise_msg='Please install via http://www.cosmologic.de/turbomole/home.html')
+        return which(
+            "define",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via http://www.cosmologic.de/turbomole/home.html",
+        )
 
     def get_version(self) -> str:
-        which_prog = which('define')
+        which_prog = which("define")
         if which_prog not in self.version_cache:
             # We use basically a dummy stdin as we dont want to pipe any real
             # input into define. We only want to parse the version number from
@@ -47,13 +49,13 @@ class TurbomoleHarness(ProgramHarness):
                 tmpdir = Path(tmpdir)
                 stdout = execute_define("\n", cwd=tmpdir)
             # Tested with V7.3 and V7.4.0
-            version_re  = re.compile("TURBOMOLE (?:rev\. )?(V.+?)\s+")
+            version_re = re.compile("TURBOMOLE (?:rev\. )?(V.+?)\s+")
             mobj = version_re.search(stdout)
             version = mobj[1]
             self.version_cache[which_prog] = safe_version(version)
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
+    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
@@ -61,24 +63,21 @@ class TurbomoleHarness(ProgramHarness):
 
         # TODO: handle input errors?! But then define probably already crashed...
         # if 'There is an error in the input file' in dexe["stdout"]:
-            # raise InputError(dexe["stdout"])
+        # raise InputError(dexe["stdout"])
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
-    def build_input(self, input_model: 'AtomicInput', config: 'JobConfig',
-                    template: Optional[str] = None) -> Dict[str, Any]:
-        turbomolrec = {
-            'infiles': {},
-            'outfiles': {"control": "control", },
-            'scratch_directory': config.scratch_directory,
-        }
+    def build_input(
+        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+    ) -> Dict[str, Any]:
+        turbomolrec = {"infiles": {}, "outfiles": {"control": "control"}, "scratch_directory": config.scratch_directory}
 
         # Handle molecule
         # TODO: what's up with moldata? Do I need it?
-        coord_str, moldata = input_model.molecule.to_string(dtype='turbomole', return_data=True)
+        coord_str, moldata = input_model.molecule.to_string(dtype="turbomole", return_data=True)
 
         # Prepare stdin for define call
         model = input_model.model
@@ -87,10 +86,13 @@ class TurbomoleHarness(ProgramHarness):
         # 'a1 2' would be the 1st excited state of the irreducible group A1.
         # Right now only GS are supported, so this is hardcoded as 'x'.
         geoopt = "x" if input_model.driver.derivative_int() > 0 else ""
-        stdin, subs = prepare_stdin(model.method, model.basis, input_model.keywords,
-                                    input_model.molecule.molecular_charge,
-                                    input_model.molecule.molecular_multiplicity,
-                                    geoopt,
+        stdin, subs = prepare_stdin(
+            model.method,
+            model.basis,
+            input_model.keywords,
+            input_model.molecule.molecular_charge,
+            input_model.molecule.molecular_multiplicity,
+            geoopt,
         )
         with temporary_directory(suffix="_define_scratch") as tmpdir:
             tmpdir = Path(tmpdir)
@@ -105,7 +107,7 @@ class TurbomoleHarness(ProgramHarness):
                 if not full_fn.exists():
                     continue
                 with open(full_fn) as handle:
-                    turbomolrec['infiles'][fn] = handle.read()
+                    turbomolrec["infiles"][fn] = handle.read()
 
         env = os.environ.copy()
         env["PARA_ARCH"] = "SMP"
@@ -113,12 +115,10 @@ class TurbomoleHarness(ProgramHarness):
         env["SMPCPUS"] = str(config.ncores)
         # TODO: set memory
 
-        turbomolrec['environment'] = env
+        turbomolrec["environment"] = env
 
         keywords = input_model.keywords
-        ri_calculation = any([keywords.get(ri_kw, False)
-                              for ri_kw in KEYWORDS["ri"]
-        ])
+        ri_calculation = any([keywords.get(ri_kw, False) for ri_kw in KEYWORDS["ri"]])
 
         # Set appropriate commands. We always need a reference wavefunction
         # so the first command will be dscf or ridft.
@@ -142,19 +142,15 @@ class TurbomoleHarness(ProgramHarness):
         if input_model.driver.derivative_int() == 1:
             turbomolrec["outfiles"]["gradient"] = "gradient"
         command = ["; ".join(commands)]
-        turbomolrec['command'] = command
+        turbomolrec["command"] = command
 
         # TODO: check if the chosen commands are available with which()?
 
         return turbomolrec
 
-    def execute(self,
-                inputs: Dict[str, Any],
-                *,
-                extra_outfiles=None,
-                extra_commands=None,
-                scratch_name=None,
-                timeout=None) -> Tuple[bool, Dict]:
+    def execute(
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+    ) -> Tuple[bool, Dict]:
 
         success, dexe = execute(
             inputs["command"],
@@ -166,9 +162,9 @@ class TurbomoleHarness(ProgramHarness):
         )
         return success, dexe
 
-    def parse_output(self,
-                     outfiles: Dict[str, str],
-                     input_model: 'AtomicInput') -> 'AtomicResult':  # lgtm: [py/similar-function]
+    def parse_output(
+        self, outfiles: Dict[str, str], input_model: "AtomicInput"
+    ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")
 
@@ -176,23 +172,21 @@ class TurbomoleHarness(ProgramHarness):
         qcvars, gradient, hessian = harvest(input_model.molecule, stdout, **outfiles)
 
         if gradient is not None:
-            qcvars['CURRENT GRADIENT'] = gradient
+            qcvars["CURRENT GRADIENT"] = gradient
 
         if hessian is not None:
-            qcvars['CURRENT HESSIAN'] = hessian
+            qcvars["CURRENT HESSIAN"] = hessian
 
-        retres = qcvars[f'CURRENT {input_model.driver.upper()}']
+        retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
 
         output_data = input_model.dict()
         output_data["extras"]["outfiles"] = outfiles
         output_data["properties"] = {}
-        output_data["provenance"] = Provenance(creator="Turbomole",
-                                               version=self.get_version(),
-                                               routine="turbomole")
+        output_data["provenance"] = Provenance(creator="Turbomole", version=self.get_version(), routine="turbomole")
         output_data["return_result"] = retres
         output_data["stdout"] = stdout
-        output_data['success'] = True
+        output_data["success"] = True
 
         return AtomicResult(**output_data)

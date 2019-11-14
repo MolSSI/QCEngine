@@ -5,6 +5,7 @@ For details regarding MDI, see https://molssi.github.io/MDI_Library/html/index.h
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+
 import qcelemental as qcel
 from qcelemental.util import which_import
 
@@ -15,26 +16,30 @@ try:
     from mdi import MDI_Recv, MDI_Send, MDI_Get_Intra_Code_MPI_Comm
     from mdi import MDI_DOUBLE, MDI_CHAR, MDI_INT, MDI_DOUBLE_NUMPY
     from mdi import MDI_COMMAND_LENGTH
+
     use_mdi = True
 except ImportError:
     use_mdi = False
 
 try:
     from mpi4py import MPI
+
     use_mpi4py = True
 except ImportError:
     use_mpi4py = False
 
 
-class MDIServer():
-    def __init__(self,
-                 mdi_options: str,
-                 program: str,
-                 molecule,
-                 model,
-                 keywords,
-                 raise_error: bool = False,
-                 local_options: Optional[Dict[str, Any]] = None):
+class MDIServer:
+    def __init__(
+        self,
+        mdi_options: str,
+        program: str,
+        molecule,
+        model,
+        keywords,
+        raise_error: bool = False,
+        local_options: Optional[Dict[str, Any]] = None,
+    ):
         """ Initialize an MDIServer object for communication with MDI
 
         Parameters
@@ -56,7 +61,7 @@ class MDIServer():
         """
 
         # Confirm that the MDI library has been located
-        which_import('mdi', raise_error=True, raise_msg="Please install via 'conda install pymdi -c conda-forge'")
+        which_import("mdi", raise_error=True, raise_msg="Please install via 'conda install pymdi -c conda-forge'")
 
         # Initialize MDI
         mpi_world = None
@@ -74,7 +79,7 @@ class MDIServer():
 
         # The MDI interface does not currently support multiple fragments
         if len(self.molecule.fragments) != 1:
-            raise Exception('The MDI interface does not support multiple fragments')
+            raise Exception("The MDI interface does not support multiple fragments")
 
         # Molecule charge and multiplicity
         self.total_charge = self.molecule.molecular_charge
@@ -119,7 +124,7 @@ class MDIServer():
             ">TOTCHARGE": self.recv_total_charge,
             "<ELEC_MULT": self.send_multiplicity,
             ">ELEC_MULT": self.recv_multiplicity,
-            "EXIT": self.stop
+            "EXIT": self.stop,
         }
 
         # Accept a communicator to the driver code
@@ -145,9 +150,10 @@ class MDIServer():
                             "molecular_charge": self.total_charge,
                             "fragment_charges": [self.total_charge],
                             "molecular_multiplicity": self.multiplicity,
-                            "fragment_multiplicities": [self.multiplicity]
-                        }
-                    })
+                            "fragment_multiplicities": [self.multiplicity],
+                        },
+                    }
+                )
                 self.molecule_validated = True
             except qcel.exceptions.ValidationError:
                 # The molecule didn't validate correctly, but a future >TOTCHARGE or >ELEC_MULT command might fix it
@@ -159,7 +165,7 @@ class MDIServer():
             except qcel.exceptions.ValidationError:
                 if self.molecule_validated:
                     # This update caused the validation error
-                    raise Exception('MDI command caused a validation error')
+                    raise Exception("MDI command caused a validation error")
 
     # Respond to the <NATOMS command
     def send_natoms(self) -> int:
@@ -216,7 +222,7 @@ class MDIServer():
         """
         # Ensure that the molecule currently passes validation
         if not self.molecule_validated:
-            raise Exception('MDI attempting to compute energy on an unvalidated molecule')
+            raise Exception("MDI attempting to compute energy on an unvalidated molecule")
         self.run_energy()
         energy = self.compute_return.return_result
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
@@ -233,16 +239,14 @@ class MDIServer():
         """
         # Ensure that the molecule currently passes validation
         if not self.molecule_validated:
-            raise Exception('MDI attempting to compute gradients on an unvalidated molecule')
+            raise Exception("MDI attempting to compute gradients on an unvalidated molecule")
 
-        input = qcel.models.ResultInput(molecule=self.molecule,
-                                        driver="gradient",
-                                        model=self.model,
-                                        keywords=self.keywords)
-        self.compute_return = compute(input_data=input,
-                                      program=self.program,
-                                      raise_error=self.raise_error,
-                                      local_options=self.local_options)
+        input = qcel.models.AtomicInput(
+            molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
+        )
+        self.compute_return = compute(
+            input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
+        )
 
         forces = self.compute_return.return_result
         MDI_Send(forces, len(forces), MDI_DOUBLE_NUMPY, self.comm)
@@ -252,14 +256,12 @@ class MDIServer():
     def run_energy(self) -> None:
         """ Run an energy calculation
         """
-        input = qcel.models.ResultInput(molecule=self.molecule,
-                                        driver="energy",
-                                        model=self.model,
-                                        keywords=self.keywords)
-        self.compute_return = compute(input_data=input,
-                                      program=self.program,
-                                      raise_error=self.raise_error,
-                                      local_options=self.local_options)
+        input = qcel.models.AtomicInput(
+            molecule=self.molecule, driver="energy", model=self.model, keywords=self.keywords
+        )
+        self.compute_return = compute(
+            input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
+        )
 
     # Respond to the <NCOMMANDS command
     def send_ncommands(self) -> int:
@@ -287,7 +289,7 @@ class MDIServer():
 
         # confirm that command_string is the correct length
         if len(command_string) != len(self.commands) * MDI_COMMAND_LENGTH:
-            raise Exception('Programming error: MDI command_string is incorrect length')
+            raise Exception("Programming error: MDI command_string is incorrect length")
 
         MDI_Send(command_string, len(command_string), MDI_CHAR, self.comm)
         return command_string
@@ -445,4 +447,4 @@ class MDIServer():
                     self.commands[supported_command]()
                     found_command = True
             if not found_command:
-                raise Exception('Unrecognized command: ' + str(command))
+                raise Exception("Unrecognized command: " + str(command))

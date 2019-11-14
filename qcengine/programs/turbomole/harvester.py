@@ -13,7 +13,7 @@ def parse_decimal(regex, text, method="search"):
     if method == "search":
         # groups = matches.groups()
         # if len(groups) == 1:
-            # groups = ("", groups[0])
+        # groups = ("", groups[0])
         matches = [matches.groups()]
     return [(method, Decimal(energy)) for method, energy in matches]
 
@@ -23,21 +23,21 @@ def parse_reference_energy(stdout: str):
     energy_dict = PreservingDict()
 
     # Total energy from dscf or ridft
-    total_energy_re = re.compile('total energy\s+=\s+([\d\-\.]+)')
+    total_energy_re = re.compile("total energy\s+=\s+([\d\-\.]+)")
     mobj = total_energy_re.search(stdout)
     total_energy = Decimal(mobj[1])
 
     # Check for DFT, default to HF
-    energy_key = 'HF TOTAL ENERGY'
-    dft_mobj = re.search('density functional', stdout)
+    energy_key = "HF TOTAL ENERGY"
+    dft_mobj = re.search("density functional", stdout)
     if dft_mobj:
-        energy_key = 'DFT TOTAL ENERGY'
+        energy_key = "DFT TOTAL ENERGY"
     energy_dict[energy_key] = total_energy
 
     # Take into account energies from ricc2 runs. They will be different
     # from the HF energy.
     current_energy = total_energy
-    energy_dict['CURRENT ENERGY'] = current_energy
+    energy_dict["CURRENT ENERGY"] = current_energy
 
     return energy_dict
 
@@ -52,19 +52,19 @@ def parse_ricc2(stdout: str):
     if len(matches) == 0:
         matches = parse_decimal("E(MP2)\s+:\s+", stdout, "search")
 
-    ricc2_dict['CURRENT ENERGY'] = matches[-1][1]
+    ricc2_dict["CURRENT ENERGY"] = matches[-1][1]
 
     return ricc2_dict
 
 
 def parse_gradient(gradient):
     grad_re = re.compile(
-                "\$grad.+" \
-                "cycle =\s+(?P<cycle>\d+)\s+" \
-                "(?P<energy_type>.+?) energy =\s+(?P<energy>[\d\.\-]+)\s+" \
-                "\|dE/dxyz\| =\s+(?P<grad_norm>[\d\.]+)" \
-                "(?P<coords_gradients>.+)\$end",
-                re.DOTALL,
+        "\$grad.+"
+        "cycle =\s+(?P<cycle>\d+)\s+"
+        "(?P<energy_type>.+?) energy =\s+(?P<energy>[\d\.\-]+)\s+"
+        "\|dE/dxyz\| =\s+(?P<grad_norm>[\d\.]+)"
+        "(?P<coords_gradients>.+)\$end",
+        re.DOTALL,
     )
     mobj = grad_re.match(gradient)
 

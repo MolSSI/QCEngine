@@ -1,15 +1,8 @@
 # Available methods
 METHODS = {
     # Dummy for HF
-    "hf": [
-        "hf",
-    ],
-    "ricc2": [
-        "rimp2",
-        "rimp3",
-        "rimp4",
-        "ricc2"
-    ],
+    "hf": ["hf"],
+    "ricc2": ["rimp2", "rimp3", "rimp4", "ricc2"],
     # Hardcoded XC-functionals that can be selected from the dft submenu
     # of define.
     "dft_hardcoded": [
@@ -60,20 +53,13 @@ METHODS = {
         "m06-libxc",
         "cam-b3lyp-libxc",
         "hse06-libxc",
-    ]
+    ],
 }
 
 # Available keywords
 KEYWORDS = {
     # Resolution of identity
-    "ri": [
-        "rijk",
-        "ri",
-        "marij"
-    ],
+    "ri": ["rijk", "ri", "marij"],
     # Dispersion correction
-    "dsp": [
-        "d3",
-        "d3bj"
-    ],
+    "dsp": ["d3", "d3bj"],
 }

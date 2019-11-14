@@ -3,10 +3,10 @@ import sys
 import time
 
 import pytest
-from qcelemental.models import AtomicInput, OptimizationInput
 
+from qcelemental.models import AtomicInput
 from qcengine import util
-from qcengine.exceptions import InputError, QCEngineException
+from qcengine.exceptions import InputError
 
 
 def test_model_wrapper():

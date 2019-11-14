@@ -25,7 +25,7 @@ A simple example of QCEngine's capabilities is as follows:
     H  0.0  1.494  1.027
     """)
 
-    >>> input = qcel.models.ResultInput(
+    >>> input = qcel.models.AtomicInput(
         molecule=mol,
         driver="energy",
         model={"method": "SCF", "basis": "sto-3g"},

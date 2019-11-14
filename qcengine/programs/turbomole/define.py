@@ -21,6 +21,7 @@ def decode_define(str_: str) -> str:
         str_ = str_.decode("latin-1")
     return str_
 
+
 def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
     """Call define with the input define in stdin."""
 
@@ -36,7 +37,7 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
             # stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
             stdout, _ = proc.communicate(str.encode(stdin), timeout=15)
             stdout = decode_define(stdout)
-        except TimeoutExpired as error:
+        except TimeoutExpired:
             raise InputError(f"define call timed out!")
             # TODO: How to get the stdout when define times out? Calling
             # communiate may also result in an indefinite hang so I disabled it
@@ -55,8 +56,9 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
     return stdout
 
 
-def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
-                  charge: int, mult: int, geoopt: Optional[str] = "")  -> str:
+def prepare_stdin(
+    method: str, basis: str, keywords: Dict[str, Any], charge: int, mult: int, geoopt: Optional[str] = ""
+) -> str:
     """Prepares a str that can be sent to define to produce the desired
     input for Turbomole."""
 
@@ -66,16 +68,14 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
 
     methods_flat = list(it.chain(*[m for m in METHODS.values()]))
     if method not in methods_flat:
-        raise InputError(f"Method {method} not in supported methods "
-                         f"{methods_flat}!")
+        raise InputError(f"Method {method} not in supported methods " f"{methods_flat}!")
 
     # This variable may contain substitutions that will be made to
     # the control file after it was created from a define call, e.g.
     # setting XC functionals that aren't hardcoded in define etc.
     subs = None
 
-    def occ_num_mo_data(charge: int, mult: int,
-                        unrestricted: Optional[bool] = False) -> str:
+    def occ_num_mo_data(charge: int, mult: int, unrestricted: Optional[bool] = False) -> str:
         """Handles the 'Occupation Number & Molecular Orbital' section
         of define. Sets appropriate charge and multiplicity in the
         system and decided between restricted and unrestricted calculation.
@@ -152,50 +152,37 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
     # Resolution of identity
     def set_ri(keywords):
         # TODO: senex/RIJCOSX?
-        ri_kws = {ri_kw: keywords.get(ri_kw, False)
-                  for ri_kw in KEYWORDS["ri"]}
-        ri_stdins = {
-            "rijk": "rijk\non\n\n",
-            "ri": "ri\non\n\n",
-            "marij": "marij\n\n",
-        }
-        ri_stdin = "\n".join([ri_stdins[ri_kw] for ri_kw, use in ri_kws.items()
-                              if use
-        ])
+        ri_kws = {ri_kw: keywords.get(ri_kw, False) for ri_kw in KEYWORDS["ri"]}
+        ri_stdins = {"rijk": "rijk\non\n\n", "ri": "ri\non\n\n", "marij": "marij\n\n"}
+        ri_stdin = "\n".join([ri_stdins[ri_kw] for ri_kw, use in ri_kws.items() if use])
         return ri_stdin
 
         # ri_stdin = ""
         # # Use either RIJK or RIJ if requested.
         # if ri_kws["rijk"]:
-            # ri_stdin = """rijk
-                          # on
+        # ri_stdin = """rijk
+        # on
 
-                       # """
+        # """
         # elif ri_kws["rij"]:
-            # ri_stdin = """rij
-                         # on
+        # ri_stdin = """rij
+        # on
 
-                      # """
+        # """
         # # MARIJ can be used additionally.
         # if ri_kws["marij"]:
-            # ri_stdin += """marij
+        # ri_stdin += """marij
 
-                        # """
+        # """
         # return ri_stdin
 
     # Dispersion correction
     def set_dsp(keywords):
         # TODO: set_ri and set_dsp are basically the same funtion. Maybe
         # we could abstract this somehow?
-        dsp_kws = {dsp_kw: keywords.get(dsp_kw, False)
-                   for dsp_kw in KEYWORDS["dsp"]}
-        dsp_stdins = {
-            "d3": "dsp\non\n\n",
-            "d3bj": "dsp\nbj\n\n",
-        }
-        dsp_stdin = "\n".join([dsp_stdins[dsp_kw]
-                               for dsp_kw, use in dsp_kws.items() if use
-        ])
+        dsp_kws = {dsp_kw: keywords.get(dsp_kw, False) for dsp_kw in KEYWORDS["dsp"]}
+        dsp_stdins = {"d3": "dsp\non\n\n", "d3bj": "dsp\nbj\n\n"}
+        dsp_stdin = "\n".join([dsp_stdins[dsp_kw] for dsp_kw, use in dsp_kws.items() if use])
         return dsp_stdin
 
     kwargs = {
@@ -228,6 +215,8 @@ def prepare_stdin(method: str, basis: str, keywords: Dict[str, Any],
     {scf_iters}
 
     *
-    """.format(**kwargs)
+    """.format(
+        **kwargs
+    )
 
     return stdin, subs

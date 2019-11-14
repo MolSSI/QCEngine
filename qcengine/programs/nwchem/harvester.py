@@ -16,7 +16,7 @@ def harvest_output(outtext):
     pass_coord = []
     pass_grad = []
     print(pass_coord)
-    for outpass in re.split(r' Line search:', outtext, re.MULTILINE):
+    for outpass in re.split(r" Line search:", outtext, re.MULTILINE):
         psivar, nwcoord, nwgrad, version, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
@@ -44,17 +44,18 @@ def harvest_output(outtext):
 
 
 def harvest_outfile_pass(outtext):
-    """Function to read NWChem output file *outtext* and parse important 
+    """Function to read NWChem output file *outtext* and parse important
     quantum chemical information from it in
 
     """
     psivar = PreservingDict()
     psivar_coord = None
     psivar_grad = None
-    version = ''
-    error = ''
+    version = ""
+    error = ""
 
     NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+    # fmt: off
 
     # Process version
     mobj = re.search(
@@ -186,7 +187,7 @@ def harvest_outfile_pass(outtext):
             mobj = re.search(
                 r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext,
-                re.MULTILINE)  # yapf: disable
+                re.MULTILINE)
 
             if mobj:
                 mbpt_plain = cc_name.replace('\\', '').replace('MBPT', 'MP').replace('(', '').replace(')', '')
@@ -204,7 +205,7 @@ def harvest_outfile_pass(outtext):
                 r'^\s+' + cc_name + r'\s+' + r'correction energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext,
-                re.MULTILINE)  # yapf: disable
+                re.MULTILINE)
 
             if mobj:
                 cc_plain = cc_name.replace('\\', '')
@@ -292,7 +293,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'Excited state root\s+\d{1,2}\s*' +
             r'^\s+' + r'Excitation energy / hartree' + r'\s+=\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'/ eV\s+' + r'\s+=\s+' + NUMBER + r'\s*$',
-            outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+            outtext, re.MULTILINE | re.DOTALL)
 
         if mobj:
             ext_energy = {}  # dic
@@ -343,7 +344,7 @@ def harvest_outfile_pass(outtext):
             r'Transition Moments' + r'\s+X\s+' + NUMBER + r'\s+Y\s+' + NUMBER + r'\s+Z\s+' + NUMBER + r'\s*' + r'^\s+'
             + r'Transition Moments' + r'\s+XX\s+' + NUMBER + r'\s+XY\s+' + NUMBER + r'\s+XZ\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'Transition Moments' + r'\s+YY\s+' + NUMBER + r'\s+YZ\s+' + NUMBER + r'\s+ZZ\s+' + NUMBER +
-            r'\s*$', outtext, re.MULTILINE)  # yapf: disable
+            r'\s*$', outtext, re.MULTILINE)
 
         if mobj:
             print('matched TDDFT with transition moments')
@@ -375,7 +376,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'Root' + r'\s+' + r'(\d+)' + r'\s+' + r'(\w+)' + r'\s+' + r'(.*?)' + r'\s+' + NUMBER +
             r'\s+a\.u\.\s+' + NUMBER + r'\s+eV\s*' + r'^\s+' +
             r'----------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            r'Transition Moments' + r'\s+Spin forbidden\s*$', outtext, re.MULTILINE)  # yapf: disable
+            r'Transition Moments' + r'\s+Spin forbidden\s*$', outtext, re.MULTILINE)
 
         if mobj:
             print('matched TDDFT - spin forbidden')
@@ -440,7 +441,7 @@ def harvest_outfile_pass(outtext):
             r'\s*' + r'^\s+' + r'---- ---------------- ---------- -------------- -------------- --------------' +
             r'\s*' +
             r'((?:\s+([1-9][0-9]*)+\s+([A-Z][a-z]*)+\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)'
-            + r'\s*$', outtext, re.MULTILINE | re.IGNORECASE)  # yapf: disable
+            + r'\s*$', outtext, re.MULTILINE | re.IGNORECASE)
 
         if mobj:
             print('matched geom')
@@ -526,47 +527,47 @@ def harvest_outfile_pass(outtext):
             psivar['NWCHEM ERROR CODE'] = mobj.group(1)
             # TODO process errors into error var
 
+    # fmt: on
+
     # Process CURRENT energies (TODO: needs better way)
-    if 'HF TOTAL ENERGY' in psivar:
-        psivar['SCF TOTAL ENERGY'] = psivar['HF TOTAL ENERGY']
-        psivar['CURRENT REFERENCE ENERGY'] = psivar['HF TOTAL ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['HF TOTAL ENERGY']
+    if "HF TOTAL ENERGY" in psivar:
+        psivar["SCF TOTAL ENERGY"] = psivar["HF TOTAL ENERGY"]
+        psivar["CURRENT REFERENCE ENERGY"] = psivar["HF TOTAL ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["HF TOTAL ENERGY"]
 
-    if 'MP2 TOTAL ENERGY' in psivar and 'MP2 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP2 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP2 TOTAL ENERGY']
-    if 'MP3 TOTAL ENERGY' in psivar and 'MP3 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP3 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP3 TOTAL ENERGY']
-    if 'MP4 TOTAL ENERGY' in psivar and 'MP4 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP4 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP4 TOTAL ENERGY']
+    if "MP2 TOTAL ENERGY" in psivar and "MP2 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP2 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP2 TOTAL ENERGY"]
+    if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP3 TOTAL ENERGY"]
+    if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
 
-    if 'DFT TOTAL ENERGY' in psivar:
-        psivar['CURRENT REFERENCE ENERGY'] = psivar['DFT TOTAL ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['DFT TOTAL ENERGY']
+    if "DFT TOTAL ENERGY" in psivar:
+        psivar["CURRENT REFERENCE ENERGY"] = psivar["DFT TOTAL ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["DFT TOTAL ENERGY"]
 
     # Process TCE CURRENT energies
     # Need to be fixed
     # HOW TO KNOW options['NWCHEM']['NWCHEM_TCE']['value']?
     # TODO: CURRENT ENERGY = TCE ENERGY
-    if ('%s TOTAL ENERGY' % (cc_name) in psivar and \
-       ('%s CORRELATION ENERGY' % (cc_name) in psivar)):
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['%s CORRELATION ENERGY' % (cc_name)]
-        psivar['CURRENT ENERGY'] = psivar['%s TOTAL ENERGY' % (cc_name)]
+    if "%s TOTAL ENERGY" % (cc_name) in psivar and ("%s CORRELATION ENERGY" % (cc_name) in psivar):
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["%s CORRELATION ENERGY" % (cc_name)]
+        psivar["CURRENT ENERGY"] = psivar["%s TOTAL ENERGY" % (cc_name)]
 
-    if 'CCSD TOTAL ENERGY' in psivar and 'CCSD CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CCSD CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CCSD TOTAL ENERGY']
+    if "CCSD TOTAL ENERGY" in psivar and "CCSD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSD TOTAL ENERGY"]
 
-    if 'CCSD(T) TOTAL ENERGY' in psivar and 'CCSD(T) CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CCSD(T) CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CCSD(T) TOTAL ENERGY']
+    if "CCSD(T) TOTAL ENERGY" in psivar and "CCSD(T) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD(T) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSD(T) TOTAL ENERGY"]
 
-    if ('EOM-%s TOTAL ENERGY' % (cc_name) in psivar) and \
-       ('%s EXCITATION ENERGY' %(cc_name) in psivar):
-        psivar['CURRENT ENERGY'] = psivar['EOM-%s TOTAL ENERGY' % (cc_name)]
-        psivar['CURRENT EXCITATION ENERGY'] = psivar['%s EXCITATION ENERGY' % (cc_name)]
+    if ("EOM-%s TOTAL ENERGY" % (cc_name) in psivar) and ("%s EXCITATION ENERGY" % (cc_name) in psivar):
+        psivar["CURRENT ENERGY"] = psivar["EOM-%s TOTAL ENERGY" % (cc_name)]
+        psivar["CURRENT EXCITATION ENERGY"] = psivar["%s EXCITATION ENERGY" % (cc_name)]
 
     return psivar, psivar_coord, psivar_grad, version, error
 
@@ -579,9 +580,9 @@ def harvest_hessian(hess):
     raise NotImplementedError()
 
 
-def harvest(p4Mol, nwout, **largs):  #check orientation and scratch files
+def harvest(p4Mol, nwout, **largs):  # check orientation and scratch files
     """Parses all the pieces of output from NWChem: the stdout in
-    *nwout* Scratch files are not yet considered at this moment. 
+    *nwout* Scratch files are not yet considered at this moment.
 
     """
 
@@ -594,8 +595,10 @@ def harvest(p4Mol, nwout, **largs):  #check orientation and scratch files
     if outMol:
         if p4Mol:
             if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
-                raise ValueError("""NWChem outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f).""" % \
-                            (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy()))
+                raise ValueError(
+                    """NWChem outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
+                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                )
             ## TEST##########
             # else:
             #   print ( """NWChem outfile (NRE: %f) consistent with Psi4 input (NRE: %f).""" % \
