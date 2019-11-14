@@ -62,10 +62,10 @@ def test_sp_ccsd_rhf_full(program, basis, keywords, h2o):
     assert res["success"] is True
 
     # aug-cc-pvdz
-    scftot = -76.0413815332
-    mp2tot = -76.2632792578
-    mp2corl = -0.2218977246
-    ccsdcorl = -0.2294105794
+    # scftot = -76.0413815332
+    # mp2tot = -76.2632792578
+    # mp2corl = -0.2218977246
+    # ccsdcorl = -0.2294105794
     ccsdtot = -76.2707921127
 
     atol = 1.0e-6
@@ -142,10 +142,10 @@ def test_sp_ccsd_rohf_full(program, basis, keywords, nh2):
     assert res["success"] is True
 
     # aug-cc-pvdz
-    scftot = -55.570724348574
-    ssccsdcorl = -0.0339827
-    osccsdcorl = -0.1442533
-    ccsdcorl = -0.178236032911
+    # scftot = -55.570724348574
+    # ssccsdcorl = -0.0339827
+    # osccsdcorl = -0.1442533
+    # ccsdcorl = -0.178236032911
     ccsdtot = -55.748960381485
 
     atol = 1.0e-6

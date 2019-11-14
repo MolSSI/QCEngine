@@ -684,7 +684,6 @@ def harvest(p4Mol, c4out, **largs):
         # oriDip = None if dipolDip is None else p4c4.transform_vector(dipolDip)
 
     elif outMol:
-        oriCoord = None
         oriGrad = None
         oriHess = None
         oriDip = None if dipolDip is None else dipolDip

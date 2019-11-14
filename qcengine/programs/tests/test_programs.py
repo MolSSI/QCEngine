@@ -2,7 +2,6 @@
 Tests the DQM compute dispatch module
 """
 
-import copy
 
 import numpy as np
 import pytest
@@ -10,7 +9,6 @@ import pytest
 import qcengine as qcng
 from qcelemental.models import AtomicInput, Molecule
 from qcengine import testing
-from qcengine.testing import failure_engine
 
 
 def test_missing_key():

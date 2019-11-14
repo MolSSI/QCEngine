@@ -2,11 +2,6 @@
 Tests the MDI interface
 """
 
-import copy
-import os
-
-import pydantic
-import pytest
 
 import qcengine as qcng
 from qcelemental.testing import compare_values
@@ -78,10 +73,10 @@ def test_mdi_water():
     assert compare_values(expected, masses, atol=1.0e-7)
 
     # Test the <NCOMMANDS command
-    ncommands = engine.send_ncommands()
+    engine.send_ncommands()
 
     # Test the <COMMANDS command
-    commands = engine.send_commands()
+    engine.send_commands()
 
     # Test the <TOTCHARGE command
     totcharge = engine.send_total_charge()

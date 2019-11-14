@@ -50,7 +50,6 @@ class ProcedureHarness(BaseModel, abc.ABC):
         bool
             If the proceudre was found or not.
         """
-        pass
 
     def _build_model(self, data: Dict[str, Any], model: "BaseModel") -> "BaseModel":
         """
@@ -66,4 +65,3 @@ class ProcedureHarness(BaseModel, abc.ABC):
         str
             Return a valid, safe python version string.
         """
-        pass

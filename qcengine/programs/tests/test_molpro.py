@@ -1,6 +1,3 @@
-import copy
-
-import numpy as np
 import pytest
 
 import qcelemental as qcel

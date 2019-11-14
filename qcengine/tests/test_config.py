@@ -3,7 +3,6 @@ Tests the DQM compute module configuration
 """
 
 import copy
-import os
 
 import pydantic
 import pytest

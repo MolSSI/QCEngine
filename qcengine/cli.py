@@ -8,20 +8,19 @@ import os.path
 import sys
 from typing import Any, Dict
 
-from .config import global_repr  # info
-
 from . import (
     __version__,
     compute,
     compute_procedure,
     get_procedure,
-    get_program,  # run and run-procedure; info
     list_all_procedures,
     list_all_programs,
     list_available_procedures,
     list_available_programs,
 )
+from .config import global_repr  # info
 
+from . import get_program  # run and run-procedure; info
 
 __all__ = ["main"]
 

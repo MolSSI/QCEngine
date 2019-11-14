@@ -42,7 +42,6 @@ class ProgramHarness(BaseModel, abc.ABC):
         bool
             Returns True if the program was found, False otherwise.
         """
-        pass
 
     ## Utility
 
@@ -54,7 +53,6 @@ class ProgramHarness(BaseModel, abc.ABC):
         str
             Return a valid, safe python version string.
         """
-        pass
 
     ## Computers
 

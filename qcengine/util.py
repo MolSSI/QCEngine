@@ -521,7 +521,7 @@ def disk_files(
                 with open(filename, omode) as fp:
                     outfiles[fl] = fp.read()
                     LOGGER.info(f"... Writing ({omode}): {filename}")
-            except (OSError, FileNotFoundError) as err:
+            except (OSError, FileNotFoundError):
                 if "*" in fl:
                     gfls = {}
                     for gfl in lwd.glob(fl):

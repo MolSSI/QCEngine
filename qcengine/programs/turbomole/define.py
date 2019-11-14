@@ -37,7 +37,7 @@ def execute_define(stdin: str, cwd: Optional["Path"] = None) -> str:
             # stdout, _ = proc.communicate(str.encode(stdin), timeout=30)
             stdout, _ = proc.communicate(str.encode(stdin), timeout=15)
             stdout = decode_define(stdout)
-        except TimeoutExpired as error:
+        except TimeoutExpired:
             raise InputError(f"define call timed out!")
             # TODO: How to get the stdout when define times out? Calling
             # communiate may also result in an indefinite hang so I disabled it

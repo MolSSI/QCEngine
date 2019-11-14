@@ -2,13 +2,12 @@
 Tests the DQM compute dispatch module
 """
 
-import copy
 
 import numpy as np
 import pytest
 
 import qcengine as qcng
-from qcelemental.models import AtomicInput, Molecule
+from qcelemental.models import AtomicInput
 from qcengine import testing
 
 _canonical_methods = [
