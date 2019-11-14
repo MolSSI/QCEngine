@@ -13,15 +13,25 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
-v0.12.0 / 2019-11-DD
--------------------
+v0.12.0 / 2019-11-13
+--------------------
 
 New Features
 ++++++++++++
 
+-(:pr:`159`) Adds MolSSI Driver Interface support.
+-(:pr:`160`) Adds Turbomole support.
+-(:pr:`164`) Adds Q-Chem support.
+
 Enhancements
 ++++++++++++
 
+-(:pr:`155`) Support for Psi4 Wavefunctions using v1.4a2 or greater.
+-(:pr:`162`) Adds test for geometry optimization with trajectory protocol truncation.
+-(:pr:`167`) CFOUR and NWChem parsing improvements for CCSD(T) properties.
+-(:pr:`168`) Standardizes on ``dispatch.out`` for the common output files.
+-(:pr:`170`) Increases coverage and begins a common documentation page.
+-(:pr:`171`) Add Molpro to the standard suite.
 - (:pr:`172`) Models renamed according to https://github.com/MolSSI/QCElemental/issues/155, particularly
   ``ResultInput`` -> ``AtomicInput``, ``Result`` -> ``AtomicResult``, ``Optimization`` -> ``OptimizationResult``.
 
