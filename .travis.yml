@@ -18,10 +18,10 @@ matrix:
       env:
         - PYTHON_VER=3.7
         - PROG=PSI4DEV  # py37 not avail for latest release
-    - os: linux
-      env:
-        - PYTHON_VER=3.6
-        - PROG=ANI
+#    - os: linux
+#      env:
+#        - PYTHON_VER=3.6
+#        - PROG=ANI
 
 before_install:
     # Additional info about the build
