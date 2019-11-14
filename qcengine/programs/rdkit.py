@@ -26,12 +26,14 @@ class RDKitHarness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        return which_import('rdkit',
-                            return_bool=True,
-                            raise_error=raise_error,
-                            raise_msg='Please install via `conda install rdkit -c conda-forge`.')
+        return which_import(
+            "rdkit",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install rdkit -c conda-forge`.",
+        )
 
-    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
+    def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
         """
         Runs RDKit in FF typing
         """
@@ -48,7 +50,7 @@ class RDKitHarness(ProgramHarness):
         jmol = input_data.molecule
 
         # Handle errors
-        if abs(jmol.molecular_charge) > 1.e-6:
+        if abs(jmol.molecular_charge) > 1.0e-6:
             raise InputError("RDKit does not currently support charged molecules.")
 
         if not jmol.connectivity:  # Check for empty list
@@ -72,9 +74,14 @@ class RDKitHarness(ProgramHarness):
         conf = Chem.Conformer(natom)
         bohr2ang = ureg.conversion_factor("bohr", "angstrom")
         for line in range(natom):
-            conf.SetAtomPosition(line, (bohr2ang * jmol.geometry[line, 0],
-                                        bohr2ang * jmol.geometry[line, 1],
-                                        bohr2ang * jmol.geometry[line, 2]))  # yapf: disable
+            conf.SetAtomPosition(
+                line,
+                (
+                    bohr2ang * jmol.geometry[line, 0],
+                    bohr2ang * jmol.geometry[line, 1],
+                    bohr2ang * jmol.geometry[line, 2],
+                ),
+            )  # yapf: disable
 
         mol.AddConformer(conf)
         Chem.rdmolops.SanitizeMol(mol)
@@ -100,9 +107,9 @@ class RDKitHarness(ProgramHarness):
         else:
             raise InputError(f"RDKit can only compute energy and gradient driver methods. Found {input_data.driver}.")
 
-        ret_data["provenance"] = Provenance(creator="rdkit",
-                                            version=rdkit.__version__,
-                                            routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField")
+        ret_data["provenance"] = Provenance(
+            creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField"
+        )
 
         ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True

@@ -6,13 +6,13 @@ from typing import Any, Dict, Tuple
 def format_keyword(keyword: str, val: Any, lop_off: bool = True) -> Tuple[str, str]:
     """Reformat value `val` for `keyword` from python into GAMESS-speak."""
 
-    text = ''
+    text = ""
 
     # Transform booleans into Fortran booleans
-    if str(val) == 'True':
-        text += '.true.'
-    elif str(val) == 'False':
-        text += '.false.'
+    if str(val) == "True":
+        text += ".true."
+    elif str(val) == "False":
+        text += ".false."
 
     # No Transform
     else:
@@ -29,16 +29,16 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
 
     grouped_options = collections.defaultdict(dict)
     for group_key, val in keywords.items():
-        group, key = group_key.split('__')
+        group, key = group_key.split("__")
         grouped_options[group.lower()][key.lower()] = val
 
     grouped_lines = {}
     for group, opts in sorted(grouped_options.items()):
         line = []
-        line.append(f'${group.lower()}')
+        line.append(f"${group.lower()}")
         for key, val in sorted(grouped_options[group].items()):
-            line.append('='.join(format_keyword(key, val, lop_off=False)))
-        line.append('$end\n')
-        grouped_lines[group] = textwrap.fill(' '.join(line), initial_indent=' ', subsequent_indent='  ')
+            line.append("=".join(format_keyword(key, val, lop_off=False)))
+        line.append("$end\n")
+        grouped_lines[group] = textwrap.fill(" ".join(line), initial_indent=" ", subsequent_indent="  ")
 
-    return '\n'.join(grouped_lines.values()) + '\n'
+    return "\n".join(grouped_lines.values()) + "\n"

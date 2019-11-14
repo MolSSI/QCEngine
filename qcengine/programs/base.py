@@ -25,14 +25,14 @@ __all__ = ["register_program", "get_program", "list_all_programs", "list_availab
 programs = {}
 
 
-def register_program(entry_point: 'ProgramHarness') -> None:
+def register_program(entry_point: "ProgramHarness") -> None:
     """
     Register a new ProgramHarness with QCEngine.
     """
 
     name = entry_point.name
     if name.lower() in programs.keys():
-        raise ValueError('{} is already a registered program.'.format(name))
+        raise ValueError("{} is already a registered program.".format(name))
 
     programs[name.lower()] = entry_point
 
@@ -47,7 +47,7 @@ def unregister_program(name: str) -> None:
         raise KeyError(f"Program {name} is not registered with QCEngine")
 
 
-def get_program(name: str, check: bool = True) -> 'ProgramHarness':
+def get_program(name: str, check: bool = True) -> "ProgramHarness":
     """
     Returns a program's executor class
 

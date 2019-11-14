@@ -32,31 +32,28 @@ def nh2():
     return qcel.models.Molecule.from_data(smol)
 
 
-@pytest.mark.parametrize('program,basis,keywords', [
-    pytest.param('cfour', 'aug-pvdz', {'scf_conv': 12}, marks=testing.using_cfour),
-    pytest.param('cfour', 'aug-pvdz', {}, marks=testing.using_cfour),
-    pytest.param('gamess', 'accd', {'contrl__ispher': 1}, marks=testing.using_gamess),
-    pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
-    pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True}, marks=testing.using_nwchem),
-    pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce'}, marks=testing.using_nwchem),
-    pytest.param('psi4', 'aug-cc-pvdz', {'scf_type': 'direct'}, marks=testing.using_psi4),
-    pytest.param('qchem', 'aug-cc-pvdz', {}, marks=testing.using_qchem),
-    pytest.param('turbomole', 'aug-cc-pVDZ', {}, marks=testing.using_turbomole),
-])  # yapf: disable
+@pytest.mark.parametrize(
+    "program,basis,keywords",
+    [
+        pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=testing.using_cfour),
+        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using_cfour),
+        pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=testing.using_gamess),
+        pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using_molpro),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using_nwchem),
+        pytest.param(
+            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using_nwchem
+        ),
+        pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "direct"}, marks=testing.using_psi4),
+        pytest.param("qchem", "aug-cc-pvdz", {}, marks=testing.using_qchem),
+        pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=testing.using_turbomole),
+    ],
+)  # yapf: disable
 def test_sp_hf_rhf(program, basis, keywords, h2o):
     """cfour/sp-rhf-hf/input.dat
     #! single point HF/adz on water
 
     """
-    resi = {
-        "molecule": h2o,
-        "driver": "energy",
-        "model": {
-            "method": "hf",
-            "basis": basis
-        },
-        "keywords": keywords,
-    }
+    resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
 
@@ -67,31 +64,36 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
     # aug-cc-pvdz
     scf_tot = -76.0413815332
 
-    atol = 1.e-6
+    atol = 1.0e-6
     assert compare_values(scf_tot, res["return_result"], atol=atol)
 
 
-@pytest.mark.parametrize('program,basis,keywords', [
-    pytest.param('cfour', 'aug-pvdz', {'reference': 'uhf', 'occupation': [[3,1,1,0],[3,0,1,0]], 'scf_conv': 12}, marks=testing.using_cfour),
-    pytest.param('cfour', 'aug-pvdz', {'reference': 'uhf'}, marks=testing.using_cfour),
-    pytest.param('gamess', 'accd', {'contrl__ispher': 1, 'contrl__scftyp': 'uhf'}, marks=testing.using_gamess),
-    pytest.param('molpro', 'aug-cc-pvdz', {'reference': 'unrestricted'}, marks=testing.using_molpro),
-    pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'scf__uhf': True}, marks=testing.using_nwchem),
-    pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce', 'scf__uhf': True}, marks=testing.using_nwchem),
-    pytest.param('psi4', 'aug-cc-pvdz', {'reference': 'uhf', 'scf_type': 'direct'}, marks=testing.using_psi4),
-    pytest.param('qchem', 'aug-cc-pvdz', {}, marks=testing.using_qchem),
-    pytest.param('turbomole', 'aug-cc-pVDZ', {}, marks=testing.using_turbomole),
-])  # yapf: disable
+@pytest.mark.parametrize(
+    "program,basis,keywords",
+    [
+        pytest.param(
+            "cfour",
+            "aug-pvdz",
+            {"reference": "uhf", "occupation": [[3, 1, 1, 0], [3, 0, 1, 0]], "scf_conv": 12},
+            marks=testing.using_cfour,
+        ),
+        pytest.param("cfour", "aug-pvdz", {"reference": "uhf"}, marks=testing.using_cfour),
+        pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=testing.using_gamess),
+        pytest.param("molpro", "aug-cc-pvdz", {"reference": "unrestricted"}, marks=testing.using_molpro),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__uhf": True}, marks=testing.using_nwchem),
+        pytest.param(
+            "nwchem",
+            "aug-cc-pvdz",
+            {"basis__spherical": True, "qc_module": "tce", "scf__uhf": True},
+            marks=testing.using_nwchem,
+        ),
+        pytest.param("psi4", "aug-cc-pvdz", {"reference": "uhf", "scf_type": "direct"}, marks=testing.using_psi4),
+        pytest.param("qchem", "aug-cc-pvdz", {}, marks=testing.using_qchem),
+        pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=testing.using_turbomole),
+    ],
+)  # yapf: disable
 def test_sp_hf_uhf(program, basis, keywords, nh2):
-    resi = {
-        "molecule": nh2,
-        "driver": "energy",
-        "model": {
-            "method": "hf",
-            "basis": basis
-        },
-        "keywords": keywords,
-    }
+    resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
 
@@ -102,29 +104,37 @@ def test_sp_hf_uhf(program, basis, keywords, nh2):
     # aug-cc-pvdz
     scf_tot = -55.57513805253009
 
-    atol = 1.e-6
+    atol = 1.0e-6
     assert compare_values(scf_tot, res["return_result"], atol=atol)
 
-@pytest.mark.parametrize('program,basis,keywords', [
-    pytest.param('cfour', 'aug-pvdz', {'reference': 'rohf', 'occupation': [[3,1,1,0],[3,0,1,0]], 'scf_conv': 12}, marks=testing.using_cfour),
-    pytest.param('cfour', 'aug-pvdz', {'reference': 'rohf'}, marks=testing.using_cfour),
-    pytest.param('gamess', 'accd', {'contrl__ispher': 1, 'contrl__scftyp': 'rohf'}, marks=testing.using_gamess),
-    pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
-    pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'scf__rohf': True}, marks=testing.using_nwchem),
-    pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce', 'scf__rohf': True}, marks=testing.using_nwchem),
-    pytest.param('psi4', 'aug-cc-pvdz', {'reference': 'rohf', 'scf_type': 'direct'}, marks=testing.using_psi4),
-    pytest.param('qchem', 'aug-cc-pvdz', {"UNRESTRICTED": False}, marks=testing.using_qchem),
-])  # yapf: disable
+
+@pytest.mark.parametrize(
+    "program,basis,keywords",
+    [
+        pytest.param(
+            "cfour",
+            "aug-pvdz",
+            {"reference": "rohf", "occupation": [[3, 1, 1, 0], [3, 0, 1, 0]], "scf_conv": 12},
+            marks=testing.using_cfour,
+        ),
+        pytest.param("cfour", "aug-pvdz", {"reference": "rohf"}, marks=testing.using_cfour),
+        pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "rohf"}, marks=testing.using_gamess),
+        pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using_molpro),
+        pytest.param(
+            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__rohf": True}, marks=testing.using_nwchem
+        ),
+        pytest.param(
+            "nwchem",
+            "aug-cc-pvdz",
+            {"basis__spherical": True, "qc_module": "tce", "scf__rohf": True},
+            marks=testing.using_nwchem,
+        ),
+        pytest.param("psi4", "aug-cc-pvdz", {"reference": "rohf", "scf_type": "direct"}, marks=testing.using_psi4),
+        pytest.param("qchem", "aug-cc-pvdz", {"UNRESTRICTED": False}, marks=testing.using_qchem),
+    ],
+)  # yapf: disable
 def test_sp_hf_rohf(program, basis, keywords, nh2):
-    resi = {
-        "molecule": nh2,
-        "driver": "energy",
-        "model": {
-            "method": "hf",
-            "basis": basis
-        },
-        "keywords": keywords,
-    }
+    resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
 
@@ -135,5 +145,5 @@ def test_sp_hf_rohf(program, basis, keywords, nh2):
     # aug-cc-pvdz
     scf_tot = -55.570724348574
 
-    atol = 1.e-6
+    atol = 1.0e-6
     assert compare_values(scf_tot, res["return_result"], atol=atol)

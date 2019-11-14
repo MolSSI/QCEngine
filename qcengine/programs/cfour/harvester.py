@@ -19,7 +19,7 @@ def harvest_output(outtext):
     pass_grad = []
 
     # for outpass in re.split(r'--invoking executable xjoda', outtext, re.MULTILINE):
-    for outpass in re.split(r'JODA beginning optimization cycle', outtext, re.MULTILINE):
+    for outpass in re.split(r"JODA beginning optimization cycle", outtext, re.MULTILINE):
         psivar, c4coord, c4grad, version, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(c4coord)
@@ -53,8 +53,8 @@ def harvest_outfile_pass(outtext):
     psivar = PreservingDict()
     psivar_coord = None
     psivar_grad = None
-    version = ''
-    error = ''
+    version = ""
+    error = ""
 
     #    TODO: BCC
     #          CI
@@ -62,6 +62,7 @@ def harvest_outfile_pass(outtext):
     #          other ROHF tests
     #          vcc/ecc
 
+    # fmt: off
     NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
 
     # Process version
@@ -533,49 +534,50 @@ def harvest_outfile_pass(outtext):
         if int(mobj.group(2)) != 0:
             error += '--executable {} finished with status {}'.format(mobj.group(1), mobj.group(2))
 
+    # fmt: on
+
     # Process CURRENT energies (TODO: needs better way)
-    if 'SCF TOTAL ENERGY' in psivar:
-        psivar['CURRENT REFERENCE ENERGY'] = psivar['SCF TOTAL ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['SCF TOTAL ENERGY']
-        psivar['HF TOTAL ENERGY'] = psivar['SCF TOTAL ENERGY']
+    if "SCF TOTAL ENERGY" in psivar:
+        psivar["CURRENT REFERENCE ENERGY"] = psivar["SCF TOTAL ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["SCF TOTAL ENERGY"]
+        psivar["HF TOTAL ENERGY"] = psivar["SCF TOTAL ENERGY"]
 
-    if 'MP2 TOTAL ENERGY' in psivar and 'MP2 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP2 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP2 TOTAL ENERGY']
+    if "MP2 TOTAL ENERGY" in psivar and "MP2 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP2 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP2 TOTAL ENERGY"]
 
-    if 'MP3 TOTAL ENERGY' in psivar and 'MP3 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP3 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP3 TOTAL ENERGY']
+    if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP3 TOTAL ENERGY"]
 
-    if 'MP4 TOTAL ENERGY' in psivar and 'MP4 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP4 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP4 TOTAL ENERGY']
+    if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
 
+    #    if ('%s TOTAL ENERGY' % (mobj.group('fullCC')) in psivar) and \
+    #       ('%s CORRELATION ENERGY' % (mobj.group('fullCC')) in psivar):
+    #        psivar['CURRENT CORRELATION ENERGY'] = psivar['%s CORRELATION ENERGY' % (mobj.group('fullCC')]
+    #        psivar['CURRENT ENERGY'] = psivar['%s TOTAL ENERGY' % (mobj.group('fullCC')]
 
-#    if ('%s TOTAL ENERGY' % (mobj.group('fullCC')) in psivar) and \
-#       ('%s CORRELATION ENERGY' % (mobj.group('fullCC')) in psivar):
-#        psivar['CURRENT CORRELATION ENERGY'] = psivar['%s CORRELATION ENERGY' % (mobj.group('fullCC')]
-#        psivar['CURRENT ENERGY'] = psivar['%s TOTAL ENERGY' % (mobj.group('fullCC')]
+    if "CC2 TOTAL ENERGY" in psivar and "CC2 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CC2 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CC2 TOTAL ENERGY"]
 
-    if 'CC2 TOTAL ENERGY' in psivar and 'CC2 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CC2 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CC2 TOTAL ENERGY']
+    if "CCSD TOTAL ENERGY" in psivar and "CCSD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSD TOTAL ENERGY"]
 
-    if 'CCSD TOTAL ENERGY' in psivar and 'CCSD CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CCSD CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CCSD TOTAL ENERGY']
+    if "CCSD(T) TOTAL ENERGY" in psivar and "CCSD(T) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD(T) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSD(T) TOTAL ENERGY"]
 
-    if 'CCSD(T) TOTAL ENERGY' in psivar and 'CCSD(T) CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CCSD(T) CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CCSD(T) TOTAL ENERGY']
+    if "CC3 TOTAL ENERGY" in psivar and "CC3 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CC3 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CC3 TOTAL ENERGY"]
 
-    if 'CC3 TOTAL ENERGY' in psivar and 'CC3 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CC3 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CC3 TOTAL ENERGY']
-
-    if 'CCSDT TOTAL ENERGY' in psivar and 'CCSDT CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CCSDT CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CCSDT TOTAL ENERGY']
+    if "CCSDT TOTAL ENERGY" in psivar and "CCSDT CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSDT TOTAL ENERGY"]
 
     return psivar, psivar_coord, psivar_grad, version, error
 
@@ -592,20 +594,20 @@ def harvest(p4Mol, c4out, **largs):
     # Collect results from output file and subsidiary files
     outPsivar, outMol, outGrad, version, error = harvest_output(c4out)
 
-    if largs.get('GRD'):
-        grdMol, grdGrad = harvest_GRD(largs['GRD'])
+    if largs.get("GRD"):
+        grdMol, grdGrad = harvest_GRD(largs["GRD"])
     else:
         grdMol, grdGrad = None, None
 
-    if largs.get('FCMFINAL'):
-        fcmHess = load_hessian(largs['FCMFINAL'], dtype='fcmfinal')
+    if largs.get("FCMFINAL"):
+        fcmHess = load_hessian(largs["FCMFINAL"], dtype="fcmfinal")
         if np.count_nonzero(fcmHess) == 0:
             fcmHess = None
     else:
         fcmHess = None
 
-    if largs.get('DIPOL'):
-        dipolDip = harvest_DIPOL(largs['DIPOL'])
+    if largs.get("DIPOL"):
+        dipolDip = harvest_DIPOL(largs["DIPOL"])
     else:
         dipolDip = None
 
@@ -619,29 +621,33 @@ def harvest(p4Mol, c4out, **largs):
     if outMol:
         if grdMol:
             if abs(outMol.nuclear_repulsion_energy() - grdMol.nuclear_repulsion_energy()) > 1.0e-3:
-                raise ValueError("""Cfour outfile (NRE: %f) inconsistent with Cfour GRD (NRE: %f).""" % \
-                        (outMol.nuclear_repulsion_energy(), grdMol.nuclear_repulsion_energy()))
+                raise ValueError(
+                    """Cfour outfile (NRE: %f) inconsistent with Cfour GRD (NRE: %f)."""
+                    % (outMol.nuclear_repulsion_energy(), grdMol.nuclear_repulsion_energy())
+                )
         if p4Mol:
             if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
-                raise ValueError("""Cfour outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f).""" % \
-                    (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy()))
+                raise ValueError(
+                    """Cfour outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
+                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                )
     else:
         raise ValueError("""No coordinate information extracted from Cfour output.""")
 
-#    print '    <<<   [1] P4-MOL   >>>'
-#    if p4Mol:
-#        p4Mol.print_out_in_bohr()
-#    print '    <<<   [2] C4-OUT-MOL   >>>'
-#    if outMol:
-#        outMol.print_out_in_bohr()
-#    print '    <<<   [3] C4-GRD-MOL   >>>'
-#    if grdMol:
-#        grdMol.print_out_in_bohr()
+    #    print '    <<<   [1] P4-MOL   >>>'
+    #    if p4Mol:
+    #        p4Mol.print_out_in_bohr()
+    #    print '    <<<   [2] C4-OUT-MOL   >>>'
+    #    if outMol:
+    #        outMol.print_out_in_bohr()
+    #    print '    <<<   [3] C4-GRD-MOL   >>>'
+    #    if grdMol:
+    #        grdMol.print_out_in_bohr()
 
-# Set up array reorientation object
+    # Set up array reorientation object
     if p4Mol and grdMol:
         amol, data = grdMol.align(p4Mol, atoms_map=False, mols_align=True, verbose=0)
-        mill = data['mill']
+        mill = data["mill"]
 
         oriCoord = mill.align_coordinates(grdMol.geometry)  # (np_out=True))
         oriGrad = mill.align_gradient(np.array(grdGrad))
@@ -663,7 +669,7 @@ def harvest(p4Mol, c4out, **largs):
     elif p4Mol and outMol:
         # TODO watch out - haven't seen atom_map=False yet
         amol, data = outMol.align(p4Mol, atoms_map=True, mols_align=True, verbose=0)
-        mill = data['mill']
+        mill = data["mill"]
 
         oriCoord = mill.align_coordinates(outMol.geometry)  # (np_out=True))
         oriGrad = None
@@ -683,29 +689,28 @@ def harvest(p4Mol, c4out, **largs):
         oriHess = None
         oriDip = None if dipolDip is None else dipolDip
 
-
-#    print p4c4
-#    print '    <<<   [4] C4-ORI-MOL   >>>'
-#    if oriCoord is not None:
-#        for item in oriCoord:
-#            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
-#
-#    print '    <<<   [1] C4-GRD-GRAD   >>>'
-#    if grdGrad is not None:
-#        for item in grdGrad:
-#            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
-#    print '    <<<   [2] C4-ORI-GRAD   >>>'
-#    if oriGrad is not None:
-#        for item in oriGrad:
-#            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
+    #    print p4c4
+    #    print '    <<<   [4] C4-ORI-MOL   >>>'
+    #    if oriCoord is not None:
+    #        for item in oriCoord:
+    #            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
+    #
+    #    print '    <<<   [1] C4-GRD-GRAD   >>>'
+    #    if grdGrad is not None:
+    #        for item in grdGrad:
+    #            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
+    #    print '    <<<   [2] C4-ORI-GRAD   >>>'
+    #    if oriGrad is not None:
+    #        for item in oriGrad:
+    #            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
 
     retMol = None if p4Mol else grdMol
 
     if oriDip is not None:
         oriDip *= qcel.constants.dipmom_au2debye
-        outPsivar['CURRENT DIPOLE X'] = oriDip[0]
-        outPsivar['CURRENT DIPOLE Y'] = oriDip[1]
-        outPsivar['CURRENT DIPOLE Z'] = oriDip[2]
+        outPsivar["CURRENT DIPOLE X"] = oriDip[0]
+        outPsivar["CURRENT DIPOLE Y"] = oriDip[1]
+        outPsivar["CURRENT DIPOLE Z"] = oriDip[2]
         # outPsivar['CURRENT DIPOLE X'] = str(oriDip[0] * psi_dipmom_au2debye)
         # outPsivar['CURRENT DIPOLE Y'] = str(oriDip[1] * psi_dipmom_au2debye)
         # outPsivar['CURRENT DIPOLE Z'] = str(oriDip[2] * psi_dipmom_au2debye)
@@ -740,21 +745,21 @@ def harvest_GRD(grd):
     """
     grd = grd.splitlines()
     Nat = int(grd[0].split()[0])
-    molxyz = f'{Nat} bohr\n\n'
+    molxyz = f"{Nat} bohr\n\n"
 
     grad = []
     for at in range(Nat):
         mline = grd[at + 1].split()
-        el = 'GH' if int(float(mline[0])) == 0 else qcel.periodictable.to_E(int(float(mline[0])))
-        molxyz += '%s %16s %16s %16s\n' % (el, mline[-3], mline[-2], mline[-1])
+        el = "GH" if int(float(mline[0])) == 0 else qcel.periodictable.to_E(int(float(mline[0])))
+        molxyz += "%s %16s %16s %16s\n" % (el, mline[-3], mline[-2], mline[-1])
         lline = grd[at + 1 + Nat].split()
         grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
-    mol = Molecule(validate=False,
-                   **qcel.molparse.to_schema(qcel.molparse.from_string(molxyz,
-                                                                       dtype='xyz+',
-                                                                       fix_com=True,
-                                                                       fix_orientation=True)["qm"],
-                                             dtype=2))
+    mol = Molecule(
+        validate=False,
+        **qcel.molparse.to_schema(
+            qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=2
+        ),
+    )
 
     return mol, grad
 

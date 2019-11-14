@@ -16,7 +16,7 @@ def harvest_output(outtext):
     pass_coord = []
     pass_grad = []
     print(pass_coord)
-    for outpass in re.split(r' Line search:', outtext, re.MULTILINE):
+    for outpass in re.split(r" Line search:", outtext, re.MULTILINE):
         psivar, nwcoord, nwgrad, version, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
@@ -51,10 +51,11 @@ def harvest_outfile_pass(outtext):
     psivar = PreservingDict()
     psivar_coord = None
     psivar_grad = None
-    version = ''
-    error = ''
+    version = ""
+    error = ""
 
     NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+    # fmt: off
 
     # Process version
     mobj = re.search(
@@ -526,47 +527,47 @@ def harvest_outfile_pass(outtext):
             psivar['NWCHEM ERROR CODE'] = mobj.group(1)
             # TODO process errors into error var
 
+    # fmt: on
+
     # Process CURRENT energies (TODO: needs better way)
-    if 'HF TOTAL ENERGY' in psivar:
-        psivar['SCF TOTAL ENERGY'] = psivar['HF TOTAL ENERGY']
-        psivar['CURRENT REFERENCE ENERGY'] = psivar['HF TOTAL ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['HF TOTAL ENERGY']
+    if "HF TOTAL ENERGY" in psivar:
+        psivar["SCF TOTAL ENERGY"] = psivar["HF TOTAL ENERGY"]
+        psivar["CURRENT REFERENCE ENERGY"] = psivar["HF TOTAL ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["HF TOTAL ENERGY"]
 
-    if 'MP2 TOTAL ENERGY' in psivar and 'MP2 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP2 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP2 TOTAL ENERGY']
-    if 'MP3 TOTAL ENERGY' in psivar and 'MP3 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP3 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP3 TOTAL ENERGY']
-    if 'MP4 TOTAL ENERGY' in psivar and 'MP4 CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['MP4 CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['MP4 TOTAL ENERGY']
+    if "MP2 TOTAL ENERGY" in psivar and "MP2 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP2 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP2 TOTAL ENERGY"]
+    if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP3 TOTAL ENERGY"]
+    if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
 
-    if 'DFT TOTAL ENERGY' in psivar:
-        psivar['CURRENT REFERENCE ENERGY'] = psivar['DFT TOTAL ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['DFT TOTAL ENERGY']
+    if "DFT TOTAL ENERGY" in psivar:
+        psivar["CURRENT REFERENCE ENERGY"] = psivar["DFT TOTAL ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["DFT TOTAL ENERGY"]
 
     # Process TCE CURRENT energies
     # Need to be fixed
     # HOW TO KNOW options['NWCHEM']['NWCHEM_TCE']['value']?
     # TODO: CURRENT ENERGY = TCE ENERGY
-    if ('%s TOTAL ENERGY' % (cc_name) in psivar and \
-       ('%s CORRELATION ENERGY' % (cc_name) in psivar)):
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['%s CORRELATION ENERGY' % (cc_name)]
-        psivar['CURRENT ENERGY'] = psivar['%s TOTAL ENERGY' % (cc_name)]
+    if "%s TOTAL ENERGY" % (cc_name) in psivar and ("%s CORRELATION ENERGY" % (cc_name) in psivar):
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["%s CORRELATION ENERGY" % (cc_name)]
+        psivar["CURRENT ENERGY"] = psivar["%s TOTAL ENERGY" % (cc_name)]
 
-    if 'CCSD TOTAL ENERGY' in psivar and 'CCSD CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CCSD CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CCSD TOTAL ENERGY']
+    if "CCSD TOTAL ENERGY" in psivar and "CCSD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSD TOTAL ENERGY"]
 
-    if 'CCSD(T) TOTAL ENERGY' in psivar and 'CCSD(T) CORRELATION ENERGY' in psivar:
-        psivar['CURRENT CORRELATION ENERGY'] = psivar['CCSD(T) CORRELATION ENERGY']
-        psivar['CURRENT ENERGY'] = psivar['CCSD(T) TOTAL ENERGY']
+    if "CCSD(T) TOTAL ENERGY" in psivar and "CCSD(T) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD(T) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSD(T) TOTAL ENERGY"]
 
-    if ('EOM-%s TOTAL ENERGY' % (cc_name) in psivar) and \
-       ('%s EXCITATION ENERGY' %(cc_name) in psivar):
-        psivar['CURRENT ENERGY'] = psivar['EOM-%s TOTAL ENERGY' % (cc_name)]
-        psivar['CURRENT EXCITATION ENERGY'] = psivar['%s EXCITATION ENERGY' % (cc_name)]
+    if ("EOM-%s TOTAL ENERGY" % (cc_name) in psivar) and ("%s EXCITATION ENERGY" % (cc_name) in psivar):
+        psivar["CURRENT ENERGY"] = psivar["EOM-%s TOTAL ENERGY" % (cc_name)]
+        psivar["CURRENT EXCITATION ENERGY"] = psivar["%s EXCITATION ENERGY" % (cc_name)]
 
     return psivar, psivar_coord, psivar_grad, version, error
 
@@ -579,7 +580,7 @@ def harvest_hessian(hess):
     raise NotImplementedError()
 
 
-def harvest(p4Mol, nwout, **largs):  #check orientation and scratch files
+def harvest(p4Mol, nwout, **largs):  # check orientation and scratch files
     """Parses all the pieces of output from NWChem: the stdout in
     *nwout* Scratch files are not yet considered at this moment. 
 
@@ -594,8 +595,10 @@ def harvest(p4Mol, nwout, **largs):  #check orientation and scratch files
     if outMol:
         if p4Mol:
             if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
-                raise ValueError("""NWChem outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f).""" % \
-                            (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy()))
+                raise ValueError(
+                    """NWChem outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
+                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                )
             ## TEST##########
             # else:
             #   print ( """NWChem outfile (NRE: %f) consistent with Psi4 input (NRE: %f).""" % \
