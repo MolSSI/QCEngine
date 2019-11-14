@@ -19,7 +19,7 @@ class ProcedureHarness(BaseModel, abc.ABC):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def build_input_model(self, data: Union[Dict[str, Any], 'BaseModel'], raise_error: bool = True) -> 'BaseModel':
+    def build_input_model(self, data: Union[Dict[str, Any], "BaseModel"], raise_error: bool = True) -> "BaseModel":
         """
         Build and validate the input model, passes if the data was a normal BaseModel input.
 
@@ -35,8 +35,9 @@ class ProcedureHarness(BaseModel, abc.ABC):
         BaseModel
             The input model for the procedure.
         """
+
     @abc.abstractmethod
-    def compute(self, input_data: 'BaseModel', config: 'JobConfig') -> 'BaseModel':
+    def compute(self, input_data: "BaseModel", config: "JobConfig") -> "BaseModel":
         pass
 
     @abc.abstractmethod
@@ -51,7 +52,7 @@ class ProcedureHarness(BaseModel, abc.ABC):
         """
         pass
 
-    def _build_model(self, data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel':
+    def _build_model(self, data: Dict[str, Any], model: "BaseModel") -> "BaseModel":
         """
         Quick wrapper around util.model_wrapper for inherited classes
         """

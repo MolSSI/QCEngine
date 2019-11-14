@@ -12,6 +12,6 @@ from .programs import get_program, list_all_programs, list_available_programs, r
 from .stock_mols import get_molecule
 
 # Handle versioneer
-__version__ = get_information('version')
-__git_revision__ = get_information('git_revision')
+__version__ = get_information("version")
+__git_revision__ = get_information("git_revision")
 del get_information

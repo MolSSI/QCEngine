@@ -26,11 +26,13 @@ def _process_failure_and_return(model, return_dict, raise_error):
         return False
 
 
-def compute(input_data: Union[Dict[str, Any], 'AtomicInput'],
-            program: str,
-            raise_error: bool = False,
-            local_options: Optional[Dict[str, Any]] = None,
-            return_dict: bool = False) -> 'AtomicResult':
+def compute(
+    input_data: Union[Dict[str, Any], "AtomicInput"],
+    program: str,
+    raise_error: bool = False,
+    local_options: Optional[Dict[str, Any]] = None,
+    return_dict: bool = False,
+) -> "AtomicResult":
     """Executes a single quantum chemistry program given a QC Schema input.
 
     The full specification can be found at:
@@ -95,11 +97,13 @@ def compute(input_data: Union[Dict[str, Any], 'AtomicInput'],
     return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
 
 
-def compute_procedure(input_data: Union[Dict[str, Any], 'BaseModel'],
-                      procedure: str,
-                      raise_error: bool = False,
-                      local_options: Optional[Dict[str, str]] = None,
-                      return_dict: bool = False) -> 'BaseModel':
+def compute_procedure(
+    input_data: Union[Dict[str, Any], "BaseModel"],
+    procedure: str,
+    raise_error: bool = False,
+    local_options: Optional[Dict[str, str]] = None,
+    return_dict: bool = False,
+) -> "BaseModel":
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters

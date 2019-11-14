@@ -10,8 +10,17 @@ from typing import Any, Dict
 
 from .config import global_repr  # info
 
-from . import (__version__, compute, compute_procedure, get_procedure, get_program,  # run and run-procedure; info
-               list_all_procedures, list_all_programs, list_available_procedures, list_available_programs)
+from . import (
+    __version__,
+    compute,
+    compute_procedure,
+    get_procedure,
+    get_program,  # run and run-procedure; info
+    list_all_procedures,
+    list_all_programs,
+    list_available_procedures,
+    list_available_programs,
+)
 
 
 __all__ = ["main"]
@@ -20,37 +29,39 @@ info_choices = frozenset(["version", "programs", "procedures", "config", "all"])
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='A CLI for the QCEngine.')
-    parser.add_argument('--version', action='version', version=f"{__version__}")
+    parser = argparse.ArgumentParser(description="A CLI for the QCEngine.")
+    parser.add_argument("--version", action="version", version=f"{__version__}")
 
     subparsers = parser.add_subparsers(dest="command")
 
-    info = subparsers.add_parser('info', help="Print information about QCEngine setup, version, and environment.")
-    info.add_argument("category",
-                      nargs="*",
-                      default="all",
-                      choices=info_choices,
-                      help="The information categories to show.")
+    info = subparsers.add_parser("info", help="Print information about QCEngine setup, version, and environment.")
+    info.add_argument(
+        "category", nargs="*", default="all", choices=info_choices, help="The information categories to show."
+    )
 
-    run = subparsers.add_parser('run', help="Run a program on a given task. Output is printed as a JSON blob.")
-    run.add_argument('program', type=str, help="The program to run.")
-    run.add_argument('data',
-                     type=str,
-                     help="Data describing the task to run. "
-                     "One of: (i) A JSON blob, "
-                     "(ii) A file name, "
-                     "(iii) '-', indicating data will be read from STDIN.")
+    run = subparsers.add_parser("run", help="Run a program on a given task. Output is printed as a JSON blob.")
+    run.add_argument("program", type=str, help="The program to run.")
+    run.add_argument(
+        "data",
+        type=str,
+        help="Data describing the task to run. "
+        "One of: (i) A JSON blob, "
+        "(ii) A file name, "
+        "(iii) '-', indicating data will be read from STDIN.",
+    )
 
-    run_procedure = subparsers.add_parser('run-procedure',
-                                          help="Run a procedure on a given task. "
-                                          "Output is printed as a JSON blob.")
-    run_procedure.add_argument('procedure', type=str, help="The procedure to run.")
-    run_procedure.add_argument('data',
-                               type=str,
-                               help="Data describing the task to run. "
-                               "One of: (i) A JSON blob, "
-                               "(ii) A file name, "
-                               "(iii) '-', indicating data will be read from STDIN.")
+    run_procedure = subparsers.add_parser(
+        "run-procedure", help="Run a procedure on a given task. " "Output is printed as a JSON blob."
+    )
+    run_procedure.add_argument("procedure", type=str, help="The procedure to run.")
+    run_procedure.add_argument(
+        "data",
+        type=str,
+        help="Data describing the task to run. "
+        "One of: (i) A JSON blob, "
+        "(ii) A file name, "
+        "(iii) '-', indicating data will be read from STDIN.",
+    )
 
     args = vars(parser.parse_args())
     if args["command"] is None:
@@ -63,6 +74,7 @@ def parse_args():
 def info_cli(args):
     def info_version():
         import qcelemental
+
         print(">>> Version information")
         print(f"QCEngine version:    {__version__}")
         print(f"QCElemental version: {qcelemental.__version__}")
