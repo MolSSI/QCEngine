@@ -1,10 +1,10 @@
 import os
 
 import pytest
-import qcelemental as qcel
-from qcelemental.testing import compare_recursive
 
+import qcelemental as qcel
 import qcengine as qcng
+from qcelemental.testing import compare_recursive
 from qcengine.testing import qcengine_records, using_terachem
 
 # Prep globals

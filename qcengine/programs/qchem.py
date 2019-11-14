@@ -7,6 +7,7 @@ import tempfile
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+
 from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
 

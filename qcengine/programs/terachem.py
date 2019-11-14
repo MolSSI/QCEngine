@@ -5,11 +5,10 @@ Calls the TeraChem executable.
 import re
 from typing import Any, Dict, Optional
 
+import qcengine.util as uti
 from qcelemental.models import AtomicResult, FailedOperation
 from qcelemental.molparse.regex import DECIMAL, NUMBER
 from qcelemental.util import parse_version, safe_version, which
-
-import qcengine.util as uti
 
 from ..exceptions import UnknownError
 from ..util import popen

@@ -7,9 +7,9 @@ import os
 
 import pydantic
 import pytest
-from qcelemental.testing import compare_values
 
 import qcengine as qcng
+from qcelemental.testing import compare_values
 from qcengine import testing
 
 

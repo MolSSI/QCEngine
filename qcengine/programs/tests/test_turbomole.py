@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
-import qcelemental
-from qcelemental.testing import compare_values
 
+import qcelemental
 import qcengine
+from qcelemental.testing import compare_values
 from qcengine import testing
 
 
