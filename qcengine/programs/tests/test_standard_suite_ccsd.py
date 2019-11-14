@@ -43,7 +43,7 @@ def nh2():
             "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using_nwchem
         ),
         pytest.param("psi4", "aug-cc-pvdz", {}, marks=testing.using_psi4),
-        pytest.param("qchem", "aug-cc-pvdz", {"N_FROZEN_CORE": 0}, marks=testing.using_qchem),
+        # pytest.param("qchem", "aug-cc-pvdz", {"N_FROZEN_CORE": 0}, marks=testing.using_qchem),
         # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
         # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ],
@@ -127,7 +127,7 @@ def test_sp_ccsd_uhf_fc_error(program, basis, keywords, nh2, errmsg):
             marks=testing.using_nwchem,
         ),
         pytest.param("psi4", "AUG-CC-PVDZ", {"REFERENCE": "ROHF"}, marks=testing.using_psi4),
-        pytest.param("qchem", "AUG-CC-PVDZ", {"UNRESTRICTED": False}, marks=testing.using_qchem),
+        # pytest.param("qchem", "AUG-CC-PVDZ", {"UNRESTRICTED": False}, marks=testing.using_qchem),
         # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
         # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ],

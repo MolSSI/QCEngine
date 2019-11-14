@@ -7,6 +7,7 @@ import pytest
 import qcengine as qcng
 from qcelemental.models import OptimizationInput
 from qcengine import testing
+from qcengine.testing import failure_engine
 
 
 @pytest.fixture(scope="function")

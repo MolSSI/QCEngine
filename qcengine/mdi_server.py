@@ -241,7 +241,7 @@ class MDIServer:
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute gradients on an unvalidated molecule")
 
-        input = qcel.models.ResultInput(
+        input = qcel.models.AtomicInput(
             molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
         )
         self.compute_return = compute(
@@ -256,7 +256,7 @@ class MDIServer:
     def run_energy(self) -> None:
         """ Run an energy calculation
         """
-        input = qcel.models.ResultInput(
+        input = qcel.models.AtomicInput(
             molecule=self.molecule, driver="energy", model=self.model, keywords=self.keywords
         )
         self.compute_return = compute(
