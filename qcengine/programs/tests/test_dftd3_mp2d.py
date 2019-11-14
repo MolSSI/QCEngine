@@ -27,6 +27,31 @@ def test_dftd3_task(method):
     assert ret["success"] is True
 
 
+def test_dftd3_error():
+    json_data = {
+        "molecule": qcng.get_molecule("eneyne"),
+        "driver": "energy",
+        "model": {"method": "b3lyp-d3(bj)"},
+        "keywords": {},
+    }
+
+    # Test driver
+    with pytest.raises(qcng.exceptions.InputError) as exc:
+        input_data = json_data.copy()
+        input_data["driver"] = "properties"
+        ret = qcng.compute(input_data, "dftd3", raise_error=True)
+
+    assert "driver" in str(exc.value)
+
+    # Test extension
+    with pytest.raises(qcng.exceptions.InputError) as exc:
+        input_data = json_data.copy()
+        input_data["model"]["method"] = "b3lyp-quadD"
+        ret = qcng.compute(input_data, "dftd3", raise_error=True)
+
+    assert "correction level" in str(exc.value)
+
+
 ## Resources
 
 ref = {}

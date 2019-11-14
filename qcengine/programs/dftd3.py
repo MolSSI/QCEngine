@@ -106,7 +106,7 @@ class DFTD3Harness(ProgramHarness):
         if mtd.startswith("d3-"):
             mtd = mtd[3:]
 
-        if input_model.driver.derivative_int() > 1:
+        if (input_model.driver.derivative_int() > 1) or (input_model.driver == "properties"):
             raise InputError(f"""DFTD3 valid driver options are 'energy' and 'gradient', not {input_model.driver}""")
 
         # temp until actual options object
@@ -188,7 +188,9 @@ class DFTD3Harness(ProgramHarness):
                 break
         else:
             if not ((real_nat == 1) and (input_model.driver == "gradient")):
-                raise UnknownError("Unsuccessful run. Possibly -D variant not available in dftd3 version.")
+                raise UnknownError(
+                    f"Unsuccessful run. Possibly -D variant not available in dftd3 version. Model: {input_data.model}"
+                )
 
         # parse gradient output
         # * DFTD3 crashes on one-atom gradients. Avoid the error (above) and just force the correct result (below).
