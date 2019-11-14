@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := all
 isort = isort -rc qcengine
 black = black qcengine
-autoflake = autoflake -ir --remove-all-unused-imports --ignore-init-module-imports --remove-unused-variables qcengine
+autoflake = autoflake -ir --remove-all-unused-imports --ignore-init-module-imports --remove-unused-variables --exclude="**/tests/**" qcengine
 
 .PHONY: install
 install:
