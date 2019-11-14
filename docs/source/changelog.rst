@@ -22,7 +22,7 @@ New Features
 Enhancements
 ++++++++++++
 
-- (:pr:``) Models renamed according to https://github.com/MolSSI/QCElemental/issues/155, particularly
+- (:pr:`172`) Models renamed according to https://github.com/MolSSI/QCElemental/issues/155, particularly
   ``ResultInput`` -> ``AtomicInput``, ``Result`` -> ``AtomicResult``, ``Optimization`` -> ``OptimizationResult``.
 
 Bug Fixes

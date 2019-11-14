@@ -10,14 +10,10 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-#  - qcelemental >=0.12.0
+  - qcelemental >=0.12.0
   - pydantic>=1.0.0
 
     # Testing
   - pytest
   - pytest-cov
   - codecov
-
-    # Pip includes
-  - pip:
-    - git+git://github.com/MolSSI/QCElemental#egg=qcelemental
