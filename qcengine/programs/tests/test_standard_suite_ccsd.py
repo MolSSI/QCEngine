@@ -47,7 +47,7 @@ def nh2():
         # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
         # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ],
-)  # yapf: disable
+)
 def test_sp_ccsd_rhf_full(program, basis, keywords, h2o):
     """cfour/sp-rhf-ccsd/input.dat
     #! single point CCSD/qz2p on water
@@ -94,7 +94,7 @@ def test_sp_ccsd_rhf_full(program, basis, keywords, h2o):
             marks=testing.using_gamess,
         ),
     ],
-)  # yapf: disable
+)
 def test_sp_ccsd_uhf_fc_error(program, basis, keywords, nh2, errmsg):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "ccsd", "basis": basis}, "keywords": keywords}
 
@@ -131,7 +131,7 @@ def test_sp_ccsd_uhf_fc_error(program, basis, keywords, nh2, errmsg):
         # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
         # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ],
-)  # yapf: disable
+)
 def test_sp_ccsd_rohf_full(program, basis, keywords, nh2):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "ccsd", "basis": basis}, "keywords": keywords}
 

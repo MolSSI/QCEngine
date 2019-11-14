@@ -785,7 +785,7 @@ dashcoeff = {
             "mp2": {"params": {"s8": 1.187, "a1": 0.944, "a2": 0.480, "rcut": 0.72, "w": 0.20}}  # Rezac:2018:4711
         },
     },
-}  # yapf: disable
+}
 
 
 def get_dispersion_aliases():

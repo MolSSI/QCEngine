@@ -81,7 +81,7 @@ class RDKitHarness(ProgramHarness):
                     bohr2ang * jmol.geometry[line, 1],
                     bohr2ang * jmol.geometry[line, 2],
                 ),
-            )  # yapf: disable
+            )
 
         mol.AddConformer(conf)
         Chem.rdmolops.SanitizeMol(mol)

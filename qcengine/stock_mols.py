@@ -65,7 +65,7 @@ _test_mols = {
             3.963929,
         ],
     },
-}  # yapf: disable
+}
 
 
 def get_molecule(name):

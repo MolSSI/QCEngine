@@ -47,7 +47,7 @@ def nh2():
         pytest.param("qchem", "aug-cc-pvdz", {}, marks=testing.using_qchem),
         pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=testing.using_turbomole),
     ],
-)  # yapf: disable
+)
 def test_sp_hf_rhf(program, basis, keywords, h2o):
     """cfour/sp-rhf-hf/input.dat
     #! single point HF/adz on water
@@ -91,7 +91,7 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
         pytest.param("qchem", "aug-cc-pvdz", {}, marks=testing.using_qchem),
         pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=testing.using_turbomole),
     ],
-)  # yapf: disable
+)
 def test_sp_hf_uhf(program, basis, keywords, nh2):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
@@ -132,7 +132,7 @@ def test_sp_hf_uhf(program, basis, keywords, nh2):
         pytest.param("psi4", "aug-cc-pvdz", {"reference": "rohf", "scf_type": "direct"}, marks=testing.using_psi4),
         pytest.param("qchem", "aug-cc-pvdz", {"UNRESTRICTED": False}, marks=testing.using_qchem),
     ],
-)  # yapf: disable
+)
 def test_sp_hf_rohf(program, basis, keywords, nh2):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 

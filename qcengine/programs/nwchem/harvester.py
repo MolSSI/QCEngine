@@ -44,7 +44,7 @@ def harvest_output(outtext):
 
 
 def harvest_outfile_pass(outtext):
-    """Function to read NWChem output file *outtext* and parse important 
+    """Function to read NWChem output file *outtext* and parse important
     quantum chemical information from it in
 
     """
@@ -187,7 +187,7 @@ def harvest_outfile_pass(outtext):
             mobj = re.search(
                 r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext,
-                re.MULTILINE)  # yapf: disable
+                re.MULTILINE)
 
             if mobj:
                 mbpt_plain = cc_name.replace('\\', '').replace('MBPT', 'MP').replace('(', '').replace(')', '')
@@ -205,7 +205,7 @@ def harvest_outfile_pass(outtext):
                 r'^\s+' + cc_name + r'\s+' + r'correction energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext,
-                re.MULTILINE)  # yapf: disable
+                re.MULTILINE)
 
             if mobj:
                 cc_plain = cc_name.replace('\\', '')
@@ -293,7 +293,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'Excited state root\s+\d{1,2}\s*' +
             r'^\s+' + r'Excitation energy / hartree' + r'\s+=\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'/ eV\s+' + r'\s+=\s+' + NUMBER + r'\s*$',
-            outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+            outtext, re.MULTILINE | re.DOTALL)
 
         if mobj:
             ext_energy = {}  # dic
@@ -344,7 +344,7 @@ def harvest_outfile_pass(outtext):
             r'Transition Moments' + r'\s+X\s+' + NUMBER + r'\s+Y\s+' + NUMBER + r'\s+Z\s+' + NUMBER + r'\s*' + r'^\s+'
             + r'Transition Moments' + r'\s+XX\s+' + NUMBER + r'\s+XY\s+' + NUMBER + r'\s+XZ\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'Transition Moments' + r'\s+YY\s+' + NUMBER + r'\s+YZ\s+' + NUMBER + r'\s+ZZ\s+' + NUMBER +
-            r'\s*$', outtext, re.MULTILINE)  # yapf: disable
+            r'\s*$', outtext, re.MULTILINE)
 
         if mobj:
             print('matched TDDFT with transition moments')
@@ -376,7 +376,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'Root' + r'\s+' + r'(\d+)' + r'\s+' + r'(\w+)' + r'\s+' + r'(.*?)' + r'\s+' + NUMBER +
             r'\s+a\.u\.\s+' + NUMBER + r'\s+eV\s*' + r'^\s+' +
             r'----------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            r'Transition Moments' + r'\s+Spin forbidden\s*$', outtext, re.MULTILINE)  # yapf: disable
+            r'Transition Moments' + r'\s+Spin forbidden\s*$', outtext, re.MULTILINE)
 
         if mobj:
             print('matched TDDFT - spin forbidden')
@@ -441,7 +441,7 @@ def harvest_outfile_pass(outtext):
             r'\s*' + r'^\s+' + r'---- ---------------- ---------- -------------- -------------- --------------' +
             r'\s*' +
             r'((?:\s+([1-9][0-9]*)+\s+([A-Z][a-z]*)+\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)'
-            + r'\s*$', outtext, re.MULTILINE | re.IGNORECASE)  # yapf: disable
+            + r'\s*$', outtext, re.MULTILINE | re.IGNORECASE)
 
         if mobj:
             print('matched geom')
@@ -582,7 +582,7 @@ def harvest_hessian(hess):
 
 def harvest(p4Mol, nwout, **largs):  # check orientation and scratch files
     """Parses all the pieces of output from NWChem: the stdout in
-    *nwout* Scratch files are not yet considered at this moment. 
+    *nwout* Scratch files are not yet considered at this moment.
 
     """
 

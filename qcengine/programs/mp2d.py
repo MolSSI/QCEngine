@@ -223,7 +223,7 @@ class MP2DHarness(ProgramHarness):
             ),
             "return_result": retres,
             "stdout": stdout,
-        }  # yapf: disable
+        }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
 

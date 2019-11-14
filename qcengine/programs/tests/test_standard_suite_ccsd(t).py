@@ -43,7 +43,7 @@ def nh2():
         pytest.param("psi4", "aug-cc-pvdz", {}, marks=testing.using_psi4),
         pytest.param("gamess", "accd", {"ccinp__ncore": 0, "contrl__ispher": 1}, marks=testing.using_gamess),
     ],
-)  # yapf: disable
+)
 def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o):
     """cfour/sp-rhf-ccsd/input.dat
     #! single point CCSD(T)/adz on water
@@ -82,7 +82,7 @@ def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o):
             marks=testing.using_gamess,
         ),
     ],
-)  # yapf: disable
+)
 def test_sp_ccsd_t_uhf_fc_error(program, basis, keywords, nh2, errmsg):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "ccsd(t)", "basis": basis}, "keywords": keywords}
 
@@ -105,7 +105,7 @@ def test_sp_ccsd_t_uhf_fc_error(program, basis, keywords, nh2, errmsg):
         # pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce', 'scf__rohf': True}, marks=testing.using_nwchem),
         pytest.param("psi4", "aug-cc-pvdz", {"reference": "rohf"}, marks=testing.using_psi4),
     ],
-)  # yapf: disable
+)
 def test_sp_ccsd_t_rohf_full(program, basis, keywords, nh2):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "ccsd(t)", "basis": basis}, "keywords": keywords}
 

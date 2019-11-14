@@ -21,7 +21,7 @@ _canonical_methods = [
     ("torchani", {"method": "ANI1x"}),
     ("entos", {"method": "pbe", "basis": "6-31G"}),
     ("turbomole", {"method": "pbe", "basis": "6-31G"}),
-]  # yapf: disable
+]
 
 
 @pytest.mark.parametrize("program, model", _canonical_methods)
@@ -67,7 +67,7 @@ def test_compute_gradient(program, model):
         ("entos", {"method": "bad"}),
         ("turbomole", {"method": "bad"}),
     ],
-)  # yapf: disable
+)
 def test_compute_bad_models(program, model):
     if not testing.has_program(program):
         pytest.skip("Program '{}' not found.".format(program))

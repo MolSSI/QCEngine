@@ -114,13 +114,7 @@ def test_optimization_protocols(input_data):
 @testing.using_rdkit
 def test_geometric_retries(failure_engine, input_data):
 
-    failure_engine.iter_modes = [
-        "random_error",
-        "pass",  # Iter 1
-        "random_error",
-        "random_error",
-        "pass",  # Iter 2
-    ]  # yapf: disable
+    failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
     failure_engine.iter_modes.extend(["pass"] * 20)
 
     input_data["initial_molecule"] = {
@@ -141,13 +135,7 @@ def test_geometric_retries(failure_engine, input_data):
     assert "retries" not in ret.trajectory[2].provenance.dict()
 
     # Ensure we still fail
-    failure_engine.iter_modes = [
-        "random_error",
-        "pass",  # Iter 1
-        "random_error",
-        "random_error",
-        "pass",  # Iter 2
-    ]  # yapf: disable
+    failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
     ret = qcng.compute_procedure(input_data, "geometric", local_options={"ncores": 13, "retries": 1})
     assert ret.success is False
     assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
@@ -177,7 +165,7 @@ def test_geometric_retries(failure_engine, input_data):
             marks=testing.using_mopac,
         ),
     ],
-)  # yapf: disable
+)
 def test_geometric_generic(input_data, program, model, bench):
 
     input_data["initial_molecule"] = qcng.get_molecule("water")

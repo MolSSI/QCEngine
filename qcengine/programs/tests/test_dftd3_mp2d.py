@@ -117,7 +117,7 @@ gref["eneyne"]["B3LYP-D2"] = dict(
             ),
         ],
     )
-)  # yapf: disable
+)
 gref["eneyne"]["B3LYP-D3"] = dict(
     zip(
         dmm,
@@ -184,7 +184,7 @@ gref["eneyne"]["B3LYP-D3"] = dict(
             ),
         ],
     )
-)  # yapf: disable
+)
 gref["eneyne"]["B3LYP-D3(BJ)"] = dict(
     zip(
         dmm,
@@ -251,7 +251,7 @@ gref["eneyne"]["B3LYP-D3(BJ)"] = dict(
             ),
         ],
     )
-)  # yapf: disable
+)
 gref["eneyne"]["PBE-D2"] = dict(
     zip(
         dmm,
@@ -318,7 +318,7 @@ gref["eneyne"]["PBE-D2"] = dict(
             ),
         ],
     )
-)  # yapf: disable
+)
 gref["eneyne"]["PBE-D3"] = dict(
     zip(
         dmm,
@@ -385,7 +385,7 @@ gref["eneyne"]["PBE-D3"] = dict(
             ),
         ],
     )
-)  # yapf: disable
+)
 gref["eneyne"]["PBE-D3(BJ)"] = dict(
     zip(
         dmm,
@@ -452,7 +452,7 @@ gref["eneyne"]["PBE-D3(BJ)"] = dict(
             ),
         ],
     )
-)  # yapf: disable
+)
 gref["eneyne"]["ATM"] = dict(
     zip(
         dmm,
@@ -519,7 +519,7 @@ gref["eneyne"]["ATM"] = dict(
             ),
         ],
     )
-)  # yapf: disable
+)
 gref["eneyne"]["MP2-DMP2"] = dict(
     zip(
         dmm,
@@ -586,11 +586,11 @@ gref["eneyne"]["MP2-DMP2"] = dict(
             ),
         ],
     )
-)  # yapf: disable
+)
 gref["ne"] = {}
-gref["ne"]["B3LYP-D3(BJ)"] = {"atom": np.zeros(3)}
-gref["ne"]["MP2-DMP2"] = {"atom": np.zeros(3)}
-gref["ne"]["ATM"] = {"atom": np.zeros(3)}
+gref["ne"]["B3LYP-D3(BJ)"] = {"atom": np.zeros((1, 3))}
+gref["ne"]["MP2-DMP2"] = {"atom": np.zeros((1, 3))}
+gref["ne"]["ATM"] = {"atom": np.zeros((1, 3))}
 
 seneyne = """
 C   0.000000  -0.667578  -2.124659
@@ -736,7 +736,7 @@ def _compute_key(pjrec):
         (({"name_hint": "mp2-dmp2"}, "MP2-DMP2"), dmp2dmp2),
         (({"name_hint": "MP2", "level_hint": "dmp2"}, "MP2-DMP2"), dmp2dmp2),
     ],
-)  # yapf: disable
+)
 def test_dftd3__from_arrays(inp, expected):
     res = empirical_dispersion_resources.from_arrays(**inp[0])
     assert compare_recursive(expected, res, atol=1.0e-4)
@@ -757,7 +757,7 @@ def test_dftd3__from_arrays(inp, expected):
         ({"name_hint": "asdf-d4"}),
         ({"name_hint": "atm(gr)", "level_hint": "chg"}),
     ],
-)  # yapf:disable
+)
 def test_dftd3__from_arrays__error(inp):
     with pytest.raises(qcng.exceptions.InputError):
         empirical_dispersion_resources.from_arrays(**inp)
@@ -841,7 +841,7 @@ def test_3():
             marks=[using_dftd3_321],
         ),
     ],
-)  # yapf: disable
+)
 def test_molecule__run_dftd3__23body(inp, subjects):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -900,7 +900,7 @@ def test_qcdb__energy_d3():
         ({"parent": "eneyne", "name": "mp2d-mp2-dmp2", "subject": "mAgB", "lbl": "MP2-DMP2"}),
         ({"parent": "ne", "name": "mp2d-mp2-dmp2", "subject": "atom", "lbl": "MP2-DMP2"}),
     ],
-)  # yapf: disable
+)
 def test_mp2d__run_mp2d__2body(inp, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -957,7 +957,7 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
         ({"parent": "eneyne", "name": "d3-PBE-D2", "subject": "mAgB", "lbl": "PBE-D2"}),
         ({"parent": "ne", "name": "d3-b3lyp-d3bj", "subject": "atom", "lbl": "B3LYP-D3(BJ)"}),
     ],
-)  # yapf: disable
+)
 def test_dftd3__run_dftd3__2body(inp, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1016,7 +1016,7 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
         ({"parent": "eneyne", "name": "d3-atmgr", "subject": "gAmB", "lbl": "ATM"}),
         ({"parent": "ne", "name": "d3-atmgr", "subject": "atom", "lbl": "ATM"}),
     ],
-)  # yapf: disable
+)
 def test_dftd3__run_dftd3__3body(inp, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]

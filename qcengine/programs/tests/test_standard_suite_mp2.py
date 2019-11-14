@@ -46,7 +46,7 @@ def nh2():
         # TODO Molpro has frozen-core on by default. For this to pass need keyword frozen_core = False
         # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
     ],
-)  # yapf: disable
+)
 def test_sp_mp2_rhf_full(program, basis, keywords, h2o):
     """cfour/sp-rhf-ccsd/input.dat
     #! single point MP2/adz on water
@@ -106,7 +106,7 @@ def test_sp_mp2_rhf_full(program, basis, keywords, h2o):
         # TODO Molpro needs a new keyword for unrestricted MP2 (otherwise RMP2 by default) and needs symmetry c1
         # pytest.param('molpro', 'aug-cc-pvdz', {"reference": "unrestricted"}, marks=testing.using_molpro),
     ],
-)  # yapf: disable
+)
 def test_sp_mp2_uhf_fc(program, basis, keywords, nh2):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "mp2", "basis": basis}, "keywords": keywords}
 
@@ -126,7 +126,7 @@ def test_sp_mp2_uhf_fc(program, basis, keywords, nh2):
 @pytest.mark.parametrize(
     "program,basis,keywords,errmsg",
     [pytest.param("nwchem", "aug-cc-pvdz", {"scf__rohf": True}, "unknown SCFTYPE", marks=testing.using_nwchem)],
-)  # yapf: disable
+)
 def test_sp_mp2_rohf_full_error(program, basis, keywords, nh2, errmsg):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "mp2", "basis": basis}, "keywords": keywords}
 

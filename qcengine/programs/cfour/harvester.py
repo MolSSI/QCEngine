@@ -67,14 +67,14 @@ def harvest_outfile_pass(outtext):
 
     # Process version
     mobj = re.search(r'^\s*' + r'Version' + r'\s+' + r'(?P<version>[\w.]+)' + r'\s*$',
-                     outtext, re.MULTILINE)  # yapf: disable
+                     outtext, re.MULTILINE)
     if mobj:
         print('matched version')
         version = mobj.group('version')
 
     # Process NRE
     mobj = re.search(r'^\s+' + r'(?:Nuclear repulsion energy :)' + r'\s+' + NUMBER + r'\s+a\.u\.\s*$',
-                     outtext, re.MULTILINE)  # yapf: disable
+                     outtext, re.MULTILINE)
     if mobj:
         print('matched nre')
         psivar['NUCLEAR REPULSION ENERGY'] = mobj.group(1)
@@ -82,14 +82,14 @@ def harvest_outfile_pass(outtext):
     # Process SCF
     mobj = re.search(
         r'^\s+' + r'(?:E\(SCF\))' + r'\s+=\s+' + NUMBER + r'\s+a\.u\.\s*$',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched scf1')
         psivar['SCF TOTAL ENERGY'] = mobj.group(1)
 
     mobj = re.search(
         r'^\s+' + r'(?:E\(SCF\)=)' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched scf2')
         psivar['SCF TOTAL ENERGY'] = mobj.group(1)
@@ -100,14 +100,14 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'(?:SCF has converged.)' + r'\s*$' +
             r'(?:.*?)' +
             r'^\s+' + r'(?:\d+)' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-            outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+            outtext, re.MULTILINE | re.DOTALL)
         if mobj:
             print('matched scf3')
             psivar['SCF TOTAL ENERGY'] = mobj.group(1)
 
     mobj = re.search(
         r'^\s+' + r'(?:E\(ROHF\)=)' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched scf4')
         psivar['SCF TOTAL ENERGY'] = mobj.group(1)
@@ -118,7 +118,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:E2\(AB\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:E2\(TOT\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:Total MP2 energy)' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*$',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched mp2r')
         psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = 2 * Decimal(mobj.group(1))
@@ -132,7 +132,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:E2\(AB\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:E2\(TOT\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:Total MP2 energy)' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*$',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched mp2u')
         psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
@@ -148,7 +148,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:E2\(SINGLE\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:E2\(TOT\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:Total MP2 energy)' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*$',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched mp2ro')
         psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
@@ -162,7 +162,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:S-MBPT\(2\))' + r'\s+' + r'(?P<sgl>' + NUMBER + r')' + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:D-MBPT\(2\))' + r'\s+' + r'(?P<dbl>' + NUMBER + r')' + r'\s+' +
                                                 r'(?P<mp2tot>' + NUMBER + r')' + r'\s*$',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched mp2ro2')
         # psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
@@ -175,7 +175,7 @@ def harvest_outfile_pass(outtext):
     mobj = re.search(
         r'^\s+' + r'(?:D-MBPT\(2\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:D-MBPT\(3\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched mp3r')
         dmp2 = Decimal(mobj.group(1))
@@ -192,7 +192,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:D-MBPT\(2\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:S-MBPT\(3\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:D-MBPT\(3\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched mp3ro')
         dmp2 = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
@@ -209,7 +209,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:D-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:Q-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:S-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched mp4r')
         dmp2 = Decimal(mobj.group(1))
@@ -231,7 +231,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:D-MBPT\(3\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:L-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:NL-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched mp4ro')
         dmp2 = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
@@ -251,7 +251,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:Q-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:S-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:T-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched mp4tr')
         dmp4sdq = Decimal(mobj.group(1)) + Decimal(mobj.group(3)) + Decimal(mobj.group(5))
@@ -269,7 +269,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:NL-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:WT12-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
         r'^\s+' + r'(?:T-MBPT\(4\))' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched mp4tro')
         dmp4sdq = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
@@ -289,7 +289,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:\d+)' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+DIIS\s*' +
         r'^\s*(?:-+)\s*' +
         r'^\s*(?:A miracle (?:has come|come) to pass. The CC iterations have converged.)\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched cc with full %s iterating %s' % (mobj.group('fullCC'), mobj.group('iterCC')))
         psivar['%s CORRELATION ENERGY' % (mobj.group('iterCC'))] = mobj.group(3)
@@ -304,7 +304,7 @@ def harvest_outfile_pass(outtext):
         r'^\s*' + r'(?:\w+ iterations converged .*?)' +
         r'^\s*' +
         r'^\s*' + r'(?:Total (?P<iterCC>\w+) energy:)' + r'\s+' + r'(?P<tot>' + NUMBER + r')\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ncc cc iter')
         psivar['{} CORRELATION ENERGY'.format(mobj.group('iterCC'))] = mobj.group('corl')
@@ -317,7 +317,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:E\(CCSD\))' + r'\s+=\s+' + NUMBER + r'\s*' +
         r'(?:.*?)' +
         r'^\s+' + r'(?:E\(CCSD\(T\)\))' + r'\s+=\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)   # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ccsd(t) vcc')
         psivar['SCF TOTAL ENERGY'] = mobj.group(1)
@@ -330,7 +330,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:E\(CCSD\))' + r'\s+=\s+' + NUMBER + r'\s*' +
         r'(?:.*?)' +
         r'^\s+' + r'(?:E\(CCSD\(T\)\))' + r'\s+=\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ccsd(t) vcc v2')
         psivar['CCSD TOTAL ENERGY'] = mobj.group(1)
@@ -345,7 +345,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:Total perturbative triples energy:)' + r'\s+' + NUMBER + r'\s*' +
         r'^\s*(?:-+)\s*' +
         r'^\s+' + r'(?:CCSD\(T\) energy)' + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ccsd(t) ecc')
         psivar['SCF TOTAL ENERGY'] = mobj.group(1)
@@ -363,7 +363,7 @@ def harvest_outfile_pass(outtext):
         r'(?:.*?)' +
         r'^\s*(?:-+)\s*' +
         r'^\s+' + r'(?:CCSD\(T\) energy)' + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ccsd(t) ecc v2')
         psivar['SCF TOTAL ENERGY'] = mobj.group(1)
@@ -376,7 +376,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:CCSD energy)' + r'\s+' + NUMBER + r'\s*' +
         r'^\s*(?:-+)\s*' +
         r'^\s+' + r'(?:CCSD\(T\) energy)' + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ccsd(t) lamb')
         psivar['CCSD TOTAL ENERGY'] = mobj.group(1)
@@ -388,7 +388,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'(?:CCSD\(T\) contribution:)\s+' + r'(?P<tcorr>' + NUMBER + ')' + r'\s*'
         r'^\s*' + r'(?:CCSD\[T\] contribution:)\s+' + r'(?P<bkttcorr>' + NUMBER + ')' + r'\s*'
         r'^\s*' + r'(?:Total CCSD\(T\) energy:)\s+' + r'(?P<ttot>' + NUMBER + ')' + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ccsd(t) ncc')
         psivar['(T) CORRECTION ENERGY'] = mobj.group('tcorr')
@@ -398,7 +398,7 @@ def harvest_outfile_pass(outtext):
     mobj = re.search(
         r'^\s*' + r'(?:CCSD\[T\] correlation energy:)\s+' + r'(?P<bkttcorr>' + NUMBER + ')' + r'\s*'
         r'^\s*' + r'(?:CCSD\(T\) correlation energy:)\s+' + r'(?P<tcorr>' + NUMBER + ')' + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ccsd(t) ncc v2')
         psivar['(T) CORRECTION ENERGY'] = mobj.group('tcorr')
@@ -408,7 +408,7 @@ def harvest_outfile_pass(outtext):
     mobj = re.search(
         r'^\s*' + r'(?:The total diagonal Born-Oppenheimer correction \(DBOC\) is:)\s+' +
         r'(?P<dboc>' + NUMBER + ')' + r'\s*a.u.\s*',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched dboc ecc')
         psivar['CCSD DBOC ENERGY'] = mobj.group('dboc')
@@ -421,7 +421,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+(?:ECCBB)\s+' + NUMBER + r'\s*' +
         r'^\s+(?:ECCAB)\s+' + NUMBER + r'\s*' +
         r'^\s+(?:Total)\s+' + NUMBER + r'\s*',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:  # PRINT=2 to get SCS-CC components
         print('matched scscc')
         psivar['%s SAME-SPIN CORRELATION ENERGY' %
@@ -441,7 +441,7 @@ def harvest_outfile_pass(outtext):
         r'(?:.*?)' +
         # r'^\s+' + r'The CC iterations have converged.' + r'\s*$',
         r'^\s+' + r'(?:A miracle come to pass. )?' + r'The CC iterations have converged.' + r'\s*$',
-        outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+        outtext, re.MULTILINE | re.DOTALL)
     if mobj:  # PRINT=2 to get SCS components
         print('matched scscc2')
         psivar['%s SAME-SPIN CORRELATION ENERGY' %
@@ -459,7 +459,7 @@ def harvest_outfile_pass(outtext):
         r'((?:\s+[A-Z]+\s*#\d+\s+\d?\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
         r'\n\n' +
         r'\s+' + 'Molecular gradient norm',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched molgrad')
         atoms = []
@@ -478,7 +478,7 @@ def harvest_outfile_pass(outtext):
         r'^\s+(?:-+)\s*' +
         r'((?:\s+[A-Z]+\s+[0-9]+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
         r'^\s+(?:-+)\s*',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched geom')
         molxyz = '%d bohr\n\n' % len(mobj.group(1).splitlines())
@@ -497,7 +497,7 @@ def harvest_outfile_pass(outtext):
     mobj = re.search(r'^\s+' + r'@GETXYZ-I,     1 atoms read from ZMAT.' + r'\s*$', outtext, re.MULTILINE)
     mobj2 = re.search(
         r'^([A-Z]+)#1' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj and mobj2:
         print('matched atom2')  # unsavory for when atom never printed except for basis file
         # Dinky Molecule
@@ -512,7 +512,7 @@ def harvest_outfile_pass(outtext):
     mobj = re.search(
         r'^\s+' + r'@GETXYZ-I,     1 atoms read from ZMAT.' + r'\s*' +
         r'^\s+' + r'[0-9]+\s+([A-Z]+)\s+[0-9]+\s+' + NUMBER + r'\s*',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched atom')
         # Dinky Molecule
@@ -527,7 +527,7 @@ def harvest_outfile_pass(outtext):
     # Process error codes
     mobj = re.search(
         r'^\s*' + r'--executable ' + r'(\w+)' + r' finished with status' + r'\s+' + r'([1-9][0-9]*)',
-        outtext, re.MULTILINE)  # yapf: disable
+        outtext, re.MULTILINE)
     if mobj:
         print('matched error')
         # psivar['CFOUR ERROR CODE'] = mobj.group(2)
