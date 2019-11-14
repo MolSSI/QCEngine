@@ -27,6 +27,7 @@ def test_dftd3_task(method):
     assert ret["success"] is True
 
 
+@using_dftd3
 def test_dftd3_error():
     json_data = {
         "molecule": qcng.get_molecule("eneyne"),
