@@ -6,6 +6,7 @@ Requires RDKit
 import json
 import os
 import hashlib
+import urllib.request 
 from typing import Dict
 
 from qcelemental.models import Provenance, Result
@@ -38,6 +39,7 @@ class OpenMMHarness(ProgramHarness):
 
     def _get_off_forcefield(self, offxml):
 
+        from openforcefield.typing.engines import smirnoff
         # perhaps want to avoid using a massive string as our key
         # if `offxml` is actual xml content?
         key = hashlib.sha256(offxml.encode()).hexdigest()
@@ -61,6 +63,23 @@ class OpenMMHarness(ProgramHarness):
         """
         pass
 
+    def _generate_basis(self, input_data):
+        
+        # first try the offxml key, if it exists
+        offxml = input_data.model.get('offxml')
+
+        if offxml:
+            input_data.model['basis'] = os.path.splitext(os.path.basename(offxml))[0]
+            return
+
+        # next try the url key, if it exists
+        url = input_data.model.get('url')
+
+        if url:
+            # TODO: DOESN'T APPEAR TO BE A WAY TO GET A MEANINGFUL FORCEFIELD DESIGNATOR FROM THE XML CONTENTS ITSELF
+            # PERHAPS THIS SHOULD BE ADDED IN FUTURE RELEASES?
+            input_data.model['basis'] = os.path.splitext(os.path.basename(url))[0]
+            return
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -86,10 +105,13 @@ class OpenMMHarness(ProgramHarness):
         from simtk import unit
 
         import openforcefield.topology as offtop
-        from openforcefield.typing.engines import smirnoff
 
         # Failure flag
         ret_data = {"success": False}
+
+        # generate basis, not given
+        if not input_data.model.get('basis'):
+            self._generate_basis(input_data)
 
         # get number of threads to use from `JobConfig.ncores`; otherwise, try environment variable
         nthreads = config.ncores
@@ -111,8 +133,7 @@ class OpenMMHarness(ProgramHarness):
             if input_data.model.offxml:
                 offxml = input_data.model.offxml
             elif input_data.model.url:
-                # TODO: add pull of offxml data from a url
-                pass
+                offxml = urllib.request.urlopen(input_data.model.url)
             else:
                 raise InputError("OpenMM requires either `model.offxml` or `model.url` to be set")
 
