@@ -42,10 +42,10 @@ class OpenMMHarness(ProgramHarness):
         from openforcefield.typing.engines import smirnoff
         # perhaps want to avoid using a massive string as our key
         # if `offxml` is actual xml content?
-        key = hashlib.sha256(offxml.encode()).hexdigest()
 
         off_forcefield = smirnoff.ForceField(offxml)
 
+        #key = hashlib.sha256(offxml.encode()).hexdigest()
         return off_forcefield
 
 
@@ -66,20 +66,18 @@ class OpenMMHarness(ProgramHarness):
     def _generate_basis(self, input_data):
         
         # first try the offxml key, if it exists
-        offxml = input_data.model.get('offxml')
+        offxml = getattr(input_data.model, 'offxml', None)
 
         if offxml:
-            input_data.model['basis'] = os.path.splitext(os.path.basename(offxml))[0]
-            return
+            return os.path.splitext(os.path.basename(offxml))[0]
 
         # next try the url key, if it exists
-        url = input_data.model.get('url')
+        url = getattr(input_data.model, 'url', None)
 
         if url:
             # TODO: DOESN'T APPEAR TO BE A WAY TO GET A MEANINGFUL FORCEFIELD DESIGNATOR FROM THE XML CONTENTS ITSELF
             # PERHAPS THIS SHOULD BE ADDED IN FUTURE RELEASES?
-            input_data.model['basis'] = os.path.splitext(os.path.basename(url))[0]
-            return
+            return os.path.splitext(os.path.basename(url))[0]
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -110,8 +108,9 @@ class OpenMMHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # generate basis, not given
-        if not input_data.model.get('basis'):
-            self._generate_basis(input_data)
+        if not input_data.model.basis:
+            basis = self._generate_basis(input_data)
+            ret_data['basis'] = basis
 
         # get number of threads to use from `JobConfig.ncores`; otherwise, try environment variable
         nthreads = config.ncores
@@ -130,9 +129,9 @@ class OpenMMHarness(ProgramHarness):
             # `openforcefield.typing.engines.smirnoff.ForceField` already, we
             # can eliminate the `offxml` and `url` distinction
             # URL processing can happen there
-            if input_data.model.offxml:
+            if getattr(input_data.model, 'offxml', None):
                 offxml = input_data.model.offxml
-            elif input_data.model.url:
+            elif getattr(input_data.model, 'url', None):
                 offxml = urllib.request.urlopen(input_data.model.url)
             else:
                 raise InputError("OpenMM requires either `model.offxml` or `model.url` to be set")
@@ -167,6 +166,8 @@ class OpenMMHarness(ProgramHarness):
             # Set positions from our Open Force Field `Molecule`
             context.setPositions(off_mol.conformers[0])
 
+            ret_data["properties"] = {}
+
             # Execute driver
             try:
                 if input_data.driver == "energy":
@@ -175,7 +176,8 @@ class OpenMMHarness(ProgramHarness):
                     state = context.getState(getEnergy=True)
 
                     # Get the potential as a simtk.unit.Quantity, put into units of hartree
-                    ret_data["return_result"] = state.getPotentialEnergy() / unit.hartree
+                    q = (state.getPotentialEnergy() / unit.hartree)
+                    ret_data["return_result"] = q.value_in_unit(q.unit)
 
                 elif input_data.driver == "gradient":
 
@@ -189,7 +191,8 @@ class OpenMMHarness(ProgramHarness):
                     gradient = state.getForces(asNumpy=True)
 
                     # Convert to hartree/bohr and reformat as 1D array
-                    ret_data["return_result"] = (gradient / (unit.hartree/unit.bohr)).reshape([n_atoms * 3])
+                    q = (gradient / (unit.hartree/unit.bohr)).reshape([n_atoms * 3])
+                    ret_data["return_result"] = q.value_in_unit(q.unit)
 
                 else:
                     raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
