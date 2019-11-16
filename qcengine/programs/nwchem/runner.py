@@ -82,7 +82,7 @@ class NWChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs NWChem in executable mode
         """
@@ -105,7 +105,7 @@ class NWChemHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 

@@ -24,7 +24,7 @@ class GeometricProcedure(ProcedureHarness):
     def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
         return self._build_model(data, OptimizationInput)
 
-    def compute(self, input_data: "OptimizationInput", config: "JobConfig") -> "OptimizationResult":
+    def compute(self, input_data: "OptimizationInput", config: "TaskConfig") -> "OptimizationResult":
         try:
             import geometric
         except ModuleNotFoundError:

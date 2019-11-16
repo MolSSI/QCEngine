@@ -239,13 +239,13 @@ def popen(
 
 
 @contextmanager
-def environ_context(config: Optional["JobConfig"] = None, env: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+def environ_context(config: Optional["TaskConfig"] = None, env: Optional[Dict[str, str]] = None) -> Dict[str, str]:
     """Temporarily set environment variables inside the context manager and
     fully restore previous environment afterwards.
 
     Parameters
     ----------
-    config : Optional[JobConfig], optional
+    config : Optional[TaskConfig], optional
         Automatically sets MKL/OMP num threads based off the input config.
     env : Optional[Dict[str, str]], optional
         A dictionary of environment variables to update.

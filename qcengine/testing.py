@@ -90,7 +90,7 @@ def failure_engine():
         def found(raise_error: bool = False) -> bool:
             return True
 
-        def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+        def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
             self.ncalls += 1
             mode = self.iter_modes.pop(0)
 

@@ -52,7 +52,7 @@ class TeraChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Run TeraChem
         """
@@ -81,7 +81,7 @@ class TeraChemHarness(ProgramHarness):
         return result
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
         # Write the geom xyz file with unit au
         xyz_file = input_model.molecule.to_string(dtype="terachem", units="Bohr")

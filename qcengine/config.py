@@ -81,7 +81,7 @@ class NodeDescriptor(pydantic.BaseModel):
         extra = "forbid"
 
 
-class JobConfig(pydantic.BaseModel):
+class TaskConfig(pydantic.BaseModel):
 
     # Specifications
     ncores: int  # Number of ncores per task
@@ -200,7 +200,7 @@ def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     return ret
 
 
-def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] = None) -> JobConfig:
+def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] = None) -> TaskConfig:
     """
     Returns the configuration key for qcengine.
     """
@@ -240,7 +240,7 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
     if local_options is not None:
         config.update(local_options)
 
-    return JobConfig(**config)
+    return TaskConfig(**config)
 
 
 def get_provenance_augments() -> Dict[str, str]:

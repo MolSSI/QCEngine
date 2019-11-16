@@ -55,7 +55,7 @@ class Psi4Harness(ProgramHarness):
 
         return candidate_version
 
-    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs Psi4 in API mode
         """
