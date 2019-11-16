@@ -88,11 +88,6 @@ class OpenMMHarness(ProgramHarness):
         import openforcefield.topology as offtop
         from openforcefield.typing.engines import smirnoff
 
-        # temporary shim for making hartree available in `simtk.unit`
-        if not hasattr(unit, 'hartree'):
-            unit.hartree_base_unit = unit.ScaledUnit(4.3597447222071e-18, unit.joule, "hartree", "Ha")
-            unit.hartree = unit.hartrees = unit.Unit({unit.hartree_base_unit: 1.0})
-        
         # Failure flag
         ret_data = {"success": False}
 
