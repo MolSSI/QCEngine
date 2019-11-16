@@ -5,6 +5,7 @@ Requires RDKit
 """
 import json
 import os
+import hashlib
 from typing import Dict
 
 from qcelemental.models import Provenance, Result
@@ -20,6 +21,9 @@ from .rdkit import RDKitHarness
 
 class OpenMMHarness(ProgramHarness):
 
+    _CACHE = {}
+    _CACHE_MAX_SIZE = 10
+
     _defaults = {
         "name": "OpenMM",
         "scratch": True,
@@ -31,6 +35,32 @@ class OpenMMHarness(ProgramHarness):
 
     class Config(ProgramHarness.Config):
         pass
+
+    def _get_off_forcefield(self, offxml):
+
+        # perhaps want to avoid using a massive string as our key
+        # if `offxml` is actual xml content?
+        key = hashlib.sha256(offxml.encode()).hexdigest()
+
+        off_forcefield = smirnoff.ForceField(offxml)
+
+        return off_forcefield
+
+
+    def _get_openmm_system(self, off_forcefield, off_top):
+
+        #key = f"{mol_hash}-{input_model.method}-{hash(forcefield_schema)}"
+
+        openmm_system = off_forcefield.create_openmm_system(off_top)
+
+        return openmm_system
+
+    def _cache_it(self, key, value):
+        """Add to our LRU cache, possibly popping off least used key.
+
+        """
+        pass
+
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -98,11 +128,11 @@ class OpenMMHarness(ProgramHarness):
             off_mol = offtop.Molecule(rdkit_mol)
 
             # Load an Open Force Field `ForceField`
-            off_forcefield = smirnoff.ForceField(offxml)
+            off_forcefield = self._get_off_forcefield(offxml)
 
             # Create OpenMM system in vacuum from forcefield, molecule
             off_top = off_mol.to_topology()
-            openmm_system = off_forcefield.create_openmm_system(off_top)
+            openmm_system = self._get_openmm_system(off_forcefield, off_top)
             
             # Need an integrator for simulation even if we don't end up using it really
             integrator = openmm.VerletIntegrator(1.0*unit.femtoseconds)
