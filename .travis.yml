@@ -18,10 +18,10 @@ matrix:
       env:
         - PYTHON_VER=3.7
         - PROG=PSI4DEV  # py37 not avail for latest release
-    - os: linux
-      env:
-        - PYTHON_VER=3.6
-        - PROG=ANI
+#    - os: linux
+#      env:
+#        - PYTHON_VER=3.6
+#        - PROG=ANI
 
 before_install:
     # Additional info about the build
@@ -59,7 +59,8 @@ install:
       pip install torch_nightly -q -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
       pip install torchani -q
     fi
-  - pip install git+https://github.com/MolSSI/QCEngineRecords.git#egg=qcenginerecords
+  - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
+  - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
   - conda list
 
     # Build and install package

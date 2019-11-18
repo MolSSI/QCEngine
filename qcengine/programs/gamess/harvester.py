@@ -5,6 +5,7 @@ import re
 from decimal import Decimal
 
 import numpy as np
+
 import qcelemental as qcel
 from qcelemental.models import Molecule
 
@@ -22,11 +23,13 @@ def harvest(p4Mol, gamessout, **largs):
     if outMol:
         if p4Mol:
             if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
-                raise ValueError("""gamess outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f).""" % \
-                            (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy()))
+                raise ValueError(
+                    """gamess outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
+                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                )
 
         amol, data = outMol.align(p4Mol, atoms_map=False, mols_align=True, verbose=0)
-        mill = data['mill']
+        mill = data["mill"]
         if outGrad is not None:
             outGrad = mill.align_gradient(np.array(outGrad))
     else:
@@ -44,9 +47,10 @@ def harvest_output(outtext):
     pass_grad = []
 
     for outpass in re.split(
-            r'^\s+' + r'--------' +
-            r'NSERCH:' + r'([1-9][0-9][0-9][0-9]*)'+r'\s*' +
-            r'^\s+' + r'--------', outtext, re.MULTILINE):  # yapf: disable
+        r"^\s+" + r"--------" + r"NSERCH:" + r"([1-9][0-9][0-9][0-9]*)" + r"\s*" + r"^\s+" + r"--------",
+        outtext,
+        re.MULTILINE,
+    ):
 
         qcvar, gamesscoord, gamessgrad = harvest_outfile_pass(outpass)
         pass_qcvar.append(qcvar)
@@ -68,15 +72,16 @@ def harvest_outfile_pass(outtext):
     NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
 
     # If calculation fail to converge
-    mobj = re.search(r'^\s+' + r'(?:GAMESS TERMINATED ABNORMALLY)' + r'\s*$', outtext, re.MULTILINE)
+    mobj = re.search(r"^\s+" + r"(?:GAMESS TERMINATED ABNORMALLY)" + r"\s*$", outtext, re.MULTILINE)
     if mobj:
-        print('GAMESS TERMINATED ABNORMALLY')
+        print("GAMESS TERMINATED ABNORMALLY")
 
     # If calculation converged
+    # fmt: off
     else:
         mobj = re.search(
             r'^\s+' + r'(?:            TOTAL ENERGY)' + r'\s+=\s*' + NUMBER + r's*$',
-            outtext, re.MULTILINE)  # yapf: disable
+            outtext, re.MULTILINE)
         if mobj:
             print('matched gamess_RHF energy')
             qcvar['HF TOTAL ENERGY'] = mobj.group(1)
@@ -85,7 +90,7 @@ def harvest_outfile_pass(outtext):
         # Process NRE
         mobj = re.search(
             r'^\s+' + r'(?:   NUCLEAR REPULSION ENERGY)' + r'\s+=\s*' + NUMBER + r'\s*$',
-            outtext, re.MULTILINE)  # yapf: disable
+            outtext, re.MULTILINE)
         if mobj:
             print('matched NRE')
             qcvar['NUCLEAR REPULSION ENERGY'] = mobj.group(1)
@@ -96,7 +101,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'E\(1\)' + r'=\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'E\(2\)' + r'=\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'E\(MP2\)' + r'=\s+' + NUMBER + r'\s*$'
-            ,outtext, re.MULTILINE)  # yapf: disable
+            ,outtext, re.MULTILINE)
         if mobj:
             print('matched mp2')
             qcvar['MP2 CORRELATION ENERGY'] = mobj.group(3)
@@ -109,7 +114,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'E\(ZAPT\) ' + r'=\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'-----------------------------------' + r'\s*' +
             r'^\s+' + r'E\(MP2\)  ' + r'=\s+' + NUMBER + r'\s*$'
-            ,outtext, re.MULTILINE)  # yapf: disable
+            ,outtext, re.MULTILINE)
         if mobj:
             print('matched mp2')
             qcvar['MP2 CORRELATION ENERGY'] = mobj.group(2)
@@ -122,7 +127,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'REFERENCE ENERGY:' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'MBPT\(2\) ENERGY:' + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CCSD    ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*$',
-            outtext, re.MULTILINE)  # yapf: disable
+            outtext, re.MULTILINE)
         if mobj:
             print('matched rhf ccsd')
             qcvar['HF TOTAL ENERGY'] = mobj.group(1)
@@ -137,7 +142,7 @@ def harvest_outfile_pass(outtext):
             r'\s+' + r'\n' +
             r'^\s+' + r'REFERENCE ENERGY:' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CCSD ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR. E=\s+' + r'\s+' + NUMBER + r'\s*$',
-            outtext, re.MULTILINE)  # yapf: disable
+            outtext, re.MULTILINE)
         if mobj:
             print('matched rohf ccsd')
             qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
@@ -149,7 +154,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'CCSD                       ENERGY:'       + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CR-CC\(2,3\),A OR CCSD\(2\)_T  ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CR-CC\(2,3\) OR CR-CCSD\(T\)_L ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*'
-            ,outtext, re.MULTILINE)  # yapf: disable
+            ,outtext, re.MULTILINE)
         if mobj:
             print('matched cc-cr(2,3)')
             qcvar['CCSD TOTAL ENERGY'] = mobj.group(1)
@@ -168,7 +173,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'CCSD    ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CCSD\[T\] ENERGY:' + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CCSD\(T\) ENERGY:' + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*$'
-            ,outtext, re.MULTILINE)  # yapf: disable
+            ,outtext, re.MULTILINE)
         if mobj:
             print('matched ccsd(t)')
             qcvar['HF TOTAL ENERGY'] = mobj.group(1)
@@ -186,7 +191,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'USING THE EXPECTATION VALUE DENSITY' + r'\s*' +
             r'(?:.*?)' +
             r'^\s+' + r'TOTAL ENERGY =' + r'\s+' + NUMBER + r'\s*$',
-            outtext, re.MULTILINE | re.DOTALL)  # yapf: disable
+            outtext, re.MULTILINE | re.DOTALL)
         if mobj:
             print('matched fci')
             qcvar['FCI TOTAL ENERGY'] = mobj.group(2)
@@ -202,7 +207,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'A' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + r'CONVERGED\s+' +
             r'^\s+' + r'A' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + r'CONVERGED\s+' +
             r'^\s+' + r'A' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + r'CONVERGED\s+',
-            outtext, re.MULTILINE)  # yapf: disable
+            outtext, re.MULTILINE)
         if mobj:
             print('matched eom-ccsd')
             qcvar['EOM-CCSD ROOT 1 EXCITATION ENERGY'] = mobj.group(1)
@@ -220,7 +225,7 @@ def harvest_outfile_pass(outtext):
         #     ,outtext, re.MULTILINE)
         mobj = re.search(
             r'^\s+' + r'DFT EXCHANGE \+ CORRELATION ENERGY' + r'\s+=\s*' + NUMBER + r'\s*$',
-            outtext, re.MULTILINE)  # yapf: disable
+            outtext, re.MULTILINE)
         if mobj:
             print('matched dft')
             qcvar['DFT TOTAL ENERGY'] = mobj.group(1)
@@ -231,7 +236,7 @@ def harvest_outfile_pass(outtext):
                 r'^\s+' + r'ATOM      ATOMIC                      COORDINATES \(BOHR\)' + r'\s*' +
                 r'^\s+' + r'CHARGE         X                   Y                   Z'+ r'\s*' +
                 r'((?:\s+([A-Z][a-z]*)+\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)'+r'\s*$'
-                , outtext, re.MULTILINE | re.IGNORECASE)  # yapf: disable
+                , outtext, re.MULTILINE | re.IGNORECASE)
         if mobj:
             print('matched geom')
             molxyz = '%d bohr\n\n' % len(mobj.group(1).splitlines())
@@ -253,7 +258,7 @@ def harvest_outfile_pass(outtext):
                 r'^\s+' + r'UNITS ARE HARTREE/BOHR    E\'X               E\'Y               E\'Z' + r'\s*' +
                 r'((?:\s+([1-9][0-9]*)+\s+([A-Z][a-x]*)+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
                 r'\s*$',
-                outtext, re.MULTILINE)   # yapf: disable
+                outtext, re.MULTILINE)
         if mobj:
             print('matched gradient - after')
             atoms = []
@@ -267,33 +272,34 @@ def harvest_outfile_pass(outtext):
                     atoms.append(lline[1])
                     qcvar_grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
             qcvar_grad = np.array(qcvar_grad)
+    # fmt: on
 
     # Process CURRENT Energies
-    if 'HF TOTAL ENERGY' in qcvar:
-        qcvar['CURRENT REFERENCE ENERGY'] = qcvar['HF TOTAL ENERGY']
-        qcvar['CURRENT ENERGY'] = qcvar['HF TOTAL ENERGY']
+    if "HF TOTAL ENERGY" in qcvar:
+        qcvar["CURRENT REFERENCE ENERGY"] = qcvar["HF TOTAL ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["HF TOTAL ENERGY"]
 
-    if 'MP2 TOTAL ENERGY' in qcvar and 'MP2 CORRELATION ENERGY' in qcvar:
-        qcvar['CURRENT CORRELATION ENERGY'] = qcvar['MP2 CORRELATION ENERGY']
-        qcvar['CURRENT ENERGY'] = qcvar['MP2 TOTAL ENERGY']
+    if "MP2 TOTAL ENERGY" in qcvar and "MP2 CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["MP2 CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["MP2 TOTAL ENERGY"]
 
-    if 'CCSD TOTAL ENERGY' in qcvar and 'CCSD CORRELATION ENERGY' in qcvar:
-        qcvar['CURRENT CORRELATION ENERGY'] = qcvar['CCSD CORRELATION ENERGY']
-        qcvar['CURRENT ENERGY'] = qcvar['CCSD TOTAL ENERGY']
+    if "CCSD TOTAL ENERGY" in qcvar and "CCSD CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CCSD TOTAL ENERGY"]
 
-    if 'CR-CC(2,3) TOTAL ENERGY' in qcvar and 'CR-CC(2,3) CORRELATION ENERGY' in qcvar:
-        qcvar['CURRENT CORRELATION ENERGY'] = qcvar['CR-CC(2,3) CORRELATION ENERGY']
-        qcvar['CURRENT ENERGY'] = qcvar['CR-CC(2,3) TOTAL ENERGY']
+    if "CR-CC(2,3) TOTAL ENERGY" in qcvar and "CR-CC(2,3) CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CR-CC(2,3) CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CR-CC(2,3) TOTAL ENERGY"]
 
-    if 'CCSD(T) TOTAL ENERGY' in qcvar and 'CCSD(T) CORRELATION ENERGY' in qcvar:
-        qcvar['CURRENT CORRELATION ENERGY'] = qcvar['CCSD(T) CORRELATION ENERGY']
-        qcvar['CURRENT ENERGY'] = qcvar['CCSD(T) TOTAL ENERGY']
+    if "CCSD(T) TOTAL ENERGY" in qcvar and "CCSD(T) CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD(T) CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CCSD(T) TOTAL ENERGY"]
 
-    if 'DFT TOTAL ENERGY' in qcvar:
-        qcvar['CURRENT REFERENCE ENERGY'] = qcvar['DFT TOTAL ENERGY']
-        qcvar['CURRENT ENERGY'] = qcvar['DFT TOTAL ENERGY']
+    if "DFT TOTAL ENERGY" in qcvar:
+        qcvar["CURRENT REFERENCE ENERGY"] = qcvar["DFT TOTAL ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["DFT TOTAL ENERGY"]
 
-    if 'FCI TOTAL ENERGY' in qcvar:  # and 'FCI CORRELATION ENERGY' in qcvar:
-        qcvar['CURRENT ENERGY'] = qcvar['FCI TOTAL ENERGY']
+    if "FCI TOTAL ENERGY" in qcvar:  # and 'FCI CORRELATION ENERGY' in qcvar:
+        qcvar["CURRENT ENERGY"] = qcvar["FCI TOTAL ENERGY"]
 
     return qcvar, qcvar_coord, qcvar_grad

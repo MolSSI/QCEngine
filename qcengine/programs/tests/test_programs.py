@@ -2,13 +2,12 @@
 Tests the DQM compute dispatch module
 """
 
-import copy
 
 import numpy as np
 import pytest
-from qcelemental.models import Molecule, ResultInput
 
 import qcengine as qcng
+from qcelemental.models import AtomicInput, Molecule
 from qcengine import testing
 from qcengine.testing import failure_engine
 
@@ -29,13 +28,8 @@ def test_psi4_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {
-            "method": "SCF",
-            "basis": "sto-3g"
-        },
-        "keywords": {
-            "scf_type": "df"
-        }
+        "model": {"method": "SCF", "basis": "sto-3g"},
+        "keywords": {"scf_type": "df"},
     }
 
     ret = qcng.compute(input_data, "psi4", raise_error=True, return_dict=True)
@@ -56,16 +50,9 @@ def test_psi4_interactive_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {
-            "method": "SCF",
-            "basis": "sto-3g"
-        },
-        "keywords": {
-            "scf_type": "df"
-        },
-        "extras": {
-            "psiapi": True
-        }
+        "model": {"method": "SCF", "basis": "sto-3g"},
+        "keywords": {"scf_type": "df"},
+        "extras": {"psiapi": True},
     }
 
     ret = qcng.compute(input_data, "psi4", raise_error=True)
@@ -80,16 +67,9 @@ def test_psi4_wavefunction_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {
-            "method": "SCF",
-            "basis": "sto-3g"
-        },
-        "keywords": {
-            "scf_type": "df"
-        },
-        "protocols": {
-            "wavefunction": "orbitals_and_eigenvalues"
-        }
+        "model": {"method": "SCF", "basis": "sto-3g"},
+        "keywords": {"scf_type": "df"},
+        "protocols": {"wavefunction": "orbitals_and_eigenvalues"},
     }
 
     ret = qcng.compute(input_data, "psi4", raise_error=True)
@@ -100,20 +80,17 @@ def test_psi4_wavefunction_task():
 @testing.using_psi4
 def test_psi4_internal_failure():
 
-    mol = Molecule.from_data("""0 3
+    mol = Molecule.from_data(
+        """0 3
      O    0.000000000000     0.000000000000    -0.068516245955
-    """)
+    """
+    )
 
     psi4_task = {
         "molecule": mol,
         "driver": "energy",
-        "model": {
-            "method": "ccsd",
-            "basis": "6-31g"
-        },
-        "keywords": {
-            "reference": "rhf"
-        }
+        "model": {"method": "ccsd", "basis": "6-31g"},
+        "keywords": {"reference": "rhf"},
     }
     with pytest.raises(qcng.exceptions.InputError) as exc:
         ret = qcng.compute(psi4_task, "psi4", raise_error=True)
@@ -123,22 +100,14 @@ def test_psi4_internal_failure():
 
 @testing.using_psi4
 def test_psi4_ref_switch():
-    inp = ResultInput(
+    inp = AtomicInput(
         **{
-            "molecule": {
-                "symbols": ["Li"],
-                "geometry": [0, 0, 0],
-                "molecular_multiplicity": 2
-            },
+            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0], "molecular_multiplicity": 2},
             "driver": "energy",
-            "model": {
-                "method": "B3LYP",
-                "basis": "sto-3g"
-            },
-            "keywords": {
-                "scf_type": "df"
-            }
-        })
+            "model": {"method": "B3LYP", "basis": "sto-3g"},
+            "keywords": {"scf_type": "df"},
+        }
+    )
 
     ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
 
@@ -152,10 +121,8 @@ def test_rdkit_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "gradient",
-        "model": {
-            "method": "UFF"
-        },
-        "keywords": {}
+        "model": {"method": "UFF"},
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "rdkit", raise_error=True)
@@ -168,11 +135,8 @@ def test_rdkit_connectivity_error():
     input_data = {
         "molecule": qcng.get_molecule("water").dict(exclude={"connectivity"}),
         "driver": "gradient",
-        "model": {
-            "method": "UFF",
-            "basis": ""
-        },
-        "keywords": {}
+        "model": {"method": "UFF", "basis": ""},
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "rdkit")
@@ -188,11 +152,8 @@ def test_torchani_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "gradient",
-        "model": {
-            "method": "ANI1x",
-            "basis": None
-        },
-        "keywords": {}
+        "model": {"method": "ANI1x", "basis": None},
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "torchani", raise_error=True)
@@ -206,23 +167,18 @@ def test_mopac_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "gradient",
-        "model": {
-            "method": "PM6",
-            "basis": None
-        },
-        "keywords": {
-            "pulay": False
-        }
+        "model": {"method": "PM6", "basis": None},
+        "keywords": {"pulay": False},
     }
 
     ret = qcng.compute(input_data, "mopac", raise_error=True)
     assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
-    energy = pytest.approx(-0.08474117913025125, rel=1.e-5)
+    energy = pytest.approx(-0.08474117913025125, rel=1.0e-5)
 
     # Check gradient
     ret = qcng.compute(input_data, "mopac", raise_error=True)
     assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
-    assert np.linalg.norm(ret.return_result) == pytest.approx(0.03543560156912385, rel=1.e-4)
+    assert np.linalg.norm(ret.return_result) == pytest.approx(0.03543560156912385, rel=1.0e-4)
     assert ret.properties.return_energy == energy
 
     # Check energy

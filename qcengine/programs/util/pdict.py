@@ -16,6 +16,7 @@ class PreservingDict(dict):
     works in decimal.Decimal (scalar) and np.ndarray (non-scalar)
 
     """
+
     def __init__(self, *args, **kwargs):
         self.update(*args, **kwargs)
 
@@ -23,18 +24,21 @@ class PreservingDict(dict):
         try:
             key = key.upper()
         except AttributeError:
-            raise AttributeError('Keys stored as upper-case strings: %s unsuitable' % (key))
+            raise AttributeError("Keys stored as upper-case strings: %s unsuitable" % (key))
 
         if isinstance(value, (list, np.ndarray)):
             # non-scalar
             value = np.array(value)
 
-            if key in self.keys() and not 'CURRENT' in key:
-                if np.allclose(self[key], value, atol=1.e-5, rtol=1e-3):
+            if key in self.keys() and not "CURRENT" in key:
+                if np.allclose(self[key], value, atol=1.0e-5, rtol=1e-3):
                     best_value = value  # no way to choose, really
                 else:
-                    raise ValueError("""Output file yielded both {} and {} as values for quantity {}.""".format(
-                        self[key], value, key))
+                    raise ValueError(
+                        """Output file yielded both {} and {} as values for quantity {}.""".format(
+                            self[key], value, key
+                        )
+                    )
                 # print("""Resetting array {} to {}""".format(key, best_value))
             else:
                 best_value = value
@@ -43,30 +47,39 @@ class PreservingDict(dict):
         else:
             # scalar
             value = Decimal(value)
-            if abs(float(value)) < 1.e-16:
-                value = Decimal('0')
+            if abs(float(value)) < 1.0e-16:
+                value = Decimal("0")
 
-            if key in self.keys() and not 'CURRENT' in key:
+            if key in self.keys() and not "CURRENT" in key:
                 # Validate choosing more detailed value for variable
                 existing_exp = self[key].as_tuple().exponent  # 0.1111 --> -4
                 candidate_exp = value.as_tuple().exponent
                 if existing_exp > candidate_exp:  # candidate has more digits
-                    places = Decimal(10)**(existing_exp + 1)  # exp+1 permits slack in rounding
+                    places = Decimal(10) ** (existing_exp + 1)  # exp+1 permits slack in rounding
                     best_value = value
                 else:  # existing has more digits
-                    places = Decimal(10)**(candidate_exp + 1)
+                    places = Decimal(10) ** (candidate_exp + 1)
                     best_value = self[key]
                 # Validate values are the same
-                #places = max(places, Decimal('1E-11'))  # for computed psivars
-                places = max(places, Decimal('1E-{}'.format(accept_places)))  # for computed psivars
-                #print('FLOOR: ', self[key].quantize(places, rounding=ROUND_FLOOR) - value.quantize(places, rounding=ROUND_FLOOR))
-                #print('CEIL:  ', self[key].quantize(places, rounding=ROUND_CEILING) - value.quantize(places, rounding=ROUND_CEILING))
-                if ((self[key].quantize(places, rounding=ROUND_CEILING).compare(
-                        value.quantize(places, rounding=ROUND_CEILING)) != 0)
-                        and (self[key].quantize(places, rounding=ROUND_FLOOR).compare(
-                            value.quantize(places, rounding=ROUND_FLOOR)) != 0)):
-                    raise ValueError("""Output file yielded both %s and %s as values for quantity %s.""" %
-                                     (self[key].to_eng_string(), value.to_eng_string(), key))
+                # places = max(places, Decimal('1E-11'))  # for computed psivars
+                places = max(places, Decimal("1E-{}".format(accept_places)))  # for computed psivars
+                # print('FLOOR: ', self[key].quantize(places, rounding=ROUND_FLOOR) - value.quantize(places, rounding=ROUND_FLOOR))
+                # print('CEIL:  ', self[key].quantize(places, rounding=ROUND_CEILING) - value.quantize(places, rounding=ROUND_CEILING))
+                if (
+                    self[key]
+                    .quantize(places, rounding=ROUND_CEILING)
+                    .compare(value.quantize(places, rounding=ROUND_CEILING))
+                    != 0
+                ) and (
+                    self[key]
+                    .quantize(places, rounding=ROUND_FLOOR)
+                    .compare(value.quantize(places, rounding=ROUND_FLOOR))
+                    != 0
+                ):
+                    raise ValueError(
+                        """Output file yielded both %s and %s as values for quantity %s."""
+                        % (self[key].to_eng_string(), value.to_eng_string(), key)
+                    )
                 # print("""Resetting variable {} to {}""".format(key, best_value.to_eng_string()))
             else:
                 best_value = value
@@ -90,15 +103,15 @@ class PreservingDict(dict):
         return self[key]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     c4info = PreservingDict()
-    c4info['scf 4.5e0 total energy'] = '-1.e-4'
-    c4info['1.3'] = '.4'
-    c4info['curl'] = '-437.12345678'
-    c4info['curl'] = '-437.12345677'
-    c4info['curl'] = '-437.123456'
-    c4info['curl'] = '-437.123457'
-    c4info['curl'] = '-437.1234444'  # fails
-    c4info['curl'] = '-437.123456789'
-    c4info['curl'] = '-437.1234567779'  # fails
+    c4info["scf 4.5e0 total energy"] = "-1.e-4"
+    c4info["1.3"] = ".4"
+    c4info["curl"] = "-437.12345678"
+    c4info["curl"] = "-437.12345677"
+    c4info["curl"] = "-437.123456"
+    c4info["curl"] = "-437.123457"
+    c4info["curl"] = "-437.1234444"  # fails
+    c4info["curl"] = "-437.123456789"
+    c4info["curl"] = "-437.1234567779"  # fails
     print(c4info)

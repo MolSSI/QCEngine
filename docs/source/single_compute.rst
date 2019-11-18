@@ -24,17 +24,17 @@ An example input is as follows:
     >>> import qcelemental as qcel
 
     >>> mol = qcel.models.Molecule.from_data("""
-    O  0.0  0.000  -0.129
-    H  0.0 -1.494  1.027
-    H  0.0  1.494  1.027
-    """)
+    >>>     O  0.0  0.000  -0.129
+    >>>     H  0.0 -1.494  1.027
+    >>>     H  0.0  1.494  1.027
+    >>>     """)
 
-    >>> inp = qcel.models.ResultInput(
-        molecule=mol,
-        driver="energy",
-        model={"method": "SCF", "basis": "sto-3g"},
-        keywords={"scf_type": "df"}
-        )
+    >>> inp = qcel.models.AtomicInput(
+    >>>     molecule=mol,
+    >>>     driver="energy",
+    >>>     model={"method": "SCF", "basis": "sto-3g"},
+    >>>     keywords={"scf_type": "df"}
+    >>>     )
 
 
 Computation
@@ -70,29 +70,14 @@ The results contain a complete record of the computation:
     >>> ret.provenance.cpu
     Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz
 
-A short description of the fields is as follow:
 
-- ``return_result`` - the direct return of the ``driver`` input. That is energy and gradient for a driver ``energy`` and ``gradient`` call, respectively.
-- ``properties`` - Values associated with the ``return_result`` such as the ``scf_one_electron_energy``.
-- ``stdout`` - The ``stdout`` or log of a programs run.
-- ``provenance`` - A description of the calling program, version, wall time, etc.
+Input Fields
+-------------
 
-A complete description of the input is also available in the output:
+.. autoclass:: qcelemental.models.AtomicInput
 
-.. code:: python
+Returned Fields
+---------------
 
-    >>> ret.driver
-    energy
-
-
-Fields
-------
-
-A list of all fields is available through the ``fields`` property on the input and output:
-
-.. code:: python
-
-    >>> ret.fields
-    ['molecule', 'driver', 'model', 'id', 'schema_name', 'schema_version', 'keywords',
-     'extras', 'provenance', 'return_result', 'success', 'properties', 'stdout', 'stderr', 'error']
+.. autoclass:: qcelemental.models.AtomicResult
 

@@ -25,7 +25,7 @@ A simple example of QCEngine's capabilities is as follows:
     H  0.0  1.494  1.027
     """)
 
-    >>> input = qcel.models.ResultInput(
+    >>> input = qcel.models.AtomicInput(
         molecule=mol,
         driver="energy",
         model={"method": "SCF", "basis": "sto-3g"},
@@ -58,11 +58,16 @@ Currently available compute backends for single results are as follow:
 
 - Quantum Chemistry:
 
-  - `Terachem <http://www.petachem.com>`_
+  - `Entos <https://www.entos.info>`_
   - `Molpro <https://www.molpro.net>`_
   - `Psi4 <http://www.psicode.org>`_
+  - `Terachem <http://www.petachem.com>`_
 
-- AI Evaluation:
+- Semi-Emperical:
+
+  - `MOPAC <http://www.petachem.com>`_
+
+- AI Potential:
 
   - `TorchANI <https://github.com/aiqm/torchani>`_
 
@@ -70,16 +75,15 @@ Currently available compute backends for single results are as follow:
 
   - `RDKit <http://rdkit.org>`_
 
+- Analytical Corrections:
+
+  - `DFTD3 <https://www.chemie.uni-bonn.de/pctc/mulliken-center/software/dft-d3/>`_
+
 In addition, several procedures are available:
 
 - Geometry Optimization:
 
   - `geomeTRIC <https://github.com/leeping/geomeTRIC>`_
-
-Information about detected compute backends and procedures may be printed using the :doc:`CLI <cli>`::
-
-    qcengine info --programs
-    qcengine info --procedures
 
 Configuration Determination
 ---------------------------
@@ -106,11 +110,26 @@ Each of these options can be specified by the user as well.
     >>> qcng.get_config(local_options={"scratch_directory": "$SCRATCH"})
     <JobConfig ncores=2 memory=2.506 scratch_directory='/my_scratch'>
 
-Configuration information may be printed using the :doc:`CLI <cli>`::
+Program and Procedure Information
+---------------------------------
 
-   qcengine info --config
+Available programs and procedures may be printed using the :doc:`CLI <cli>`::
 
-========
+   >>> qcengine info
+   >> Version information
+   QCEngine version:    v0.11.0
+   QCElemental version: v0.11.0
+
+   >> Program information
+   Available programs:
+   mopac v2016
+   psi4 v1.3.2
+   rdkit v2019.03.4
+
+   Other supported programs:
+   cfour dftd3 entos gamess molpro mp2d nwchem terachem torchani
+   ...
+
 
 .. toctree::
     :maxdepth: 2
@@ -149,6 +168,17 @@ Index
     single_compute
     environment
     cli
+
+**Programs**
+
+* :doc:`program_overview`
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+    :caption: Programs
+
+    program_overview
 
 
 **Developer Documentation**
