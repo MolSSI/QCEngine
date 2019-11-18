@@ -4,8 +4,10 @@ Calls the OpenMM executable.
 Requires RDKit
 """
 import json
+import io
 import os
 import hashlib
+import datetime
 import urllib.request 
 from typing import Dict
 
@@ -37,15 +39,19 @@ class OpenMMHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def _get_off_forcefield(self, offxml):
+    def _get_off_forcefield(self, hashstring, offxml):
 
         from openforcefield.typing.engines import smirnoff
-        # perhaps want to avoid using a massive string as our key
-        # if `offxml` is actual xml content?
+        key = hashlib.sha256(hashstring.encode()).hexdigest()
 
-        off_forcefield = smirnoff.ForceField(offxml)
+        # get forcefield from cache, build new one if not present
+        off_forcefield = (self._get_cache(key) if key in self._CACHE
+                          else smirnoff.ForceField(offxml))
 
-        #key = hashlib.sha256(offxml.encode()).hexdigest()
+        # cache forcefield, no matter what
+        # handles updating time touched, dropping items if cache too large
+        self._cache_it(key, off_forcefield)
+
         return off_forcefield
 
 
@@ -57,11 +63,28 @@ class OpenMMHarness(ProgramHarness):
 
         return openmm_system
 
+    def _get_cache(self, key):
+        return self._CACHE[key]['value']
+
     def _cache_it(self, key, value):
         """Add to our LRU cache, possibly popping off least used key.
 
         """
-        pass
+        self._CACHE[key] = {'value': value,
+                            'last_used': datetime.datetime.utcnow()}
+
+        # if cache is beyond max size, whittle it down by dropping entry least
+        # recently used
+        while len(self._CACHE) > self._CACHE_MAX_SIZE:
+            for i, (key, value) in enumerate(self._CACHE.items()):
+                if i == 0:
+                    oldest = value['last_used']
+                    oldest_key = key
+                else:
+                    oldest, oldest_key = (value['last_used'], key
+                              if (value['last_used'] < oldest) else oldest, oldest_key)
+
+            self._CACHE.pop(oldest_key)
 
     def _generate_basis(self, input_data):
         
@@ -128,11 +151,21 @@ class OpenMMHarness(ProgramHarness):
             # TODO: If urls are supported by
             # `openforcefield.typing.engines.smirnoff.ForceField` already, we
             # can eliminate the `offxml` and `url` distinction
-            # URL processing can happen there
+            # URL processing can happen there instead
             if getattr(input_data.model, 'offxml', None):
+                # we were given a file path or relative path
                 offxml = input_data.model.offxml
+
+                # Load an Open Force Field `ForceField`
+                off_forcefield = self._get_off_forcefield(offxml, offxml)
             elif getattr(input_data.model, 'url', None):
-                offxml = urllib.request.urlopen(input_data.model.url)
+                # we were given a url
+                with urllib.request.urlopen(input_data.model.url) as req:
+                    xml = req.read().decode()
+
+                # Load an Open Force Field `ForceField`
+                with io.StringIO(xml) as f:
+                    off_forcefield = self._get_off_forcefield(xml, f)
             else:
                 raise InputError("OpenMM requires either `model.offxml` or `model.url` to be set")
 
@@ -141,9 +174,6 @@ class OpenMMHarness(ProgramHarness):
 
             # Create an Open Force Field `Molecule` from the RDKit Molecule
             off_mol = offtop.Molecule(rdkit_mol)
-
-            # Load an Open Force Field `ForceField`
-            off_forcefield = self._get_off_forcefield(offxml)
 
             # Create OpenMM system in vacuum from forcefield, molecule
             off_top = off_mol.to_topology()
