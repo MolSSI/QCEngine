@@ -190,8 +190,8 @@ class OpenMMHarness(ProgramHarness):
 
             # TODO: FIXME set number of threads;
             # this line currently throws an exception
-            #if nthreads:
-            #    platform.setPropertyValue(context, 'Threads', str(nthreads))
+            if nthreads:
+                platform.setPropertyValue(context, 'Threads', str(nthreads))
 
             # Set positions from our Open Force Field `Molecule`
             context.setPositions(off_mol.conformers[0])
