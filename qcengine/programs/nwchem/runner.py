@@ -115,10 +115,7 @@ class NWChemHarness(ProgramHarness):
         # Handle basis set
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
-            if ropts.scrolls['QCDB']['BASIS'] == "nwchem-{el}":
-                opts[f'basis_nwchem-{el}'] = f'library {input_model.model.basis}'
-            else:
-                opts[f'basis__{el}'] = f'library {input_model.model.basis}'
+            opts[f'basis__{el}'] = f'library {input_model.model.basis}'
 
         print('JOB_OPTS')
         pp.pprint(opts)

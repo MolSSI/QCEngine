@@ -62,5 +62,8 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
             opts['tce__ccsd(t)'] = True
         else:
             mdccmd = f'task ccsd(t) {runtyp}\n\n'
+    
+    elif method == 'tddft':
+        mdccmd = f'task tddft {runtyp}\n\n'
 
     return mdccmd, opts
