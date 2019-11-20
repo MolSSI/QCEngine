@@ -185,13 +185,16 @@ class OpenMMHarness(ProgramHarness):
             # Set platform to CPU explicitly
             platform = openmm.Platform.getPlatformByName('CPU')
 
-            # Initialize context
-            context = openmm.Context(openmm_system, integrator, platform)
-
-            # TODO: FIXME set number of threads;
-            # this line currently throws an exception
+            # Set number of threads to use
+            # if `nthreads` is `None`, OpenMM default of all logical cores on
+            # processor will be used
             if nthreads:
-                platform.setPropertyValue(context, 'Threads', str(nthreads))
+                properties = {'Threads': str(nthreads)}
+            else:
+                properties = {}
+
+            # Initialize context
+            context = openmm.Context(openmm_system, integrator, platform, properties)
 
             # Set positions from our Open Force Field `Molecule`
             context.setPositions(off_mol.conformers[0])
