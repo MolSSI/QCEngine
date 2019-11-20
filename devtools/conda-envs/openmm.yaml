@@ -4,10 +4,10 @@ channels:
   - omnia-dev
   - omnia
 dependencies:
-  - rdkit
-  - openmm
-  - openforcefield
-  - openforcefields
+  - conda-forge::rdkit
+  - omnia-dev::openmm
+  - omnia::openforcefield
+  - omnia::openforcefields
 
     # Core
   - python
