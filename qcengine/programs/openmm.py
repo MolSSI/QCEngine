@@ -4,7 +4,6 @@ Calls the OpenMM executable.
 Requires RDKit
 """
 import json
-import io
 import os
 import hashlib
 import datetime
@@ -160,11 +159,10 @@ class OpenMMHarness(ProgramHarness):
             elif getattr(input_data.model, 'url', None):
                 # we were given a url
                 with urllib.request.urlopen(input_data.model.url) as req:
-                    xml = req.read().decode()
+                    xml = req.read()
 
                 # Load an Open Force Field `ForceField`
-                with io.StringIO(xml) as f:
-                    off_forcefield = self._get_off_forcefield(xml, f)
+                off_forcefield = self._get_off_forcefield(xml.decode(), xml)
             else:
                 raise InputError("OpenMM requires either `model.offxml` or `model.url` to be set")
 
