@@ -23,7 +23,7 @@ class ProgramHarness(BaseModel, abc.ABC):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
         pass
 
     @staticmethod
@@ -42,9 +42,8 @@ class ProgramHarness(BaseModel, abc.ABC):
         bool
             Returns True if the program was found, False otherwise.
         """
-        pass
 
-## Utility
+    ## Utility
 
     def get_version(self) -> str:
         """Finds program, extracts version, returns normalized version string.
@@ -54,22 +53,23 @@ class ProgramHarness(BaseModel, abc.ABC):
         str
             Return a valid, safe python version string.
         """
-        pass
 
+    ## Computers
 
-## Computers
-
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
-                    template: Optional[str] = None) -> Dict[str, Any]:
+    def build_input(
+        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+    ) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
-    def execute(self,
-                inputs: Dict[str, Any],
-                extra_outfiles: Optional[List[str]] = None,
-                extra_commands: Optional[List[str]] = None,
-                scratch_name: Optional[str] = None,
-                timeout: Optional[int] = None) -> Tuple[bool, Dict[str, Any]]:
+    def execute(
+        self,
+        inputs: Dict[str, Any],
+        extra_outfiles: Optional[List[str]] = None,
+        extra_commands: Optional[List[str]] = None,
+        scratch_name: Optional[str] = None,
+        timeout: Optional[int] = None,
+    ) -> Tuple[bool, Dict[str, Any]]:
         raise ValueError("execute is not implemented for {}.", self.__class__)
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
         raise ValueError("parse_output is not implemented for {}.", self.__class__)

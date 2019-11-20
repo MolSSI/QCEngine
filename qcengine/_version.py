@@ -76,11 +76,8 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
             dispcmd = str([c] + args)
             # remember shell=False, so use git.cmd on windows, not just git
             p = subprocess.Popen(
-                [c] + args,
-                cwd=cwd,
-                env=env,
-                stdout=subprocess.PIPE,
-                stderr=(subprocess.PIPE if hide_stderr else None))
+                [c] + args, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=(subprocess.PIPE if hide_stderr else None)
+            )
             break
         except EnvironmentError:
             e = sys.exc_info()[1]
@@ -92,7 +89,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
             return None, None
     else:
         if verbose:
-            print("unable to find command, tried %s" % (commands, ))
+            print("unable to find command, tried %s" % (commands,))
         return None, None
     stdout = p.communicate()[0].strip()
     if sys.version_info[0] >= 3:
@@ -118,11 +115,11 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
         dirname = os.path.basename(root)
         if dirname.startswith(parentdir_prefix):
             return {
-                "version": dirname[len(parentdir_prefix):],
+                "version": dirname[len(parentdir_prefix) :],
                 "full-revisionid": None,
                 "dirty": False,
                 "error": None,
-                "date": None
+                "date": None,
             }
         else:
             rootdirs.append(root)
@@ -185,7 +182,7 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
     # starting in git-1.8.3, tags are listed as "tag: foo-1.0" instead of
     # just "foo-1.0". If we see a "tag: " prefix, prefer those.
     TAG = "tag: "
-    tags = set([r[len(TAG):] for r in refs if r.startswith(TAG)])
+    tags = set([r[len(TAG) :] for r in refs if r.startswith(TAG)])
     if not tags:
         # Either we're using git < 1.8.3, or there really are no tags. We use
         # a heuristic: assume all version tags have a digit. The old git %d
@@ -194,7 +191,7 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
         # between branches and tags. By ignoring refnames without digits, we
         # filter out many common branch names like "release" and
         # "stabilization", as well as "HEAD" and "master".
-        tags = set([r for r in refs if re.search(r'\d', r)])
+        tags = set([r for r in refs if re.search(r"\d", r)])
         if verbose:
             print("discarding '%s', no digits" % ",".join(refs - tags))
     if verbose:
@@ -202,7 +199,7 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
     for ref in sorted(tags):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
         if ref.startswith(tag_prefix):
-            r = ref[len(tag_prefix):]
+            r = ref[len(tag_prefix) :]
             if verbose:
                 print("picking %s" % r)
             return {
@@ -210,7 +207,7 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
                 "full-revisionid": keywords["full"].strip(),
                 "dirty": False,
                 "error": None,
-                "date": date
+                "date": date,
             }
     # no suitable tags, so version is "0+unknown", but full hex is still there
     if verbose:
@@ -220,7 +217,7 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
         "full-revisionid": keywords["full"].strip(),
         "dirty": False,
         "error": "no suitable tags",
-        "date": None
+        "date": None,
     }
 
 
@@ -245,8 +242,8 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = run_command(
-        GITS, ["describe", "--tags", "--dirty", "--always", "--long", "--match",
-               "%s*" % tag_prefix], cwd=root)
+        GITS, ["describe", "--tags", "--dirty", "--always", "--long", "--match", "%s*" % tag_prefix], cwd=root
+    )
     # --long was added in git-1.5.5
     if describe_out is None:
         raise NotThisMethod("'git describe' failed")
@@ -269,16 +266,16 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     dirty = git_describe.endswith("-dirty")
     pieces["dirty"] = dirty
     if dirty:
-        git_describe = git_describe[:git_describe.rindex("-dirty")]
+        git_describe = git_describe[: git_describe.rindex("-dirty")]
 
     # now we have TAG-NUM-gHEX or HEX
 
     if "-" in git_describe:
         # TAG-NUM-gHEX
-        mo = re.search(r'^(.+)-(\d+)-g([0-9a-f]+)$', git_describe)
+        mo = re.search(r"^(.+)-(\d+)-g([0-9a-f]+)$", git_describe)
         if not mo:
             # unparseable. Maybe git-describe is misbehaving?
-            pieces["error"] = ("unable to parse git-describe output: '%s'" % describe_out)
+            pieces["error"] = "unable to parse git-describe output: '%s'" % describe_out
             return pieces
 
         # tag
@@ -287,9 +284,9 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
             if verbose:
                 fmt = "tag '%s' doesn't start with prefix '%s'"
                 print(fmt % (full_tag, tag_prefix))
-            pieces["error"] = ("tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix))
+            pieces["error"] = "tag '%s' doesn't start with prefix '%s'" % (full_tag, tag_prefix)
             return pieces
-        pieces["closest-tag"] = full_tag[len(tag_prefix):]
+        pieces["closest-tag"] = full_tag[len(tag_prefix) :]
 
         # distance: number of commits since tag
         pieces["distance"] = int(mo.group(2))
@@ -454,7 +451,7 @@ def render(pieces, style):
             "full-revisionid": pieces.get("long"),
             "dirty": None,
             "error": pieces["error"],
-            "date": None
+            "date": None,
         }
 
     if not style or style == "default":
@@ -480,7 +477,7 @@ def render(pieces, style):
         "full-revisionid": pieces["long"],
         "dirty": pieces["dirty"],
         "error": None,
-        "date": pieces.get("date")
+        "date": pieces.get("date"),
     }
 
 
@@ -504,7 +501,7 @@ def get_versions():
         # versionfile_source is the relative path from the top of the source
         # tree (where the .git directory might live) to this file. Invert
         # this to find the root from __file__.
-        for i in cfg.versionfile_source.split('/'):
+        for i in cfg.versionfile_source.split("/"):
             root = os.path.dirname(root)
     except NameError:
         return {
@@ -512,7 +509,7 @@ def get_versions():
             "full-revisionid": None,
             "dirty": None,
             "error": "unable to find root of source tree",
-            "date": None
+            "date": None,
         }
 
     try:
@@ -532,5 +529,5 @@ def get_versions():
         "full-revisionid": None,
         "dirty": None,
         "error": "unable to compute version",
-        "date": None
+        "date": None,
     }

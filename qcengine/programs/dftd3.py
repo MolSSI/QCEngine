@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 
 import qcelemental as qcel
-from qcelemental.models import FailedOperation, Provenance, Result
+from qcelemental.models import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, ResourceError, UnknownError
@@ -40,25 +40,28 @@ class DFTD3Harness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        return which('dftd3',
-                     return_bool=True,
-                     raise_error=raise_error,
-                     raise_msg='Please install via `conda install dftd3 -c psi4`.')
+        return which(
+            "dftd3",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install dftd3 -c psi4`.",
+        )
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which('dftd3')
+        which_prog = which("dftd3")
         if which_prog not in self.version_cache:
             # Note: anything below v3.2.1 will return the help menu here. but that's fine as version compare evals to False.
-            command = [which_prog, '-version']
+            command = [which_prog, "-version"]
             import subprocess
+
             proc = subprocess.run(command, stdout=subprocess.PIPE)
-            self.version_cache[which_prog] = safe_version(proc.stdout.decode('utf-8').strip())
+            self.version_cache[which_prog] = safe_version(proc.stdout.decode("utf-8").strip())
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
@@ -71,51 +74,48 @@ class DFTD3Harness(ProgramHarness):
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
-            output_model = FailedOperation(success=False,
-                                           error={
-                                               "error_type": "execution_error",
-                                               "error_message": dexe["stderr"]
-                                           },
-                                           input_data=input_model.dict())
+            output_model = FailedOperation(
+                success=False,
+                error={"error_type": "execution_error", "error_message": dexe["stderr"]},
+                input_data=input_model.dict(),
+            )
 
         return output_model
 
-    def execute(self,
-                inputs: Dict[str, Any],
-                *,
-                extra_outfiles=None,
-                extra_commands=None,
-                scratch_name=None,
-                timeout=None) -> Tuple[bool, Dict]:
+    def execute(
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+    ) -> Tuple[bool, Dict]:
 
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
             inputs["outfiles"],
             scratch_messy=False,
-            #env=inputs["env"],
+            # env=inputs["env"],
             scratch_directory=inputs["scratch_directory"],
             blocking_files=inputs["blocking_files"],
         )
         return success, dexe
 
-    def build_input(self, input_model: 'ResultInput', config: 'JobConfig',
-                    template: Optional[str] = None) -> Dict[str, Any]:
+    def build_input(
+        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+    ) -> Dict[str, Any]:
 
         # strip engine hint
         mtd = input_model.model.method
-        if mtd.startswith('d3-'):
+        if mtd.startswith("d3-"):
             mtd = mtd[3:]
 
-        if input_model.driver.derivative_int() > 1:
+        if (input_model.driver.derivative_int() > 1) or (input_model.driver == "properties"):
             raise InputError(f"""DFTD3 valid driver options are 'energy' and 'gradient', not {input_model.driver}""")
 
         # temp until actual options object
-        input_model.extras['info'] = empirical_dispersion_resources.from_arrays(
+        input_model.extras["info"] = empirical_dispersion_resources.from_arrays(
             name_hint=mtd,
-            level_hint=input_model.keywords.get('level_hint', None),
-            param_tweaks=input_model.keywords.get('params_tweaks', None),
-            dashcoeff_supplement=input_model.keywords.get('dashcoeff_supplement', None))
+            level_hint=input_model.keywords.get("level_hint", None),
+            param_tweaks=input_model.keywords.get("params_tweaks", None),
+            dashcoeff_supplement=input_model.keywords.get("dashcoeff_supplement", None),
+        )
 
         # this is what the dftd3 program needs, not what the job needs
         # * form dftd3_parameters string that governs dispersion calc
@@ -124,48 +124,47 @@ class DFTD3Harness(ProgramHarness):
 
         # Need 'real' field later and that's only guaranteed for molrec
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
-        #jobrec['molecule']['real'] = molrec['real']
+        # jobrec['molecule']['real'] = molrec['real']
 
-        #env = {
+        # env = {
         #    'HOME': os.environ.get('HOME'),
         #    'PATH': os.environ.get('PATH'),
         #    #'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
         #    #        os.pathsep + os.environ.get('PATH'),
         #    #'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
-        #}
+        # }
 
-        command = ['dftd3', 'dftd3_geometry.xyz']
-        if input_model.driver == 'gradient':
-            command.append('-grad')
-        if input_model.extras['info']['dashlevel'] == 'atmgr':
-            command.append('-abc')
+        command = ["dftd3", "dftd3_geometry.xyz"]
+        if input_model.driver == "gradient":
+            command.append("-grad")
+        if input_model.extras["info"]["dashlevel"] == "atmgr":
+            command.append("-abc")
 
         infiles = {
-            '.dftd3par.local':
-            dftd3_coeff_formatter(input_model.extras['info']['dashlevel'], input_model.extras['info']['dashparams']),
-            'dftd3_geometry.xyz':
-            qcel.molparse.to_string(molrec, dtype='xyz', units='Angstrom', ghost_format=''),
+            ".dftd3par.local": dftd3_coeff_formatter(
+                input_model.extras["info"]["dashlevel"], input_model.extras["info"]["dashparams"]
+            ),
+            "dftd3_geometry.xyz": qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format=""),
         }
 
         return {
             "command": command,
             "infiles": infiles,
-            "outfiles": ['dftd3_gradient', 'dftd3_abc_gradient'],
+            "outfiles": ["dftd3_gradient", "dftd3_abc_gradient"],
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
-            "blocking_files": [os.path.join(pathlib.Path.home(), '.dftd3par.' + socket.gethostname())],
+            "blocking_files": [os.path.join(pathlib.Path.home(), ".dftd3par." + socket.gethostname())],
         }
 
+    #   Notes
+    #   -----
+    #   Central to harvesting is the fact (to the planting, not to the DFTD3
+    #   program) that 2-body and 3-body are run separately. Because of how
+    #   damping functions work (see GH:psi4/psi4#1407), some 2-body damping
+    #   schemes can give wrong answers for 3-body. And because 3-body is
+    #   set to run with some dummy values, the 2-body values are no good.
 
-#   Notes
-#   -----
-#   Central to harvesting is the fact (to the planting, not to the DFTD3
-#   program) that 2-body and 3-body are run separately. Because of how
-#   damping functions work (see GH:psi4/psi4#1407), some 2-body damping
-#   schemes can give wrong answers for 3-body. And because 3-body is
-#   set to run with some dummy values, the 2-body values are no good.
-
-    def parse_output(self, outfiles: Dict[str, str], input_model: 'ResultInput') -> 'Result':
+    def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
         stdout = outfiles.pop("stdout")
 
         for fl, contents in outfiles.items():
@@ -179,105 +178,107 @@ class DFTD3Harness(ProgramHarness):
         real_nat = np.sum(real)
 
         for ln in stdout.splitlines():
-            if re.match(' Edisp /kcal,au', ln):
+            if re.match(" Edisp /kcal,au", ln):
                 ene = Decimal(ln.split()[3])
             elif re.match(r" E6\(ABC\) \"   :", ln):  # c. v3.2.0
                 raise ResourceError("Cannot process ATM results from DFTD3 prior to v3.2.1.")
             elif re.match(r""" E6\(ABC\) /kcal,au:""", ln):
                 atm = Decimal(ln.split()[-1])
-            elif re.match(' normal termination of dftd3', ln):
+            elif re.match(" normal termination of dftd3", ln):
                 break
         else:
-            if not ((real_nat == 1) and (input_model.driver == 'gradient')):
-                raise UnknownError('Unsuccessful run. Possibly -D variant not available in dftd3 version.')
+            if not ((real_nat == 1) and (input_model.driver == "gradient")):
+                raise UnknownError(
+                    f"Unsuccessful run. Possibly -D variant not available in dftd3 version. Model: {input_data.model}"
+                )
 
         # parse gradient output
         # * DFTD3 crashes on one-atom gradients. Avoid the error (above) and just force the correct result (below).
-        if outfiles['dftd3_gradient'] is not None:
-            srealgrad = outfiles['dftd3_gradient'].replace('D', 'E')
-            realgrad = np.fromstring(srealgrad, count=3 * real_nat, sep=' ').reshape((-1, 3))
+        if outfiles["dftd3_gradient"] is not None:
+            srealgrad = outfiles["dftd3_gradient"].replace("D", "E")
+            realgrad = np.fromstring(srealgrad, count=3 * real_nat, sep=" ").reshape((-1, 3))
         elif real_nat == 1:
             realgrad = np.zeros((1, 3))
 
-        if outfiles['dftd3_abc_gradient'] is not None:
-            srealgrad = outfiles['dftd3_abc_gradient'].replace('D', 'E')
-            realgradabc = np.fromstring(srealgrad, count=3 * real_nat, sep=' ').reshape((-1, 3))
+        if outfiles["dftd3_abc_gradient"] is not None:
+            srealgrad = outfiles["dftd3_abc_gradient"].replace("D", "E")
+            realgradabc = np.fromstring(srealgrad, count=3 * real_nat, sep=" ").reshape((-1, 3))
         elif real_nat == 1:
             realgradabc = np.zeros((1, 3))
 
-        if input_model.driver == 'gradient':
+        if input_model.driver == "gradient":
             ireal = np.argwhere(real).reshape((-1))
             fullgrad = np.zeros((full_nat, 3))
-            rg = realgradabc if (input_model.extras['info']['dashlevel'] == 'atmgr') else realgrad
+            rg = realgradabc if (input_model.extras["info"]["dashlevel"] == "atmgr") else realgrad
             try:
                 fullgrad[ireal, :] = rg
             except NameError as exc:
-                raise UnknownError('Unsuccessful gradient collection.') from exc
+                raise UnknownError("Unsuccessful gradient collection.") from exc
 
-        qcvkey = input_model.extras['info']['fctldash'].upper()
+        qcvkey = input_model.extras["info"]["fctldash"].upper()
 
         calcinfo = []
-        if input_model.extras['info']['dashlevel'] == 'atmgr':
-            calcinfo.append(qcel.Datum('CURRENT ENERGY', 'Eh', atm))
-            calcinfo.append(qcel.Datum('DISPERSION CORRECTION ENERGY', 'Eh', atm))
-            calcinfo.append(qcel.Datum('3-BODY DISPERSION CORRECTION ENERGY', 'Eh', atm))
-            calcinfo.append(qcel.Datum('AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY', 'Eh', atm))
+        if input_model.extras["info"]["dashlevel"] == "atmgr":
+            calcinfo.append(qcel.Datum("CURRENT ENERGY", "Eh", atm))
+            calcinfo.append(qcel.Datum("DISPERSION CORRECTION ENERGY", "Eh", atm))
+            calcinfo.append(qcel.Datum("3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
+            calcinfo.append(qcel.Datum("AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
 
-            if input_model.driver == 'gradient':
-                calcinfo.append(qcel.Datum('CURRENT GRADIENT', 'Eh/a0', fullgrad))
-                calcinfo.append(qcel.Datum('DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
-                calcinfo.append(qcel.Datum('3-BODY DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
+            if input_model.driver == "gradient":
+                calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
+                calcinfo.append(qcel.Datum("DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
+                calcinfo.append(qcel.Datum("3-BODY DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
                 calcinfo.append(
-                    qcel.Datum('AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
+                    qcel.Datum("AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad)
+                )
 
         else:
-            calcinfo.append(qcel.Datum('CURRENT ENERGY', 'Eh', ene))
-            calcinfo.append(qcel.Datum('DISPERSION CORRECTION ENERGY', 'Eh', ene))
-            calcinfo.append(qcel.Datum('2-BODY DISPERSION CORRECTION ENERGY', 'Eh', ene))
+            calcinfo.append(qcel.Datum("CURRENT ENERGY", "Eh", ene))
+            calcinfo.append(qcel.Datum("DISPERSION CORRECTION ENERGY", "Eh", ene))
+            calcinfo.append(qcel.Datum("2-BODY DISPERSION CORRECTION ENERGY", "Eh", ene))
             if qcvkey:
-                calcinfo.append(qcel.Datum(f'{qcvkey} DISPERSION CORRECTION ENERGY', 'Eh', ene))
+                calcinfo.append(qcel.Datum(f"{qcvkey} DISPERSION CORRECTION ENERGY", "Eh", ene))
 
-            if input_model.driver == 'gradient':
-                calcinfo.append(qcel.Datum('CURRENT GRADIENT', 'Eh/a0', fullgrad))
-                calcinfo.append(qcel.Datum('DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
-                calcinfo.append(qcel.Datum('2-BODY DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
+            if input_model.driver == "gradient":
+                calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
+                calcinfo.append(qcel.Datum("DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
+                calcinfo.append(qcel.Datum("2-BODY DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
                 if qcvkey:
-                    calcinfo.append(qcel.Datum(f'{qcvkey} DISPERSION CORRECTION GRADIENT', 'Eh/a0', fullgrad))
+                    calcinfo.append(qcel.Datum(f"{qcvkey} DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
 
-        #LOGtext += qcel.datum.print_variables({info.label: info for info in calcinfo})
+        # LOGtext += qcel.datum.print_variables({info.label: info for info in calcinfo})
         calcinfo = {info.label: info.data for info in calcinfo}
-        #calcinfo = qcel.util.unnp(calcinfo, flat=True)
+        # calcinfo = qcel.util.unnp(calcinfo, flat=True)
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
         calcinfo = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v
-            for k, v in qcel.util.unnp(calcinfo, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(calcinfo, flat=True).items()
         }
 
         # jobrec['properties'] = {"return_energy": ene}
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
 
-        retres = calcinfo[f'CURRENT {input_model.driver.upper()}']
+        retres = calcinfo[f"CURRENT {input_model.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()
 
         output_data = {
-            'extras': input_model.extras,
-            'properties': {},
-            'provenance': Provenance(creator="DFTD3",
-                                     version=self.get_version(),
-                                     routine=__name__ + '.' + sys._getframe().f_code.co_name),
-            'return_result': retres,
-            'stdout': stdout,
-        }  # yapf: disable
-        output_data["extras"]['local_keywords'] = input_model.extras['info']
-        output_data["extras"]['qcvars'] = calcinfo
+            "extras": input_model.extras,
+            "properties": {},
+            "provenance": Provenance(
+                creator="DFTD3", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
+            ),
+            "return_result": retres,
+            "stdout": stdout,
+        }
+        output_data["extras"]["local_keywords"] = input_model.extras["info"]
+        output_data["extras"]["qcvars"] = calcinfo
 
-        output_data['success'] = True
-        return Result(**{**input_model.dict(), **output_data})
+        output_data["success"] = True
+        return AtomicResult(**{**input_model.dict(), **output_data})
 
 
 def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:
@@ -314,19 +315,20 @@ def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:
     dashformatter = """{:12.6f} {:12.6f} {:12.6f} {:12.6f} {:12.6f} {:6}\n"""
 
     dashlvl = dashlvl.lower()
-    if dashlvl == 'd2':
-        return dashformatter.format(dashcoeff['s6'], dashcoeff['sr6'], 0.0, 0.0, dashcoeff['alpha6'], 2)
-    elif dashlvl == 'd3zero':
-        return dashformatter.format(dashcoeff['s6'], dashcoeff['sr6'], dashcoeff['s8'], dashcoeff['sr8'],
-                                    dashcoeff['alpha6'], 3)
-    elif dashlvl == 'd3bj':
-        return dashformatter.format(dashcoeff['s6'], dashcoeff['a1'], dashcoeff['s8'], dashcoeff['a2'], 0.0, 4)
-    elif dashlvl == 'd3mzero':
-        return dashformatter.format(dashcoeff['s6'], dashcoeff['sr6'], dashcoeff['s8'], dashcoeff['beta'], 14.0, 5)
-    elif dashlvl == 'd3mbj':
-        return dashformatter.format(dashcoeff['s6'], dashcoeff['a1'], dashcoeff['s8'], dashcoeff['a2'], 0.0, 6)
-    elif dashlvl == 'atmgr':
+    if dashlvl == "d2":
+        return dashformatter.format(dashcoeff["s6"], dashcoeff["sr6"], 0.0, 0.0, dashcoeff["alpha6"], 2)
+    elif dashlvl == "d3zero":
+        return dashformatter.format(
+            dashcoeff["s6"], dashcoeff["sr6"], dashcoeff["s8"], dashcoeff["sr8"], dashcoeff["alpha6"], 3
+        )
+    elif dashlvl == "d3bj":
+        return dashformatter.format(dashcoeff["s6"], dashcoeff["a1"], dashcoeff["s8"], dashcoeff["a2"], 0.0, 4)
+    elif dashlvl == "d3mzero":
+        return dashformatter.format(dashcoeff["s6"], dashcoeff["sr6"], dashcoeff["s8"], dashcoeff["beta"], 14.0, 5)
+    elif dashlvl == "d3mbj":
+        return dashformatter.format(dashcoeff["s6"], dashcoeff["a1"], dashcoeff["s8"], dashcoeff["a2"], 0.0, 6)
+    elif dashlvl == "atmgr":
         # need to set first four parameters to something other than None, otherwise DFTD3 gets mad or a bit wrong
-        return dashformatter.format(1.0, 0.0, 0.0, 0.0, dashcoeff['alpha6'], 3)
+        return dashformatter.format(1.0, 0.0, 0.0, 0.0, dashcoeff["alpha6"], 3)
     else:
         raise InputError(f"""-D correction level {dashlvl} is not available. Choose among {dashcoeff.keys()}.""")

@@ -3,7 +3,6 @@ Tests the DQM compute module configuration
 """
 
 import copy
-import os
 
 import pydantic
 import pytest
@@ -42,22 +41,14 @@ def test_node_environ():
 
     scratch_name = "myscratch1234"
     with environ_context(env={"QCA_SCRATCH_DIR": scratch_name}):
-        description = {
-            "name": "something",
-            "hostname_pattern": "*",
-            "scratch_directory": "$QCA_SCRATCH_DIR",
-        }
+        description = {"name": "something", "hostname_pattern": "*", "scratch_directory": "$QCA_SCRATCH_DIR"}
 
         node = qcng.config.NodeDescriptor(**description)
         assert node.scratch_directory == scratch_name
 
 
 def test_node_skip_environ():
-    description = {
-        "name": "something",
-        "hostname_pattern": "*",
-        "scratch_directory": "$RANDOM_ENVIRON",
-    }
+    description = {"name": "something", "hostname_pattern": "*", "scratch_directory": "$RANDOM_ENVIRON"}
 
     node = qcng.config.NodeDescriptor(**description)
     assert node.scratch_directory is None
@@ -75,28 +66,26 @@ def opt_state_basic():
     scratch_name = "myscratch1234"
     with environ_context(env={"QCA_SCRATCH_DIR": scratch_name}):
 
-        configs = [{
-            "name": "dragonstooth",
-            "hostname_pattern": "dt*",
-            "jobs_per_node": 2,
-            "ncores": 12,
-            "memory": 120,
-            "scratch_directory": "$NOVAR_RANDOM_ABC123"
-        }, {
-            "name": "newriver",
-            "hostname_pattern": "nr*",
-            "jobs_per_node": 2,
-            "ncores": 24,
-            "memory": 240
-        }, {
-            "name": "default",
-            "hostname_pattern": "*",
-            "jobs_per_node": 1,
-            "memory": 4,
-            "memory_safety_factor": 0,
-            "ncores": 5,
-            "scratch_directory": "$QCA_SCRATCH_DIR"
-        }]
+        configs = [
+            {
+                "name": "dragonstooth",
+                "hostname_pattern": "dt*",
+                "jobs_per_node": 2,
+                "ncores": 12,
+                "memory": 120,
+                "scratch_directory": "$NOVAR_RANDOM_ABC123",
+            },
+            {"name": "newriver", "hostname_pattern": "nr*", "jobs_per_node": 2, "ncores": 24, "memory": 240},
+            {
+                "name": "default",
+                "hostname_pattern": "*",
+                "jobs_per_node": 1,
+                "memory": 4,
+                "memory_safety_factor": 0,
+                "ncores": 5,
+                "scratch_directory": "$QCA_SCRATCH_DIR",
+            },
+        ]
         for desc in configs:
             node = qcng.config.NodeDescriptor(**desc)
             qcng.config.NODE_DESCRIPTORS[desc["name"]] = node

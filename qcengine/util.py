@@ -2,10 +2,8 @@
 Several import utilities
 """
 
-import importlib
 import io
 import json
-import operator
 import os
 import shutil
 import signal
@@ -16,7 +14,7 @@ import time
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import ValidationError
 
@@ -25,10 +23,10 @@ from qcelemental.models import FailedOperation
 from .config import LOGGER, get_provenance_augments
 from .exceptions import InputError, QCEngineException
 
-__all__ = ["compute_wrapper", "get_module_function", "model_wrapper", "handle_output_metadata"]
+__all__ = ["compute_wrapper", "model_wrapper", "handle_output_metadata"]
 
 
-def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel':
+def model_wrapper(input_data: Dict[str, Any], model: "BaseModel") -> "BaseModel":
     """
     Wrap input data in the given model, or return a controlled error
     """
@@ -38,7 +36,8 @@ def model_wrapper(input_data: Dict[str, Any], model: 'BaseModel') -> 'BaseModel'
             input_data = model(**input_data)
         except ValidationError as exc:
             raise InputError(
-                f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}") from None
+                f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}"
+            ) from None
     elif isinstance(input_data, model):
         input_data = input_data.copy()
     else:
@@ -102,47 +101,18 @@ def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> D
         metadata["stderr"] = new_stderr.getvalue() or None
 
 
-def get_module_function(module: str, func_name: str, subpackage=None) -> Callable[..., Any]:
-    """Obtains a function from a given string
-
-    Parameters
-    ----------
-    module : str
-        The module to pull the function from
-    func_name : str
-        The name of the function to acquire, can be in a subpackage
-    subpackage : None, optional
-        Explicitly import a subpackage if required
-
-    Returns
-    -------
-    ret : function
-        The requested functions
-
-    Example
-    -------
-
-    # Import numpy.linalg.eigh
-    f = get_module_function("numpy", "linalg.eigh")
-    f(np.ones((2, 2)))
-
-    """
-    # Will throw import error if we fail
-    pkg = importlib.import_module(module, subpackage)
-
-    return operator.attrgetter(func_name)(pkg)
-
-
-def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
-                           metadata: Dict[str, Any],
-                           raise_error: bool = False,
-                           return_dict: bool = True) -> Union[Dict[str, Any], 'BaseModel']:
+def handle_output_metadata(
+    output_data: Union[Dict[str, Any], "BaseModel"],
+    metadata: Dict[str, Any],
+    raise_error: bool = False,
+    return_dict: bool = True,
+) -> Union[Dict[str, Any], "BaseModel"]:
     """
     Fuses general metadata and output together.
 
     Returns
     -------
-    result : dict or pydantic.models.Result
+    result : dict or pydantic.models.AtomicResult
         Output type depends on return_dict or a dict if an error was generated in model construction
     """
 
@@ -191,9 +161,9 @@ def handle_output_metadata(output_data: Union[Dict[str, Any], 'BaseModel'],
         ret = output_data.__class__(**output_fusion)
     else:
         # Should only be reachable on failures
-        ret = FailedOperation(success=output_fusion.pop("success", False),
-                              error=output_fusion.pop("error"),
-                              input_data=output_fusion)
+        ret = FailedOperation(
+            success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion
+        )
 
     if return_dict:
         return json.loads(ret.json())  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
@@ -205,7 +175,7 @@ def terminate_process(proc: Any, timeout: int = 15) -> None:
     if proc.poll() is None:
 
         # Sigint (keyboard interupt)
-        if sys.platform.startswith('win'):
+        if sys.platform.startswith("win"):
             proc.send_signal(signal.CTRL_BREAK_EVENT)
         else:
             proc.send_signal(signal.SIGINT)
@@ -221,8 +191,9 @@ def terminate_process(proc: Any, timeout: int = 15) -> None:
 
 
 @contextmanager
-def popen(args: List[str], append_prefix: bool = False,
-          popen_kwargs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def popen(
+    args: List[str], append_prefix: bool = False, popen_kwargs: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """
     Opens a background task
 
@@ -236,22 +207,22 @@ def popen(args: List[str], append_prefix: bool = False,
         popen_kwargs = popen_kwargs.copy()
 
     # Bin prefix
-    if sys.platform.startswith('win'):
-        bin_prefix = os.path.join(sys.prefix, 'Scripts')
+    if sys.platform.startswith("win"):
+        bin_prefix = os.path.join(sys.prefix, "Scripts")
     else:
-        bin_prefix = os.path.join(sys.prefix, 'bin')
+        bin_prefix = os.path.join(sys.prefix, "bin")
 
     # Do we prefix with Python?
     if append_prefix:
         args[0] = os.path.join(bin_prefix, args[0])
 
-    if sys.platform.startswith('win'):
+    if sys.platform.startswith("win"):
         # Allow using CTRL_C_EVENT / CTRL_BREAK_EVENT
-        popen_kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+        popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-    popen_kwargs['stdout'] = subprocess.PIPE
-    popen_kwargs['stderr'] = subprocess.PIPE
-    LOGGER.info('Popen', args, popen_kwargs)
+    popen_kwargs["stdout"] = subprocess.PIPE
+    popen_kwargs["stderr"] = subprocess.PIPE
+    LOGGER.info("Popen", args, popen_kwargs)
     ret = {"proc": subprocess.Popen(args, **popen_kwargs)}
     try:
         yield ret
@@ -268,7 +239,7 @@ def popen(args: List[str], append_prefix: bool = False,
 
 
 @contextmanager
-def environ_context(config: Optional['JobConfig'] = None, env: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+def environ_context(config: Optional["JobConfig"] = None, env: Optional[Dict[str, str]] = None) -> Dict[str, str]:
     """Temporarily set environment variables inside the context manager and
     fully restore previous environment afterwards.
 
@@ -305,20 +276,23 @@ def environ_context(config: Optional['JobConfig'] = None, env: Optional[Dict[str
                 os.environ[key] = value
 
 
-def execute(command: List[str],
-            infiles: Optional[Dict[str, str]] = None,
-            outfiles: Optional[List[str]] = None,
-            *,
-            as_binary: Optional[List[str]] = None,
-            scratch_name: Optional[str] = None,
-            scratch_directory: Optional[str] = None,
-            scratch_suffix: Optional[str] = None,
-            scratch_messy: bool = False,
-            scratch_exist_ok: bool = False,
-            blocking_files: Optional[List[str]] = None,
-            timeout: Optional[int] = None,
-            interupt_after: Optional[int] = None,
-            environment: Optional[Dict[str, str]] = None) -> Tuple[bool, Dict[str, Any]]:
+def execute(
+    command: List[str],
+    infiles: Optional[Dict[str, str]] = None,
+    outfiles: Optional[List[str]] = None,
+    *,
+    as_binary: Optional[List[str]] = None,
+    scratch_name: Optional[str] = None,
+    scratch_directory: Optional[str] = None,
+    scratch_suffix: Optional[str] = None,
+    scratch_messy: bool = False,
+    scratch_exist_ok: bool = False,
+    blocking_files: Optional[List[str]] = None,
+    timeout: Optional[int] = None,
+    interupt_after: Optional[int] = None,
+    environment: Optional[Dict[str, str]] = None,
+    shell: Optional[bool] = False,
+) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
 
@@ -353,6 +327,8 @@ def execute(command: List[str],
         Interupt the process (not hard kill) after n seconds.
     environment : dict, optional
         The environment to run in
+    shell : bool, optional
+        Run command through the shell.
 
     Raises
     ------
@@ -379,7 +355,7 @@ def execute(command: List[str],
     if blocking_files is not None:
         for fl in blocking_files:
             if os.path.isfile(fl):
-                raise FileExistsError('Existing file can interfere with execute operation.', fl)
+                raise FileExistsError("Existing file can interfere with execute operation.", fl)
 
     # Format popen
     popen_kwargs = {}
@@ -387,22 +363,25 @@ def execute(command: List[str],
         popen_kwargs["env"] = {k: v for k, v in environment.items() if v is not None}
 
     # Execute
-    with temporary_directory(child=scratch_name,
-                             parent=scratch_directory,
-                             messy=scratch_messy,
-                             exist_ok=scratch_exist_ok,
-                             suffix=scratch_suffix) as scrdir:
+    with temporary_directory(
+        child=scratch_name,
+        parent=scratch_directory,
+        messy=scratch_messy,
+        exist_ok=scratch_exist_ok,
+        suffix=scratch_suffix,
+    ) as scrdir:
         popen_kwargs["cwd"] = scrdir
+        popen_kwargs["shell"] = shell
         with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
 
                 realtime_stdout = ""
                 while True:
                     output = proc["proc"].stdout.readline()
-                    if output == b'' and proc["proc"].poll() is not None:
+                    if output == b"" and proc["proc"].poll() is not None:
                         break
                     if output:
-                        realtime_stdout += output.decode('utf-8')
+                        realtime_stdout += output.decode("utf-8")
 
                 if interupt_after is None:
                     proc["proc"].wait(timeout=timeout)
@@ -412,19 +391,16 @@ def execute(command: List[str],
 
             proc["stdout"] = realtime_stdout
             retcode = proc["proc"].poll()
-        proc['outfiles'] = extrafiles
-    proc['scratch_directory'] = scrdir
+        proc["outfiles"] = extrafiles
+    proc["scratch_directory"] = scrdir
 
     return retcode == 0, proc
 
 
 @contextmanager
-def temporary_directory(child: str = None,
-                        *,
-                        parent: str = None,
-                        suffix: str = None,
-                        messy: bool = False,
-                        exist_ok: bool = False) -> str:
+def temporary_directory(
+    child: str = None, *, parent: str = None, suffix: str = None, messy: bool = False, exist_ok: bool = False
+) -> str:
     """Create and cleanup a quarantined working directory with a parent scratch directory.
 
     Parameters
@@ -467,7 +443,7 @@ def temporary_directory(child: str = None,
 
     """
     if child is None:
-        tmpdir = tempfile.mkdtemp(dir=parent, suffix=suffix)
+        tmpdir = Path(tempfile.mkdtemp(dir=parent, suffix=suffix))
     else:
         if parent is None:
             parent = Path(tempfile.gettempdir())
@@ -487,15 +463,17 @@ def temporary_directory(child: str = None,
     finally:
         if not messy:
             shutil.rmtree(tmpdir)
-            LOGGER.info(f'... Removing {tmpdir}')
+            LOGGER.info(f"... Removing {tmpdir}")
 
 
 @contextmanager
-def disk_files(infiles: Dict[str, Union[str, bytes]],
-               outfiles: Dict[str, None],
-               *,
-               cwd: Optional[str] = None,
-               as_binary: Optional[List[str]] = None) -> Dict[str, Union[str, bytes]]:
+def disk_files(
+    infiles: Dict[str, Union[str, bytes]],
+    outfiles: Dict[str, None],
+    *,
+    cwd: Optional[str] = None,
+    as_binary: Optional[List[str]] = None,
+) -> Dict[str, Union[str, bytes]]:
     """Write and collect files.
 
     Parameters
@@ -527,29 +505,29 @@ def disk_files(infiles: Dict[str, Union[str, bytes]],
 
     try:
         for fl, content in infiles.items():
-            omode = 'wb' if fl in as_binary else 'w'
+            omode = "wb" if fl in as_binary else "w"
             filename = lwd / fl
             with open(filename, omode) as fp:
                 fp.write(content)
-                LOGGER.info(f'... Writing ({omode}): {filename}')
+                LOGGER.info(f"... Writing ({omode}): {filename}")
 
         yield outfiles
 
     finally:
         for fl in outfiles.keys():
-            omode = 'rb' if fl in as_binary else 'r'
+            omode = "rb" if fl in as_binary else "r"
             try:
                 filename = lwd / fl
                 with open(filename, omode) as fp:
                     outfiles[fl] = fp.read()
-                    LOGGER.info(f'... Writing ({omode}): {filename}')
-            except (OSError, FileNotFoundError) as err:
-                if '*' in fl:
+                    LOGGER.info(f"... Writing ({omode}): {filename}")
+            except (OSError, FileNotFoundError):
+                if "*" in fl:
                     gfls = {}
                     for gfl in lwd.glob(fl):
                         with open(gfl, omode) as fp:
                             gfls[gfl.name] = fp.read()
-                            LOGGER.info(f'... Writing ({omode}): {gfl}')
+                            LOGGER.info(f"... Writing ({omode}): {gfl}")
                     if not gfls:
                         gfls = None
                     outfiles[fl] = gfls

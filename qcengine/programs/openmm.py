@@ -11,7 +11,7 @@ import datetime
 import urllib.request 
 from typing import Dict
 
-from qcelemental.models import Provenance, Result
+from qcelemental.models import Provenance, AtomicResult
 from qcelemental.util import which_import
 
 from .model import ProgramHarness
@@ -53,7 +53,6 @@ class OpenMMHarness(ProgramHarness):
         self._cache_it(key, off_forcefield)
 
         return off_forcefield
-
 
     def _get_openmm_system(self, off_forcefield, off_top):
 
@@ -116,7 +115,7 @@ class OpenMMHarness(ProgramHarness):
 
         return (rdkit_found and openmm_found)
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
         """
         Runs OpenMM on given structure, inputs, in vacuum.
         """
@@ -234,4 +233,4 @@ class OpenMMHarness(ProgramHarness):
                                             version=openmm.__version__,
                                             nthreads=nthreads)
 
-        return Result(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**{**input_data.dict(), **ret_data})

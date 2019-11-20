@@ -4,12 +4,8 @@ import subprocess
 import sys
 from typing import List
 
-from qcengine import testing
-from qcengine import util
-from qcengine import cli
-from qcengine import get_molecule
-
-from qcelemental.models import ResultInput, OptimizationInput
+from qcelemental.models import AtomicInput, OptimizationInput
+from qcengine import cli, get_molecule, testing, util
 
 
 def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
@@ -32,9 +28,9 @@ def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
         QCEngine CLI standard output.
     """
     if stdin is not None:
-        stdin = stdin.encode('utf-8')
+        stdin = stdin.encode("utf-8")
 
-    return subprocess.check_output([sys.executable, '-m', 'qcengine'] + args, input=stdin)
+    return subprocess.check_output([sys.executable, "-m", "qcengine"] + args, input=stdin)
 
 
 def test_no_args():
@@ -61,14 +57,13 @@ def test_info():
 @testing.using_psi4
 def test_run_psi4(tmp_path):
     """Tests qcengine run with psi4 and JSON input"""
+
     def check_result(stdout):
         output = json.loads(stdout)
         assert output["provenance"]["creator"].lower() == "psi4"
         assert output["success"] is True
 
-    inp = ResultInput(molecule=get_molecule("hydrogen"),
-                      driver="energy",
-                      model={"method": "hf", "basis": "6-31G"})
+    inp = AtomicInput(molecule=get_molecule("hydrogen"), driver="energy", model={"method": "hf", "basis": "6-31G"})
 
     args = ["run", "psi4", inp.json()]
     check_result(run_qcengine_cli(args))
@@ -85,26 +80,17 @@ def test_run_psi4(tmp_path):
 @testing.using_psi4
 def test_run_procedure(tmp_path):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
+
     def check_result(stdout):
         output = json.loads(stdout)
         assert output["provenance"]["creator"].lower() == "geometric"
         assert output["success"] is True
 
-    inp = {"schema_name": "qcschema_optimization_input",
-           "schema_version": 1,
-           "keywords": {
-               "coordsys": "tric",
-               "maxiter": 100,
-               "program": "psi4"
-           },
-           "input_specification": {
-               "schema_name": "qcschema_input",
-               "schema_version": 1,
-               "driver": "gradient",
-               "model": {"method": "HF", "basis": "sto-3g"},
-               "keywords": {},
-           },
-           "initial_molecule": get_molecule("hydrogen")}
+    inp = {
+        "keywords": {"coordsys": "tric", "maxiter": 100, "program": "psi4"},
+        "input_specification": {"driver": "gradient", "model": {"method": "HF", "basis": "sto-3g"}, "keywords": {}},
+        "initial_molecule": get_molecule("hydrogen"),
+    }
     inp = OptimizationInput(**inp)
 
     args = ["run-procedure", "geometric", inp.json()]

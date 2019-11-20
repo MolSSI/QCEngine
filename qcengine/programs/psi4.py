@@ -5,7 +5,7 @@ import json
 import os
 from typing import Dict
 
-from qcelemental.models import Result
+from qcelemental.models import AtomicResult
 from qcelemental.util import deserialize, parse_version, safe_version, which
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
@@ -30,29 +30,32 @@ class Psi4Harness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        return which('psi4',
-                     return_bool=True,
-                     raise_error=raise_error,
-                     raise_msg='Please install via `conda install psi4 -c psi4`.')
+        return which(
+            "psi4",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install psi4 -c psi4`.",
+        )
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which('psi4')
+        which_prog = which("psi4")
         if which_prog not in self.version_cache:
-            with popen([which_prog, '--version']) as exc:
-                exc["proc"].wait(timeout=15)
+            with popen([which_prog, "--version"]) as exc:
+                exc["proc"].wait(timeout=30)
             self.version_cache[which_prog] = safe_version(exc["stdout"])
 
         candidate_version = self.version_cache[which_prog]
 
         if "undef" in candidate_version:
             raise TypeError(
-                "Using custom build without tags. Please pull git tags with `git pull origin master --tags`.")
+                "Using custom build without tags. Please pull git tags with `git pull origin master --tags`."
+            )
 
         return candidate_version
 
-    def compute(self, input_model: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
         """
         Runs Psi4 in API mode
         """
@@ -91,9 +94,12 @@ class Psi4Harness(ProgramHarness):
                     input_data["schema_name"] = "qc_schema_input"
 
                 # Execute the program
-                success, output = execute([which("psi4"), "--scratch", tmpdir, "--json", "data.json"],
-                                          {"data.json": json.dumps(input_data)}, ["data.json"],
-                                          scratch_directory=tmpdir)
+                success, output = execute(
+                    [which("psi4"), "--scratch", tmpdir, "--json", "data.json"],
+                    {"data.json": json.dumps(input_data)},
+                    ["data.json"],
+                    scratch_directory=tmpdir,
+                )
 
                 if success:
                     output_data = json.loads(output["outfiles"]["data.json"])
@@ -134,6 +140,7 @@ class Psi4Harness(ProgramHarness):
 
                 if ("psiapi" in input_model.extras) and input_model.extras["psiapi"]:
                     import psi4
+
                     psi4.core.set_num_threads(config.ncores, quiet=True)
                     psi4.set_memory(f"{config.memory}GB", quiet=True)
                     output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
@@ -141,14 +148,20 @@ class Psi4Harness(ProgramHarness):
                     success = True
                 else:
                     run_cmd = [
-                        which("psi4"), "--scratch", tmpdir, "--nthread",
-                        str(config.ncores), "--memory", f"{config.memory}GB", "--qcschema", "data.msgpack"
+                        which("psi4"),
+                        "--scratch",
+                        tmpdir,
+                        "--nthread",
+                        str(config.ncores),
+                        "--memory",
+                        f"{config.memory}GB",
+                        "--qcschema",
+                        "data.msgpack",
                     ]
                     input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
-                    success, output = execute(run_cmd,
-                                              input_files, ["data.msgpack"],
-                                              as_binary=["data.msgpack"],
-                                              scratch_directory=tmpdir)
+                    success, output = execute(
+                        run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
+                    )
                     if success:
                         output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
 
@@ -172,8 +185,7 @@ class Psi4Harness(ProgramHarness):
                 else:
                     # Likely a random error, worth retrying
                     raise RandomError(error_message)
-            elif ("SIGSEV" in error_message) or ("SIGSEGV" in error_message) or (
-                    "segmentation fault" in error_message):
+            elif ("SIGSEV" in error_message) or ("SIGSEGV" in error_message) or ("segmentation fault" in error_message):
                 raise RandomError(error_message)
             elif ("TypeError: set_global_option" in error_message) or (error_type == "ValidationError"):
                 raise InputError(error_message)
@@ -189,4 +201,4 @@ class Psi4Harness(ProgramHarness):
         # Delete keys
         output_data.pop("return_output", None)
 
-        return Result(**output_data)
+        return AtomicResult(**output_data)
