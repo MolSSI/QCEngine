@@ -156,6 +156,7 @@ _programs = {
     "cfour": which("xcfour", return_bool=True),
     "gamess": which("rungms", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),
+    "openmm": which_import(".openmm", package='simtk', return_bool=True),
     "turbomole": which("define", return_bool=True),
     "mdi": which_import("mdi", return_bool=True),
 }
@@ -187,6 +188,7 @@ using_terachem = _build_pytest_skip("terachem")
 using_cfour = _build_pytest_skip("cfour")
 using_gamess = _build_pytest_skip("gamess")
 using_nwchem = _build_pytest_skip("nwchem")
+using_openmm = _build_pytest_skip("openmm")
 using_turbomole = _build_pytest_skip("turbomole")
 using_mdi = _build_pytest_skip("mdi")
 

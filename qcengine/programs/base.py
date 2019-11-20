@@ -13,6 +13,7 @@ from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
 from .nwchem import NWChemHarness
+from .openmm import OpenMMHarness 
 from .psi4 import Psi4Harness
 from .qchem import QChemHarness
 from .rdkit import RDKitHarness
@@ -110,6 +111,7 @@ register_program(TorchANIHarness())
 
 # Molecular Mechanics
 register_program(RDKitHarness())
+register_program(OpenMMHarness())
 
 # Analytical Corrections
 register_program(DFTD3Harness())
