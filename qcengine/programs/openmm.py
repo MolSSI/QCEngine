@@ -199,40 +199,35 @@ class OpenMMHarness(ProgramHarness):
             # Set positions from our Open Force Field `Molecule`
             context.setPositions(off_mol.conformers[0])
 
-            ret_data["properties"] = {}
+            # Compute the energy of the configuration
+            state = context.getState(getEnergy=True)
+
+            # Get the potential as a simtk.unit.Quantity, put into units of hartree
+            q = (state.getPotentialEnergy() / unit.hartree)
+
+            ret_data["properties"] = {"return_energy": q.value_in_unit(q.unit)}
 
             # Execute driver
-            try:
-                if input_data.driver == "energy":
+            if input_data.driver == "energy":
+                ret_data["return_result"] = ret_data["properties"]["return_energy"]
 
-                    # Compute the energy of the configuration
-                    state = context.getState(getEnergy=True)
+            elif input_data.driver == "gradient":
+                # Get number of atoms
+                n_atoms = len(jmol.symbols)
 
-                    # Get the potential as a simtk.unit.Quantity, put into units of hartree
-                    q = (state.getPotentialEnergy() / unit.hartree)
-                    ret_data["return_result"] = q.value_in_unit(q.unit)
+                # Compute the forces
+                state = context.getState(getForces=True)
 
-                elif input_data.driver == "gradient":
+                # Get the gradient as a simtk.unit.Quantity with shape (n_atoms, 3)
+                gradient = state.getForces(asNumpy=True)
 
-                    # Get number of atoms
-                    n_atoms = len(jmol.symbols)
-
-                    # Compute the forces
-                    state = context.getState(getForces=True)
-
-                    # Get the gradient as a simtk.unit.Quantity with shape (n_atoms, 3)
-                    gradient = state.getForces(asNumpy=True)
-
-                    # Convert to hartree/bohr and reformat as 1D array
-                    q = (gradient / (unit.hartree/unit.bohr)).reshape([n_atoms * 3])
-                    ret_data["return_result"] = q.value_in_unit(q.unit)
-
-                else:
-                    raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
-            except:
-                raise
+                # Convert to hartree/bohr and reformat as 1D array
+                q = (gradient / (unit.hartree/unit.bohr)).reshape([n_atoms * 3])
+                ret_data["return_result"] = q.value_in_unit(q.unit)
             else:
-                ret_data["success"] = True
+                raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
+
+        ret_data["success"] = True
 
         # Move several pieces up a level
         ret_data["provenance"] = Provenance(creator="openmm",
