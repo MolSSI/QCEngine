@@ -3,20 +3,17 @@ Calls the OpenMM executable.
 
 Requires RDKit
 """
-import json
 import os
 import hashlib
 import datetime
 import urllib.request 
-from typing import Dict
 
 from qcelemental.models import Provenance, AtomicResult
 from qcelemental.util import which_import
 
 from .model import ProgramHarness
-from ..exceptions import InputError, RandomError, ResourceError, UnknownError
-from ..util import execute, popen, temporary_directory
-from ..units import ureg
+from ..exceptions import InputError
+from ..util import temporary_directory
 
 from .rdkit import RDKitHarness
 
@@ -79,8 +76,9 @@ class OpenMMHarness(ProgramHarness):
                     oldest = value['last_used']
                     oldest_key = key
                 else:
-                    oldest, oldest_key = (value['last_used'], key
-                              if (value['last_used'] < oldest) else oldest, oldest_key)
+                    oldest, oldest_key = ((value['last_used'], key)
+                              if (value['last_used'] < oldest)
+                              else oldest, oldest_key)
 
             self._CACHE.pop(oldest_key)
 
