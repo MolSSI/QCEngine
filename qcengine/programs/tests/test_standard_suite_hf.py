@@ -37,6 +37,12 @@ def nh2():
     [
         pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=testing.using_cfour),
         pytest.param("cfour", "aug-pvdz", {}, marks=testing.using_cfour),
+        pytest.param(
+            "entos",
+            "aug-cc-pVDZ",
+            {"coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
+            marks=testing.using_entos
+        ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=testing.using_gamess),
         pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using_molpro),
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using_nwchem),
@@ -78,6 +84,12 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
             marks=testing.using_cfour,
         ),
         pytest.param("cfour", "aug-pvdz", {"reference": "uhf"}, marks=testing.using_cfour),
+        pytest.param(
+            "entos",
+            "aug-cc-pVDZ",
+            {"ansatz": "u", "coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
+            marks=testing.using_entos
+        ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=testing.using_gamess),
         pytest.param("molpro", "aug-cc-pvdz", {"reference": "unrestricted"}, marks=testing.using_molpro),
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__uhf": True}, marks=testing.using_nwchem),

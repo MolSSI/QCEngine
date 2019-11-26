@@ -25,13 +25,6 @@ class EntosHarness(ProgramHarness):
     }
     version_cache: Dict[str, str] = {}
 
-    # Energy commands that are currently supported
-    _energy_commands: Set[str] = {
-        "dft",
-        "hf",
-        # "xtb"
-    }
-
     # List of DFT functionals
     _dft_functionals: Set[str] = {
         "SLATER",
@@ -74,10 +67,24 @@ class EntosHarness(ProgramHarness):
     }
 
     # Available keywords for each of the energy commands
-    _dft_keywords: Set[str] = {"df", "orbital_grad_threshold", "energy_threshold"}
-    _hf_keywords: Set[str] = {"df", "orbital_grad_threshold", "energy_threshold"}
+    _dft_keywords: Set[str] = {
+        "ansatz",
+        "df",
+        "orbital_grad_threshold",
+        "energy_threshold",
+        "coulomb_method",
+        "exchange_method"}
+    _hf_keywords: Set[str] = {
+        "ansatz",
+        "df",
+        "orbital_grad_threshold",
+        "energy_threshold",
+        "coulomb_method",
+        "exchange_method"}
     # _xtb_keywords = {}
-    _keyword_map: Dict[str, Any] = {
+
+    # Energy commands that are currently supported and their available keywords
+    _energy_commands: Dict[str, Any] = {
         "dft": _dft_keywords,
         "hf": _hf_keywords,
         # "xtb": _xtb_keywords
@@ -87,7 +94,8 @@ class EntosHarness(ProgramHarness):
         pass
 
     def found(self, raise_error: bool = False) -> bool:
-        return which("entos", return_bool=True, raise_error=raise_error, raise_msg="Please install via XXX")
+        return which("entos", return_bool=True, raise_error=raise_error,
+                     raise_msg="Please install via https://www.entos.info/")
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -109,7 +117,7 @@ class EntosHarness(ProgramHarness):
 
         # Check entos version
         if parse_version(self.get_version()) < parse_version("0.6"):
-            raise TypeError("entos version '{}' not supported".format(self.get_version()))
+            raise TypeError(f"entos version {self.get_version()} not supported")
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
@@ -168,6 +176,7 @@ class EntosHarness(ProgramHarness):
 
         # Entos does not create an output file and only prints to stdout
         proc["outfiles"]["results.json"] = proc["stdout"]
+        # print(proc["outfiles"]["dispatch.out"])
         return exe_success, proc
 
     def build_input(
@@ -195,7 +204,6 @@ class EntosHarness(ProgramHarness):
                     "spin": float(input_model.molecule.molecular_multiplicity - 1),
                 },
                 "hf": {
-                    "xc": input_model.model.method.upper(),
                     "ao": input_model.model.basis,
                     "charge": input_model.molecule.molecular_charge,
                     "spin": float(input_model.molecule.molecular_multiplicity - 1),
@@ -207,7 +215,7 @@ class EntosHarness(ProgramHarness):
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
             energy_extra_options = {}
             for key in caseless_keywords.keys():
-                if key in self._keyword_map[energy_command]:
+                if key in self._energy_commands[energy_command]:
                     energy_extra_options[key] = caseless_keywords[key]
 
             # Additional sub trees
@@ -272,6 +280,7 @@ class EntosHarness(ProgramHarness):
             str_template = string.Template(template)
             input_file = str_template.substitute()
 
+        # print(input_file)
         return {
             "commands": ["entos", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
             "infiles": {"dispatch.in": input_file, "geometry.xyz": xyz_file},
@@ -387,7 +396,8 @@ class EntosHarness(ProgramHarness):
             energy_command = method.lower()
 
         # Check method is supported
-        if energy_command not in self._energy_commands:
+        energy_commands = [key for key in self._energy_commands]
+        if energy_command not in energy_commands:
             raise InputError(f"Energy method, {method}, not implemented for entos.")
 
         return energy_command
