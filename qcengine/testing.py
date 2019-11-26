@@ -23,7 +23,7 @@ def _check_qcenginerecords(return_data=False):
 
         qcer_hash = qcenginerecords.__git_revision__[:7]
         if qcer_hash != QCENGINE_RECORDS_COMMIT[:7]:
-            msg = f"Incorrect QCEngineRecord Git Revsion, found {qcer_hash} need {QCENGINE_RECORDS_COMMIT[:7]}."
+            msg = f"Incorrect QCEngineRecord Git Revision, found {qcer_hash} need {QCENGINE_RECORDS_COMMIT[:7]}."
         else:
             skip = False
             msg = "Works!"
@@ -152,7 +152,7 @@ _programs = {
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
-    "entos": is_program_new_enough("entos", "0.6"),
+    "entos": is_program_new_enough("entos", "0.7"),
     "cfour": which("xcfour", return_bool=True),
     "gamess": which("rungms", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),

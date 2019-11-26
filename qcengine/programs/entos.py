@@ -67,27 +67,27 @@ class EntosHarness(ProgramHarness):
     }
 
     # Available keywords for each of the energy commands
-    _dft_keywords: Set[str] = {
+    _dft_keywords_extra: Set[str] = {
         "ansatz",
         "df",
         "orbital_grad_threshold",
         "energy_threshold",
         "coulomb_method",
         "exchange_method"}
-    _hf_keywords: Set[str] = {
+    _hf_keywords_extra: Set[str] = {
         "ansatz",
         "df",
         "orbital_grad_threshold",
         "energy_threshold",
         "coulomb_method",
         "exchange_method"}
-    # _xtb_keywords = {}
+    _xtb_keywords_extra = {}
 
     # Energy commands that are currently supported and their available keywords
     _energy_commands: Dict[str, Any] = {
-        "dft": _dft_keywords,
-        "hf": _hf_keywords,
-        # "xtb": _xtb_keywords
+        "dft": _dft_keywords_extra,
+        "hf": _hf_keywords_extra,
+        "xtb": _xtb_keywords_extra
     }
 
     class Config(ProgramHarness.Config):
@@ -116,11 +116,12 @@ class EntosHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Check entos version
-        if parse_version(self.get_version()) < parse_version("0.6"):
+        if parse_version(self.get_version()) < parse_version("0.7"):
             raise TypeError(f"entos version {self.get_version()} not supported")
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
+        # print(job_inputs["infiles"]["dispatch.in"])
 
         # Run entos
         exe_success, proc = self.execute(job_inputs)
@@ -195,8 +196,8 @@ class EntosHarness(ProgramHarness):
 
             # Define base options for the energy command (options that can be taken directly from input_model)
             # TODO Perhaps create a new function that takes as input the energy command and
-            #      returns the Dict energy_options
-            energy_options = {
+            #      returns the Dict energy_keywords_from_input_model
+            energy_keywords_from_input_model = {
                 "dft": {
                     "xc": input_model.model.method.upper(),
                     "ao": input_model.model.basis,
@@ -208,38 +209,40 @@ class EntosHarness(ProgramHarness):
                     "charge": input_model.molecule.molecular_charge,
                     "spin": float(input_model.molecule.molecular_multiplicity - 1),
                 },
-                # "xtb": {}
+                "xtb": {
+                    "charge": input_model.molecule.molecular_charge,
+                }
             }
 
             # Resolve keywords (extra options) for the energy command
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
-            energy_extra_options = {}
+            energy_keywords_extra = {}
             for key in caseless_keywords.keys():
                 if key in self._energy_commands[energy_command]:
-                    energy_extra_options[key] = caseless_keywords[key]
+                    energy_keywords_extra[key] = caseless_keywords[key]
 
             # Additional sub trees
             structure = {"structure": {"file": "geometry.xyz"}}  # Structure sub tree
-            print_results = {"print": {"results": True}}  # Print sub tree
 
             # Create the input dictionary for a energy call
             if input_model.driver == "energy":
                 input_dict = {
                     energy_command: {
                         **structure,
-                        **energy_options[energy_command],
-                        **energy_extra_options,
+                        **energy_keywords_from_input_model[energy_command],
+                        **energy_keywords_extra,
                     },
-                    **print_results,
                 }
             # Create the input dictionary for a gradient call
             elif input_model.driver == "gradient":
                 input_dict = {
                     "gradient": {
                         **structure,
-                        energy_command: {**energy_options[energy_command], **energy_extra_options},
+                        energy_command: {
+                            **energy_keywords_from_input_model[energy_command],
+                            **energy_keywords_extra,
+                        },
                     },
-                    **print_results,
                 }
             # TODO Add support for hessians
             elif input_model.driver == 'hessian':
@@ -277,7 +280,7 @@ class EntosHarness(ProgramHarness):
             str_template = string.Template(template)
             input_file = str_template.substitute()
 
-        print(input_file)
+        # print(input_file)
         return {
             "commands": ["entos", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
             "infiles": {"dispatch.in": input_file, "geometry.xyz": xyz_file},
@@ -305,7 +308,10 @@ class EntosHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
-        dft_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
+        dft_map = {
+            "energy": "scf_total_energy",
+            "n_iter": "scf_iterations"
+        }
         dft_extras = {
             "converged": "scf_converged",
             "ao_basis": {"basis": {"n_functions", "shells"}},
@@ -314,15 +320,26 @@ class EntosHarness(ProgramHarness):
             "fock": "fock",
         }
 
-        hf_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
+        hf_map = {
+            "energy": "scf_total_energy",
+            "n_iter": "scf_iterations"
+        }
+
+        xtb_map = {
+            "energy": "scf_total_energy",
+            "n_iter": "scf_iterations"
+        }
 
         energy_command_map = {
             "dft": dft_map,
             "hf": hf_map,
-            # "xtb": xtb_map,
+            "xtb": xtb_map
         }
 
-        gradient_map = {"energy": "scf_total_energy", "gradient": "gradient"}
+        gradient_map = {
+            "energy": "scf_total_energy",
+            "gradient": "gradient"
+        }
 
         energy_command = self.determine_energy_command(input_model.model.method)
 
