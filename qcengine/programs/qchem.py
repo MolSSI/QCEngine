@@ -225,7 +225,6 @@ $end
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
         output_data = {}
-        outfiles["dispatch.out"]
 
         bdata = {}
         for k, v in outfiles.items():
@@ -242,7 +241,7 @@ $end
         elif input_model.driver == "hessian":
             output_data["return_result"] = bdata["132.0"]
         else:
-            raise ValueError(f"Could not parse drive of type {driver}.")
+            raise ValueError(f"Could not parse driver of type {input_model.driver}.")
 
         properties = {
             "nuclear_repulsion_energy": bdata["99.0"][0],
