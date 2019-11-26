@@ -28,7 +28,8 @@ class EntosHarness(ProgramHarness):
     # Energy commands that are currently supported
     _energy_commands: Set[str] = {
         "dft",
-        "xtb"
+        "hf",
+        # "xtb"
     }
 
     # List of DFT functionals
@@ -73,11 +74,13 @@ class EntosHarness(ProgramHarness):
     }
 
     # Available keywords for each of the energy commands
-    _dft_keywords: Set[str] = {"df"}
-    _xtb_keywords = {}
+    _dft_keywords: Set[str] = {"df", "orbital_grad_threshold", "energy_threshold"}
+    _hf_keywords: Set[str] = {"df", "orbital_grad_threshold", "energy_threshold"}
+    # _xtb_keywords = {}
     _keyword_map: Dict[str, Any] = {
         "dft": _dft_keywords,
-        "xtb": _xtb_keywords
+        "hf": _hf_keywords,
+        # "xtb": _xtb_keywords
     }
 
     class Config(ProgramHarness.Config):
@@ -172,6 +175,7 @@ class EntosHarness(ProgramHarness):
     ) -> Dict[str, Any]:
 
         # Write the geom xyz file with unit au
+        # TODO Make entos dtype in QCElemental
         xyz_file = input_model.molecule.to_string(dtype="xyz", units="Angstrom")
 
         # Create input file
@@ -190,9 +194,13 @@ class EntosHarness(ProgramHarness):
                     "charge": input_model.molecule.molecular_charge,
                     "spin": float(input_model.molecule.molecular_multiplicity - 1),
                 },
-                "xtb": {
-                    "charge": input_model.molecule.molecular_charge
-                }
+                "hf": {
+                    "xc": input_model.model.method.upper(),
+                    "ao": input_model.model.basis,
+                    "charge": input_model.molecule.molecular_charge,
+                    "spin": float(input_model.molecule.molecular_multiplicity - 1),
+                },
+                # "xtb": {}
             }
 
             # Resolve keywords (extra options) for the energy command
@@ -300,11 +308,12 @@ class EntosHarness(ProgramHarness):
             "fock": "fock",
         }
 
-        xtb_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
+        hf_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
 
         energy_command_map = {
             "dft": dft_map,
-            "xtb": xtb_map
+            "hf": hf_map,
+            # "xtb": xtb_map,
         }
 
         gradient_map = {"energy": "scf_total_energy", "gradient": "gradient"}
@@ -370,9 +379,8 @@ class EntosHarness(ProgramHarness):
 
         if method.upper() in self._dft_functionals:
             energy_command = "dft"
-        # For now entos supports HF calculations through the dft energy_command with xc = HF
         elif method.upper() == "HF":
-            energy_command = "dft"
+            energy_command = "hf"
         elif method.upper() == "XTB":
             energy_command = "xtb"
         else:
