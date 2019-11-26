@@ -1,5 +1,5 @@
 """
-Calls the entos executable.
+The entos QCEngine Harness
 """
 
 import json
@@ -221,7 +221,6 @@ class EntosHarness(ProgramHarness):
             # Additional sub trees
             structure = {"structure": {"file": "geometry.xyz"}}  # Structure sub tree
             print_results = {"print": {"results": True}}  # Print sub tree
-            name_results = {"name": "json_results"}
 
             # Create the input dictionary for a energy call
             if input_model.driver == "energy":
@@ -230,7 +229,6 @@ class EntosHarness(ProgramHarness):
                         **structure,
                         **energy_options[energy_command],
                         **energy_extra_options,
-                        **name_results,
                     },
                     **print_results,
                 }
@@ -240,7 +238,6 @@ class EntosHarness(ProgramHarness):
                     "gradient": {
                         **structure,
                         energy_command: {**energy_options[energy_command], **energy_extra_options},
-                        **name_results,
                     },
                     **print_results,
                 }
@@ -258,7 +255,7 @@ class EntosHarness(ProgramHarness):
                 raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
             # Write input file
-            input_file = self.write_input_recursive(input_dict)
+            input_file = ["json_results := "] + self.write_input_recursive(input_dict)
             input_file = "\n".join(input_file)
 
         # Use the template input file if present
@@ -280,7 +277,7 @@ class EntosHarness(ProgramHarness):
             str_template = string.Template(template)
             input_file = str_template.substitute()
 
-        # print(input_file)
+        print(input_file)
         return {
             "commands": ["entos", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
             "infiles": {"dispatch.in": input_file, "geometry.xyz": xyz_file},
