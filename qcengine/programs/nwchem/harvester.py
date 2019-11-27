@@ -330,28 +330,25 @@ def harvest_outfile_pass(outtext):
         # psivar name might need to be fixed
         # each root excitation energy is extracted from the last iteration of right hand side
         mobj = re.findall(
-            # r'^\s+' + r'Excited-state calculation' + r'\s+' + r'\(\s+' + r'(.*?)' + r'\s+' + r'symmetry\)' + r'\s*' +
-            # r'^\s+' + r'=========================================' + r'\s*' + r'(?:.*?)'
-            # +  #Skip to line before right-hand side iterations
-            # r'^\s+' + r'EOM-' + cc_name + r' right-hand side iterations' + r'\s*' + r'(?:.*?)' + r'^\s+' + r'Iteration'
-            # + r'\s+\d+\s+' + r'using' + r'\s+\d+\s+' + r'trial vectors' + r'\s*' +
-            # r'((?:\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+(?:(\s+\d+\.\d+\s+\d+\.\d+)?)\s*\n)+)' + r'^\s+' +
-            # r'--------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            # r'Iterations converged' + r'\s*$',
-            # outtext,
-            # re.MULTILINE | re.DOTALL)
-            r'^\s+' + r'Excited-state calculation' + r'\s+' + r'\((.*?)\)' + r'\s*' +
-            r'^\s+' + r'EOM-' + cc_name + r'\s+right-hand side iterations' + r'\s*' +  # capture cc_name
-            r'^\s+' + r'Iterations converged' + r'\s*' +  # skip to excitation
-            r'^\s+' + r'Excited state root\s+\d{1,2}\s*' +
-            r'^\s+' + r'Excitation energy / hartree' + r'\s+=\s+' + NUMBER + r'\s*' +
-            r'^\s+' + r'/ eV\s+' + r'\s+=\s+' + NUMBER + r'\s*$',
+            r'^\s+(?:Excited-state calculation \( )(.*)\s+(?:symmetry\))\s+(?:.*\n)*^\s+EOM-' + cc-name +
+            # (..) captures symmetry
+            r'right-hand side iterations\s+(?:.*\n)*(?:Excited state root)\s+' + NUMBER + #root
+            r'\s*(?:Excitation energy / hartree)\s+.\s+' + NUMBER + #excitation energy hartree 
+            r'\s*(?:/ eV)\s+.\s+' + NUMBER + r'\s*$', #excitation energy eV
             outtext, re.MULTILINE | re.DOTALL)
+        #regex should be more dynamic in finding values
+        #mobj.group(0) = symmetry value
+        #mobj.group(1) = cc_name
+        #mobj.group(2) = root number
+        #mobj.group(3) = excitation energy (hartree)
+        #mobj.group(4) = excitation energy (eV)
 
         if mobj:
+            print(mobj)
             ext_energy = {}  # dic
 
             ext_energy_list = []
+            print(f'matched eom-{cc_name}')
             for mobj_list in mobj:
                 logger.debug('matched EOM-%s - %s symmetry' % (cc_name, mobj_list[0]))  # cc_name, symmetry
                 logger.debug(mobj_list)
@@ -390,14 +387,21 @@ def harvest_outfile_pass(outtext):
 # Process TDDFT
 #       1) Spin allowed
         mobj = re.findall(
-            r'^\s+' + r'----------------------------------------------------------------------------' + r'\s*' +
-            r'^\s+' + r'Root' + r'\s+' + r'(\d+)' + r'\s+' + r'(\w+)' + r'\s+' + r'(.*?)' + r'\s+' + NUMBER +
-            r'\s+a\.u\.\s+' + NUMBER + r'\s+eV\s*' + r'^\s+' +
-            r'----------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            r'Transition Moments' + r'\s+X\s+' + NUMBER + r'\s+Y\s+' + NUMBER + r'\s+Z\s+' + NUMBER + r'\s*' + r'^\s+'
-            + r'Transition Moments' + r'\s+XX\s+' + NUMBER + r'\s+XY\s+' + NUMBER + r'\s+XZ\s+' + NUMBER + r'\s*' +
-            r'^\s+' + r'Transition Moments' + r'\s+YY\s+' + NUMBER + r'\s+YZ\s+' + NUMBER + r'\s+ZZ\s+' + NUMBER +
-            r'\s*$', outtext, re.MULTILINE)
+            r'^\s+(?:Root)\s+(\d+)\s(\w+)\s+(.*?)\s+(\d+\.\d+)\s(?:a\.u\.)\s+(\d+\.\d+)\s+(?:\w+)'
+            #Root # singlet/triplet symmetry # a.u. # eV
+            + r'\s+(?:.*\n)\s+Transition Moments\s+X\s'+ NUMBER + r'\s+Y\s'+ NUMBER+ r'\s+Z\s'+ NUMBER
+            #X # Y # Z #
+            + r'\s+Transition Moments\s+XX\s'+ NUMBER + r'\s+XY\s'+ NUMBER+ r'\s+XZ\s'+ NUMBER
+            + r'\s+Transition Moments\s+YY\s'+ NUMBER + r'\s+YZ\s'+ NUMBER+ r'\s+ZZ\s'+ NUMBER + r'\s*$',
+            outtext, re.MULTILINE)
+            #r'^\s+' + r'----------------------------------------------------------------------------' + r'\s*' +
+            #r'^\s+' + r'Root' + r'\s+' + r'(\d+)' + r'\s+' + r'(\w+)' + r'\s+' + r'(.*?)' + r'\s+' + NUMBER +
+            #r'\s+a\.u\.\s+' + NUMBER + r'\s+eV\s*' + r'^\s+' +
+            #r'----------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
+            #r'Transition Moments' + r'\s+X\s+' + NUMBER + r'\s+Y\s+' + NUMBER + r'\s+Z\s+' + NUMBER + r'\s*' + r'^\s+'
+            #+ r'Transition Moments' + r'\s+XX\s+' + NUMBER + r'\s+XY\s+' + NUMBER + r'\s+XZ\s+' + NUMBER + r'\s*' +
+            #r'^\s+' + r'Transition Moments' + r'\s+YY\s+' + NUMBER + r'\s+YZ\s+' + NUMBER + r'\s+ZZ\s+' + NUMBER +
+            #r'\s*$', outtext, re.MULTILINE)
 
         if mobj:
             logger.debug('matched TDDFT with transition moments')
