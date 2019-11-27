@@ -169,6 +169,21 @@ class GAMESSHarness(ProgramHarness):
             for k, v in qcel.util.unnp(qcvars, flat=True).items()
         }
 
+        # copy qcvars into schema where possible
+        qcvars_to_properties = {
+            "DFT_XC_ENERGY": "scf_xc_energy",
+            "SCF TOTAL ENERGY": "scf_total_energy",
+            "MP2 CORRELATION ENERGY": "mp2_correlation_energy",
+            'MP2 TOTAL ENERGY': "mp2_total_energy",
+            "CCSD CORRELATION ENERGY": "ccsd_correlation_energy",
+            "CCSD TOTAL ENERGY": "ccsd_total_energy",
+            "CCSD(T) CORRELATION ENERGY": "ccsd_prt_pr_correlation_energy",
+            "CCSD(T) TOTAL ENERGY": "ccsd_prt_pr_total_energy"
+        }
+        for qcvar in qcvars:
+            if qcvar in qcvars_to_properties:
+                output_data['properties'][qcvars_to_properties[qcvar]] = qcvars[qcvar]
+
         output_data['success'] = True
 
         return Result(**{**input_model.dict(), **output_data})

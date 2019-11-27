@@ -223,9 +223,8 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'DFT EXCHANGE \+ CORRELATION ENERGY' + r'\s+=\s*' + NUMBER + r'\s*$',
             outtext, re.MULTILINE)  # yapf: disable
         if mobj:
-            print('matched dft')
-            qcvar['DFT TOTAL ENERGY'] = mobj.group(1)
-            qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
+            print('matched dft xc')
+            qcvar['DFT XC ENERGY'] = mobj.group(1)
 
         # Process Geometry
         mobj = re.search(
