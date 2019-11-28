@@ -271,6 +271,48 @@ def harvest_outfile_pass(outtext):
                     atoms.append(lline[1])
                     qcvar_grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
             qcvar_grad = np.array(qcvar_grad)
+
+        # Process SCF blocks
+        mobj = re.search(
+            r'^\s+' + r'PROPERTIES FOR THE .* DFT FUNCTIONAL .* DENSITY MATRIX' +
+            r'(.*)' +
+            r'\.\.\.\.\.\. END OF PROPERTY EVALUATION \.\.\.\.\.\.',
+            outtext, re.MULTILINE | re.DOTALL)
+        if mobj:
+            print("matched dft props")
+            prop_block = mobj.group(1)
+            mobj_energy = re.search(
+                r'\s+ENERGY COMPONENTS\s*\n' +
+                r'\s+-----------------\s*\n' +
+                r'\s*\n' +
+                r'\s+WAVEFUNCTION NORMALIZATION =.*\n' +
+                r'\s*\n' +
+                r'\s+ONE ELECTRON ENERGY =\s+'+NUMBER+r'\n' +
+                r'\s+TWO ELECTRON ENERGY =\s+'+NUMBER+r'\n' +
+                r'\s+NUCLEAR REPULSION ENERGY =\s+'+NUMBER+r'\n' +
+                r'\s+------------------\s*\n' +
+                r'\s+TOTAL ENERGY =\s+'+NUMBER+r'\n',
+                prop_block)
+            if mobj_energy:
+                qcvar["ONE-ELECTRON ENERGY"] = mobj_energy.group(1)
+                qcvar["TWO-ELECTRON ENERGY"] = mobj_energy.group(2)
+                qcvar["SCF TOTAL ENERGY"] = mobj_energy.group(4)
+                qcvar["DFT TOTAL ENERGY"] = mobj_energy.group(4)
+
+            mobj_dipole = re.search(
+                r'\s+ELECTROSTATIC MOMENTS\s*\n'
+                r'\s+---------------------\s*\n'
+                r'\s*\n'
+                r'\s*POINT\s+1\s+X\s+Y\s+Z\s+\(BOHR\)\s+CHARGE\s*\n'
+                r'.*\n'
+                r'\s*DX\s+DY\s+DZ\s+/D/\s+\(DEBYE\)\s*\n'
+                r'\s*'+NUMBER+'\s+'+NUMBER+'\s+'+NUMBER+'\s+'+NUMBER+r'\s*\n',
+                prop_block)
+            if mobj_dipole:
+                qcvar["SCF DIPOLE X"] = mobj_dipole.group(1)
+                qcvar["SCF DIPOLE Y"] = mobj_dipole.group(2)
+                qcvar["SCF DIPOLE Z"] = mobj_dipole.group(3)
+
     # fmt: on
 
     # Process CURRENT Energies

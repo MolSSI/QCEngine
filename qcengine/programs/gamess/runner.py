@@ -164,7 +164,9 @@ class GAMESSHarness(ProgramHarness):
 
         # copy qcvars into schema where possible
         qcvars_to_properties = {
-            "DFT_XC_ENERGY": "scf_xc_energy",
+            "DFT XC ENERGY": "scf_xc_energy",
+            "ONE-ELECTRON ENERGY": "scf_one_electron_energy",
+            "TWO-ELECTRON ENERGY": "scf_two_electron_energy",
             "SCF TOTAL ENERGY": "scf_total_energy",
             "MP2 CORRELATION ENERGY": "mp2_correlation_energy",
             'MP2 TOTAL ENERGY': "mp2_total_energy",
@@ -176,7 +178,11 @@ class GAMESSHarness(ProgramHarness):
         for qcvar in qcvars:
             if qcvar in qcvars_to_properties:
                 output_data['properties'][qcvars_to_properties[qcvar]] = qcvars[qcvar]
-
+        if {'SCF DIPOLE X', 'SCF DIPOLE Y', 'SCF DIPOLE Z'} & set(qcvars.keys()):
+            conv = Decimal(qcel.constants.conversion_factor('debye', 'e * bohr'))
+            output_data['properties']['scf_dipole_moment'] = [qcvars['SCF DIPOLE X'] * conv,
+                                                              qcvars['SCF DIPOLE Y'] * conv,
+                                                              qcvars['SCF DIPOLE Z'] * conv]
         output_data["success"] = True
 
         return AtomicResult(**{**input_model.dict(), **output_data})
