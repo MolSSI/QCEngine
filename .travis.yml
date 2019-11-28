@@ -18,10 +18,14 @@ matrix:
       env:
         - PYTHON_VER=3.7
         - PROG=PSI4DEV  # py37 not avail for latest release
+#    - os: linux
+#      env:
+#        - PYTHON_VER=3.6
+#        - PROG=ANI
     - os: linux
       env:
         - PYTHON_VER=3.6
-        - PROG=ANI
+        - PROG=OPENMM
 
 before_install:
     # Additional info about the build
@@ -45,6 +49,8 @@ install:
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/psi-nightly.yaml
     elif [ $PROG == "ANI" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/torchani.yaml
+    elif [ $PROG == "OPENMM" ]; then
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/openmm.yaml
     else
       echo "ERROR: No match for PROG ($PROG)."
       exit 1
@@ -59,7 +65,8 @@ install:
       pip install torch_nightly -q -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
       pip install torchani -q
     fi
-  - pip install git+https://github.com/MolSSI/QCEngineRecords.git#egg=qcenginerecords
+  - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
+  - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
   - conda list
 
     # Build and install package

@@ -4,7 +4,7 @@ Calls the TorchANI package.
 
 from typing import Dict
 
-from qcelemental.models import Provenance, Result
+from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError, ResourceError
@@ -22,7 +22,7 @@ class TorchANIHarness(ProgramHarness):
         "thread_safe": True,
         "thread_parallel": False,
         "node_parallel": False,
-        "managed_memory": False
+        "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
 
@@ -31,22 +31,25 @@ class TorchANIHarness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        return which_import('torchani',
-                            return_bool=True,
-                            raise_error=raise_error,
-                            raise_msg='Please install via `pip install torchani`.')
+        return which_import(
+            "torchani",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `pip install torchani`.",
+        )
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which_import('torchani')
+        which_prog = which_import("torchani")
         if which_prog not in self.version_cache:
             import torchani
+
             self.version_cache[which_prog] = safe_version(torchani.__version__)
 
         return self.version_cache[which_prog]
 
-    def get_model(self, name: str) -> 'torchani.models.BuiltinModels':
+    def get_model(self, name: str) -> "torchani.models.BuiltinModels":
         name = name.lower()
 
         if name in self._CACHE:
@@ -74,7 +77,7 @@ class TorchANIHarness(ProgramHarness):
 
         return self._CACHE[name]
 
-    def compute(self, input_data: 'ResultInput', config: 'JobConfig') -> 'Result':
+    def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
         """
         Runs TorchANI in FF typing
         """
@@ -88,7 +91,7 @@ class TorchANIHarness(ProgramHarness):
         import torchani
         import numpy as np
 
-        device = torch.device('cpu')
+        device = torch.device("cpu")
 
         # Failure flag
         ret_data = {"success": False}
@@ -122,14 +125,16 @@ class TorchANIHarness(ProgramHarness):
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
         elif input_data.driver == "gradient":
             derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
-            ret_data["return_result"] = np.asarray(derivative *
-                                                   ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
+            ret_data["return_result"] = (
+                np.asarray(derivative * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
+            )
         elif input_data.driver == "hessian":
             hessian = torchani.utils.hessian(coordinates, energies=energy)
             ret_data["return_result"] = np.asarray(hessian)
         else:
             raise InputError(
-                f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.driver}.")
+                f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.driver}."
+            )
 
         #######################################################################
         # Description of the quantities stored in `extras`
@@ -152,19 +157,21 @@ class TorchANIHarness(ProgramHarness):
         #   points in the regions where this quantity is below a certain
         #   threshold (inclusion criteria)
         ret_data["extras"] = input_data.extras.copy()
-        ret_data["extras"].update({
-            "ensemble_energies": energy_array.detach().numpy(),
-            "ensemble_energy_avg": energy.item(),
-            "ensemble_energy_std": ensemble_std.item(),
-            "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item()
-        })
+        ret_data["extras"].update(
+            {
+                "ensemble_energies": energy_array.detach().numpy(),
+                "ensemble_energy_avg": energy.item(),
+                "ensemble_energy_std": ensemble_std.item(),
+                "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item(),
+            }
+        )
 
-        ret_data["provenance"] = Provenance(creator="torchani",
-                                            version="unknown",
-                                            routine='torchani.builtin.aev_computer')
+        ret_data["provenance"] = Provenance(
+            creator="torchani", version="unknown", routine="torchani.builtin.aev_computer"
+        )
 
         ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
-        return Result(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**{**input_data.dict(), **ret_data})

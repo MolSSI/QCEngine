@@ -26,11 +26,12 @@ LOGGER.setLevel(logging.CRITICAL)
 def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
     import cpuinfo
     import psutil
+
     global _global_values
     if _global_values is None:
         _global_values = {}
         _global_values["hostname"] = socket.gethostname()
-        _global_values["memory"] = round(psutil.virtual_memory().available / (1024**3), 3)
+        _global_values["memory"] = round(psutil.virtual_memory().available / (1024 ** 3), 3)
         _global_values["username"] = getpass.getuser()
 
         # Work through VMs and logical cores.
@@ -70,7 +71,7 @@ class NodeDescriptor(pydantic.BaseModel):
     jobs_per_node: int = 2
     retries: int = 0
 
-    def __init__(self, **data: Dict[str, Any]) -> 'BaseModel':
+    def __init__(self, **data: Dict[str, Any]) -> "BaseModel":
 
         data = parse_environment(data)
         super().__init__(**data)
@@ -98,7 +99,7 @@ def _load_defaults() -> None:
 
     # Find the config
     load_path = None
-    test_paths = [os.getcwd(), os.path.join(os.path.expanduser('~'), ".qcarchive")]
+    test_paths = [os.getcwd(), os.path.join(os.path.expanduser("~"), ".qcarchive")]
 
     if "DQM_CONFIG_PATH" in os.environ:
         test_paths.insert(0, os.environ["DQM_CONFIG_PATH"])
@@ -115,6 +116,7 @@ def _load_defaults() -> None:
 
     else:
         import yaml
+
         LOGGER.info("Found 'qcengine.yaml' at path: {}".format(load_path))
         with open(load_path, "r") as stream:
             user_config = yaml.load(stream)
@@ -175,10 +177,9 @@ def get_node_descriptor(hostname: Optional[str] = None) -> NodeDescriptor:
             config = node
             break
     else:
-        config = NodeDescriptor(name="default",
-                                hostname_pattern="*",
-                                memory=get_global("memory"),
-                                ncores=get_global("ncores"))
+        config = NodeDescriptor(
+            name="default", hostname_pattern="*", memory=get_global("memory"), ncores=get_global("ncores")
+        )
 
     return config
 
@@ -225,7 +226,7 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
     memory = local_options.pop("memory", None)
     if memory is None:
         memory = node.memory or get_global("memory")
-        memory_coeff = (1 - node.memory_safety_factor / 100)
+        memory_coeff = 1 - node.memory_safety_factor / 100
         memory = round(memory * memory_coeff / jobs_per_node, 3)
 
     config["memory"] = memory
@@ -248,9 +249,9 @@ def get_provenance_augments() -> Dict[str, str]:
         "cpu": get_global("cpu_brand"),
         "hostname": get_global("hostname"),
         "username": get_global("username"),
-        "qcengine_version": get_information("version")
+        "qcengine_version": get_information("version"),
     }
 
 
-def get_logger() -> 'Logger':
+def get_logger() -> "Logger":
     return LOGGER
