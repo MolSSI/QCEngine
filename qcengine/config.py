@@ -124,6 +124,7 @@ def _load_defaults() -> None:
         for k, v in user_config.items():
             NODE_DESCRIPTORS[k] = NodeDescriptor(name=k, **v)
 
+
 def global_repr() -> str:
     """
     A representation of the current global configuration.
