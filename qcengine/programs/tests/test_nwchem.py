@@ -21,10 +21,16 @@ def nh2():
 
 @using_nwchem
 def test_b3lyp(nh2):
+    # Run NH2
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "b3lyp", "basis": "3-21g"}}
-
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
 
+    # Make sure the calculation completed successfully
     assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
+
+    # Check the other status information
+    assert res["extras"]["qcvars"]['N ALPHA ELECTRONS'] == '5'
+    assert res["extras"]["qcvars"]['N ATOMS'] == '3'
+    assert res["extras"]["qcvars"]['N BASIS'] == '13'

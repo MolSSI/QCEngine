@@ -1,4 +1,6 @@
 import re
+import logging
+from typing import Tuple, NoReturn
 from decimal import Decimal
 
 import qcelemental as qcel
@@ -6,39 +8,38 @@ from qcelemental.models import Molecule
 
 from ..util import PreservingDict
 
+logger = logging.getLogger(__name__)
 
-def harvest_output(outtext):
-    """Function to separate portions of a NWChem output file *outtext*,
-    divided by " Line search:".
 
+def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, str]:
+    """Function to read an entire NWChem output file.
+
+    Reads all of the different "line search" segments of a file and returns
+    values from the last segment for which a geometry was written.
+
+    Args:
+        outtext (str): Output written to stdout
+    Returns:
+        - (PreservingDict) Variables extracted from the output file in the last complete step
+        - (Molecule): Molecule from the last complete step
+        - (list): Gradient from the last complete step
+        - (str): Version string
+        - (str): Error message, if any
     """
+
+    # Loop over all steps
+    # TODO (wardlt): Is it only necessary to read the last two steps?
     pass_psivar = []
     pass_coord = []
     pass_grad = []
-    print(pass_coord)
     for outpass in re.split(r" Line search:", outtext, re.MULTILINE):
         psivar, nwcoord, nwgrad, version, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
         pass_grad.append(nwgrad)
 
-        # print ('\n\nXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n')
-        # print (outpass)
-        # print (psivar, nwcoord, nwgrad)
-        # print (psivar, nwgrad)
-        # print ('\n\nxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n')
-
+    # Determine which segment contained the last geometry
     retindx = -1 if pass_coord[-1] else -2
-
-    # print ('    <<<  NW PSIVAR  >>>')
-    # for item in pass_psivar[retindx]:
-    #   print('       %30s %16.8f' % (item, pass_psivar[retindx][item]))
-    # print ('    <<<  NW COORD   >>>')
-    # for item in pass_coord[retindx]:
-    #    print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
-    #    print ('    <<<   NW GRAD   >>>')
-    # for item in pass_grad[retindx]:
-    #   print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
 
     return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
 
@@ -52,7 +53,7 @@ def harvest_outfile_pass(outtext):
     psivar_coord = None
     psivar_grad = None
     version = ""
-    error = ""
+    error = ""  # TODO (wardlt): The error string is never used.
 
     NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
     # fmt: off
@@ -62,35 +63,35 @@ def harvest_outfile_pass(outtext):
         r'^\s+' + r'Northwest Computational Chemistry Package (NWChem)' + r'\s+' + r'(?:<version>\d+.\d+)' + r'\s*$',
         outtext, re.MULTILINE)
     if mobj:
-        print('matched version')
+        logger.debug('matched version')
         version = mobj.group('version')
 
     # Process SCF
     # 1)Fail to converge
     mobj = re.search(r'^\s+' + r'(?:Calculation failed to converge)' + r'\s*$', outtext, re.MULTILINE)
     if mobj:
-        print('failed to converge')
+        logger.debug('failed to converge')
 
     # 2)Calculation converged
     else:
         mobj = re.search(r'^\s+' + r'(?:Total SCF energy)' + r'\s+=\s*' + NUMBER + r's*$', outtext, re.MULTILINE)
         if mobj:
-            print('matched HF')
+            logger.debug('matched HF')
             psivar['HF TOTAL ENERGY'] = mobj.group(1)
 
     # Process Effective nuclear repulsion energy (a.u.)
         mobj = re.search(r'^\s+' + r'Effective nuclear repulsion energy \(a\.u\.\)' + r'\s+' + NUMBER + r'\s*$',
                          outtext, re.MULTILINE)
         if mobj:
-            print('matched NRE')
-            # print (mobj.group(1))
+            logger.debug('matched NRE')
+            # logger.debug (mobj.group(1))
             psivar['NUCLEAR REPULSION ENERGY'] = mobj.group(1)
 
         # Process DFT (RDFT, RODFT,UDFT, SODFT [SODFT for nwchem versions before nwchem 6.8])
         mobj = re.search(r'^\s+' + r'(?:Total DFT energy)' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
         if mobj:
-            print('matched DFT')
-            print(mobj.group(1))
+            logger.debug('matched DFT')
+            logger.debug(mobj.group(1))
             psivar['DFT TOTAL ENERGY'] = mobj.group(1)
 
         # SODFT [for nwchem 6.8+]
@@ -98,7 +99,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'Total SO-DFT energy' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Nuclear repulsion energy' +
             r'\s+' + NUMBER + r'\s*$', outtext, re.MULTILINE)
         if mobj:
-            print('matched DFT')
+            logger.debug('matched DFT')
             # print (mobj.group(1))
             psivar['DFT TOTAL ENERGY'] = mobj.group(1)
             psivar['NUCLEAR REPULSION ENERGY'] = mobj.group(2)
@@ -112,7 +113,7 @@ def harvest_outfile_pass(outtext):
         # for mobj_list in mobj:
 
         if mobj:  # Need to change to accommodate find all instances
-            print('matched mcscf')  # MCSCF energy calculation
+            logger.debug('matched mcscf')  # MCSCF energy calculation
             psivar['HF TOTAL ENERGY'] = mobj.group(1)
             psivar['ONE-ELECTRON ENERGY'] = mobj.group(2)
             psivar['TWO-ELECTRON ENERGY'] = mobj.group(3)
@@ -120,7 +121,7 @@ def harvest_outfile_pass(outtext):
         # for mobj_list in mobj:
         #   for i in mobj_list:
         #       count += 0
-        # print('matched mcscf iteration %i', count)
+        # logger.debug('matched mcscf iteration %i', count)
         # psivar['HF TOTAL ENERGY'] = mobj.group(1)
         # psivar['ONE-ELECTRON ENERGY'] = mobj.group(2)
         # psivar['TWO-ELECTRON ENERGY'] = mobj.group(3)
@@ -133,7 +134,7 @@ def harvest_outfile_pass(outtext):
                          r'Triplet pairs' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Total MP2 energy' + r'\s+' +
                          NUMBER + r'\s*$', outtext, re.MULTILINE)  # MP2
         if mobj:
-            print('matched scf-mp2')
+            logger.debug('matched scf-mp2')
             psivar['HF TOTAL ENERGY'] = mobj.group(1)
             psivar['MP2 CORRELATION ENERGY'] = mobj.group(2)
             psivar['MP2 TOTAL ENERGY'] = mobj.group(5)
@@ -145,23 +146,23 @@ def harvest_outfile_pass(outtext):
             r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Total SCS-MP2 energy' + r'\s+' + NUMBER + r'\s*$', outtext,
             re.MULTILINE)
         if mobj:
-            print('matched scs-mp2')
+            logger.debug('matched scs-mp2')
             psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(1)) * Decimal(mobj.group(2))
             psivar['MP2 OPPOSITE-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) * Decimal(mobj.group(4))
 
-            print(mobj.group(1))  # ess
-            print(mobj.group(2))  # fss
-            print(mobj.group(3))  # eos
-            print(mobj.group(4))  # fos
-            print(mobj.group(5))  # scs corl
-            print(mobj.group(6))  # scs-mp2
+            logger.debug(mobj.group(1))  # ess
+            logger.debug(mobj.group(2))  # fss
+            logger.debug(mobj.group(3))  # eos
+            logger.debug(mobj.group(4))  # fos
+            logger.debug(mobj.group(5))  # scs corl
+            logger.debug(mobj.group(6))  # scs-mp2
 
         # 2) DFT-MP2
         mobj = re.search(
             r'^\s+' + r'DFT energy' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Unscaled MP2 energy' + r'\s+' + NUMBER +
             r'\s*' + r'^\s+' + r'Total DFT+MP2 energy' + r'\s+' + NUMBER + r'\s*$', outtext, re.MULTILINE)
         if mobj:
-            print('matched dft-mp2')
+            logger.debug('matched dft-mp2')
             psivar['DFT TOTAL ENERGY'] = mobj.group(1)
             psivar['MP2 CORRELATION ENERGY'] = mobj.group(2)
             psivar['MP2 TOTAL ENERGY'] = mobj.group(3)
@@ -174,7 +175,7 @@ def harvest_outfile_pass(outtext):
             r'\s+' + NUMBER + r'\s*$', outtext, re.MULTILINE)
 
         if mobj:
-            print('matched coupled cluster-mp2')
+            logger.debug('matched coupled cluster-mp2')
             psivar['MP2 CORRELATION ENERGY'] = mobj.group(2)
             psivar['MP2 TOTAL ENERGY'] = mobj.group(3)
 
@@ -191,7 +192,7 @@ def harvest_outfile_pass(outtext):
 
             if mobj:
                 mbpt_plain = cc_name.replace('\\', '').replace('MBPT', 'MP').replace('(', '').replace(')', '')
-                print(f'matched tce mbpt {mbpt_plain}', mobj.groups())
+                logger.debug(f'matched tce mbpt {mbpt_plain}', mobj.groups())
 
                 if mbpt_plain == 'MP2':
                     psivar[f'{mbpt_plain} CORRELATION ENERGY'] = mobj.group(1)
@@ -210,7 +211,7 @@ def harvest_outfile_pass(outtext):
             if mobj:
                 cc_plain = cc_name.replace('\\', '')
                 cc_corr = cc_plain.replace('CCSD', '')
-                print(f'matched tce cc {cc_plain}')
+                logger.debug(f'matched tce cc {cc_plain}')
 
                 psivar[f'{cc_corr} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_plain} CORRELATION ENERGY'] = mobj.group(2)
@@ -223,8 +224,8 @@ def harvest_outfile_pass(outtext):
                 r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
 
             if mobj:
-                print(f'matched {cc_name}')
-                print(mobj)
+                logger.debug(f'matched {cc_name}')
+                logger.debug(mobj)
                 psivar[f'{cc_name} CORRELATION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_name} TOTAL ENERGY'] = mobj.group(2)
 
@@ -236,7 +237,7 @@ def harvest_outfile_pass(outtext):
             re.MULTILINE | re.DOTALL)
 
         if mobj:
-            print('matched ccsd')
+            logger.debug('matched ccsd')
             psivar['CCSD CORRELATION ENERGY'] = mobj.group(2)
             psivar['CCSD TOTAL ENERGY'] = mobj.group(3)
 
@@ -246,7 +247,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'Total CCSD\(T\) energy:' + r'\s+' + NUMBER + r'\s*$', outtext, re.MULTILINE | re.DOTALL)
 
         if mobj:
-            print('matched ccsd(t)')
+            logger.debug('matched ccsd(t)')
             psivar['(T) CORRECTION ENERGY'] = mobj.group(1)
             psivar['CCSD(T) CORRELATION ENERGY'] = Decimal(mobj.group(2)) - psivar['HF TOTAL ENERGY']
             psivar['CCSD(T) TOTAL ENERGY'] = mobj.group(2)
@@ -260,7 +261,7 @@ def harvest_outfile_pass(outtext):
             r'\s+' + NUMBER + r'\s*$', outtext, re.MULTILINE | re.DOTALL)
         # SCS-CCSD included
         if mobj:
-            print('matched scs-ccsd')
+            logger.debug('matched scs-ccsd')
             psivar['CCSD SAME-SPIN CORRELATION ENERGY'] = psivar['SCS-CCSD SAME-SPIN CORRELATION ENERGY'] = (
                 Decimal(mobj.group(1)) * Decimal(mobj.group(2)))
             psivar['CCSD OPPOSITE-SPIN CORRELATION ENERGY'] = psivar['SCS-CCSD OPPOSITE-SPIN CORRELATION ENERGY'] = (
@@ -300,16 +301,16 @@ def harvest_outfile_pass(outtext):
 
             ext_energy_list = []
             for mobj_list in mobj:
-                print('matched EOM-%s - %s symmetry' % (cc_name, mobj_list[0]))  # cc_name, symmetry
-                print(mobj_list)
+                logger.debug('matched EOM-%s - %s symmetry' % (cc_name, mobj_list[0]))  # cc_name, symmetry
+                logger.debug(mobj_list)
                 count = 0
                 for line in mobj_list[1].splitlines():
                     lline = line.split()
-                    print(lline[1])  # in hartree
-                    print(lline[2])  # in eV
+                    logger.debug(lline[1])  # in hartree
+                    logger.debug(lline[2])  # in eV
                     count += 1
 
-                    print('matched excitation energy #%d - %s symmetry' % (count, mobj_list[0]))
+                    logger.debug('matched excitation energy #%d - %s symmetry' % (count, mobj_list[0]))
 
                     ext_energy_list.append(lline[1])  # Collect all excitation energies
 
@@ -331,7 +332,7 @@ def harvest_outfile_pass(outtext):
         gs = re.search(r'^\s+' + r'Ground-state symmetry is' + gssym + r'\s*$', outtext, re.MULTILINE)
 
         if gs:
-            print('matched ground-state symmetry')
+            logger.debug('matched ground-state symmetry')
             psivar['GROUND-STATE SYMMETRY'] = gssym.group(1)
 
 # Process TDDFT
@@ -347,7 +348,7 @@ def harvest_outfile_pass(outtext):
             r'\s*$', outtext, re.MULTILINE)
 
         if mobj:
-            print('matched TDDFT with transition moments')
+            logger.debug('matched TDDFT with transition moments')
             for mobj_list in mobj:
                 # print (mobj_list)
                 # print (mobj_list[0]) #root number
@@ -379,7 +380,7 @@ def harvest_outfile_pass(outtext):
             r'Transition Moments' + r'\s+Spin forbidden\s*$', outtext, re.MULTILINE)
 
         if mobj:
-            print('matched TDDFT - spin forbidden')
+            logger.debug('matched TDDFT - spin forbidden')
             for mobj_list in mobj:
                 #### temporary psivars ####
                 psivar['TDDFT ROOT %s %s %s EXCITATION ENERGY' %
@@ -387,7 +388,7 @@ def harvest_outfile_pass(outtext):
                 psivar['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0], mobj_list[1], mobj_list[2])] = \
                     psivar['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
             if mobj:
-                print('Non-variation initial energy')  # prints out energy, 5 counts
+                logger.debug('Non-variation initial energy')  # prints out energy, 5 counts
 
         # Process geometry
         # 1) CHARGE
@@ -396,7 +397,7 @@ def harvest_outfile_pass(outtext):
                          re.MULTILINE | re.IGNORECASE)
 
         if mobj:
-            print('matched charge')
+            logger.debug('matched charge')
             out_charge = int(float(mobj.group(1)))
 
         # Read charge from General information (not scf module)
@@ -404,7 +405,7 @@ def harvest_outfile_pass(outtext):
                          re.MULTILINE | re.IGNORECASE)
 
         if mobj:
-            print('matched charge')
+            logger.debug('matched charge')
             out_charge = int(float(mobj.group(1)))
 
         # 2) MULTIPLICITY
@@ -413,7 +414,7 @@ def harvest_outfile_pass(outtext):
                          re.MULTILINE | re.IGNORECASE)
 
         if mobj:
-            print('matched multiplicity')
+            logger.debug('matched multiplicity')
             out_mult = int(mobj.group(1)) + 1
 
         # Read multiplicity from SCF module through alpha, beta electrons
@@ -422,15 +423,17 @@ def harvest_outfile_pass(outtext):
             r'(\d+)' + r'\s*$', outtext, re.MULTILINE | re.IGNORECASE)
 
         if mobj:
-            print('matched multiplicity')
+            logger.debug('matched multiplicity via alpha and beta electrons')
             out_mult = int(mobj.group(1)) - int(mobj.group(2)) + 1  # nopen + 1
+            psivar['N ALPHA ELECTRONS'] = mobj.group(1)
+            psivar['N BETA ELECTRONS'] = mobj.group(2)
 
         # Read multiplicity from General information (not scf module)
         mobj = re.search(r'^\s+' + r'Spin multiplicity:' + r'\s+' + r'(\d+)' + r'\s*$', outtext,
                          re.MULTILINE | re.IGNORECASE)
 
         if mobj:
-            print('matched multiplicity')
+            logger.debug('matched multiplicity')
             out_mult = int(mobj.group(1))
 
         # 3) Initial geometry
@@ -444,7 +447,7 @@ def harvest_outfile_pass(outtext):
             + r'\s*$', outtext, re.MULTILINE | re.IGNORECASE)
 
         if mobj:
-            print('matched geom')
+            logger.debug('matched geom')
 
             # dinky molecule w/ charge and multiplicity
             if mobj.group(1) == 'angstroms':
@@ -480,7 +483,7 @@ def harvest_outfile_pass(outtext):
             + r'\s*$', outtext, re.MULTILINE)
 
         if mobj:
-            print('matched molgrad')
+            logger.debug('matched molgrad')
             atoms = []
             psivar_grad = []
             for line in mobj.group(1).splitlines():
@@ -503,7 +506,7 @@ def harvest_outfile_pass(outtext):
             r'Total dipole' + r'\s+' + NUMBER + r'\s' + r'DEBYE\(S\)' + r'\s*$', outtext, re.MULTILINE)
 
         if mobj:
-            print('matched total dipole')
+            logger.debug('matched total dipole')
             # print (mobj.group(5), 'a.u.')
             # print (mobj.group(10),'debye(s)')
 
@@ -521,13 +524,26 @@ def harvest_outfile_pass(outtext):
                 r'------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
                 r'There is an error in the input file' + r'\s*$', outtext, re.MULTILINE)
             if mobj:
-                print('matched error')
+                logger.debug('matched error')
             # print (mobj.group(1)) #error line number
             # print (mobj.group(2)) #error reason
             psivar['NWCHEM ERROR CODE'] = mobj.group(1)
             # TODO process errors into error var
 
-    # fmt: on
+    # Get the size of the basis sets, etc
+    mobj = re.search(r'No. of atoms\s+:\s+(\d+)', outtext, re.MULTILINE)
+    if mobj:
+        psivar["N ATOMS"] = mobj.group(1)
+    mobj = re.search(r"No. of electrons\s+:\s+(\d+)\s+Alpha electrons\s+:\s+(\d+)\s+Beta electrons\s+:\s+(\d+)",
+                     outtext, re.MULTILINE)
+    if mobj:
+        psivar["N ALPHA ELECTRONS"] = mobj.group(2)
+        psivar["N BETA ELECTRONS"] = mobj.group(3)
+    mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)",
+                     outtext, re.MULTILINE)
+    if mobj:
+        psivar["N MO"] = mobj.group(2)
+        psivar["N BASIS"] = mobj.group(1)
 
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
@@ -580,30 +596,33 @@ def harvest_hessian(hess):
     raise NotImplementedError()
 
 
-def harvest(p4Mol, nwout, **largs):  # check orientation and scratch files
+def harvest(in_mol: Molecule, nwout: str, **kwargs) -> Tuple[PreservingDict, None, list, Molecule, str, str]:
     """Parses all the pieces of output from NWChem: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 
+    Args:
+        in_mol (Molecule): Input molecule
+        nwout (str): NWChem output molecule
+    Returns:
+        - (PreservingDict) Variables extracted from the output file in the last complete step
+        - (None): Hessian from the last complete step (Not yet implemented)
+        - (list): Gradient from the last complete step
+        - (Molecule): Molecule from the last complete step
+        - (str): Version string
+        - (str): Error message, if any
     """
 
+    # Parse the NWChem output
     outPsivar, outMol, outGrad, version, error = harvest_output(nwout)
-    # print ('outMol', outMol)
-    # print ('outGrad', outGrad)
-    # print ('P4Mol', p4Mol)
-    # Coordinate info check
 
+    # Make sure the input and output molecules are the same
     if outMol:
-        if p4Mol:
-            if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
+        if in_mol:
+            if abs(outMol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
                     """NWChem outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
-                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                    % (outMol.nuclear_repulsion_energy(), in_mol.nuclear_repulsion_energy())
                 )
-            ## TEST##########
-            # else:
-            #   print ( """NWChem outfile (NRE: %f) consistent with Psi4 input (NRE: %f).""" % \
-            #             (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy()))
-            ################
     else:
         raise ValueError("""No coordinate information extracted from NWChem output.""")
 
