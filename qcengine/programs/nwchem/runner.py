@@ -18,7 +18,7 @@ from ...exceptions import InputError
 from ...util import execute
 from ..model import ProgramHarness
 from .germinate import muster_modelchem
-from .harvester import harvest
+from .harvester import harvest, extract_formatted_properties
 from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -175,11 +175,15 @@ class NWChemHarness(ProgramHarness):
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()
 
+        # Get the formatted properties
+        qcprops = extract_formatted_properties(qcvars)
+
+        # Format them inout an output
         output_data = {
             "schema_name": "qcschema_output",
             "schema_version": 1,
             "extras": {"outfiles": outfiles},
-            "properties": {},
+            "properties": qcprops,
             "provenance": Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
             "return_result": retres,
             "stdout": stdout,

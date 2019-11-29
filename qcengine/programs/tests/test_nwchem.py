@@ -1,5 +1,6 @@
 """Tests for NWChem functionality"""
 from qcengine.testing import using_nwchem
+from math import isclose
 import qcelemental as qcel
 import qcengine as qcng
 import pytest
@@ -34,3 +35,7 @@ def test_b3lyp(nh2):
     assert res["extras"]["qcvars"]['N ALPHA ELECTRONS'] == '5'
     assert res["extras"]["qcvars"]['N ATOMS'] == '3'
     assert res["extras"]["qcvars"]['N BASIS'] == '13'
+
+    # Make sure the properties parsed correctly
+    assert isclose(res['properties']['return_energy'], -55.554037, abs_tol=1e-3)
+    assert res['properties']['calcinfo_natom'] == 3

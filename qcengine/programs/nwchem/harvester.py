@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import qcelemental as qcel
 from qcelemental.models import Molecule
+from qcelemental.models.results import AtomicResultProperties
 
 from ..util import PreservingDict
 
@@ -594,6 +595,45 @@ def harvest_hessian(hess):
 
     """
     raise NotImplementedError()
+
+
+def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultProperties:
+    """Get named properties out of the general variables extracted out of the result file
+
+    Args:
+        psivars (PreservingDict): Dictionary of the output results
+    Returns:
+        (AtomicResultProperties) Properties in a standard format
+    """
+    # TODO (wardlt): Get more of the named variables out of the NWChem file
+
+    # Initialize the output
+    output = dict()
+
+    # Extract the Calc Info
+    output.update(dict(
+        calcinfo_nbasis=psivars.get('N BASIS', None),
+        calcinfo_nmo=psivars.get('N MO', None),
+        calcinfo_natom=psivars.get('N ATOMS', None),
+        calcinfo_nalpha=psivars.get('N ALPHA ELECTRONS', None),
+        calcinfo_nbeta=psivars.get('N BETA ELECTRONS', None),
+    ))
+
+    # Get the "canonical" properties
+    output['return_energy'] = psivars['CURRENT ENERGY']
+    output['nuclear_repulsion_energy'] = psivars['NUCLEAR REPULSION ENERGY']
+
+    # Get the SCF properties
+    output['scf_total_energy'] = psivars.get('HF TOTAL ENERGY', None)
+    output['scf_one_electron_energy'] = psivars.get('ONE-ELECTRON ENERGY', None)
+    output['scf_two_electron_energy'] = psivars.get('ONE-ELECTRON ENERGY', None)
+
+    # Get the MP2 properties
+    output['mp2_total_correlation_energy'] = psivars.get('MP2 CORRELATION ENERGY', None)
+    output['mp2_total_energy'] = psivars.get('MP2 TOTAL ENERGY', None)
+    output['mp2_same_spin_correlation_energy'] = psivars.get('MP2 SAME-SPIN CORRELATION ENERGY', None)
+    output['mp2_opposite_spin_correlation_energy'] = psivars.get('MP2 OPPOSITE-SPIN CORRELATION ENERGY', None)
+    return AtomicResultProperties(**output)
 
 
 def harvest(in_mol: Molecule, nwout: str, **kwargs) -> Tuple[PreservingDict, None, list, Molecule, str, str]:
