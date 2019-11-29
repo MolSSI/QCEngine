@@ -12,7 +12,7 @@ import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
-from qcengine.config import JobConfig
+from qcengine.config import JobConfig, get_config
 from qcengine.exceptions import UnknownError
 from ...exceptions import InputError
 from ...util import execute
@@ -59,9 +59,14 @@ class NWChemHarness(ProgramHarness):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
+        # Get the node configuration
+        config = get_config()
+
+        # Run NWChem
         which_prog = which("nwchem")
         if which_prog not in self.version_cache:
-            success, output = execute([which_prog, "v.nw"], {"v.nw": ""})
+            success, output = execute([which_prog, "v.nw"], {"v.nw": ""},
+                                      scratch_directory=config.scratch_directory)
 
             if success:
                 for line in output["stdout"].splitlines():
