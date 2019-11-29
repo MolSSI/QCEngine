@@ -27,7 +27,6 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
     # Write out the theory directive
     if method == "nwchem":
         mdccmd = ""
-        pass
 
     elif method in ["scf", "hf"]:
         mdccmd = f"task scf {runtyp}\n\n"
