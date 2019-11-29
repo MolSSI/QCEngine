@@ -12,6 +12,7 @@ import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
+from qcengine.config import JobConfig
 from qcengine.exceptions import UnknownError
 from ...exceptions import InputError
 from ...util import execute
@@ -69,6 +70,8 @@ class NWChemHarness(ProgramHarness):
                     if "nwchem revision" in line:
                         revision = line.strip().split()[-1]
                 self.version_cache[which_prog] = safe_version(branch + "+" + revision)
+            else:
+                raise UnknownError(output['stderr'])
 
         return self.version_cache[which_prog]
 
