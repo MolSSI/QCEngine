@@ -12,6 +12,7 @@ import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
+from qcengine.exceptions import UnknownError
 from ...exceptions import InputError
 from ...util import execute
 from ..model import ProgramHarness
@@ -90,6 +91,8 @@ class NWChemHarness(ProgramHarness):
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
+        else:
+            raise UnknownError(dexe["stderr"])
 
     def build_input(
         self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
