@@ -28,7 +28,7 @@ class EntosHarness(ProgramHarness):
     # Energy commands that are currently supported
     _energy_commands: Set[str] = {
         "dft",
-        # "xtb"
+        "xtb"
     }
 
     # List of DFT functionals
@@ -74,10 +74,10 @@ class EntosHarness(ProgramHarness):
 
     # Available keywords for each of the energy commands
     _dft_keywords: Set[str] = {"df"}
-    # _xtb_keywords = {}
+    _xtb_keywords = {}
     _keyword_map: Dict[str, Any] = {
         "dft": _dft_keywords,
-        # "xtb": _xtb_keywords
+        "xtb": _xtb_keywords
     }
 
     class Config(ProgramHarness.Config):
@@ -190,7 +190,9 @@ class EntosHarness(ProgramHarness):
                     "charge": input_model.molecule.molecular_charge,
                     "spin": float(input_model.molecule.molecular_multiplicity - 1),
                 },
-                # "xtb": {}
+                "xtb": {
+                    "charge": input_model.molecule.molecular_charge
+                }
             }
 
             # Resolve keywords (extra options) for the energy command
@@ -227,7 +229,15 @@ class EntosHarness(ProgramHarness):
                     **print_results,
                 }
             # TODO Add support for hessians
-            # elif input_model.driver == 'hessian':
+            elif input_model.driver == 'hessian':
+                input_dict = {
+                    "hessian": {
+                        **structure,
+                        energy_command: {**energy_options[energy_command], **energy_extra_options},
+                        **name_results,
+                    },
+                    **print_results,
+                }
             else:
                 raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
@@ -290,24 +300,32 @@ class EntosHarness(ProgramHarness):
             "fock": "fock",
         }
 
+        xtb_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
+
         energy_command_map = {
             "dft": dft_map,
-            # "xtb": xtb_map,
+            "xtb": xtb_map
         }
 
         gradient_map = {"energy": "scf_total_energy", "gradient": "gradient"}
+
+        energy_command = self.determine_energy_command(input_model.model.method)
+
+        hessian_map = {"hessian": "hessian"}
+        hessian_map.update(energy_command_map[energy_command])
 
         # Initialize properties dictionary
         properties = {}
 
         # Determine the energy_command
-        energy_command = self.determine_energy_command(input_model.model.method)
 
         # Determine whether to use the energy map or the gradient map
         if input_model.driver == "energy":
             entos_map = energy_command_map[energy_command]
         elif input_model.driver == "gradient":
             entos_map = gradient_map
+        elif input_model.driver == "hessian":
+            entos_map = hessian_map
         else:
             raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
@@ -327,10 +345,14 @@ class EntosHarness(ProgramHarness):
                 raise KeyError(f"Could not find {input_model.model} total energy")
         elif input_model.driver == "gradient":
             if "gradient" in properties:
-                output_data["return_result"] = properties["gradient"]
-                properties.pop("gradient")
+                output_data["return_result"] = properties.pop("gradient")
             else:
                 raise KeyError("Gradient not found.")
+        elif input_model.driver == "hessian":
+            if "hessian" in properties:
+                output_data["return_result"] = properties.pop("hessian")
+            else:
+                raise KeyError("Hessian not found.")
         else:
             raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
@@ -351,6 +373,8 @@ class EntosHarness(ProgramHarness):
         # For now entos supports HF calculations through the dft energy_command with xc = HF
         elif method.upper() == "HF":
             energy_command = "dft"
+        elif method.upper() == "XTB":
+            energy_command = "xtb"
         else:
             energy_command = method.lower()
 
