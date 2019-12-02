@@ -1,6 +1,6 @@
 import re
 import logging
-from typing import Tuple, NoReturn
+from typing import Tuple
 from decimal import Decimal
 
 import qcelemental as qcel
@@ -611,13 +611,13 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     output = dict()
 
     # Extract the Calc Info
-    output.update(dict(
-        calcinfo_nbasis=psivars.get('N BASIS', None),
-        calcinfo_nmo=psivars.get('N MO', None),
-        calcinfo_natom=psivars.get('N ATOMS', None),
-        calcinfo_nalpha=psivars.get('N ALPHA ELECTRONS', None),
-        calcinfo_nbeta=psivars.get('N BETA ELECTRONS', None),
-    ))
+    output.update({
+        'calcinfo_nbasis': psivars.get('N BASIS', None),
+        'calcinfo_nmo': psivars.get('N MO', None),
+        'calcinfo_natom': psivars.get('N ATOMS', None),
+        'calcinfo_nalpha': psivars.get('N ALPHA ELECTRONS', None),
+        'calcinfo_nbeta': psivars.get('N BETA ELECTRONS', None)
+    })
 
     # Get the "canonical" properties
     output['return_energy'] = psivars['CURRENT ENERGY']

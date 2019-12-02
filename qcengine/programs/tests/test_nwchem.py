@@ -1,4 +1,5 @@
 """Tests for NWChem functionality"""
+from qcelemental.testing import compare_values
 from qcengine.testing import using_nwchem
 from math import isclose
 import qcelemental as qcel
@@ -27,6 +28,7 @@ def test_b3lyp(nh2):
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
 
     # Make sure the calculation completed successfully
+    assert compare_values(-55.554037, res["return_result"], atol=1e-3)
     assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
@@ -37,5 +39,7 @@ def test_b3lyp(nh2):
     assert res["extras"]["qcvars"]['N BASIS'] == '13'
 
     # Make sure the properties parsed correctly
-    assert isclose(res['properties']['return_energy'], -55.554037, abs_tol=1e-3)
-    assert res['properties']['calcinfo_natom'] == 3
+    assert compare_values(-55.554037, res["properties"]["return_energy"], atol=1e-3)
+    assert res["properties"]["calcinfo_natom"] == 3
+    assert res["properties"]["calcinfo_nalpha"] == 5
+    assert res["properties"]["calcinfo_nbasis"] == 13

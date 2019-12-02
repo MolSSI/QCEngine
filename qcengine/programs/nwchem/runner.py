@@ -3,6 +3,7 @@ Calls the NWChem executable.
 """
 import copy
 import pprint
+import logging
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -22,6 +23,7 @@ from .harvester import harvest, extract_formatted_properties
 from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
+logger = logging.getLogger(__name__)
 
 
 class NWChemHarness(ProgramHarness):
@@ -130,8 +132,9 @@ class NWChemHarness(ProgramHarness):
         for el in set(input_model.molecule.symbols):
             opts[f"basis__{el}"] = f"library {input_model.model.basis}"
 
-        print("JOB_OPTS")
-        pp.pprint(opts)
+        # Log the job settings
+        logger.debug("JOB_OPTS")
+        logger.debug(pp.pformat(opts))
 
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
