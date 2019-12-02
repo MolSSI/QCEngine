@@ -4,7 +4,11 @@ The entos QCEngine Harness
 
 import json
 import string
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..config import JobConfig
+    from qcelemental.models import AtomicInput
 
 from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
@@ -67,21 +71,20 @@ class EntosHarness(ProgramHarness):
     }
 
     # Available keywords for each of the energy commands
+    _scf_keywords_extra: Set[str] = {
+        "ansatz",
+        "df",
+        "orbital_grad_threshold",
+        "energy_threshold",
+        "coulomb_method",
+        "exchange_method"}
     _dft_keywords_extra: Set[str] = {
-        "ansatz",
-        "df",
-        "orbital_grad_threshold",
-        "energy_threshold",
-        "coulomb_method",
-        "exchange_method"}
+        *_scf_keywords_extra
+    }
     _hf_keywords_extra: Set[str] = {
-        "ansatz",
-        "df",
-        "orbital_grad_threshold",
-        "energy_threshold",
-        "coulomb_method",
-        "exchange_method"}
-    _xtb_keywords_extra = {}
+        *_scf_keywords_extra
+    }
+    _xtb_keywords_extra: Set[str] = {}
 
     # Energy commands that are currently supported and their available keywords
     _energy_commands: Dict[str, Any] = {
@@ -135,14 +138,14 @@ class EntosHarness(ProgramHarness):
             return UnknownError(proc["stderr"])
 
     def execute(
-        self,
-        inputs: Dict[str, Any],
-        extra_infiles: Optional[Dict[str, str]] = None,
-        extra_outfiles: Optional[List[str]] = None,
-        extra_commands: Optional[List[str]] = None,
-        scratch_name: Optional[str] = None,
-        scratch_messy: bool = False,
-        timeout: Optional[int] = None,
+            self,
+            inputs: Dict[str, Any],
+            extra_infiles: Optional[Dict[str, str]] = None,
+            extra_outfiles: Optional[List[str]] = None,
+            extra_commands: Optional[List[str]] = None,
+            scratch_name: Optional[str] = None,
+            scratch_messy: bool = False,
+            timeout: Optional[int] = None,
     ) -> Tuple[bool, Dict[str, Any]]:
         """
         For option documentation go look at qcengine/util.execute
@@ -179,7 +182,7 @@ class EntosHarness(ProgramHarness):
         return exe_success, proc
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+            self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
 
         # Write the geom xyz file with unit au
@@ -193,19 +196,18 @@ class EntosHarness(ProgramHarness):
             energy_command = self.determine_energy_command(input_model.model.method)
 
             # Define base options for the energy command (options that can be taken directly from input_model)
-            # TODO Perhaps create a new function that takes as input the energy command and
-            #      returns the Dict energy_keywords_from_input_model
+            scf_keywords_from_input_model = {
+                "ao": input_model.model.basis,
+                "charge": input_model.molecule.molecular_charge,
+                "spin": float(input_model.molecule.molecular_multiplicity - 1)
+            }
             energy_keywords_from_input_model = {
                 "dft": {
                     "xc": input_model.model.method.upper(),
-                    "ao": input_model.model.basis,
-                    "charge": input_model.molecule.molecular_charge,
-                    "spin": float(input_model.molecule.molecular_multiplicity - 1),
+                    **scf_keywords_from_input_model
                 },
                 "hf": {
-                    "ao": input_model.model.basis,
-                    "charge": input_model.molecule.molecular_charge,
-                    "spin": float(input_model.molecule.molecular_multiplicity - 1),
+                    **scf_keywords_from_input_model
                 },
                 "xtb": {
                     "charge": input_model.molecule.molecular_charge,
@@ -246,16 +248,18 @@ class EntosHarness(ProgramHarness):
                 input_dict = {
                     "hessian": {
                         **structure,
-                        energy_command: {**energy_options[energy_command], **energy_extra_options},
-                        **name_results,
+                        energy_command: {
+                            **energy_keywords_from_input_model[energy_command],
+                            **energy_keywords_extra
+                        },
                     },
-                    **print_results,
                 }
             else:
                 raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
             # Write input file
-            input_file = [f"entos_policy(version = '{self.get_version()}')", "json_results := "] + self.write_input_recursive(input_dict)
+            input_file = [f"entos_policy(version = '{self.get_version()}')", "json_results := "] \
+                         + self.write_input_recursive(input_dict)
             input_file = "\n".join(input_file)
 
         # Use the template input file if present
@@ -304,26 +308,27 @@ class EntosHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
-        dft_map = {
+        scf_map = {
             "energy": "scf_total_energy",
             "n_iter": "scf_iterations"
         }
-        dft_extras = {
+        scf_extras = {
             "converged": "scf_converged",
             "ao_basis": {"basis": {"n_functions", "shells"}},
             "density": "scf_density",
             "orbitals": "scf_orbitals",
             "fock": "fock",
         }
+        dft_map = {
+            **scf_map
+        }
 
         hf_map = {
-            "energy": "scf_total_energy",
-            "n_iter": "scf_iterations"
+            **scf_map
         }
 
         xtb_map = {
-            "energy": "scf_total_energy",
-            "n_iter": "scf_iterations"
+            **scf_map
         }
 
         energy_command_map = {
@@ -332,20 +337,19 @@ class EntosHarness(ProgramHarness):
             "xtb": xtb_map
         }
 
-        gradient_map = {
-            "energy": "scf_total_energy",
-            "gradient": "gradient"
-        }
-
+        # Determine the energy_command
         energy_command = self.determine_energy_command(input_model.model.method)
+
+        gradient_map = {"gradient": "gradient"}
+        gradient_map.update({"energy": "scf_total_energy"})
+        # TODO Uncomment once entos adds scf_map to gradient json results
+        # gradient_map.update(energy_command_map[energy_command])
 
         hessian_map = {"hessian": "hessian"}
         hessian_map.update(energy_command_map[energy_command])
 
         # Initialize properties dictionary
         properties = {}
-
-        # Determine the energy_command
 
         # Determine whether to use the energy map or the gradient map
         if input_model.driver == "energy":

@@ -1,9 +1,12 @@
 """
 Integrates the computes together
 """
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, TYPE_CHECKING
 
-from pydantic.main import BaseModel
+if TYPE_CHECKING:
+    from pydantic.main import BaseModel
+    from qcelemental.models import AtomicResult
+
 from qcelemental.models import AtomicInput, FailedOperation, AtomicResult
 
 from .config import get_config
