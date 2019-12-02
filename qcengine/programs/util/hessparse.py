@@ -1,6 +1,7 @@
 import numpy as np
 
 from qcelemental.util import filter_comments
+from pydantic import ValidationError
 
 
 def load_hessian(shess: str, dtype: str) -> np.ndarray:

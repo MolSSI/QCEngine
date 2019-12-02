@@ -3,7 +3,8 @@ Integrates the computes together
 """
 from typing import Any, Dict, Optional, Union
 
-from qcelemental.models import AtomicInput, FailedOperation
+from pydantic.main import BaseModel
+from qcelemental.models import AtomicInput, FailedOperation, AtomicResult
 
 from .config import get_config
 from .exceptions import InputError, RandomError
