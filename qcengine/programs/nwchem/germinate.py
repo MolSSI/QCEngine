@@ -92,8 +92,8 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         raise InputError(f"Method \"{method}\" not yet supported by QCEngine")
 
     elif method == "tce":
-        raise ImportError(f"Do not specify TCE as a method. Instead specify the desired method "
-                          f"and \"qc_module=True\" in the run configuration")
+        raise InputError(f"Do not specify TCE as a method. Instead specify the desired method "
+                         f"and \"qc_module=True\" in the run configuration")
 
     elif method in _xc_functionals:
         opts["dft__xc"] = method
