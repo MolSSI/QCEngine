@@ -12,7 +12,7 @@ import qcelemental as qcel
 import qcengine as qcng
 from qcelemental.util import which, which_import
 
-QCENGINE_RECORDS_COMMIT = "cdb75d2"
+QCENGINE_RECORDS_COMMIT = "f81f0f2"
 
 
 def _check_qcenginerecords(return_data=False):
@@ -152,7 +152,7 @@ _programs = {
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
-    "entos": is_program_new_enough("entos", "0.7"),
+    "entos": is_program_new_enough("entos", "0.7.1"),
     "cfour": which("xcfour", return_bool=True),
     "gamess": which("rungms", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),

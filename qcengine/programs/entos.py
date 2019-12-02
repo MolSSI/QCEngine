@@ -116,7 +116,7 @@ class EntosHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Check entos version
-        if parse_version(self.get_version()) < parse_version("0.7"):
+        if parse_version(self.get_version()) < parse_version("0.7.1"):
             raise TypeError(f"entos version {self.get_version()} not supported")
 
         # Setup the job
@@ -255,7 +255,7 @@ class EntosHarness(ProgramHarness):
                 raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
             # Write input file
-            input_file = ["json_results := "] + self.write_input_recursive(input_dict)
+            input_file = [f"entos_policy(version = '{self.get_version()}')", "json_results := "] + self.write_input_recursive(input_dict)
             input_file = "\n".join(input_file)
 
         # Use the template input file if present
