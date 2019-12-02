@@ -367,36 +367,26 @@ def harvest_outfile_pass(outtext):
 # Process TDDFT
 #       1) Spin allowed
         mobj = re.findall(
-            r'^\s+(?:Root)\s+(\d+)\s(\w+)\s+(.*?)\s+(\d+\.\d+)\s(?:a\.u\.)\s+(\d+\.\d+)\s+(?:\w+)'
-            #Root # singlet/triplet symmetry # a.u. # eV
-            + r'\s+(?:.*\n)\s+Transition Moments\s+X\s'+ NUMBER + r'\s+Y\s'+ NUMBER+ r'\s+Z\s'+ NUMBER
-            #X # Y # Z #
-            + r'\s+Transition Moments\s+XX\s'+ NUMBER + r'\s+XY\s'+ NUMBER+ r'\s+XZ\s'+ NUMBER
-            + r'\s+Transition Moments\s+YY\s'+ NUMBER + r'\s+YZ\s'+ NUMBER+ r'\s+ZZ\s'+ NUMBER + r'\s*$',
+            r'^\s+(?:Root)\s+(\d+)\s+(.*?)\s+' + NUMBER + r'\s(?:a\.u\.)\s+' + NUMBER + r'\s+(?:\w+)'
+            #Root | symmetry | a.u. | eV
+            + r'\s+(?:.\w+.\s+.\s+\d+.\d+)' #s2 value 
+            + r'\s+(?:.*\n)\s+Transition Moments\s+X\s+'+ NUMBER + r'\s+Y\s+'+ NUMBER+ r'\s+Z\s+'+ NUMBER #dipole
+            + r'\s+Transition Moments\s+XX\s+'+ NUMBER + r'\s+XY\s+'+ NUMBER+ r'\s+XZ\s+'+ NUMBER #quadrople
+            + r'\s+Transition Moments\s+YY\s+'+ NUMBER + r'\s+YZ\s+'+ NUMBER+ r'\s+ZZ\s+'+ NUMBER #quadrople 
+            + r'\s*$',
             outtext, re.MULTILINE)
-            #r'^\s+' + r'----------------------------------------------------------------------------' + r'\s*' +
-            #r'^\s+' + r'Root' + r'\s+' + r'(\d+)' + r'\s+' + r'(\w+)' + r'\s+' + r'(.*?)' + r'\s+' + NUMBER +
-            #r'\s+a\.u\.\s+' + NUMBER + r'\s+eV\s*' + r'^\s+' +
-            #r'----------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            #r'Transition Moments' + r'\s+X\s+' + NUMBER + r'\s+Y\s+' + NUMBER + r'\s+Z\s+' + NUMBER + r'\s*' + r'^\s+'
-            #+ r'Transition Moments' + r'\s+XX\s+' + NUMBER + r'\s+XY\s+' + NUMBER + r'\s+XZ\s+' + NUMBER + r'\s*' +
-            #r'^\s+' + r'Transition Moments' + r'\s+YY\s+' + NUMBER + r'\s+YZ\s+' + NUMBER + r'\s+ZZ\s+' + NUMBER +
-            #r'\s*$', outtext, re.MULTILINE)
 
         if mobj:
             print('matched TDDFT with transition moments')
-            print(mobj)
             for mobj_list in mobj:
-                # print (mobj_list)
-                # print (mobj_list[0]) #root number
-                # print (mobj_list[1]) #singlet or triplet?
-                # print (mobj_list[2]) #symmetry
-
+                print (mobj_list)
+                psivar['TDDFT ROOT %s EXCITATION ENERGY - %s SYMMETRY' % (mobj_list[0], mobj_list[1])] = mobj_list[2] #in eV
+                psivar['TDDFT ROOT %s EXCITED STATE ENERGY - %s SYMMETRY' % (mobj_list[0], mobj_list[1])] = psivar['DFT TOTAL ENERGY'] + Decimal(mobj_list[2]) 
                 #### temporary psivars ####
-                psivar['TDDFT ROOT %s %s %s EXCITATION ENERGY' %
-                       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
-                psivar ['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0],mobj_list[1],mobj_list[2])] = \
-                    psivar ['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
+                #psivar['TDDFT ROOT %d %s %s EXCITATION ENERGY' %
+                #       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
+                #psivar ['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0],mobj_list[1],mobj_list[2])] = \
+                #    psivar ['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
                 psivar['TDDFT ROOT %s DIPOLE X' % (mobj_list[0])] = mobj_list[5]
                 psivar['TDDFT ROOT %s DIPOLE Y' % (mobj_list[0])] = mobj_list[6]
                 psivar['TDDFT ROOT %s DIPOLE Z' % (mobj_list[0])] = mobj_list[7]
