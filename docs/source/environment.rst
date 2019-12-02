@@ -52,3 +52,32 @@ The global environment can also be inspected directly.
         },
         'cpu_brand': 'Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz'
     }
+
+Configuration Files
+-------------------
+
+The computational environment defaults can be overridden by configuration files.
+
+Configuration files must be named ``qcengine.yaml`` and stored either in the directory
+from which you run QCEngine, a folder named ``.qcarchive`` in your home directory,
+or in a folder specified by the ``DQM_CONFIG_PATH`` environmental variable.
+Only one configuration file will be used if multiple are available.
+The ``DQM_CONFIG_PATH`` configuration file takes precedence over the current directory,
+which takes precedence over the ``.qcarchive`` folder.
+
+The configuration file is a YAML file that contains a dictionary of different node configurations.
+The keys in the YAML file are human-friendly names for the configurations.
+The values are dictionaries that define configurations for different nodes,
+following the ``NodeDescription`` schema:
+
+.. autoclass:: qcengine.config.NodeDescriptor
+
+When running QCEngine, the proper configuration for a node is determined based on the hostname of the node
+and matching the ``hostname_pattern`` to each of the configurations defined in ``qcengine.yaml``.
+
+An example ``qcengine.yaml`` file that sets the scratch directory for all nodes is as follows:
+
+.. code:: yaml
+    all:
+      hostname_pattern: "*"
+      scratch_directory: ./scratch

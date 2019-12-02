@@ -147,7 +147,7 @@ def test_config_local_njob_ncore(opt_state_basic):
     assert pytest.approx(config.memory, 0.1) == 1.33
 
 
-def test_config_local_njob_ncore(opt_state_basic):
+def test_config_local_njob_ncore_plus_memory(opt_state_basic):
     config = qcng.config.get_config(hostname="something", local_options={"jobs_per_node": 3, "ncores": 1, "memory": 6})
     assert config.ncores == 1
     assert pytest.approx(config.memory, 0.1) == 6
@@ -159,5 +159,4 @@ def test_config_validation(opt_state_basic):
 
 
 def test_global_repr():
-
     assert isinstance(qcng.config.global_repr(), str)
