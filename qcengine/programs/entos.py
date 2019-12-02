@@ -121,7 +121,6 @@ class EntosHarness(ProgramHarness):
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
-        # print(job_inputs["infiles"]["dispatch.in"])
 
         # Run entos
         exe_success, proc = self.execute(job_inputs)
@@ -177,7 +176,6 @@ class EntosHarness(ProgramHarness):
 
         # Entos does not create an output file and only prints to stdout
         proc["outfiles"]["results.json"] = proc["stdout"]
-        # print(proc["outfiles"]["dispatch.out"])
         return exe_success, proc
 
     def build_input(
@@ -244,7 +242,6 @@ class EntosHarness(ProgramHarness):
                         },
                     },
                 }
-            # TODO Add support for hessians
             elif input_model.driver == 'hessian':
                 input_dict = {
                     "hessian": {
@@ -280,7 +277,6 @@ class EntosHarness(ProgramHarness):
             str_template = string.Template(template)
             input_file = str_template.substitute()
 
-        # print(input_file)
         return {
             "commands": ["entos", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
             "infiles": {"dispatch.in": input_file, "geometry.xyz": xyz_file},
