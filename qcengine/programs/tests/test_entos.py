@@ -25,6 +25,7 @@ def test_entos_output_parser(test_case):
     assert check, (output, output_ref)
 
 
+@using_entos
 @pytest.mark.parametrize("test_case", entos_info.list_test_cases())
 def test_entos_input_formatter(test_case):
 
