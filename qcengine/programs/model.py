@@ -23,7 +23,7 @@ class ProgramHarness(BaseModel, abc.ABC):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         pass
 
     @staticmethod
@@ -57,7 +57,7 @@ class ProgramHarness(BaseModel, abc.ABC):
     ## Computers
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 

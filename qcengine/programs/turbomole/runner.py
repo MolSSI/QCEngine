@@ -55,7 +55,7 @@ class TurbomoleHarness(ProgramHarness):
             self.version_cache[which_prog] = safe_version(version)
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
@@ -71,7 +71,7 @@ class TurbomoleHarness(ProgramHarness):
             return self.parse_output(dexe["outfiles"], input_model)
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
         turbomolrec = {"infiles": {}, "outfiles": {"control": "control"}, "scratch_directory": config.scratch_directory}
 

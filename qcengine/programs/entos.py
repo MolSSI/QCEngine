@@ -7,7 +7,7 @@ import string
 from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..config import JobConfig
+    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
 
 from qcelemental.models import AtomicResult
@@ -109,7 +109,7 @@ class EntosHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Run entos
         """
@@ -180,7 +180,7 @@ class EntosHarness(ProgramHarness):
         return exe_success, proc
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
 
         # Write the geom xyz file with unit au

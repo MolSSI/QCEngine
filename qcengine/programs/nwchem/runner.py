@@ -13,7 +13,7 @@ import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
-from qcengine.config import JobConfig, get_config
+from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 from ...exceptions import InputError
 from ...util import execute
@@ -82,7 +82,7 @@ class NWChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs NWChem in executable mode
         """
@@ -105,7 +105,7 @@ class NWChemHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 

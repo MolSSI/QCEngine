@@ -77,7 +77,7 @@ class TorchANIHarness(ProgramHarness):
 
         return self._CACHE[name]
 
-    def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs TorchANI in FF typing
         """
