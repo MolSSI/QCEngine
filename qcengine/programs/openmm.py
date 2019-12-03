@@ -112,7 +112,7 @@ class OpenMMHarness(ProgramHarness):
 
         return (rdkit_found and openmm_found)
 
-    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
+    def compute(self, input_data: 'AtomicInput', config: 'TaskConfig') -> 'AtomicResult':
         """
         Runs OpenMM on given structure, inputs, in vacuum.
         """
@@ -131,7 +131,7 @@ class OpenMMHarness(ProgramHarness):
             basis = self._generate_basis(input_data)
             ret_data['basis'] = basis
 
-        # get number of threads to use from `JobConfig.ncores`; otherwise, try environment variable
+        # get number of threads to use from `TaskConfig.ncores`; otherwise, try environment variable
         nthreads = config.ncores
         if nthreads is None:
             nthreads = os.environ.get('OPENMM_CPU_THREADS')

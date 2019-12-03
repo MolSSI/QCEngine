@@ -7,7 +7,7 @@ import string
 from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..config import JobConfig
+    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
 
 from qcelemental.models import AtomicResult
