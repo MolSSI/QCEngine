@@ -35,7 +35,7 @@ class QChemHarness(ProgramHarness):
             raise_msg="Please install by visiting the Q-Chem website.",
         )
 
-    def _get_qc_path(self, config: Optional["JobConfig"] = None):
+    def _get_qc_path(self, config: Optional["TaskConfig"] = None):
         paths = os.environ.copy()
         paths["QCSCRATCH"] = tempfile.gettempdir()
         if config and config.scratch_directory:
@@ -67,7 +67,7 @@ class QChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Run qchem
         """
@@ -159,7 +159,7 @@ class QChemHarness(ProgramHarness):
         return exe_success, proc
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
 
         # Check some bounds on what cannot be parsed
@@ -225,7 +225,6 @@ $end
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
         output_data = {}
-        outfiles["dispatch.out"]
 
         bdata = {}
         for k, v in outfiles.items():
@@ -242,7 +241,7 @@ $end
         elif input_model.driver == "hessian":
             output_data["return_result"] = bdata["132.0"]
         else:
-            raise ValueError(f"Could not parse drive of type {driver}.")
+            raise ValueError(f"Could not parse driver of type {input_model.driver}.")
 
         properties = {
             "nuclear_repulsion_energy": bdata["99.0"][0],

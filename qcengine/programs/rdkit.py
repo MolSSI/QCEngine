@@ -25,29 +25,8 @@ class RDKitHarness(ProgramHarness):
         pass
 
     @staticmethod
-    def found(raise_error: bool = False) -> bool:
-        return which_import(
-            "rdkit",
-            return_bool=True,
-            raise_error=raise_error,
-            raise_msg="Please install via `conda install rdkit -c conda-forge`.",
-        )
-
-    def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
-        """
-        Runs RDKit in FF typing
-        """
-
-        self.found(raise_error=True)
-        import rdkit
+    def _process_molecule_rdkit(jmol):
         from rdkit import Chem
-        from rdkit.Chem import AllChem
-
-        # Failure flag
-        ret_data = {"success": False}
-
-        # Build the Molecule
-        jmol = input_data.molecule
 
         # Handle errors
         if abs(jmol.molecular_charge) > 1.0e-6:
@@ -85,6 +64,33 @@ class RDKitHarness(ProgramHarness):
 
         mol.AddConformer(conf)
         Chem.rdmolops.SanitizeMol(mol)
+
+        return mol
+
+    @staticmethod
+    def found(raise_error: bool = False) -> bool:
+        return which_import(
+            "rdkit",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install rdkit -c conda-forge`.",
+        )
+
+    def compute(self, input_data: 'AtomicInput', config: 'TaskConfig') -> 'AtomicResult':
+        """
+        Runs RDKit in FF typing
+        """
+
+        self.found(raise_error=True)
+        import rdkit
+        from rdkit.Chem import AllChem
+
+        # Failure flag
+        ret_data = {"success": False}
+
+        # Build the Molecule
+        jmol = input_data.molecule
+        mol = self._process_molecule_rdkit(jmol)
 
         if input_data.model.method.lower() == "uff":
             ff = AllChem.UFFGetMoleculeForceField(mol)

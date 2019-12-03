@@ -1,7 +1,7 @@
 Program Overview
 ================
 
-The general capabalities available through QCEngine for each program can be
+The general capabilities available through QCEngine for each program can be
 found below:
 
 Quantum Chemistry
@@ -12,7 +12,7 @@ Quantum Chemistry
 +============+============+===+===+===+============+==============+
 | CFOUR      | ✘          | ✓ | ✓ | ✘ | ✓          | ✘            |
 +------------+------------+---+---+---+------------+--------------+
-| Entos      | ✘          | ✓ | ✓ | ✘ | ✘          | ✘            |
+| Entos      | ✘          | ✓ | ✓ | ✓ | ✘          | ✘            |
 +------------+------------+---+---+---+------------+--------------+
 | GAMESS     | ✘          | ✓ | ✓ | ✘ | ✓          | ✘            |
 +------------+------------+---+---+---+------------+--------------+
@@ -29,7 +29,7 @@ Quantum Chemistry
 | Turbomole  | ✘          | ✓ | ✓ | ✘ | ✘          | ✘            |
 +------------+------------+---+---+---+------------+--------------+
 
-Semi-Emperical
+Semi-Empirical
 --------------
 
 +------------+------------+---+---+---+------------+--------------+
