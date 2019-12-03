@@ -77,7 +77,8 @@ class EntosHarness(ProgramHarness):
         "orbital_grad_threshold",
         "energy_threshold",
         "coulomb_method",
-        "exchange_method"}
+        "exchange_method",
+    }
     _dft_keywords_extra: Set[str] = _scf_keywords_extra.copy()
     _hf_keywords_extra: Set[str] = _scf_keywords_extra.copy()
     _xtb_keywords_extra: Set[str] = {}
@@ -86,15 +87,16 @@ class EntosHarness(ProgramHarness):
     _energy_commands: Dict[str, Any] = {
         "dft": _dft_keywords_extra,
         "hf": _hf_keywords_extra,
-        "xtb": _xtb_keywords_extra
+        "xtb": _xtb_keywords_extra,
     }
 
     class Config(ProgramHarness.Config):
         pass
 
     def found(self, raise_error: bool = False) -> bool:
-        return which("entos", return_bool=True, raise_error=raise_error,
-                     raise_msg="Please install via https://www.entos.info/")
+        return which(
+            "entos", return_bool=True, raise_error=raise_error, raise_msg="Please install via https://www.entos.info/"
+        )
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -134,14 +136,14 @@ class EntosHarness(ProgramHarness):
             return UnknownError(proc["stderr"])
 
     def execute(
-            self,
-            inputs: Dict[str, Any],
-            extra_infiles: Optional[Dict[str, str]] = None,
-            extra_outfiles: Optional[List[str]] = None,
-            extra_commands: Optional[List[str]] = None,
-            scratch_name: Optional[str] = None,
-            scratch_messy: bool = False,
-            timeout: Optional[int] = None,
+        self,
+        inputs: Dict[str, Any],
+        extra_infiles: Optional[Dict[str, str]] = None,
+        extra_outfiles: Optional[List[str]] = None,
+        extra_commands: Optional[List[str]] = None,
+        scratch_name: Optional[str] = None,
+        scratch_messy: bool = False,
+        timeout: Optional[int] = None,
     ) -> Tuple[bool, Dict[str, Any]]:
         """
         For option documentation go look at qcengine/util.execute
@@ -178,7 +180,7 @@ class EntosHarness(ProgramHarness):
         return exe_success, proc
 
     def build_input(
-            self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
 
         # Write the geom xyz file with unit au
@@ -195,19 +197,12 @@ class EntosHarness(ProgramHarness):
             scf_keywords_from_input_model = {
                 "ao": input_model.model.basis,
                 "charge": input_model.molecule.molecular_charge,
-                "spin": float(input_model.molecule.molecular_multiplicity - 1)
+                "spin": float(input_model.molecule.molecular_multiplicity - 1),
             }
             energy_keywords_from_input_model = {
-                "dft": {
-                    "xc": input_model.model.method.upper(),
-                    **scf_keywords_from_input_model
-                },
-                "hf": {
-                    **scf_keywords_from_input_model
-                },
-                "xtb": {
-                    "charge": input_model.molecule.molecular_charge,
-                }
+                "dft": {"xc": input_model.model.method.upper(), **scf_keywords_from_input_model},
+                "hf": {**scf_keywords_from_input_model},
+                "xtb": {"charge": input_model.molecule.molecular_charge,},
             }
 
             # Resolve keywords (extra options) for the energy command
@@ -234,28 +229,24 @@ class EntosHarness(ProgramHarness):
                 input_dict = {
                     "gradient": {
                         **structure,
-                        energy_command: {
-                            **energy_keywords_from_input_model[energy_command],
-                            **energy_keywords_extra,
-                        },
+                        energy_command: {**energy_keywords_from_input_model[energy_command], **energy_keywords_extra,},
                     },
                 }
-            elif input_model.driver == 'hessian':
+            elif input_model.driver == "hessian":
                 input_dict = {
                     "hessian": {
                         **structure,
-                        energy_command: {
-                            **energy_keywords_from_input_model[energy_command],
-                            **energy_keywords_extra
-                        },
+                        energy_command: {**energy_keywords_from_input_model[energy_command], **energy_keywords_extra},
                     },
                 }
             else:
                 raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
             # Write input file
-            input_file = [f"entos_policy(version = '{self.get_version()}')", "json_results := "] \
-                         + self.write_input_recursive(input_dict)
+            input_file = [
+                f"entos_policy(version = '{self.get_version()}')",
+                "json_results := ",
+            ] + self.write_input_recursive(input_dict)
             input_file = "\n".join(input_file)
 
         # Use the template input file if present
@@ -304,10 +295,7 @@ class EntosHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
-        scf_map = {
-            "energy": "scf_total_energy",
-            "n_iter": "scf_iterations"
-        }
+        scf_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
         scf_extras = {
             "converged": "scf_converged",
             "ao_basis": {"basis": {"n_functions", "shells"}},
@@ -321,11 +309,7 @@ class EntosHarness(ProgramHarness):
 
         xtb_map = scf_map.copy()
 
-        energy_command_map = {
-            "dft": dft_map,
-            "hf": hf_map,
-            "xtb": xtb_map
-        }
+        energy_command_map = {"dft": dft_map, "hf": hf_map, "xtb": xtb_map}
 
         # Determine the energy_command
         energy_command = self.determine_energy_command(input_model.model.method)
