@@ -316,7 +316,7 @@ def harvest_outfile_pass(outtext):
             r'\s*(?:Excitation energy / hartree)\s+.\s+' + NUMBER + #excitation energy hartree 
             r'\s*(?:/ eV)\s+.\s+' + NUMBER + r'\s*$', #excitation energy eV
             outtext, re.MULTILINE | re.DOTALL)
-        #regex should be more dynamic in finding values
+        #regex should be more dynamic in finding values, need to revisit
         #mobj.group(0) = symmetry value
         #mobj.group(1) = cc_name
         #mobj.group(2) = root number
@@ -400,20 +400,29 @@ def harvest_outfile_pass(outtext):
 
 #       2) Spin forbidden
         mobj = re.findall(
-            r'^\s+' + r'----------------------------------------------------------------------------' + r'\s*' +
-            r'^\s+' + r'Root' + r'\s+' + r'(\d+)' + r'\s+' + r'(\w+)' + r'\s+' + r'(.*?)' + r'\s+' + NUMBER +
-            r'\s+a\.u\.\s+' + NUMBER + r'\s+eV\s*' + r'^\s+' +
-            r'----------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            r'Transition Moments' + r'\s+Spin forbidden\s*$', outtext, re.MULTILINE)
+            r'^\s+(?:Root)\s+(\d+)\s+(.*?)\s+' + NUMBER + r'\s(?:a\.u\.)\s+' + NUMBER + r'\s+(?:\w+)'
+            #Root | symmetry | a.u. | eV
+            + r'\s+(?:.\w+.\s+.\s+\d+.\d+)' #s2 value 
+            + r'\s+Transition Moments\s+(?:Spin forbidden)' + r'\s*$',
+            outtext, re.MULTILINE)
+        #mobj.group(0) = Root
+        #mobj.group(1) = symmetry
+        #mobj.group(2) a.u.
+        #mobj.group(3) e.V
+        #mobj.group(4) Excitation energy
+        #mobj.group(5) Excited state energy
 
         if mobj:
             print('matched TDDFT - spin forbidden')
             for mobj_list in mobj:
                 #### temporary psivars ####
-                psivar['TDDFT ROOT %s %s %s EXCITATION ENERGY' %
-                       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
-                psivar['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0], mobj_list[1], mobj_list[2])] = \
-                    psivar['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
+                psivar['TDDFT ROOT %s EXCITATION ENERGY - %s SYMMETRY' % (mobj_list[0], mobj_list[2])] = mobj_list[4] #in eV
+                psivar['TDDFT ROOT %s EXCITED STATE ENERGY - %s SYMMETRY' % (mobj_list[0], mobj_list[2])] = psivar['DFT TOTAL ENERGY'] + qcel.constants.converstion_factor("eV", "hartree")*Decimal(mobj_list[4]) 
+
+                #psivar['TDDFT ROOT %s %s %s EXCITATION ENERGY' %
+                #       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
+                #psivar['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0], mobj_list[1], mobj_list[2])] = \
+                #    psivar['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
             if mobj:
                 print('Non-variation initial energy')  # prints out energy, 5 counts
 
