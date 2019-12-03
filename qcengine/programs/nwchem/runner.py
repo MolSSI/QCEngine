@@ -2,8 +2,8 @@
 Calls the NWChem executable.
 """
 import copy
-import pprint
 import logging
+import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -12,14 +12,14 @@ import numpy as np
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
-
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
+
 from ...exceptions import InputError
 from ...util import execute
 from ..model import ProgramHarness
 from .germinate import muster_modelchem
-from .harvester import harvest, extract_formatted_properties
+from .harvester import extract_formatted_properties, harvest
 from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -67,8 +67,7 @@ class NWChemHarness(ProgramHarness):
         # Run NWChem
         which_prog = which("nwchem")
         if which_prog not in self.version_cache:
-            success, output = execute([which_prog, "v.nw"], {"v.nw": ""},
-                                      scratch_directory=config.scratch_directory)
+            success, output = execute([which_prog, "v.nw"], {"v.nw": ""}, scratch_directory=config.scratch_directory)
 
             if success:
                 for line in output["stdout"].splitlines():
@@ -78,7 +77,7 @@ class NWChemHarness(ProgramHarness):
                         revision = line.strip().split()[-1]
                 self.version_cache[which_prog] = safe_version(branch + "+" + revision)
             else:
-                raise UnknownError(output['stderr'])
+                raise UnknownError(output["stderr"])
 
         return self.version_cache[which_prog]
 

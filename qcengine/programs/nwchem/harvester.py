@@ -1,7 +1,7 @@
-import re
 import logging
-from typing import Tuple
+import re
 from decimal import Decimal
+from typing import Tuple
 
 import qcelemental as qcel
 from qcelemental.models import Molecule
