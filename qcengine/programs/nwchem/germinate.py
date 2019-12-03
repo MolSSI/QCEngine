@@ -160,7 +160,10 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
             mdccmd = f"task tce {runtyp}\n\n"
             opts["tce__ccsd(t)"] = True
         else:
-            mdccmd = f"task ccsd(t) {runtyp}\n\n"
+            mdccmd = f'task ccsd(t) {runtyp}\n\n'
+    
+    elif method == 'tddft':
+        mdccmd = f'task tddft {runtyp}\n\n'
 
     elif method in ["sodft", "direct_mp2", "rimp2", "mcscf", "selci", "md", "pspw", "band"]:
         raise InputError(f'Method "{method}" not yet supported by QCEngine')

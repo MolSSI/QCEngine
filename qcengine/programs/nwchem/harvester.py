@@ -224,7 +224,6 @@ def harvest_outfile_pass(outtext):
                 r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', 
                 outtext, re.MULTILINE)
-
             if mobj:
                 cc_plain = cc_name.replace('\\', '')
                 cc_corr = cc_plain.replace('CCSD', '')
@@ -233,7 +232,6 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_corr} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_plain} CORRELATION ENERGY'] = mobj.group(2)
                 psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
-        
         #TCE dipole with () or []
             mobj2 = re.search(
                     r'^\s+' + cc_name + r'dipole moments / hartree & Debye' + r'\s*' +
@@ -282,6 +280,7 @@ def harvest_outfile_pass(outtext):
                 psivar[f'CURRENT DIPOLE Z'] = mobj2.group(6)
 
         # Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
+
         mobj = re.search(
             r'^\s+' + r'-----------' + r'\s*' + r'^\s+' + r'CCSD Energy' + r'\s*' + r'^\s+' + r'-----------' + r'\s*' +
             r'^\s+' + r'Reference energy:' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'CCSD corr\. energy:' + r'\s+' +
