@@ -78,12 +78,8 @@ class EntosHarness(ProgramHarness):
         "energy_threshold",
         "coulomb_method",
         "exchange_method"}
-    _dft_keywords_extra: Set[str] = {
-        *_scf_keywords_extra
-    }
-    _hf_keywords_extra: Set[str] = {
-        *_scf_keywords_extra
-    }
+    _dft_keywords_extra: Set[str] = _scf_keywords_extra.copy()
+    _hf_keywords_extra: Set[str] = _scf_keywords_extra.copy()
     _xtb_keywords_extra: Set[str] = {}
 
     # Energy commands that are currently supported and their available keywords
@@ -319,17 +315,11 @@ class EntosHarness(ProgramHarness):
             "orbitals": "scf_orbitals",
             "fock": "fock",
         }
-        dft_map = {
-            **scf_map
-        }
+        dft_map = scf_map.copy()
 
-        hf_map = {
-            **scf_map
-        }
+        hf_map = scf_map.copy()
 
-        xtb_map = {
-            **scf_map
-        }
+        xtb_map = scf_map.copy()
 
         energy_command_map = {
             "dft": dft_map,
