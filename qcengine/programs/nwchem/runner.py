@@ -149,7 +149,7 @@ class NWChemHarness(ProgramHarness):
 
         # Determine the command
         if config.nnodes > 1:
-            nwchemrec["command"] = create_mpi_invocation(which("nwchem"), )
+            nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
         else:
             nwchemrec["command"] = [which("nwchem")]
 
