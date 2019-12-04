@@ -37,7 +37,7 @@ class ProcedureHarness(BaseModel, abc.ABC):
         """
 
     @abc.abstractmethod
-    def compute(self, input_data: "BaseModel", config: "JobConfig") -> "BaseModel":
+    def compute(self, input_data: "BaseModel", config: "TaskConfig") -> "BaseModel":
         pass
 
     @abc.abstractmethod

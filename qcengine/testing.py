@@ -12,7 +12,7 @@ import qcelemental as qcel
 import qcengine as qcng
 from qcelemental.util import which, which_import
 
-QCENGINE_RECORDS_COMMIT = "fe14d77"
+QCENGINE_RECORDS_COMMIT = "a18e236"
 
 
 def _check_qcenginerecords(return_data=False):
@@ -23,7 +23,7 @@ def _check_qcenginerecords(return_data=False):
 
         qcer_hash = qcenginerecords.__git_revision__[:7]
         if qcer_hash != QCENGINE_RECORDS_COMMIT[:7]:
-            msg = f"Incorrect QCEngineRecord Git Revsion, found {qcer_hash} need {QCENGINE_RECORDS_COMMIT[:7]}."
+            msg = f"Incorrect QCEngineRecord Git Revision, found {qcer_hash} need {QCENGINE_RECORDS_COMMIT[:7]}."
         else:
             skip = False
             msg = "Works!"
@@ -90,7 +90,7 @@ def failure_engine():
         def found(raise_error: bool = False) -> bool:
             return True
 
-        def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+        def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
             self.ncalls += 1
             mode = self.iter_modes.pop(0)
 
@@ -152,7 +152,7 @@ _programs = {
     "terachem": which("terachem", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
-    "entos": is_program_new_enough("entos", "0.6"),
+    "entos": is_program_new_enough("entos", "0.7.1"),
     "cfour": which("xcfour", return_bool=True),
     "gamess": which("rungms", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),

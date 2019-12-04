@@ -51,7 +51,7 @@ class MopacHarness(ProgramHarness):
         # Not really possible to pull at the moment, MolSSI will add a version ability
         return "2016"
 
-    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs Psi4 in API mode
         """
@@ -109,7 +109,7 @@ class MopacHarness(ProgramHarness):
         return exe_success, proc
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
 
         if template is not None:

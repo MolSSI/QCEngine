@@ -3,6 +3,7 @@ Calls the NWChem executable.
 """
 import copy
 import pprint
+import logging
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -12,14 +13,17 @@ import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
+from qcengine.config import TaskConfig, get_config
+from qcengine.exceptions import UnknownError
 from ...exceptions import InputError
 from ...util import execute
 from ..model import ProgramHarness
 from .germinate import muster_modelchem
-from .harvester import harvest
+from .harvester import harvest, extract_formatted_properties
 from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
+logger = logging.getLogger(__name__)
 
 
 class NWChemHarness(ProgramHarness):
@@ -57,9 +61,14 @@ class NWChemHarness(ProgramHarness):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
+        # Get the node configuration
+        config = get_config()
+
+        # Run NWChem
         which_prog = which("nwchem")
         if which_prog not in self.version_cache:
-            success, output = execute([which_prog, "v.nw"], {"v.nw": ""})
+            success, output = execute([which_prog, "v.nw"], {"v.nw": ""},
+                                      scratch_directory=config.scratch_directory)
 
             if success:
                 for line in output["stdout"].splitlines():
@@ -68,10 +77,12 @@ class NWChemHarness(ProgramHarness):
                     if "nwchem revision" in line:
                         revision = line.strip().split()[-1]
                 self.version_cache[which_prog] = safe_version(branch + "+" + revision)
+            else:
+                raise UnknownError(output['stderr'])
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs NWChem in executable mode
         """
@@ -90,9 +101,11 @@ class NWChemHarness(ProgramHarness):
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
+        else:
+            raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -119,8 +132,9 @@ class NWChemHarness(ProgramHarness):
         for el in set(input_model.molecule.symbols):
             opts[f"basis__{el}"] = f"library {input_model.model.basis}"
 
-        print("JOB_OPTS")
-        pp.pprint(opts)
+        # Log the job settings
+        logger.debug("JOB_OPTS")
+        logger.debug(pp.pformat(opts))
 
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
@@ -164,11 +178,15 @@ class NWChemHarness(ProgramHarness):
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()
 
+        # Get the formatted properties
+        qcprops = extract_formatted_properties(qcvars)
+
+        # Format them inout an output
         output_data = {
             "schema_name": "qcschema_output",
             "schema_version": 1,
             "extras": {"outfiles": outfiles},
-            "properties": {},
+            "properties": qcprops,
             "provenance": Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
             "return_result": retres,
             "stdout": stdout,

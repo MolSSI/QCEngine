@@ -40,7 +40,7 @@ class QChemHarness(ProgramHarness):
             raise_msg="Please install by visiting the Q-Chem website.",
         )
 
-    def _get_qc_path(self, config: Optional["JobConfig"] = None):
+    def _get_qc_path(self, config: Optional["TaskConfig"] = None):
         paths = os.environ.copy()
         paths["QCSCRATCH"] = tempfile.gettempdir()
         if config and config.scratch_directory:
@@ -72,7 +72,7 @@ class QChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "JobConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Run qchem
         """
@@ -164,7 +164,7 @@ class QChemHarness(ProgramHarness):
         return exe_success, proc
 
     def build_input(
-        self, input_model: "AtomicInput", config: "JobConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
 
         # Check some bounds on what cannot be parsed

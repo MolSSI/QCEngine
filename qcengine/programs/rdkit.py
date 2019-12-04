@@ -76,7 +76,7 @@ class RDKitHarness(ProgramHarness):
             raise_msg="Please install via `conda install rdkit -c conda-forge`.",
         )
 
-    def compute(self, input_data: 'AtomicInput', config: 'JobConfig') -> 'AtomicResult':
+    def compute(self, input_data: 'AtomicInput', config: 'TaskConfig') -> 'AtomicResult':
         """
         Runs RDKit in FF typing
         """
