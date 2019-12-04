@@ -18,7 +18,7 @@ from qcelemental import constants
 from ..exceptions import InputError, UnknownError
 from ..util import disk_files, execute, popen, temporary_directory
 from .model import ProgramHarness
-
+from .util import regex
 
 class QChemHarness(ProgramHarness):
     _defaults: Dict[str, Any] = {
@@ -269,9 +269,9 @@ $end
         """Parses a log file. Should only be used when QCSCRATCH is not available."""
         warnings.warn("parse_logfile should only be used when the QCSCRATCH directory is not available.")
 
-        NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+        NUMBER = regex.NUMBER
 
-        input = {}
+        input_dict = {}
         mobj = re.search(r'\n-{20,}\nUser input:\n-{20,}\n(.+)\n-{20,}', outtext, re.DOTALL)
         if mobj:
             inputtext = mobj.group(1)
@@ -285,7 +285,7 @@ $end
                 cf = constants.conversion_factor('angstrom', 'bohr')
                 geometry = [list(map(lambda x: float(x) *cf, line.split()[1:4])) for line in lines[1:]]
                 molecule = {'molecular_multiplicity': spin, 'molecular_charge': charge, 'geometry': geometry, 'symbols': symbols}
-                input["molecule"] = molecule
+                input_dict["molecule"] = molecule
 
             rem_match = re.search(r'\$rem\s*\n([^\$]+)\n\s*\$end', inputtext, re.DOTALL | re.IGNORECASE)
             if rem_match:
@@ -295,21 +295,21 @@ $end
                 for line in lines:
                     s = line.split()
                     keywords[s[0].lower()] = s[1]
-                input["model"] = {}
-                input["model"]["method"] = keywords.pop('method').lower()
-                input["model"]["basis"] = keywords.pop('basis').lower()
+                input_dict["model"] = {}
+                input_dict["model"]["method"] = keywords.pop('method').lower()
+                input_dict["model"]["basis"] = keywords.pop('basis').lower()
                 if 'jobtype' in keywords:
                     jobtype = keywords.pop('jobtype')
                 else:
                     jobtype = 'sp'
                 _jobtype_to_driver = {'sp': 'energy', 'force': 'gradient', 'freq': 'hessian'}
-                input["driver"] = _jobtype_to_driver[jobtype]
+                input_dict["driver"] = _jobtype_to_driver[jobtype]
                 for key in keywords:
                     if keywords[key] == "false":
                         keywords[key] = False
                     if keywords[key] == "true":
                         keywords[key] = True
-                input["keywords"] = keywords
+                input_dict["keywords"] = keywords
 
         provenance = provenance_stamp(__name__)
 
@@ -344,8 +344,8 @@ $end
         if mobj:
             properties['calcinfo_nbasis'] = int(mobj.group(1))
 
-        if "molecule" in input:
-            properties['calcinfo_natom'] = len(input['molecule']['symbols'])
+        if "molecule" in input_dict:
+            properties['calcinfo_natom'] = len(input_dict['molecule']['symbols'])
 
         mobj = re.search(r'\n\s*(\d+)\s+'+NUMBER+'\s+'+NUMBER+r'\s+Convergence criterion met\s*\n', outtext)
         if mobj:
@@ -400,7 +400,7 @@ $end
                         "wb97x-rv", "wb97m-v", "m11", "mn12-sx", "wb97m-rv", "wm05-d", "wm06-d3", "dsd-pbepbe-d3","wb97x-2(lp)","wb97x-2(tqz)","xyg3","xygj-os","b2plyp","b2gpplyp","dsd-pbep86-d3","ls1dh-pbe","pbe-qidh","pbe0-2","pbe0-dh","ptpss-d3","dsd-pbeb95-d3","pwpb95-d3"}
         _mp2_methods = {"rimp2"}
 
-        method = input["model"]["method"].lower()
+        method = input_dict["model"]["method"].lower()
         if method in _mp2_methods:
             properties["return_energy"] = properties["mp2_total_energy"]
         elif method in _scf_methods:
@@ -408,7 +408,7 @@ $end
         else:
             raise NotImplementedError(f"Method {method} not supported for energy driver.")
 
-        if input["driver"] == "gradient":
+        if input_dict["driver"] == "gradient":
             def read_matrix(text):
                 lines = text.split("\n")
                 i = 0
@@ -457,7 +457,7 @@ $end
         results["stdout"] = outtext
         results["provenance"] = provenance
         results["properties"] = properties
-        if input["driver"] == "energy":
+        if input_dict["driver"] == "energy":
             results["return_result"] = properties["return_energy"]
 
-        return AtomicResult(**{**input, **results})
+        return AtomicResult(**{**input_dict, **results})

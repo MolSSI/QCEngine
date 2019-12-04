@@ -7,7 +7,7 @@ import qcelemental as qcel
 from qcelemental.models import Molecule
 from qcelemental.models.results import AtomicResultProperties
 
-from ..util import PreservingDict
+from ..util import PreservingDict, regex
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ def harvest_outfile_pass(outtext):
     version = ""
     error = ""  # TODO (wardlt): The error string is never used.
 
-    NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+    NUMBER = regex.NUMBER
     # fmt: off
 
     # Process version

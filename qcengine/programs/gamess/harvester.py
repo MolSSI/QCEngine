@@ -11,6 +11,7 @@ import qcelemental as qcel
 from qcelemental.models import Molecule
 
 from ..util import PreservingDict
+from ..util import regex
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
@@ -71,7 +72,7 @@ def harvest_outfile_pass(outtext):
     qcvar_coord = None
     qcvar_grad = None
 
-    NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+    NUMBER = regex.NUMBER
 
     # If calculation fail to converge
     mobj = re.search(r"^\s+" + r"(?:GAMESS TERMINATED ABNORMALLY)" + r"\s*$", outtext, re.MULTILINE)

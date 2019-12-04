@@ -6,7 +6,7 @@ import numpy as np
 import qcelemental as qcel
 from qcelemental.models import Molecule
 
-from ..util import PreservingDict, load_hessian
+from ..util import PreservingDict, load_hessian, regex
 
 
 def harvest_output(outtext):
@@ -63,7 +63,7 @@ def harvest_outfile_pass(outtext):
     #          vcc/ecc
 
     # fmt: off
-    NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+    NUMBER = regex.NUMBER
 
     # Process version
     mobj = re.search(r'^\s*' + r'Version' + r'\s+' + r'(?P<version>[\w.]+)' + r'\s*$',
