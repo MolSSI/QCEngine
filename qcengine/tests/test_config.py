@@ -1,5 +1,5 @@
 """
-Tests the DQM compute module configuration
+Tests the QCEngine compute module configuration
 """
 
 import copy
@@ -8,7 +8,7 @@ import pydantic
 import pytest
 
 import qcengine as qcng
-from qcengine.util import environ_context
+from qcengine.util import environ_context, create_mpi_invocation
 
 
 def test_node_blank():
@@ -77,6 +77,15 @@ def opt_state_basic():
                 "scratch_directory": "$NOVAR_RANDOM_ABC123",
             },
             {"name": "newriver", "hostname_pattern": "nr*", "jobs_per_node": 2, "ncores": 24, "memory": 240},
+            {
+                "name": "batchnode",
+                "hostname_pattern": "bn*",
+                "is_batch_node": True,
+                "jobs_per_node": 1,
+                "mpirun_command": "mpirun -n {total_ranks}",
+                "ncores": 24,
+                "memory": 240
+            },
             {
                 "name": "default",
                 "hostname_pattern": "*",
@@ -155,8 +164,18 @@ def test_config_local_njob_ncore_plus_memory(opt_state_basic):
 
 
 def test_config_local_nnodes(opt_state_basic):
-    config = qcng.config.get_config(hostname="something", local_options={"nnodes": 4})
-    assert config.nnodes == 4
+    # Give a warning that mentions that mpirun is needed if you define a multi-node task
+    with pytest.raises(ValueError) as exc:
+        qcng.config.get_config(hostname="something", local_options={"nnodes": 10})
+    assert 'https://qcengine.readthedocs.io/en/stable/environment.html' in str(exc.value)
+
+    # Test with an MPI run command
+    config = qcng.config.get_config(hostname="something",
+                                    local_options={"nnodes": 4,
+                                                   "mpirun_command": "mpirun -n {total_ranks} -N {ranks_per_node}"})
+    assert config.use_mpirun
+    assert config.mpirun_command.startswith('mpirun')
+    assert create_mpi_invocation('hello_world', config) == ['mpirun', '-n', '20', '-N', '5', 'hello_world']
 
 
 def test_config_validation(opt_state_basic):
@@ -166,3 +185,16 @@ def test_config_validation(opt_state_basic):
 
 def test_global_repr():
     assert isinstance(qcng.config.global_repr(), str)
+
+
+def test_batch_node(opt_state_basic):
+    # Should always use mpirun
+    config = qcng.config.get_config(hostname="bn1")
+    assert config.use_mpirun
+    assert config.ncores == 24
+    assert config.nnodes == 1
+
+    config = qcng.config.get_config(hostname="bn1", local_options={'nnodes': 2})
+    assert config.use_mpirun
+    assert config.ncores == 24
+    assert config.nnodes == 2

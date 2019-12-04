@@ -276,6 +276,11 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
     if local_options is not None:
         config.update(local_options)
 
+    # Make sure mpirun command is defined if needed
+    if config["use_mpirun"] and config["mpirun_command"] is None:
+        raise ValueError("You need to define the mpirun command for this node. "
+                         "See: https://qcengine.readthedocs.io/en/stable/environment.html")
+
     return TaskConfig(**config)
 
 
