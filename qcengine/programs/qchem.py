@@ -5,8 +5,9 @@ Calls the Q-Chem executable.
 import os
 import re
 import tempfile
+import warnings
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -17,8 +18,6 @@ from qcelemental import constants
 from ..exceptions import InputError, UnknownError
 from ..util import disk_files, execute, popen, temporary_directory
 from .model import ProgramHarness
-
-from pathlib import Path
 
 
 class QChemHarness(ProgramHarness):
@@ -266,10 +265,9 @@ $end
         return AtomicResult(**{**input_model.dict(), **output_data})
 
     @staticmethod
-    def parse_logfile(logpath: Union[str, Path]) -> AtomicResult:
+    def parse_logfile(outtext: str) -> AtomicResult:
         """Parses a log file. Should only be used when QCSCRATCH is not available."""
-        with open(logpath, 'r') as handle:
-            outtext = handle.read()
+        warnings.warn("parse_logfile should only be used when the QCSCRATCH directory is not available.")
 
         NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
 

@@ -7,6 +7,7 @@ from qcelemental.testing import compare_recursive, compare_values
 from qcengine.testing import qcengine_records, using_qchem
 
 qchem_info = qcengine_records("qchem")
+qchem_logonly_info = qcengine_records("qchem_logonly")
 
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
@@ -90,3 +91,22 @@ def test_qchem_orientation():
     ret = qcng.compute(inp, "qchem", raise_error=True)
 
     assert compare_values(np.linalg.norm(ret.return_result, axis=0), [0, 0.00559696541, 0.00559696541])
+
+
+@pytest.mark.parametrize("test_case", qchem_logonly_info.list_test_cases())
+def test_qchem_logfile_parser(test_case):
+
+    # Get output file data
+    data = qchem_logonly_info.get_test_data(test_case)
+
+    with pytest.warns(Warning):
+        output = qcng.get_program("qchem", check=False).parse_logfile(data["qchem.out"]).dict()
+    output["stdout"] = None
+
+    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    for key in output["provenance"]:
+        if key not in output_ref["provenance"]:
+            output.pop(key)
+
+    check = compare_recursive(output_ref, output)
+    assert check, check
