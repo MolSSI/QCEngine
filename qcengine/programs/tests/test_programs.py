@@ -224,6 +224,7 @@ def test_random_failure_with_success(failure_engine):
     assert ret.provenance.retries == 1
     assert ret.extras["ncalls"] == 2
 
+
 @testing.using_openmm
 def test_openmm_task_offxml_basis():
     from qcengine.programs.openmm import OpenMMHarness
@@ -231,12 +232,8 @@ def test_openmm_task_offxml_basis():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {
-            "method": "openmm",
-            "basis": "openff-1.0.0",
-            "offxml": "openff-1.0.0.offxml",
-        },
-        "keywords": {}
+        "model": {"method": "openmm", "basis": "openff-1.0.0", "offxml": "openff-1.0.0.offxml",},
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "openmm", raise_error=True)
@@ -261,12 +258,8 @@ def test_openmm_task_offxml_nobasis():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {
-            "method": "openmm",
-            "basis": None,
-            "offxml": "openff-1.0.0.offxml",
-        },
-        "keywords": {}
+        "model": {"method": "openmm", "basis": None, "offxml": "openff-1.0.0.offxml",},
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "openmm", raise_error=True)
@@ -295,9 +288,8 @@ def test_openmm_task_url_basis():
             "basis": "openff-1.0.0",
             "url": "https://raw.githubusercontent.com/openforcefield/openforcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
         },
-        "keywords": {}
+        "keywords": {},
     }
-
 
     ret = qcng.compute(input_data, "openmm", raise_error=True)
 
@@ -326,7 +318,7 @@ def test_openmm_task_url_nobasis():
             "basis": None,
             "url": "https://raw.githubusercontent.com/openforcefield/openforcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
         },
-        "keywords": {}
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "openmm", raise_error=True)

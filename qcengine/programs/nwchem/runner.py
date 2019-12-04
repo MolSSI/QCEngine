@@ -67,8 +67,7 @@ class NWChemHarness(ProgramHarness):
         # Run NWChem
         which_prog = which("nwchem")
         if which_prog not in self.version_cache:
-            success, output = execute([which_prog, "v.nw"], {"v.nw": ""},
-                                      scratch_directory=config.scratch_directory)
+            success, output = execute([which_prog, "v.nw"], {"v.nw": ""}, scratch_directory=config.scratch_directory)
 
             if success:
                 for line in output["stdout"].splitlines():
@@ -78,7 +77,7 @@ class NWChemHarness(ProgramHarness):
                         revision = line.strip().split()[-1]
                 self.version_cache[which_prog] = safe_version(branch + "+" + revision)
             else:
-                raise UnknownError(output['stderr'])
+                raise UnknownError(output["stderr"])
 
         return self.version_cache[which_prog]
 

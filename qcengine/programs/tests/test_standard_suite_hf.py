@@ -41,7 +41,7 @@ def nh2():
             "entos",
             "aug-cc-pVDZ",
             {"coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
-            marks=testing.using_entos
+            marks=testing.using_entos,
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=testing.using_gamess),
         pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using_molpro),
@@ -88,7 +88,7 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
             "entos",
             "aug-cc-pVDZ",
             {"ansatz": "u", "coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
-            marks=testing.using_entos
+            marks=testing.using_entos,
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=testing.using_gamess),
         pytest.param("molpro", "aug-cc-pvdz", {"reference": "unrestricted"}, marks=testing.using_molpro),
