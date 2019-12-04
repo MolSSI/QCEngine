@@ -68,7 +68,6 @@ def compute(
 
         # Grab the executor and build the input model
         executor = get_program(program)
-        print("executor", executor)
 
         # Build the model and validate
         input_data = model_wrapper(input_data, AtomicInput)

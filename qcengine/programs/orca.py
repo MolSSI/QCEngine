@@ -3,6 +3,8 @@ Calls the Orca executable.
 """
 
 import string
+import cclib
+import io
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -67,9 +69,7 @@ class OrcaHarness(ProgramHarness):
         pass
 
     def found(self, raise_error: bool = False) -> bool:
-        return which(
-            "orca", return_bool=True, raise_error=raise_error, raise_msg="Please install via."
-        )
+        return which("orca", return_bool=True, raise_error=raise_error, raise_msg="Please install via.")
 
     # TODO Consider changing this to use molpro --version instead of performing a full execute
     def get_version(self) -> str:
@@ -111,14 +111,11 @@ class OrcaHarness(ProgramHarness):
 
         # Run Orca
         exe_success, proc = self.execute(job_inputs)
-        print("Sucess and Proc")
-        print(exe_success, proc)
-        print("END")
 
         # Determine whether the calculation succeeded
         if exe_success:
             # If execution succeeded, collect results
-            result = self.parse_output(proc["outfiles"], input_data)
+            result = self.parse_output(proc["stdout"], input_data)
             return result
         else:
             # Return UnknownError for error propagation
@@ -145,7 +142,7 @@ class OrcaHarness(ProgramHarness):
             infiles.update(extra_infiles)
 
         # Collect all output files and update with extra_outfiles
-        outfiles = ["dispatch.out", "dispatch.xml"]
+        outfiles = []
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
@@ -215,7 +212,6 @@ class OrcaHarness(ProgramHarness):
                 input_file.append("! SP {} {}".format(input_model.model.method, input_model.model.basis))
                 input_file.append(xyz_block)
 
-
                 # energy_call.append(f"{{{dft_type},{input_model.model.method}}}")
             elif input_model.model.method.upper() in self._hf_methods:  # HF case
                 energy_call.append(f"{{{hf_type}}}")
@@ -250,7 +246,6 @@ class OrcaHarness(ProgramHarness):
             str_template = string.Template(template)
             input_file = str_template.substitute()
 
-        print(input_file)
         return {
             # "commands": ["molpro", "dispatch.mol", "-d", ".", "-W", ".", "-n", str(config.ncores)],
             "commands": ["orca", "dispatch.mol"],
@@ -260,11 +255,7 @@ class OrcaHarness(ProgramHarness):
         }
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
-        print("parse output calling")
-        print("outfiles", outfiles)
-        tree = ET.ElementTree(ET.fromstring(outfiles["dispatch.xml"]))
-        root = tree.getroot()
-        # print(root.tag)
+        data = cclib.io.ccread(io.StringIO(outfiles))
 
         # TODO Read information from molecule tag
         #      - cml:molecule, cml:atomArray (?)
