@@ -3,17 +3,22 @@ Calls the Q-Chem executable.
 """
 
 import os
+import re
 import tempfile
-from typing import Any, Dict, List, Optional, Tuple
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-from qcelemental.models import AtomicResult
-from qcelemental.util import parse_version, safe_version, which
+from qcelemental.models import AtomicInput, AtomicResult
+from qcelemental.util import parse_version, safe_version, which, provenance_stamp
+from qcelemental import constants
 
 from ..exceptions import InputError, UnknownError
 from ..util import disk_files, execute, popen, temporary_directory
 from .model import ProgramHarness
+
+from pathlib import Path
 
 
 class QChemHarness(ProgramHarness):
@@ -222,7 +227,7 @@ $end
 
         return ret
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
+    def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> AtomicResult:
 
         output_data = {}
 
@@ -259,3 +264,202 @@ $end
         output_data["success"] = True
 
         return AtomicResult(**{**input_model.dict(), **output_data})
+
+    @staticmethod
+    def parse_logfile(logpath: Union[str, Path]) -> AtomicResult:
+        """Parses a log file. Should only be used when QCSCRATCH is not available."""
+        with open(logpath, 'r') as handle:
+            outtext = handle.read()
+
+        NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+
+        input = {}
+        mobj = re.search(r'\n-{20,}\nUser input:\n-{20,}\n(.+)\n-{20,}', outtext, re.DOTALL)
+        if mobj:
+            inputtext = mobj.group(1)
+
+            molecule_match = re.search(r'\$molecule\s*\n([^\$]+)\n\s*\$end', inputtext, re.DOTALL | re.IGNORECASE)
+            if molecule_match:
+                molecule_text = molecule_match.group(1)
+                lines = molecule_text.split('\n')
+                charge, spin = map(int, lines[0].split())
+                symbols = [line.split()[0] for line in lines[1:]]
+                cf = constants.conversion_factor('angstrom', 'bohr')
+                geometry = [list(map(lambda x: float(x) *cf, line.split()[1:4])) for line in lines[1:]]
+                molecule = {'molecular_multiplicity': spin, 'molecular_charge': charge, 'geometry': geometry, 'symbols': symbols}
+                input["molecule"] = molecule
+
+            rem_match = re.search(r'\$rem\s*\n([^\$]+)\n\s*\$end', inputtext, re.DOTALL | re.IGNORECASE)
+            if rem_match:
+                rem_text = rem_match.group(1)
+                lines = rem_text.split('\n')
+                keywords = {}
+                for line in lines:
+                    s = line.split()
+                    keywords[s[0].lower()] = s[1]
+                input["model"] = {}
+                input["model"]["method"] = keywords.pop('method').lower()
+                input["model"]["basis"] = keywords.pop('basis').lower()
+                if 'jobtype' in keywords:
+                    jobtype = keywords.pop('jobtype')
+                else:
+                    jobtype = 'sp'
+                _jobtype_to_driver = {'sp': 'energy', 'force': 'gradient', 'freq': 'hessian'}
+                input["driver"] = _jobtype_to_driver[jobtype]
+                for key in keywords:
+                    if keywords[key] == "false":
+                        keywords[key] = False
+                    if keywords[key] == "true":
+                        keywords[key] = True
+                input["keywords"] = keywords
+
+        provenance = provenance_stamp(__name__)
+
+        mobj = re.search(r'This is a multi-thread run using ([0-9]+) threads', outtext)
+        if mobj:
+            provenance["nthreads"] = int(mobj.group(1))
+
+        mobj = re.search(r'Total job time:\s*'+NUMBER+r's\(wall\)', outtext)
+        if mobj:
+            provenance["wall_time"] = float(mobj.group(1))
+
+        mobj = re.search(r'Archival summary:\s*\n[0-9]+\\[0-9+]\\([\w\.\-]+)\\', outtext)
+        if mobj:
+            provenance["hostname"] = mobj.group(1)
+
+        properties = {}
+
+        mobj = re.search(r'\n\s*SCF\s+energy in the final basis set =\s+'+NUMBER+r'\s*\n', outtext)
+        if mobj:
+            properties['scf_total_energy'] = float(mobj.group(1))
+
+        mobj = re.search(r'\n\s*Nuclear Repulsion Energy =\s+'+NUMBER+r'\s+hartrees\s*\n', outtext)
+        if mobj:
+            properties['nuclear_repulsion_energy'] = float(mobj.group(1))
+
+        mobj = re.search(r'\n\s*There are\s+(\d+) alpha and\s+(\d+) beta electrons\s*\n', outtext)
+        if mobj:
+            properties['calcinfo_nalpha'] = int(mobj.group(1))
+            properties['calcinfo_nbeta'] = int(mobj.group(2))
+
+        mobj = re.search(r'\n\s*There are\s+\d+ shells and\s+(\d+) basis functions\s*\n', outtext)
+        if mobj:
+            properties['calcinfo_nbasis'] = int(mobj.group(1))
+
+        if "molecule" in input:
+            properties['calcinfo_natom'] = len(input['molecule']['symbols'])
+
+        mobj = re.search(r'\n\s*(\d+)\s+'+NUMBER+'\s+'+NUMBER+r'\s+Convergence criterion met\s*\n', outtext)
+        if mobj:
+            properties['scf_iterations'] = int(mobj.group(1))
+
+        mobj = re.search(r'\n\s+Dipole Moment (Debye)\s*\n\s+X\s+'+NUMBER+r'\s+Y\s+'+NUMBER+'\s+Z\s+'+NUMBER+'\s*\n', outtext)
+        if mobj:
+            cf = constants.conversion_factor('debye', 'e * bohr')
+            properties['scf_dipole_moment'] = [float(mobj.group(i)) * cf for i in range(1, 4)]
+
+        mobj = re.search(r'\n\s*RI-MP2 TOTAL ENERGY\s+=\s+'+NUMBER+r'\s+au\s*\n', outtext)
+        if mobj:
+            properties['mp2_total_energy'] = float(mobj.group(1))
+
+        mobj = re.search(r'\n\s*RI-MP2 CORRELATION ENERGY\s+=\s+' + NUMBER + r'\s+au\s*\n', outtext)
+        if mobj:
+            properties['mp2_correlation_energy'] = float(mobj.group(1))
+
+        mobj = re.search(r'\n\s*RI-MP2 SINGLES ENERGY\s+=\s+' + NUMBER + r'\s+au\s*\n', outtext)
+        if mobj:
+            properties['mp2_singles_energy'] = float(mobj.group(1))
+
+        mobj_aaaa = re.search(r'\n\s*RI-MP2 ENERGY \(aa\|aa\)\s+=\s+' + NUMBER + r'\s+au\s*\n', outtext)
+        mobj_bbbb = re.search(r'\n\s*RI-MP2 ENERGY \(bb\|bb\)\s+=\s+' + NUMBER + r'\s+au\s*\n', outtext)
+        if mobj_aaaa and mobj_bbbb:
+            properties['mp2_same_spin_correlation_energy'] = float(mobj_aaaa.group(1)) + float(mobj_bbbb.group(1))
+
+        mobj_aabb = re.search(r'\n\s*RI-MP2 ENERGY \(aa\|bb\)\s+=\s+' + NUMBER + r'\s+au\s*\n', outtext)
+        mobj_bbaa = re.search(r'\n\s*RI-MP2 ENERGY \(bb\|aa\)\s+=\s+' + NUMBER + r'\s+au\s*\n', outtext)
+        if mobj_aaaa and mobj_bbbb:
+            properties['mp2_opposite_spin_correlation_energy'] = float(mobj_aabb.group(1)) + float(mobj_bbaa.group(1))
+
+        results = {}
+
+
+
+
+        _scf_methods = {"hf", "spw92", "lda", "svwn5", "b97-d3(0)", "b97-d", "pbe", "blyp", "revpbe", "beef-vdw", "bop",
+                        "bp86", "bp86vwn", "bpbe", "edf1", "edf2", "gam", "hcth93", "hcth120", "hcth147", "hcth407",
+                        "hle16", "kt1", "kt2", "kt3", "mpw91", "n12", "olyp", "pbeop", "pbesol", "pw91", "rpbe",
+                        "rvv10", "sogga", "sogga11", "vv10", "b97m-v", "b97m-rv", "m06-l", "tpss",
+                        "revtpss", "bloc", "m11-l", "mbeef", "mgga_ms0", "mgga_ms1", "mgga_ms2", "mgga_mvs", "mn12-l",
+                        "mn15-l", "otpss", "pkzb", "scan", "t-hcth", "tm", "vsxc", "b3lyp", "pbe0", "revpbe0",
+                        "b97", "b1lyp", "b1pw91", "b3lyp5", "b3p86", "b1lyp", "b1pw91", "b3lyp5", "b3p86", "b3pw91",
+                        "b5050lyp", "b97-1", "b97-2", "b97-3", "b97-k", "bhhlyp", "hflyp", "mpw1k", "mpw1lyp",
+                        "mpw1pbe", "mpw1pw91", "o3lyp", "pbeh-3c", "pbe50", "sogga11-x", "wc04", "wp04", "x3lyp",
+                         "m06-2x", "m08-hx", "tpssh", "revtpssh", "b1b95", "b3tlap", "bb1k", "bmk", "dldf",
+                        "m05", "m05-2x", "m06", "m06-hf", "m08-so", "mgga_ms2h", "mgga_mvsh", "mn15", "mpw1b95",
+                        "mpwb1k", "pw6b95", "pwb6k", "scan0", "t-hcthh", "tpss0", "wb97x-v",
+                        "wb97x-d3", "wb97x-d", "cam-b3lyp", "cam-qtp00", "cam-qtp01", "hse-hjs", "lc-rvv10", "lc-vv10",
+                        "lc-wpbe08", "lrc-bop", "lrc-wpbe", "lrc-wpbeh", "n12-sx", "rcam-b3lyp", "wb97", "wb97x",
+                        "wb97x-rv", "wb97m-v", "m11", "mn12-sx", "wb97m-rv", "wm05-d", "wm06-d3", "dsd-pbepbe-d3","wb97x-2(lp)","wb97x-2(tqz)","xyg3","xygj-os","b2plyp","b2gpplyp","dsd-pbep86-d3","ls1dh-pbe","pbe-qidh","pbe0-2","pbe0-dh","ptpss-d3","dsd-pbeb95-d3","pwpb95-d3"}
+        _mp2_methods = {"rimp2"}
+
+        method = input["model"]["method"].lower()
+        if method in _mp2_methods:
+            properties["return_energy"] = properties["mp2_total_energy"]
+        elif method in _scf_methods:
+            properties["return_energy"] = properties["scf_total_energy"]
+        else:
+            raise NotImplementedError(f"Method {method} not supported for energy driver.")
+
+        if input["driver"] == "gradient":
+            def read_matrix(text):
+                lines = text.split("\n")
+                i = 0
+                mdict = defaultdict(dict)
+                maxcol = 0
+                maxrow = 0
+                while i < len(lines):
+                    cols = [int(idx) for idx in lines[i].split()]
+                    maxcol = max(maxcol, *cols)
+                    i += 1
+                    while i < len(lines):
+                        s = lines[i].split()
+                        if len(s) <= len(cols):
+                            break
+                        assert len(s) == len(cols) + 1, s
+                        row = int(s[0])
+                        maxrow = max(maxrow, row)
+                        data = [float(field) for field in s[1:]]
+                        for col_idx, col in enumerate(cols):
+                            mdict[row - 1][col - 1] = data[col_idx]
+                        i += 1
+
+                ret = np.zeros((maxrow, maxcol))
+                for row in mdict:
+                    for col in mdict[row]:
+                        ret[row, col] = mdict[row][col]
+                return ret
+
+            if method in _mp2_methods:
+                mobj = re.search(r'\n\s+Full Analytical Gradient of MP2 Energy \(in au.\)\s*\n'
+                                 r'([\s\d\.EDed\+\-]+)\n'
+                                 r'\s*Gradient time:', outtext)
+
+            elif method in _scf_methods:
+                mobj = re.search(r'\n\s+Gradient of SCF Energy\s*\n'
+                                 r'([\s\d\.EDed\+\-]+)\n'
+                                 r'\s*Max gradient component =', outtext)
+
+            else:
+                raise NotImplementedError(f"Method {method} not supported for gradient driver.")
+
+            if mobj:
+                results["return_result"] = read_matrix(mobj.group(1)).T
+
+        results["success"] = True  # XXX: have a nice day?
+        results["stdout"] = outtext
+        results["provenance"] = provenance
+        results["properties"] = properties
+        if input["driver"] == "energy":
+            results["return_result"] = properties["return_energy"]
+
+        return AtomicResult(**{**input, **results})
