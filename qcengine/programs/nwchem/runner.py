@@ -16,7 +16,7 @@ from qcelemental.util import safe_version, which
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 from ...exceptions import InputError
-from ...util import execute
+from ...util import execute, create_mpi_invocation
 from ..model import ProgramHarness
 from .germinate import muster_modelchem
 from .harvester import harvest, extract_formatted_properties
@@ -66,8 +66,14 @@ class NWChemHarness(ProgramHarness):
 
         # Run NWChem
         which_prog = which("nwchem")
+        if config.use_mpirun:
+            command = create_mpi_invocation(which_prog, config)
+        else:
+            command = [which_prog]
+        command.append("v.nw")
+
         if which_prog not in self.version_cache:
-            success, output = execute([which_prog, "v.nw"], {"v.nw": ""},
+            success, output = execute(command, {"v.nw": ""},
                                       scratch_directory=config.scratch_directory)
 
             if success:
@@ -105,7 +111,7 @@ class NWChemHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -140,7 +146,12 @@ class NWChemHarness(ProgramHarness):
         optcmd = format_keywords(opts)
 
         nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
-        nwchemrec["command"] = [which("nwchem")]
+
+        # Determine the command
+        if config.nnodes > 1:
+            nwchemrec["command"] = create_mpi_invocation(which("nwchem"), )
+        else:
+            nwchemrec["command"] = [which("nwchem")]
 
         return nwchemrec
 

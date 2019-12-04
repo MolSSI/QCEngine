@@ -27,6 +27,8 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
     import cpuinfo
     import psutil
 
+    # TODO (wardlt): Implement a means of getting CPU information from compute nodes on clusters
+
     global _global_values
     if _global_values is None:
         _global_values = {}
@@ -72,7 +74,33 @@ class NodeDescriptor(pydantic.BaseModel):
     jobs_per_node: int = 2
     retries: int = 0
 
-    def __init__(self, **data: Dict[str, Any]) -> "BaseModel":
+    # Cluster options
+    is_batch_node: bool = pydantic.Field(False, help="""Whether the node running QCEngine is a batch node
+    
+    Some clusters are configured such that tasks are launched from a special "batch" or "MOM" onto the compute nodes.
+    The compute nodes on such clusters often have a different CPU architecture than the batch nodes and 
+    often are unable to launch MPI tasks, which has two implications:
+        1) QCEngine must make *all* calls to an executable via ``mpirun`` because the executables might not
+        be able to run on the batch node. 
+        2) QCEngine must run on the batch node to be able to launch tasks on the more than one compute nodes  
+    
+    ``is_batch_node`` is used when creating the task configuration as a means of determining whether
+    ``mpirun_command`` must always be used even for serial jobs (e.g., getting the version number)
+    """)
+    mpirun_command: Optional[str] = pydantic.Field(
+        None, description="""Invocation for launching node-parallel tasks with MPI
+        
+        The invocation need not specify the number of nodes, tasks, or cores per node.
+        Information about the task configuration will be added to the command by use of
+        Python's string formatting. The configuration will be supplied as the following variables:
+        
+            {nnodes} - Number of nodes
+            {ranks_per_node} - Number of MPI ranks per node
+            {total_ranks} - Total number of MPI ranks
+        """
+    )
+
+    def __init__(self, **data: Dict[str, Any]):
 
         data = parse_environment(data)
         super().__init__(**data)
@@ -82,13 +110,16 @@ class NodeDescriptor(pydantic.BaseModel):
 
 
 class TaskConfig(pydantic.BaseModel):
+    """Description of the configuration used to launch a task."""
 
     # Specifications
-    ncores: int  # Number of ncores per task
+    ncores: int  # Number of cores per node
     nnodes: int  # Number of nodes per task
     memory: float  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
     retries: int  # Number of retries on random failures
+    mpirun_command: Optional[str]  # Command used to launch MPI tasks, see NodeDescriptor
+    use_mpirun: bool = False  # Whether it is necessary to use MPI to run an executable
 
     class Config:
         extra = "forbid"
@@ -237,6 +268,11 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
     config["ncores"] = ncores
     config["nnodes"] = local_options.pop("nnodes", 1)
 
+    # Add in the MPI launch command template
+    config["mpirun_command"] = node.mpirun_command
+    config["use_mpirun"] = node.is_batch_node or config["nnodes"] > 1
+
+    # Override any settings
     if local_options is not None:
         config.update(local_options)
 
