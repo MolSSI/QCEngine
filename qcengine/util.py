@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import ValidationError
-
 from qcelemental.models import FailedOperation
 
 from .config import LOGGER, get_provenance_augments

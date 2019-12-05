@@ -3,18 +3,17 @@ Calls the OpenMM executable.
 
 Requires RDKit
 """
-import os
-import hashlib
 import datetime
+import hashlib
+import os
 import urllib.request
 
-from qcelemental.models import Provenance, AtomicResult
+from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import which_import
 
-from .model import ProgramHarness
 from ..exceptions import InputError
 from ..util import temporary_directory
-
+from .model import ProgramHarness
 from .rdkit import RDKitHarness
 
 

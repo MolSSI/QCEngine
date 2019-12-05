@@ -1,13 +1,14 @@
-import re
 import logging
-from typing import Tuple
+import re
 from decimal import Decimal
+from typing import Tuple
 
 import qcelemental as qcel
 from qcelemental.models import Molecule
 from qcelemental.models.results import AtomicResultProperties
+from qcelemental.molparse import regex
 
-from ..util import PreservingDict, regex
+from ..util import PreservingDict
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ def harvest_outfile_pass(outtext):
     version = ""
     error = ""  # TODO (wardlt): The error string is never used.
 
-    NUMBER = regex.NUMBER
+    NUMBER = r'(?x:' + regex.NUMBER + ')'
     # fmt: off
 
     # Process version

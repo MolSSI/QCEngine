@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which

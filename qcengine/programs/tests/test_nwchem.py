@@ -1,10 +1,12 @@
 """Tests for NWChem functionality"""
-from qcelemental.testing import compare_values
-from qcengine.testing import using_nwchem
 from math import isclose
-import qcelemental as qcel
-import qcengine as qcng
+
 import pytest
+import qcelemental as qcel
+from qcelemental.testing import compare_values
+
+import qcengine as qcng
+from qcengine.testing import using_nwchem
 
 
 @pytest.fixture

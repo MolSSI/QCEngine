@@ -1,19 +1,21 @@
 """
 Integrates the computes together
 """
-from typing import Any, Dict, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
-if TYPE_CHECKING:
-    from pydantic.main import BaseModel
-    from qcelemental.models import AtomicResult
-
-from qcelemental.models import AtomicInput, FailedOperation, AtomicResult
+from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
 
 from .config import get_config
 from .exceptions import InputError, RandomError
 from .procedures import get_procedure
 from .programs import get_program
 from .util import compute_wrapper, environ_context, handle_output_metadata, model_wrapper
+
+if TYPE_CHECKING:
+    from pydantic.main import BaseModel
+    from qcelemental.models import AtomicResult
+
+
 
 __all__ = ["compute", "compute_procedure"]
 

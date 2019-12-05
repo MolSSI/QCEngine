@@ -10,15 +10,14 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-
-from qcelemental.models import AtomicInput, AtomicResult
-from qcelemental.util import parse_version, safe_version, which, provenance_stamp
 from qcelemental import constants
+from qcelemental.models import AtomicInput, AtomicResult
+from qcelemental.molparse import regex
+from qcelemental.util import parse_version, provenance_stamp, safe_version, which
 
 from ..exceptions import InputError, UnknownError
 from ..util import disk_files, execute, popen, temporary_directory
 from .model import ProgramHarness
-from .util import regex
 
 
 class QChemHarness(ProgramHarness):
@@ -273,7 +272,7 @@ $end
             "parse_logfile will result in precision loss for some fields due to trunctation in " "Q-Chem output files."
         )
 
-        NUMBER = regex.NUMBER
+        NUMBER = r"(?x:" + regex.NUMBER + ")"
 
         outtext = outfiles["dispatch.out"]
         input_dict = {}

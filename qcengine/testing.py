@@ -6,11 +6,11 @@ from typing import List
 
 import numpy as np
 import pytest
-from pkg_resources import parse_version
-
 import qcelemental as qcel
-import qcengine as qcng
+from pkg_resources import parse_version
 from qcelemental.util import which, which_import
+
+import qcengine as qcng
 
 QCENGINE_RECORDS_COMMIT = "1403b76"
 

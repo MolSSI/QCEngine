@@ -5,7 +5,6 @@ For details regarding MDI, see https://molssi.github.io/MDI_Library/html/index.h
 from typing import Any, Dict, List, Optional
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.util import which_import
 
