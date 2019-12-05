@@ -259,7 +259,6 @@ class OrcaHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
         data = cclib.io.ccread(io.StringIO(outfiles))
-        print(dir(data))
 
         properties = {}
         extras = {}
@@ -387,14 +386,14 @@ class OrcaHarness(ProgramHarness):
 
         # Process basis set data
         # basis_set = root.find("molpro_uri:job/molpro_uri:molecule/molpro_uri:basisSet", name_space)
-        nbasis = data.nbasis
-        print(nbasis)
         # angular_type = basis_set.attrib['angular']  # cartesian vs spherical
-        properties["calcinfo_nbasis"] = nbasis
+        properties["calcinfo_nbasis"] = data.nbasis
+        properties["calcinfo_nmo"] = data.nmo
+        properties["calcinfo_natom"] = data.natom
+        properties["scf_dipole_moment"] = data.moments[1].tolist()
 
         # Grab the method from input
         method = input_model.model.method.upper()
-        print(method)
 
         # Determining the final energy
         # Throws an error if the energy isn't found for the method specified from the input_model.
