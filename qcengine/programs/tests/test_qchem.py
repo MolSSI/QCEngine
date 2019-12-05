@@ -98,15 +98,52 @@ def test_qchem_logfile_parser(test_case):
 
     # Get output file data
     data = qchem_logonly_info.get_test_data(test_case)
-
+    outfiles = {"dispatch.out": data["qchem.out"]}
     with pytest.warns(Warning):
-        output = qcng.get_program("qchem", check=False).parse_logfile(data["qchem.out"]).dict()
+        output = qcng.get_program("qchem", check=False).parse_logfile(outfiles).dict()
     output["stdout"] = None
 
     output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
-    for key in output["provenance"]:
+    for key in list(output["provenance"].keys()):
         if key not in output_ref["provenance"]:
-            output.pop(key)
+            output["provenance"].pop(key)
 
-    check = compare_recursive(output_ref, output)
-    assert check, check
+    check, message = compare_recursive(
+        output_ref, output, return_message=True, forgive=["root.molecule.provenance.version", "root.provenance.version"]
+    )
+    assert check, message
+
+
+@pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
+def test_qchem_logfile_parser_qcscr(test_case):
+
+    # Get output file data
+    data = qchem_info.get_test_data(test_case)
+    outfiles = qcel.util.deserialize(data["outfiles.msgpack"], "msgpack-ext")
+
+    with pytest.warns(Warning):
+        output = qcng.get_program("qchem", check=False).parse_logfile(outfiles).dict()
+    output["stdout"] = None
+
+    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    for key in list(output["provenance"].keys()):
+        if key not in output_ref["provenance"]:
+            output["provenance"].pop(key)
+
+    # Below fields come from the log file
+    output["properties"].pop("calcinfo_natom")
+    output["properties"].pop("calcinfo_nbasis")
+    output["properties"].pop("calcinfo_nalpha")
+    output["properties"].pop("calcinfo_nbeta")
+    output["properties"].pop("scf_iterations")
+
+    output_ref["stdout"] = None
+
+    output_ref["model"]["method"] = output_ref["model"]["method"].lower()
+    check, message = compare_recursive(
+        output_ref,
+        output,
+        return_message=True,
+        forgive=["root.molecule.provenance.version", "root.provenance.version", "root.molecule.connectivity",],
+    )
+    assert check, message
