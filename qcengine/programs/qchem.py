@@ -617,7 +617,7 @@ $end
 
             elif method in _scf_methods:
                 mobj = re.search(
-                    r"\n\s+Gradient of SCF Energy\s*\n" r"([\s\d\.EDed\+\-]+)\n" r"\s*Max gradient component =", outtext
+                    r"\n\s+Gradient of SCF Energy\s*\n([\s\d\.EDed\+\-]+)\n\s*Max gradient component =", outtext
                 )
 
             else:

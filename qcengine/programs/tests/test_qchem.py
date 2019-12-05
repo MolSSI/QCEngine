@@ -139,11 +139,15 @@ def test_qchem_logfile_parser_qcscr(test_case):
 
     output_ref["stdout"] = None
 
+    # compare_recursive.forgive can be used once QCEL#174 is released
+    output["molecule"].pop("connectivity")
+    output_ref["molecule"].pop("connectivity")
+
     output_ref["model"]["method"] = output_ref["model"]["method"].lower()
     check, message = compare_recursive(
         output_ref,
         output,
         return_message=True,
-        forgive=["root.molecule.provenance.version", "root.provenance.version", "root.molecule.connectivity",],
+        forgive=["root.molecule.provenance.version", "root.provenance.version"],
     )
     assert check, message
