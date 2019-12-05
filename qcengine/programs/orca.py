@@ -5,11 +5,10 @@ Calls the Orca executable.
 import string
 import cclib
 import io
-import xml.etree.ElementTree as ET
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from qcelemental.models import AtomicResult
-from qcelemental.util import parse_version, safe_version, which
+from qcelemental.util import parse_version, which
 
 from ..exceptions import InputError, UnknownError
 from ..util import execute
@@ -69,7 +68,12 @@ class OrcaHarness(ProgramHarness):
         pass
 
     def found(self, raise_error: bool = False) -> bool:
-        return which("orca", return_bool=True, raise_error=raise_error, raise_msg="Please install via.")
+        return which(
+            "orca",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via https://orcaforum.kofo.mpg.de/app.php/portal.",
+        )
 
     # TODO Consider changing this to use molpro --version instead of performing a full execute
     def get_version(self) -> str:
@@ -247,8 +251,7 @@ class OrcaHarness(ProgramHarness):
             input_file = str_template.substitute()
 
         return {
-            # "commands": ["molpro", "dispatch.mol", "-d", ".", "-W", ".", "-n", str(config.ncores)],
-            "commands": ["orca", "dispatch.mol"],
+            "commands": [which("orca"), "dispatch.mol"],
             "infiles": {"dispatch.mol": input_file},
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
@@ -256,178 +259,149 @@ class OrcaHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
         data = cclib.io.ccread(io.StringIO(outfiles))
+        print(dir(data))
 
-        # TODO Read information from molecule tag
-        #      - cml:molecule, cml:atomArray (?)
-        #      - basisSet
-        #       - Be aware of symmetry. Might only be able to support if symmetry,nosym
-        #      - orbitals
-        #       - Be aware of symmetry. Might only be able to support if symmetry,nosym
-        # NOTE: Spherical basis set ordering in Molpro (with no symmetry)
-        # S -->  0
-        # P --> +1, -1, 0
-        # D -->  0, -2, +1, +2, -1
-        # F --> +1, -1, 0, +3, -2, -3, +2
-        # G -->  0, -2, +1, +4, -1, +2, -4, +3, -3
-        # H --> +1, -1, +2, +3, -4, -3, +4, -5, 0, +5, -2
-        # I --> +6, -2, +5, +4, -5, +2, -6, +3, -4, 0, -3, -1, +1
         properties = {}
         extras = {}
-        name_space = {"molpro_uri": "http://www.molpro.net/schema/molpro-output"}
 
         # Molpro commands map
-        molpro_map = {
-            "Energy": {
-                "HF": "scf_total_energy",
-                "RHF": "scf_total_energy",
-                "UHF": "scf_total_energy",
-                "KS": "scf_total_energy",
-                "RKS": "scf_total_energy",
-                "UKS": "scf_total_energy",
-            },
-            "total energy": {
-                "MP2": "mp2_total_energy",
-                "CCSD": "ccsd_total_energy",
-                "CCSD(T)": "ccsd_prt_pr_total_energy",
-            },
-            "correlation energy": {
-                "MP2": "mp2_correlation_energy",
-                "CCSD": "ccsd_correlation_energy",
-                "CCSD(T)": "ccsd_prt_pr_correlation_energy",  # Need both CCSD(T) and Total
-                "Total": "ccsd_prt_pr_correlation_energy",  # Total corresponds to CCSD(T) correlation energy
-            },
-            "singlet pair energy": {"MP2": "mp2_singlet_pair_energy", "CCSD": "ccsd_singlet_pair_energy"},
-            "triplet pair energy": {"MP2": "mp2_triplet_pair_energy", "CCSD": "ccsd_triplet_pair_energy"},
-            "Dipole moment": {
-                "HF": "scf_dipole_moment",
-                "RHF": "scf_dipole_moment",
-                "UHF": "scf_dipole_moment",
-                "KS": "scf_dipole_moment",
-                "RKS": "scf_dipole_moment",
-                "UKS": "scf_dipole_moment",
-                "MP2": "mp2_dipole_moment",
-                "CCSD": "ccsd_dipole_moment",
-                "CCSD(T)": "ccsd_prt_pr_dipole_moment",
-            },
-        }
+        # molpro_map = {
+        #     "Energy": {
+        #         "HF": "scf_total_energy",
+        #         "RHF": "scf_total_energy",
+        #         "UHF": "scf_total_energy",
+        #         "KS": "scf_total_energy",
+        #         "RKS": "scf_total_energy",
+        #         "UKS": "scf_total_energy",
+        #     },
+        #     "total energy": {
+        #         "MP2": "mp2_total_energy",
+        #         "CCSD": "ccsd_total_energy",
+        #         "CCSD(T)": "ccsd_prt_pr_total_energy",
+        #     },
+        #     "correlation energy": {
+        #         "MP2": "mp2_correlation_energy",
+        #         "CCSD": "ccsd_correlation_energy",
+        #         "CCSD(T)": "ccsd_prt_pr_correlation_energy",  # Need both CCSD(T) and Total
+        #         "Total": "ccsd_prt_pr_correlation_energy",  # Total corresponds to CCSD(T) correlation energy
+        #     },
+        #     "singlet pair energy": {"MP2": "mp2_singlet_pair_energy", "CCSD": "ccsd_singlet_pair_energy"},
+        #     "triplet pair energy": {"MP2": "mp2_triplet_pair_energy", "CCSD": "ccsd_triplet_pair_energy"},
+        #     "Dipole moment": {
+        #         "HF": "scf_dipole_moment",
+        #         "RHF": "scf_dipole_moment",
+        #         "UHF": "scf_dipole_moment",
+        #         "KS": "scf_dipole_moment",
+        #         "RKS": "scf_dipole_moment",
+        #         "UKS": "scf_dipole_moment",
+        #         "MP2": "mp2_dipole_moment",
+        #         "CCSD": "ccsd_dipole_moment",
+        #         "CCSD(T)": "ccsd_prt_pr_dipole_moment",
+        #     },
+        # }
 
-        # Started adding basic support for local correlation methods in Molpro
-        molpro_extras_map = {
-            "total energy": {
-                "LMP2": "local_mp2_total_energy",
-                "LCCSD": "local_ccsd_total_energy",
-                "LCCSD(T0)": "local_ccsd_prt0_pr_total_energy",
-                "LCCSD(T)": "local_ccsd_prt_pr_total_energy",
-            },
-            "correlation energy": {"LMP2": "local_mp2_correlation_energy", "LCCSD": "local_ccsd_correlation_energy"},
-            "singlet pair energy": {"LMP2": "local_mp2_singlet_pair_energy", "LCCSD": "local_ccsd_singlet_pair_energy"},
-            "triplet pair energy": {"LMP2": "local_mp2_triplet_pair_energy", "LCCSD": "local_ccsd_triplet_pair_energy"},
-            "singles energy": {"LCCSD": "local_ccsd_singles_energy"},
-            # "strong pair energy": {
-            #     "LCCSD": "local_ccsd_strong_pair_energy"
-            # },
-            # "weak pair energy": {
-            #     "LMP2": "local_mp2_weak_pair_energy"
-            # }
-        }
+        # # Started adding basic support for local correlation methods in Molpro
+        # molpro_extras_map = {
+        #     "total energy": {
+        #         "LMP2": "local_mp2_total_energy",
+        #         "LCCSD": "local_ccsd_total_energy",
+        #         "LCCSD(T0)": "local_ccsd_prt0_pr_total_energy",
+        #         "LCCSD(T)": "local_ccsd_prt_pr_total_energy",
+        #     },
+        #     "correlation energy": {"LMP2": "local_mp2_correlation_energy", "LCCSD": "local_ccsd_correlation_energy"},
+        #     "singlet pair energy": {"LMP2": "local_mp2_singlet_pair_energy", "LCCSD": "local_ccsd_singlet_pair_energy"},
+        #     "triplet pair energy": {"LMP2": "local_mp2_triplet_pair_energy", "LCCSD": "local_ccsd_triplet_pair_energy"},
+        #     "singles energy": {"LCCSD": "local_ccsd_singles_energy"},
+        #     # "strong pair energy": {
+        #     #     "LCCSD": "local_ccsd_strong_pair_energy"
+        #     # },
+        #     # "weak pair energy": {
+        #     #     "LMP2": "local_mp2_weak_pair_energy"
+        #     # }
+        # }
 
-        # Molpro variables map used for quantities not found in the command map
-        molpro_variable_map = {
-            "_ENUC": "nuclear_repulsion_energy",
-            "_DFTFUN": "scf_xc_energy",
-            "_NELEC": ["calcinfo_nalpha", "calcinfo_nbeta"]
-            # "_EMP2_SCS": "scs_mp2_total_energy"
-        }
+        # # Molpro variables map used for quantities not found in the command map
+        # molpro_variable_map = {
+        #     "_ENUC": "nuclear_repulsion_energy",
+        #     "_DFTFUN": "scf_xc_energy",
+        #     "_NELEC": ["calcinfo_nalpha", "calcinfo_nbeta"]
+        #     # "_EMP2_SCS": "scs_mp2_total_energy"
+        # }
 
         # Process data in molpro_map by looping through each jobstep
         # The jobstep tag in Molpro contains output from commands (e.g. {HF}, {force})
-        for jobstep in root.findall("molpro_uri:job/molpro_uri:jobstep", name_space):
-            command = jobstep.attrib["command"]
-            if "FORCE" in command:  # Grab gradient
-                for child in jobstep.findall("molpro_uri:gradient", name_space):
-                    # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
-                    properties["gradient"] = [float(x) for x in child.text.split()]
-            else:  # Grab energies and dipole moment
-                for child in jobstep.findall("molpro_uri:property", name_space):
-                    property_name = child.attrib["name"]
-                    property_method = child.attrib["method"]
-                    value = child.attrib["value"]
-                    if property_name in molpro_map and property_method in molpro_map[property_name]:
-                        if property_name == "Dipole moment":
-                            properties[molpro_map[property_name][property_method]] = [float(x) for x in value.split()]
-                        else:
-                            properties[molpro_map[property_name][property_method]] = float(value)
-                    elif property_name in molpro_extras_map and property_method in molpro_extras_map[property_name]:
-                        extras[molpro_extras_map[property_name][property_method]] = float(value)
+        # for jobstep in root.findall("molpro_uri:job/molpro_uri:jobstep", name_space):
+        #     command = jobstep.attrib["command"]
+        #     if "FORCE" in command:  # Grab gradient
+        #         for child in jobstep.findall("molpro_uri:gradient", name_space):
+        #             # Stores gradient as a single list where the ordering is [1x, 1y, 1z, 2x, 2y, 2z, ...]
+        #             properties["gradient"] = [float(x) for x in child.text.split()]
+        #     else:  # Grab energies and dipole moment
+        #         for child in jobstep.findall("molpro_uri:property", name_space):
+        #             property_name = child.attrib["name"]
+        #             property_method = child.attrib["method"]
+        #             value = child.attrib["value"]
+        #             if property_name in molpro_map and property_method in molpro_map[property_name]:
+        #                 if property_name == "Dipole moment":
+        #                     properties[molpro_map[property_name][property_method]] = [float(x) for x in value.split()]
+        #                 else:
+        #                     properties[molpro_map[property_name][property_method]] = float(value)
+        #             elif property_name in molpro_extras_map and property_method in molpro_extras_map[property_name]:
+        #                 extras[molpro_extras_map[property_name][property_method]] = float(value)
 
-        # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
-        if "mp2_singlet_pair_energy" in properties and "mp2_triplet_pair_energy" in properties:
-            properties["mp2_same_spin_correlation_energy"] = (2.0 / 3.0) * properties["mp2_triplet_pair_energy"]
-            properties["mp2_opposite_spin_correlation_energy"] = (1.0 / 3.0) * properties[
-                "mp2_triplet_pair_energy"
-            ] + properties["mp2_singlet_pair_energy"]
-            del properties["mp2_singlet_pair_energy"]
-            del properties["mp2_triplet_pair_energy"]
+        # # Convert triplet and singlet pair correlation energies to opposite-spin and same-spin correlation energies
+        # if "mp2_singlet_pair_energy" in properties and "mp2_triplet_pair_energy" in properties:
+        #     properties["mp2_same_spin_correlation_energy"] = (2.0 / 3.0) * properties["mp2_triplet_pair_energy"]
+        #     properties["mp2_opposite_spin_correlation_energy"] = (1.0 / 3.0) * properties[
+        #         "mp2_triplet_pair_energy"
+        #     ] + properties["mp2_singlet_pair_energy"]
+        #     del properties["mp2_singlet_pair_energy"]
+        #     del properties["mp2_triplet_pair_energy"]
 
-        if "ccsd_singlet_pair_energy" in properties and "ccsd_triplet_pair_energy" in properties:
-            properties["ccsd_same_spin_correlation_energy"] = (2.0 / 3.0) * properties["ccsd_triplet_pair_energy"]
-            properties["ccsd_opposite_spin_correlation_energy"] = (1.0 / 3.0) * properties[
-                "ccsd_triplet_pair_energy"
-            ] + properties["ccsd_singlet_pair_energy"]
-            del properties["ccsd_singlet_pair_energy"]
-            del properties["ccsd_triplet_pair_energy"]
+        # if "ccsd_singlet_pair_energy" in properties and "ccsd_triplet_pair_energy" in properties:
+        #     properties["ccsd_same_spin_correlation_energy"] = (2.0 / 3.0) * properties["ccsd_triplet_pair_energy"]
+        #     properties["ccsd_opposite_spin_correlation_energy"] = (1.0 / 3.0) * properties[
+        #         "ccsd_triplet_pair_energy"
+        #     ] + properties["ccsd_singlet_pair_energy"]
+        #     del properties["ccsd_singlet_pair_energy"]
+        #     del properties["ccsd_triplet_pair_energy"]
 
-        # Process data in molpro_variable_map
-        # Note: For the DFT case molecule_method is the name of the functional plus R or U in front
-        molecule = root.find("molpro_uri:job/molpro_uri:molecule", name_space)
-        molecule_method = molecule.attrib["method"]
-        molecule_final_energy = float(molecule.attrib["energy"])  # Energy from the molecule tag in case its needed
-        # Loop over each variable under the variables tag to grab additional info from molpro_variable_map
-        for variable in molecule.findall("molpro_uri:variables/molpro_uri:variable", name_space):
-            variable_name = variable.attrib["name"]
-            if variable_name in molpro_variable_map:
-                if variable_name == "_NELEC":
-                    nelec = int(float(variable[0].text))
-                    nunpaired = input_model.molecule.molecular_multiplicity - 1
-                    nbeta = (nelec - nunpaired) // 2
-                    nalpha = nelec - nbeta
-                    properties[molpro_variable_map[variable_name][0]] = nalpha
-                    properties[molpro_variable_map[variable_name][1]] = nbeta
-                else:
-                    properties[molpro_variable_map[variable_name]] = float(variable[0].text)
+        # # Process data in molpro_variable_map
+        # # Note: For the DFT case molecule_method is the name of the functional plus R or U in front
+        # molecule = root.find("molpro_uri:job/molpro_uri:molecule", name_space)
+        # molecule_method = molecule.attrib["method"]
+        # molecule_final_energy = float(molecule.attrib["energy"])  # Energy from the molecule tag in case its needed
+        # # Loop over each variable under the variables tag to grab additional info from molpro_variable_map
+        # for variable in molecule.findall("molpro_uri:variables/molpro_uri:variable", name_space):
+        #     variable_name = variable.attrib["name"]
+        #     if variable_name in molpro_variable_map:
+        #         if variable_name == "_NELEC":
+        #             nelec = int(float(variable[0].text))
+        #             nunpaired = input_model.molecule.molecular_multiplicity - 1
+        #             nbeta = (nelec - nunpaired) // 2
+        #             nalpha = nelec - nbeta
+        #             properties[molpro_variable_map[variable_name][0]] = nalpha
+        #             properties[molpro_variable_map[variable_name][1]] = nbeta
+        #         else:
+        #             properties[molpro_variable_map[variable_name]] = float(variable[0].text)
 
         # Process basis set data
-        basis_set = root.find("molpro_uri:job/molpro_uri:molecule/molpro_uri:basisSet", name_space)
-        nbasis = int(basis_set.attrib["length"])
+        # basis_set = root.find("molpro_uri:job/molpro_uri:molecule/molpro_uri:basisSet", name_space)
+        nbasis = data.nbasis
+        print(nbasis)
         # angular_type = basis_set.attrib['angular']  # cartesian vs spherical
         properties["calcinfo_nbasis"] = nbasis
 
         # Grab the method from input
         method = input_model.model.method.upper()
+        print(method)
 
         # Determining the final energy
         # Throws an error if the energy isn't found for the method specified from the input_model.
-        if method in molpro_map["total energy"].keys() and molpro_map["total energy"][method] in properties:
-            final_energy = properties[molpro_map["total energy"][method]]
-        elif method in molpro_map["Energy"].keys() and molpro_map["Energy"][method] in properties:
-            final_energy = properties[molpro_map["Energy"][method]]
-        else:
-            # Back up method for determining final energy if not already present in properties
-            # Use the total energy from the molecule tag if it matches the input method
-            # if input_model.model.method.upper() in molecule_method:
-            if method in molecule_method:
-                final_energy = molecule_final_energy
-                if method in self._post_hf_methods:
-                    properties[molpro_map["total energy"][method]] = molecule_final_energy
-                    properties[molpro_map["correlation energy"][method]] = (
-                        molecule_final_energy - properties["scf_total_energy"]
-                    )
-                elif method in self._dft_functionals:
-                    properties[molpro_map["Energy"]["KS"]] = molecule_final_energy
-                elif method in self._hf_methods:
-                    properties[molpro_map["Energy"][method]] = molecule_final_energy
-            else:
-                raise KeyError(f"Could not find {method} total energy")
+        try:
+            final_energy = data.scfenergies[-1]
+        except:
+            raise KeyError(f"Could not find {method} total energy")
 
         # Initialize output_data by copying over input_model.dict()
         output_data = input_model.dict()
@@ -442,7 +416,7 @@ class OrcaHarness(ProgramHarness):
         output_data["properties"] = properties
         output_data["extras"].update(extras)
         output_data["schema_name"] = "qcschema_output"
-        output_data["stdout"] = outfiles["dispatch.out"]
+        output_data["stdout"] = outfiles
         output_data["success"] = True
 
         return AtomicResult(**output_data)
