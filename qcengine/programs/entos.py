@@ -296,20 +296,17 @@ class EntosHarness(ProgramHarness):
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
         scf_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
-        scf_extras = {
-            "converged": "scf_converged",
-            "ao_basis": {"basis": {"n_functions", "shells"}},
+        dft_map = scf_map.copy()
+        hf_map = scf_map.copy()
+        xtb_map = scf_map.copy()
+
+        energy_command_map = {"dft": dft_map, "hf": hf_map, "xtb": xtb_map}
+        extras_map = {"converged": "scf_converged"}
+        wavefunction_map = {
             "density": "scf_density",
             "orbitals": "scf_orbitals",
             "fock": "fock",
         }
-        dft_map = scf_map.copy()
-
-        hf_map = scf_map.copy()
-
-        xtb_map = scf_map.copy()
-
-        energy_command_map = {"dft": dft_map, "hf": hf_map, "xtb": xtb_map}
 
         # Determine the energy_command
         energy_command = self.determine_energy_command(input_model.model.method)
@@ -322,8 +319,10 @@ class EntosHarness(ProgramHarness):
         hessian_map = {"hessian": "hessian"}
         hessian_map.update(energy_command_map[energy_command])
 
-        # Initialize properties dictionary
+        # Initialize dictionaries for AtomicResult
         properties = {}
+        wavefunction = {}
+        extras = {}
 
         # Determine whether to use the energy map or the gradient map
         if input_model.driver == "energy":
@@ -342,8 +341,40 @@ class EntosHarness(ProgramHarness):
             if key in entos_results:
                 properties[entos_map[key]] = entos_results[key]
 
+        # Parse calcinfo_* properties from the results.json
+        if "ao_basis" in entos_results.keys():
+            properties["calcinfo_nbasis"] = entos_results["ao_basis"]["__Basis"]["n_functions"]
+        if "structure" in entos_results.keys():
+            properties["calcinfo_natom"] = len(entos_results["structure"]["__Atoms"]["atoms"])
+        # TODO Need to handle possible fractional occupations
+        #      - charge
+        #      - temperature
+        #      - spin
+        #      - spin_z
+        # if "occupations" in entos_results.keys():
+        #     occupations = entos_results["occupations"]
+        #     nelec = sum(occupations)
+        #     nbeta = nelec // 2
+        #     nalpha = nelec - nbeta
+        #     properties["calcinfo_nalpha"] = nalpha
+        #     properties["calcinfo_nbeta"] = nbeta
+        # elif "occupations_alpha" in entos_results.keys() and "occupations_beta" in entos_results.keys():
+        #     occupations_alpha = entos_results["occupations_alpha"]
+        #     occupations_beta = entos_results["occupations_beta"]
+        #     nalpha = sum(occupations_alpha)
+        #     nbeta = sum(occupations_beta)
+        #     properties["calcinfo_nalpha"] = nalpha
+        #     properties["calcinfo_nbeta"] = nbeta
+
+        # Parse results for the extras_map from results.json
+        for key in extras_map.keys():
+            if key in entos_results:
+                extras[extras_map[key]] = entos_results[key]
+
+        # Initialize output_data by copying over input_model.dict()
+        output_data = input_model.dict()
+
         # Determine the correct return_result
-        output_data = {}
         if input_model.driver == "energy":
             if "scf_total_energy" in properties:
                 output_data["return_result"] = properties["scf_total_energy"]
@@ -363,10 +394,11 @@ class EntosHarness(ProgramHarness):
             raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
         output_data["properties"] = properties
+        output_data["extras"].update(extras)
         output_data["schema_name"] = "qcschema_output"
         output_data["success"] = True
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)
 
     # Determine the energy_command
     def determine_energy_command(self, method):
@@ -376,10 +408,6 @@ class EntosHarness(ProgramHarness):
 
         if method.upper() in self._dft_functionals:
             energy_command = "dft"
-        elif method.upper() == "HF":
-            energy_command = "hf"
-        elif method.upper() == "XTB":
-            energy_command = "xtb"
         else:
             energy_command = method.lower()
 
