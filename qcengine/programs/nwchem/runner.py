@@ -2,8 +2,8 @@
 Calls the NWChem executable.
 """
 import copy
-import pprint
 import logging
+import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -12,14 +12,14 @@ import numpy as np
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
-
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
+
 from ...exceptions import InputError
 from ...util import execute, create_mpi_invocation
 from ..model import ProgramHarness
 from .germinate import muster_modelchem
-from .harvester import harvest, extract_formatted_properties
+from .harvester import extract_formatted_properties, harvest
 from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -84,7 +84,7 @@ class NWChemHarness(ProgramHarness):
                         revision = line.strip().split()[-1]
                 self.version_cache[which_prog] = safe_version(branch + "+" + revision)
             else:
-                raise UnknownError(output['stderr'])
+                raise UnknownError(output["stderr"])
 
         return self.version_cache[which_prog]
 
@@ -123,7 +123,7 @@ class NWChemHarness(ProgramHarness):
         # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
         memory_size = int(config.memory * (1024 ** 3))
         if config.use_mpirun:  # It is the memory per MPI rank
-            memory_size /= config.nnodes * config.ncores
+            memory_size //= config.nnodes * config.ncores
         opts["memory"] = memory_size
 
         # Handle molecule
@@ -139,7 +139,7 @@ class NWChemHarness(ProgramHarness):
         # Handle basis set
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
-            opts[f"basis__{el}"] = f"library {input_model.model.basis}"
+            opts[f'basis__{el}'] = f'library {input_model.model.basis}'
 
         # Log the job settings
         logger.debug("JOB_OPTS")
@@ -165,7 +165,7 @@ class NWChemHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["job.movecs", "job.hess", "job.db", "job.zmat"],
+            ["job.movecs", "job.hess", "job.db", "job.zmat", "job.fd_dipole"],
             scratch_messy=False,
             scratch_directory=inputs["scratch_directory"],
         )

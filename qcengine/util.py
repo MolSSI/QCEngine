@@ -14,7 +14,9 @@ import time
 import traceback
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from functools import partial
+from threading import Thread
+from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO
 
 from pydantic import ValidationError
 
@@ -224,6 +226,25 @@ def popen(
 
     Code and idea from dask.distributed's testing suite
     https://github.com/dask/distributed
+
+    Parameters
+    ----------
+        args: List[str]
+            Input arguments for the command
+        append_prefix: bool
+            Whether to prepend the Python path prefix to the command being executed
+        popen_kwargs: Dict[str, Any]
+            Any keyword arguments to use when launching the process
+
+    Returns
+    -------
+        exe: dict
+            Dictionary with the following keys:
+            <ul>
+                <li>proc: Popen object describing the background task</li>
+                <li>stdout: String value of the standard output of the task</li>
+                <li>stdeer: String value of the standard error of the task</li>
+            </ul>
     """
     args = list(args)
     if popen_kwargs is None:
@@ -245,22 +266,52 @@ def popen(
         # Allow using CTRL_C_EVENT / CTRL_BREAK_EVENT
         popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
+    # Route the standard error and output
     popen_kwargs["stdout"] = subprocess.PIPE
     popen_kwargs["stderr"] = subprocess.PIPE
+
+    # Prepare StringIO objects to store the stdout and stderr
+    stdout = io.BytesIO()
+    stderr = io.BytesIO()
+
+    # Launch the process
     LOGGER.info("Popen", args, popen_kwargs)
+
+    # Ready the output
     ret = {"proc": subprocess.Popen(args, **popen_kwargs)}
+
+    # Spawn threads that will read from the stderr/stdout
+    #  The PIPE uses a buffer with finite capacity. The underlying
+    #  process will stall if it is unable to write to the buffer
+    #  because the buffer is full. These threads continuously read
+    #  from the buffers to ensure that they do not fill.
+    #
+    def read_from_buffer(buffer: BinaryIO, storage: io.BytesIO):
+        for r in iter(partial(buffer.read, 1024), b''):
+            storage.write(r)
+    stdout_reader = Thread(target=read_from_buffer, args=(ret["proc"].stdout, stdout))
+    stdout_reader.start()
+    stderr_reader = Thread(target=read_from_buffer, args=(ret["proc"].stderr, stderr))
+    stderr_reader.start()
+
+    # Yield control back to the main thread
     try:
         yield ret
     except Exception:
         raise
 
     finally:
+        # Executes on an exception or once the context manager closes
         try:
             terminate_process(ret["proc"])
         finally:
-            output, error = ret["proc"].communicate()
-            ret["stdout"] = output.decode()
-            ret["stderr"] = error.decode()
+            # Wait for the reader threads to finish
+            stdout_reader.join()
+            stderr_reader.join()
+
+            # Retrieve the standard output for the process
+            ret["stdout"] = stdout.getvalue().decode()
+            ret["stderr"] = stderr.getvalue().decode()
 
 
 @contextmanager
@@ -399,22 +450,12 @@ def execute(
         popen_kwargs["shell"] = shell
         with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
-
-                realtime_stdout = ""
-                while True:
-                    output = proc["proc"].stdout.readline()
-                    if output == b"" and proc["proc"].poll() is not None:
-                        break
-                    if output:
-                        realtime_stdout += output.decode("utf-8")
-
+                # Wait for the subprocess to complete or the timeout to expire
                 if interupt_after is None:
                     proc["proc"].wait(timeout=timeout)
                 else:
                     time.sleep(interupt_after)
                     terminate_process(proc["proc"])
-
-            proc["stdout"] = realtime_stdout
             retcode = proc["proc"].poll()
         proc["outfiles"] = extrafiles
     proc["scratch_directory"] = scrdir
