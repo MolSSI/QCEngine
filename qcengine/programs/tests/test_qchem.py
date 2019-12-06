@@ -24,8 +24,8 @@ def test_qchem_output_parser(test_case):
     output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
     output_ref.pop("provenance", None)
 
-    check = compare_recursive(output_ref, output)
-    assert check, check
+    check, message = compare_recursive(output_ref, output, return_message=True)
+    assert check, message
 
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
@@ -130,13 +130,6 @@ def test_qchem_logfile_parser_qcscr(test_case):
         if key not in output_ref["provenance"]:
             output["provenance"].pop(key)
 
-    # Below fields come from the log file
-    output["properties"].pop("calcinfo_natom")
-    output["properties"].pop("calcinfo_nbasis")
-    output["properties"].pop("calcinfo_nalpha")
-    output["properties"].pop("calcinfo_nbeta")
-    output["properties"].pop("scf_iterations")
-
     output_ref["stdout"] = None
 
     # compare_recursive.forgive can be used once QCEL#174 is released
@@ -148,6 +141,6 @@ def test_qchem_logfile_parser_qcscr(test_case):
         output_ref,
         output,
         return_message=True,
-        forgive=["root.molecule.provenance.version", "root.provenance.version"],
+        forgive=["root.molecule.provenance.version", "root.provenance.version", "root.provenance.routine"],
     )
     assert check, message

@@ -18,8 +18,6 @@ if TYPE_CHECKING:
     from qcelemental.models import AtomicInput
 
 
-
-
 class EntosHarness(ProgramHarness):
     _defaults: Dict[str, Any] = {
         "name": "entos",

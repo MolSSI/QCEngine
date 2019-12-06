@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from qcelemental.models import AtomicResult
 
 
-
 __all__ = ["compute", "compute_procedure"]
 
 

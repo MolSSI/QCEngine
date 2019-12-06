@@ -231,8 +231,10 @@ $end
         output_data = {}
 
         bdata = {}
+        outtext = ""
         for k, v in outfiles.items():
             if k == "dispatch.out":
+                outtext = v
                 continue
             if v is None:
                 continue
@@ -253,16 +255,87 @@ $end
             "return_energy": bdata["99.0"][-1],
         }
 
+        _mp2_methods = {"mp2", "rimp2"}
+        if input_model.model.method.lower() in _mp2_methods:
+            properties["mp2_total_energy"] = properties["return_energy"]
+
         # Correct CCSD because its odd?
         # if input_model.model.method.lower() == "ccsd":
         #     m1 = re.findall(" CCSD correlation energy.+=.+\d+\.\d+", outfiles["dispatch.out"])
         #     m2 = re.findall(" CCSD total energy.+=.+\d+\.\d+", outfiles["dispatch.out"])
 
+        props, prov = self._parse_logfile_common(outtext, input_model.dict())
+        output_data["provenance"] = prov
         output_data["properties"] = properties
+        output_data["properties"].update(props)
         output_data["stdout"] = outfiles["dispatch.out"]
         output_data["success"] = True
 
         return AtomicResult(**{**input_model.dict(), **output_data})
+
+    def _parse_logfile_common(self, outtext: str, input_dict: Dict[str, Any]):
+        """
+        Parses fields from log file that are not parsed from QCSCRATCH in parse_output
+        """
+
+        NUMBER = r"(?x:" + regex.NUMBER + ")"
+
+        properties = {}
+        provenance = provenance_stamp(__name__)
+        mobj = re.search(r"This is a multi-thread run using ([0-9]+) threads", outtext)
+        if mobj:
+            provenance["nthreads"] = int(mobj.group(1))
+
+        mobj = re.search(r"Total job time:\s*" + NUMBER + r"s\(wall\)", outtext)
+        if mobj:
+            provenance["wall_time"] = float(mobj.group(1))
+
+        mobj = re.search(r"Archival summary:\s*\n[0-9]+\\[0-9+]\\([\w\.\-]+)\\", outtext)
+        if mobj:
+            provenance["hostname"] = mobj.group(1)
+
+        mobj = re.search(r"\n\s*There are\s+(\d+) alpha and\s+(\d+) beta electrons\s*\n", outtext)
+        if mobj:
+            properties["calcinfo_nalpha"] = int(mobj.group(1))
+            properties["calcinfo_nbeta"] = int(mobj.group(2))
+
+        mobj = re.search(r"\n\s*There are\s+\d+ shells and\s+(\d+) basis functions\s*\n", outtext)
+        if mobj:
+            properties["calcinfo_nbasis"] = int(mobj.group(1))
+
+        mobj = re.search(r"\n\s*RI-MP2 CORRELATION ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        if mobj:
+            properties["mp2_correlation_energy"] = float(mobj.group(1))
+
+        mobj = re.search(r"\n\s*RI-MP2 SINGLES ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        if mobj:
+            properties["mp2_singles_energy"] = float(mobj.group(1))
+
+        mobj_aaaa = re.search(r"\n\s*RI-MP2 ENERGY \(aa\|aa\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        mobj_bbbb = re.search(r"\n\s*RI-MP2 ENERGY \(bb\|bb\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        if mobj_aaaa and mobj_bbbb:
+            properties["mp2_same_spin_correlation_energy"] = float(mobj_aaaa.group(1)) + float(mobj_bbbb.group(1))
+
+        mobj_aabb = re.search(r"\n\s*RI-MP2 ENERGY \(aa\|bb\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        mobj_bbaa = re.search(r"\n\s*RI-MP2 ENERGY \(bb\|aa\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        if mobj_aaaa and mobj_bbbb:
+            properties["mp2_opposite_spin_correlation_energy"] = float(mobj_aabb.group(1)) + float(mobj_bbaa.group(1))
+
+        properties["calcinfo_natom"] = len(input_dict["molecule"]["symbols"])
+
+        mobj = re.search(r"\n\s*(\d+)\s+" + NUMBER + "\s+" + NUMBER + r"\s+Convergence criterion met\s*\n", outtext)
+        if mobj:
+            properties["scf_iterations"] = int(mobj.group(1))
+
+        mobj = re.search(
+            r"\n\s+Dipole Moment \(Debye\)\s*\n\s+X\s+" + NUMBER + r"\s+Y\s+" + NUMBER + r"\s+Z\s+" + NUMBER + r"\s*\n",
+            outtext,
+        )
+        if mobj:
+            cf = constants.conversion_factor("debye", "e * bohr")
+            properties["scf_dipole_moment"] = [float(mobj.group(i)) * cf for i in range(1, 4)]
+
+        return properties, provenance
 
     def parse_logfile(self, outfiles: Dict[str, str]) -> AtomicResult:
         """
@@ -336,19 +409,8 @@ $end
         try:
             qcscr_result = self.parse_output(outfiles, AtomicInput(**input_dict)).dict()
         except KeyError:
-            qcscr_result = {"properties": {}, "provenance": provenance_stamp(__name__), **input_dict}
-
-        mobj = re.search(r"This is a multi-thread run using ([0-9]+) threads", outtext)
-        if mobj and qcscr_result["provenance"].get("nthreads", None) is None:
-            qcscr_result["provenance"]["nthreads"] = int(mobj.group(1))
-
-        mobj = re.search(r"Total job time:\s*" + NUMBER + r"s\(wall\)", outtext)
-        if mobj and qcscr_result["provenance"].get("wall_time", None) is None:
-            qcscr_result["provenance"]["wall_time"] = float(mobj.group(1))
-
-        mobj = re.search(r"Archival summary:\s*\n[0-9]+\\[0-9+]\\([\w\.\-]+)\\", outtext)
-        if mobj and qcscr_result["provenance"].get("hostname", None) is None:
-            qcscr_result["provenance"]["hostname"] = mobj.group(1)
+            props, prov = self._parse_logfile_common(outtext, input_dict)
+            qcscr_result = {"properties": props, "provenance": prov, **input_dict}
 
         mobj = re.search(r"\n\s*SCF\s+energy in the final basis set =\s+" + NUMBER + r"\s*\n", outtext)
         if mobj and qcscr_result["properties"].get("scf_total_energy", None) is None:
@@ -358,60 +420,9 @@ $end
         if mobj and qcscr_result["properties"].get("nuclear_repulsion_energy", None) is None:
             qcscr_result["properties"]["nuclear_repulsion_energy"] = float(mobj.group(1))
 
-        mobj = re.search(r"\n\s*There are\s+(\d+) alpha and\s+(\d+) beta electrons\s*\n", outtext)
-        if mobj and qcscr_result["properties"].get("calcinfo_nalpha", None) is None:
-            qcscr_result["properties"]["calcinfo_nalpha"] = int(mobj.group(1))
-        if mobj and qcscr_result["properties"].get("calcinfo_nbeta", None) is None:
-            qcscr_result["properties"]["calcinfo_nbeta"] = int(mobj.group(2))
-
-        mobj = re.search(r"\n\s*There are\s+\d+ shells and\s+(\d+) basis functions\s*\n", outtext)
-        if mobj and qcscr_result["properties"].get("calcinfo_nbasis", None) is None:
-            qcscr_result["properties"]["calcinfo_nbasis"] = int(mobj.group(1))
-
-        if "molecule" in input_dict and qcscr_result["properties"].get("calcinfo_natom", None) is None:
-            qcscr_result["properties"]["calcinfo_natom"] = len(input_dict["molecule"]["symbols"])
-
-        mobj = re.search(r"\n\s*(\d+)\s+" + NUMBER + "\s+" + NUMBER + r"\s+Convergence criterion met\s*\n", outtext)
-        if mobj and qcscr_result["properties"].get("scf_iterations", None) is None:
-            qcscr_result["properties"]["scf_iterations"] = int(mobj.group(1))
-
-        mobj = re.search(
-            r"\n\s+Dipole Moment (Debye)\s*\n\s+X\s+" + NUMBER + r"\s+Y\s+" + NUMBER + "\s+Z\s+" + NUMBER + "\s*\n",
-            outtext,
-        )
-        if mobj and qcscr_result["properties"].get("scf_dipole_moment", None) is None:
-            cf = constants.conversion_factor("debye", "e * bohr")
-            qcscr_result["properties"]["scf_dipole_moment"] = [float(mobj.group(i)) * cf for i in range(1, 4)]
-
         mobj = re.search(r"\n\s*RI-MP2 TOTAL ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
         if mobj and qcscr_result["properties"].get("mp2_total_energy", None) is None:
             qcscr_result["properties"]["mp2_total_energy"] = float(mobj.group(1))
-
-        mobj = re.search(r"\n\s*RI-MP2 CORRELATION ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        if mobj and qcscr_result["properties"].get("mp2_correlation_energy", None) is None:
-            qcscr_result["properties"]["mp2_correlation_energy"] = float(mobj.group(1))
-
-        mobj = re.search(r"\n\s*RI-MP2 SINGLES ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        if mobj and qcscr_result["properties"].get("mp2_singles_energy", None) is None:
-            qcscr_result["properties"]["mp2_singles_energy"] = float(mobj.group(1))
-
-        mobj_aaaa = re.search(r"\n\s*RI-MP2 ENERGY \(aa\|aa\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        mobj_bbbb = re.search(r"\n\s*RI-MP2 ENERGY \(bb\|bb\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        if mobj_aaaa and mobj_bbbb and qcscr_result["properties"].get("mp2_same_spin_correlation_energy", None) is None:
-            qcscr_result["properties"]["mp2_same_spin_correlation_energy"] = float(mobj_aaaa.group(1)) + float(
-                mobj_bbbb.group(1)
-            )
-
-        mobj_aabb = re.search(r"\n\s*RI-MP2 ENERGY \(aa\|bb\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        mobj_bbaa = re.search(r"\n\s*RI-MP2 ENERGY \(bb\|aa\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        if (
-            mobj_aaaa
-            and mobj_bbbb
-            and qcscr_result["properties"].get("mp2_opposite_spin_correlation_energy", None) is None
-        ):
-            qcscr_result["properties"]["mp2_opposite_spin_correlation_energy"] = float(mobj_aabb.group(1)) + float(
-                mobj_bbaa.group(1)
-            )
 
         _scf_methods = {
             "hf",
