@@ -81,3 +81,12 @@ An example ``qcengine.yaml`` file that sets the scratch directory for all nodes 
     all:
       hostname_pattern: "*"
       scratch_directory: ./scratch
+
+Cluster Configuration
+---------------------
+
+A node configuration file is required when using node-parallel tasks on a compute cluster.
+The configuration file must contain a description of the command used to launch MPI tasks and,
+in some cases, the designation that a certain node is a compute node.
+See the descriptions for ``mpirun_command`` and ``is_batch_node`` in the ``NodeDescriptor``
+documentation for further details.
