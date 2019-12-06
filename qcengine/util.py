@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pydantic import ValidationError
 
 from qcelemental.models import FailedOperation
-from qcengine.config import NodeDescriptor, TaskConfig
+from qcengine.config import TaskConfig
 
 from .config import LOGGER, get_provenance_augments
 from .exceptions import InputError, QCEngineException
