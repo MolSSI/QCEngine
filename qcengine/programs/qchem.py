@@ -585,7 +585,7 @@ $end
             elif method in _scf_methods:
                 qcscr_result["properties"]["return_energy"] = qcscr_result["properties"]["scf_total_energy"]
             else:
-                raise NotImplementedError(f"Method {method} not supported for energy driver.")
+                raise NotImplementedError(f"Method {method} not supported by logfile parser for energy driver.")
 
         if input_dict["driver"] == "gradient" and qcscr_result.get("return_result", None) is None:
 
@@ -631,7 +631,7 @@ $end
                 )
 
             else:
-                raise NotImplementedError(f"Method {method} not supported for gradient driver.")
+                raise NotImplementedError(f"Method {method} not supported by the logfile parser for gradient driver.")
 
             if mobj:
                 qcscr_result["return_result"] = read_matrix(mobj.group(1)).T
