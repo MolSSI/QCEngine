@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from functools import partial
 from threading import Thread
-from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO
+from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO, TextIO
 
 from pydantic import ValidationError
 
@@ -193,9 +193,8 @@ def terminate_process(proc: Any, timeout: int = 15) -> None:
 
 
 @contextmanager
-def popen(
-    args: List[str], append_prefix: bool = False, popen_kwargs: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+def popen(args: List[str], append_prefix: bool = False, popen_kwargs: Optional[Dict[str, Any]] = None,
+          pass_output_forward: bool = False) -> Dict[str, Any]:
     """
     Opens a background task
 
@@ -210,7 +209,8 @@ def popen(
             Whether to prepend the Python path prefix to the command being executed
         popen_kwargs: Dict[str, Any]
             Any keyword arguments to use when launching the process
-
+        pass_output_forward: bool
+            Whether to pass the stdout and stderr forward to the system's stdout and stderr
     Returns
     -------
         exe: dict
@@ -261,12 +261,14 @@ def popen(
     #  because the buffer is full. These threads continuously read
     #  from the buffers to ensure that they do not fill.
     #
-    def read_from_buffer(buffer: BinaryIO, storage: io.BytesIO):
+    def read_from_buffer(buffer: BinaryIO, storage: io.BytesIO, sysio: TextIO):
         for r in iter(partial(buffer.read, 1024), b''):
             storage.write(r)
-    stdout_reader = Thread(target=read_from_buffer, args=(ret["proc"].stdout, stdout))
+            if pass_output_forward:
+                sysio.write(r.decode())
+    stdout_reader = Thread(target=read_from_buffer, args=(ret["proc"].stdout, stdout, sys.stdout))
     stdout_reader.start()
-    stderr_reader = Thread(target=read_from_buffer, args=(ret["proc"].stderr, stderr))
+    stderr_reader = Thread(target=read_from_buffer, args=(ret["proc"].stderr, stderr, sys.stderr))
     stderr_reader.start()
 
     # Yield control back to the main thread
