@@ -123,7 +123,7 @@ class NWChemHarness(ProgramHarness):
         # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
         memory_size = int(config.memory * (1024 ** 3))
         if config.use_mpirun:  # It is the memory per MPI rank
-            memory_size /= config.nnodes * config.ncores
+            memory_size //= config.nnodes * config.ncores
         opts["memory"] = memory_size
 
         # Handle molecule
