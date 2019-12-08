@@ -44,8 +44,8 @@ def test_psi4_task():
     assert ret.success is True
 
 
-@testing.using_psi4
-@testing.using_gcp
+@testing.using("psi4")
+@testing.using("gcp")
 def test_psi4_hf3c_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -60,7 +60,7 @@ def test_psi4_hf3c_task():
     assert ret.model.basis is None
 
 
-@testing.using_psi4_14
+@testing.using("psi4_14")
 def test_psi4_interactive_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -77,7 +77,7 @@ def test_psi4_interactive_task():
     assert ret.extras.pop("psiapi_evaluated", False)
 
 
-@testing.using_psi4_14
+@testing.using("psi4_14")
 def test_psi4_wavefunction_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -92,7 +92,7 @@ def test_psi4_wavefunction_task():
     assert ret.wavefunction.scf_orbitals_a.shape == (7, 7)
 
 
-@testing.using_psi4
+@testing.using("psi4")
 def test_psi4_internal_failure():
 
     mol = Molecule.from_data(
@@ -113,7 +113,7 @@ def test_psi4_internal_failure():
     assert "reference is only" in str(exc.value)
 
 
-@testing.using_psi4
+@testing.using("psi4")
 def test_psi4_ref_switch():
     inp = AtomicInput(
         **{
@@ -131,7 +131,7 @@ def test_psi4_ref_switch():
     assert ret.properties.calcinfo_nbeta == 1
 
 
-@testing.using_rdkit
+@testing.using("rdkit")
 def test_rdkit_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),

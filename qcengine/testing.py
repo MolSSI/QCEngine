@@ -140,30 +140,34 @@ def failure_engine():
 
 # Figure out what is imported
 _programs = {
+    "cfour": which("xcfour", return_bool=True),
     "dftd3": which("dftd3", return_bool=True),
+    "entos": is_program_new_enough("entos", "0.7.1"),
+    "gamess": which("rungms", return_bool=True),
+    "gcp": which("gcp", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
-    "psi4": is_program_new_enough("psi4", "1.2"),
-    "psi4_14": is_program_new_enough("psi4", "1.4a2.dev250"),
-    "qchem": is_program_new_enough("qchem", "5.2"),
-    "rdkit": which_import("rdkit", return_bool=True),
-    "qcdb": which_import("qcdb", return_bool=True),
-    "torchani": is_program_new_enough("torchani", "0.9"),
-    "mp2d": which("mp2d", return_bool=True),
-    "terachem": which("terachem", return_bool=True),
+    "mdi": which_import("mdi", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
-    "entos": is_program_new_enough("entos", "0.7.1"),
-    "cfour": which("xcfour", return_bool=True),
-    "gamess": which("rungms", return_bool=True),
+    "mp2d": which("mp2d", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),
-    "openmm": which_import(".openmm", package='simtk', return_bool=True),
+    "openmm": which_import(".openmm", package="simtk", return_bool=True),
+    "psi4": is_program_new_enough("psi4", "1.2"),
+    "psi4_14": is_program_new_enough("psi4", "1.4a2.dev250"),
+    "qcdb": which_import("qcdb", return_bool=True),
+    "qchem": is_program_new_enough("qchem", "5.2"),
+    "rdkit": which_import("rdkit", return_bool=True),
+    "terachem": which("terachem", return_bool=True),
+    "torchani": is_program_new_enough("torchani", "0.9"),
     "turbomole": which("define", return_bool=True),
-    "mdi": which_import("mdi", return_bool=True),
 }
 
 
 def has_program(name):
-    return _programs[name]
+    if name in _programs:
+        return _programs[name]
+    else:
+        raise KeyError(f"Program {name} not registered with QCEngine testing.")
 
 
 def _build_pytest_skip(program):
@@ -171,26 +175,39 @@ def _build_pytest_skip(program):
     return pytest.mark.skipif(has_program(program) is False, reason=import_message.format(program))
 
 
+_using_cache = {}
+
+
+def using(program):
+
+    if program not in _using_cache:
+        import_message = f"Not detecting module {program}. Install package if necessary to enable tests."
+        skip = pytest.mark.skipif(has_program(program) is False, reason=import_message)
+        _using_cache[program] = skip
+
+    return _using_cache[program]
+
+
 # Add flags
+using_cfour = _build_pytest_skip("cfour")
 using_dftd3 = _build_pytest_skip("dftd3")
 using_entos = _build_pytest_skip("entos")
+using_gamess = _build_pytest_skip("gamess")
 using_geometric = _build_pytest_skip("geometric")
-using_mopac = _build_pytest_skip("mopac")
+using_mdi = _build_pytest_skip("mdi")
 using_molpro = _build_pytest_skip("molpro")
+using_mopac = _build_pytest_skip("mopac")
 using_mp2d = _build_pytest_skip("mp2d")
+using_nwchem = _build_pytest_skip("nwchem")
+using_openmm = _build_pytest_skip("openmm")
 using_psi4 = _build_pytest_skip("psi4")
 using_psi4_14 = _build_pytest_skip("psi4_14")
 using_qcdb = _build_pytest_skip("qcdb")
 using_qchem = _build_pytest_skip("qchem")
 using_rdkit = _build_pytest_skip("rdkit")
-using_torchani = _build_pytest_skip("torchani")
 using_terachem = _build_pytest_skip("terachem")
-using_cfour = _build_pytest_skip("cfour")
-using_gamess = _build_pytest_skip("gamess")
-using_nwchem = _build_pytest_skip("nwchem")
-using_openmm = _build_pytest_skip("openmm")
+using_torchani = _build_pytest_skip("torchani")
 using_turbomole = _build_pytest_skip("turbomole")
-using_mdi = _build_pytest_skip("mdi")
 
 using_dftd3_321 = pytest.mark.skipif(
     is_program_new_enough("dftd3", "3.2.1") is False,
