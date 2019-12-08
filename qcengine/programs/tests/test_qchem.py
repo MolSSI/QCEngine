@@ -4,7 +4,7 @@ import pytest
 import qcelemental as qcel
 import qcengine as qcng
 from qcelemental.testing import compare_recursive, compare_values
-from qcengine.testing import qcengine_records, using_qchem
+from qcengine.testing import qcengine_records, using
 
 qchem_info = qcengine_records("qchem")
 
@@ -51,7 +51,7 @@ def test_qchem_input_formatter_template(test_case):
     assert input_file.keys() >= {"commands", "infiles"}
 
 
-@using_qchem
+@using("qchem")
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
 def test_qchem_executor(test_case):
     # Get input file data
@@ -69,7 +69,7 @@ def test_qchem_executor(test_case):
     assert compare_recursive(output_ref.return_result, result.return_result, atol=atol)
 
 
-@using_qchem
+@using("qchem")
 def test_qchem_orientation():
 
     mol = qcel.models.Molecule.from_data(
