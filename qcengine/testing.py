@@ -142,6 +142,7 @@ def failure_engine():
 _programs = {
     "cfour": which("xcfour", return_bool=True),
     "dftd3": which("dftd3", return_bool=True),
+    "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),
     "entos": is_program_new_enough("entos", "0.7.1"),
     "gamess": which("rungms", return_bool=True),
     "gcp": which("gcp", return_bool=True),
@@ -170,11 +171,6 @@ def has_program(name):
         raise KeyError(f"Program {name} not registered with QCEngine testing.")
 
 
-def _build_pytest_skip(program):
-    import_message = "Not detecting module {}. Install package if necessary to enable tests."
-    return pytest.mark.skipif(has_program(program) is False, reason=import_message.format(program))
-
-
 _using_cache = {}
 
 
@@ -186,30 +182,3 @@ def using(program):
         _using_cache[program] = skip
 
     return _using_cache[program]
-
-
-# Add flags
-using_cfour = _build_pytest_skip("cfour")
-using_dftd3 = _build_pytest_skip("dftd3")
-using_entos = _build_pytest_skip("entos")
-using_gamess = _build_pytest_skip("gamess")
-using_geometric = _build_pytest_skip("geometric")
-using_mdi = _build_pytest_skip("mdi")
-using_molpro = _build_pytest_skip("molpro")
-using_mopac = _build_pytest_skip("mopac")
-using_mp2d = _build_pytest_skip("mp2d")
-using_nwchem = _build_pytest_skip("nwchem")
-using_openmm = _build_pytest_skip("openmm")
-using_psi4 = _build_pytest_skip("psi4")
-using_psi4_14 = _build_pytest_skip("psi4_14")
-using_qcdb = _build_pytest_skip("qcdb")
-using_qchem = _build_pytest_skip("qchem")
-using_rdkit = _build_pytest_skip("rdkit")
-using_terachem = _build_pytest_skip("terachem")
-using_torchani = _build_pytest_skip("torchani")
-using_turbomole = _build_pytest_skip("turbomole")
-
-using_dftd3_321 = pytest.mark.skipif(
-    is_program_new_enough("dftd3", "3.2.1") is False,
-    reason="DFTD3 does not include 3.2.1 features. Update package and add to PATH",
-)
