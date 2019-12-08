@@ -32,17 +32,32 @@ def test_psi4_task():
         "keywords": {"scf_type": "df"},
     }
 
-    ret = qcng.compute(input_data, "psi4", raise_error=True, return_dict=True)
+    ret = qcng.compute(input_data, "psi4", raise_error=True)
 
-    assert ret["driver"] == "energy"
-    assert "provenance" in ret
-    assert "Final Energy" in ret["stdout"]
+    assert ret.driver == "energy"
+    assert "Final Energy" in ret.stdout
 
-    for key in ["cpu", "hostname", "username", "wall_time"]:
-        assert key in ret["provenance"]
+    prov_keys = {"cpu", "hostname", "username", "wall_time"}
+    assert ret.provenance.dict().keys() >= prov_keys
+    assert "retries" not in ret.provenance.dict()
 
-    assert ret["success"] is True
-    assert "retries" not in ret["provenance"]
+    assert ret.success is True
+
+
+@testing.using_psi4
+@testing.using_gcp
+def test_psi4_hf3c_task():
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {"method": "HF3c"},
+        "keywords": {"scf_type": "df"},
+    }
+
+    ret = qcng.compute(input_data, "psi4", raise_error=True)
+
+    assert ret.success is True
+    assert ret.model.basis is None
 
 
 @testing.using_psi4_14
@@ -224,6 +239,7 @@ def test_random_failure_with_success(failure_engine):
     assert ret.provenance.retries == 1
     assert ret.extras["ncalls"] == 2
 
+
 @testing.using_openmm
 def test_openmm_task_offxml_basis():
     from qcengine.programs.openmm import OpenMMHarness
@@ -231,12 +247,8 @@ def test_openmm_task_offxml_basis():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {
-            "method": "openmm",
-            "basis": "openff-1.0.0",
-            "offxml": "openff-1.0.0.offxml",
-        },
-        "keywords": {}
+        "model": {"method": "openmm", "basis": "openff-1.0.0", "offxml": "openff-1.0.0.offxml"},
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "openmm", raise_error=True)
@@ -261,12 +273,8 @@ def test_openmm_task_offxml_nobasis():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {
-            "method": "openmm",
-            "basis": None,
-            "offxml": "openff-1.0.0.offxml",
-        },
-        "keywords": {}
+        "model": {"method": "openmm", "basis": None, "offxml": "openff-1.0.0.offxml"},
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "openmm", raise_error=True)
@@ -295,9 +303,8 @@ def test_openmm_task_url_basis():
             "basis": "openff-1.0.0",
             "url": "https://raw.githubusercontent.com/openforcefield/openforcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
         },
-        "keywords": {}
+        "keywords": {},
     }
-
 
     ret = qcng.compute(input_data, "openmm", raise_error=True)
 
@@ -326,7 +333,7 @@ def test_openmm_task_url_nobasis():
             "basis": None,
             "url": "https://raw.githubusercontent.com/openforcefield/openforcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
         },
-        "keywords": {}
+        "keywords": {},
     }
 
     ret = qcng.compute(input_data, "openmm", raise_error=True)
