@@ -3,7 +3,7 @@ import pytest
 import qcelemental as qcel
 import qcengine as qcng
 from qcelemental.testing import compare_recursive
-from qcengine.testing import qcengine_records, using_entos
+from qcengine.testing import qcengine_records, using
 
 entos_info = qcengine_records("entos")
 
@@ -25,7 +25,7 @@ def test_entos_output_parser(test_case):
     assert check, (output, output_ref)
 
 
-@using_entos
+@using("entos")
 @pytest.mark.parametrize("test_case", entos_info.list_test_cases())
 def test_entos_input_formatter(test_case):
 
@@ -50,7 +50,7 @@ def test_entos_input_formatter_template(test_case):
     assert input_file.keys() >= {"commands", "infiles"}
 
 
-@using_entos
+@using("entos")
 @pytest.mark.parametrize("test_case", entos_info.list_test_cases())
 def test_entos_executor(test_case):
     # Get input file data

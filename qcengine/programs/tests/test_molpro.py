@@ -3,7 +3,7 @@ import pytest
 import qcelemental as qcel
 import qcengine as qcng
 from qcelemental.testing import compare_recursive
-from qcengine.testing import qcengine_records, using_molpro
+from qcengine.testing import qcengine_records, using
 
 molpro_info = qcengine_records("molpro")
 
@@ -38,7 +38,7 @@ def test_molpro_input_formatter(test_case):
     assert input_file.keys() >= {"commands", "infiles"}
 
 
-@using_molpro
+@using("molpro")
 @pytest.mark.parametrize("test_case", molpro_info.list_test_cases())
 def test_molpro_executor(test_case):
     # Get input file data

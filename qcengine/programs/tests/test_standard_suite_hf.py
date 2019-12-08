@@ -35,23 +35,23 @@ def nh2():
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [
-        pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=testing.using_cfour),
-        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using_cfour),
+        pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=testing.using("cfour")),
+        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using("cfour")),
         pytest.param(
             "entos",
             "aug-cc-pVDZ",
             {"coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
-            marks=testing.using_entos
+            marks=testing.using("entos")
         ),
-        pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=testing.using_gamess),
-        pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using_molpro),
-        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using_nwchem),
+        pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=testing.using("gamess")),
+        pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using("molpro")),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using("nwchem")),
         pytest.param(
-            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using_nwchem
+            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using("nwchem")
         ),
-        pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "direct"}, marks=testing.using_psi4),
-        pytest.param("qchem", "aug-cc-pvdz", {}, marks=testing.using_qchem),
-        pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=testing.using_turbomole),
+        pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "direct"}, marks=testing.using("psi4")),
+        pytest.param("qchem", "aug-cc-pvdz", {}, marks=testing.using("qchem")),
+        pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=testing.using("turbomole")),
     ],
 )
 def test_sp_hf_rhf(program, basis, keywords, h2o):
@@ -81,27 +81,27 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
             "cfour",
             "aug-pvdz",
             {"reference": "uhf", "occupation": [[3, 1, 1, 0], [3, 0, 1, 0]], "scf_conv": 12},
-            marks=testing.using_cfour,
+            marks=testing.using("cfour"),
         ),
-        pytest.param("cfour", "aug-pvdz", {"reference": "uhf"}, marks=testing.using_cfour),
+        pytest.param("cfour", "aug-pvdz", {"reference": "uhf"}, marks=testing.using("cfour")),
         pytest.param(
             "entos",
             "aug-cc-pVDZ",
             {"ansatz": "u", "coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
-            marks=testing.using_entos
+            marks=testing.using("entos")
         ),
-        pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=testing.using_gamess),
-        pytest.param("molpro", "aug-cc-pvdz", {"reference": "unrestricted"}, marks=testing.using_molpro),
-        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__uhf": True}, marks=testing.using_nwchem),
+        pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=testing.using("gamess")),
+        pytest.param("molpro", "aug-cc-pvdz", {"reference": "unrestricted"}, marks=testing.using("molpro")),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__uhf": True}, marks=testing.using("nwchem")),
         pytest.param(
             "nwchem",
             "aug-cc-pvdz",
             {"basis__spherical": True, "qc_module": "tce", "scf__uhf": True},
-            marks=testing.using_nwchem,
+            marks=testing.using("nwchem"),
         ),
-        pytest.param("psi4", "aug-cc-pvdz", {"reference": "uhf", "scf_type": "direct"}, marks=testing.using_psi4),
-        pytest.param("qchem", "aug-cc-pvdz", {}, marks=testing.using_qchem),
-        pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=testing.using_turbomole),
+        pytest.param("psi4", "aug-cc-pvdz", {"reference": "uhf", "scf_type": "direct"}, marks=testing.using("psi4")),
+        pytest.param("qchem", "aug-cc-pvdz", {}, marks=testing.using("qchem")),
+        pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=testing.using("turbomole")),
     ],
 )
 def test_sp_hf_uhf(program, basis, keywords, nh2):
@@ -127,22 +127,22 @@ def test_sp_hf_uhf(program, basis, keywords, nh2):
             "cfour",
             "aug-pvdz",
             {"reference": "rohf", "occupation": [[3, 1, 1, 0], [3, 0, 1, 0]], "scf_conv": 12},
-            marks=testing.using_cfour,
+            marks=testing.using("cfour"),
         ),
-        pytest.param("cfour", "aug-pvdz", {"reference": "rohf"}, marks=testing.using_cfour),
-        pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "rohf"}, marks=testing.using_gamess),
-        pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using_molpro),
+        pytest.param("cfour", "aug-pvdz", {"reference": "rohf"}, marks=testing.using("cfour")),
+        pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "rohf"}, marks=testing.using("gamess")),
+        pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using("molpro")),
         pytest.param(
-            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__rohf": True}, marks=testing.using_nwchem
+            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__rohf": True}, marks=testing.using("nwchem")
         ),
         pytest.param(
             "nwchem",
             "aug-cc-pvdz",
             {"basis__spherical": True, "qc_module": "tce", "scf__rohf": True},
-            marks=testing.using_nwchem,
+            marks=testing.using("nwchem"),
         ),
-        pytest.param("psi4", "aug-cc-pvdz", {"reference": "rohf", "scf_type": "direct"}, marks=testing.using_psi4),
-        pytest.param("qchem", "aug-cc-pvdz", {"UNRESTRICTED": False}, marks=testing.using_qchem),
+        pytest.param("psi4", "aug-cc-pvdz", {"reference": "rohf", "scf_type": "direct"}, marks=testing.using("psi4")),
+        pytest.param("qchem", "aug-cc-pvdz", {"UNRESTRICTED": False}, marks=testing.using("qchem")),
     ],
 )
 def test_sp_hf_rohf(program, basis, keywords, nh2):
