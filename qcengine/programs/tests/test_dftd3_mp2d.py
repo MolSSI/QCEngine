@@ -2,15 +2,15 @@ import copy
 
 import numpy as np
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
+
+import qcengine as qcng
+from qcengine import testing
 from qcengine.programs import empirical_dispersion_resources
-from qcengine.testing import is_program_new_enough, using_dftd3, using_dftd3_321, using_mp2d, using_psi4, using_qcdb
 
 
-@using_dftd3
+@testing.using("dftd3")
 @pytest.mark.parametrize("method", ["b3lyp-d3", "b3lyp-d3m", "b3lyp-d3bj", "b3lyp-d3mbj"])
 def test_dftd3_task(method):
     json_data = {"molecule": qcng.get_molecule("eneyne"), "driver": "energy", "model": {"method": method}}
@@ -27,7 +27,7 @@ def test_dftd3_task(method):
     assert ret["success"] is True
 
 
-@using_dftd3
+@testing.using("dftd3")
 def test_dftd3_error():
     json_data = {
         "molecule": qcng.get_molecule("eneyne"),
@@ -638,7 +638,7 @@ Ne 0 0 0
 
 
 def eneyne_ne_qcdbmols():
-    if not is_program_new_enough("psi4", "1.4a1.dev55"):
+    if not testing.is_program_new_enough("psi4", "1.4a1.dev55"):
         pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     from psi4.driver import qcdb
 
@@ -658,7 +658,7 @@ def eneyne_ne_qcdbmols():
 
 
 def eneyne_ne_psi4mols():
-    if not is_program_new_enough("psi4", "1.4a1.dev55"):
+    if not testing.is_program_new_enough("psi4", "1.4a1.dev55"):
         pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     import psi4
 
@@ -814,7 +814,7 @@ def test_dftd3__from_arrays__supplement():
     assert compare_recursive(ans, res, tnm() + " idempotent", atol=1.0e-4)
 
 
-@using_dftd3
+@testing.using("dftd3")
 def test_3():
     sys = qcel.molparse.from_string(seneyne)["qm"]
 
@@ -833,13 +833,13 @@ def test_3():
     assert compare("B3LYP-D3(BJ)", _compute_key(res["extras"]["local_keywords"]), "key")
 
 
-@using_dftd3
+@testing.using("dftd3")
 @pytest.mark.parametrize(
     "subjects",
     [
-        pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
+        pytest.param(eneyne_ne_psi4mols, marks=testing.using("psi4")),
         pytest.param(
-            eneyne_ne_qcdbmols, marks=using_psi4
+            eneyne_ne_qcdbmols, marks=testing.using("psi4")
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
     ],
     ids=["qmol", "pmol"],
@@ -860,11 +860,11 @@ def test_3():
         # below two xfail until dftd3 that's only 2-body is out of psi4 proper
         pytest.param(
             {"first": "atmgr", "second": "atmgr", "parent": "eneyne", "subject": "gAmB", "lbl": "ATM"},
-            marks=[using_dftd3_321],
+            marks=[testing.using("dftd3_321")],
         ),
         pytest.param(
             {"first": "pbe-atmgr", "second": None, "parent": "ne", "subject": "atom", "lbl": "ATM"},
-            marks=[using_dftd3_321],
+            marks=[testing.using("dftd3_321")],
         ),
     ],
 )
@@ -878,7 +878,7 @@ def test_molecule__run_dftd3__23body(inp, subjects):
     assert compare_values(gexpected, G, atol=1.0e-7)
 
 
-@using_qcdb
+@testing.using("qcdb")
 def test_qcdb__energy_d3():
     eneyne = qcdb.set_molecule(seneyne)
     eneyne.update_geometry()
@@ -904,13 +904,13 @@ def test_qcdb__energy_d3():
     )
 
 
-@using_mp2d
+@testing.using("mp2d")
 @pytest.mark.parametrize(
     "subjects",
     [
-        pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
+        pytest.param(eneyne_ne_psi4mols, marks=testing.using("psi4")),
         pytest.param(
-            eneyne_ne_qcdbmols, marks=using_psi4
+            eneyne_ne_qcdbmols, marks=testing.using("psi4")
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
@@ -961,13 +961,13 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
     )
 
 
-@using_dftd3
+@testing.using("dftd3")
 @pytest.mark.parametrize(
     "subjects",
     [
-        pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
+        pytest.param(eneyne_ne_psi4mols, marks=testing.using("psi4")),
         pytest.param(
-            eneyne_ne_qcdbmols, marks=using_psi4
+            eneyne_ne_qcdbmols, marks=testing.using("psi4")
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
@@ -1020,13 +1020,13 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
     )
 
 
-@using_dftd3_321
+@testing.using("dftd3_321")
 @pytest.mark.parametrize(
     "subjects",
     [
-        pytest.param(eneyne_ne_psi4mols, marks=using_psi4),
+        pytest.param(eneyne_ne_psi4mols, marks=testing.using("psi4")),
         pytest.param(
-            eneyne_ne_qcdbmols, marks=using_psi4
+            eneyne_ne_qcdbmols, marks=testing.using("psi4")
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],

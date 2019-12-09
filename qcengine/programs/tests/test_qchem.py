@@ -1,12 +1,13 @@
 import numpy as np
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_recursive, compare_values
-from qcengine.testing import qcengine_records, using_qchem
+
+import qcengine as qcng
+from qcengine.testing import qcengine_records, using
 
 qchem_info = qcengine_records("qchem")
+qchem_logonly_info = qcengine_records("qchem_logonly")
 
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
@@ -23,8 +24,8 @@ def test_qchem_output_parser(test_case):
     output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
     output_ref.pop("provenance", None)
 
-    check = compare_recursive(output_ref, output)
-    assert check, check
+    check, message = compare_recursive(output_ref, output, return_message=True)
+    assert check, message
 
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
@@ -51,7 +52,7 @@ def test_qchem_input_formatter_template(test_case):
     assert input_file.keys() >= {"commands", "infiles"}
 
 
-@using_qchem
+@using("qchem")
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
 def test_qchem_executor(test_case):
     # Get input file data
@@ -69,7 +70,7 @@ def test_qchem_executor(test_case):
     assert compare_recursive(output_ref.return_result, result.return_result, atol=atol)
 
 
-@using_qchem
+@using("qchem")
 def test_qchem_orientation():
 
     mol = qcel.models.Molecule.from_data(
@@ -90,3 +91,56 @@ def test_qchem_orientation():
     ret = qcng.compute(inp, "qchem", raise_error=True)
 
     assert compare_values(np.linalg.norm(ret.return_result, axis=0), [0, 0.00559696541, 0.00559696541])
+
+
+@pytest.mark.parametrize("test_case", qchem_logonly_info.list_test_cases())
+def test_qchem_logfile_parser(test_case):
+
+    # Get output file data
+    data = qchem_logonly_info.get_test_data(test_case)
+    outfiles = {"dispatch.out": data["qchem.out"]}
+    with pytest.warns(Warning):
+        output = qcng.get_program("qchem", check=False).parse_logfile(outfiles).dict()
+    output["stdout"] = None
+
+    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    for key in list(output["provenance"].keys()):
+        if key not in output_ref["provenance"]:
+            output["provenance"].pop(key)
+
+    check, message = compare_recursive(
+        output_ref, output, return_message=True, forgive=["root.molecule.provenance.version", "root.provenance.version"]
+    )
+    assert check, message
+
+
+@pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
+def test_qchem_logfile_parser_qcscr(test_case):
+
+    # Get output file data
+    data = qchem_info.get_test_data(test_case)
+    outfiles = qcel.util.deserialize(data["outfiles.msgpack"], "msgpack-ext")
+
+    with pytest.warns(Warning):
+        output = qcng.get_program("qchem", check=False).parse_logfile(outfiles).dict()
+    output["stdout"] = None
+
+    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    for key in list(output["provenance"].keys()):
+        if key not in output_ref["provenance"]:
+            output["provenance"].pop(key)
+
+    output_ref["stdout"] = None
+
+    # compare_recursive.forgive can be used once QCEL#174 is released
+    output["molecule"].pop("connectivity")
+    output_ref["molecule"].pop("connectivity")
+
+    output_ref["model"]["method"] = output_ref["model"]["method"].lower()
+    check, message = compare_recursive(
+        output_ref,
+        output,
+        return_message=True,
+        forgive=["root.molecule.provenance.version", "root.provenance.version", "root.provenance.routine"],
+    )
+    assert check, message

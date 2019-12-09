@@ -1,8 +1,8 @@
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_values
+
+import qcengine as qcng
 from qcengine import testing
 
 
@@ -34,17 +34,17 @@ def nh2():
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [
-        pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=testing.using_cfour),
-        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using_cfour),
-        pytest.param("gamess", "accd", {"mp2__nacore": 0, "contrl__ispher": 1}, marks=testing.using_gamess),
-        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using_nwchem),
+        pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=testing.using("cfour")),
+        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using("cfour")),
+        pytest.param("gamess", "accd", {"mp2__nacore": 0, "contrl__ispher": 1}, marks=testing.using("gamess")),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using("nwchem")),
         pytest.param(
-            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using_nwchem
+            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using("nwchem")
         ),
-        pytest.param("psi4", "aug-cc-pvdz", {"mp2_type": "conv"}, marks=testing.using_psi4),
-        pytest.param("qchem", "aug-cc-pvdz", {"N_FROZEN_CORE": 0}, marks=testing.using_qchem),
+        pytest.param("psi4", "aug-cc-pvdz", {"mp2_type": "conv"}, marks=testing.using("psi4")),
+        pytest.param("qchem", "aug-cc-pvdz", {"N_FROZEN_CORE": 0}, marks=testing.using("qchem")),
         # TODO Molpro has frozen-core on by default. For this to pass need keyword frozen_core = False
-        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
+        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using("molpro")),
     ],
 )
 def test_sp_mp2_rhf_full(program, basis, keywords, h2o):
@@ -80,31 +80,31 @@ def test_sp_mp2_rhf_full(program, basis, keywords, h2o):
                 "scf_conv": 12,
                 "cc_conv": 12,
             },
-            marks=testing.using_cfour,
+            marks=testing.using("cfour"),
         ),
-        pytest.param("cfour", "aug-pvdz", {"reference": "uhf", "dropmo": 1}, marks=testing.using_cfour),
-        pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=testing.using_gamess),
+        pytest.param("cfour", "aug-pvdz", {"reference": "uhf", "dropmo": 1}, marks=testing.using("cfour")),
+        pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=testing.using("gamess")),
         pytest.param(
             "nwchem",
             "aug-cc-pvdz",
             {"basis__spherical": True, "qc_module": "tce", "scf__uhf": True, "tce__freeze": 1},
-            marks=testing.using_nwchem,
+            marks=testing.using("nwchem"),
         ),
         pytest.param(
             "nwchem",
             "aug-cc-pvdz",
             {"basis__spherical": True, "scf__uhf": True, "mp2__freeze": 1},
-            marks=testing.using_nwchem,
+            marks=testing.using("nwchem"),
         ),
         pytest.param(
             "psi4",
             "aug-cc-pvdz",
             {"reference": "uhf", "freeze_core": True, "mp2_type": "conv"},
-            marks=testing.using_psi4,
+            marks=testing.using("psi4"),
         ),
-        pytest.param("qchem", "aug-cc-pvdz", {"N_frozen_CORE": "fC"}, marks=testing.using_qchem),
+        pytest.param("qchem", "aug-cc-pvdz", {"N_frozen_CORE": "fC"}, marks=testing.using("qchem")),
         # TODO Molpro needs a new keyword for unrestricted MP2 (otherwise RMP2 by default) and needs symmetry c1
-        # pytest.param('molpro', 'aug-cc-pvdz', {"reference": "unrestricted"}, marks=testing.using_molpro),
+        # pytest.param('molpro', 'aug-cc-pvdz', {"reference": "unrestricted"}, marks=testing.using("molpro")),
     ],
 )
 def test_sp_mp2_uhf_fc(program, basis, keywords, nh2):
@@ -125,7 +125,7 @@ def test_sp_mp2_uhf_fc(program, basis, keywords, nh2):
 
 @pytest.mark.parametrize(
     "program,basis,keywords,errmsg",
-    [pytest.param("nwchem", "aug-cc-pvdz", {"scf__rohf": True}, "unknown SCFTYPE", marks=testing.using_nwchem)],
+    [pytest.param("nwchem", "aug-cc-pvdz", {"scf__rohf": True}, "unknown SCFTYPE", marks=testing.using("nwchem"))],
 )
 def test_sp_mp2_rohf_full_error(program, basis, keywords, nh2, errmsg):
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "mp2", "basis": basis}, "keywords": keywords}

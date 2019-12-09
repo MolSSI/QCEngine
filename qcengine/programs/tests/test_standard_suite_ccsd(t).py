@@ -1,8 +1,8 @@
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_values
+
+import qcengine as qcng
 from qcengine import testing
 
 
@@ -34,14 +34,14 @@ def nh2():
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [
-        pytest.param("cfour", "aug-pvdz", {"scf_conv": 12, "cc_conv": 12}, marks=testing.using_cfour),
-        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using_cfour),
-        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using_nwchem),
+        pytest.param("cfour", "aug-pvdz", {"scf_conv": 12, "cc_conv": 12}, marks=testing.using("cfour")),
+        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using("cfour")),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using("nwchem")),
         pytest.param(
-            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using_nwchem
+            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using("nwchem")
         ),
-        pytest.param("psi4", "aug-cc-pvdz", {}, marks=testing.using_psi4),
-        pytest.param("gamess", "accd", {"ccinp__ncore": 0, "contrl__ispher": 1}, marks=testing.using_gamess),
+        pytest.param("psi4", "aug-cc-pvdz", {}, marks=testing.using("psi4")),
+        pytest.param("gamess", "accd", {"ccinp__ncore": 0, "contrl__ispher": 1}, marks=testing.using("gamess")),
     ],
 )
 def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o):
@@ -72,14 +72,14 @@ def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o):
             "aug-cc-pvdz",
             {"ccsd__freeze": 1, "scf__uhf": True},
             "ccsd: nopen is not zero",
-            marks=testing.using_nwchem,
+            marks=testing.using("nwchem"),
         ),
         pytest.param(
             "gamess",
             "accd",
             {"contrl__scftyp": "uhf"},
             "CCTYP IS PROGRAMMED ONLY FOR SCFTYP=RHF OR ROHF",
-            marks=testing.using_gamess,
+            marks=testing.using("gamess"),
         ),
     ],
 )
@@ -99,11 +99,11 @@ def test_sp_ccsd_t_uhf_fc_error(program, basis, keywords, nh2, errmsg):
             "cfour",
             "aug-pvdz",
             {"reference": "rohf", "occupation": [[3, 1, 1, 0], [3, 0, 1, 0]], "scf_conv": 12, "cc_conv": 12},
-            marks=testing.using_cfour,
+            marks=testing.using("cfour"),
         ),
-        pytest.param("cfour", "aug-pvdz", {"reference": "rohf"}, marks=testing.using_cfour),
-        # pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce', 'scf__rohf': True}, marks=testing.using_nwchem),
-        pytest.param("psi4", "aug-cc-pvdz", {"reference": "rohf"}, marks=testing.using_psi4),
+        pytest.param("cfour", "aug-pvdz", {"reference": "rohf"}, marks=testing.using("cfour")),
+        # pytest.param('nwchem', 'aug-cc-pvdz', {'basis__spherical': True, 'qc_module': 'tce', 'scf__rohf': True}, marks=testing.using("nwchem")),
+        pytest.param("psi4", "aug-cc-pvdz", {"reference": "rohf"}, marks=testing.using("psi4")),
     ],
 )
 def test_sp_ccsd_t_rohf_full(program, basis, keywords, nh2):
