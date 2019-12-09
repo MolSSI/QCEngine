@@ -12,7 +12,7 @@ from qcelemental.util import which, which_import
 
 import qcengine as qcng
 
-QCENGINE_RECORDS_COMMIT = "6597e1a"
+QCENGINE_RECORDS_COMMIT = "98bc716"
 
 
 def _check_qcenginerecords(return_data=False):

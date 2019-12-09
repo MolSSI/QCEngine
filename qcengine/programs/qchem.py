@@ -11,13 +11,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from qcelemental import constants
-from qcelemental.models import AtomicInput, AtomicResult
+from qcelemental.models import AtomicInput, AtomicResult, Molecule
 from qcelemental.molparse import regex
 from qcelemental.util import parse_version, provenance_stamp, safe_version, which
 
 from ..exceptions import InputError, UnknownError
 from ..util import disk_files, execute, popen, temporary_directory
 from .model import ProgramHarness
+
+NUMBER = r"(?x:" + regex.NUMBER + ")"
 
 
 class QChemHarness(ProgramHarness):
@@ -278,8 +280,6 @@ $end
         Parses fields from log file that are not parsed from QCSCRATCH in parse_output
         """
 
-        NUMBER = r"(?x:" + regex.NUMBER + ")"
-
         properties = {}
         provenance = provenance_stamp(__name__)
         mobj = re.search(r"This is a multi-thread run using ([0-9]+) threads", outtext)
@@ -345,9 +345,13 @@ $end
             "parse_logfile will result in precision loss for some fields due to trunctation in " "Q-Chem output files."
         )
 
-        NUMBER = r"(?x:" + regex.NUMBER + ")"
-
         outtext = outfiles["dispatch.out"]
+
+        mobj = re.search(r"(?:User input\:|Running Job?)\s+\d+\s+of\s+(\d+)", outtext)
+        if mobj:
+            if int(mobj.group(1)) > 1:
+                raise InputError("Multi-job Q-Chem log files not supported.")
+
         input_dict = {}
         mobj = re.search(r"\n-{20,}\nUser input:\n-{20,}\n(.+)\n-{20,}", outtext, re.DOTALL)
         if mobj:
@@ -359,8 +363,10 @@ $end
                 lines = rem_text.split("\n")
                 keywords = {}
                 for line in lines:
-                    s = line.split()
-                    keywords[s[0].lower()] = s[1]
+                    s = re.sub(r"(^|[^\\])!.*", "", line).split()
+                    if len(s) == 0:
+                        continue
+                    keywords[s[0].lower()] = s[1].lower()
                 input_dict["model"] = {}
                 input_dict["model"]["method"] = keywords.pop("method").lower()
                 input_dict["model"]["basis"] = keywords.pop("basis").lower()
@@ -368,8 +374,12 @@ $end
                     jobtype = keywords.pop("jobtype")
                 else:
                     jobtype = "sp"
-                _jobtype_to_driver = {"sp": "energy", "force": "gradient", "freq": "hessian"}
-                input_dict["driver"] = _jobtype_to_driver[jobtype]
+                _jobtype_to_driver = {"sp": "energy", "force": "gradient", "freq": "hessian"}  # optimization intentionally not supported
+                try:
+                    input_dict["driver"] = _jobtype_to_driver[jobtype]
+                except KeyError:
+                    raise KeyError(f"Jobtype {jobtype} not supported in qchem log file parser.")
+
                 for key in keywords:
                     if keywords[key] == "false":
                         keywords[key] = False
@@ -380,22 +390,10 @@ $end
             molecule_match = re.search(r"\$molecule\s*\n([^\$]+)\n\s*\$end", inputtext, re.DOTALL | re.IGNORECASE)
             if molecule_match:
                 molecule_text = molecule_match.group(1)
-                lines = molecule_text.split("\n")
-                charge, spin = map(int, lines[0].split())
-                symbols = [line.split()[0] for line in lines[1:]]
-                if input_dict["keywords"].get("input_bohr", False):
-                    cf = 1
-                else:
-                    cf = constants.conversion_factor("angstrom", "bohr")
-
-                geometry = [list(map(lambda x: float(x) * cf, line.split()[1:4])) for line in lines[1:]]
-                molecule = {
-                    "molecular_multiplicity": spin,
-                    "molecular_charge": charge,
-                    "geometry": geometry,
-                    "symbols": symbols,
-                }
-                input_dict["molecule"] = molecule
+                if keywords.get("input_bohr", False):
+                    molecule_text += "\nunits au"
+                molecule = Molecule.from_data(molecule_text, dtype="psi4")
+                input_dict["molecule"] = molecule.dict()
 
             _excluded_rem = {
                 "input_bohr",
