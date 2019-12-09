@@ -74,6 +74,10 @@ class Psi4Harness(ProgramHarness):
         error_message = None
         compute_success = False
 
+        # Basis must not be None for HF3c
+        old_basis = input_model.model.basis
+        input_model.model.__dict__["basis"] = old_basis or ""
+
         with temporary_directory(parent=parent, suffix="_psi_scratch") as tmpdir:
 
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
@@ -193,6 +197,9 @@ class Psi4Harness(ProgramHarness):
                 raise InputError(error_message)
             else:
                 raise UnknownError(error_message)
+
+        # Reset basis
+        output_data["model"]["basis"] = old_basis
 
         # Move several pieces up a level
         output_data["provenance"]["memory"] = round(config.memory, 3)
