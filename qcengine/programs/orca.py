@@ -5,6 +5,7 @@ Calls the Orca executable.
 import string
 import cclib
 import io
+import numpy as np
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from qcelemental.models import AtomicResult
@@ -106,7 +107,7 @@ class OrcaHarness(ProgramHarness):
         # Check if Molpro executable is found
         self.found(raise_error=True)
 
-        # Check Molpro version
+        # Check Orca version
         if parse_version(self.get_version()) < parse_version("4.2.1"):
             raise TypeError("Orca version '{}' not supported".format(self.get_version()))
 
@@ -114,12 +115,13 @@ class OrcaHarness(ProgramHarness):
         job_inputs = self.build_input(input_data, config)
 
         # Run Orca
-        exe_success, proc = self.execute(job_inputs)
+        binary = ["dispatch.gbw"]
+        exe_success, proc = self.execute(job_inputs, as_binary=binary)
 
         # Determine whether the calculation succeeded
         if exe_success:
             # If execution succeeded, collect results
-            result = self.parse_output(proc["stdout"], input_data)
+            result = self.parse_output(proc, input_data)
             return result
         else:
             # Return UnknownError for error propagation
@@ -139,14 +141,13 @@ class OrcaHarness(ProgramHarness):
         """
         For option documentation go look at qcengine/util.execute
         """
-
-        # Collect all input files and update with extra_infiles
         infiles = inputs["infiles"]
         if extra_infiles is not None:
             infiles.update(extra_infiles)
 
         # Collect all output files and update with extra_outfiles
-        outfiles = []
+        outfiles = ["dispatch.gbw", "dispatch.engrad"]
+
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
 
@@ -155,7 +156,7 @@ class OrcaHarness(ProgramHarness):
         if extra_commands is not None:
             commands = extra_commands
 
-        # Run the Molpro program
+        # Run the Orca program
         exe_success, proc = execute(
             commands,
             infiles=infiles,
@@ -226,9 +227,7 @@ class OrcaHarness(ProgramHarness):
             if input_model.driver == "energy":
                 input_file.extend(energy_call)
             elif input_model.driver == "gradient":
-                input_file.extend(energy_call)
-                input_file.append("")
-                input_file.append("{force}")
+                input_file[0] = "{} {}".format(input_file[0], "engrad")
             else:
                 raise InputError(f"Driver {input_model.driver} not implemented for Molpro.")
 
@@ -258,11 +257,11 @@ class OrcaHarness(ProgramHarness):
         }
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
-        data = cclib.io.ccread(io.StringIO(outfiles))
+
+        data = cclib.io.ccread(io.StringIO(outfiles["stdout"]))
 
         properties = {}
         extras = {}
-
 
         # Process basis set data
         properties["calcinfo_nbasis"] = data.nbasis
@@ -276,7 +275,7 @@ class OrcaHarness(ProgramHarness):
         # Determining the final energy
         # Throws an error if the energy isn't found for the method specified from the input_model.
         try:
-            final_energy = data.scfenergies[-1]
+            final_energy = data.scfenergies[-1] * 0.0367493
         except:
             raise KeyError(f"Could not find {method} total energy")
 
@@ -285,16 +284,46 @@ class OrcaHarness(ProgramHarness):
 
         # Determining return_result
         if input_model.driver == "energy":
-            output_data["return_result"] = final_energy
+            output_data["return_result"] = final_energy 
+            extras["CURRENT ENERGY"] = final_energy
         elif input_model.driver == "gradient":
-            raise KeyError(f"Could not find {method} gradient")
-            # output_data["return_result"] = properties.pop("gradient")
+            gradient = self.get_gradient(outfiles["outfiles"]["dispatch.engrad"])
+            output_data["return_result"] = gradient
+            extras["CURRENT GRADIENT"] = gradient
 
         # Final output_data assignments needed for the AtomicResult object
+
         output_data["properties"] = properties
         output_data["extras"].update(extras)
         output_data["schema_name"] = "qcschema_output"
-        output_data["stdout"] = outfiles
+        output_data["stdout"] = outfiles["stdout"]
         output_data["success"] = True
 
+        import uuid
+        myid = str(uuid.uuid4())
+        with open("/tmp/orcafiles/{}".format(myid), "wb") as handle:
+            handle.write(outfiles["outfiles"]["dispatch.gbw"])
+        output_data["extras"]["gbw"] = myid
+
         return AtomicResult(**output_data)
+
+    def get_gradient(self, gradient_file):
+        """Get gradient from engrad Orca file
+        """
+        copy = False
+        found = False
+        gradient = []
+
+        for line in gradient_file.splitlines():
+            if "gradient" in line:
+                found = True
+                copy = True
+            if found and copy:
+                try:
+                    gradient.append(float(line))
+                except ValueError:
+                    pass
+        
+        dim = np.sqrt(len(gradient)).astype(int)
+
+        return np.array(gradient).reshape(dim, dim)
