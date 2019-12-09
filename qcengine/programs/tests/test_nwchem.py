@@ -1,12 +1,10 @@
 """Tests for NWChem functionality"""
-from math import isclose
-
 import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import using_nwchem
+from qcengine.testing import using
 
 
 @pytest.fixture
@@ -23,7 +21,7 @@ def nh2():
     return qcel.models.Molecule.from_data(smol)
 
 
-@using_nwchem
+@using("nwchem")
 def test_b3lyp(nh2):
     # Run NH2
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "b3lyp", "basis": "3-21g"}}

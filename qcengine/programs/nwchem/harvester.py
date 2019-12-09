@@ -201,15 +201,30 @@ def harvest_outfile_pass(outtext):
                 else:
                     psivar[f'{mbpt_plain} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{mbpt_plain} TOTAL ENERGY'] = mobj.group(2)
+            #TCE dipole- MBPT(n)
+            mobj2 = re.search(
+                    r'^\s+' +  r'dipole moments / hartree & Debye' + r'\s*' +
+                    r'^\s+' + r'X' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Y' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Z' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Total' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
+                    outtext, re.MULTILINE)
 
-        # Process CC '()' correction part through tce [dertype] command
-        for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]']:
+            if mobj2:
+                mbpt_plain = cc_name.replace('\\', '').replace('MBPT', 'MP').replace('(', '').replace(')', '')
+                print(f'matched tce {mbpt_plain} dipole moment')
+                #only pulling Debye
+                psivar[f'{mbpt_plain} DIPOLE X'] = mobj2.group(2)
+                psivar[f'{mbpt_plain} DIPOLE Y'] = mobj2.group(4)
+                psivar[f'{mbpt_plain} DIPOLE Z'] = mobj2.group(6)
+
+        #TCE with () or [] 
+        for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]', r'CCSD\(2\)_T', r'CCSD\(2\)', r'CCSDT\(2\)_Q', r'CR-CCSD\[T\]', r'CR-CCSD\(T\)', r'LR-CCSD\(T\)', r'LR-CCSD\(TQ\)-1', r'CREOMSD\(T\)']:
             mobj = re.search(
                 r'^\s+' + cc_name + r'\s+' + r'correction energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
                 r'^\s+' + cc_name + r'\s+' + r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' +
-                r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', outtext,
-                re.MULTILINE)
-
+                r'^\s+' + cc_name + r'\s+' + r'total energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*$', 
+                outtext, re.MULTILINE)
             if mobj:
                 cc_plain = cc_name.replace('\\', '')
                 cc_corr = cc_plain.replace('CCSD', '')
@@ -218,8 +233,27 @@ def harvest_outfile_pass(outtext):
                 psivar[f'{cc_corr} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_plain} CORRELATION ENERGY'] = mobj.group(2)
                 psivar[f'{cc_plain} TOTAL ENERGY'] = mobj.group(3)
-        # Process other TCE cases
-        for cc_name in [r'CISD', r'CISDT', r'CISDTQ', r'CCD', r'CCSD', r'CCSDT', r'CCSDTQ', r'LCCSD', r'LCCD']:
+        #TCE dipole with () or []
+            mobj2 = re.search(
+                    r'^\s+' + cc_name + r'dipole moments / hartree & Debye' + r'\s*' +
+                    r'^\s+' + r'X' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Y' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Z' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Total' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
+                    outtext, re.MULTILINE)
+
+            if mobj2:
+                cc_plain = cc_name.replace('\\', '')
+                cc_corr = cc_plain.replace('CCSD', '')
+                print(f'matched tce {cc_plain} dipole moment')
+
+                #only pulling Debye
+                psivar[f'{cc_plain} DIPOLE X'] = mobj2.group(2)
+                psivar[f'{cc_plain} DIPOLE Y'] = mobj2.group(4)
+                psivar[f'{cc_plain} DIPOLE Z'] = mobj2.group(6)
+        
+        #Process other TCE cases
+        for cc_name in [r'CISD', r'CISDT', r'CISDTQ', r'CCD', r'CC2', r'CCSD', r'CCSDT', r'CCSDTQ', r'LCCSD', r'LCCD', r'CCSDTA']:
             mobj = re.search(
                 r'^\s+' + r'Iterations converged' + r'\s*' + r'^\s+' + cc_name + r'\s+' +
                 r'correlation energy / hartree' + r'\s+=\s*' + NUMBER + r'\s*' + r'^\s+' + cc_name + r'\s+' +
@@ -230,8 +264,24 @@ def harvest_outfile_pass(outtext):
                 logger.debug(mobj)
                 psivar[f'{cc_name} CORRELATION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_name} TOTAL ENERGY'] = mobj.group(2)
+        #TCE dipole
+            mobj2 = re.search(
+                    r'^\s+' + r'dipole moments / hartree & Debye' + r'\s*' +
+                    r'^\s+' + r'X' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Y' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Z' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
+                    r'^\s+' + r'Total' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*$',
+                    outtext, re.MULTILINE)
+            if mobj2:
+                print(f'matched tce dipole moment')
+
+                #only pulling Debye
+                psivar[f'CURRENT DIPOLE X'] = mobj2.group(2)
+                psivar[f'CURRENT DIPOLE Y'] = mobj2.group(4)
+                psivar[f'CURRENT DIPOLE Z'] = mobj2.group(6)
 
         # Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
+
         mobj = re.search(
             r'^\s+' + r'-----------' + r'\s*' + r'^\s+' + r'CCSD Energy' + r'\s*' + r'^\s+' + r'-----------' + r'\s*' +
             r'^\s+' + r'Reference energy:' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'CCSD corr\. energy:' + r'\s+' +
@@ -280,28 +330,25 @@ def harvest_outfile_pass(outtext):
         # psivar name might need to be fixed
         # each root excitation energy is extracted from the last iteration of right hand side
         mobj = re.findall(
-            # r'^\s+' + r'Excited-state calculation' + r'\s+' + r'\(\s+' + r'(.*?)' + r'\s+' + r'symmetry\)' + r'\s*' +
-            # r'^\s+' + r'=========================================' + r'\s*' + r'(?:.*?)'
-            # +  #Skip to line before right-hand side iterations
-            # r'^\s+' + r'EOM-' + cc_name + r' right-hand side iterations' + r'\s*' + r'(?:.*?)' + r'^\s+' + r'Iteration'
-            # + r'\s+\d+\s+' + r'using' + r'\s+\d+\s+' + r'trial vectors' + r'\s*' +
-            # r'((?:\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+(?:(\s+\d+\.\d+\s+\d+\.\d+)?)\s*\n)+)' + r'^\s+' +
-            # r'--------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            # r'Iterations converged' + r'\s*$',
-            # outtext,
-            # re.MULTILINE | re.DOTALL)
-            r'^\s+' + r'Excited-state calculation' + r'\s+' + r'\((.*?)\)' + r'\s*' +
-            r'^\s+' + r'EOM-' + cc_name + r'\s+right-hand side iterations' + r'\s*' +  # capture cc_name
-            r'^\s+' + r'Iterations converged' + r'\s*' +  # skip to excitation
-            r'^\s+' + r'Excited state root\s+\d{1,2}\s*' +
-            r'^\s+' + r'Excitation energy / hartree' + r'\s+=\s+' + NUMBER + r'\s*' +
-            r'^\s+' + r'/ eV\s+' + r'\s+=\s+' + NUMBER + r'\s*$',
+            r'^\s+(?:Excited-state calculation \( )(.*)\s+(?:symmetry\))\s+(?:.*\n)*^\s+EOM-' + cc-name +
+            # (..) captures symmetry
+            r'right-hand side iterations\s+(?:.*\n)*(?:Excited state root)\s+' + NUMBER + #root
+            r'\s*(?:Excitation energy / hartree)\s+.\s+' + NUMBER + #excitation energy hartree 
+            r'\s*(?:/ eV)\s+.\s+' + NUMBER + r'\s*$', #excitation energy eV
             outtext, re.MULTILINE | re.DOTALL)
+        #regex should be more dynamic in finding values, need to revisit
+        #mobj.group(0) = symmetry value
+        #mobj.group(1) = cc_name
+        #mobj.group(2) = root number
+        #mobj.group(3) = excitation energy (hartree)
+        #mobj.group(4) = excitation energy (eV)
 
         if mobj:
+            print(mobj)
             ext_energy = {}  # dic
 
             ext_energy_list = []
+            print(f'matched eom-{cc_name}')
             for mobj_list in mobj:
                 logger.debug('matched EOM-%s - %s symmetry' % (cc_name, mobj_list[0]))  # cc_name, symmetry
                 logger.debug(mobj_list)
@@ -340,28 +387,26 @@ def harvest_outfile_pass(outtext):
 # Process TDDFT
 #       1) Spin allowed
         mobj = re.findall(
-            r'^\s+' + r'----------------------------------------------------------------------------' + r'\s*' +
-            r'^\s+' + r'Root' + r'\s+' + r'(\d+)' + r'\s+' + r'(\w+)' + r'\s+' + r'(.*?)' + r'\s+' + NUMBER +
-            r'\s+a\.u\.\s+' + NUMBER + r'\s+eV\s*' + r'^\s+' +
-            r'----------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            r'Transition Moments' + r'\s+X\s+' + NUMBER + r'\s+Y\s+' + NUMBER + r'\s+Z\s+' + NUMBER + r'\s*' + r'^\s+'
-            + r'Transition Moments' + r'\s+XX\s+' + NUMBER + r'\s+XY\s+' + NUMBER + r'\s+XZ\s+' + NUMBER + r'\s*' +
-            r'^\s+' + r'Transition Moments' + r'\s+YY\s+' + NUMBER + r'\s+YZ\s+' + NUMBER + r'\s+ZZ\s+' + NUMBER +
-            r'\s*$', outtext, re.MULTILINE)
+            r'^\s+(?:Root)\s+(\d+)\s+(.*?)\s+' + NUMBER + r'\s(?:a\.u\.)\s+' + NUMBER + r'\s+(?:\w+)'
+            #Root | symmetry | a.u. | eV
+            + r'\s+(?:.\w+.\s+.\s+\d+.\d+)' #s2 value 
+            + r'\s+(?:.*\n)\s+Transition Moments\s+X\s+'+ NUMBER + r'\s+Y\s+'+ NUMBER+ r'\s+Z\s+'+ NUMBER #dipole
+            + r'\s+Transition Moments\s+XX\s+'+ NUMBER + r'\s+XY\s+'+ NUMBER+ r'\s+XZ\s+'+ NUMBER #quadrople
+            + r'\s+Transition Moments\s+YY\s+'+ NUMBER + r'\s+YZ\s+'+ NUMBER+ r'\s+ZZ\s+'+ NUMBER #quadrople 
+            + r'\s*$',
+            outtext, re.MULTILINE)
 
         if mobj:
             logger.debug('matched TDDFT with transition moments')
             for mobj_list in mobj:
-                # print (mobj_list)
-                # print (mobj_list[0]) #root number
-                # print (mobj_list[1]) #singlet or triplet?
-                # print (mobj_list[2]) #symmetry
-
+                print (mobj_list)
+                psivar['TDDFT ROOT %s EXCITATION ENERGY - %s SYMMETRY' % (mobj_list[0], mobj_list[1])] = mobj_list[2] #in eV
+                psivar['TDDFT ROOT %s EXCITED STATE ENERGY - %s SYMMETRY' % (mobj_list[0], mobj_list[1])] = psivar['DFT TOTAL ENERGY'] + Decimal(mobj_list[2]) 
                 #### temporary psivars ####
-                psivar['TDDFT ROOT %s %s %s EXCITATION ENERGY' %
-                       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
-                psivar ['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0],mobj_list[1],mobj_list[2])] = \
-                    psivar ['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
+                #psivar['TDDFT ROOT %d %s %s EXCITATION ENERGY' %
+                #       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
+                #psivar ['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0],mobj_list[1],mobj_list[2])] = \
+                #    psivar ['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
                 psivar['TDDFT ROOT %s DIPOLE X' % (mobj_list[0])] = mobj_list[5]
                 psivar['TDDFT ROOT %s DIPOLE Y' % (mobj_list[0])] = mobj_list[6]
                 psivar['TDDFT ROOT %s DIPOLE Z' % (mobj_list[0])] = mobj_list[7]
@@ -375,20 +420,29 @@ def harvest_outfile_pass(outtext):
 
 #       2) Spin forbidden
         mobj = re.findall(
-            r'^\s+' + r'----------------------------------------------------------------------------' + r'\s*' +
-            r'^\s+' + r'Root' + r'\s+' + r'(\d+)' + r'\s+' + r'(\w+)' + r'\s+' + r'(.*?)' + r'\s+' + NUMBER +
-            r'\s+a\.u\.\s+' + NUMBER + r'\s+eV\s*' + r'^\s+' +
-            r'----------------------------------------------------------------------------' + r'\s*' + r'^\s+' +
-            r'Transition Moments' + r'\s+Spin forbidden\s*$', outtext, re.MULTILINE)
+            r'^\s+(?:Root)\s+(\d+)\s+(.*?)\s+' + NUMBER + r'\s(?:a\.u\.)\s+' + NUMBER + r'\s+(?:\w+)'
+            #Root | symmetry | a.u. | eV
+            + r'\s+(?:.\w+.\s+.\s+\d+.\d+)' #s2 value 
+            + r'\s+Transition Moments\s+(?:Spin forbidden)' + r'\s*$',
+            outtext, re.MULTILINE)
+        #mobj.group(0) = Root
+        #mobj.group(1) = symmetry
+        #mobj.group(2) a.u.
+        #mobj.group(3) e.V
+        #mobj.group(4) Excitation energy
+        #mobj.group(5) Excited state energy
 
         if mobj:
             logger.debug('matched TDDFT - spin forbidden')
             for mobj_list in mobj:
                 #### temporary psivars ####
-                psivar['TDDFT ROOT %s %s %s EXCITATION ENERGY' %
-                       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
-                psivar['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0], mobj_list[1], mobj_list[2])] = \
-                    psivar['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
+                psivar['TDDFT ROOT %s EXCITATION ENERGY - %s SYMMETRY' % (mobj_list[0], mobj_list[2])] = mobj_list[4] #in eV
+                psivar['TDDFT ROOT %s EXCITED STATE ENERGY - %s SYMMETRY' % (mobj_list[0], mobj_list[2])] = psivar['DFT TOTAL ENERGY'] + qcel.constants.converstion_factor("eV", "hartree")*Decimal(mobj_list[4]) 
+
+                #psivar['TDDFT ROOT %s %s %s EXCITATION ENERGY' %
+                #       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
+                #psivar['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0], mobj_list[1], mobj_list[2])] = \
+                #    psivar['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
             if mobj:
                 logger.debug('Non-variation initial energy')  # prints out energy, 5 counts
 
@@ -497,20 +551,24 @@ def harvest_outfile_pass(outtext):
                     atoms.append(lline[1])  # Tag
                     psivar_grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
 
-        # Process dipole
+        # Process dipole (Properties)
         mobj = re.search(
-            r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s' + r'A\.U\.' + r'\s*' + r'^\s+' + r'DMX' + r'\s+' +
-            NUMBER + r'.*' + r'\s*' + r'^\s+' + r'DMY' + r'\s+' + NUMBER + r'.*' + r'\s*' + r'^\s+' + r'DMZ' + r'\s+' +
-            NUMBER + r'.' + r'\s*' + r'^\s+' + r'.*' + r'\s*' + r'^\s+' + r'Total dipole' + r'\s+' + NUMBER + r'\s' +
-            r'A\.U\.' + r'\s*' + r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s' + r'Debye\(s\)' + r'\s*' +
-            r'^\s+' + r'DMX' + r'\s+' + NUMBER + r'.*' + r'\s*' + r'^\s+' + r'DMY' + r'\s+' + NUMBER + r'.*' + r'\s*' +
-            r'^\s+' + r'DMZ' + r'\s+' + NUMBER + r'.*' + r'\s*' + r'^\s+' + r'.*' + r'\s*' + r'^\s+' +
-            r'Total dipole' + r'\s+' + NUMBER + r'\s' + r'DEBYE\(S\)' + r'\s*$', outtext, re.MULTILINE)
+            r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s+' + r'A\.U\.' + r'\s*' + 
+            r'^\s+' + r'DMX' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'DMY' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'DMZ' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'.*' +
+            r'^\s+' + r'Total dipole' + r'\s+' + NUMBER + r'\s+' + r'A\.U\.' + r'\s*' + 
+            r'^\s+' + r'Dipole moment' + r'\s+' + NUMBER + r'\s' + r'Debye\(s\)' + r'\s*' +
+            r'^\s+' + r'DMX' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'DMY' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'DMZ' + r'\s+' + NUMBER + r'.*' +
+            r'^\s+' + r'.*' + 
+            r'^\s+' + r'Total dipole' + r'\s+' + NUMBER + r'\s' + r'DEBYE\(S\)' + r'\s*$', 
+            outtext, re.MULTILINE)
 
         if mobj:
             logger.debug('matched total dipole')
-            # print (mobj.group(5), 'a.u.')
-            # print (mobj.group(10),'debye(s)')
 
             # UNIT = DEBYE(S)
             psivar['CURRENT DIPOLE X'] = mobj.group(7)

@@ -19,8 +19,8 @@ def input_data():
     }
 
 
-@testing.using_psi4
-@testing.using_geometric
+@testing.using("psi4")
+@testing.using("geometric")
 def test_geometric_psi4(input_data):
 
     input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
@@ -43,8 +43,8 @@ def test_geometric_psi4(input_data):
         assert "WIBERG_LOWDIN_INDICES" in single.extras["qcvars"]
 
 
-@testing.using_psi4
-@testing.using_geometric
+@testing.using("psi4")
+@testing.using("geometric")
 def test_geometric_local_options(input_data):
 
     input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
@@ -62,8 +62,8 @@ def test_geometric_local_options(input_data):
     assert "_qcengine_local_config" not in ret.trajectory[0].extras
 
 
-@testing.using_rdkit
-@testing.using_geometric
+@testing.using("rdkit")
+@testing.using("geometric")
 def test_geometric_stdout(input_data):
 
     input_data["initial_molecule"] = qcng.get_molecule("water")
@@ -77,8 +77,8 @@ def test_geometric_stdout(input_data):
     assert "Converged!" in ret.stdout
 
 
-@testing.using_geometric
-@testing.using_rdkit
+@testing.using("geometric")
+@testing.using("rdkit")
 def test_geometric_rdkit_error(input_data):
 
     input_data["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity"})
@@ -92,8 +92,8 @@ def test_geometric_rdkit_error(input_data):
     assert isinstance(ret.error.error_message, str)
 
 
-@testing.using_rdkit
-@testing.using_geometric
+@testing.using("rdkit")
+@testing.using("geometric")
 def test_optimization_protocols(input_data):
 
     input_data["initial_molecule"] = qcng.get_molecule("water")
@@ -111,8 +111,8 @@ def test_optimization_protocols(input_data):
     assert ret.final_molecule.get_hash() == ret.trajectory[1].molecule.get_hash()
 
 
-@testing.using_geometric
-@testing.using_rdkit
+@testing.using("geometric")
+@testing.using("rdkit")
 def test_geometric_retries(failure_engine, input_data):
 
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
@@ -143,7 +143,7 @@ def test_geometric_retries(failure_engine, input_data):
     assert len(ret.input_data["trajectory"]) == 2
 
 
-@testing.using_geometric
+@testing.using("geometric")
 @pytest.mark.parametrize(
     "program, model, bench",
     [
@@ -151,19 +151,19 @@ def test_geometric_retries(failure_engine, input_data):
             "rdkit",
             {"method": "UFF"},
             [1.87130923886072, 2.959448636243545, 104.5099642579023],
-            marks=testing.using_rdkit,
+            marks=testing.using("rdkit"),
         ),
         pytest.param(
             "torchani",
             {"method": "ANI1x"},
             [1.82581873750194, 2.866376526793269, 103.4332610730292],
-            marks=testing.using_torchani,
+            marks=testing.using("torchani"),
         ),
         pytest.param(
             "mopac",
             {"method": "PM6"},
             [1.7927843431811934, 2.893333237502448, 107.60441967992045],
-            marks=testing.using_mopac,
+            marks=testing.using("mopac"),
         ),
     ],
 )

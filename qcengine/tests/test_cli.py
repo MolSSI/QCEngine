@@ -55,7 +55,7 @@ def test_info():
         assert output in default_output
 
 
-@testing.using_psi4
+@testing.using("psi4")
 def test_run_psi4(tmp_path):
     """Tests qcengine run with psi4 and JSON input"""
 
@@ -77,8 +77,8 @@ def test_run_psi4(tmp_path):
     check_result(run_qcengine_cli(args, stdin=inp.json()))
 
 
-@testing.using_geometric
-@testing.using_psi4
+@testing.using("geometric")
+@testing.using("psi4")
 def test_run_procedure(tmp_path):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
 

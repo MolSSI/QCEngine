@@ -23,7 +23,7 @@ def test_missing_key_raises():
         ret = qcng.compute({"hello": "hi"}, "bleh", raise_error=True)
 
 
-@testing.using_psi4
+@testing.using("psi4")
 def test_psi4_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -32,20 +32,35 @@ def test_psi4_task():
         "keywords": {"scf_type": "df"},
     }
 
-    ret = qcng.compute(input_data, "psi4", raise_error=True, return_dict=True)
+    ret = qcng.compute(input_data, "psi4", raise_error=True)
 
-    assert ret["driver"] == "energy"
-    assert "provenance" in ret
-    assert "Final Energy" in ret["stdout"]
+    assert ret.driver == "energy"
+    assert "Final Energy" in ret.stdout
 
-    for key in ["cpu", "hostname", "username", "wall_time"]:
-        assert key in ret["provenance"]
+    prov_keys = {"cpu", "hostname", "username", "wall_time"}
+    assert ret.provenance.dict().keys() >= prov_keys
+    assert "retries" not in ret.provenance.dict()
 
-    assert ret["success"] is True
-    assert "retries" not in ret["provenance"]
+    assert ret.success is True
 
 
-@testing.using_psi4_14
+@testing.using("psi4")
+@testing.using("gcp")
+def test_psi4_hf3c_task():
+    input_data = {
+        "molecule": qcng.get_molecule("water"),
+        "driver": "energy",
+        "model": {"method": "HF3c"},
+        "keywords": {"scf_type": "df"},
+    }
+
+    ret = qcng.compute(input_data, "psi4", raise_error=True)
+
+    assert ret.success is True
+    assert ret.model.basis is None
+
+
+@testing.using("psi4_14")
 def test_psi4_interactive_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -62,7 +77,7 @@ def test_psi4_interactive_task():
     assert ret.extras.pop("psiapi_evaluated", False)
 
 
-@testing.using_psi4_14
+@testing.using("psi4_14")
 def test_psi4_wavefunction_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -77,7 +92,7 @@ def test_psi4_wavefunction_task():
     assert ret.wavefunction.scf_orbitals_a.shape == (7, 7)
 
 
-@testing.using_psi4
+@testing.using("psi4")
 def test_psi4_internal_failure():
 
     mol = Molecule.from_data(
@@ -98,7 +113,7 @@ def test_psi4_internal_failure():
     assert "reference is only" in str(exc.value)
 
 
-@testing.using_psi4
+@testing.using("psi4")
 def test_psi4_ref_switch():
     inp = AtomicInput(
         **{
@@ -116,7 +131,7 @@ def test_psi4_ref_switch():
     assert ret.properties.calcinfo_nbeta == 1
 
 
-@testing.using_rdkit
+@testing.using("rdkit")
 def test_rdkit_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -130,7 +145,7 @@ def test_rdkit_task():
     assert ret.success is True
 
 
-@testing.using_rdkit
+@testing.using("rdkit")
 def test_rdkit_connectivity_error():
     input_data = {
         "molecule": qcng.get_molecule("water").dict(exclude={"connectivity"}),
@@ -147,7 +162,7 @@ def test_rdkit_connectivity_error():
         qcng.compute(input_data, "rdkit", raise_error=True)
 
 
-@testing.using_torchani
+@testing.using("torchani")
 def test_torchani_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -162,7 +177,7 @@ def test_torchani_task():
     assert ret.driver == "gradient"
 
 
-@testing.using_mopac
+@testing.using("mopac")
 def test_mopac_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -225,14 +240,14 @@ def test_random_failure_with_success(failure_engine):
     assert ret.extras["ncalls"] == 2
 
 
-@testing.using_openmm
+@testing.using("openmm")
 def test_openmm_task_offxml_basis():
     from qcengine.programs.openmm import OpenMMHarness
 
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {"method": "openmm", "basis": "openff-1.0.0", "offxml": "openff-1.0.0.offxml",},
+        "model": {"method": "openmm", "basis": "openff-1.0.0", "offxml": "openff-1.0.0.offxml"},
         "keywords": {},
     }
 
@@ -251,14 +266,14 @@ def test_openmm_task_offxml_basis():
 
 
 @pytest.mark.skip("`basis` must be explicitly specified at this time")
-@testing.using_openmm
+@testing.using("openmm")
 def test_openmm_task_offxml_nobasis():
     from qcengine.programs.openmm import OpenMMHarness
 
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {"method": "openmm", "basis": None, "offxml": "openff-1.0.0.offxml",},
+        "model": {"method": "openmm", "basis": None, "offxml": "openff-1.0.0.offxml"},
         "keywords": {},
     }
 
@@ -276,7 +291,7 @@ def test_openmm_task_offxml_nobasis():
     assert ret.success is True
 
 
-@testing.using_openmm
+@testing.using("openmm")
 def test_openmm_task_url_basis():
     from qcengine.programs.openmm import OpenMMHarness
 
@@ -306,7 +321,7 @@ def test_openmm_task_url_basis():
 
 
 @pytest.mark.skip("`basis` must be explicitly specified at this time")
-@testing.using_openmm
+@testing.using("openmm")
 def test_openmm_task_url_nobasis():
     from qcengine.programs.openmm import OpenMMHarness
 

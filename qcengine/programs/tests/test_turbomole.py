@@ -22,10 +22,10 @@ def h2o():
 @pytest.mark.parametrize(
     "method, keywords, ref_energy",
     [
-        pytest.param("hf", {}, -75.95536954370, marks=testing.using_turbomole),
-        pytest.param("pbe0", {"grid": "m5"}, -76.27371135900, marks=testing.using_turbomole),
-        pytest.param("ricc2", {}, -76.1603807755, marks=testing.using_turbomole),
-        pytest.param("rimp2", {}, -76.1593614075, marks=testing.using_turbomole),
+        pytest.param("hf", {}, -75.95536954370, marks=testing.using("turbomole")),
+        pytest.param("pbe0", {"grid": "m5"}, -76.27371135900, marks=testing.using("turbomole")),
+        pytest.param("ricc2", {}, -76.1603807755, marks=testing.using("turbomole")),
+        pytest.param("rimp2", {}, -76.1593614075, marks=testing.using("turbomole")),
     ],
 )
 def test_turbomole_energy(method, keywords, ref_energy, h2o):
@@ -42,10 +42,10 @@ def test_turbomole_energy(method, keywords, ref_energy, h2o):
 @pytest.mark.parametrize(
     "method, keywords, ref_norm",
     [
-        pytest.param("hf", {}, 0.099340, marks=testing.using_turbomole),
-        pytest.param("pbe0", {"grid": "m5"}, 0.060631, marks=testing.using_turbomole),
-        pytest.param("ricc2", {}, 0.059378, marks=testing.using_turbomole),
-        pytest.param("rimp2", {}, 0.061576, marks=testing.using_turbomole),
+        pytest.param("hf", {}, 0.099340, marks=testing.using("turbomole")),
+        pytest.param("pbe0", {"grid": "m5"}, 0.060631, marks=testing.using("turbomole")),
+        pytest.param("ricc2", {}, 0.059378, marks=testing.using("turbomole")),
+        pytest.param("rimp2", {}, 0.061576, marks=testing.using("turbomole")),
     ],
 )
 def test_turbomole_gradient(method, keywords, ref_norm, h2o):
@@ -66,7 +66,7 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o):
     assert compare_values(ref_norm, grad_norm)
 
 
-@testing.using_turbomole
+@testing.using("turbomole")
 def test_turbomole_ri_dsp(h2o):
     resi = {
         "molecule": h2o,

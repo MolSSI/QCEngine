@@ -35,17 +35,17 @@ def nh2():
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [
-        pytest.param("cfour", "aug-pvdz", {"SCF_CONV": 12, "CC_CONV": 12}, marks=testing.using_cfour),
-        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using_cfour),
-        pytest.param("gamess", "accd", {"ccinp__ncore": 0, "contrl__ispher": 1}, marks=testing.using_gamess),
-        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using_nwchem),
+        pytest.param("cfour", "aug-pvdz", {"SCF_CONV": 12, "CC_CONV": 12}, marks=testing.using("cfour")),
+        pytest.param("cfour", "aug-pvdz", {}, marks=testing.using("cfour")),
+        pytest.param("gamess", "accd", {"ccinp__ncore": 0, "contrl__ispher": 1}, marks=testing.using("gamess")),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=testing.using("nwchem")),
         pytest.param(
-            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using_nwchem
+            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=testing.using("nwchem")
         ),
-        pytest.param("psi4", "aug-cc-pvdz", {}, marks=testing.using_psi4),
-        # pytest.param("qchem", "aug-cc-pvdz", {"N_FROZEN_CORE": 0}, marks=testing.using_qchem),
+        pytest.param("psi4", "aug-cc-pvdz", {}, marks=testing.using("psi4")),
+        # pytest.param("qchem", "aug-cc-pvdz", {"N_FROZEN_CORE": 0}, marks=testing.using("qchem")),
         # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
-        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
+        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using("molpro")),
     ],
 )
 def test_sp_ccsd_rhf_full(program, basis, keywords, h2o):
@@ -84,14 +84,14 @@ def test_sp_ccsd_rhf_full(program, basis, keywords, h2o):
             "aug-cc-pvdz",
             {"ccsd__freeze": 1, "scf__uhf": True},
             "ccsd: nopen is not zero",
-            marks=testing.using_nwchem,
+            marks=testing.using("nwchem"),
         ),
         pytest.param(
             "gamess",
             "accd",
             {"contrl__scftyp": "uhf"},
             "CCTYP IS PROGRAMMED ONLY FOR SCFTYP=RHF OR ROHF",
-            marks=testing.using_gamess,
+            marks=testing.using("gamess"),
         ),
     ],
 )
@@ -111,25 +111,25 @@ def test_sp_ccsd_uhf_fc_error(program, basis, keywords, nh2, errmsg):
             "cfour",
             "AUG-PVDZ",
             {"refERENCE": "ROhf", "OCCUPATION": [[3, 1, 1, 0], [3, 0, 1, 0]], "SCF_CONV": 12, "CC_CONV": 12},
-            marks=testing.using_cfour,
+            marks=testing.using("cfour"),
         ),
-        pytest.param("cfour", "AUG-PVDZ", {"REFERENCE": "ROHF"}, marks=testing.using_cfour),
+        pytest.param("cfour", "AUG-PVDZ", {"REFERENCE": "ROHF"}, marks=testing.using("cfour")),
         pytest.param(
             "gamess",
             "ACCD",
             {"CONTRL__ISPHER": 1, "CONTRL__SCFTYP": "ROHF", "CCINP__NCORE": 0},
-            marks=testing.using_gamess,
+            marks=testing.using("gamess"),
         ),
         pytest.param(
             "nwchem",
             "AUG-CC-PVDZ",
             {"BASIS__SPHERICAL": True, "QC_MODULE": "TCE", "SCF__ROHF": True},
-            marks=testing.using_nwchem,
+            marks=testing.using("nwchem"),
         ),
-        pytest.param("psi4", "AUG-CC-PVDZ", {"REFERENCE": "ROHF"}, marks=testing.using_psi4),
-        # pytest.param("qchem", "AUG-CC-PVDZ", {"UNRESTRICTED": False}, marks=testing.using_qchem),
+        pytest.param("psi4", "AUG-CC-PVDZ", {"REFERENCE": "ROHF"}, marks=testing.using("psi4")),
+        # pytest.param("qchem", "AUG-CC-PVDZ", {"UNRESTRICTED": False}, marks=testing.using("qchem")),
         # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
-        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using_molpro),
+        # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=testing.using("molpro")),
     ],
 )
 def test_sp_ccsd_rohf_full(program, basis, keywords, nh2):
