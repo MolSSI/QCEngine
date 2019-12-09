@@ -27,7 +27,8 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
     import cpuinfo
     import psutil
 
-    # TODO (wardlt): Implement a means of getting CPU information from compute nodes on clusters
+    # TODO (wardlt): Implement a means of getting CPU information from compute nodes on clusters for MPI tasks
+    #  The QC code runs on a different node than the node running this Python function, which may have different info
 
     global _global_values
     if _global_values is None:
@@ -128,7 +129,10 @@ class TaskConfig(pydantic.BaseModel):
     """Description of the configuration used to launch a task."""
 
     # Specifications
-    ncores: int  # Number of cores per node
+    ncores: int = pydantic.Field(None, description="""Number cores per task.
+    
+    The number of cores per task should correspond to the number of ranks per node for tasks
+    that use more than 1 node.""")
     nnodes: int  # Number of nodes per task
     memory: float  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
