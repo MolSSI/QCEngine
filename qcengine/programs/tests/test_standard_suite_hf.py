@@ -1,8 +1,8 @@
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_values
+
+import qcengine as qcng
 from qcengine import testing
 
 
@@ -41,7 +41,7 @@ def nh2():
             "entos",
             "aug-cc-pVDZ",
             {"coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
-            marks=testing.using("entos")
+            marks=testing.using("entos"),
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=testing.using("gamess")),
         pytest.param("molpro", "aug-cc-pvdz", {}, marks=testing.using("molpro")),
@@ -88,11 +88,13 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
             "entos",
             "aug-cc-pVDZ",
             {"ansatz": "u", "coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
-            marks=testing.using("entos")
+            marks=testing.using("entos"),
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=testing.using("gamess")),
         pytest.param("molpro", "aug-cc-pvdz", {"reference": "unrestricted"}, marks=testing.using("molpro")),
-        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__uhf": True}, marks=testing.using("nwchem")),
+        pytest.param(
+            "nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__uhf": True}, marks=testing.using("nwchem")
+        ),
         pytest.param(
             "nwchem",
             "aug-cc-pvdz",

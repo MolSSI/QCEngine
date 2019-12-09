@@ -5,6 +5,7 @@ import sys
 from typing import List
 
 from qcelemental.models import AtomicInput, OptimizationInput
+
 from qcengine import cli, get_molecule, testing, util
 
 

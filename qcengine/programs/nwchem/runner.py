@@ -8,10 +8,10 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
+
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 
@@ -129,7 +129,7 @@ class NWChemHarness(ProgramHarness):
         # Handle basis set
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
-            opts[f'basis__{el}'] = f'library {input_model.model.basis}'
+            opts[f"basis__{el}"] = f"library {input_model.model.basis}"
 
         # Log the job settings
         logger.debug("JOB_OPTS")
