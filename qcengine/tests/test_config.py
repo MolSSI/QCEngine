@@ -6,6 +6,7 @@ import copy
 
 import pydantic
 import pytest
+from qcengine.config import NodeDescriptor
 
 import qcengine as qcng
 from qcengine.util import environ_context, create_mpi_invocation
@@ -82,7 +83,7 @@ def opt_state_basic():
                 "hostname_pattern": "bn*",
                 "is_batch_node": True,
                 "jobs_per_node": 1,
-                "mpirun_command": "mpirun -n {total_ranks}",
+                "mpirun_command": "mpirun -n {total_ranks} -N {ranks_per_node}",
                 "ncores": 24,
                 "memory": 240
             },
@@ -198,3 +199,14 @@ def test_batch_node(opt_state_basic):
     assert config.use_mpirun
     assert config.ncores == 24
     assert config.nnodes == 2
+
+
+def test_mpirun_command_errors():
+    # Checks for ranks_per_node
+    with pytest.raises(ValueError) as exc:
+        NodeDescriptor(name="something", hostname_pattern="*", mpirun_command="mpirun -n {total_ranks}")
+    assert 'must explicitly state' in str(exc.value)
+
+    with pytest.raises(ValueError) as exc:
+        NodeDescriptor(name="something", hostname_pattern="*", mpirun_command="mpirun -N {ranks_per_node}")
+    assert 'must contain either' in str(exc.value)

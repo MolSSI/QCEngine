@@ -97,13 +97,28 @@ class NodeDescriptor(pydantic.BaseModel):
             {nnodes} - Number of nodes
             {ranks_per_node} - Number of MPI ranks per node
             {total_ranks} - Total number of MPI ranks
+            
+        As examples, the ``aprun`` command on Cray systems should be similar to 
+        ``aprun -n {total_ranks} -N {ranks_per_node}`` and ``mpirun`` from OpenMPI should
+        be similar to ``mpirun -np {total_ranks} -N {ranks_per_node}``.
+        
+        Presently, your ``mpirun_command`` string should also contain any configuration details 
+        necessary for properly configuring OpenMP. As an example, the Cray ``aprun`` command for a
+        configuration 8  OpenMP threads per MPI rank would be similar
+        to: ``aprun -n {total_ranks} -N {ranks_per_node} -d 8 -j 1``
         """
     )
 
     def __init__(self, **data: Dict[str, Any]):
-
         data = parse_environment(data)
         super().__init__(**data)
+
+        if self.mpirun_command is not None:
+            # Ensure that the mpirun_command contains necessary information
+            if not ('{total_ranks}' in self.mpirun_command or '{nnodes}' in self.mpirun_command):
+                raise ValueError('mpirun_command must contain either {total_ranks} or {nnodes}')
+            if '{ranks_per_node}' not in self.mpirun_command:
+                raise ValueError('mpirun_command must explicitly state the number of ranks per node')
 
     class Config:
         extra = "forbid"
