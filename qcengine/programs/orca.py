@@ -286,9 +286,11 @@ class OrcaHarness(ProgramHarness):
         if input_model.driver == "energy":
             output_data["return_result"] = final_energy 
             extras["CURRENT ENERGY"] = final_energy
+
         elif input_model.driver == "gradient":
             gradient = self.get_gradient(outfiles["outfiles"]["dispatch.engrad"])
             output_data["return_result"] = gradient
+            extras["CURRENT ENERGY"] = final_energy
             extras["CURRENT GRADIENT"] = gradient
 
         # Final output_data assignments needed for the AtomicResult object
