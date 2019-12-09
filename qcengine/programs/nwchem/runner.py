@@ -66,7 +66,7 @@ class NWChemHarness(ProgramHarness):
 
         # Run NWChem
         which_prog = which("nwchem")
-        if config.use_mpirun:
+        if config.use_mpiexec:
             command = create_mpi_invocation(which_prog, config)
         else:
             command = [which_prog]
@@ -122,7 +122,7 @@ class NWChemHarness(ProgramHarness):
         # for nwchem, [GiB] --> [B]
         # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
         memory_size = int(config.memory * (1024 ** 3))
-        if config.use_mpirun:  # It is the memory per MPI rank
+        if config.use_mpiexec:  # It is the memory per MPI rank
             memory_size //= config.nnodes * config.ncores
         opts["memory"] = memory_size
 

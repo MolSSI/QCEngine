@@ -41,10 +41,11 @@ def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]
     """
 
     # Make the mpirun invocation
-    mpirun_str = task_config.mpirun_command.format(
+    mpirun_str = task_config.mpiexec_command.format(
         nnodes=task_config.nnodes,
-        ranks_per_node=task_config.ncores,
-        total_ranks=task_config.nnodes * task_config.ncores
+        ranks_per_node=task_config.ncores // task_config.cores_per_rank,
+        total_ranks=task_config.nnodes * task_config.ncores,
+        cores_per_rank=task_config.cores_per_rank
     )
     command = mpirun_str.split()
 

@@ -88,5 +88,5 @@ Cluster Configuration
 A node configuration file is required when using node-parallel tasks on a compute cluster.
 The configuration file must contain a description of the command used to launch MPI tasks and,
 in some cases, the designation that a certain node is a compute node.
-See the descriptions for ``mpirun_command`` and ``is_batch_node`` in the ``NodeDescriptor``
+See the descriptions for ``mpiexec_command`` and ``is_batch_node`` in the ``NodeDescriptor``
 documentation for further details.

@@ -71,7 +71,9 @@ class NodeDescriptor(pydantic.BaseModel):
     memory_safety_factor: int = 10  # Percentage of memory as a safety factor
 
     # Specifications
-    ncores: Optional[int] = None
+    ncores: Optional[int] = pydantic.Field(None, description="""Number of cores accessible to each task on this node
+    
+    The default value, ``None``, will allow QCEngine to autodetect the number of cores.""")
     jobs_per_node: int = 2
     retries: int = 0
 
@@ -86,9 +88,9 @@ class NodeDescriptor(pydantic.BaseModel):
         2) QCEngine must run on the batch node to be able to launch tasks on the more than one compute nodes  
     
     ``is_batch_node`` is used when creating the task configuration as a means of determining whether
-    ``mpirun_command`` must always be used even for serial jobs (e.g., getting the version number)
+    ``mpiexec_command`` must always be used even for serial jobs (e.g., getting the version number)
     """)
-    mpirun_command: Optional[str] = pydantic.Field(
+    mpiexec_command: Optional[str] = pydantic.Field(
         None, description="""Invocation for launching node-parallel tasks with MPI
         
         The invocation need not specify the number of nodes, tasks, or cores per node.
@@ -97,16 +99,19 @@ class NodeDescriptor(pydantic.BaseModel):
         
             {nnodes} - Number of nodes
             {ranks_per_node} - Number of MPI ranks per node
+            {cores_per_rank} - Number of cores to use for each MPI rank
             {total_ranks} - Total number of MPI ranks
             
         As examples, the ``aprun`` command on Cray systems should be similar to 
         ``aprun -n {total_ranks} -N {ranks_per_node}`` and ``mpirun`` from OpenMPI should
         be similar to ``mpirun -np {total_ranks} -N {ranks_per_node}``.
         
-        Presently, your ``mpirun_command`` string should also contain any configuration details 
-        necessary for properly configuring OpenMP. As an example, the Cray ``aprun`` command for a
-        configuration 8  OpenMP threads per MPI rank would be similar
-        to: ``aprun -n {total_ranks} -N {ranks_per_node} -d 8 -j 1``
+        Programs where each MPI rank can use multiple threads (e.g., QC programs with MPI+OpenMP) can 
+        use the {cores_per_rank} option to control the hybrid parallelism. 
+        As an example, the Cray ``aprun`` command using this figure could be:
+        ``aprun -n {total_ranks} -N {ranks_per_node} -d {cores_per_rank} -j 1``.
+        The appropriate number of ranks per node will be determined based on the number of
+        cores per node and the number of cores per rank.
         """
     )
 
@@ -114,12 +119,12 @@ class NodeDescriptor(pydantic.BaseModel):
         data = parse_environment(data)
         super().__init__(**data)
 
-        if self.mpirun_command is not None:
-            # Ensure that the mpirun_command contains necessary information
-            if not ('{total_ranks}' in self.mpirun_command or '{nnodes}' in self.mpirun_command):
-                raise ValueError('mpirun_command must contain either {total_ranks} or {nnodes}')
-            if '{ranks_per_node}' not in self.mpirun_command:
-                raise ValueError('mpirun_command must explicitly state the number of ranks per node')
+        if self.mpiexec_command is not None:
+            # Ensure that the mpiexec_command contains necessary information
+            if not ('{total_ranks}' in self.mpiexec_command or '{nnodes}' in self.mpiexec_command):
+                raise ValueError('mpiexec_command must contain either {total_ranks} or {nnodes}')
+            if '{ranks_per_node}' not in self.mpiexec_command:
+                raise ValueError('mpiexec_command must explicitly state the number of ranks per node')
 
     class Config:
         extra = "forbid"
@@ -129,16 +134,14 @@ class TaskConfig(pydantic.BaseModel):
     """Description of the configuration used to launch a task."""
 
     # Specifications
-    ncores: int = pydantic.Field(None, description="""Number cores per task.
-    
-    The number of cores per task should correspond to the number of ranks per node for tasks
-    that use more than 1 node.""")
+    ncores: int = pydantic.Field(None, description="Number cores per task on each node")
     nnodes: int  # Number of nodes per task
     memory: float  # Amount of memory in GiB per node
     scratch_directory: Optional[str]  # What location to use as scratch
     retries: int  # Number of retries on random failures
-    mpirun_command: Optional[str]  # Command used to launch MPI tasks, see NodeDescriptor
-    use_mpirun: bool = False  # Whether it is necessary to use MPI to run an executable
+    mpiexec_command: Optional[str]  # Command used to launch MPI tasks, see NodeDescriptor
+    use_mpiexec: bool = False  # Whether it is necessary to use MPI to run an executable
+    cores_per_rank: int = pydantic.Field(1, description="Number of cores per MPI rank")
 
     class Config:
         extra = "forbid"
@@ -279,7 +282,7 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
 
     config["memory"] = memory
 
-    # Handle ncores
+    # Get the number of cores available to each task
     ncores = local_options.pop("ncores", int(ncores / jobs_per_node))
     if ncores < 1:
         raise KeyError("Number of jobs per node exceeds the number of available cores.")
@@ -288,16 +291,17 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
     config["nnodes"] = local_options.pop("nnodes", 1)
 
     # Add in the MPI launch command template
-    config["mpirun_command"] = node.mpirun_command
-    config["use_mpirun"] = node.is_batch_node or config["nnodes"] > 1
+    config["mpiexec_command"] = node.mpiexec_command
+    config["use_mpiexec"] = node.is_batch_node or config["nnodes"] > 1
+    config["cores_per_rank"] = local_options.get("cores_per_rank", 1)
 
     # Override any settings
     if local_options is not None:
         config.update(local_options)
 
     # Make sure mpirun command is defined if needed
-    if config["use_mpirun"] and config["mpirun_command"] is None:
-        raise ValueError("You need to define the mpirun command for this node. "
+    if config["use_mpiexec"] and config["mpiexec_command"] is None:
+        raise ValueError("You need to define the mpiexec command for this node. "
                          "See: https://qcengine.readthedocs.io/en/stable/environment.html")
 
     return TaskConfig(**config)
