@@ -410,7 +410,7 @@ $end
             props, prov = self._parse_logfile_common(outtext, input_dict)
             qcscr_result = {"properties": props, "provenance": prov, **input_dict}
 
-        mobj = re.search(r"\n\s*SCF\s+energy in the final basis set =\s+" + NUMBER + r"\s*\n", outtext)
+        mobj = re.search(r"\n\s*Total\s+energy in the final basis set =\s+" + NUMBER + r"\s*\n", outtext)
         if mobj and qcscr_result["properties"].get("scf_total_energy", None) is None:
             qcscr_result["properties"]["scf_total_energy"] = float(mobj.group(1))
 
