@@ -44,7 +44,7 @@ def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]
         nnodes=task_config.nnodes,
         ranks_per_node=task_config.ncores // task_config.cores_per_rank,
         total_ranks=task_config.nnodes * task_config.ncores,
-        cores_per_rank=task_config.cores_per_rank
+        cores_per_rank=task_config.cores_per_rank,
     )
     command = mpirun_str.split()
 
@@ -218,8 +218,12 @@ def terminate_process(proc: Any, timeout: int = 15) -> None:
 
 
 @contextmanager
-def popen(args: List[str], append_prefix: bool = False, popen_kwargs: Optional[Dict[str, Any]] = None,
-          pass_output_forward: bool = False) -> Dict[str, Any]:
+def popen(
+    args: List[str],
+    append_prefix: bool = False,
+    popen_kwargs: Optional[Dict[str, Any]] = None,
+    pass_output_forward: bool = False,
+) -> Dict[str, Any]:
     """
     Opens a background task
 
@@ -287,10 +291,11 @@ def popen(args: List[str], append_prefix: bool = False, popen_kwargs: Optional[D
     #  from the buffers to ensure that they do not fill.
     #
     def read_from_buffer(buffer: BinaryIO, storage: io.BytesIO, sysio: TextIO):
-        for r in iter(partial(buffer.read, 1024), b''):
+        for r in iter(partial(buffer.read, 1024), b""):
             storage.write(r)
             if pass_output_forward:
                 sysio.write(r.decode())
+
     stdout_reader = Thread(target=read_from_buffer, args=(ret["proc"].stdout, stdout, sys.stdout))
     stdout_reader.start()
     stderr_reader = Thread(target=read_from_buffer, args=(ret["proc"].stderr, stderr, sys.stderr))

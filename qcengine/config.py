@@ -71,14 +71,19 @@ class NodeDescriptor(pydantic.BaseModel):
     memory_safety_factor: int = 10  # Percentage of memory as a safety factor
 
     # Specifications
-    ncores: Optional[int] = pydantic.Field(None, description="""Number of cores accessible to each task on this node
+    ncores: Optional[int] = pydantic.Field(
+        None,
+        description="""Number of cores accessible to each task on this node
     
-    The default value, ``None``, will allow QCEngine to autodetect the number of cores.""")
+    The default value, ``None``, will allow QCEngine to autodetect the number of cores.""",
+    )
     jobs_per_node: int = 2
     retries: int = 0
 
     # Cluster options
-    is_batch_node: bool = pydantic.Field(False, help="""Whether the node running QCEngine is a batch node
+    is_batch_node: bool = pydantic.Field(
+        False,
+        help="""Whether the node running QCEngine is a batch node
     
     Some clusters are configured such that tasks are launched from a special "batch" or "MOM" onto the compute nodes.
     The compute nodes on such clusters often have a different CPU architecture than the batch nodes and 
@@ -89,9 +94,11 @@ class NodeDescriptor(pydantic.BaseModel):
     
     ``is_batch_node`` is used when creating the task configuration as a means of determining whether
     ``mpiexec_command`` must always be used even for serial jobs (e.g., getting the version number)
-    """)
+    """,
+    )
     mpiexec_command: Optional[str] = pydantic.Field(
-        None, description="""Invocation for launching node-parallel tasks with MPI
+        None,
+        description="""Invocation for launching node-parallel tasks with MPI
         
         The invocation need not specify the number of nodes, tasks, or cores per node.
         Information about the task configuration will be added to the command by use of
@@ -112,7 +119,7 @@ class NodeDescriptor(pydantic.BaseModel):
         ``aprun -n {total_ranks} -N {ranks_per_node} -d {cores_per_rank} -j 1``.
         The appropriate number of ranks per node will be determined based on the number of
         cores per node and the number of cores per rank.
-        """
+        """,
     )
 
     def __init__(self, **data: Dict[str, Any]):
@@ -121,10 +128,10 @@ class NodeDescriptor(pydantic.BaseModel):
 
         if self.mpiexec_command is not None:
             # Ensure that the mpiexec_command contains necessary information
-            if not ('{total_ranks}' in self.mpiexec_command or '{nnodes}' in self.mpiexec_command):
-                raise ValueError('mpiexec_command must contain either {total_ranks} or {nnodes}')
-            if '{ranks_per_node}' not in self.mpiexec_command:
-                raise ValueError('mpiexec_command must explicitly state the number of ranks per node')
+            if not ("{total_ranks}" in self.mpiexec_command or "{nnodes}" in self.mpiexec_command):
+                raise ValueError("mpiexec_command must contain either {total_ranks} or {nnodes}")
+            if "{ranks_per_node}" not in self.mpiexec_command:
+                raise ValueError("mpiexec_command must explicitly state the number of ranks per node")
 
     class Config:
         extra = "forbid"
@@ -301,8 +308,10 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
 
     # Make sure mpirun command is defined if needed
     if config["use_mpiexec"] and config["mpiexec_command"] is None:
-        raise ValueError("You need to define the mpiexec command for this node. "
-                         "See: https://qcengine.readthedocs.io/en/stable/environment.html")
+        raise ValueError(
+            "You need to define the mpiexec command for this node. "
+            "See: https://qcengine.readthedocs.io/en/stable/environment.html"
+        )
 
     return TaskConfig(**config)
 

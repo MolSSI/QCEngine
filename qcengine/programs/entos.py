@@ -202,7 +202,7 @@ class EntosHarness(ProgramHarness):
             energy_keywords_from_input_model = {
                 "dft": {"xc": input_model.model.method.upper(), **scf_keywords_from_input_model},
                 "hf": {**scf_keywords_from_input_model},
-                "xtb": {"charge": input_model.molecule.molecular_charge,},
+                "xtb": {"charge": input_model.molecule.molecular_charge},
             }
 
             # Resolve keywords (extra options) for the energy command
@@ -222,22 +222,22 @@ class EntosHarness(ProgramHarness):
                         **structure,
                         **energy_keywords_from_input_model[energy_command],
                         **energy_keywords_extra,
-                    },
+                    }
                 }
             # Create the input dictionary for a gradient call
             elif input_model.driver == "gradient":
                 input_dict = {
                     "gradient": {
                         **structure,
-                        energy_command: {**energy_keywords_from_input_model[energy_command], **energy_keywords_extra,},
-                    },
+                        energy_command: {**energy_keywords_from_input_model[energy_command], **energy_keywords_extra},
+                    }
                 }
             elif input_model.driver == "hessian":
                 input_dict = {
                     "hessian": {
                         **structure,
                         energy_command: {**energy_keywords_from_input_model[energy_command], **energy_keywords_extra},
-                    },
+                    }
                 }
             else:
                 raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")

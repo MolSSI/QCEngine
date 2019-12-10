@@ -57,7 +57,7 @@ def harvest_outfile_pass(outtext):
     version = ""
     error = ""  # TODO (wardlt): The error string is never used.
 
-    NUMBER = r'(?x:' + regex.NUMBER + ')'
+    NUMBER = r"(?x:" + regex.NUMBER + ")"
     # fmt: off
 
     # Process version
@@ -590,17 +590,21 @@ def harvest_outfile_pass(outtext):
             psivar['NWCHEM ERROR CODE'] = mobj.group(1)
             # TODO process errors into error var
 
+    # fmt: on
+
     # Get the size of the basis sets, etc
-    mobj = re.search(r'No. of atoms\s+:\s+(\d+)', outtext, re.MULTILINE)
+    mobj = re.search(r"No. of atoms\s+:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
         psivar["N ATOMS"] = mobj.group(1)
-    mobj = re.search(r"No. of electrons\s+:\s+(\d+)\s+Alpha electrons\s+:\s+(\d+)\s+Beta electrons\s+:\s+(\d+)",
-                     outtext, re.MULTILINE)
+    mobj = re.search(
+        r"No. of electrons\s+:\s+(\d+)\s+Alpha electrons\s+:\s+(\d+)\s+Beta electrons\s+:\s+(\d+)",
+        outtext,
+        re.MULTILINE,
+    )
     if mobj:
         psivar["N ALPHA ELECTRONS"] = mobj.group(2)
         psivar["N BETA ELECTRONS"] = mobj.group(3)
-    mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)",
-                     outtext, re.MULTILINE)
+    mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
         psivar["N MO"] = mobj.group(2)
         psivar["N BASIS"] = mobj.group(1)
@@ -670,28 +674,30 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     output = dict()
 
     # Extract the Calc Info
-    output.update({
-        'calcinfo_nbasis': psivars.get('N BASIS', None),
-        'calcinfo_nmo': psivars.get('N MO', None),
-        'calcinfo_natom': psivars.get('N ATOMS', None),
-        'calcinfo_nalpha': psivars.get('N ALPHA ELECTRONS', None),
-        'calcinfo_nbeta': psivars.get('N BETA ELECTRONS', None)
-    })
+    output.update(
+        {
+            "calcinfo_nbasis": psivars.get("N BASIS", None),
+            "calcinfo_nmo": psivars.get("N MO", None),
+            "calcinfo_natom": psivars.get("N ATOMS", None),
+            "calcinfo_nalpha": psivars.get("N ALPHA ELECTRONS", None),
+            "calcinfo_nbeta": psivars.get("N BETA ELECTRONS", None),
+        }
+    )
 
     # Get the "canonical" properties
-    output['return_energy'] = psivars['CURRENT ENERGY']
-    output['nuclear_repulsion_energy'] = psivars['NUCLEAR REPULSION ENERGY']
+    output["return_energy"] = psivars["CURRENT ENERGY"]
+    output["nuclear_repulsion_energy"] = psivars["NUCLEAR REPULSION ENERGY"]
 
     # Get the SCF properties
-    output['scf_total_energy'] = psivars.get('HF TOTAL ENERGY', None)
-    output['scf_one_electron_energy'] = psivars.get('ONE-ELECTRON ENERGY', None)
-    output['scf_two_electron_energy'] = psivars.get('ONE-ELECTRON ENERGY', None)
+    output["scf_total_energy"] = psivars.get("HF TOTAL ENERGY", None)
+    output["scf_one_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
+    output["scf_two_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
 
     # Get the MP2 properties
-    output['mp2_total_correlation_energy'] = psivars.get('MP2 CORRELATION ENERGY', None)
-    output['mp2_total_energy'] = psivars.get('MP2 TOTAL ENERGY', None)
-    output['mp2_same_spin_correlation_energy'] = psivars.get('MP2 SAME-SPIN CORRELATION ENERGY', None)
-    output['mp2_opposite_spin_correlation_energy'] = psivars.get('MP2 OPPOSITE-SPIN CORRELATION ENERGY', None)
+    output["mp2_total_correlation_energy"] = psivars.get("MP2 CORRELATION ENERGY", None)
+    output["mp2_total_energy"] = psivars.get("MP2 TOTAL ENERGY", None)
+    output["mp2_same_spin_correlation_energy"] = psivars.get("MP2 SAME-SPIN CORRELATION ENERGY", None)
+    output["mp2_opposite_spin_correlation_energy"] = psivars.get("MP2 OPPOSITE-SPIN CORRELATION ENERGY", None)
     return AtomicResultProperties(**output)
 
 
