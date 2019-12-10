@@ -13,6 +13,32 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.13.0 / 2019-12-10
+--------------------
+
+New Features
+++++++++++++
+-(:pr:`151`) Adds a OpenMM Harness for evaluation of SMIRNOFF force fields.
+-(:pr:`189`) General MPI support and MPI CLI generator.
+
+Enhancements
+++++++++++++
+-(:pr:`175`) Allows specifications for ``nnodes`` to begin MPI support.
+-(:pr:`177`) NWChem - Parsing updates including Hessian abilities.
+-(:pr:`180`) GAMESS - Output properties improvements.
+-(:pr:`181`) NWChem - Output properties improvements.
+-(:pr:`183`) Entos - Hessian and XTB support.
+-(:pr:`185`) Entos - Improved subcommand support.
+-(:pr:`187`) QChem - Support for raw log files without the binary file requirements.
+-(:pr:`188`) Automatic buffer reads to prevent deadlocking of process for very large outputs.
+-(:pr:`194`) DFTD3 - Improved error message on failed evaluations.
+-(:pr:`195`) Blackens the code base add GHA-based lint checks.
+
+Bug Fixes
++++++++++
+-(:pr:`179`) QChem - fixes print issue when driver is of an incorrect value.
+-(:pr:`190`) Psi4 - fixes issues for methods without basis sets such as HF-3c.
+
 v0.12.0 / 2019-11-13
 --------------------
 
