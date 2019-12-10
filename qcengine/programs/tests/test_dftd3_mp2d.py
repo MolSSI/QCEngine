@@ -2,12 +2,12 @@ import copy
 
 import numpy as np
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
-from qcengine.programs import empirical_dispersion_resources
+
+import qcengine as qcng
 from qcengine import testing
+from qcengine.programs import empirical_dispersion_resources
 
 
 @testing.using("dftd3")

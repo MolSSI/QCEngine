@@ -219,3 +219,4 @@ def test_mpirun_command_errors():
     with pytest.raises(ValueError) as exc:
         NodeDescriptor(name="something", hostname_pattern="*", mpiexec_command="mpirun -N {ranks_per_node}")
     assert 'must contain either' in str(exc.value)
+

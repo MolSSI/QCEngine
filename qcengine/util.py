@@ -19,7 +19,6 @@ from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO
 
 from pydantic import ValidationError
-
 from qcelemental.models import FailedOperation
 from qcengine.config import TaskConfig
 
