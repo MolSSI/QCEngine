@@ -8,7 +8,7 @@ import pytest
 from qcelemental.models import AtomicInput
 
 import qcengine as qcng
-from qcengine import testing
+from qcengine.testing import has_program
 
 _canonical_methods = [
     ("dftd3", {"method": "b3lyp-d3"}),
@@ -26,7 +26,7 @@ _canonical_methods = [
 
 @pytest.mark.parametrize("program, model", _canonical_methods)
 def test_compute_energy(program, model):
-    if not testing.has_program(program):
+    if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
     inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"), driver="energy", model=model)
@@ -38,7 +38,7 @@ def test_compute_energy(program, model):
 
 @pytest.mark.parametrize("program, model", _canonical_methods)
 def test_compute_gradient(program, model):
-    if not testing.has_program(program):
+    if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
     inp = AtomicInput(
@@ -69,7 +69,7 @@ def test_compute_gradient(program, model):
     ],
 )
 def test_compute_bad_models(program, model):
-    if not testing.has_program(program):
+    if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
     adriver = model.pop("driver", "energy")

@@ -8,8 +8,7 @@ import pytest
 from qcelemental.models import AtomicInput, Molecule
 
 import qcengine as qcng
-from qcengine import testing
-from qcengine.testing import failure_engine
+from qcengine.testing import failure_engine, using
 
 
 def test_missing_key():
@@ -23,7 +22,7 @@ def test_missing_key_raises():
         ret = qcng.compute({"hello": "hi"}, "bleh", raise_error=True)
 
 
-@testing.using("psi4")
+@using("psi4")
 def test_psi4_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -44,8 +43,8 @@ def test_psi4_task():
     assert ret.success is True
 
 
-@testing.using("psi4")
-@testing.using("gcp")
+@using("psi4")
+@using("gcp")
 def test_psi4_hf3c_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -60,7 +59,7 @@ def test_psi4_hf3c_task():
     assert ret.model.basis is None
 
 
-@testing.using("psi4_14")
+@using("psi4_14")
 def test_psi4_interactive_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -77,7 +76,7 @@ def test_psi4_interactive_task():
     assert ret.extras.pop("psiapi_evaluated", False)
 
 
-@testing.using("psi4_14")
+@using("psi4_14")
 def test_psi4_wavefunction_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -92,7 +91,7 @@ def test_psi4_wavefunction_task():
     assert ret.wavefunction.scf_orbitals_a.shape == (7, 7)
 
 
-@testing.using("psi4")
+@using("psi4")
 def test_psi4_internal_failure():
 
     mol = Molecule.from_data(
@@ -113,7 +112,7 @@ def test_psi4_internal_failure():
     assert "reference is only" in str(exc.value)
 
 
-@testing.using("psi4")
+@using("psi4")
 def test_psi4_ref_switch():
     inp = AtomicInput(
         **{
@@ -131,7 +130,7 @@ def test_psi4_ref_switch():
     assert ret.properties.calcinfo_nbeta == 1
 
 
-@testing.using("rdkit")
+@using("rdkit")
 def test_rdkit_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -145,7 +144,7 @@ def test_rdkit_task():
     assert ret.success is True
 
 
-@testing.using("rdkit")
+@using("rdkit")
 def test_rdkit_connectivity_error():
     input_data = {
         "molecule": qcng.get_molecule("water").dict(exclude={"connectivity"}),
@@ -162,7 +161,7 @@ def test_rdkit_connectivity_error():
         qcng.compute(input_data, "rdkit", raise_error=True)
 
 
-@testing.using("torchani")
+@using("torchani")
 def test_torchani_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -177,7 +176,7 @@ def test_torchani_task():
     assert ret.driver == "gradient"
 
 
-@testing.using("mopac")
+@using("mopac")
 def test_mopac_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -240,7 +239,7 @@ def test_random_failure_with_success(failure_engine):
     assert ret.extras["ncalls"] == 2
 
 
-@testing.using("openmm")
+@using("openmm")
 def test_openmm_task_offxml_basis():
     from qcengine.programs.openmm import OpenMMHarness
 
@@ -266,7 +265,7 @@ def test_openmm_task_offxml_basis():
 
 
 @pytest.mark.skip("`basis` must be explicitly specified at this time")
-@testing.using("openmm")
+@using("openmm")
 def test_openmm_task_offxml_nobasis():
     from qcengine.programs.openmm import OpenMMHarness
 
@@ -291,7 +290,7 @@ def test_openmm_task_offxml_nobasis():
     assert ret.success is True
 
 
-@testing.using("openmm")
+@using("openmm")
 def test_openmm_task_url_basis():
     from qcengine.programs.openmm import OpenMMHarness
 
@@ -321,7 +320,7 @@ def test_openmm_task_url_basis():
 
 
 @pytest.mark.skip("`basis` must be explicitly specified at this time")
-@testing.using("openmm")
+@using("openmm")
 def test_openmm_task_url_nobasis():
     from qcengine.programs.openmm import OpenMMHarness
 

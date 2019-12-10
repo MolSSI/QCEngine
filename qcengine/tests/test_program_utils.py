@@ -5,7 +5,7 @@ Tests the DQM compute dispatch module
 import pytest
 
 import qcengine as qcng
-from qcengine import testing
+from qcengine.testing import using
 
 
 def test_list_programs():
@@ -17,9 +17,9 @@ def test_list_programs():
 @pytest.mark.parametrize(
     "program",
     [
-        pytest.param("psi4", marks=testing.using("psi4")),
-        pytest.param("torchani", marks=testing.using("torchani")),
-        pytest.param("rdkit", marks=testing.using("rdkit")),
+        pytest.param("psi4", marks=using("psi4")),
+        pytest.param("torchani", marks=using("torchani")),
+        pytest.param("rdkit", marks=using("rdkit")),
     ],
 )
 def test_check_program_avail(program):
@@ -41,7 +41,7 @@ def test_list_procedures():
     assert r >= {"geometric"}
 
 
-@pytest.mark.parametrize("procedure", [pytest.param("geometric", marks=testing.using("geometric"))])
+@pytest.mark.parametrize("procedure", [pytest.param("geometric", marks=using("geometric"))])
 def test_check_procedure_avail(procedure):
 
     assert procedure in qcng.list_available_procedures()

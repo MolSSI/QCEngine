@@ -3,8 +3,8 @@ import pytest
 import qcelemental
 from qcelemental.testing import compare_values
 
-import qcengine
-from qcengine import testing
+import qcengine as qcng
+from qcengine.testing import using
 
 
 @pytest.fixture
@@ -22,16 +22,16 @@ def h2o():
 @pytest.mark.parametrize(
     "method, keywords, ref_energy",
     [
-        pytest.param("hf", {}, -75.95536954370, marks=testing.using("turbomole")),
-        pytest.param("pbe0", {"grid": "m5"}, -76.27371135900, marks=testing.using("turbomole")),
-        pytest.param("ricc2", {}, -76.1603807755, marks=testing.using("turbomole")),
-        pytest.param("rimp2", {}, -76.1593614075, marks=testing.using("turbomole")),
+        pytest.param("hf", {}, -75.95536954370, marks=using("turbomole")),
+        pytest.param("pbe0", {"grid": "m5"}, -76.27371135900, marks=using("turbomole")),
+        pytest.param("ricc2", {}, -76.1603807755, marks=using("turbomole")),
+        pytest.param("rimp2", {}, -76.1593614075, marks=using("turbomole")),
     ],
 )
 def test_turbomole_energy(method, keywords, ref_energy, h2o):
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": method, "basis": "def2-SVP"}, "keywords": keywords}
 
-    res = qcengine.compute(resi, "turbomole", raise_error=True, return_dict=True)
+    res = qcng.compute(resi, "turbomole", raise_error=True, return_dict=True)
 
     assert res["driver"] == "energy"
     assert res["success"] is True
@@ -42,10 +42,10 @@ def test_turbomole_energy(method, keywords, ref_energy, h2o):
 @pytest.mark.parametrize(
     "method, keywords, ref_norm",
     [
-        pytest.param("hf", {}, 0.099340, marks=testing.using("turbomole")),
-        pytest.param("pbe0", {"grid": "m5"}, 0.060631, marks=testing.using("turbomole")),
-        pytest.param("ricc2", {}, 0.059378, marks=testing.using("turbomole")),
-        pytest.param("rimp2", {}, 0.061576, marks=testing.using("turbomole")),
+        pytest.param("hf", {}, 0.099340, marks=using("turbomole")),
+        pytest.param("pbe0", {"grid": "m5"}, 0.060631, marks=using("turbomole")),
+        pytest.param("ricc2", {}, 0.059378, marks=using("turbomole")),
+        pytest.param("rimp2", {}, 0.061576, marks=using("turbomole")),
     ],
 )
 def test_turbomole_gradient(method, keywords, ref_norm, h2o):
@@ -56,7 +56,7 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o):
         "keywords": keywords,
     }
 
-    res = qcengine.compute(resi, "turbomole", raise_error=True)
+    res = qcng.compute(resi, "turbomole", raise_error=True)
 
     assert res.driver == "gradient"
     assert res.success is True
@@ -66,7 +66,7 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o):
     assert compare_values(ref_norm, grad_norm)
 
 
-@testing.using("turbomole")
+@using("turbomole")
 def test_turbomole_ri_dsp(h2o):
     resi = {
         "molecule": h2o,
@@ -75,7 +75,7 @@ def test_turbomole_ri_dsp(h2o):
         "keywords": {"ri": True, "d3bj": True},
     }
 
-    res = qcengine.compute(resi, "turbomole", raise_error=True)
+    res = qcng.compute(resi, "turbomole", raise_error=True)
 
     assert res.driver == "energy"
     assert res.success is True
