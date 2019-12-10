@@ -287,10 +287,11 @@ class OrcaHarness(ProgramHarness):
 
         import uuid
 
-        myid = str(uuid.uuid4())
-        with open("/tmp/orcafiles/{}".format(myid), "wb") as handle:
+        name = str(uuid.uuid4())
+        name += ".gbw"
+        with open("/tmp/orcafiles/{}".format(name), "wb") as handle:
             handle.write(outfiles["outfiles"]["dispatch.gbw"])
-        output_data["extras"]["gbw"] = myid
+        output_data["extras"]["gbw"] = name
 
         return AtomicResult(**output_data)
 
@@ -310,6 +311,6 @@ class OrcaHarness(ProgramHarness):
                 except ValueError:
                     pass
 
-        dim = np.sqrt(len(gradient)).astype(int)
+        dim = int(len(gradient) / 3)
 
-        return np.array(gradient).reshape(dim, dim)
+        return np.array(gradient).reshape(dim, 3)
