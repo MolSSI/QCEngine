@@ -25,5 +25,5 @@ jobs:
 
     - name: Lint
       shell: bash
-      run: black qcelemental --check
+      run: black qcengine --check
 
