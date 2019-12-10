@@ -1,8 +1,8 @@
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_values
+
+import qcengine as qcng
 from qcengine import testing
 
 

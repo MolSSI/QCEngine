@@ -19,13 +19,38 @@ from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO, TextIO
 
 from pydantic import ValidationError
-
 from qcelemental.models import FailedOperation
+from qcengine.config import TaskConfig
 
 from .config import LOGGER, get_provenance_augments
 from .exceptions import InputError, QCEngineException
 
-__all__ = ["compute_wrapper", "model_wrapper", "handle_output_metadata"]
+__all__ = ["compute_wrapper", "model_wrapper", "handle_output_metadata", "create_mpi_invocation", "execute"]
+
+
+def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]:
+    """Create the launch command for an MPI-parallel task
+
+     Parameters
+     ----------
+        executable: str
+            Path to executable
+        task_config: TaskConfig
+            Specification for number of nodes, cores per node, etc.
+    """
+
+    # Make the mpirun invocation
+    mpirun_str = task_config.mpiexec_command.format(
+        nnodes=task_config.nnodes,
+        ranks_per_node=task_config.ncores // task_config.cores_per_rank,
+        total_ranks=task_config.nnodes * task_config.ncores,
+        cores_per_rank=task_config.cores_per_rank
+    )
+    command = mpirun_str.split()
+
+    # Add in the desired executable
+    command.append(executable)
+    return command
 
 
 def model_wrapper(input_data: Dict[str, Any], model: "BaseModel") -> "BaseModel":

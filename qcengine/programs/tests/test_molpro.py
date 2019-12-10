@@ -1,8 +1,8 @@
 import pytest
-
 import qcelemental as qcel
-import qcengine as qcng
 from qcelemental.testing import compare_recursive
+
+import qcengine as qcng
 from qcengine.testing import qcengine_records, using
 
 molpro_info = qcengine_records("molpro")

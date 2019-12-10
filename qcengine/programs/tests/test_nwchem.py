@@ -1,10 +1,10 @@
 """Tests for NWChem functionality"""
-from qcelemental.testing import compare_values
-from qcengine.testing import using
-from math import isclose
-import qcelemental as qcel
-import qcengine as qcng
 import pytest
+import qcelemental as qcel
+from qcelemental.testing import compare_values
+
+import qcengine as qcng
+from qcengine.testing import using
 
 
 @pytest.fixture
@@ -34,9 +34,9 @@ def test_b3lyp(nh2):
     assert res["success"] is True
 
     # Check the other status information
-    assert res["extras"]["qcvars"]['N ALPHA ELECTRONS'] == '5'
-    assert res["extras"]["qcvars"]['N ATOMS'] == '3'
-    assert res["extras"]["qcvars"]['N BASIS'] == '13'
+    assert res["extras"]["qcvars"]["N ALPHA ELECTRONS"] == "5"
+    assert res["extras"]["qcvars"]["N ATOMS"] == "3"
+    assert res["extras"]["qcvars"]["N BASIS"] == "13"
 
     # Make sure the properties parsed correctly
     assert compare_values(-55.554037, res["properties"]["return_energy"], atol=1e-3)

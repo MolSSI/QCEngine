@@ -10,7 +10,6 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which
@@ -189,7 +188,7 @@ class DFTD3Harness(ProgramHarness):
         else:
             if not ((real_nat == 1) and (input_model.driver == "gradient")):
                 raise UnknownError(
-                    f"Unsuccessful run. Possibly -D variant not available in dftd3 version. Model: {input_data.model}"
+                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_data.model}"
                 )
 
         # parse gradient output

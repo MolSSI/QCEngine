@@ -6,6 +6,7 @@ from typing import Tuple
 import qcelemental as qcel
 from qcelemental.models import Molecule
 from qcelemental.models.results import AtomicResultProperties
+from qcelemental.molparse import regex
 
 from ..util import PreservingDict
 
@@ -56,7 +57,7 @@ def harvest_outfile_pass(outtext):
     version = ""
     error = ""  # TODO (wardlt): The error string is never used.
 
-    NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+    NUMBER = r'(?x:' + regex.NUMBER + ')'
     # fmt: off
 
     # Process version

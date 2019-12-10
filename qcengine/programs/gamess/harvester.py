@@ -6,9 +6,9 @@ import re
 from decimal import Decimal
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import Molecule
+from qcelemental.molparse import regex
 
 from ..util import PreservingDict
 
@@ -71,7 +71,7 @@ def harvest_outfile_pass(outtext):
     qcvar_coord = None
     qcvar_grad = None
 
-    NUMBER = "((?:[-+]?\\d*\\.\\d+(?:[DdEe][-+]?\\d+)?)|(?:[-+]?\\d+\\.\\d*(?:[DdEe][-+]?\\d+)?))"
+    NUMBER = r"(?x:" + regex.NUMBER + ")"
 
     # If calculation fail to converge
     mobj = re.search(r"^\s+" + r"(?:GAMESS TERMINATED ABNORMALLY)" + r"\s*$", outtext, re.MULTILINE)

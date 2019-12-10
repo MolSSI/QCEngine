@@ -4,11 +4,7 @@ The entos QCEngine Harness
 
 import json
 import string
-from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..config import TaskConfig
-    from qcelemental.models import AtomicInput
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
 from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
@@ -16,6 +12,10 @@ from qcelemental.util import parse_version, safe_version, which
 from ..exceptions import InputError, UnknownError
 from ..util import execute, popen
 from .model import ProgramHarness
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 
 class EntosHarness(ProgramHarness):

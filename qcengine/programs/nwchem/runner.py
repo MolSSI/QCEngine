@@ -8,15 +8,15 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
+
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 
 from ...exceptions import InputError
-from ...util import execute
+from ...util import execute, create_mpi_invocation
 from ..model import ProgramHarness
 from .germinate import muster_modelchem
 from .harvester import extract_formatted_properties, harvest
@@ -66,8 +66,15 @@ class NWChemHarness(ProgramHarness):
 
         # Run NWChem
         which_prog = which("nwchem")
+        if config.use_mpiexec:
+            command = create_mpi_invocation(which_prog, config)
+        else:
+            command = [which_prog]
+        command.append("v.nw")
+
         if which_prog not in self.version_cache:
-            success, output = execute([which_prog, "v.nw"], {"v.nw": ""}, scratch_directory=config.scratch_directory)
+            success, output = execute(command, {"v.nw": ""},
+                                      scratch_directory=config.scratch_directory)
 
             if success:
                 for line in output["stdout"].splitlines():
@@ -104,7 +111,7 @@ class NWChemHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -114,7 +121,10 @@ class NWChemHarness(ProgramHarness):
         # Handle memory
         # for nwchem, [GiB] --> [B]
         # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
-        opts["memory"] = int(config.memory * (1024 ** 3))
+        memory_size = int(config.memory * (1024 ** 3))
+        if config.use_mpiexec:  # It is the memory per MPI rank
+            memory_size //= config.nnodes * config.ncores
+        opts["memory"] = memory_size
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
@@ -129,7 +139,7 @@ class NWChemHarness(ProgramHarness):
         # Handle basis set
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
-            opts[f'basis__{el}'] = f'library {input_model.model.basis}'
+            opts[f"basis__{el}"] = f"library {input_model.model.basis}"
 
         # Log the job settings
         logger.debug("JOB_OPTS")
@@ -139,7 +149,12 @@ class NWChemHarness(ProgramHarness):
         optcmd = format_keywords(opts)
 
         nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
-        nwchemrec["command"] = [which("nwchem")]
+
+        # Determine the command
+        if config.nnodes > 1:
+            nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
+        else:
+            nwchemrec["command"] = [which("nwchem")]
 
         return nwchemrec
 
