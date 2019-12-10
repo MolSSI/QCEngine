@@ -170,8 +170,7 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
 
     elif method == "tce":
         raise InputError(
-            f"Do not specify TCE as a method. Instead specify the desired method "
-            f'as a keyword and "qc_module=True".'
+            f"Do not specify TCE as a method. Instead specify the desired method " f'as a keyword and "qc_module=True".'
         )
 
     elif method in _xc_functionals:

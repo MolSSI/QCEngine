@@ -6,11 +6,11 @@ Tests the MDI interface
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine import testing
+from qcengine.testing import using
 
 
-@testing.using("psi4")
-@testing.using("mdi")
+@using("psi4")
+@using("mdi")
 def test_mdi_water():
     json_data = {
         "molecule": qcng.get_molecule("water"),

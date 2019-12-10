@@ -85,7 +85,7 @@ def opt_state_basic():
                 "jobs_per_node": 1,
                 "mpiexec_command": "mpirun -n {total_ranks} -N {ranks_per_node}",
                 "ncores": 24,
-                "memory": 240
+                "memory": 240,
             },
             {
                 "name": "default",
@@ -168,24 +168,42 @@ def test_config_local_nnodes(opt_state_basic):
     # Give a warning that mentions that mpirun is needed if you define a multi-node task
     with pytest.raises(ValueError) as exc:
         qcng.config.get_config(hostname="something", local_options={"nnodes": 10})
-    assert 'https://qcengine.readthedocs.io/en/stable/environment.html' in str(exc.value)
+    assert "https://qcengine.readthedocs.io/en/stable/environment.html" in str(exc.value)
 
     # Test with an MPI run command
-    local_options = {"nnodes": 4,
-                     "mpiexec_command": "mpirun -n {total_ranks} -N {ranks_per_node} --cpus-per-slot {cores_per_rank}"}
+    local_options = {
+        "nnodes": 4,
+        "mpiexec_command": "mpirun -n {total_ranks} -N {ranks_per_node} --cpus-per-slot {cores_per_rank}",
+    }
     config = qcng.config.get_config(hostname="something", local_options=local_options)
     assert config.use_mpiexec
-    assert config.mpiexec_command.startswith('mpirun')
-    assert create_mpi_invocation('hello_world', config) == ['mpirun', '-n', '20', '-N', '5', '--cpus-per-slot', '1',
-                                                            'hello_world']
+    assert config.mpiexec_command.startswith("mpirun")
+    assert create_mpi_invocation("hello_world", config) == [
+        "mpirun",
+        "-n",
+        "20",
+        "-N",
+        "5",
+        "--cpus-per-slot",
+        "1",
+        "hello_world",
+    ]
 
     # Change the number of cores per rank
     local_options["cores_per_rank"] = 2
-    config = qcng.config.get_config(hostname='something', local_options=local_options)
+    config = qcng.config.get_config(hostname="something", local_options=local_options)
     assert config.use_mpiexec
-    assert config.mpiexec_command.startswith('mpirun')
-    assert create_mpi_invocation('hello_world', config) == ['mpirun', '-n', '20', '-N', '2', '--cpus-per-slot', '2',
-                                                            'hello_world']
+    assert config.mpiexec_command.startswith("mpirun")
+    assert create_mpi_invocation("hello_world", config) == [
+        "mpirun",
+        "-n",
+        "20",
+        "-N",
+        "2",
+        "--cpus-per-slot",
+        "2",
+        "hello_world",
+    ]
 
 
 def test_config_validation(opt_state_basic):
@@ -204,7 +222,7 @@ def test_batch_node(opt_state_basic):
     assert config.ncores == 24
     assert config.nnodes == 1
 
-    config = qcng.config.get_config(hostname="bn1", local_options={'nnodes': 2})
+    config = qcng.config.get_config(hostname="bn1", local_options={"nnodes": 2})
     assert config.use_mpiexec
     assert config.ncores == 24
     assert config.nnodes == 2
@@ -214,9 +232,8 @@ def test_mpirun_command_errors():
     # Checks for ranks_per_node
     with pytest.raises(ValueError) as exc:
         NodeDescriptor(name="something", hostname_pattern="*", mpiexec_command="mpirun -n {total_ranks}")
-    assert 'must explicitly state' in str(exc.value)
+    assert "must explicitly state" in str(exc.value)
 
     with pytest.raises(ValueError) as exc:
         NodeDescriptor(name="something", hostname_pattern="*", mpiexec_command="mpirun -N {ranks_per_node}")
-    assert 'must contain either' in str(exc.value)
-
+    assert "must contain either" in str(exc.value)

@@ -73,8 +73,7 @@ class NWChemHarness(ProgramHarness):
         command.append("v.nw")
 
         if which_prog not in self.version_cache:
-            success, output = execute(command, {"v.nw": ""},
-                                      scratch_directory=config.scratch_directory)
+            success, output = execute(command, {"v.nw": ""}, scratch_directory=config.scratch_directory)
 
             if success:
                 for line in output["stdout"].splitlines():

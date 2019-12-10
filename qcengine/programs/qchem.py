@@ -374,7 +374,11 @@ $end
                     jobtype = keywords.pop("jobtype")
                 else:
                     jobtype = "sp"
-                _jobtype_to_driver = {"sp": "energy", "force": "gradient", "freq": "hessian"}  # optimization intentionally not supported
+                _jobtype_to_driver = {
+                    "sp": "energy",
+                    "force": "gradient",
+                    "freq": "hessian",
+                }  # optimization intentionally not supported
                 try:
                     input_dict["driver"] = _jobtype_to_driver[jobtype]
                 except KeyError:

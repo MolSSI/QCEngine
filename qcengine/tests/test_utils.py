@@ -79,13 +79,13 @@ def test_disk_files():
 
 def test_popen_tee_output(capsys):
     # Test without passing
-    with util.popen(['echo', 'hello']) as proc:
-        proc['proc'].wait()
-    assert proc['stdout'].strip() == 'hello'
+    with util.popen(["echo", "hello"]) as proc:
+        proc["proc"].wait()
+    assert proc["stdout"].strip() == "hello"
 
     # Test with passing
-    with util.popen(['echo', 'hello'], pass_output_forward=True) as proc:
-        proc['proc'].wait()
-    assert proc['stdout'] == 'hello\n'
+    with util.popen(["echo", "hello"], pass_output_forward=True) as proc:
+        proc["proc"].wait()
+    assert proc["stdout"] == "hello\n"
     captured = capsys.readouterr()
-    assert captured.out == 'hello\n'
+    assert captured.out == "hello\n"
