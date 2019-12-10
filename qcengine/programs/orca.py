@@ -49,15 +49,6 @@ class OrcaHarness(ProgramHarness):
     }
     # fmt: on
 
-    # Different open-shell scenarios:
-    # - Restricted references
-    #       RHF-RMP2 (like RHF-UMP2 using Molpro's naming convention for CC methods)
-    #       RHF-UCCSD
-    #       RHF-UCCSD(T)
-    #       RHF-RCCSD
-    #       RHF-RCCSD(T)
-    # - Unrestricted references (Only supported up to UMP2, no CC support)
-    #       UHF-UMP2
     # NOTE: Unrestricted SCF methods must be specified by using keyword reference
     _hf_methods: Set[str] = {"HF", "RHF"}
     _restricted_post_hf_methods: Set[str] = {"MP2", "CCSD", "CCSD(T)"}  # RMP2, RCCSD, RCCSD(T)}
@@ -183,20 +174,8 @@ class OrcaHarness(ProgramHarness):
             if "reference" in caseless_keywords and caseless_keywords["reference"] == "unrestricted":
                 unrestricted = True
 
-            # Memory is in megawords per core for Molpro
-            # memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
-            # input_file.append("memory,{},M".format(memory_mw_core))
-            # input_file.append("")
-
             # Write the geom
             xyz_block = input_model.molecule.to_string(dtype="orca", units="Angstrom")
-            # input_file.append(xyz_block)
-
-            # Write the basis set
-            # input_file.append("basis={")
-            # input_file.append(f"default,{input_model.model.basis}")
-            # input_file.append("}")
-            # input_file.append("")
 
             # Determine what SCF type (restricted vs. unrestricted)
             hf_type = "RHF"
@@ -207,19 +186,20 @@ class OrcaHarness(ProgramHarness):
 
             # Write energy call
             energy_call = []
-            # If post-hf method is called then make sure to write a HF call first
+
             if input_model.model.method.upper() in self._post_hf_methods:  # post SCF case
                 energy_call.append(f"{{{hf_type}}}")
                 energy_call.append("")
                 energy_call.append(f"{{{input_model.model.method}}}")
-            # If DFT call make sure to write {rks,method}
+
             elif input_model.model.method.upper() in self._dft_functionals:  # DFT case
                 input_file.append("! SP {} {}".format(input_model.model.method, input_model.model.basis))
                 input_file.append(xyz_block)
 
-                # energy_call.append(f"{{{dft_type},{input_model.model.method}}}")
             elif input_model.model.method.upper() in self._hf_methods:  # HF case
-                energy_call.append(f"{{{hf_type}}}")
+                input_file.append("! SP {} {}".format(input_model.model.method, input_model.model.basis))
+                input_file.append(xyz_block)
+
             else:
                 raise InputError(f"Method {input_model.model.method} not implemented for Molpro.")
 
@@ -230,6 +210,9 @@ class OrcaHarness(ProgramHarness):
                 input_file[0] = "{} {}".format(input_file[0], "engrad")
             else:
                 raise InputError(f"Driver {input_model.driver} not implemented for Molpro.")
+
+            parallel = "%pal nproc {} end".format(config.ncores)
+            input_file.append(parallel)
 
             input_file = "\n".join(input_file)
         else:
@@ -262,6 +245,7 @@ class OrcaHarness(ProgramHarness):
 
         properties = {}
         extras = {}
+        extras["ev_to_hartrees"] = 0.0367493
 
         # Process basis set data
         properties["calcinfo_nbasis"] = data.nbasis
@@ -275,7 +259,7 @@ class OrcaHarness(ProgramHarness):
         # Determining the final energy
         # Throws an error if the energy isn't found for the method specified from the input_model.
         try:
-            final_energy = data.scfenergies[-1] * 0.0367493
+            final_energy = data.scfenergies[-1] * extras["ev_to_hartrees"]
         except:
             raise KeyError(f"Could not find {method} total energy")
 
@@ -284,7 +268,7 @@ class OrcaHarness(ProgramHarness):
 
         # Determining return_result
         if input_model.driver == "energy":
-            output_data["return_result"] = final_energy 
+            output_data["return_result"] = final_energy
             extras["CURRENT ENERGY"] = final_energy
 
         elif input_model.driver == "gradient":
@@ -302,6 +286,7 @@ class OrcaHarness(ProgramHarness):
         output_data["success"] = True
 
         import uuid
+
         myid = str(uuid.uuid4())
         with open("/tmp/orcafiles/{}".format(myid), "wb") as handle:
             handle.write(outfiles["outfiles"]["dispatch.gbw"])
@@ -310,8 +295,7 @@ class OrcaHarness(ProgramHarness):
         return AtomicResult(**output_data)
 
     def get_gradient(self, gradient_file):
-        """Get gradient from engrad Orca file
-        """
+        """Get gradient from engrad Orca file"""
         copy = False
         found = False
         gradient = []
@@ -325,7 +309,7 @@ class OrcaHarness(ProgramHarness):
                     gradient.append(float(line))
                 except ValueError:
                     pass
-        
+
         dim = np.sqrt(len(gradient)).astype(int)
 
         return np.array(gradient).reshape(dim, dim)
