@@ -105,6 +105,7 @@ class Psi4Harness(ProgramHarness):
                     scratch_directory=tmpdir,
                 )
 
+                output_data = input_data.copy()
                 if success:
                     output_data = json.loads(output["outfiles"]["data.json"])
                     if "extras" not in output_data:
@@ -168,6 +169,8 @@ class Psi4Harness(ProgramHarness):
                     )
                     if success:
                         output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
+                    else:
+                        output_data = input_model.dict()
 
                 if success:
                     if output_data["success"] is False:
