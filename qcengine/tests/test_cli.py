@@ -6,7 +6,8 @@ from typing import List
 
 from qcelemental.models import AtomicInput, OptimizationInput
 
-from qcengine import cli, get_molecule, testing, util
+from qcengine import cli, get_molecule, util
+from qcengine.testing import using
 
 
 def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
@@ -55,7 +56,7 @@ def test_info():
         assert output in default_output
 
 
-@testing.using("psi4")
+@using("psi4")
 def test_run_psi4(tmp_path):
     """Tests qcengine run with psi4 and JSON input"""
 
@@ -77,8 +78,8 @@ def test_run_psi4(tmp_path):
     check_result(run_qcengine_cli(args, stdin=inp.json()))
 
 
-@testing.using("geometric")
-@testing.using("psi4")
+@using("geometric")
+@using("psi4")
 def test_run_procedure(tmp_path):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
 

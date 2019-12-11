@@ -75,3 +75,17 @@ def test_disk_files():
     assert outfiles.keys() == {"thing*", "other"}
     assert outfiles["thing*"]["thing1"] == "hello"
     assert outfiles["other"] == "everyone"
+
+
+def test_popen_tee_output(capsys):
+    # Test without passing
+    with util.popen(["echo", "hello"]) as proc:
+        proc["proc"].wait()
+    assert proc["stdout"].strip() == "hello"
+
+    # Test with passing
+    with util.popen(["echo", "hello"], pass_output_forward=True) as proc:
+        proc["proc"].wait()
+    assert proc["stdout"] == "hello\n"
+    captured = capsys.readouterr()
+    assert captured.out == "hello\n"

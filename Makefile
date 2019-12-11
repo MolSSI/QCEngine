@@ -9,8 +9,8 @@ install:
 
 .PHONY: format
 format:
-	$(autoflake)
-	$(isort)
+#	$(autoflake)
+#	$(isort)
 	$(black)
 
 .PHONY: lint

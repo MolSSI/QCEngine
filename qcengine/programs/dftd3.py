@@ -188,7 +188,7 @@ class DFTD3Harness(ProgramHarness):
         else:
             if not ((real_nat == 1) and (input_model.driver == "gradient")):
                 raise UnknownError(
-                    f"Unsuccessful run. Possibly -D variant not available in dftd3 version. Model: {input_data.model}"
+                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_data.model}"
                 )
 
         # parse gradient output
