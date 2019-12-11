@@ -29,7 +29,7 @@ Enhancements
 -(:pr:`181`) NWChem - Output properties improvements.
 -(:pr:`183`) Entos - Hessian and XTB support.
 -(:pr:`185`) Entos - Improved subcommand support.
--(:pr:`187`) QChem - Support for raw log files without the binary file requirements.
+-(:pr:`187`) QChem - Support for raw log files without the binary file requirements and improved output properties support.
 -(:pr:`188`) Automatic buffer reads to prevent deadlocking of process for very large outputs.
 -(:pr:`194`) DFTD3 - Improved error message on failed evaluations.
 -(:pr:`195`) Blackens the code base add GHA-based lint checks.
