@@ -1,5 +1,7 @@
 from typing import Any, Dict, Tuple
 
+from qcengine.exceptions import InputError
+
 
 def format_keywords(keywords: Dict[str, Any]) -> str:
     """Form keywords deck from dictionary `keywords` where keys are CFOUR keyword ("__" separating

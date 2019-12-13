@@ -6,8 +6,7 @@ import json
 import string
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
-from qcelemental.models import AtomicResult, BasisSet
-from qcelemental.models.basis import BasisCenter
+from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError

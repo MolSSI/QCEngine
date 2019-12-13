@@ -3,7 +3,11 @@ Calls the Psi4 executable.
 """
 import json
 import os
-from typing import Dict
+from typing import Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 from qcelemental.models import AtomicResult
 from qcelemental.util import deserialize, parse_version, safe_version, which
