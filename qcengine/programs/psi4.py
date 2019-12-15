@@ -30,8 +30,6 @@ class Psi4Harness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        import shutil
-        print("shutil:", shutil.which("psi4"))
         print("qcng:  ", which("psi4"))
         return which(
             "psi4",
@@ -46,11 +44,14 @@ class Psi4Harness(ProgramHarness):
         which_prog = which("psi4")
         print("v0:", which_prog)
         print("v1:", self.version_cache)
+        with popen([which_prog, "--version"]) as exc:
+            exc["proc"].wait(timeout=30)
+        print("v2:", exc["stdout"])
+        print("v3:", exc["stdout"].strip())
+        print("v4:", safe_version(exc["stdout"]))
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
-            print("v2:", exc["stdout"])
-            print("v3:", safe_version(exc["stdout"]))
             self.version_cache[which_prog] = safe_version(exc["stdout"])
 
         candidate_version = self.version_cache[which_prog]
@@ -151,14 +152,14 @@ class Psi4Harness(ProgramHarness):
             else:
 
                 if input_model.extras.get("psiapi", False):
-                #if ("psiapi" in input_model.extras) and input_model.extras["psiapi"]:
                     import psi4
+
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()
 
                     psi4.core.set_num_threads(config.ncores, quiet=True)
                     psi4.set_memory(f"{config.memory}GB", quiet=True)
-                    psi4.core.IOManager.shared_object().set_default_path(str(tmpdir)) #os.path.abspath(os.path.expanduser(args["scratch"])))
-                    print('scratchE', psi4.core.IOManager.shared_object().get_default_path())
+                    psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
+                    print("scratchE", psi4.core.IOManager.shared_object().get_default_path())
                     output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
                     output_data["extras"]["psiapi_evaluated"] = True
                     success = True
