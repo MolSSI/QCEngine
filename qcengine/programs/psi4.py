@@ -47,12 +47,12 @@ class Psi4Harness(ProgramHarness):
         with popen([which_prog, "--version"]) as exc:
             exc["proc"].wait(timeout=30)
         print("v2:", exc["stdout"])
-        print("v3:", exc["stdout"].strip())
         print("v4:", safe_version(exc["stdout"]))
+        print("v5:", safe_version(exc["stdout"].split()[-1]))
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
-            self.version_cache[which_prog] = safe_version(exc["stdout"])
+            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[-1])
 
         candidate_version = self.version_cache[which_prog]
 
