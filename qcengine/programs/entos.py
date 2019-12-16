@@ -2,11 +2,12 @@
 The entos QCEngine Harness
 """
 
+import copy
 import json
 import string
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
-from qcelemental.models import AtomicResult
+from qcelemental.models import AtomicResult, BasisSet
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
@@ -16,6 +17,36 @@ from .model import ProgramHarness
 if TYPE_CHECKING:
     from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+
+def reorder_ao_indices_1d(matrix: List[List[float]], basis: BasisSet, to_cca_ao_order: Dict[str, Dict[int, List[int]]]) -> List[List[float]]:
+    """
+    Reorder the row atomic orbital (AO) indices of matrix. (e.g. Orbitals)
+    """
+
+    # Orbitals in entos are stored column major so matrix[0][2] refers to the 1st column and 3rd row
+    num_cols = len(matrix)
+    new_matrix = copy.deepcopy(matrix)
+    for col_index in range(0, num_cols):
+        ao_shift = 0
+        for atom in basis.atom_map:
+            for electron_shell in basis.center_data[atom].electron_shells:
+                entos_to_cca_indices = to_cca_ao_order[electron_shell.harmonic_type][electron_shell.angular_momentum[0]]
+                for bas_index in range(0, len(entos_to_cca_indices)):
+                    new_matrix[col_index][ao_shift + entos_to_cca_indices[bas_index]] = matrix[col_index][ao_shift + bas_index]
+                ao_shift += len(entos_to_cca_indices)
+
+    return new_matrix
+
+
+def reorder_ao_indices_2d(matrix: List[List[float]], basis: BasisSet, to_cca_ao_order: Dict[int, List[int]]) -> List[List[float]]:
+    """
+    Reorder both row and column atomic orbital (AO) indices of matrix. (e.g. Fock, density)
+    """
+
+    new_matrix = matrix.copy()
+
+    return new_matrix
 
 
 class EntosHarness(ProgramHarness):
@@ -88,6 +119,27 @@ class EntosHarness(ProgramHarness):
         "dft": _dft_keywords_extra,
         "hf": _hf_keywords_extra,
         "xtb": _xtb_keywords_extra,
+    }
+
+    # This map order converts entos ordering to CCA ordering
+    # Entos spherical basis ordering for each angular momentum
+    # S -->  0
+    # P --> +1,  0, -1
+    # D --> +2, +1,  0, -1, -2
+    # F --> +3, +2, +1,  0, -1, -2, -3
+    # G --> +4, +3, +2, +1,  0, -1, -2, -3, -4
+    # H --> +5, +4, +3, +2, +1,  0, -1, -2, -3, -4, -5
+    # I --> +6, +5, +4, +3, +2, +1,  0, -1, -2, -3, -4, -5, -6
+    _entos_to_cca_ao_order: Dict[str, Dict[int, List[int]]] = {
+        "spherical": {
+        0: [0],
+        1: [2, 1, 0],
+        2: [4, 3, 2, 1, 0],
+        3: [6, 5, 4, 3, 2, 1, 0],
+        4: [8, 7, 6, 5, 4, 3, 2, 1, 0],
+        5: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+        6: [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+        }
     }
 
     class Config(ProgramHarness.Config):
@@ -399,7 +451,8 @@ class EntosHarness(ProgramHarness):
                     "atom_map": atom_map,
                     "nbf": entos_results["ao_basis"]["__Basis"]["n_functions"],
                 }
-                wavefunction["basis"] = basis_info
+                basis_set = BasisSet(**basis_info)
+                wavefunction["basis"] = basis_set
             else:
                 raise KeyError(
                     f"Basis set information not found so wavefunction protocol {input_model.protocols.wavefunction} is not available."
@@ -412,6 +465,15 @@ class EntosHarness(ProgramHarness):
                 for key in wavefunction_map["restricted"].keys():
                     if key in entos_results:
                         wavefunction[wavefunction_map["restricted"][key]] = entos_results[key]
+                        # TODO Uncomment if CCA ordering should be used
+                        # if "orbitals" in key:
+                        #     wavefunction[wavefunction_map["restricted"][key]] = reorder_ao_indices_1d(
+                        #         entos_results[key], basis_set, self._entos_to_cca_ao_order)
+                        # elif "density" in key or "fock" in key:
+                        #     wavefunction[wavefunction_map["restricted"][key]] = reorder_ao_indices_2d(
+                        #         entos_results[key], basis_set, self._entos_to_cca_ao_order)
+                        # else:
+                        #     wavefunction[wavefunction_map["restricted"][key]] = entos_results[key]
             elif n_channels == 2:
                 wavefunction["restricted"] = False
                 for key in wavefunction_map["unrestricted"].keys():
@@ -451,7 +513,7 @@ class EntosHarness(ProgramHarness):
         return AtomicResult(**output_data)
 
     # Determine the energy_command
-    def determine_energy_command(self, method):
+    def determine_energy_command(self, method: str) -> str:
         """
         Determine the energy command in entos
         """
