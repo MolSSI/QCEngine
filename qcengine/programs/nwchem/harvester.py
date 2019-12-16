@@ -330,7 +330,7 @@ def harvest_outfile_pass(outtext):
         # psivar name might need to be fixed
         # each root excitation energy is extracted from the last iteration of right hand side
         mobj = re.findall(
-            r'^\s+(?:Excited-state calculation \( )(.*)\s+(?:symmetry\))\s+(?:.*\n)*^\s+EOM-' + cc-name +
+            r'^\s+(?:Excited-state calculation \( )(.*)\s+(?:symmetry\))\s+(?:.*\n)*^\s+EOM-' + cc_name +
             # (..) captures symmetry
             r'right-hand side iterations\s+(?:.*\n)*(?:Excited state root)\s+' + NUMBER + #root
             r'\s*(?:Excitation energy / hartree)\s+.\s+' + NUMBER + #excitation energy hartree 
