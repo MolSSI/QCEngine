@@ -30,7 +30,6 @@ class Psi4Harness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        print("qcng:  ", which("psi4"))
         return which(
             "psi4",
             return_bool=True,
@@ -42,13 +41,8 @@ class Psi4Harness(ProgramHarness):
         self.found(raise_error=True)
 
         which_prog = which("psi4")
-        print("v0:", which_prog)
-        print("v1:", self.version_cache)
         with popen([which_prog, "--version"]) as exc:
             exc["proc"].wait(timeout=30)
-        print("v2:", exc["stdout"])
-        print("v4:", safe_version(exc["stdout"]))
-        print("v5:", safe_version(exc["stdout"].split()[-1]))
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
@@ -159,7 +153,6 @@ class Psi4Harness(ProgramHarness):
                     psi4.core.set_num_threads(config.ncores, quiet=True)
                     psi4.set_memory(f"{config.memory}GB", quiet=True)
                     psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
-                    print("scratchE", psi4.core.IOManager.shared_object().get_default_path())
                     output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
                     output_data["extras"]["psiapi_evaluated"] = True
                     success = True
