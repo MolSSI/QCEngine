@@ -89,7 +89,15 @@ def harvest_outfile_pass(outtext):
             # logger.debug (mobj.group(1))
             psivar['NUCLEAR REPULSION ENERGY'] = mobj.group(1)
 
+        # Process DFT dispersion energy (a.u.)
+        mobj = re.search(r'^\s+' + r'(?:Dispersion correction)' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
+        if mobj:
+            logger.debug('matched Dispersion')
+            logger.debug(mobj.group(1))
+            psivar['DFT DISPERSION ENERGY'] = mobj.group(1)
+
         # Process DFT (RDFT, RODFT,UDFT, SODFT [SODFT for nwchem versions before nwchem 6.8])
+
         mobj = re.search(r'^\s+' + r'(?:Total DFT energy)' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
         if mobj:
             logger.debug('matched DFT')
