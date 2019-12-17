@@ -699,7 +699,8 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     # Get the SCF properties
     output["scf_total_energy"] = psivars.get("HF TOTAL ENERGY", None)
     output["scf_one_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
-    output["scf_two_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
+    output["scf_two_electron_energy"] = psivars.get("TWO-ELECTRON ENERGY", None)
+    output["scf_dispersion_correction_energy"] = psivars.get("DFT DISPERSION ENERGY", None)
 
     # Get the MP2 properties
     output["mp2_total_correlation_energy"] = psivars.get("MP2 CORRELATION ENERGY", None)
