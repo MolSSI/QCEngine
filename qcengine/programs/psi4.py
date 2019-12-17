@@ -152,7 +152,7 @@ class Psi4Harness(ProgramHarness):
                     psi4.set_memory(f"{config.memory}GB", quiet=True)
                     psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
                     output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
-                    print(output_data)
+                    print(output_data["extras"])
                     output_data["extras"]["psiapi_evaluated"] = True
                     success = True
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)
