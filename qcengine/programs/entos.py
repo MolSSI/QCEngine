@@ -20,9 +20,9 @@ if TYPE_CHECKING:
 
 
 # TODO Make the reorder_* functions general? If so where should they live?
-#      Note: This relies on to_cca_ao_order having the necessary spherical/cartesian conversions
+#      Note: This relies on to_new_ao_order having the necessary spherical/cartesian conversions
 def reorder_ao_indices_col(
-    matrix: np.ndarray, basis: BasisSet, to_cca_ao_order: Dict[str, Dict[int, List[int]]]
+    matrix: np.ndarray, basis: BasisSet, to_new_ao_order: Dict[str, Dict[int, List[int]]]
 ) -> np.ndarray:
     """
     Reorder the row atomic orbital (AO) indices of matrix. (e.g. Orbitals)
@@ -35,7 +35,7 @@ def reorder_ao_indices_col(
         ao_shift = 0
         for atom in basis.atom_map:
             for electron_shell in basis.center_data[atom].electron_shells:
-                to_cca_indices = to_cca_ao_order[electron_shell.harmonic_type][electron_shell.angular_momentum[0]]
+                to_cca_indices = to_new_ao_order[electron_shell.harmonic_type][electron_shell.angular_momentum[0]]
                 for bas_index in range(0, len(to_cca_indices)):
                     new_matrix[row_index][ao_shift + to_cca_indices[bas_index]] = matrix[row_index][
                         ao_shift + bas_index
@@ -46,28 +46,49 @@ def reorder_ao_indices_col(
 
 
 def reorder_ao_indices_2d(
-    matrix: np.ndarray, basis: BasisSet, to_cca_ao_order: Dict[str, Dict[int, List[int]]]
+    matrix: np.ndarray, basis: BasisSet, to_new_ao_order: Dict[str, Dict[int, List[int]]]
 ) -> np.ndarray:
     """
     Reorder both row and column atomic orbital (AO) indices of matrix. (e.g. Fock, density)
     """
 
-    col_reordered_matrix = reorder_ao_indices_col(matrix, basis, to_cca_ao_order)
-    new_matrix = reorder_ao_indices_col(col_reordered_matrix.transpose(), basis, to_cca_ao_order)
+    col_reordered_matrix = reorder_ao_indices_col(matrix, basis, to_new_ao_order)
+    new_matrix = reorder_ao_indices_col(col_reordered_matrix.transpose(), basis, to_new_ao_order)
 
     return new_matrix
 
 
-def entos_to_cca_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
+def cca_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
+    ao_order = {}
+    for ang_mom in range(max_angular_momentum):
+        ao_order[ang_mom] = [x for x in range(-1 * ang_mom, ang_mom + 1)]
+    return ao_order
+
+
+def to_cca_ao_order(cca_ao_order: Dict[int, List[int]], program_ao_order: Dict[int, List[int]]) -> Dict[int, List[int]]:
     """
-    This function determines the conversion of AO ordering up to max_angular_momentum between entos and the CCA standard.
-    The AO ordering in entos is the reverse of CCA AO ordering.
+    This function determines the conversion of AO ordering for each angular momentum between the CCA standard and the
+    provided program harness.
     """
 
-    to_cca_ao_order = {}
+    to_cca = {}
+    for ang_mom in program_ao_order.keys():
+        prog_order = program_ao_order[ang_mom]
+        cca_order = cca_ao_order[ang_mom]
+        sort_indices = []
+        for element in cca_order:
+            sort_indices.append(prog_order.index(element))
+
+        to_cca[ang_mom] = sort_indices
+
+    return to_cca
+
+
+def entos_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
+    ao_order = {}
     for ang_mom in range(max_angular_momentum):
-        to_cca_ao_order[ang_mom] = [x for x in range(ang_mom - 1, -1, -1)]
-    return to_cca_ao_order
+        ao_order[ang_mom] = [x for x in range(ang_mom, -1 * ang_mom - 1, -1)]
+    return ao_order
 
 
 class EntosHarness(ProgramHarness):
@@ -144,7 +165,7 @@ class EntosHarness(ProgramHarness):
 
     # This map order converts entos ordering to CCA ordering
     # Entos spherical basis ordering for each angular momentum. Follows reverse order of CCA.
-    _entos_to_cca_ao_order = {"spherical": entos_to_cca_ao_order_spherical(26)}
+    _entos_to_cca_ao_order = {"spherical": to_cca_ao_order(cca_ao_order_spherical(10), entos_ao_order_spherical(10))}
 
     class Config(ProgramHarness.Config):
         pass
