@@ -442,11 +442,22 @@ class EntosHarness(ProgramHarness):
                             )
                         else:
                             wavefunction[wavefunction_map["restricted"][key]] = entos_results[key]
+            # TODO Add a test in QCEngineRecords
             elif n_channels == 2:
                 wavefunction["restricted"] = False
                 for key in wavefunction_map["unrestricted"].keys():
                     if key in entos_results:
-                        wavefunction[wavefunction_map["unrestricted"][key]] = entos_results[key]
+                        if "orbitals" in key:
+                            orbitals_transposed = reorder_column_ao_indices(
+                                np.array(entos_results[key]), basis_set, self._entos_to_cca_ao_order
+                            )
+                            wavefunction[wavefunction_map["restricted"][key]] = orbitals_transposed.transpose()
+                        elif "density" in key or "fock" in key:
+                            wavefunction[wavefunction_map["restricted"][key]] = reorder_row_and_column_ao_indices(
+                                entos_results[key], basis_set, self._entos_to_cca_ao_order
+                            )
+                        else:
+                            wavefunction[wavefunction_map["restricted"][key]] = entos_results[key]
 
         # Parse results for the extras_map from results.json
         extras = {}
