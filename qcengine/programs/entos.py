@@ -4,6 +4,7 @@ The entos QCEngine Harness
 
 import copy
 import json
+import numpy as np
 import string
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
@@ -19,26 +20,25 @@ if TYPE_CHECKING:
     from qcelemental.models import AtomicInput
 
 
-def reorder_ao_indices_row(
-    matrix: List[List[float]], basis: BasisSet, to_cca_ao_order: Dict[str, Dict[int, List[int]]]
-) -> List[List[float]]:
+# TODO Make the reorder_* functions general? If so where should they live?
+#      Note: This relies on to_cca_ao_order having the necessary spherical/cartesian conversions
+def reorder_ao_indices_col(
+    matrix: np.ndarray, basis: BasisSet, to_cca_ao_order: Dict[str, Dict[int, List[int]]]
+) -> np.ndarray:
     """
     Reorder the row atomic orbital (AO) indices of matrix. (e.g. Orbitals)
     """
 
-    # TODO Make this a general function? Where should it live?
-    #      Note:
-    #           - This relies on the matrix being stored as column major
-    #           - This relies on to_cca_ao_order having the necessary spherical/cartesian conversions
-    num_cols = len(matrix)
-    new_matrix = copy.deepcopy(matrix)
-    for col_index in range(0, num_cols):
+    num_cols = len(matrix[0])
+    num_rows = len(matrix)
+    new_matrix = np.zeros([num_rows, num_cols])
+    for row_index in range(0, num_rows):
         ao_shift = 0
         for atom in basis.atom_map:
             for electron_shell in basis.center_data[atom].electron_shells:
                 to_cca_indices = to_cca_ao_order[electron_shell.harmonic_type][electron_shell.angular_momentum[0]]
                 for bas_index in range(0, len(to_cca_indices)):
-                    new_matrix[col_index][ao_shift + to_cca_indices[bas_index]] = matrix[col_index][
+                    new_matrix[row_index][ao_shift + to_cca_indices[bas_index]] = matrix[row_index][
                         ao_shift + bas_index
                     ]
                 ao_shift += len(to_cca_indices)
@@ -46,42 +46,15 @@ def reorder_ao_indices_row(
     return new_matrix
 
 
-def reorder_ao_indices_col(
-    matrix: List[List[float]], basis: BasisSet, to_cca_ao_order: Dict[str, Dict[int, List[int]]]
-) -> List[List[float]]:
-    """
-    Reorder the column atomic orbital (AO) indices of matrix.
-    """
-
-    # TODO Make this a general function? Where should it live?
-    #      Note:
-    #           - This relies on the matrix being stored as column major
-    #           - This relies on to_cca_ao_order having the necessary spherical/cartesian conversions
-    num_rows = len(matrix[0])
-    new_matrix = copy.deepcopy(matrix)
-    for row_index in range(0, num_rows):
-        ao_shift = 0
-        for atom in basis.atom_map:
-            for electron_shell in basis.center_data[atom].electron_shells:
-                to_cca_indices = to_cca_ao_order[electron_shell.harmonic_type][electron_shell.angular_momentum[0]]
-                for bas_index in range(0, len(to_cca_indices)):
-                    new_matrix[ao_shift + to_cca_indices[bas_index]][row_index] = matrix[ao_shift + bas_index][
-                        row_index
-                    ]
-                ao_shift += len(to_cca_indices)
-
-    return new_matrix
-
-
 def reorder_ao_indices_2d(
-    matrix: List[List[float]], basis: BasisSet, to_cca_ao_order: Dict[str, Dict[int, List[int]]]
-) -> List[List[float]]:
+    matrix: np.ndarray, basis: BasisSet, to_cca_ao_order: Dict[str, Dict[int, List[int]]]
+) -> np.ndarray:
     """
     Reorder both row and column atomic orbital (AO) indices of matrix. (e.g. Fock, density)
     """
 
-    row_reordered_matrix = reorder_ao_indices_row(matrix, basis, to_cca_ao_order)
-    new_matrix = reorder_ao_indices_col(row_reordered_matrix, basis, to_cca_ao_order)
+    col_reordered_matrix = reorder_ao_indices_col(matrix, basis, to_cca_ao_order)
+    new_matrix = reorder_ao_indices_col(col_reordered_matrix.transpose(), basis, to_cca_ao_order)
 
     return new_matrix
 
@@ -502,8 +475,9 @@ class EntosHarness(ProgramHarness):
                 for key in wavefunction_map["restricted"].keys():
                     if key in entos_results:
                         if "orbitals" in key:
-                            wavefunction[wavefunction_map["restricted"][key]] = reorder_ao_indices_row(
-                                entos_results[key], basis_set, self._entos_to_cca_ao_order
+                            # Note: Orbitals are stored column major
+                            wavefunction[wavefunction_map["restricted"][key]] = reorder_ao_indices_col(
+                                np.array(entos_results[key]), basis_set, self._entos_to_cca_ao_order
                             )
                         elif "density" in key or "fock" in key:
                             wavefunction[wavefunction_map["restricted"][key]] = reorder_ao_indices_2d(
