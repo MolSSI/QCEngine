@@ -2,7 +2,6 @@
 The entos QCEngine Harness
 """
 
-import copy
 import json
 import numpy as np
 import string
@@ -57,6 +56,18 @@ def reorder_ao_indices_2d(
     new_matrix = reorder_ao_indices_col(col_reordered_matrix.transpose(), basis, to_cca_ao_order)
 
     return new_matrix
+
+
+def entos_to_cca_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
+    """
+    This function determines the conversion of AO ordering up to max_angular_momentum between entos and the CCA standard.
+    The AO ordering in entos is the reverse of CCA AO ordering.
+    """
+
+    to_cca_ao_order = {}
+    for ang_mom in range(max_angular_momentum):
+        to_cca_ao_order[ang_mom] = [x for x in range(ang_mom - 1, -1, -1)]
+    return to_cca_ao_order
 
 
 class EntosHarness(ProgramHarness):
@@ -132,25 +143,8 @@ class EntosHarness(ProgramHarness):
     }
 
     # This map order converts entos ordering to CCA ordering
-    # Entos spherical basis ordering for each angular momentum
-    # S -->  0
-    # P --> +1,  0, -1
-    # D --> +2, +1,  0, -1, -2
-    # F --> +3, +2, +1,  0, -1, -2, -3
-    # G --> +4, +3, +2, +1,  0, -1, -2, -3, -4
-    # H --> +5, +4, +3, +2, +1,  0, -1, -2, -3, -4, -5
-    # I --> +6, +5, +4, +3, +2, +1,  0, -1, -2, -3, -4, -5, -6
-    _entos_to_cca_ao_order: Dict[str, Dict[int, List[int]]] = {
-        "spherical": {
-            0: [0],
-            1: [2, 1, 0],
-            2: [4, 3, 2, 1, 0],
-            3: [6, 5, 4, 3, 2, 1, 0],
-            4: [8, 7, 6, 5, 4, 3, 2, 1, 0],
-            5: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
-            6: [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
-        }
-    }
+    # Entos spherical basis ordering for each angular momentum. Follows reverse order of CCA.
+    _entos_to_cca_ao_order = {"spherical": entos_to_cca_ao_order_spherical(26)}
 
     class Config(ProgramHarness.Config):
         pass
@@ -475,10 +469,10 @@ class EntosHarness(ProgramHarness):
                 for key in wavefunction_map["restricted"].keys():
                     if key in entos_results:
                         if "orbitals" in key:
-                            # Note: Orbitals are stored column major
-                            wavefunction[wavefunction_map["restricted"][key]] = reorder_ao_indices_col(
+                            orbitals_transposed = reorder_ao_indices_col(
                                 np.array(entos_results[key]), basis_set, self._entos_to_cca_ao_order
                             )
+                            wavefunction[wavefunction_map["restricted"][key]] = orbitals_transposed.transpose()
                         elif "density" in key or "fock" in key:
                             wavefunction[wavefunction_map["restricted"][key]] = reorder_ao_indices_2d(
                                 entos_results[key], basis_set, self._entos_to_cca_ao_order
