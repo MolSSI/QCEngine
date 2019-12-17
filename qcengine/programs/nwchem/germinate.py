@@ -4,6 +4,7 @@ from qcengine.exceptions import InputError
 
 # List of XC functionals known to NWChem
 _xc_functionals = [
+    "dft",
     "acm",
     "b3lyp",
     "beckehandh",
@@ -174,7 +175,8 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         )
 
     elif method in _xc_functionals:
-        opts["dft__xc"] = method
+        if method != "dft":
+            opts["dft__xc"] = method
         if use_tce:
             mdccmd = f"task tce {runtyp}\n\n"
             opts["tce__"] = "dft"
