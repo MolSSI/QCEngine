@@ -390,7 +390,6 @@ class EntosHarness(ProgramHarness):
                 electron_shells_by_center = {}
                 for basis_item in entos_results["ao_basis"]["__Basis"]["electron_shells"]:
                     center_index = basis_item["center_index"]
-                    normalized_primitives = basis_item["normalized_primitives"]
 
                     electron_shell_info = {
                         "angular_momentum": [basis_item["angular_momentum"]],
