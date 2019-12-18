@@ -89,7 +89,15 @@ def harvest_outfile_pass(outtext):
             # logger.debug (mobj.group(1))
             psivar['NUCLEAR REPULSION ENERGY'] = mobj.group(1)
 
+        # Process DFT dispersion energy (a.u.)
+        mobj = re.search(r'^\s+' + r'(?:Dispersion correction)' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
+        if mobj:
+            logger.debug('matched Dispersion')
+            logger.debug(mobj.group(1))
+            psivar['DFT DISPERSION ENERGY'] = mobj.group(1)
+
         # Process DFT (RDFT, RODFT,UDFT, SODFT [SODFT for nwchem versions before nwchem 6.8])
+
         mobj = re.search(r'^\s+' + r'(?:Total DFT energy)' + r'\s+=\s*' + NUMBER + r'\s*$', outtext, re.MULTILINE)
         if mobj:
             logger.debug('matched DFT')
@@ -330,7 +338,7 @@ def harvest_outfile_pass(outtext):
         # psivar name might need to be fixed
         # each root excitation energy is extracted from the last iteration of right hand side
         mobj = re.findall(
-            r'^\s+(?:Excited-state calculation \( )(.*)\s+(?:symmetry\))\s+(?:.*\n)*^\s+EOM-' + cc-name +
+            r'^\s+(?:Excited-state calculation \( )(.*)\s+(?:symmetry\))\s+(?:.*\n)*^\s+EOM-' + cc_name +
             # (..) captures symmetry
             r'right-hand side iterations\s+(?:.*\n)*(?:Excited state root)\s+' + NUMBER + #root
             r'\s*(?:Excitation energy / hartree)\s+.\s+' + NUMBER + #excitation energy hartree 
@@ -691,7 +699,8 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     # Get the SCF properties
     output["scf_total_energy"] = psivars.get("HF TOTAL ENERGY", None)
     output["scf_one_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
-    output["scf_two_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
+    output["scf_two_electron_energy"] = psivars.get("TWO-ELECTRON ENERGY", None)
+    output["scf_dispersion_correction_energy"] = psivars.get("DFT DISPERSION ENERGY", None)
 
     # Get the MP2 properties
     output["mp2_total_correlation_energy"] = psivars.get("MP2 CORRELATION ENERGY", None)
