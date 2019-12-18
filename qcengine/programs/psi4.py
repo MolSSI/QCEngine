@@ -64,7 +64,6 @@ class Psi4Harness(ProgramHarness):
 
         if pversion < parse_version("1.2"):
             raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version()))
-        print("VERSION", self.get_version(), pversion, parse_version("1.4a2.dev160"), pversion < parse_version("1.4a2.dev160"))
 
         # Location resolution order config.scratch_dir, $PSI_SCRATCH, /tmp
         parent = config.scratch_directory
@@ -87,7 +86,6 @@ class Psi4Harness(ProgramHarness):
 
             # Old-style JSON-based command line
             if pversion < parse_version("1.4a2.dev160"):
-                print("hit old")
 
                 # Setup the job
                 input_data = input_model.dict(encoding="json")
@@ -146,7 +144,6 @@ class Psi4Harness(ProgramHarness):
             else:
 
                 if input_model.extras.get("psiapi", False):
-                    print("hit new psiapi")
                     import psi4
 
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()
@@ -154,12 +151,10 @@ class Psi4Harness(ProgramHarness):
                     psi4.set_memory(f"{config.memory}GB", quiet=True)
                     psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
                     output_data = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
-                    print(output_data["extras"])
                     output_data["extras"]["psiapi_evaluated"] = True
                     success = True
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)
                 else:
-                    print("hit new psithon")
                     run_cmd = [
                         which("psi4"),
                         "--scratch",
