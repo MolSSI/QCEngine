@@ -7,7 +7,11 @@ import re
 import socket
 import sys
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 import numpy as np
 import qcelemental as qcel
@@ -188,7 +192,7 @@ class DFTD3Harness(ProgramHarness):
         else:
             if not ((real_nat == 1) and (input_model.driver == "gradient")):
                 raise UnknownError(
-                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_data.model}"
+                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.model}"
                 )
 
         # parse gradient output
