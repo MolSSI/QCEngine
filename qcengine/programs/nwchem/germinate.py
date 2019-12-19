@@ -182,7 +182,7 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
             mdccmd = f"task dft {runtyp}\n\n"
 
     elif method != "dft":
-            mdccmd = f"task dft {runtyp}\n\n"
+        mdccmd = f"task dft {runtyp}\n\n"
 
     else:
         raise InputError(f"Method not recognized: {method}")
