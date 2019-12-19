@@ -175,12 +175,14 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         )
 
     elif method in _xc_functionals:
-        if method != "dft":
-            opts["dft__xc"] = method
+        opts["dft__xc"] = method
         if use_tce:
             mdccmd = f"task tce {runtyp}\n\n"
             opts["tce__"] = "dft"
         else:
+            mdccmd = f"task dft {runtyp}\n\n"
+
+    elif method != "dft":
             mdccmd = f"task dft {runtyp}\n\n"
 
     else:
