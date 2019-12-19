@@ -109,7 +109,7 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         0: "energy",
         1: "gradient",
         2: "hessian",
-        #'properties': 'prop',
+        # 'properties': 'prop',
     }[derint]
 
     # Write out the theory directive
@@ -181,7 +181,7 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         else:
             mdccmd = f"task dft {runtyp}\n\n"
 
-    elif method != "dft":
+    elif method == "dft":
         mdccmd = f"task dft {runtyp}\n\n"
 
     else:
