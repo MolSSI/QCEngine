@@ -444,6 +444,8 @@ def execute(
     popen_kwargs = {}
     if environment is not None:
         popen_kwargs["env"] = {k: v for k, v in environment.items() if v is not None}
+    if scratch_directory is not None:
+        scratch_directory = str(scratch_directory)  # Windows unhappy with Path
 
     # Execute
     with temporary_directory(
