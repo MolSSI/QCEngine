@@ -533,7 +533,7 @@ def temporary_directory(
             else:
                 raise
     try:
-        yield tmpdir
+        yield str(tmpdir)
 
     finally:
         if not messy:

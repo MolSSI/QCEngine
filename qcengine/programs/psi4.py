@@ -158,7 +158,7 @@ class Psi4Harness(ProgramHarness):
                     run_cmd = [
                         which("psi4"),
                         "--scratch",
-                        tmpdir,
+                        str(tmpdir),
                         "--nthread",
                         str(config.ncores),
                         "--memory",
