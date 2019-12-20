@@ -178,64 +178,11 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         if use_tce:
             mdccmd = f"task tce {runtyp}\n\n"
             opts["tce__"] = "dft"
-        elseimport qcelemental as qcel
-import qcengine as qcng
-sdimerF='/home/adrian/projects/qca/benzeneDimer/Sdimer-004.xyz'
-pddimerF='/home/adrian/projects/qca/benzeneDimer/PDdimer-051.xyz'
-SDIMER_MOL = qcel.models.Molecule.from_file(filename=sdimerF)
-PDDIMER_MOL = qcel.models.Molecule.from_file(filename=pddimerF)
-
-KW = {'dft__xc': 'xc vwn_1_rpa 0.19 lyp 0.81 HFexch 0.20  slater 0.80 becke88 nonlocal 0.72',
-      'dft__direct': True,
-      # 'dft__disp__vdw': 3,
-      'dft__grid': 'fine',
-      'dft__tolerances__tight': True,
-      'dft__tolerances__acccoul': 10,
-      'dft__tolerances__radius': 30,
-      'dft__convergence__density': 1e-6}
-
-blyp = {'dft__xc': 'becke88 lyp',  # blyp
-        'dft__direct': True,
-        'dft__grid': 'fine',
-        'dft__tolerances__tight': True,
-        'dft__tolerances__radius': 30,
-        'dft__tolerances__acccoul': 10,
-        'dft__convergence__density': 1e-6}
-
-b3lyp = {'dft__xc': 'b3lyp',
-         'dft__direct': True,
-         # 'dft__disp__vdw': 3,
-         'dft__grid': 'fine',
-         'dft__tolerances__tight': True,
-         'dft__tolerances__acccoul': 10,
-         'dft__tolerances__radius': 30,
-         'dft__convergence__density': 1e-6}
-
-
-inp2 = qcel.models.AtomicInput(
-    molecule=PDDIMER_MOL,
-    driver="energy",
-    model={"method": "dft", "basis": 'sto-3g'},
-    keywords=blyp
-)
-inp3 = qcel.models.AtomicInput(
-    molecule=PDDIMER_MOL,
-    driver="energy",
-    model={"method": "dft", "basis": 'sto-3g'},
-    keywords=b3lyp
-)
-
-# r1 = qcng.compute(inp1, 'nwchem')
-r2 = qcng.compute(inp2, 'nwchem')
-r3 = qcng.compute(inp3, 'nwchem')
+        else:
             mdccmd = f"task dft {runtyp}\n\n"
 
     elif method == "dft":
-        if use_tce:
-            mdccmd = f"task tce {runtyp}\n\n"
-            opts["tce__"] = "dft"
-        else:
-            mdccmd = f"task dft {runtyp}\n\n"
+        mdccmd = f"task dft {runtyp}\n\n"
 
     else:
         raise InputError(f"Method not recognized: {method}")
