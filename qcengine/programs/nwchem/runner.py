@@ -1,6 +1,7 @@
 """
 Calls the NWChem executable.
 """
+import re
 import copy
 import logging
 import pprint
@@ -9,7 +10,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models import AtomicResult, Provenance, AtomicInput
 from qcelemental.util import safe_version, which
 
 from qcengine.config import TaskConfig, get_config
@@ -110,7 +111,7 @@ class NWChemHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -147,7 +148,30 @@ class NWChemHarness(ProgramHarness):
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 
+        # Combine the molecule description, options and method command together
         nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
+
+        # For gradient methods, add a Python command to save the gradients in full precision
+        if input_model.driver == "gradient":
+            # Get the name of the theory used for computing the gradients
+            theory = re.search('^task (\w+) ', mdccmd, re.MULTILINE).group(1)
+            logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
+
+            # Create a Python function to get the gradient from NWChem's checkpoint file (rtdb)
+            #  and save it to a JSON file. The stdout for NWChem only prints 6 _decimal places_
+            #  (not 6 significant figures)
+            pycmd = f"""
+python
+  if ga_nodeid() == 0:
+      import json
+      grad = rtdb_get('{theory}:gradient')
+      with open('nwchem.grad', 'w') as fp:
+          json.dump(grad, fp)
+end
+
+task python
+            """
+            nwchemrec["infiles"]["nwchem.nw"] += pycmd
 
         # Determine the command
         if config.nnodes > 1:
@@ -164,8 +188,9 @@ class NWChemHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["job.movecs", "job.hess", "job.db", "job.zmat", "job.fd_dipole"],
+            ["nwchem.hess", "nwchem.grad"],
             scratch_messy=False,
+            scratch_exist_ok=True,
             scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
@@ -174,9 +199,10 @@ class NWChemHarness(ProgramHarness):
         self, outfiles: Dict[str, str], input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
+        # Get the stdout from the calculation (required)
         stdout = outfiles.pop("stdout")
 
-        # nwmol, if it exists, is dinky, just a clue to geometry of nwchem results
+        # Read the NWChem stdout file and, if needed, the hess or grad files
         qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
         if nwgrad is not None:

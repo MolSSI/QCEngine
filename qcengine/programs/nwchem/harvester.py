@@ -1,8 +1,10 @@
-import logging
 import re
+import json
+import logging
 from decimal import Decimal
 from typing import Tuple
 
+import numpy as np
 import qcelemental as qcel
 from qcelemental.models import Molecule
 from qcelemental.models.results import AtomicResultProperties
@@ -660,12 +662,28 @@ def harvest_outfile_pass(outtext):
     return psivar, psivar_coord, psivar_grad, version, error
 
 
-def harvest_hessian(hess):
-    """Parses the contents *hessian* of the NWChem hess file into a hessian array.
-    Hess file name has to be "nwchem.hess". (default)
+def harvest_hessian(hess: str) -> np.ndarray:
+    """Parses the contents of the NWChem hess file into a hessian array.
+
+    Args:
+        hess (str): Contents of the hess file
 
     """
-    raise NotImplementedError()
+
+    # Change the "D[+-]" notation of Fortran output to "E[+-]" used by Python
+    hess_conv = hess.replace("D", "E")
+
+    # Parse all of the float values
+    hess_triu = [float(x) for x in hess_conv.strip().splitlines()]
+
+    # The value in the Hessian matrix is the upper triangle
+    #  We first convert it to a 2D array
+    n = int(np.sqrt(8 * len(hess_triu) + 1) - 1) // 2  # Size of the 2D matrix
+    hess_arr = np.zeros((n, n))
+    hess_arr[np.triu_indices(n)] = hess_triu
+
+    # Symmetrize it
+    return hess_arr.T + hess_arr - np.diag(np.diag(hess_arr))
 
 
 def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultProperties:
@@ -710,13 +728,14 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     return AtomicResultProperties(**output)
 
 
-def harvest(in_mol: Molecule, nwout: str, **kwargs) -> Tuple[PreservingDict, None, list, Molecule, str, str]:
+def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, None, list, Molecule, str, str]:
     """Parses all the pieces of output from NWChem: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 
     Args:
         in_mol (Molecule): Input molecule
         nwout (str): NWChem output molecule
+        outfiles (dict): Dictionary of outfile files and their contents
     Returns:
         - (PreservingDict) Variables extracted from the output file in the last complete step
         - (None): Hessian from the last complete step (Not yet implemented)
@@ -729,6 +748,17 @@ def harvest(in_mol: Molecule, nwout: str, **kwargs) -> Tuple[PreservingDict, Non
     # Parse the NWChem output
     outPsivar, outMol, outGrad, version, error = harvest_output(nwout)
 
+    # If available, read higher-accuracy gradients
+    #  These were output using a Python Task in NWChem to read them out of the database
+    if outfiles.get("nwchem.grad") is not None:
+        logger.debug('Reading higher-accuracy gradients')
+        outGrad = json.loads(outfiles.get("nwchem.grad"))
+
+    # If available, read the hessian
+    outHess = None
+    if outfiles.get("nwchem.hess") is not None:
+        outHess = harvest_hessian(outfiles.get("nwchem.hess"))
+
     # Make sure the input and output molecules are the same
     if outMol:
         if in_mol:
@@ -740,4 +770,4 @@ def harvest(in_mol: Molecule, nwout: str, **kwargs) -> Tuple[PreservingDict, Non
     else:
         raise ValueError("""No coordinate information extracted from NWChem output.""")
 
-    return outPsivar, None, outGrad, outMol, version, error
+    return outPsivar, outHess, outGrad, outMol, version, error

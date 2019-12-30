@@ -43,3 +43,18 @@ def test_b3lyp(nh2):
     assert res["properties"]["calcinfo_natom"] == 3
     assert res["properties"]["calcinfo_nalpha"] == 5
     assert res["properties"]["calcinfo_nbasis"] == 13
+
+
+@using("nwchem")
+def test_hess(nh2):
+    resi = {"molecule": nh2, "driver": "hessian", "model": {"method": "b3lyp", "basis": "3-21g"}}
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    assert compare_values(-3.5980754370E-02, res["return_result"][0], atol=1e-3)
+
+
+@using("nwchem")
+def test_gradient(nh2):
+    resi = {"molecule": nh2, "driver": "gradient", "model": {"method": "b3lyp", "basis": "3-21g"},
+            "keywords": {"dft__convergence__gradient": "1e-6"}}
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    assert compare_values(4.22418267e-2, res["return_result"][2], atol=1e-7)  # Beyond accuracy of NWChem stdout
