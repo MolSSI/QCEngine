@@ -751,7 +751,7 @@ def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, N
     # If available, read higher-accuracy gradients
     #  These were output using a Python Task in NWChem to read them out of the database
     if outfiles.get("nwchem.grad") is not None:
-        logger.debug('Reading higher-accuracy gradients')
+        logger.debug("Reading higher-accuracy gradients")
         outGrad = json.loads(outfiles.get("nwchem.grad"))
 
     # If available, read the hessian
