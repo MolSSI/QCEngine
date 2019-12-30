@@ -3,6 +3,7 @@ import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_values
 
+import numpy as np
 import qcengine as qcng
 from qcengine.testing import using
 
@@ -62,3 +63,26 @@ def test_gradient(nh2):
     }
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
     assert compare_values(4.22418267e-2, res["return_result"][2], atol=1e-7)  # Beyond accuracy of NWChem stdout
+
+    # Rotate the molecule and verify that the gradient changes
+    shifted_nh2, _ = nh2.scramble(do_shift=False, do_mirror=False, do_rotate=True, do_resort=False)
+
+    resi["molecule"] = shifted_nh2
+    res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+
+    assert not compare_values(4.22418267e-2, res_shifted["return_result"][2], atol=1e-7)
+
+    # Make sure the two matrices still have the same determinant and norms, as they are just rotations of each other
+    #  I am leveraging the fact that the gradients are square, 3x3 matrices just by happenstance of the
+    #  test molecule having 3 atoms
+    orig_grads = np.reshape(res["return_result"], (-1, 3))
+    shif_grads = np.reshape(res_shifted["return_result"], (-1, 3))
+
+    # Test that the magnitude of forces are the same
+    assert np.allclose(np.linalg.norm(orig_grads, ord=2, axis=1), np.linalg.norm(shif_grads, ord=2, axis=1))
+
+    # Test that the determinants are the same
+    orig_det = np.linalg.det(orig_grads)
+    shif_det = np.linalg.det(shif_grads)
+
+    assert np.allclose(orig_det, shif_det)

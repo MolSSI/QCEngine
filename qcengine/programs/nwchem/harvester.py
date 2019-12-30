@@ -770,4 +770,17 @@ def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, N
     else:
         raise ValueError("""No coordinate information extracted from NWChem output.""")
 
+    # If present, align the gradients and hessian with the original molecular coordinates
+    #  NWChem rotates the coordinates of the input molecule. `outMol` contains the coordinates for the
+    #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
+    amol, data = outMol.align(in_mol, atoms_map=True, mols_align=True, verbose=0)
+
+    mill = data["mill"]  # Retrieve tool with alignment routines
+
+    if outGrad is not None:
+        outGrad = mill.align_gradient(np.array(outGrad).reshape(-1, 3))
+    if outHess is not None:
+        print("rotating hessian")
+        outHess = mill.align_hessian(np.array(outHess))
+
     return outPsivar, outHess, outGrad, outMol, version, error
