@@ -14,15 +14,17 @@ class OptKingProcedure(ProcedureHarness):
         pass
 
     def found(self, raise_error: bool = False) -> bool:
-        return which_import('optking',
-                            return_bool=True,
-                            raise_error=raise_error,
-                            raise_msg='Please install via `conda install optking -c psi4`.')
+        return which_import(
+            "optking",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install optking -c psi4`.",
+        )
 
-    def build_input_model(self, data: Union[Dict[str, Any], 'OptimizationInput']) -> 'OptimizationInput':
+    def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
         return self._build_model(data, OptimizationInput)
 
-    def compute(self, input_model: 'OptimizationInput', config: 'JobConfig') -> 'Optimization':
+    def compute(self, input_model: "OptimizationInput", config: "JobConfig") -> "Optimization":
         try:
             import optking
         except ModuleNotFoundError:

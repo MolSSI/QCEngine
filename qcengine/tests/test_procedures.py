@@ -19,10 +19,10 @@ def input_data():
 
 
 @using("psi4")
-@pytest.mark.parametrize("optizer", [
-    pytest.param("geometric", marks=[using("geometric")]),
-    pytest.param("optking", marks=[using("optking")]),
-])
+@pytest.mark.parametrize(
+    "optizer",
+    [pytest.param("geometric", marks=[using("geometric")]), pytest.param("optking", marks=[using("optking")])],
+)
 def test_geometric_psi4(input_data, optizer):
 
     input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
