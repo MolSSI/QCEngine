@@ -746,41 +746,40 @@ def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, N
     """
 
     # Parse the NWChem output
-    outPsivar, outMol, outGrad, version, error = harvest_output(nwout)
+    out_psivar, out_mol, out_grad, version, error = harvest_output(nwout)
 
     # If available, read higher-accuracy gradients
     #  These were output using a Python Task in NWChem to read them out of the database
     if outfiles.get("nwchem.grad") is not None:
         logger.debug("Reading higher-accuracy gradients")
-        outGrad = json.loads(outfiles.get("nwchem.grad"))
+        out_grad = json.loads(outfiles.get("nwchem.grad"))
 
     # If available, read the hessian
-    outHess = None
+    out_hess = None
     if outfiles.get("nwchem.hess") is not None:
-        outHess = harvest_hessian(outfiles.get("nwchem.hess"))
+        out_hess = harvest_hessian(outfiles.get("nwchem.hess"))
 
     # Make sure the input and output molecules are the same
-    if outMol:
+    if out_mol:
         if in_mol:
-            if abs(outMol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
+            if abs(out_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
                     """NWChem outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
-                    % (outMol.nuclear_repulsion_energy(), in_mol.nuclear_repulsion_energy())
+                    % (out_mol.nuclear_repulsion_energy(), in_mol.nuclear_repulsion_energy())
                 )
     else:
         raise ValueError("""No coordinate information extracted from NWChem output.""")
 
     # If present, align the gradients and hessian with the original molecular coordinates
-    #  NWChem rotates the coordinates of the input molecule. `outMol` contains the coordinates for the
+    #  NWChem rotates the coordinates of the input molecule. `out_mol` contains the coordinates for the
     #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
-    amol, data = outMol.align(in_mol, atoms_map=True, mols_align=True, verbose=0)
+    amol, data = out_mol.align(in_mol, atoms_map=True, mols_align=True, verbose=0)
 
     mill = data["mill"]  # Retrieve tool with alignment routines
 
-    if outGrad is not None:
-        outGrad = mill.align_gradient(np.array(outGrad).reshape(-1, 3))
-    if outHess is not None:
-        print("rotating hessian")
-        outHess = mill.align_hessian(np.array(outHess))
+    if out_grad is not None:
+        out_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
+    if out_hess is not None:
+        out_hess = mill.align_hessian(np.array(out_hess))
 
-    return outPsivar, outHess, outGrad, outMol, version, error
+    return out_psivar, out_hess, out_grad, out_mol, version, error
