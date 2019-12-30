@@ -666,6 +666,7 @@ def harvest_hessian(hess: str) -> np.ndarray:
     """Parses the contents of the NWChem hess file into a hessian array.
 
     Args:
+        
         hess (str): Contents of the hess file
 
     """
@@ -674,16 +675,20 @@ def harvest_hessian(hess: str) -> np.ndarray:
     hess_conv = hess.replace("D", "E")
 
     # Parse all of the float values
-    hess_triu = [float(x) for x in hess_conv.strip().splitlines()]
+    hess_tri = [float(x) for x in hess_conv.strip().splitlines()]
 
-    # The value in the Hessian matrix is the upper triangle
-    #  We first convert it to a 2D array
-    n = int(np.sqrt(8 * len(hess_triu) + 1) - 1) // 2  # Size of the 2D matrix
+    # The value in the Hessian matrix is the lower triangle printed row-wise (e.g., 0,0 -> 1,0 -> 1,1 -> ...)
+    n = int(np.sqrt(8 * len(hess_tri) + 1) - 1) // 2  # Size of the 2D matrix
+
+    # Add the lower diagonal
     hess_arr = np.zeros((n, n))
-    hess_arr[np.triu_indices(n)] = hess_triu
+    hess_arr[np.tril_indices(n)] = hess_tri
 
-    # Symmetrize it
-    return hess_arr.T + hess_arr - np.diag(np.diag(hess_arr))
+    # Transpose and then set the lower diagonal again
+    hess_arr = np.transpose(hess_arr)  # Numpy implementations might only change the ordering to column-major
+    hess_arr[np.tril_indices(n)] = hess_tri
+
+    return hess_arr.T  # So that the array is listed in C-order, needed by some alignment routines
 
 
 def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultProperties:

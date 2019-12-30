@@ -151,7 +151,8 @@ class NWChemHarness(ProgramHarness):
         # Combine the molecule description, options and method command together
         nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
 
-        # For gradient methods, add a Python command to save the gradients in full precision
+        # For gradient methods, add a Python command to save the gradients in higher precision
+        #  Note: The Hessian is already stored in high precision in a file named "*.hess"
         if input_model.driver == "gradient":
             # Get the name of the theory used for computing the gradients
             theory = re.search("^task (\w+) ", mdccmd, re.MULTILINE).group(1)
@@ -211,11 +212,12 @@ task python
         if nwhess is not None:
             qcvars["CURRENT HESSIAN"] = nwhess
 
+        # Normalize the output as a float or list of floats
         retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
-            retres = retres.ravel().tolist()
+            retres = retres.tolist()
 
         # Get the formatted properties
         qcprops = extract_formatted_properties(qcvars)

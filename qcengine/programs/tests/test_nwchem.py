@@ -49,8 +49,19 @@ def test_b3lyp(nh2):
 @using("nwchem")
 def test_hess(nh2):
     resi = {"molecule": nh2, "driver": "hessian", "model": {"method": "b3lyp", "basis": "3-21g"}}
-    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
-    assert compare_values(-3.5980754370e-02, res["return_result"][0], atol=1e-3)
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False)
+    assert compare_values(-3.5980754370e-02, res.return_result[0, 0], atol=1e-3)
+    assert compare_values(0, res.return_result[1, 0], atol=1e-3)
+    assert compare_values(0, res.return_result[0, 1], atol=1e-3)
+    assert np.allclose(res.return_result, res.return_result.T, atol=1e-8)  # Should be symmetric about diagonal
+
+    # Test that the Hessian changes with rotation, but that its determinants remain the same
+    shifted_nh2, _ = nh2.scramble(do_shift=False, do_mirror=False, do_rotate=True, do_resort=False)
+
+    resi["molecule"] = shifted_nh2
+    res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False)
+    assert not np.allclose(res.return_result, res_shifted.return_result, atol=1e-8)
+    assert np.isclose(np.linalg.det(res.return_result), np.linalg.det(res_shifted.return_result))
 
 
 @using("nwchem")
