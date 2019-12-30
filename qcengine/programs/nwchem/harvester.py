@@ -666,9 +666,9 @@ def harvest_hessian(hess: str) -> np.ndarray:
     """Parses the contents of the NWChem hess file into a hessian array.
 
     Args:
-        
         hess (str): Contents of the hess file
-
+    Returns:
+        (np.ndarray) Hessian matrix as a 2D array
     """
 
     # Change the "D[+-]" notation of Fortran output to "E[+-]" used by Python

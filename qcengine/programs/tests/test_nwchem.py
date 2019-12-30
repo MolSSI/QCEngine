@@ -52,7 +52,7 @@ def test_hess(nh2):
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False)
     assert compare_values(-3.5980754370e-02, res.return_result[0, 0], atol=1e-3)
     assert compare_values(0, res.return_result[1, 0], atol=1e-3)
-    assert compare_values(0, res.return_result[0, 1], atol=1e-3)
+    assert compare_values(0.018208307756, res.return_result[3, 0], atol=1e-3)
     assert np.allclose(res.return_result, res.return_result.T, atol=1e-8)  # Should be symmetric about diagonal
 
     # Test that the Hessian changes with rotation, but that its determinants remain the same
