@@ -8,6 +8,12 @@ import hashlib
 import os
 import urllib.request
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
+
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import which_import
 

@@ -3,19 +3,34 @@ The entos QCEngine Harness
 """
 
 import json
+import numpy as np
 import string
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
-from qcelemental.models import AtomicResult
+from qcelemental.models import AtomicResult, BasisSet
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
 from ..util import execute, popen
 from .model import ProgramHarness
 
+from .util import (
+    reorder_column_ao_indices,
+    reorder_row_and_column_ao_indices,
+    cca_ao_order_spherical,
+    get_ao_conversion,
+)
+
 if TYPE_CHECKING:
     from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+
+def entos_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
+    ao_order = {}
+    for ang_mom in range(max_angular_momentum):
+        ao_order[ang_mom] = [x for x in range(ang_mom, -1 * ang_mom - 1, -1)]
+    return ao_order
 
 
 class EntosHarness(ProgramHarness):
@@ -89,6 +104,10 @@ class EntosHarness(ProgramHarness):
         "hf": _hf_keywords_extra,
         "xtb": _xtb_keywords_extra,
     }
+
+    # This map order converts entos ordering to CCA ordering
+    # Entos spherical basis ordering for each angular momentum. Follows reverse order of CCA.
+    _entos_to_cca_ao_order = {"spherical": get_ao_conversion(cca_ao_order_spherical(10), entos_ao_order_spherical(10))}
 
     class Config(ProgramHarness.Config):
         pass
@@ -296,20 +315,33 @@ class EntosHarness(ProgramHarness):
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
         scf_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
-        scf_extras = {
-            "converged": "scf_converged",
-            "ao_basis": {"basis": {"n_functions", "shells"}},
-            "density": "scf_density",
-            "orbitals": "scf_orbitals",
-            "fock": "fock",
-        }
         dft_map = scf_map.copy()
-
         hf_map = scf_map.copy()
-
         xtb_map = scf_map.copy()
 
         energy_command_map = {"dft": dft_map, "hf": hf_map, "xtb": xtb_map}
+        extras_map = {"converged": "scf_converged"}
+        wavefunction_map = {
+            "restricted": {
+                "orbitals": "scf_orbitals_a",
+                "density": "scf_density_a",
+                "fock": "scf_fock_a",
+                "eigenvalues": "scf_eigenvalues_a",
+                "occupations": "scf_occupations_a",
+            },
+            "unrestricted": {
+                "orbitals_alpha": "scf_orbitals_a",
+                "orbitals_beta": "scf_orbitals_b",
+                "density_alpha": "scf_density_a",
+                "density_beta": "scf_density_b",
+                "fock_alpha": "scf_fock_a",
+                "fock_beta": "scf_fock_b",
+                "eigenvalues_alpha": "scf_eigenvalues_a",
+                "eigenvalues_beta": "scf_eigenvalues_b",
+                "occupations_alpha": "scf_occupations_a",
+                "occupations_beta": "scf_occupations_b",
+            },
+        }
 
         # Determine the energy_command
         energy_command = self.determine_energy_command(input_model.model.method)
@@ -322,9 +354,6 @@ class EntosHarness(ProgramHarness):
         hessian_map = {"hessian": "hessian"}
         hessian_map.update(energy_command_map[energy_command])
 
-        # Initialize properties dictionary
-        properties = {}
-
         # Determine whether to use the energy map or the gradient map
         if input_model.driver == "energy":
             entos_map = energy_command_map[energy_command]
@@ -336,56 +365,145 @@ class EntosHarness(ProgramHarness):
             raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
         # Parse the results.json output from entos
+        properties = {}
         load_results = json.loads(outfiles["results.json"])
         entos_results = load_results["json_results"]
         for key in entos_map.keys():
             if key in entos_results:
                 properties[entos_map[key]] = entos_results[key]
 
+        # Parse calcinfo_* properties from the results.json
+        if "ao_basis" in entos_results.keys():
+            properties["calcinfo_nbasis"] = entos_results["ao_basis"]["__Basis"]["n_functions"]
+        if "structure" in entos_results.keys():
+            properties["calcinfo_natom"] = len(entos_results["structure"]["__Atoms"]["atoms"])
+
+        # Parse wavefunction quantities from entos_results
+        wavefunction = {}
+        if input_model.protocols.wavefunction != "none":
+
+            # First parse basis set information
+            if "ao_basis" in entos_results.keys():
+                atom_map = [item[0] for item in entos_results["structure"]["__Atoms"]["atoms"]]
+
+                # Each item in electron_shells is a dictionary containing info for one basis function
+                electron_shells_by_center = {}
+                for basis_item in entos_results["ao_basis"]["__Basis"]["electron_shells"]:
+                    center_index = basis_item["center_index"]
+
+                    electron_shell_info = {
+                        "angular_momentum": [basis_item["angular_momentum"]],
+                        "harmonic_type": basis_item["function_type"].split("_")[-1],
+                        "exponents": basis_item["exponents"],
+                        "coefficients": basis_item["coefficients"],
+                    }
+                    if center_index not in electron_shells_by_center:
+                        electron_shells_by_center[center_index] = [electron_shell_info]
+                    else:
+                        electron_shells_by_center[center_index].append(electron_shell_info)
+
+                # Construct center_data from electron_shells_by_center
+                # Note: Duplicate atoms will over write each other
+                center_data = {}
+                for i in range(len(electron_shells_by_center)):
+                    basis_center_info = {"electron_shells": electron_shells_by_center[i]}
+                    center_data[atom_map[i]] = basis_center_info
+
+                # Construct BasisSet
+                basis_info = {
+                    "name": input_model.model.basis,
+                    # "description": "", # None provided by entos
+                    "center_data": center_data,
+                    "atom_map": atom_map,
+                    "nbf": entos_results["ao_basis"]["__Basis"]["n_functions"],
+                }
+                basis_set = BasisSet(**basis_info)
+                wavefunction["basis"] = basis_set
+            else:
+                raise KeyError(
+                    f"Basis set information not found so wavefunction protocol {input_model.protocols.wavefunction} is not available."
+                )
+
+            # Now parse wavefunction information
+            n_channels = entos_results["n_channels"]
+            if n_channels == 1:
+                wavefunction["restricted"] = True
+                for key in wavefunction_map["restricted"].keys():
+                    if key in entos_results:
+                        if "orbitals" in key:
+                            orbitals_transposed = reorder_column_ao_indices(
+                                np.array(entos_results[key]), basis_set, self._entos_to_cca_ao_order
+                            )
+                            wavefunction[wavefunction_map["restricted"][key]] = orbitals_transposed.transpose()
+                        elif "density" in key or "fock" in key:
+                            wavefunction[wavefunction_map["restricted"][key]] = reorder_row_and_column_ao_indices(
+                                entos_results[key], basis_set, self._entos_to_cca_ao_order
+                            )
+                        else:
+                            wavefunction[wavefunction_map["restricted"][key]] = entos_results[key]
+            # TODO Add a test in QCEngineRecords
+            elif n_channels == 2:
+                wavefunction["restricted"] = False
+                for key in wavefunction_map["unrestricted"].keys():
+                    if key in entos_results:
+                        if "orbitals" in key:
+                            orbitals_transposed = reorder_column_ao_indices(
+                                np.array(entos_results[key]), basis_set, self._entos_to_cca_ao_order
+                            )
+                            wavefunction[wavefunction_map["restricted"][key]] = orbitals_transposed.transpose()
+                        elif "density" in key or "fock" in key:
+                            wavefunction[wavefunction_map["restricted"][key]] = reorder_row_and_column_ao_indices(
+                                entos_results[key], basis_set, self._entos_to_cca_ao_order
+                            )
+                        else:
+                            wavefunction[wavefunction_map["restricted"][key]] = entos_results[key]
+
+        # Parse results for the extras_map from results.json
+        extras = {}
+        for key in extras_map.keys():
+            if key in entos_results:
+                extras[extras_map[key]] = entos_results[key]
+
+        # Initialize output_data by copying over input_model.dict()
+        output_data = input_model.dict()
+
         # Determine the correct return_result
-        output_data = {}
         if input_model.driver == "energy":
             if "scf_total_energy" in properties:
                 output_data["return_result"] = properties["scf_total_energy"]
             else:
                 raise KeyError(f"Could not find {input_model.model} total energy")
-        elif input_model.driver == "gradient":
-            if "gradient" in properties:
-                output_data["return_result"] = properties.pop("gradient")
+        elif input_model.driver == "gradient" or input_model.driver == "hessian":
+            if input_model.driver in properties:
+                output_data["return_result"] = properties.pop(input_model.driver)
             else:
-                raise KeyError("Gradient not found.")
-        elif input_model.driver == "hessian":
-            if "hessian" in properties:
-                output_data["return_result"] = properties.pop("hessian")
-            else:
-                raise KeyError("Hessian not found.")
+                raise KeyError(f"{input_model.driver} not found.")
         else:
             raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
 
         output_data["properties"] = properties
+        if input_model.protocols.wavefunction != "none":
+            output_data["wavefunction"] = wavefunction
+        output_data["extras"].update(extras)
         output_data["schema_name"] = "qcschema_output"
         output_data["success"] = True
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)
 
     # Determine the energy_command
-    def determine_energy_command(self, method):
+    def determine_energy_command(self, method: str) -> str:
         """
         Determine the energy command in entos
         """
 
         if method.upper() in self._dft_functionals:
             energy_command = "dft"
-        elif method.upper() == "HF":
-            energy_command = "hf"
-        elif method.upper() == "XTB":
-            energy_command = "xtb"
         else:
             energy_command = method.lower()
 
         # Check method is supported
         energy_commands = [key for key in self._energy_commands]
         if energy_command not in energy_commands:
-            raise InputError(f"Energy method, {method}, not implemented for entos.")
+            raise InputError(f"The energy method {method} is not implemented in QCEngine for entos.")
 
         return energy_command
