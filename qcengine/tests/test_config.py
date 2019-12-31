@@ -197,7 +197,7 @@ def test_config_local_nnodes(opt_state_basic):
     assert create_mpi_invocation("hello_world", config) == [
         "mpirun",
         "-n",
-        "20",
+        "10",
         "-N",
         "2",
         "--cpus-per-slot",
