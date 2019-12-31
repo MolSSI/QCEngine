@@ -123,7 +123,7 @@ class NWChemHarness(ProgramHarness):
         # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
         memory_size = int(config.memory * (1024 ** 3))
         if config.use_mpiexec:  # It is the memory per MPI rank
-            memory_size //= config.nnodes * config.ncores
+            memory_size //= config.nnodes * config.ncores // config.cores_per_rank
         opts["memory"] = memory_size
 
         # Handle molecule
@@ -175,8 +175,9 @@ task python
             nwchemrec["infiles"]["nwchem.nw"] += pycmd
 
         # Determine the command
-        if config.nnodes > 1:
+        if config.use_mpiexec:
             nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
+            logger.info(f"Launching with mpiexec: {' '.join(nwchemrec['command'])}")
         else:
             nwchemrec["command"] = [which("nwchem")]
 
