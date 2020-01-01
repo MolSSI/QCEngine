@@ -163,9 +163,9 @@ class NWChemHarness(ProgramHarness):
             #  (not 6 significant figures)
             pycmd = f"""
 python
+  grad = rtdb_get('{theory}:gradient')
   if ga_nodeid() == 0:
       import json
-      grad = rtdb_get('{theory}:gradient')
       with open('nwchem.grad', 'w') as fp:
           json.dump(grad, fp)
 end
