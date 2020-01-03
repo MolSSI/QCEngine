@@ -1,7 +1,10 @@
 """Tests for NWChem functionality"""
 import pytest
+import logging
 import qcelemental as qcel
 from qcelemental.testing import compare_values
+from qcelemental.molparse import from_string, to_schema
+from qcelemental.models import Molecule
 
 import numpy as np
 import qcengine as qcng
@@ -20,6 +23,22 @@ def nh2():
  symmetry c1
 """
     return qcel.models.Molecule.from_data(smol)
+
+
+@pytest.fixture
+def problematic_mol() -> Molecule:
+    """Molecule with causes the """
+    mol_dict = from_string("""5
+problem molecule
+C                    -0.023882416957     2.051854680480     0.015170845154
+H                     0.101848034591    -0.056139192140    -0.168622795063
+H                     1.991847353162     2.688758815555     0.170465320656
+H                    -1.207660826274     2.655247931936    -1.636557172888
+H                    -0.982047704522     2.919570674169     1.695146072141""",
+                           dtype='xyz'
+                           )['qm']
+    mol_dict['units'] = 'Bohr'
+    return to_schema(mol_dict, dtype=2)
 
 
 @using("nwchem")
@@ -97,3 +116,19 @@ def test_gradient(nh2):
     shif_det = np.linalg.det(shif_grads)
 
     assert np.allclose(orig_det, shif_det)
+
+
+@using("nwchem")
+def test_autosym_recovery(problematic_mol, caplog):
+    resi = {
+        "molecule": Molecule.from_data(problematic_mol),
+        "driver": "gradient",
+        "model": {"method": "b3lyp", "basis": "3-21g"},
+    }
+
+    with caplog.at_level(logging.DEBUG):
+        qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+
+    # Make sure it applied the mitigations
+    assert 'Encountered symmetry detection problem' in caplog.text
+    assert 'Inserting "autosym 0.001" into the geometry' in caplog.text

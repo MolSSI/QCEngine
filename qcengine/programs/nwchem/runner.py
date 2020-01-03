@@ -6,7 +6,7 @@ import copy
 import logging
 import pprint
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, List
 
 import numpy as np
 import qcelemental as qcel
@@ -25,6 +25,7 @@ from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
+_max_attempts = 5  # Hard-coded value for how many times Harness will attempt to run
 
 
 class NWChemHarness(ProgramHarness):
@@ -94,29 +95,51 @@ class NWChemHarness(ProgramHarness):
         """
         self.found(raise_error=True)
 
-        job_inputs = self.build_input(input_model, config)
-        success, dexe = self.execute(job_inputs)
+        n_attempts = 0
+        observed_fixable_problems = []
+        while len(observed_fixable_problems) < 5:
+            # Make an input file with the mitigations
+            job_inputs = self.build_input(input_model, config,
+                                          observed_fixable_problems=observed_fixable_problems)
 
-        if "There is an error in the input file" in dexe["stdout"]:
-            raise InputError(dexe["stdout"])
-        if "not compiled" in dexe["stdout"]:
-            # recoverable with a different compilation with optional modules
-            raise InputError(dexe["stdout"])
+            # Run the job
+            success, dexe = self.execute(job_inputs)
 
-        if success:
-            dexe["outfiles"]["stdout"] = dexe["stdout"]
-            dexe["outfiles"]["stderr"] = dexe["stderr"]
-            return self.parse_output(dexe["outfiles"], input_model)
-        else:
-            raise UnknownError(dexe["stderr"])
+            # Look for "recoverable" errors
+            if "sym_geom_project: sym_center_map is inconsistent with requested accuracy" in dexe["stdout"]:
+                logger.info('Encountered symmetry detection problem')
+                # The autosym needs to be made less aggressive
+                observed_fixable_problems.append('sym_geom_project')
+
+            # Look for known errors in the input file
+            elif "There is an error in the input file" in dexe["stdout"]:
+                raise InputError(dexe["stdout"])
+            elif "not compiled" in dexe["stdout"]:
+                # recoverable with a different compilation with optional modules
+                raise InputError(dexe["stdout"])
+
+            # If successful, parse output
+            elif success:
+                dexe["outfiles"]["stdout"] = dexe["stdout"]
+                dexe["outfiles"]["stderr"] = dexe["stderr"]
+                return self.parse_output(dexe["outfiles"], input_model)
+
+            # If not, and no recoverable errors raise
+            else:
+                raise UnknownError(dexe["stderr"])
+        raise UnknownError(dexe["stdout"])
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None,
+            observed_fixable_problems: Optional[List] = None
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
         opts = copy.deepcopy(input_model.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
+
+        # If None, replace input with an empty list
+        observed_fixable_problems = observed_fixable_problems or []
 
         # Handle memory
         # for nwchem, [GiB] --> [B]
@@ -128,6 +151,10 @@ class NWChemHarness(ProgramHarness):
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
+        if 'sym_geom_project' in observed_fixable_problems:
+            # Increase the tolerance on the symmetry detection
+            logger.info('Inserting "autosym 0.001" into the geometry definition')
+            molcmd = re.sub(r'geometry ([^\n]*)', r'geometry \1 autosym 0.001', molcmd)
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
