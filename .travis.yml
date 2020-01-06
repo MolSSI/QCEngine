@@ -61,7 +61,7 @@ install:
     elif [ $PROG == "OPENMM" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/openmm.yaml
     elif [ $PROG == "NWCHEM" ]; then
-      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/base.yaml
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/nwchem.yaml
     else
       echo "ERROR: No match for PROG ($PROG)."
       exit 1
@@ -78,7 +78,6 @@ install:
     fi
   - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
   - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
-  - which conda python nwchem
   - conda list
 
     # Build and install package
