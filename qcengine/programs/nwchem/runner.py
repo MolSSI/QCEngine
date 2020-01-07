@@ -16,19 +16,18 @@ from qcelemental.util import safe_version, which
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 
-from ...exceptions import InputError
+from ...exceptions import InputError, KnownError
 from ...util import execute, create_mpi_invocation
-from ..model import ProgramHarness
+from ..model import ErrorCorrectionProgramHarness
 from .germinate import muster_modelchem
 from .harvester import extract_formatted_properties, harvest
 from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
-_max_attempts = 5  # Hard-coded value for how many times Harness will attempt to run
 
 
-class NWChemHarness(ProgramHarness):
+class NWChemHarness(ErrorCorrectionProgramHarness):
     """
 
     Notes
@@ -48,7 +47,7 @@ class NWChemHarness(ProgramHarness):
     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
+    class Config(ErrorCorrectionProgramHarness.Config):
         pass
 
     @staticmethod
@@ -89,49 +88,44 @@ class NWChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
-        """
-        Runs NWChem in executable mode
-        """
+    def _compute(self, input_data: AtomicInput, config: "TaskConfig", observed_errors: List[str]) -> AtomicResult:
         self.found(raise_error=True)
 
-        n_attempts = 0
-        observed_fixable_problems = []
-        while len(observed_fixable_problems) < 5:
-            # Make an input file with the mitigations
-            job_inputs = self.build_input(input_model, config,
-                                          observed_fixable_problems=observed_fixable_problems)
+        # Make an input file with the mitigations
+        job_inputs = self.build_input(input_data, config, observed_errors=observed_errors)
 
-            # Run the job
-            success, dexe = self.execute(job_inputs)
+        # Run the job
+        success, dexe = self.execute(job_inputs)
 
-            # Look for "recoverable" errors
-            if "sym_geom_project: sym_center_map is inconsistent with requested accuracy" in dexe["stdout"]:
-                logger.info('Encountered symmetry detection problem')
-                # The autosym needs to be made less aggressive
-                observed_fixable_problems.append('sym_geom_project')
+        # Look for "recoverable" errors
+        if "sym_geom_project: sym_center_map is inconsistent with requested accuracy" in dexe["stdout"]:
+            logger.info("Encountered symmetry detection problem")
+            # The autosym needs to be made less aggressive
+            raise KnownError(dexe["stdout"], "sym_geom_project")
 
-            # Look for known errors in the input file
-            elif "There is an error in the input file" in dexe["stdout"]:
-                raise InputError(dexe["stdout"])
-            elif "not compiled" in dexe["stdout"]:
-                # recoverable with a different compilation with optional modules
-                raise InputError(dexe["stdout"])
+        # Look for known errors in the input file
+        elif "There is an error in the input file" in dexe["stdout"]:
+            raise InputError(dexe["stdout"])
+        elif "not compiled" in dexe["stdout"]:
+            # recoverable with a different compilation with optional modules
+            raise InputError(dexe["stdout"])
 
-            # If successful, parse output
-            elif success:
-                dexe["outfiles"]["stdout"] = dexe["stdout"]
-                dexe["outfiles"]["stderr"] = dexe["stderr"]
-                return self.parse_output(dexe["outfiles"], input_model)
+        # If successful, parse output
+        elif success:
+            dexe["outfiles"]["stdout"] = dexe["stdout"]
+            dexe["outfiles"]["stderr"] = dexe["stderr"]
+            return self.parse_output(dexe["outfiles"], input_data)
 
-            # If not, and no recoverable errors raise
-            else:
-                raise UnknownError(dexe["stderr"])
-        raise UnknownError(dexe["stdout"])
+        # If not, and no recoverable errors raise
+        else:
+            raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None,
-            observed_fixable_problems: Optional[List] = None
+        self,
+        input_model: AtomicInput,
+        config: TaskConfig,
+        template: Optional[str] = None,
+        observed_errors: Optional[List] = None,
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -139,7 +133,7 @@ class NWChemHarness(ProgramHarness):
         opts = {k.lower(): v for k, v in opts.items()}
 
         # If None, replace input with an empty list
-        observed_fixable_problems = observed_fixable_problems or []
+        observed_errors = observed_errors or []
 
         # Handle memory
         # for nwchem, [GiB] --> [B]
@@ -151,10 +145,10 @@ class NWChemHarness(ProgramHarness):
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
-        if 'sym_geom_project' in observed_fixable_problems:
+        if "sym_geom_project" in observed_errors:
             # Increase the tolerance on the symmetry detection
             logger.info('Inserting "autosym 0.001" into the geometry definition')
-            molcmd = re.sub(r'geometry ([^\n]*)', r'geometry \1 autosym 0.001', molcmd)
+            molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 autosym 0.001", molcmd)
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method

@@ -67,3 +67,27 @@ class RandomError(QCEngineException):
 
     error_type = "random_error"
     header = "QCEngine Random Error"
+
+
+class KnownError(QCEngineException):
+    """
+    Error that could be recovered from. User must define a message and a name for the error
+
+    The name of the error could be used by the
+    """
+
+    error_type = "known_error"
+    header = "QCEngine Known Error"
+
+    def __init__(self, message: str, error_name: str):
+        """
+
+        Parameters
+        ----------
+        message: str
+            Message to give to the user describing the error
+        error_name: str
+             A label for the type of error, used when determining how to correct the result
+        """
+        super().__init__(message)
+        self.error_name = error_name
