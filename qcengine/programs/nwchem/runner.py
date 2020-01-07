@@ -248,7 +248,7 @@ task python
         output_data = {
             "schema_name": "qcschema_output",
             "schema_version": 1,
-            "extras": {"outfiles": outfiles},
+            "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": qcprops,
             "provenance": Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
             "return_result": retres,
