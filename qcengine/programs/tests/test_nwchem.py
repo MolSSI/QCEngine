@@ -1,4 +1,6 @@
 """Tests for NWChem functionality"""
+from typing import Tuple
+
 import pytest
 import logging
 import qcelemental as qcel
@@ -25,21 +27,34 @@ def nh2():
     return qcel.models.Molecule.from_data(smol)
 
 
-@pytest.fixture
-def problematic_mol() -> Molecule:
-    """Molecule with causes the """
-    mol_dict = from_string(
-        """5
+@pytest.fixture(
+    params=[
+        (
+            "sym_geom_project",
+            """5
 problem molecule
 C                    -0.023882416957     2.051854680480     0.015170845154
 H                     0.101848034591    -0.056139192140    -0.168622795063
 H                     1.991847353162     2.688758815555     0.170465320656
 H                    -1.207660826274     2.655247931936    -1.636557172888
 H                    -0.982047704522     2.919570674169     1.695146072141""",
-        dtype="xyz",
-    )["qm"]
+        ),
+        (
+            "sym_map",
+            """4
+problem_molecule
+N                     0.175125259758     1.766334351756    -0.364093068829
+H                    -0.073384441932    -0.101051416417     0.167104340622
+H                     1.805728057807     2.718491719551     0.155935622654
+H                    -1.203844475633     2.681779035110    -1.412361704447""",
+        ),
+    ]
+)
+def problematic_mols(request) -> Tuple[Molecule, str]:
+    """Convert a molecule to a Molecule object, assuming its units are Bohr"""
+    mol_dict = from_string(request.param[1], dtype="xyz")["qm"]
     mol_dict["units"] = "Bohr"
-    return to_schema(mol_dict, dtype=2)
+    return to_schema(mol_dict, dtype=2), request.param[0]
 
 
 @using("nwchem")
@@ -120,16 +135,15 @@ def test_gradient(nh2):
 
 
 @using("nwchem")
-def test_autosym_recovery(problematic_mol, caplog):
+def test_autosym_recovery(problematic_mols, caplog):
+    molecule, error = problematic_mols
     resi = {
-        "molecule": Molecule.from_data(problematic_mol),
+        "molecule": Molecule.from_data(molecule),
         "driver": "gradient",
         "model": {"method": "b3lyp", "basis": "3-21g"},
     }
 
     with caplog.at_level(logging.DEBUG):
-        qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+        result = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False)
 
-    # Make sure it applied the mitigations
-    assert "Encountered symmetry detection problem" in caplog.text
-    assert 'Inserting "autosym 0.001" into the geometry' in caplog.text
+    assert error in result.extras["observed_errors"]

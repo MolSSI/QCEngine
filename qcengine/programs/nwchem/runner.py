@@ -102,6 +102,8 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             logger.info("Encountered symmetry detection problem")
             # The autosym needs to be made less aggressive
             raise KnownError(dexe["stdout"], "sym_geom_project")
+        elif "sym_map: no match" in dexe["stdout"]:
+            raise KnownError(dexe["stdout"], "sym_map")
 
         # Look for known errors in the input file
         elif "There is an error in the input file" in dexe["stdout"]:
@@ -145,7 +147,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
-        if "sym_geom_project" in observed_errors:
+        if "sym_geom_project" in observed_errors or "sym_map" in observed_errors:
             # Increase the tolerance on the symmetry detection
             logger.info('Inserting "autosym 0.001" into the geometry definition')
             molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 autosym 0.001", molcmd)
