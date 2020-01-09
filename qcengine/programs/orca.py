@@ -164,7 +164,7 @@ class OrcaHarness(ProgramHarness):
             # caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
 
             # Write the geom
-            xyz_block = input_model.molecule.to_string(dtype="orca", units="Angstrom")
+            xyz_block = input_model.molecule.to_string(dtype="orca", units="Bohr")
 
             # Determine what SCF type (restricted vs. unrestricted)
             hf_type = "RHF"
@@ -180,6 +180,7 @@ class OrcaHarness(ProgramHarness):
                 energy_call.append(f"{{{hf_type}}}")
                 energy_call.append("")
                 energy_call.append(f"{{{input_model.model.method}}}")
+            
 
             elif input_model.model.method.upper() in self._dft_functionals:  # DFT case
                 input_file.append("! SP {} {}".format(input_model.model.method, input_model.model.basis))
