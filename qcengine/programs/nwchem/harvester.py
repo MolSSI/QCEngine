@@ -1,8 +1,10 @@
-import logging
 import re
+import json
+import logging
 from decimal import Decimal
 from typing import Tuple
 
+import numpy as np
 import qcelemental as qcel
 from qcelemental.models import Molecule
 from qcelemental.models.results import AtomicResultProperties
@@ -660,12 +662,33 @@ def harvest_outfile_pass(outtext):
     return psivar, psivar_coord, psivar_grad, version, error
 
 
-def harvest_hessian(hess):
-    """Parses the contents *hessian* of the NWChem hess file into a hessian array.
-    Hess file name has to be "nwchem.hess". (default)
+def harvest_hessian(hess: str) -> np.ndarray:
+    """Parses the contents of the NWChem hess file into a hessian array.
 
+    Args:
+        hess (str): Contents of the hess file
+    Returns:
+        (np.ndarray) Hessian matrix as a 2D array
     """
-    raise NotImplementedError()
+
+    # Change the "D[+-]" notation of Fortran output to "E[+-]" used by Python
+    hess_conv = hess.replace("D", "E")
+
+    # Parse all of the float values
+    hess_tri = [float(x) for x in hess_conv.strip().splitlines()]
+
+    # The value in the Hessian matrix is the lower triangle printed row-wise (e.g., 0,0 -> 1,0 -> 1,1 -> ...)
+    n = int(np.sqrt(8 * len(hess_tri) + 1) - 1) // 2  # Size of the 2D matrix
+
+    # Add the lower diagonal
+    hess_arr = np.zeros((n, n))
+    hess_arr[np.tril_indices(n)] = hess_tri
+
+    # Transpose and then set the lower diagonal again
+    hess_arr = np.transpose(hess_arr)  # Numpy implementations might only change the ordering to column-major
+    hess_arr[np.tril_indices(n)] = hess_tri
+
+    return hess_arr.T  # So that the array is listed in C-order, needed by some alignment routines
 
 
 def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultProperties:
@@ -710,13 +733,14 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     return AtomicResultProperties(**output)
 
 
-def harvest(in_mol: Molecule, nwout: str, **kwargs) -> Tuple[PreservingDict, None, list, Molecule, str, str]:
+def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, None, list, Molecule, str, str]:
     """Parses all the pieces of output from NWChem: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 
     Args:
         in_mol (Molecule): Input molecule
         nwout (str): NWChem output molecule
+        outfiles (dict): Dictionary of outfile files and their contents
     Returns:
         - (PreservingDict) Variables extracted from the output file in the last complete step
         - (None): Hessian from the last complete step (Not yet implemented)
@@ -727,17 +751,40 @@ def harvest(in_mol: Molecule, nwout: str, **kwargs) -> Tuple[PreservingDict, Non
     """
 
     # Parse the NWChem output
-    outPsivar, outMol, outGrad, version, error = harvest_output(nwout)
+    out_psivar, out_mol, out_grad, version, error = harvest_output(nwout)
+
+    # If available, read higher-accuracy gradients
+    #  These were output using a Python Task in NWChem to read them out of the database
+    if outfiles.get("nwchem.grad") is not None:
+        logger.debug("Reading higher-accuracy gradients")
+        out_grad = json.loads(outfiles.get("nwchem.grad"))
+
+    # If available, read the hessian
+    out_hess = None
+    if outfiles.get("nwchem.hess") is not None:
+        out_hess = harvest_hessian(outfiles.get("nwchem.hess"))
 
     # Make sure the input and output molecules are the same
-    if outMol:
+    if out_mol:
         if in_mol:
-            if abs(outMol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
+            if abs(out_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
                     """NWChem outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
-                    % (outMol.nuclear_repulsion_energy(), in_mol.nuclear_repulsion_energy())
+                    % (out_mol.nuclear_repulsion_energy(), in_mol.nuclear_repulsion_energy())
                 )
     else:
         raise ValueError("""No coordinate information extracted from NWChem output.""")
 
-    return outPsivar, None, outGrad, outMol, version, error
+    # If present, align the gradients and hessian with the original molecular coordinates
+    #  NWChem rotates the coordinates of the input molecule. `out_mol` contains the coordinates for the
+    #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
+    amol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
+
+    mill = data["mill"]  # Retrieve tool with alignment routines
+
+    if out_grad is not None:
+        out_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
+    if out_hess is not None:
+        out_hess = mill.align_hessian(np.array(out_hess))
+
+    return out_psivar, out_hess, out_grad, out_mol, version, error

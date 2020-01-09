@@ -2,10 +2,14 @@
 Calls the TorchANI package.
 """
 
-from typing import Dict
+from typing import Dict, TYPE_CHECKING
 
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import parse_version, safe_version, which_import
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 from ..exceptions import InputError, ResourceError
 from ..units import ureg

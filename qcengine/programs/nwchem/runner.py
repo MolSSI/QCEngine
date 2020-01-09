@@ -1,6 +1,7 @@
 """
 Calls the NWChem executable.
 """
+import re
 import copy
 import logging
 import pprint
@@ -9,7 +10,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models import AtomicResult, Provenance, AtomicInput
 from qcelemental.util import safe_version, which
 
 from qcengine.config import TaskConfig, get_config
@@ -110,7 +111,7 @@ class NWChemHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -122,7 +123,7 @@ class NWChemHarness(ProgramHarness):
         # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
         memory_size = int(config.memory * (1024 ** 3))
         if config.use_mpiexec:  # It is the memory per MPI rank
-            memory_size //= config.nnodes * config.ncores
+            memory_size //= config.nnodes * config.ncores // config.cores_per_rank
         opts["memory"] = memory_size
 
         # Handle molecule
@@ -147,11 +148,36 @@ class NWChemHarness(ProgramHarness):
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 
+        # Combine the molecule description, options and method command together
         nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
 
+        # For gradient methods, add a Python command to save the gradients in higher precision
+        #  Note: The Hessian is already stored in high precision in a file named "*.hess"
+        if input_model.driver == "gradient":
+            # Get the name of the theory used for computing the gradients
+            theory = re.search("^task (\w+) ", mdccmd, re.MULTILINE).group(1)
+            logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
+
+            # Create a Python function to get the gradient from NWChem's checkpoint file (rtdb)
+            #  and save it to a JSON file. The stdout for NWChem only prints 6 _decimal places_
+            #  (not 6 significant figures)
+            pycmd = f"""
+python
+  grad = rtdb_get('{theory}:gradient')
+  if ga_nodeid() == 0:
+      import json
+      with open('nwchem.grad', 'w') as fp:
+          json.dump(grad, fp)
+end
+
+task python
+            """
+            nwchemrec["infiles"]["nwchem.nw"] += pycmd
+
         # Determine the command
-        if config.nnodes > 1:
+        if config.use_mpiexec:
             nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
+            logger.info(f"Launching with mpiexec: {' '.join(nwchemrec['command'])}")
         else:
             nwchemrec["command"] = [which("nwchem")]
 
@@ -164,8 +190,9 @@ class NWChemHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["job.movecs", "job.hess", "job.db", "job.zmat", "job.fd_dipole"],
+            ["nwchem.hess", "nwchem.grad"],
             scratch_messy=False,
+            scratch_exist_ok=True,
             scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
@@ -174,9 +201,10 @@ class NWChemHarness(ProgramHarness):
         self, outfiles: Dict[str, str], input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
+        # Get the stdout from the calculation (required)
         stdout = outfiles.pop("stdout")
 
-        # nwmol, if it exists, is dinky, just a clue to geometry of nwchem results
+        # Read the NWChem stdout file and, if needed, the hess or grad files
         qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
         if nwgrad is not None:
@@ -185,11 +213,12 @@ class NWChemHarness(ProgramHarness):
         if nwhess is not None:
             qcvars["CURRENT HESSIAN"] = nwhess
 
+        # Normalize the output as a float or list of floats
         retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
-            retres = retres.ravel().tolist()
+            retres = retres.tolist()
 
         # Get the formatted properties
         qcprops = extract_formatted_properties(qcvars)
@@ -198,7 +227,7 @@ class NWChemHarness(ProgramHarness):
         output_data = {
             "schema_name": "qcschema_output",
             "schema_version": 1,
-            "extras": {"outfiles": outfiles},
+            "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": qcprops,
             "provenance": Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
             "return_result": retres,

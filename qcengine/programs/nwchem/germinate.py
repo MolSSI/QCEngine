@@ -109,7 +109,7 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         0: "energy",
         1: "gradient",
         2: "hessian",
-        #'properties': 'prop',
+        # 'properties': 'prop',
     }[derint]
 
     # Write out the theory directive
@@ -173,8 +173,15 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
             f"Do not specify TCE as a method. Instead specify the desired method " f'as a keyword and "qc_module=True".'
         )
 
-    elif method in _xc_functionals:
+    elif method.split()[0] in _xc_functionals:
         opts["dft__xc"] = method
+        if use_tce:
+            mdccmd = f"task tce {runtyp}\n\n"
+            opts["tce__"] = "dft"
+        else:
+            mdccmd = f"task dft {runtyp}\n\n"
+
+    elif method == "dft":
         if use_tce:
             mdccmd = f"task tce {runtyp}\n\n"
             opts["tce__"] = "dft"
