@@ -161,14 +161,14 @@ class OrcaHarness(ProgramHarness):
             input_file = []
 
             # Resolving keywords
-            caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
+            # caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
 
             # Write the geom
             xyz_block = input_model.molecule.to_string(dtype="orca", units="Angstrom")
 
             # Determine what SCF type (restricted vs. unrestricted)
             hf_type = "RHF"
-            dft_type = "RKS"
+            # dft_type = "RKS"
             # if unrestricted:
             #     hf_type = "UHF"
             #     dft_type = "UKS"
