@@ -106,8 +106,7 @@ class OrcaHarness(ProgramHarness):
         job_inputs = self.build_input(input_data, config)
 
         # Run Orca
-        binary = ["dispatch.gbw"]
-        exe_success, proc = self.execute(job_inputs, as_binary=binary)
+        exe_success, proc = self.execute(job_inputs)
 
         # Determine whether the calculation succeeded
         if exe_success:
@@ -137,7 +136,7 @@ class OrcaHarness(ProgramHarness):
             infiles.update(extra_infiles)
 
         # Collect all output files and update with extra_outfiles
-        outfiles = ["dispatch.gbw", "dispatch.engrad"]
+        outfiles = ["dispatch.engrad"]
 
         if extra_outfiles is not None:
             outfiles.extend(extra_outfiles)
@@ -284,14 +283,6 @@ class OrcaHarness(ProgramHarness):
         output_data["schema_name"] = "qcschema_output"
         output_data["stdout"] = outfiles["stdout"]
         output_data["success"] = True
-
-        import uuid
-
-        name = str(uuid.uuid4())
-        name += ".gbw"
-        with open("/tmp/orcafiles/{}".format(name), "wb") as handle:
-            handle.write(outfiles["outfiles"]["dispatch.gbw"])
-        output_data["extras"]["gbw"] = name
 
         return AtomicResult(**output_data)
 
