@@ -75,8 +75,8 @@ def info_cli(args):
         import qcelemental
 
         print(">>> Version information")
-        print(f"QCEngine version:    {__version__}")
-        print(f"QCElemental version: {qcelemental.__version__}")
+        print(f"QCEngine:    {__version__}")
+        print(f"QCElemental: {qcelemental.__version__}")
         print()
 
     def info_programs():  # lgtm: [py/similar-function]
@@ -88,11 +88,15 @@ def info_cli(args):
             version = get_program(prog_name).get_version()
             if version is None:
                 version = "???"
-            print(f"{prog_name} v{version}")
+            print(f"{prog_name + ':':12} v{version}")
 
         print()
         print("Other supported programs:")
         print(" ".join(sorted(all_progs - avail_progs)))
+        print()
+        print(
+            """If you think available programs are missing, query for details: `python -c "import qcengine as qcng; qcng.get_program('<program>')"`"""
+        )
         print()
 
     def info_procedures():  # lgtm: [py/similar-function]
