@@ -34,34 +34,42 @@ class Psi4Harness(ProgramHarness):
         pass
 
     @staticmethod
-    def found(raise_error: bool = False, psiapi: bool = False) -> bool:
-        if psiapi:
-            command = which_import
-        else:
-            command = which
+    def found(raise_error: bool = False) -> bool:
+        psithon = which("psi4", return_bool=True)
+        psiapi = which_import("psi4", return_bool=True)
 
-        return command(
-            "psi4",
-            return_bool=True,
-            raise_error=raise_error,
-            raise_msg="Please install via `conda install psi4 -c psi4`.",
-        )
+        if psithon and not psiapi:
+            with popen([which("psi4"), "--pythonpath"]) as exc:
+                exc["proc"].wait(timeout=30)
+            sys.path.append(exc["stdout"].split()[-1])
 
-    def get_version(self, psiapi: bool = False) -> str:
-        self.found(raise_error=True, psiapi=psiapi)
+        if psiapi and not psithon:
+            psiimport = str(Path(which_import("psi4")).parent.parent)
+            env = os.environ.copy()
+            env["PYTHONPATH"] = psiimport
+            with popen(["python", "-c", "import psi4; print(psi4.executable[:-5])"], popen_kwargs={"env": env}) as exc:
+                exc["proc"].wait(timeout=30)
+            os.environ["PATH"] += os.pathsep + exc["stdout"].split()[-1]
 
-        if psiapi:
-            which_prog = which_import("psi4")
-            if which_prog not in self.version_cache:
-                import psi4
-                self.version_cache[which_prog] = safe_version(psi4.__version__)
+        if psithon or psiapi:
+            return True
 
         else:
-            which_prog = which("psi4")
-            if which_prog not in self.version_cache:
-                with popen([which_prog, "--version"]) as exc:
-                    exc["proc"].wait(timeout=30)
-                self.version_cache[which_prog] = safe_version(exc["stdout"].split()[-1])
+            return which(
+                "psi4",
+                return_bool=True,
+                raise_error=raise_error,
+                raise_msg="Please install via `conda install psi4 -c psi4`.",
+            )
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        which_prog = which("psi4")
+        if which_prog not in self.version_cache:
+            with popen([which_prog, "--version"]) as exc:
+                exc["proc"].wait(timeout=30)
+            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[-1])
 
         candidate_version = self.version_cache[which_prog]
 
@@ -76,13 +84,12 @@ class Psi4Harness(ProgramHarness):
         """
         Runs Psi4 in API mode
         """
-        psiapi = input_model.extras.get("psiapi", False)
 
-        self.found(raise_error=True, psiapi=psiapi)
-        pversion = parse_version(self.get_version(psiapi=psiapi))
+        self.found(raise_error=True)
+        pversion = parse_version(self.get_version())
 
         if pversion < parse_version("1.2"):
-            raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version(psiapi=psiapi)))
+            raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version()))
 
         # Location resolution order config.scratch_dir, $PSI_SCRATCH, /tmp
         parent = config.scratch_directory
@@ -162,7 +169,7 @@ class Psi4Harness(ProgramHarness):
 
             else:
 
-                if psiapi:
+                if input_model.extras.get("psiapi", False):
                     import psi4
 
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()
