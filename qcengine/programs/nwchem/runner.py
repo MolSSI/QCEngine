@@ -52,25 +52,21 @@ class NWChemHarness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        qc = which("nwchem", return_bool=True)
-        dep = which_import("networkx", return_bool=True)
-
-        if (qc and dep) or not raise_error:
-            return qc and dep
-
-        which(
+        qc = which(
             "nwchem",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via http://www.nwchem-sw.org/index.php/Download",
         )
 
-        which_import(
+        dep = which_import(
             "networkx",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="For NWChem harness, please install via `conda install networkx -c conda-forge`.",
         )
+
+        return qc and dep
 
     def get_version(self) -> str:
         self.found(raise_error=True)

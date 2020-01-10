@@ -68,7 +68,7 @@ def get_program(name: str, check: bool = True) -> "ProgramHarness":
     ret = programs[name]
     if check:
         try:
-            found = ret.found(raise_error=True)
+            ret.found(raise_error=True)
         except ModuleNotFoundError as err:
             raise ResourceError(f"Program {name} is registered with QCEngine, but cannot be found.") from err
 
