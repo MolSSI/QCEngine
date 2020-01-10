@@ -3,6 +3,7 @@ Calls the Psi4 executable.
 """
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Dict, TYPE_CHECKING
 
@@ -41,7 +42,10 @@ class Psi4Harness(ProgramHarness):
         if psithon and not psiapi:
             with popen([which("psi4"), "--pythonpath"]) as exc:
                 exc["proc"].wait(timeout=30)
-            sys.path.append(exc["stdout"].split()[-1])
+            if "pythonpath does not exist" in exc["stderr"]:
+                pass
+            else:
+                sys.path.append(exc["stdout"].split()[-1])
 
         if psiapi and not psithon:
             psiimport = str(Path(which_import("psi4")).parent.parent)
@@ -54,13 +58,12 @@ class Psi4Harness(ProgramHarness):
         if psithon or psiapi:
             return True
 
-        else:
-            return which(
-                "psi4",
-                return_bool=True,
-                raise_error=raise_error,
-                raise_msg="Please install via `conda install psi4 -c psi4`.",
-            )
+        return which(
+            "psi4",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install psi4 -c psi4`.",
+        )
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -84,7 +87,6 @@ class Psi4Harness(ProgramHarness):
         """
         Runs Psi4 in API mode
         """
-
         self.found(raise_error=True)
         pversion = parse_version(self.get_version())
 
