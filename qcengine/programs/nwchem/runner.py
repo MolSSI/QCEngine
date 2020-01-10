@@ -104,6 +104,8 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             raise KnownError(dexe["stdout"], "sym_geom_project")
         elif "sym_map: no match" in dexe["stdout"]:
             raise KnownError(dexe["stdout"], "sym_map")
+        elif "geom_binvr: #indep variables incorrect" in dexe["stdout"]:
+            raise KnownError(dexe["stdout"], "geom_binvr")
 
         # Look for known errors in the input file
         elif "There is an error in the input file" in dexe["stdout"]:
@@ -151,6 +153,10 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             # Increase the tolerance on the symmetry detection
             logger.info('Inserting "autosym 0.001" into the geometry definition')
             molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 autosym 0.001", molcmd)
+        if "geom_binvr" in observed_errors:
+            # http://www.nwchem-sw.org/index.php/Special:AWCforum/st/id1587/%27noautoz%27.html
+            logger.info('Inserting "noautoz" into the geometry definition')
+            molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 noautoz", molcmd)
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
