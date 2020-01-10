@@ -3,13 +3,13 @@ Calls the Orca executable.
 """
 
 import string
-import cclib
 import io
 import numpy as np
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from qcelemental.models import AtomicResult
+from qcelemental.constants import conversion_factor
 from qcelemental.util import parse_version, which
+from qcelemental.models import AtomicResult
 
 from ..exceptions import InputError, UnknownError
 from ..util import execute
@@ -230,12 +230,16 @@ class OrcaHarness(ProgramHarness):
         }
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
+        try:
+            import cclib
+        except ImportError:
+            raise("You need to install the cclib python module...")
 
         data = cclib.io.ccread(io.StringIO(outfiles["stdout"]))
 
         properties = {}
         extras = {}
-        extras["ev_to_hartrees"] = 0.0367493
+        extras["ev_to_hartrees"] = conversion_factor("ev", "hartree")
 
         # Process basis set data
         properties["calcinfo_nbasis"] = data.nbasis
@@ -262,7 +266,7 @@ class OrcaHarness(ProgramHarness):
             extras["CURRENT ENERGY"] = final_energy
 
         elif input_model.driver == "gradient":
-            gradient = self.get_gradient(outfiles["outfiles"]["dispatch.engrad"])
+            gradient = self._get_gradient(outfiles["outfiles"]["dispatch.engrad"])
             output_data["return_result"] = gradient
             extras["CURRENT ENERGY"] = final_energy
             extras["CURRENT GRADIENT"] = gradient
@@ -277,7 +281,7 @@ class OrcaHarness(ProgramHarness):
 
         return AtomicResult(**output_data)
 
-    def get_gradient(self, gradient_file):
+    def _get_gradient(self, gradient_file):
         """Get gradient from engrad Orca file"""
         copy = False
         found = False
