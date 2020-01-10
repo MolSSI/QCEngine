@@ -3,6 +3,7 @@ Calls the Psi4 executable.
 """
 import json
 import os
+from pathlib import Path
 from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
     from qcelemental.models import AtomicInput
 
 from qcelemental.models import AtomicResult
-from qcelemental.util import deserialize, parse_version, safe_version, which
+from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from ..util import execute, popen, temporary_directory
@@ -33,22 +34,34 @@ class Psi4Harness(ProgramHarness):
         pass
 
     @staticmethod
-    def found(raise_error: bool = False) -> bool:
-        return which(
+    def found(raise_error: bool = False, psiapi: bool = False) -> bool:
+        if psiapi:
+            command = which_import
+        else:
+            command = which
+
+        return command(
             "psi4",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via `conda install psi4 -c psi4`.",
         )
 
-    def get_version(self) -> str:
-        self.found(raise_error=True)
+    def get_version(self, psiapi: bool = False) -> str:
+        self.found(raise_error=True, psiapi=psiapi)
 
-        which_prog = which("psi4")
-        if which_prog not in self.version_cache:
-            with popen([which_prog, "--version"]) as exc:
-                exc["proc"].wait(timeout=30)
-            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[-1])
+        if psiapi:
+            which_prog = which_import("psi4")
+            if which_prog not in self.version_cache:
+                import psi4
+                self.version_cache[which_prog] = safe_version(psi4.__version__)
+
+        else:
+            which_prog = which("psi4")
+            if which_prog not in self.version_cache:
+                with popen([which_prog, "--version"]) as exc:
+                    exc["proc"].wait(timeout=30)
+                self.version_cache[which_prog] = safe_version(exc["stdout"].split()[-1])
 
         candidate_version = self.version_cache[which_prog]
 
@@ -63,11 +76,13 @@ class Psi4Harness(ProgramHarness):
         """
         Runs Psi4 in API mode
         """
-        self.found(raise_error=True)
-        pversion = parse_version(self.get_version())
+        psiapi = input_model.extras.get("psiapi", False)
+
+        self.found(raise_error=True, psiapi=psiapi)
+        pversion = parse_version(self.get_version(psiapi=psiapi))
 
         if pversion < parse_version("1.2"):
-            raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version()))
+            raise ResourceError("Psi4 version '{}' not understood.".format(self.get_version(psiapi=psiapi)))
 
         # Location resolution order config.scratch_dir, $PSI_SCRATCH, /tmp
         parent = config.scratch_directory
@@ -147,7 +162,7 @@ class Psi4Harness(ProgramHarness):
 
             else:
 
-                if input_model.extras.get("psiapi", False):
+                if psiapi:
                     import psi4
 
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()

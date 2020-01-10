@@ -103,7 +103,7 @@ register_program(QChemHarness())
 register_program(TeraChemHarness())
 register_program(TurbomoleHarness())
 
-# Semi-emperical
+# Semi-empirical
 register_program(MopacHarness())
 
 # AI
