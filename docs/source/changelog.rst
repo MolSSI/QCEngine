@@ -1,8 +1,8 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2019-MM-DD
-.. -------------------
+.. vX.Y.0 / 2020-MM-DD
+.. --------------------
 ..
 .. New Features
 .. ++++++++++++
@@ -12,6 +12,23 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+
+
+v0.14.0 / 2020-MM-DD
+--------------------
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+-(:pr:`215`) Psi4 - indicating location by either PATH or PYTHONPATH sets up both subprocess and API execution.
+-(:pr:`215`) ``get_program`` shows the helpful "install this" messages from ``found()`` rather than just saying "cannot be found".
+
+Bug Fixes
++++++++++
+-(:pr:`215`) NWChem complains *before* a calculation if the necessary ``networkx`` package not available.
+
 
 v0.13.0 / 2019-12-10
 --------------------
