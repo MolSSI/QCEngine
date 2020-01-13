@@ -20,6 +20,7 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
 
     Reads all of the different "line search" segments of a file and returns
     values from the last segment for which a geometry was written.
+        small change
 
     Args:
         outtext (str): Output written to stdout
