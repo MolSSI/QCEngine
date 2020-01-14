@@ -27,6 +27,15 @@ matrix:
         - PYTHON_VER=3.6
         - PROG=OPENMM
 
+    - os: linux
+      addons: &1
+        apt:
+          packages:
+          - nwchem
+      env:
+        - PYTHON_VER=3.6
+        - PROG=NWCHEM
+
 before_install:
     # Additional info about the build
   - uname -a
@@ -51,6 +60,8 @@ install:
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/torchani.yaml
     elif [ $PROG == "OPENMM" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/openmm.yaml
+    elif [ $PROG == "NWCHEM" ]; then
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/nwchem.yaml
     else
       echo "ERROR: No match for PROG ($PROG)."
       exit 1

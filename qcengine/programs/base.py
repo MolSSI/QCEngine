@@ -66,8 +66,11 @@ def get_program(name: str, check: bool = True) -> "ProgramHarness":
         raise InputError(f"Program {name} is not registered to QCEngine.")
 
     ret = programs[name]
-    if check and not ret.found():
-        raise ResourceError(f"Program {name} is registered with QCEngine, but cannot be found.")
+    if check:
+        try:
+            ret.found(raise_error=True)
+        except ModuleNotFoundError as err:
+            raise ResourceError(f"Program {name} is registered with QCEngine, but cannot be found.") from err
 
     return ret
 
@@ -103,7 +106,7 @@ register_program(QChemHarness())
 register_program(TeraChemHarness())
 register_program(TurbomoleHarness())
 
-# Semi-emperical
+# Semi-empirical
 register_program(MopacHarness())
 
 # AI

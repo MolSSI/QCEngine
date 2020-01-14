@@ -15,6 +15,7 @@ _canonical_methods = [
     ("molpro", {"method": "hf", "basis": "6-31G"}),
     ("mopac", {"method": "PM6"}),
     ("mp2d", {"method": "MP2-DMP2"}),
+    ("nwchem", {"method": "hf", "basis": "6-31G"}),
     ("psi4", {"method": "hf", "basis": "6-31G"}),
     ("qchem", {"method": "hf", "basis": "6-31G"}),
     ("rdkit", {"method": "UFF"}),

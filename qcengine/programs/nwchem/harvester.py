@@ -41,6 +41,7 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
         pass_grad.append(nwgrad)
+    
 
     # Determine which segment contained the last geometry
     retindx = -1 if pass_coord[-1] else -2
@@ -599,7 +600,7 @@ def harvest_outfile_pass(outtext):
             # print (mobj.group(2)) #error reason
             psivar['NWCHEM ERROR CODE'] = mobj.group(1)
             # TODO process errors into error var
-
+ 
     # fmt: on
 
     # Get the size of the basis sets, etc
@@ -618,6 +619,20 @@ def harvest_outfile_pass(outtext):
     if mobj:
         psivar["N MO"] = mobj.group(2)
         psivar["N BASIS"] = mobj.group(1)
+    
+    forHosomi = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"]) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
+    if forHosomi:
+        if forHosomi.group(2) == "+":
+            psivar["HOMO"] = float(forHosomi.group(1)) * (10**(-1 * float(forHosomi.group(3))))
+        else:
+            psivar["HOMO"] = float(forHosomi.group(1)) * (10**(-1 * float(forHosomi.group(3))))
+    
+    forHosomi = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"] + 1) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
+    if forHosomi:
+        if forHosomi.group(2) == "+":
+            psivar["LUMO"] = float(forHosomi.group(1)) * (10**(-1 * float(forHosomi.group(3))))
+        else:
+            psivar["LUMO"] = float(forHosomi.group(1)) * (10**(-1 * float(forHosomi.group(3))))
 
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
@@ -778,7 +793,7 @@ def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, N
     # If present, align the gradients and hessian with the original molecular coordinates
     #  NWChem rotates the coordinates of the input molecule. `out_mol` contains the coordinates for the
     #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
-    amol, data = out_mol.align(in_mol, atoms_map=True, mols_align=True, verbose=0)
+    amol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
 
     mill = data["mill"]  # Retrieve tool with alignment routines
 

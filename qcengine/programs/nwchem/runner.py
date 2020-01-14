@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance, AtomicInput
-from qcelemental.util import safe_version, which
+from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
@@ -52,12 +52,21 @@ class NWChemHarness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        return which(
+        qc = which(
             "nwchem",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via http://www.nwchem-sw.org/index.php/Download",
         )
+
+        dep = which_import(
+            "networkx",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="For NWChem harness, please install via `conda install networkx -c conda-forge`.",
+        )
+
+        return qc and dep
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -123,7 +132,7 @@ class NWChemHarness(ProgramHarness):
         # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
         memory_size = int(config.memory * (1024 ** 3))
         if config.use_mpiexec:  # It is the memory per MPI rank
-            memory_size //= config.nnodes * config.ncores
+            memory_size //= config.nnodes * config.ncores // config.cores_per_rank
         opts["memory"] = memory_size
 
         # Handle molecule
@@ -163,9 +172,9 @@ class NWChemHarness(ProgramHarness):
             #  (not 6 significant figures)
             pycmd = f"""
 python
+  grad = rtdb_get('{theory}:gradient')
   if ga_nodeid() == 0:
       import json
-      grad = rtdb_get('{theory}:gradient')
       with open('nwchem.grad', 'w') as fp:
           json.dump(grad, fp)
 end
@@ -175,8 +184,9 @@ task python
             nwchemrec["infiles"]["nwchem.nw"] += pycmd
 
         # Determine the command
-        if config.nnodes > 1:
+        if config.use_mpiexec:
             nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
+            logger.info(f"Launching with mpiexec: {' '.join(nwchemrec['command'])}")
         else:
             nwchemrec["command"] = [which("nwchem")]
 
@@ -226,7 +236,7 @@ task python
         output_data = {
             "schema_name": "qcschema_output",
             "schema_version": 1,
-            "extras": {"outfiles": outfiles},
+            "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": qcprops,
             "provenance": Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
             "return_result": retres,
