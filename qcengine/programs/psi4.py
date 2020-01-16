@@ -3,6 +3,8 @@ Calls the Psi4 executable.
 """
 import json
 import os
+import sys
+from pathlib import Path
 from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -10,7 +12,7 @@ if TYPE_CHECKING:
     from qcelemental.models import AtomicInput
 
 from qcelemental.models import AtomicResult
-from qcelemental.util import deserialize, parse_version, safe_version, which
+from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from ..util import execute, popen, temporary_directory
@@ -34,6 +36,28 @@ class Psi4Harness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
+        psithon = which("psi4", return_bool=True)
+        psiapi = which_import("psi4", return_bool=True)
+
+        if psithon and not psiapi:
+            with popen([which("psi4"), "--pythonpath"]) as exc:
+                exc["proc"].wait(timeout=30)
+            if "pythonpath does not exist" in exc["stderr"]:
+                pass
+            else:
+                sys.path.append(exc["stdout"].split()[-1])
+
+        if psiapi and not psithon:
+            psiimport = str(Path(which_import("psi4")).parent.parent)
+            env = os.environ.copy()
+            env["PYTHONPATH"] = psiimport
+            with popen(["python", "-c", "import psi4; print(psi4.executable[:-5])"], popen_kwargs={"env": env}) as exc:
+                exc["proc"].wait(timeout=30)
+            os.environ["PATH"] += os.pathsep + exc["stdout"].split()[-1]
+
+        if psithon or psiapi:
+            return True
+
         return which(
             "psi4",
             return_bool=True,

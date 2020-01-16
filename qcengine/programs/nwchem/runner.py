@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance, AtomicInput
-from qcelemental.util import safe_version, which
+from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
@@ -52,12 +52,21 @@ class NWChemHarness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        return which(
+        qc = which(
             "nwchem",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via http://www.nwchem-sw.org/index.php/Download",
         )
+
+        dep = which_import(
+            "networkx",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="For NWChem harness, please install via `conda install networkx -c conda-forge`.",
+        )
+
+        return qc and dep
 
     def get_version(self) -> str:
         self.found(raise_error=True)
