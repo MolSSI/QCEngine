@@ -615,6 +615,7 @@ def harvest_outfile_pass(outtext):
     if mobj:
         psivar["N ALPHA ELECTRONS"] = mobj.group(2)
         psivar["N BETA ELECTRONS"] = mobj.group(3)
+
     mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
         psivar["N MO"] = mobj.group(2)
@@ -633,6 +634,25 @@ def harvest_outfile_pass(outtext):
             psivar["LUMO"] = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
         else:
             psivar["LUMO"] = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+    
+    #Search for Center of charge
+    mobj = re.search(
+        r"Center of charge \(in au\) is the expansion point" + r"\n" + r"\s+" + r"X\s+=\s+([+-]?\d+[.]\d+)" + r"\s+" + 
+        r"Y\s+=\s+([+-]?\d+[.]\d+)" + r"\s+" + r"Z\s+=\s+([+-]?\d+[.]\d+)", outtext, re.MULTILINE)
+    if mobj:
+        psivar["CENTER OF CHARGE"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
+    
+    mobj = re.search(
+        r"Dipole moment" + r".*?" + r"A\.U\." + r"\s+" + r"DMX\s+([+-]?\d+[.]\d+)\s+" + r"DMXEFC\s+[+-]?\d+[.]\d+\s+" + 
+        r"DMY\s+([+-]?\d+[.]\d+)\s+"  + r"DMYEFC\s+[+-]?\d+[.]\d+\s+" + r"DMZ\s+([+-]?\d+[.]\d+)\s+" +
+        r"DMZEFC\s+[+-]?\d+[.]\d+\s+" + r"\-EFC\-" + r".*?" + r"A\.U\.\s+" + r"Total dipole\s+([+-]?\d+[.]\d+\s+)", outtext, re.MULTILINE)
+    # + r"DMY\s+" + r"([+-]?\d+[.]\d+)", outtext, re.MULTILINE)
+    if mobj:
+        psivar["DIPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
+        psivar["TOTAL DIPOLE MOMENT"] = mobj.group(4)
+
+    
+        
 
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
