@@ -7,7 +7,7 @@ import io
 import numpy as np
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from qcelemental.constants import conversion_factor
+import qcelemental
 from qcelemental.util import parse_version, which
 from qcelemental.models import AtomicResult
 
@@ -64,26 +64,24 @@ class OrcaHarness(ProgramHarness):
     # TODO Consider changing this to use molpro --version instead of performing a full execute
     def get_version(self) -> str:
         self.found(raise_error=True)
+        which_prog = which("orca")
+        if which_prog not in self.version_cache:
+            success, output = execute(
+                [which_prog, "version.inp", "-d", ".", "-W", "."],
+                infiles={"version.inp": ""},
+                outfiles=["version.out"]
+            )
 
-        # name_space = {"molpro_uri": "http://www.molpro.net/schema/molpro-output"}
-        # which_prog = which("molpro")
-        # if which_prog not in self.version_cache:
-        #     success, output = execute(
-        #         [which_prog, "version.inp", "-d", ".", "-W", "."],
-        #         infiles={"version.inp": ""},
-        #         outfiles=["version.out", "version.xml"],
-        #     )
+        _output = output["stdout"].split()
 
-        #     if success:
-        #         tree = ET.ElementTree(ET.fromstring(output["outfiles"]["version.xml"]))
-        #         root = tree.getroot()
-        #         version_tree = root.find("molpro_uri:job/molpro_uri:platform/molpro_uri:version", name_space)
-        #         year = version_tree.attrib["major"]
-        #         minor = version_tree.attrib["minor"]
-        #         molpro_version = year + "." + minor
-        #         self.version_cache[which_prog] = safe_version(molpro_version)
+        for index, line in enumerate(_output):
+            if "Version" in line:
+                found = True
+                if found:
+                    version = _output[index + 1]
+                    break
 
-        return "4.2.1"
+        return version
 
     def compute(self, input_data: "AtomicInput", config: "JobConfig") -> "AtomicResult":
         """
@@ -182,11 +180,7 @@ class OrcaHarness(ProgramHarness):
                 energy_call.append(f"{{{input_model.model.method}}}")
             
 
-            elif input_model.model.method.upper() in self._dft_functionals:  # DFT case
-                input_file.append("! SP {} {}".format(input_model.model.method, input_model.model.basis))
-                input_file.append(xyz_block)
-
-            elif input_model.model.method.upper() in self._hf_methods:  # HF case
+            elif input_model.model.method.upper() in self._dft_functionals or self._hf_methods:  # DFT case
                 input_file.append("! SP {} {}".format(input_model.model.method, input_model.model.basis))
                 input_file.append(xyz_block)
 
@@ -239,7 +233,7 @@ class OrcaHarness(ProgramHarness):
 
         properties = {}
         extras = {}
-        extras["ev_to_hartrees"] = conversion_factor("ev", "hartree")
+        extras["ev_to_hartrees"] = qcelemental.constants.conversion_factor("eV", "hartree")
 
         # Process basis set data
         properties["calcinfo_nbasis"] = data.nbasis
