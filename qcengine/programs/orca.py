@@ -67,9 +67,7 @@ class OrcaHarness(ProgramHarness):
         which_prog = which("orca")
         if which_prog not in self.version_cache:
             success, output = execute(
-                [which_prog, "version.inp", "-d", ".", "-W", "."],
-                infiles={"version.inp": ""},
-                outfiles=["version.out"]
+                [which_prog, "version.inp", "-d", ".", "-W", "."], infiles={"version.inp": ""}, outfiles=["version.out"]
             )
 
         _output = output["stdout"].split()
@@ -175,10 +173,9 @@ class OrcaHarness(ProgramHarness):
             energy_call = []
 
             if input_model.model.method.upper() in self._post_hf_methods:  # post SCF case
-                energy_call.append(f"{{{hf_type}}}")
                 energy_call.append("")
-                energy_call.append(f"{{{input_model.model.method}}}")
-            
+                input_file.append("! {} {}".format(input_model.model.method, input_model.model.basis))
+                input_file.append(xyz_block)
 
             elif input_model.model.method.upper() in self._dft_functionals or self._hf_methods:  # DFT case
                 input_file.append("! SP {} {}".format(input_model.model.method, input_model.model.basis))
@@ -216,6 +213,7 @@ class OrcaHarness(ProgramHarness):
             str_template = string.Template(template)
             input_file = str_template.substitute()
 
+        print(input_file)
         return {
             "commands": [which("orca"), "dispatch.mol"],
             "infiles": {"dispatch.mol": input_file},
@@ -227,7 +225,7 @@ class OrcaHarness(ProgramHarness):
         try:
             import cclib
         except ImportError:
-            raise("You need to install the cclib python module...")
+            raise ("You need to install the cclib python module...")
 
         data = cclib.io.ccread(io.StringIO(outfiles["stdout"]))
 
