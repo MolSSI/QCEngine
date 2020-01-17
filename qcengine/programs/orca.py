@@ -213,7 +213,6 @@ class OrcaHarness(ProgramHarness):
             str_template = string.Template(template)
             input_file = str_template.substitute()
 
-        print(input_file)
         return {
             "commands": [which("orca"), "dispatch.mol"],
             "infiles": {"dispatch.mol": input_file},
