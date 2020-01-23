@@ -144,7 +144,7 @@ class DFTD3Harness(ProgramHarness):
             command.append("-abc")
 
         # Append `-anal` for pairwise atomic analysis
-        command.append('-anal')
+        command.append("-anal")
 
         infiles = {
             ".dftd3par.local": dftd3_coeff_formatter(
@@ -201,9 +201,9 @@ class DFTD3Harness(ProgramHarness):
                     atom1 = int(data[0]) - 1
                     atom2 = int(data[1]) - 1
                     Edisp = Decimal(data[-1])
-                    D3pairs[atom1, atom2] = Edisp * Decimal(qcel.constants.conversion_factor('kcal/mol', 'Eh'))
-                    D3pairs[atom2, atom1] = Edisp * Decimal(qcel.constants.conversion_factor('kcal/mol', 'Eh'))
-                    
+                    D3pairs[atom1, atom2] = Edisp * Decimal(qcel.constants.conversion_factor("kcal/mol", "Eh"))
+                    D3pairs[atom2, atom1] = Edisp * Decimal(qcel.constants.conversion_factor("kcal/mol", "Eh"))
+
             elif re.match(" normal termination of dftd3", ln):
                 break
         else:
@@ -302,6 +302,7 @@ class DFTD3Harness(ProgramHarness):
         output_data["success"] = True
 
         return AtomicResult(**{**input_model.dict(), **output_data})
+
 
 def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:
     """Return strings for DFTD3 program parameter file.
