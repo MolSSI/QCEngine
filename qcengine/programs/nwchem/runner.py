@@ -238,7 +238,7 @@ task python
             qcvars["CURRENT HESSIAN"] = nwhess
 
         # Normalize the output as a float or list of floats
-        retres = qcvars[f"CURRENT ENERGY" ]
+        retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
