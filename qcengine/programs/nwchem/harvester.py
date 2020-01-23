@@ -616,25 +616,27 @@ def harvest_outfile_pass(outtext):
         psivar["N ALPHA ELECTRONS"] = mobj.group(2)
         psivar["N BETA ELECTRONS"] = mobj.group(3)
 
-        #get HOMO and LUMO energy
-        mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"]) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
-        if mobj:
-            if mobj.group(2) == "+":
-                homo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
-                psivar["HOMO"] = Decimal(homo)
-            else:
-                homo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
-                psivar["HOMO"] = round(homo,10)
-       
+        if psivar["N ALPHA ELECTRONS"] == psivar["N BETA ELECTRONS"]:
 
-        mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"] + 1) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
-        if mobj:
-            if mobj.group(2) == "+":
-                lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
-                psivar["LUMO"] = round(lumo, 10)
-            else:
-                lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
-                psivar["LUMO"] = round(lumo, 10)
+            #get HOMO and LUMO energy
+            mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"]) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
+            if mobj:
+                if mobj.group(2) == "+":
+                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    psivar["HOMO"] = np.array([round(lumo, 10)])
+                else:
+                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    psivar["HOMO"] = np.array([round(lumo, 10)])
+        
+
+            mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"] + 1) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
+            if mobj:
+                if mobj.group(2) == "+":
+                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    psivar["LUMO"] = np.array([round(lumo, 10)])
+                else:
+                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    psivar["LUMO"] = np.array([round(lumo, 10)])
     
     mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
