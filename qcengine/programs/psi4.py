@@ -40,9 +40,9 @@ class Psi4Harness(ProgramHarness):
         psiapi = which_import("psi4", return_bool=True)
 
         if psithon and not psiapi:
-            with popen([which("psi4"), "--pythonpath"]) as exc:
+            with popen([which("psi4"), "--module"]) as exc:
                 exc["proc"].wait(timeout=30)
-            if "pythonpath does not exist" in exc["stderr"]:
+            if "module does not exist" in exc["stderr"]:
                 pass
             else:
                 sys.path.append(exc["stdout"].split()[-1])
