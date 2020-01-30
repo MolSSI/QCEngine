@@ -615,6 +615,7 @@ def harvest_outfile_pass(outtext):
         psivar["N ALPHA ELECTRONS"] = mobj.group(2)
         psivar["N BETA ELECTRONS"] = mobj.group(3)
 
+<<<<<<< HEAD
         # get HOMO and LUMO energy
     #       mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"]) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
     #       if mobj:
@@ -635,6 +636,32 @@ def harvest_outfile_pass(outtext):
     ##                lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
     #                psivar["LUMO"] = round(lumo, 10)
 
+=======
+
+        if psivar["N ALPHA ELECTRONS"] == psivar["N BETA ELECTRONS"]:
+
+            #get HOMO and LUMO energy
+            mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"]) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
+            if mobj:
+                if mobj.group(2) == "+":
+                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    psivar["HOMO"] = np.array([round(lumo, 10)])
+                else:
+                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    psivar["HOMO"] = np.array([round(lumo, 10)])
+        
+
+            mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"] + 1) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
+            if mobj:
+                if mobj.group(2) == "+":
+                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    psivar["LUMO"] = np.array([round(lumo, 10)])
+                else:
+                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    psivar["LUMO"] = np.array([round(lumo, 10)])
+
+    
+>>>>>>> 38b591006217004a520e312ed660d89c86c164ae
     mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
         psivar["N MO"] = mobj.group(2)
@@ -678,6 +705,20 @@ def harvest_outfile_pass(outtext):
     if mobj:
         psivar["DIPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
         psivar["TOTAL DIPOLE MOMENT"] = mobj.group(4)
+
+
+re.search(
+uadrupole moments in atomic units\s+" + r"Component\s+" + r"Electronic\+nuclear\s+" + r"Point charges\s+" + r"Total\s+" + r"-+\s+" +
+X\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"YY\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"ZZ\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + 
+Y\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"XZ\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"YZ\s+([+-]?\d+[.]\d+)\s+", outtext, re.MULTILINE)
+
+:
+var["QUADRUPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3), mobj.group(4), mobj.group(5), mobj.group(6)])
+
+
+
+
+591006217004a520e312ed660d89c86c164ae
 
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
