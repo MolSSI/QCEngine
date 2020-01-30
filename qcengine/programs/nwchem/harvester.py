@@ -705,21 +705,6 @@ def harvest_outfile_pass(outtext):
     if mobj:
         psivar["DIPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
         psivar["TOTAL DIPOLE MOMENT"] = mobj.group(4)
-
-
-re.search(
-uadrupole moments in atomic units\s+" + r"Component\s+" + r"Electronic\+nuclear\s+" + r"Point charges\s+" + r"Total\s+" + r"-+\s+" +
-X\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"YY\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"ZZ\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + 
-Y\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"XZ\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"YZ\s+([+-]?\d+[.]\d+)\s+", outtext, re.MULTILINE)
-
-:
-var["QUADRUPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3), mobj.group(4), mobj.group(5), mobj.group(6)])
-
-
-
-
-591006217004a520e312ed660d89c86c164ae
-
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
         psivar["SCF TOTAL ENERGY"] = psivar["HF TOTAL ENERGY"]
