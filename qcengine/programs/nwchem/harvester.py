@@ -41,7 +41,6 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
         pass_grad.append(nwgrad)
-    
 
     # Determine which segment contained the last geometry
     retindx = -1 if pass_coord[-1] else -2
@@ -600,7 +599,7 @@ def harvest_outfile_pass(outtext):
             # print (mobj.group(2)) #error reason
             psivar['NWCHEM ERROR CODE'] = mobj.group(1)
             # TODO process errors into error var
- 
+
     # fmt: on
 
     # Get the size of the basis sets, etc
@@ -616,62 +615,129 @@ def harvest_outfile_pass(outtext):
         psivar["N ALPHA ELECTRONS"] = mobj.group(2)
         psivar["N BETA ELECTRONS"] = mobj.group(3)
 
-
         if psivar["N ALPHA ELECTRONS"] == psivar["N BETA ELECTRONS"]:
 
-            #get HOMO and LUMO energy
-            mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"]) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
+            # get HOMO and LUMO energy
+            mobj = re.search(
+                r"Vector"
+                + r"\s+"
+                + r"%d" % (psivar["N ALPHA ELECTRONS"])
+                + r"\s+"
+                + r"Occ="
+                + r".*"
+                + r"\s+"
+                + r"E="
+                + r"([+-]?\s?\d+[.]\d+)"
+                + r"[D]"
+                + r"([+-])"
+                + r"[0]"
+                + r"(\d+)",
+                outtext,
+                re.MULTILINE,
+            )
             if mobj:
                 if mobj.group(2) == "+":
-                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    lumo = float(mobj.group(1)) * (10 ** (-1 * float(mobj.group(3))))
                     psivar["HOMO"] = np.array([round(lumo, 10)])
                 else:
-                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    lumo = float(mobj.group(1)) * (10 ** (-1 * float(mobj.group(3))))
                     psivar["HOMO"] = np.array([round(lumo, 10)])
-        
 
-            mobj = re.search(r"Vector" + r"\s+" + r"%d"%(psivar["N ALPHA ELECTRONS"] + 1) +  r"\s+" + r"Occ=" + r".*" + r"\s+" + r"E=" + r"([+-]?\s?\d+[.]\d+)" + r"[D]"+ r"([+-])" + r"[0]" + r"(\d+)", outtext, re.MULTILINE)
+            mobj = re.search(
+                r"Vector"
+                + r"\s+"
+                + r"%d" % (psivar["N ALPHA ELECTRONS"] + 1)
+                + r"\s+"
+                + r"Occ="
+                + r".*"
+                + r"\s+"
+                + r"E="
+                + r"([+-]?\s?\d+[.]\d+)"
+                + r"[D]"
+                + r"([+-])"
+                + r"[0]"
+                + r"(\d+)",
+                outtext,
+                re.MULTILINE,
+            )
             if mobj:
                 if mobj.group(2) == "+":
-                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    lumo = float(mobj.group(1)) * (10 ** (-1 * float(mobj.group(3))))
                     psivar["LUMO"] = np.array([round(lumo, 10)])
                 else:
-                    lumo = float(mobj.group(1)) * (10**(-1 * float(mobj.group(3))))
+                    lumo = float(mobj.group(1)) * (10 ** (-1 * float(mobj.group(3))))
                     psivar["LUMO"] = np.array([round(lumo, 10)])
 
-    
     mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
         psivar["N MO"] = mobj.group(2)
         psivar["N BASIS"] = mobj.group(1)
-    
-    #Search for Center of charge
+
+    # Search for Center of charge
     mobj = re.search(
-        r"Center of charge \(in au\) is the expansion point" + r"\n" + r"\s+" + r"X\s+=\s+([+-]?\d+[.]\d+)" + r"\s+" + 
-        r"Y\s+=\s+([+-]?\d+[.]\d+)" + r"\s+" + r"Z\s+=\s+([+-]?\d+[.]\d+)", outtext, re.MULTILINE)
+        r"Center of charge \(in au\) is the expansion point"
+        + r"\n"
+        + r"\s+"
+        + r"X\s+=\s+([+-]?\d+[.]\d+)"
+        + r"\s+"
+        + r"Y\s+=\s+([+-]?\d+[.]\d+)"
+        + r"\s+"
+        + r"Z\s+=\s+([+-]?\d+[.]\d+)",
+        outtext,
+        re.MULTILINE,
+    )
     if mobj:
         psivar["CENTER OF CHARGE"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
-    
+
     mobj = re.search(
-        r"Dipole moment" + r".*?" + r"A\.U\." + r"\s+" + r"DMX\s+([+-]?\d+[.]\d+)\s+" + r"DMXEFC\s+[+-]?\d+[.]\d+\s+" + 
-        r"DMY\s+([+-]?\d+[.]\d+)\s+"  + r"DMYEFC\s+[+-]?\d+[.]\d+\s+" + r"DMZ\s+([+-]?\d+[.]\d+)\s+" +
-        r"DMZEFC\s+[+-]?\d+[.]\d+\s+" + r"\-EFC\-" + r".*?" + r"A\.U\.\s+" + r"Total dipole\s+([+-]?\d+[.]\d+\s+)", outtext, re.MULTILINE)
+        r"Dipole moment"
+        + r".*?"
+        + r"A\.U\."
+        + r"\s+"
+        + r"DMX\s+([+-]?\d+[.]\d+)\s+"
+        + r"DMXEFC\s+[+-]?\d+[.]\d+\s+"
+        + r"DMY\s+([+-]?\d+[.]\d+)\s+"
+        + r"DMYEFC\s+[+-]?\d+[.]\d+\s+"
+        + r"DMZ\s+([+-]?\d+[.]\d+)\s+"
+        + r"DMZEFC\s+[+-]?\d+[.]\d+\s+"
+        + r"\-EFC\-"
+        + r".*?"
+        + r"A\.U\.\s+"
+        + r"Total dipole\s+([+-]?\d+[.]\d+\s+)",
+        outtext,
+        re.MULTILINE,
+    )
     # + r"DMY\s+" + r"([+-]?\d+[.]\d+)", outtext, re.MULTILINE)
     if mobj:
         psivar["DIPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
         psivar["TOTAL DIPOLE MOMENT"] = mobj.group(4)
-    
-    mobj = re.search(
-        r"Quadrupole moments in atomic units\s+" + r"Component\s+" + r"Electronic\+nuclear\s+" + r"Point charges\s+" + r"Total\s+" + r"-+\s+" +
-        r"XX\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"YY\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"ZZ\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + 
-        r"XY\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"XZ\s+([+-]?\d+[.]\d+)\s+" + r".*\s+.*\s+" + r"YZ\s+([+-]?\d+[.]\d+)\s+", outtext, re.MULTILINE)
-        
-    if mobj:
-        psivar["QUADRUPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3), mobj.group(4), mobj.group(5), mobj.group(6)])
-    
 
-    
-        
+    mobj = re.search(
+        r"Quadrupole moments in atomic units\s+"
+        + r"Component\s+"
+        + r"Electronic\+nuclear\s+"
+        + r"Point charges\s+"
+        + r"Total\s+"
+        + r"-+\s+"
+        + r"XX\s+([+-]?\d+[.]\d+)\s+"
+        + r".*\s+.*\s+"
+        + r"YY\s+([+-]?\d+[.]\d+)\s+"
+        + r".*\s+.*\s+"
+        + r"ZZ\s+([+-]?\d+[.]\d+)\s+"
+        + r".*\s+.*\s+"
+        + r"XY\s+([+-]?\d+[.]\d+)\s+"
+        + r".*\s+.*\s+"
+        + r"XZ\s+([+-]?\d+[.]\d+)\s+"
+        + r".*\s+.*\s+"
+        + r"YZ\s+([+-]?\d+[.]\d+)\s+",
+        outtext,
+        re.MULTILINE,
+    )
+
+    if mobj:
+        psivar["QUADRUPOLE MOMENT"] = np.array(
+            [mobj.group(1), mobj.group(2), mobj.group(3), mobj.group(4), mobj.group(5), mobj.group(6)]
+        )
 
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
