@@ -21,6 +21,7 @@ from ..exceptions import InputError
 from ..util import temporary_directory
 from .model import ProgramHarness
 from .rdkit import RDKitHarness
+from ..units import ureg
 
 
 class OpenMMHarness(ProgramHarness):
@@ -204,9 +205,9 @@ class OpenMMHarness(ProgramHarness):
             state = context.getState(getEnergy=True)
 
             # Get the potential as a simtk.unit.Quantity, put into units of hartree
-            q = state.getPotentialEnergy() / unit.hartree
+            q = state.getPotentialEnergy() * ureg.conversion_factor("kJ / mol", "hartree")
 
-            ret_data["properties"] = {"return_energy": q.value_in_unit(q.unit)}
+            ret_data["properties"] = {"return_energy": q._value}
 
             # Execute driver
             if input_data.driver == "energy":
@@ -223,8 +224,9 @@ class OpenMMHarness(ProgramHarness):
                 gradient = state.getForces(asNumpy=True)
 
                 # Convert to hartree/bohr and reformat as 1D array
-                q = (gradient / (unit.hartree / unit.bohr)).reshape([n_atoms * 3])
-                ret_data["return_result"] = q.value_in_unit(q.unit)
+                coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("nanometer", "bohr")
+                q = (gradient * coef).reshape([n_atoms * 3])
+                ret_data["return_result"] = q._value
             else:
                 raise InputError(
                     f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}."
