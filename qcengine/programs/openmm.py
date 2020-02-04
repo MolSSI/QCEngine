@@ -204,10 +204,14 @@ class OpenMMHarness(ProgramHarness):
             # Compute the energy of the configuration
             state = context.getState(getEnergy=True)
 
-            # Get the potential as a simtk.unit.Quantity, put into units of hartree
-            q = state.getPotentialEnergy() * ureg.conversion_factor("kJ / mol", "hartree")
+            # Get the potential, this is assumed to be a simtk.unit.Quantity, in kJ/mol
+            q = state.getPotentialEnergy()
+            # convert to hartree using the qcelemental conversion factors
+            # note we use the protected attribute ._value which is just the float of the energy
+            # to avoid any differences in internal conversion factors between OpenMM and qcelemental
+            final_energy = q._value * ureg.conversion_factor("kJ / mol", "hartree")
 
-            ret_data["properties"] = {"return_energy": q._value}
+            ret_data["properties"] = {"return_energy": final_energy}
 
             # Execute driver
             if input_data.driver == "energy":
@@ -220,13 +224,15 @@ class OpenMMHarness(ProgramHarness):
                 # Compute the forces
                 state = context.getState(getForces=True)
 
-                # Get the gradient as a simtk.unit.Quantity with shape (n_atoms, 3)
+                # Get the gradient, this is assumed to be a simtk.unit.Quantity
+                # with shape (n_atoms, 3), in kJ/mol * nanometer
                 gradient = state.getForces(asNumpy=True)
 
-                # Convert to hartree/bohr and reformat as 1D array
+                # Convert from KJ/mol  * nanometer to hartree/bohr and reformat as 1D array
                 coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("nanometer", "bohr")
-                q = (gradient * coef).reshape([n_atoms * 3])
-                ret_data["return_result"] = q._value
+                # use the protected attribute again to avoid conversion errors
+                q = (gradient._value * coef).reshape([n_atoms * 3])
+                ret_data["return_result"] = q
             else:
                 raise InputError(
                     f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}."
