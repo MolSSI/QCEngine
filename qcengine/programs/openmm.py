@@ -175,9 +175,6 @@ class OpenMMHarness(ProgramHarness):
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
 
         elif input_data.driver == "gradient":
-            # Get number of atoms
-            n_atoms = len(jmol.symbols)
-
             # Compute the forces
             state = context.getState(getForces=True)
 
@@ -185,12 +182,13 @@ class OpenMMHarness(ProgramHarness):
             gradient = state.getForces(asNumpy=True)
 
             # Convert to hartree/bohr and reformat as 1D array
-            q = (gradient / (unit.hartree / unit.bohr)).reshape([n_atoms * 3])
+            q = (gradient / (unit.hartree / unit.bohr)).reshape(-1)
             ret_data["return_result"] = q.value_in_unit(q.unit)
         else:
             raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
 
         ret_data["success"] = True
+        ret_data["extras"] = input_data.extras
 
         # Move several pieces up a level
         ret_data["provenance"] = Provenance(creator="openmm", version=openmm.__version__, nthreads=nthreads)
