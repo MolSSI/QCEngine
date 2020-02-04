@@ -80,6 +80,19 @@ def model_wrapper(input_data: Dict[str, Any], model: "BaseModel") -> "BaseModel"
 
 
 @contextmanager
+def capture_stdout():
+    oldout, olderr = sys.stdout, sys.stderr
+    try:
+        out = [io.StringIO(), io.StringIO()]
+        sys.stdout, sys.stderr = out
+        yield out
+    finally:
+        sys.stdout, sys.stderr = oldout, olderr
+        out[0] = out[0].getvalue()
+        out[1] = out[1].getvalue()
+
+
+@contextmanager
 def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> Dict[str, Any]:
     """Wraps compute for timing, output capturing, and raise protection
     """

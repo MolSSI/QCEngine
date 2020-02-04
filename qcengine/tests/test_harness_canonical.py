@@ -25,6 +25,7 @@ _canonical_methods = [
     ("turbomole", {"method": "pbe", "basis": "6-31G"}),
 ]
 
+
 def _get_molecule(program):
     if program in ["openmm"]:
         return qcng.get_molecule("water")
@@ -53,9 +54,7 @@ def test_compute_gradient(program, model):
 
     molecule = _get_molecule(program)
 
-    inp = AtomicInput(
-        molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"}
-    )
+    inp = AtomicInput(molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"})
     ret = qcng.compute(inp, program, raise_error=True)
 
     assert ret.success is True

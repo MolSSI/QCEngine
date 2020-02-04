@@ -161,6 +161,12 @@ def test_geometric_retries(failure_engine, input_data):
             [1.7927843431811934, 2.893333237502448, 107.60441967992045],
             marks=using("mopac"),
         ),
+        pytest.param(
+            "openmm",
+            {"method": "smirnoff", "basis": "openff-1.0.0"},
+            [1.889726881670907, 3.10070288709234, 110.25177977849998],
+            marks=using("openmm"),
+        ),
     ],
 )
 def test_geometric_generic(input_data, program, model, bench):

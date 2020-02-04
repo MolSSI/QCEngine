@@ -18,7 +18,7 @@ from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import which_import
 
 from ..exceptions import InputError
-from ..util import temporary_directory
+from ..util import capture_stdout
 from .model import ProgramHarness
 from .rdkit import RDKitHarness
 
@@ -111,7 +111,8 @@ class OpenMMHarness(ProgramHarness):
         from simtk import openmm
         from simtk import unit
 
-        import openforcefield.topology as offtop
+        with capture_stdout():
+            import openforcefield.topology as offtop
 
         # Failure flag
         ret_data = {"success": False}
@@ -129,12 +130,13 @@ class OpenMMHarness(ProgramHarness):
             # Process molecule with RDKit
             rdkit_mol = RDKitHarness._process_molecule_rdkit(input_data.molecule)
 
-            # Create an Open Force Field `Molecule` from the RDKit Molecule
-            off_mol = offtop.Molecule(rdkit_mol)
+            with capture_stdout():
+                # Create an Open Force Field `Molecule` from the RDKit Molecule
+                off_mol = offtop.Molecule(rdkit_mol)
 
-            # Create OpenMM system in vacuum from forcefield, molecule
-            off_top = off_mol.to_topology()
-            openmm_system = self._get_openmm_system(off_forcefield, off_top)
+                # Create OpenMM system in vacuum from forcefield, molecule
+                off_top = off_mol.to_topology()
+                openmm_system = self._get_openmm_system(off_forcefield, off_top)
         else:
             raise InputError("Accepted methods are: {'smirnoff', }")
 
@@ -166,9 +168,9 @@ class OpenMMHarness(ProgramHarness):
         state = context.getState(getEnergy=True)
 
         # Get the potential as a simtk.unit.Quantity, put into units of hartree
-        q = state.getPotentialEnergy() / unit.hartree
+        q = state.getPotentialEnergy() / unit.hartree / unit.AVOGADRO_CONSTANT_NA
 
-        ret_data["properties"] = {"return_energy": q.value_in_unit(q.unit)}
+        ret_data["properties"] = {"return_energy": q}
 
         # Execute driver
         if input_data.driver == "energy":
@@ -182,8 +184,10 @@ class OpenMMHarness(ProgramHarness):
             gradient = state.getForces(asNumpy=True)
 
             # Convert to hartree/bohr and reformat as 1D array
-            q = (gradient / (unit.hartree / unit.bohr)).reshape(-1)
-            ret_data["return_result"] = q.value_in_unit(q.unit)
+            q = (gradient / (unit.hartree / unit.bohr)).reshape(-1) / unit.AVOGADRO_CONSTANT_NA
+
+            # Force to gradient
+            ret_data["return_result"] = -1 * q
         else:
             raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
 
