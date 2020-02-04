@@ -87,22 +87,6 @@ class OpenMMHarness(ProgramHarness):
 
             self._CACHE.pop(oldest_key)
 
-    def _generate_basis(self, input_data):
-
-        # first try the offxml key, if it exists
-        offxml = getattr(input_data.model, "offxml", None)
-
-        if offxml:
-            return os.path.splitext(os.path.basename(offxml))[0]
-
-        # next try the url key, if it exists
-        url = getattr(input_data.model, "url", None)
-
-        if url:
-            # TODO: DOESN'T APPEAR TO BE A WAY TO GET A MEANINGFUL FORCEFIELD DESIGNATOR FROM THE XML CONTENTS ITSELF
-            # PERHAPS THIS SHOULD BE ADDED IN FUTURE RELEASES?
-            return os.path.splitext(os.path.basename(url))[0]
-
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         # this harness requires RDKit as well, so this needs checking too
@@ -134,44 +118,16 @@ class OpenMMHarness(ProgramHarness):
 
         # generate basis, not given
         if not input_data.model.basis:
-            basis = self._generate_basis(input_data)
-            ret_data["basis"] = basis
+            raise InputError("Method must contain a basis set.")
 
-        # get number of threads to use from `TaskConfig.ncores`; otherwise, try environment variable
-        nthreads = config.ncores
-        if nthreads is None:
-            nthreads = os.environ.get("OPENMM_CPU_THREADS")
+        # Build a system based off input
+        if input_data.model.method.lower() == "smirnoff":
 
-        # Set workdir to scratch
-        # Location resolution order config.scratch_dir, /tmp
-        parent = config.scratch_directory
-        with temporary_directory(parent=parent, suffix="_openmm_scratch") as tmpdir:
-
-            # Grab molecule, forcefield
-            jmol = input_data.molecule
-
-            # TODO: If urls are supported by
-            # `openforcefield.typing.engines.smirnoff.ForceField` already, we
-            # can eliminate the `offxml` and `url` distinction
-            # URL processing can happen there instead
-            if getattr(input_data.model, "offxml", None):
-                # we were given a file path or relative path
-                offxml = input_data.model.offxml
-
-                # Load an Open Force Field `ForceField`
-                off_forcefield = self._get_off_forcefield(offxml, offxml)
-            elif getattr(input_data.model, "url", None):
-                # we were given a url
-                with urllib.request.urlopen(input_data.model.url) as req:
-                    xml = req.read()
-
-                # Load an Open Force Field `ForceField`
-                off_forcefield = self._get_off_forcefield(xml.decode(), xml)
-            else:
-                raise InputError("OpenMM requires either `model.offxml` or `model.url` to be set")
+            ff_file = input_data.model.basis + ".offxml"
+            off_forcefield = self._get_off_forcefield(ff_file, ff_file)
 
             # Process molecule with RDKit
-            rdkit_mol = RDKitHarness._process_molecule_rdkit(jmol)
+            rdkit_mol = RDKitHarness._process_molecule_rdkit(input_data.molecule)
 
             # Create an Open Force Field `Molecule` from the RDKit Molecule
             off_mol = offtop.Molecule(rdkit_mol)
@@ -179,56 +135,60 @@ class OpenMMHarness(ProgramHarness):
             # Create OpenMM system in vacuum from forcefield, molecule
             off_top = off_mol.to_topology()
             openmm_system = self._get_openmm_system(off_forcefield, off_top)
+        else:
+            raise InputError("Accepted methods are: {'smirnoff', }")
 
-            # Need an integrator for simulation even if we don't end up using it really
-            integrator = openmm.VerletIntegrator(1.0 * unit.femtoseconds)
+        # Need an integrator for simulation even if we don't end up using it really
+        integrator = openmm.VerletIntegrator(1.0 * unit.femtoseconds)
 
-            # Set platform to CPU explicitly
-            platform = openmm.Platform.getPlatformByName("CPU")
+        # Set platform to CPU explicitly
+        platform = openmm.Platform.getPlatformByName("CPU")
 
-            # Set number of threads to use
-            # if `nthreads` is `None`, OpenMM default of all logical cores on
-            # processor will be used
-            if nthreads:
-                properties = {"Threads": str(nthreads)}
-            else:
-                properties = {}
+        # Set number of threads to use
+        # if `nthreads` is `None`, OpenMM default of all logical cores on
+        # processor will be used
+        nthreads = config.ncores
+        if nthreads is None:
+            nthreads = os.environ.get("OPENMM_CPU_THREADS")
 
-            # Initialize context
-            context = openmm.Context(openmm_system, integrator, platform, properties)
+        if nthreads:
+            properties = {"Threads": str(nthreads)}
+        else:
+            properties = {}
 
-            # Set positions from our Open Force Field `Molecule`
-            context.setPositions(off_mol.conformers[0])
+        # Initialize context
+        context = openmm.Context(openmm_system, integrator, platform, properties)
 
-            # Compute the energy of the configuration
-            state = context.getState(getEnergy=True)
+        # Set positions from our Open Force Field `Molecule`
+        context.setPositions(off_mol.conformers[0])
 
-            # Get the potential as a simtk.unit.Quantity, put into units of hartree
-            q = state.getPotentialEnergy() / unit.hartree
+        # Compute the energy of the configuration
+        state = context.getState(getEnergy=True)
 
-            ret_data["properties"] = {"return_energy": q.value_in_unit(q.unit)}
+        # Get the potential as a simtk.unit.Quantity, put into units of hartree
+        q = state.getPotentialEnergy() / unit.hartree
 
-            # Execute driver
-            if input_data.driver == "energy":
-                ret_data["return_result"] = ret_data["properties"]["return_energy"]
+        ret_data["properties"] = {"return_energy": q.value_in_unit(q.unit)}
 
-            elif input_data.driver == "gradient":
-                # Get number of atoms
-                n_atoms = len(jmol.symbols)
+        # Execute driver
+        if input_data.driver == "energy":
+            ret_data["return_result"] = ret_data["properties"]["return_energy"]
 
-                # Compute the forces
-                state = context.getState(getForces=True)
+        elif input_data.driver == "gradient":
+            # Get number of atoms
+            n_atoms = len(jmol.symbols)
 
-                # Get the gradient as a simtk.unit.Quantity with shape (n_atoms, 3)
-                gradient = state.getForces(asNumpy=True)
+            # Compute the forces
+            state = context.getState(getForces=True)
 
-                # Convert to hartree/bohr and reformat as 1D array
-                q = (gradient / (unit.hartree / unit.bohr)).reshape([n_atoms * 3])
-                ret_data["return_result"] = q.value_in_unit(q.unit)
-            else:
-                raise InputError(
-                    f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}."
-                )
+            # Get the gradient as a simtk.unit.Quantity with shape (n_atoms, 3)
+            gradient = state.getForces(asNumpy=True)
+
+            # Convert to hartree/bohr and reformat as 1D array
+            q = (gradient / (unit.hartree / unit.bohr)).reshape([n_atoms * 3])
+            ret_data["return_result"] = q.value_in_unit(q.unit)
+        else:
+            raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
 
         ret_data["success"] = True
 
