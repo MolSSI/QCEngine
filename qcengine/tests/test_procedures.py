@@ -80,7 +80,7 @@ def test_geometric_stdout(input_data):
 @using("rdkit")
 def test_geometric_rdkit_error(input_data):
 
-    input_data["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity"})
+    input_data["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity_"})
     input_data["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     input_data["keywords"]["program"] = "rdkit"
 

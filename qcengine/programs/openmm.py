@@ -6,7 +6,6 @@ Requires RDKit
 import datetime
 import hashlib
 import os
-import urllib.request
 
 from typing import TYPE_CHECKING
 
