@@ -101,8 +101,12 @@ class RDKitHarness(ProgramHarness):
         if input_data.model.method.lower() == "uff":
             ff = AllChem.UFFGetMoleculeForceField(mol)
             all_params = AllChem.UFFHasAllMoleculeParams(mol)
+        elif input_data.model.method.lower() in ["mmff94", "mmff94s"]:
+            props = AllChem.MMFFGetMoleculeProperties(mol, mmffVariant=input_data.model.method)
+            ff = AllChem.MMFFGetMoleculeForceField(mol, props)
+            all_params = AllChem.MMFFHasAllMoleculeParams(mol)
         else:
-            raise InputError("RDKit only supports the UFF method currently.")
+            raise InputError("RDKit only supports the UFF, MMFF94, and MMFF94s methods currently.")
 
         if all_params is False:
             raise InputError("RDKit parameters not found for all atom types in molecule.")

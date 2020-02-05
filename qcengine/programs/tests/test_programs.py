@@ -131,11 +131,12 @@ def test_psi4_ref_switch():
 
 
 @using("rdkit")
-def test_rdkit_task():
+@pytest.mark.parametrize("method", ["UFF", "MM94", "MM94s"])
+def test_rdkit_task(method):
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "gradient",
-        "model": {"method": "UFF"},
+        "model": {"method": method},
         "keywords": {},
     }
 
@@ -148,7 +149,7 @@ def test_rdkit_task():
 def test_rdkit_connectivity_error():
     input_data = {
         "molecule": qcng.get_molecule("water").dict(),
-        "driver": "gradient",
+        "driver": "energy",
         "model": {"method": "UFF", "basis": ""},
         "keywords": {},
     }
