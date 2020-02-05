@@ -155,9 +155,7 @@ class NWChemHarness(ProgramHarness):
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
-        mdccmd, mdcopts = muster_modelchem(
-            input_model.model.method, input_model.driver.derivative_int(), opts.pop("qc_module", False)
-        )
+        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
         opts.update(mdcopts)
 
         # Handle basis set
@@ -238,7 +236,11 @@ task python
             qcvars["CURRENT HESSIAN"] = nwhess
 
         # Normalize the output as a float or list of floats
-        retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        if input_model.driver.upper() == "PROPERTIES":
+            retres = qcvars[f"CURRENT ENERGY"]
+        else:
+            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):

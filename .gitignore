@@ -74,3 +74,6 @@ timer.dat
 *.out
 iter.dat
 psi*clean
+
+# vscode folders
+.vscode
