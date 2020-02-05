@@ -14,20 +14,32 @@ Changelog
 .. +++++++++
 
 
-v0.14.0 / 2020-MM-DD
+v0.14.0 / 2020-02-06
 --------------------
 
 New Features
 ++++++++++++
+-(:pr:`212`) NWChem - Adds CI for the NWChem harness.
+-(:pr:`226`) OpenMM - Moves the OpenMM harness to a canonical forcefield based method/basis language combination.
+-(:pr:`228`) RDKit - Adds MMFF94 force field capabilities.
 
 Enhancements
 ++++++++++++
--(:pr:`215`) Psi4 - indicating location by either PATH or PYTHONPATH sets up both subprocess and API execution.
+-(:pr:`201`) Psi4 - ``psi4 --version`` collection to only grab the last line.
+-(:pr:`202`) Entos - Adds wavefunction parsing.
+-(:pr:`203`) NWChem - Parses DFT empirical dispersion energy.
+-(:pr:`204`) NWChem - Allows custom DFT functionals to be run.
+-(:pr:`205`) NWChem - Improved gradient output and added Hessian support for NWChem.
+-(:pr:`215`) Psi4 - Psi4 location can be found by either PATH or PYTHONPATH sets up both subprocess and API execution.
 -(:pr:`215`) ``get_program`` shows the helpful "install this" messages from ``found()`` rather than just saying "cannot be found".
 
 Bug Fixes
 +++++++++
+-(:pr:`199`) Fix typo breaking NWChem property parsing.
 -(:pr:`215`) NWChem complains *before* a calculation if the necessary ``networkx`` package not available.
+-(:pr:`207`) NWChem - Minor bug fixes for NWChem when more than core per MPI rank is used.
+-(:pr:`209`) NWChem - Fixed missing extras tags in NWChem harness.
+-(:pr:`218`) Psi4 - Fixed mac psiapi runs in some circumstances.
 
 
 v0.13.0 / 2019-12-10
