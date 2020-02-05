@@ -80,7 +80,7 @@ def test_geometric_stdout(input_data):
 @using("rdkit")
 def test_geometric_rdkit_error(input_data):
 
-    input_data["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity"})
+    input_data["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity_"})
     input_data["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     input_data["keywords"]["program"] = "rdkit"
 
@@ -160,6 +160,12 @@ def test_geometric_retries(failure_engine, input_data):
             {"method": "PM6"},
             [1.7927843431811934, 2.893333237502448, 107.60441967992045],
             marks=using("mopac"),
+        ),
+        pytest.param(
+            "openmm",
+            {"method": "smirnoff", "basis": "openff-1.0.0"},
+            [1.889726881670907, 3.10070288709234, 110.25177977849998],
+            marks=using("openmm"),
         ),
     ],
 )
