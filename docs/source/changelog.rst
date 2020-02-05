@@ -19,27 +19,27 @@ v0.14.0 / 2020-02-06
 
 New Features
 ++++++++++++
--(:pr:`212`) NWChem - Adds CI for the NWChem harness.
--(:pr:`226`) OpenMM - Moves the OpenMM harness to a canonical forcefield based method/basis language combination.
--(:pr:`228`) RDKit - Adds MMFF94 force field capabilities.
+- (:pr:`212`) NWChem - Adds CI for the NWChem harness.
+- (:pr:`226`) OpenMM - Moves the OpenMM harness to a canonical forcefield based method/basis language combination.
+- (:pr:`228`) RDKit - Adds MMFF94 force field capabilities.
 
 Enhancements
 ++++++++++++
--(:pr:`201`) Psi4 - ``psi4 --version`` collection to only grab the last line.
--(:pr:`202`) Entos - Adds wavefunction parsing.
--(:pr:`203`) NWChem - Parses DFT empirical dispersion energy.
--(:pr:`204`) NWChem - Allows custom DFT functionals to be run.
--(:pr:`205`) NWChem - Improved gradient output and added Hessian support for NWChem.
--(:pr:`215`) Psi4 - Psi4 location can be found by either PATH or PYTHONPATH sets up both subprocess and API execution.
--(:pr:`215`) ``get_program`` shows the helpful "install this" messages from ``found()`` rather than just saying "cannot be found".
+- (:pr:`201`) Psi4 - ``psi4 --version`` collection to only grab the last line.
+- (:pr:`202`) Entos - Adds wavefunction parsing.
+- (:pr:`203`) NWChem - Parses DFT empirical dispersion energy.
+- (:pr:`204`) NWChem - Allows custom DFT functionals to be run.
+- (:pr:`205`) NWChem - Improved gradient output and added Hessian support for NWChem.
+- (:pr:`215`) Psi4 - Psi4 location can be found by either PATH or PYTHONPATH sets up both subprocess and API execution.
+- (:pr:`215`) ``get_program`` shows the helpful "install this" messages from ``found()`` rather than just saying "cannot be found".
 
 Bug Fixes
 +++++++++
--(:pr:`199`) Fix typo breaking NWChem property parsing.
--(:pr:`215`) NWChem complains *before* a calculation if the necessary ``networkx`` package not available.
--(:pr:`207`) NWChem - Minor bug fixes for NWChem when more than core per MPI rank is used.
--(:pr:`209`) NWChem - Fixed missing extras tags in NWChem harness.
--(:pr:`218`) Psi4 - Fixed mac psiapi runs in some circumstances.
+- (:pr:`199`) Fix typo breaking NWChem property parsing.
+- (:pr:`215`) NWChem complains *before* a calculation if the necessary ``networkx`` package not available.
+- (:pr:`207`) NWChem - Minor bug fixes for NWChem when more than core per MPI rank is used.
+- (:pr:`209`) NWChem - Fixed missing extras tags in NWChem harness.
+- (:pr:`218`) Psi4 - Fixed mac psiapi runs in some circumstances.
 
 
 v0.13.0 / 2019-12-10
@@ -47,26 +47,26 @@ v0.13.0 / 2019-12-10
 
 New Features
 ++++++++++++
--(:pr:`151`) Adds a OpenMM Harness for evaluation of SMIRNOFF force fields.
--(:pr:`189`) General MPI support and MPI CLI generator.
+- (:pr:`151`) Adds a OpenMM Harness for evaluation of SMIRNOFF force fields.
+- (:pr:`189`) General MPI support and MPI CLI generator.
 
 Enhancements
 ++++++++++++
--(:pr:`175`) Allows specifications for ``nnodes`` to begin MPI support.
--(:pr:`177`) NWChem - Parsing updates including Hessian abilities.
--(:pr:`180`) GAMESS - Output properties improvements.
--(:pr:`181`) NWChem - Output properties improvements.
--(:pr:`183`) Entos - Hessian and XTB support.
--(:pr:`185`) Entos - Improved subcommand support.
--(:pr:`187`) QChem - Support for raw log files without the binary file requirements and improved output properties support.
--(:pr:`188`) Automatic buffer reads to prevent deadlocking of process for very large outputs.
--(:pr:`194`) DFTD3 - Improved error message on failed evaluations.
--(:pr:`195`) Blackens the code base add GHA-based lint checks.
+- (:pr:`175`) Allows specifications for ``nnodes`` to begin MPI support.
+- (:pr:`177`) NWChem - Parsing updates including Hessian abilities.
+- (:pr:`180`) GAMESS - Output properties improvements.
+- (:pr:`181`) NWChem - Output properties improvements.
+- (:pr:`183`) Entos - Hessian and XTB support.
+- (:pr:`185`) Entos - Improved subcommand support.
+- (:pr:`187`) QChem - Support for raw log files without the binary file requirements and improved output properties support.
+- (:pr:`188`) Automatic buffer reads to prevent deadlocking of process for very large outputs.
+- (:pr:`194`) DFTD3 - Improved error message on failed evaluations.
+- (:pr:`195`) Blackens the code base add GHA-based lint checks.
 
 Bug Fixes
 +++++++++
--(:pr:`179`) QChem - fixes print issue when driver is of an incorrect value.
--(:pr:`190`) Psi4 - fixes issues for methods without basis sets such as HF-3c.
+- (:pr:`179`) QChem - fixes print issue when driver is of an incorrect value.
+- (:pr:`190`) Psi4 - fixes issues for methods without basis sets such as HF-3c.
 
 v0.12.0 / 2019-11-13
 --------------------
@@ -74,21 +74,20 @@ v0.12.0 / 2019-11-13
 New Features
 ++++++++++++
 
--(:pr:`159`) Adds MolSSI Driver Interface support.
--(:pr:`160`) Adds Turbomole support.
--(:pr:`164`) Adds Q-Chem support.
+- (:pr:`159`) Adds MolSSI Driver Interface support.
+- (:pr:`160`) Adds Turbomole support.
+- (:pr:`164`) Adds Q-Chem support.
 
 Enhancements
 ++++++++++++
 
--(:pr:`155`) Support for Psi4 Wavefunctions using v1.4a2 or greater.
--(:pr:`162`) Adds test for geometry optimization with trajectory protocol truncation.
--(:pr:`167`) CFOUR and NWChem parsing improvements for CCSD(T) properties.
--(:pr:`168`) Standardizes on ``dispatch.out`` for the common output files.
--(:pr:`170`) Increases coverage and begins a common documentation page.
--(:pr:`171`) Add Molpro to the standard suite.
-- (:pr:`172`) Models renamed according to https://github.com/MolSSI/QCElemental/issues/155, particularly
-  ``ResultInput`` -> ``AtomicInput``, ``Result`` -> ``AtomicResult``, ``Optimization`` -> ``OptimizationResult``.
+- (:pr:`155`) Support for Psi4 Wavefunctions using v1.4a2 or greater.
+- (:pr:`162`) Adds test for geometry optimization with trajectory protocol truncation.
+- (:pr:`167`) CFOUR and NWChem parsing improvements for CCSD(T) properties.
+- (:pr:`168`) Standardizes on ``dispatch.out`` for the common output files.
+- (:pr:`170`) Increases coverage and begins a common documentation page.
+- (:pr:`171`) Add Molpro to the standard suite.
+- (:pr:`172`) Models renamed according to https://github.com/MolSSI/QCElemental/issues/155, particularly ``ResultInput`` -> ``AtomicInput``, ``Result`` -> ``AtomicResult``, ``Optimization`` -> ``OptimizationResult``.
 
 Bug Fixes
 +++++++++

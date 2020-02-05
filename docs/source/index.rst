@@ -25,7 +25,7 @@ A simple example of QCEngine's capabilities is as follows:
     H  0.0  1.494  1.027
     """)
 
-    >>> input = qcel.models.AtomicInput(
+    >>> model = qcel.models.AtomicInput(
         molecule=mol,
         driver="energy",
         model={"method": "SCF", "basis": "sto-3g"},
@@ -172,6 +172,7 @@ Index
 **Programs**
 
 * :doc:`program_overview`
+* :doc:`programs_molecular_mechanics`
 
 .. toctree::
     :maxdepth: 1
@@ -179,6 +180,7 @@ Index
     :caption: Programs
 
     program_overview
+    programs_molecular_mechanics
 
 
 **Developer Documentation**
