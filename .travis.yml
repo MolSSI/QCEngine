@@ -50,9 +50,7 @@ install:
 
     # Create test environment for package
   - |
-    if [ $PROG == "RDKIT" ]; then
-      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/rdkit.yaml
-    elif [ $PROG == "PSI4" ]; then
+    if [ $PROG == "PSI4" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/psi.yaml
     elif [ $PROG == "PSI4DEV" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/psi-nightly.yaml
