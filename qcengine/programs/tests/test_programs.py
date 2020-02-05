@@ -248,7 +248,7 @@ def test_openmm_task_smirnoff():
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {"method": "smirnoff", "basis": "openff-1.0.0"},
+        "model": {"method": "openff-1.0.0", "basis": "smirnoff"},
         "keywords": {},
     }
 

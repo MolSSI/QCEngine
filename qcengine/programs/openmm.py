@@ -128,9 +128,9 @@ class OpenMMHarness(ProgramHarness):
             raise InputError("Method must contain a basis set.")
 
         # Build a system based off input
-        if input_data.model.method.lower() == "smirnoff":
+        if input_data.model.basis.lower() == "smirnoff":
 
-            ff_file = input_data.model.basis + ".offxml"
+            ff_file = input_data.model.method + ".offxml"
             off_forcefield = self._get_off_forcefield(ff_file, ff_file)
 
             # Process molecule with RDKit
@@ -144,7 +144,7 @@ class OpenMMHarness(ProgramHarness):
                 off_top = off_mol.to_topology()
                 openmm_system = self._get_openmm_system(off_forcefield, off_top)
         else:
-            raise InputError("Accepted methods are: {'smirnoff', }")
+            raise InputError("Accepted bases are: {'smirnoff', }")
 
         # Need an integrator for simulation even if we don't end up using it really
         integrator = openmm.VerletIntegrator(1.0 * unit.femtoseconds)
