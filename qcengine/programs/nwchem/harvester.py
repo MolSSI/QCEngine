@@ -634,7 +634,7 @@ def harvest_outfile_pass(outtext):
                 re.MULTILINE,
             )
             if mobj:
-                if mobj.group(2) == "+": # if "positve power eg."2.1225011D+01"
+                if mobj.group(2) == "+":  # if "positve power eg."2.1225011D+01"
                     homo = float(mobj.group(1)) * (10 ** (float(mobj.group(3))))
                     psivar["HOMO"] = np.array([round(homo, 10)])
                 else:
