@@ -627,19 +627,13 @@ def harvest_outfile_pass(outtext):
                 + r"E="
                 + r"([+-]?\s?\d+[.]\d+)"
                 + r"[D]"
-                + r"([+-])"
-                + r"[0]"
-                + r"(\d+)",
+                + r"([+-]0\d)",
                 outtext,
                 re.MULTILINE,
             )
             if mobj:
-                if mobj.group(2) == "+":  # if "positve power eg."2.1225011D+01"
-                    homo = float(mobj.group(1)) * (10 ** (float(mobj.group(3))))
-                    psivar["HOMO"] = np.array([round(homo, 10)])
-                else:
-                    homo = float(mobj.group(1)) * (10 ** (-1 * float(mobj.group(3))))
-                    psivar["HOMO"] = np.array([round(homo, 10)])
+                homo = float(mobj.group(1)) * (10 ** (int(mobj.group(2))))
+                psivar["HOMO"] = np.array([round(homo, 10)])
             mobj = re.search(
                 r"Vector"
                 + r"\s+"
@@ -651,19 +645,13 @@ def harvest_outfile_pass(outtext):
                 + r"E="
                 + r"([+-]?\s?\d+[.]\d+)"
                 + r"[D]"
-                + r"([+-])"
-                + r"[0]"
-                + r"(\d+)",
+                + r"([+-]0\d)",
                 outtext,
                 re.MULTILINE,
             )
             if mobj:
-                if mobj.group(2) == "+":
-                    lumo = float(mobj.group(1)) * (10 ** (float(mobj.group(3))))
-                    psivar["LUMO"] = np.array([round(lumo, 10)])
-                else:
-                    lumo = float(mobj.group(1)) * (10 ** (-1 * float(mobj.group(3))))
-                    psivar["LUMO"] = np.array([round(lumo, 10)])
+                lumo = float(mobj.group(1)) * (10 ** (int(mobj.group(2))))
+                psivar["LUMO"] = np.array([round(lumo, 10)])
 
     mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
