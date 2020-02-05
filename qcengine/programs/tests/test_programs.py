@@ -131,7 +131,7 @@ def test_psi4_ref_switch():
 
 
 @using("rdkit")
-@pytest.mark.parametrize("method", ["UFF", "MM94", "MM94s"])
+@pytest.mark.parametrize("method", ["UFF", "MMFF94", "MMFF94s"])
 def test_rdkit_task(method):
     input_data = {
         "molecule": qcng.get_molecule("water"),

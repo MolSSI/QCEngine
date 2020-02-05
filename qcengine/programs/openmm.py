@@ -91,6 +91,13 @@ class OpenMMHarness(ProgramHarness):
         # this harness requires RDKit as well, so this needs checking too
         rdkit_found = RDKitHarness.found(raise_error=raise_error)
 
+        openff_found = which_import(
+            "openforcefield",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install openforcefield -c omnia`.",
+        )
+
         openmm_found = which_import(
             ".openmm",
             return_bool=True,
@@ -99,7 +106,7 @@ class OpenMMHarness(ProgramHarness):
             raise_msg="Please install via `conda install openmm -c omnia`.",
         )
 
-        return rdkit_found and openmm_found
+        return rdkit_found and openff_found and openmm_found
 
     def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
