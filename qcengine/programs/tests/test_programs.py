@@ -147,11 +147,12 @@ def test_rdkit_task():
 @using("rdkit")
 def test_rdkit_connectivity_error():
     input_data = {
-        "molecule": qcng.get_molecule("water").dict(exclude={"connectivity"}),
+        "molecule": qcng.get_molecule("water").dict(),
         "driver": "gradient",
         "model": {"method": "UFF", "basis": ""},
         "keywords": {},
     }
+    del input_data["molecule"]["connectivity"]
 
     ret = qcng.compute(input_data, "rdkit")
     assert ret.success is False
@@ -240,13 +241,13 @@ def test_random_failure_with_success(failure_engine):
 
 
 @using("openmm")
-def test_openmm_task_offxml_basis():
+def test_openmm_task_smirnoff():
     from qcengine.programs.openmm import OpenMMHarness
 
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {"method": "openmm", "basis": "openff-1.0.0", "offxml": "openff-1.0.0.offxml"},
+        "model": {"method": "smirnoff", "basis": "openff-1.0.0"},
         "keywords": {},
     }
 
@@ -265,31 +266,6 @@ def test_openmm_task_offxml_basis():
 
 
 @pytest.mark.skip("`basis` must be explicitly specified at this time")
-@using("openmm")
-def test_openmm_task_offxml_nobasis():
-    from qcengine.programs.openmm import OpenMMHarness
-
-    input_data = {
-        "molecule": qcng.get_molecule("water"),
-        "driver": "energy",
-        "model": {"method": "openmm", "basis": None, "offxml": "openff-1.0.0.offxml"},
-        "keywords": {},
-    }
-
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
-
-    cachelength = len(OpenMMHarness._CACHE)
-
-    assert cachelength > 0
-    assert ret.success is True
-
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
-
-    # ensure cache has not grown
-    assert len(OpenMMHarness._CACHE) == cachelength
-    assert ret.success is True
-
-
 @using("openmm")
 def test_openmm_task_url_basis():
     from qcengine.programs.openmm import OpenMMHarness
@@ -300,36 +276,6 @@ def test_openmm_task_url_basis():
         "model": {
             "method": "openmm",
             "basis": "openff-1.0.0",
-            "url": "https://raw.githubusercontent.com/openforcefield/openforcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
-        },
-        "keywords": {},
-    }
-
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
-
-    cachelength = len(OpenMMHarness._CACHE)
-
-    assert cachelength > 0
-    assert ret.success is True
-
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
-
-    # ensure cache has not grown
-    assert len(OpenMMHarness._CACHE) == cachelength
-    assert ret.success is True
-
-
-@pytest.mark.skip("`basis` must be explicitly specified at this time")
-@using("openmm")
-def test_openmm_task_url_nobasis():
-    from qcengine.programs.openmm import OpenMMHarness
-
-    input_data = {
-        "molecule": qcng.get_molecule("water"),
-        "driver": "energy",
-        "model": {
-            "method": "openmm",
-            "basis": None,
             "url": "https://raw.githubusercontent.com/openforcefield/openforcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
         },
         "keywords": {},
