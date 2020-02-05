@@ -15,15 +15,16 @@ Example
 .. code:: python
 
     >>> mol = qcel.models.Molecule(
-        symbols=["O", "H", "H"],
-        geometry=[[0, 0, 0], [0, 0, 2], [0, 2, 0]],
-        connectivity=[[0, 1, 1], [0, 2, 1]],
-    )
+    >>>     symbols=["O", "H", "H"],
+    >>>     geometry=[[0, 0, 0], [0, 0, 2], [0, 2, 0]],
+    >>>     connectivity=[[0, 1, 1], [0, 2, 1]],
+    >>> )
 
-    >>> molecule=mol,
-        driver="energy",
-        model={"method": "openff-1.0.0", "basis": "smirnoff"},
-    )
+    >>> model = qcel.models.AtomicInput(
+    >>>     molecule=mol,
+    >>>     driver="energy",
+    >>>     model={"method": "openff-1.0.0", "basis": "smirnoff"},
+    >>> )
     >>> ret = qcng.compute(model, "openmm")
     >>> ret.return_result
     0.011185654397410195
