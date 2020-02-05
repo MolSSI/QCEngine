@@ -59,7 +59,7 @@ def test_psi4_hf3c_task():
     assert ret.model.basis is None
 
 
-@using("psi4_14")
+@using("psi4_runqcsk")
 def test_psi4_interactive_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -76,7 +76,7 @@ def test_psi4_interactive_task():
     assert ret.extras.pop("psiapi_evaluated", False)
 
 
-@using("psi4_14")
+@using("psi4_runqcsk")
 def test_psi4_wavefunction_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
