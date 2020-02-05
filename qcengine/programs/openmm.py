@@ -91,6 +91,13 @@ class OpenMMHarness(ProgramHarness):
         # this harness requires RDKit as well, so this needs checking too
         rdkit_found = RDKitHarness.found(raise_error=raise_error)
 
+        openff_found = which_import(
+            "openforcefield",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install openforcefield -c omnia`.",
+        )
+
         openmm_found = which_import(
             ".openmm",
             return_bool=True,
@@ -99,7 +106,7 @@ class OpenMMHarness(ProgramHarness):
             raise_msg="Please install via `conda install openmm -c omnia`.",
         )
 
-        return rdkit_found and openmm_found
+        return rdkit_found and openff_found and openmm_found
 
     def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
@@ -121,9 +128,9 @@ class OpenMMHarness(ProgramHarness):
             raise InputError("Method must contain a basis set.")
 
         # Build a system based off input
-        if input_data.model.method.lower() == "smirnoff":
+        if input_data.model.basis.lower() == "smirnoff":
 
-            ff_file = input_data.model.basis + ".offxml"
+            ff_file = input_data.model.method + ".offxml"
             off_forcefield = self._get_off_forcefield(ff_file, ff_file)
 
             # Process molecule with RDKit
@@ -137,7 +144,7 @@ class OpenMMHarness(ProgramHarness):
                 off_top = off_mol.to_topology()
                 openmm_system = self._get_openmm_system(off_forcefield, off_top)
         else:
-            raise InputError("Accepted methods are: {'smirnoff', }")
+            raise InputError("Accepted bases are: {'smirnoff', }")
 
         # Need an integrator for simulation even if we don't end up using it really
         integrator = openmm.VerletIntegrator(1.0 * unit.femtoseconds)
