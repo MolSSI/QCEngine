@@ -12,7 +12,11 @@ dependencies:
   - qcelemental >=0.12.0
   - pydantic>=1.0.0
 
+  - pytorch-cpu::pytorch
+
     # Testing
   - pytest
   - pytest-cov
   - codecov
+  - pip:
+    - torchani

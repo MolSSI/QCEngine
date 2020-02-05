@@ -150,10 +150,16 @@ def test_geometric_retries(failure_engine, input_data):
             "rdkit", {"method": "UFF"}, [1.87130923886072, 2.959448636243545, 104.5099642579023], marks=using("rdkit")
         ),
         pytest.param(
-            "rdkit", {"method": "mmff94"}, [1.8310842343589573, 2.884612338953529, 103.93822919865106], marks=using("rdkit")
+            "rdkit",
+            {"method": "mmff94"},
+            [1.8310842343589573, 2.884612338953529, 103.93822919865106],
+            marks=using("rdkit"),
         ),
         pytest.param(
-            "rdkit", {"method": "MMFF94s"}, [1.8310842343589573, 2.884612338953529, 103.93822919865106], marks=using("rdkit")
+            "rdkit",
+            {"method": "MMFF94s"},
+            [1.8310842343589573, 2.884612338953529, 103.93822919865106],
+            marks=using("rdkit"),
         ),
         pytest.param(
             "torchani",
