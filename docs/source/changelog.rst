@@ -30,7 +30,7 @@ Enhancements
 - (:pr:`203`) NWChem - Parses DFT empirical dispersion energy.
 - (:pr:`204`) NWChem - Allows custom DFT functionals to be run.
 - (:pr:`205`) NWChem - Improved gradient output and added Hessian support for NWChem.
-- (:pr:`215`) Psi4 - Psi4 location can be found by either PATH or PYTHONPATH sets up both subprocess and API execution.
+- (:pr:`215`) Psi4 - if Psi4 location can be found by either PATH or PYTHONPATH, harness sets up both subprocesses and API execution.
 - (:pr:`215`) ``get_program`` shows the helpful "install this" messages from ``found()`` rather than just saying "cannot be found".
 
 Bug Fixes
@@ -39,7 +39,6 @@ Bug Fixes
 - (:pr:`215`) NWChem complains *before* a calculation if the necessary ``networkx`` package not available.
 - (:pr:`207`) NWChem - Minor bug fixes for NWChem when more than core per MPI rank is used.
 - (:pr:`209`) NWChem - Fixed missing extras tags in NWChem harness.
-- (:pr:`218`) Psi4 - Fixed mac psiapi runs in some circumstances.
 
 
 v0.13.0 / 2019-12-10
