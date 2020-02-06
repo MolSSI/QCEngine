@@ -158,7 +158,7 @@ H 0 1 0
 def test_homo_lumo(h20v2):
     # Run NH2
     resi = {
-        "molecule": h20,
+        "molecule": h20v2,
         "driver": "energy",
         "model": {"method": "dft", "basis": "3-21g"},
         "keywords": {"dft__xc": "b3lyp"},
