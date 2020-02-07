@@ -18,6 +18,7 @@ _canonical_methods = [
     ("mp2d", {"method": "MP2-DMP2"}),
     ("nwchem", {"method": "hf", "basis": "6-31G"}),
     ("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}),
+    ("orca", {"method": "hf", "basis": "6-31G"}),
     ("psi4", {"method": "hf", "basis": "6-31G"}),
     ("qchem", {"method": "hf", "basis": "6-31G"}),
     ("rdkit", {"method": "UFF"}),
