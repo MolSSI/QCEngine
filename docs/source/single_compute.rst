@@ -27,14 +27,14 @@ An example input is as follows:
     >>>     O  0.0  0.000  -0.129
     >>>     H  0.0 -1.494  1.027
     >>>     H  0.0  1.494  1.027
-    >>>     """)
+    >>> """)
 
     >>> inp = qcel.models.AtomicInput(
     >>>     molecule=mol,
     >>>     driver="energy",
     >>>     model={"method": "SCF", "basis": "sto-3g"},
     >>>     keywords={"scf_type": "df"}
-    >>>     )
+    >>> )
 
 
 Computation

@@ -78,6 +78,7 @@ and matching the ``hostname_pattern`` to each of the configurations defined in `
 An example ``qcengine.yaml`` file that sets the scratch directory for all nodes is as follows:
 
 .. code:: yaml
+
     all:
       hostname_pattern: "*"
       scratch_directory: ./scratch

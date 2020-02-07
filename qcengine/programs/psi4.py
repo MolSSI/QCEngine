@@ -36,14 +36,29 @@ class Psi4Harness(ProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
+        """Whether Psi4 harness is ready for operation.
+
+        Parameters
+        ----------
+        raise_error: bool
+            Passed on to control negative return between False and ModuleNotFoundError raised.
+
+        Returns
+        -------
+        bool
+            If psi4 (psithon or psiapi) is found, returns True.
+            If raise_error is False and psi4 is missing, returns False.
+            If raise_error is True and psi4 is missing, the error message is raised.
+
+        """
         psithon = which("psi4", return_bool=True)
         psiapi = which_import("psi4", return_bool=True)
 
         if psithon and not psiapi:
-            with popen([which("psi4"), "--pythonpath"]) as exc:
+            with popen([which("psi4"), "--module"]) as exc:
                 exc["proc"].wait(timeout=30)
-            if "pythonpath does not exist" in exc["stderr"]:
-                pass
+            if "module does not exist" in exc["stderr"]:
+                pass  # --module argument only in Psi4 DDD branch
             else:
                 sys.path.append(exc["stdout"].split()[-1])
 
@@ -178,7 +193,12 @@ class Psi4Harness(ProgramHarness):
                     psi4.core.set_num_threads(config.ncores, quiet=True)
                     psi4.set_memory(f"{config.memory}GB", quiet=True)
                     # psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
-                    output_data = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
+                    if pversion < parse_version("1.4a2.dev500"):  # adjust to where DDD merged
+                        # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
+                        #   session*, session could unexpectedly get its own files cleaned away.
+                        output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
+                    else:
+                        output_data = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
                     output_data["extras"]["psiapi_evaluated"] = True
                     success = True
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)

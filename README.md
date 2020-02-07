@@ -1,14 +1,13 @@
 QCEngine
 ========
-[![Travis Build Status](https://travis-ci.org/MolSSI/QCEngine.png)](https://travis-ci.org/MolSSI/QCEngine)
+[![Travis build](https://img.shields.io/travis/MolSSI/QCEngine/master.svg?logo=linux&logoColor=white)](https://travis-ci.org/MolSSI/QCEngine)
 [![codecov](https://img.shields.io/codecov/c/github/MolSSI/QCEngine.svg?logo=Codecov&logoColor=white)](https://codecov.io/gh/MolSSI/QCEngine)
-[![Azure Build Status](https://dev.azure.com/MolSSI/QCArchive/_apis/build/status/MolSSI.QCEngine?branchName=master)](https://dev.azure.com/MolSSI/QCArchive/_build/latest?definitionId=5&branchName=master)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MolSSI/QCEngine.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MolSSI/QCEngine/context:python)
 [![Documentation Status](https://readthedocs.org/projects/qcengine/badge/?version=latest)](https://qcengine.readthedocs.io/en/latest/?badge=latest)
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/qcengine/badges/version.svg)](https://anaconda.org/molssi/qcengine)
-[![Chat on Slack](https://img.shields.io/badge/chat-on_slack-green.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM)
+[![Conda (channel only)](https://img.shields.io/conda/vn/conda-forge/qcengine?color=blue&logo=anaconda&logoColor=white)](https://anaconda.org/conda-forge/qcengine)
+[![Chat on Slack](https://img.shields.io/badge/chat-on_slack-808493.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM)
 
-
+<!--[![Azure Build Status](https://dev.azure.com/MolSSI/QCArchive/_apis/build/status/MolSSI.QCEngine?branchName=master)](https://dev.azure.com/MolSSI/QCArchive/_build/latest?definitionId=5&branchName=master)-->
 Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QCSchema)) for quantum chemistry.
 
 # Example
