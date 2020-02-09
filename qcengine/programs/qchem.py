@@ -38,7 +38,7 @@ class QChemHarness(ProgramHarness):
             "qchem",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install by visiting the Q-Chem website.",
+            raise_msg="Please install by visiting the Q-Chem website. Check it's in your PATH with `which qchem'.",
         )
 
     def _get_qc_path(self, config: Optional["TaskConfig"] = None):

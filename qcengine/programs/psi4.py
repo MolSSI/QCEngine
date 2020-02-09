@@ -77,7 +77,7 @@ class Psi4Harness(ProgramHarness):
             "psi4",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install psi4 -c psi4`.",
+            raise_msg="Please install via `conda install psi4 -c psi4`. Check it's in your PATH with `which psi4`.",
         )
 
     def get_version(self) -> str:
