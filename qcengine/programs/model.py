@@ -1,10 +1,14 @@
 import abc
+import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel
+from pydantic.fields import Field
 from qcelemental.models import AtomicInput, AtomicResult
 
-from qcengine.exceptions import KnownError
+from qcengine.exceptions import KnownErrorException
+
+logger = logging.getLogger(__name__)
 
 
 class ProgramHarness(BaseModel, abc.ABC):
@@ -24,8 +28,9 @@ class ProgramHarness(BaseModel, abc.ABC):
     extras: Optional[Dict[str, Any]]
 
     class Config:
-        allow_mutation: False
-        extra: "forbid"
+        allow_mutation = False
+        extra = "forbid"
+        arbitrary_types_allowed = True
 
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
@@ -123,18 +128,40 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
     Each subclass should implement the ``_compute`` and ``build_input`` methods.
     """
 
+    known_errors: List[KnownErrorException.__class__] = Field(None,
+                                                              description="List of classes that can recognize certain"
+                                                                          " correctable errors from this Harness")
+
     def compute(self, input_data: AtomicInput, config: "TaskConfig") -> AtomicResult:
-        # TODO (wardlt): Add a protocol for controlling the error correction
-        observed_errors = []  # List of the errors that have been caught
+        # Get the error correction configuration
+        error_policy = input_data.protocols.error_correction
+
+        # Run the method and, if it fails, assess if the failure is restartable
+        observed_errors = {}  # Errors that have been observed previously
         while True:
             try:
                 result = self._compute(input_data, config, observed_errors)
                 break
-            except KnownError as e:
-                if len(observed_errors) > 2:
-                    raise e
+            except KnownErrorException as e:
+                logger.info(f'Caught a {type(e)} error.')
+
+                # Determine whether this specific type of error is allowed
+                correction_allowed = error_policy.allows(e.error_name)
+                logger.info(f'Error correction for "{e.error_name}" is allowed')
+
+                # Check if it has run before
+                # TODO (wardlt): Should we allow errors to be run >1 time?
+                previously_run = e.error_name in observed_errors
+
+                # Run only if allowed and this error has not been seen before
+
+                if correction_allowed and not previously_run:
+                    logger.info("Adding error and restarting")
+                    observed_errors[e.error_name] = e.details
                 else:
-                    observed_errors.append(e.error_name)
+                    logger.info('Error has been observed before '
+                                'and mitigation did not fix the issue. Raising exception')
+                    raise e
 
         # Add the errors observed and corrected for, if any
         if len(observed_errors) > 0:
@@ -142,7 +169,8 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
         return result
 
     @abc.abstractmethod
-    def _compute(self, input_data: AtomicInput, config: "TaskConfig", observed_errors: List[str]) -> AtomicResult:
+    def _compute(self, input_data: AtomicInput, config: "TaskConfig",
+                 observed_errors: Dict[str, dict]) -> AtomicResult:
         """Private method describing how to perform a computation given specification
         that includes a list of previously-observed errors
 
@@ -152,14 +180,15 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
             Input specification for a calculation
         config: TaskConfig
             Resource configuration details
-        observed_errors: List[str]
-            List of errors that have been observed previously
+        observed_errors: Dict[str, dict]
+            Errors that have been observed and any details that go along with them
 
         Returns
         -------
         AtomicResult
             Result of the calculation
         """
+        # TODO (wardlt): Is there a standard implementation of _compute: "build_inputs" -> "execute" -> parse_output"?
 
     @abc.abstractmethod
     def build_input(

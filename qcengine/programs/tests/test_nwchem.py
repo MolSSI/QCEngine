@@ -134,7 +134,6 @@ def test_gradient(nh2):
     assert np.allclose(orig_det, shif_det)
 
 
-<<<<<<< HEAD
 @using("nwchem")
 def test_autosym_recovery(problematic_mols, caplog):
     molecule, error = problematic_mols

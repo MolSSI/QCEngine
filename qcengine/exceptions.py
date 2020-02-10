@@ -1,4 +1,7 @@
 import traceback
+from typing import Optional, Dict, Any
+
+from pydantic import Field
 
 
 class QCEngineException(Exception):
@@ -69,25 +72,54 @@ class RandomError(QCEngineException):
     header = "QCEngine Random Error"
 
 
-class KnownError(QCEngineException):
-    """
-    Error that could be recovered from. User must define a message and a name for the error
+class KnownErrorException(QCEngineException):
+    """Base class for detecting errors in the output of a ProgramHarness
 
-    The name of the error could be used by the
+    Subclasses for this class must define `error_name` and `description`, which provide
+    a short name for the error used in the error correction code and a human-readable
+    description of the error and how it is corrected.
+
+    Subclasses for this exception must fulfill the `detect_error` class method,
+     which detects if an error has occurred and raises an exception if one was detected.
+     When raising the exception, the `detect_error` routine can optionally provide details
+     about the error that are needed to correction.
     """
 
     error_type = "known_error"
     header = "QCEngine Known Error"
 
-    def __init__(self, message: str, error_name: str):
-        """
+    error_name: str = Field(None, description="Unique name for this error. Used in autodetection logic")
+    description: str = Field(None, description="Human-readable description of the error.")
+    details: Optional[Dict[str, Any]] = Field(None, description="Any details for this error. Used for user feedback"
+                                                                " and autocorrection logic")
 
-        Parameters
-        ----------
-        message: str
-            Message to give to the user describing the error
-        error_name: str
-             A label for the type of error, used when determining how to correct the result
+    def __init__(self, details: Optional[dict] = None):
+        super().__init__(self.description)
+        self.details = details
+
+    @classmethod
+    def detect_error(cls, outputs: Dict[str, str]):
+        """Detect whether this operation throws an error
+
+        Args:
+            outputs (dict): Output files needed to check for errors
+        Raises:
+            KnownErrorException: Error, if one was detected
         """
-        super().__init__(message)
-        self.error_name = error_name
+        raise NotImplementedError()
+
+
+class SimpleKnownErrorException(KnownErrorException):
+    """Subclass for errors with simple detection logic.
+
+     Most useful for error types that do not need any additional details to correct."""
+
+    @classmethod
+    def detect_error(cls, outputs: Dict[str, str]):
+        if cls._detect(outputs):
+            raise cls()
+
+    @classmethod
+    def _detect(cls, outputs: Dict[str, str]) -> bool:
+        """Detect whether an error is present"""
+        raise NotImplementedError()

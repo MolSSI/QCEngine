@@ -14,9 +14,10 @@ from qcelemental.models import AtomicResult, Provenance, AtomicInput
 from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
-from qcengine.exceptions import UnknownError
+from qcengine.exceptions import UnknownError, KnownErrorException
 
-from ...exceptions import InputError, KnownError
+from .errors import all_errors
+from ...exceptions import InputError
 from ...util import execute, create_mpi_invocation
 from ..model import ErrorCorrectionProgramHarness
 from .germinate import muster_modelchem
@@ -43,6 +44,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         "thread_parallel": False,
         "node_parallel": True,
         "managed_memory": True,
+        "known_errors": all_errors
     }
     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
     version_cache: Dict[str, str] = {}
@@ -121,18 +123,12 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         # Run the job
         success, dexe = self.execute(job_inputs)
 
-        # Look for "recoverable" errors
-        if "sym_geom_project: sym_center_map is inconsistent with requested accuracy" in dexe["stdout"]:
-            logger.info("Encountered symmetry detection problem")
-            # The autosym needs to be made less aggressive
-            raise KnownError(dexe["stdout"], "sym_geom_project")
-        elif "sym_map: no match" in dexe["stdout"]:
-            raise KnownError(dexe["stdout"], "sym_map")
-        elif "geom_binvr: #indep variables incorrect" in dexe["stdout"]:
-            raise KnownError(dexe["stdout"], "geom_binvr")
+        # Check for "recoverable" errors
+        for k in self.known_errors:
+            k.detect_error(dexe)
 
         # Look for known errors in the input file
-        elif "There is an error in the input file" in dexe["stdout"]:
+        if "There is an error in the input file" in dexe["stdout"]:
             raise InputError(dexe["stdout"])
         elif "not compiled" in dexe["stdout"]:
             # recoverable with a different compilation with optional modules
@@ -153,7 +149,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         input_model: AtomicInput,
         config: TaskConfig,
         template: Optional[str] = None,
-        observed_errors: Optional[List] = None,
+        observed_errors: Dict[str, Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -161,7 +157,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         opts = {k.lower(): v for k, v in opts.items()}
 
         # If None, replace input with an empty list
-        observed_errors = observed_errors or []
+        observed_errors = observed_errors or {}
 
         # Handle memory
         # for nwchem, [GiB] --> [B]
