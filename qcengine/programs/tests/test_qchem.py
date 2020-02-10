@@ -9,6 +9,13 @@ from qcengine.testing import qcengine_records, using
 qchem_info = qcengine_records("qchem")
 qchem_logonly_info = qcengine_records("qchem_logonly")
 
+qchem_forgive = [
+    "root.molecule.provenance.version",
+    "root.molecule.provenance.routine",
+    "root.provenance.version",
+    "root.provenance.routine",
+]
+
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
 def test_qchem_output_parser(test_case):
@@ -108,9 +115,10 @@ def test_qchem_logfile_parser(test_case):
         if key not in output_ref["provenance"]:
             output["provenance"].pop(key)
 
-    check, message = compare_recursive(
-        output_ref, output, return_message=True, forgive=["root.molecule.provenance.version", "root.provenance.version"]
-    )
+    # Modify ref to trim down total data as a molecule is now sparse
+    output_ref["molecule"] = {k: v for k, v in output_ref["molecule"].items() if k in output["molecule"]}
+
+    check, message = compare_recursive(output_ref, output, return_message=True, forgive=qchem_forgive)
     assert check, message
 
 
@@ -132,15 +140,9 @@ def test_qchem_logfile_parser_qcscr(test_case):
 
     output_ref["stdout"] = None
 
-    # compare_recursive.forgive can be used once QCEL#174 is released
-    output["molecule"].pop("connectivity")
-    output_ref["molecule"].pop("connectivity")
+    # Modify ref to trim down total data as a molecule is now sparse
+    output_ref["molecule"] = {k: v for k, v in output_ref["molecule"].items() if k in output["molecule"]}
 
     output_ref["model"]["method"] = output_ref["model"]["method"].lower()
-    check, message = compare_recursive(
-        output_ref,
-        output,
-        return_message=True,
-        forgive=["root.molecule.provenance.version", "root.provenance.version", "root.provenance.routine"],
-    )
+    check, message = compare_recursive(output_ref, output, return_message=True, forgive=qchem_forgive)
     assert check, message

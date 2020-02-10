@@ -152,9 +152,8 @@ _programs = {
     "mopac": is_program_new_enough("mopac", "2016"),
     "mp2d": which("mp2d", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),
-    "openmm": which_import(".openmm", package="simtk", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
-    "psi4_14": is_program_new_enough("psi4", "1.4a2.dev250"),
+    "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.2"),
     "rdkit": which_import("rdkit", return_bool=True),
@@ -162,6 +161,7 @@ _programs = {
     "torchani": is_program_new_enough("torchani", "0.9"),
     "turbomole": which("define", return_bool=True),
 }
+_programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 
 
 def has_program(name):

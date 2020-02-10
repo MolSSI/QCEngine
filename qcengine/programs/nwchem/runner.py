@@ -52,6 +52,21 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
+        """Whether NWChem harness is ready for operation, with both the QC program and any particular dependencies found.
+
+        Parameters
+        ----------
+        raise_error: bool
+            Passed on to control negative return between False and ModuleNotFoundError raised.
+
+        Returns
+        -------
+        bool
+            If both nwchem and its harness dependency networkx are found, returns True.
+            If raise_error is False and nwchem or networkx are missing, returns False.
+            If raise_error is True and nwchem or networkx are missing, the error message for the first missing one is raised.
+
+        """
         qc = which(
             "nwchem",
             return_bool=True,
@@ -169,9 +184,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
-        mdccmd, mdcopts = muster_modelchem(
-            input_model.model.method, input_model.driver.derivative_int(), opts.pop("qc_module", False)
-        )
+        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
         opts.update(mdcopts)
 
         # Handle basis set
@@ -252,7 +265,11 @@ task python
             qcvars["CURRENT HESSIAN"] = nwhess
 
         # Normalize the output as a float or list of floats
-        retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        if input_model.driver.upper() == "PROPERTIES":
+            retres = qcvars[f"CURRENT ENERGY"]
+        else:
+            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):

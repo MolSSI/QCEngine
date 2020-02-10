@@ -105,12 +105,7 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
     opts = {}
 
     # Map the run type to
-    runtyp = {
-        0: "energy",
-        1: "gradient",
-        2: "hessian",
-        # 'properties': 'prop',
-    }[derint]
+    runtyp = {"energy": "energy", "gradient": "gradient", "hessian": "hessian", "properties": "property"}[derint]
 
     # Write out the theory directive
     if method == "nwchem":

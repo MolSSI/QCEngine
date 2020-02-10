@@ -18,7 +18,8 @@ def test_terachem_output_parser(test_case):
     output = qcng.get_program("terachem", check=False).parse_output(data, inp).dict()
     output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
 
-    assert compare_recursive(output_ref, output, forgive={"stdout", "provenance"})
+    # Forgiving molecule since it is now sparse
+    assert compare_recursive(output_ref, output, forgive={"stdout", "provenance", "molecule"})
 
 
 @pytest.mark.parametrize("test_case", terachem_info.list_test_cases())
