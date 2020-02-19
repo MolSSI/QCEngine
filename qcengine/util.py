@@ -388,11 +388,12 @@ def execute(
     interupt_after: Optional[int] = None,
     environment: Optional[Dict[str, str]] = None,
     shell: Optional[bool] = False,
+    exit_code: Optional[int] = 0
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
 
-    Returns True if exit code zero
+    Returns True if exit code <= exit_code (default 0)
 
     Parameters
     ----------
@@ -425,6 +426,8 @@ def execute(
         The environment to run in
     shell : bool, optional
         Run command through the shell.
+    exit_code: int, optional
+        The exit code above which the process is considered failure.
 
     Raises
     ------
@@ -480,7 +483,7 @@ def execute(
         proc["outfiles"] = extrafiles
     proc["scratch_directory"] = scrdir
 
-    return retcode == 0, proc
+    return retcode <= exit_code, proc
 
 
 @contextmanager
