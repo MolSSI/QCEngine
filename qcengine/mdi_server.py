@@ -231,7 +231,7 @@ class MDIServer:
         natom = len(self.molecule.geometry)
         if coords is None:
             coords = np.zeros(3 * natom)
-            MDI_Recv(3 * natom, MDI_DOUBLE, self.comm, buf = coords)
+            MDI_Recv(3 * natom, MDI_DOUBLE, self.comm, buf=coords)
         new_geometry = np.reshape(coords, (-1, 3))
         self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{"geometry": new_geometry}})
 
