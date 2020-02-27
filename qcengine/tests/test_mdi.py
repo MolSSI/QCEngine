@@ -27,6 +27,10 @@ def test_mdi_water():
         {"scf_type": "df"},
     )
 
+    # Test the <@ command
+    node = engine.send_node()
+    assert node == "@DEFAULT"
+
     # Test the <NATOMS command
     natom = engine.send_natoms()
     assert natom == 3
@@ -72,12 +76,6 @@ def test_mdi_water():
     engine.recv_masses(expected)
     masses = engine.send_masses()
     assert compare_values(expected, masses, atol=1.0e-7)
-
-    # Test the <NCOMMANDS command
-    engine.send_ncommands()
-
-    # Test the <COMMANDS command
-    engine.send_commands()
 
     # Test the <TOTCHARGE command
     totcharge = engine.send_total_charge()
