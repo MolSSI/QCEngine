@@ -15,7 +15,7 @@ try:
     from mdi import MDI_Recv, MDI_Send, MDI_Get_Intra_Code_MPI_Comm
     from mdi import MDI_Register_Node, MDI_Register_Command
     from mdi import MDI_DOUBLE, MDI_CHAR, MDI_INT
-    from mdi import MDI_COMMAND_LENGTH
+    from mdi import MDI_COMMAND_LENGTH, MDI_MAJOR_VERSION
 
     use_mdi = True
 except ImportError:
@@ -59,6 +59,12 @@ class MDIServer:
         local_options : Optional[Dict[str, Any]], optional
             A dictionary of local configuration options
         """
+
+        if not use_mdi:
+            raise Exception("Trying to run as an MDI engine, but the MDI Library was not found")
+
+        if MDI_MAJOR_VERSION < 1:
+            raise Exception("QCEngine requires version 1.0.0 or higher of the MDI Library")
 
         # Confirm that the MDI library has been located
         which_import("mdi", raise_error=True, raise_msg="Please install via 'conda install pymdi -c conda-forge'")
