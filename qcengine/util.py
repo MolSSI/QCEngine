@@ -388,7 +388,7 @@ def execute(
     interupt_after: Optional[int] = None,
     environment: Optional[Dict[str, str]] = None,
     shell: Optional[bool] = False,
-    exit_code: Optional[int] = 0
+    exit_code: Optional[int] = 0,
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
