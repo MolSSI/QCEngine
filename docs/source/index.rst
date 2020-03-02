@@ -84,6 +84,7 @@ In addition, several procedures are available:
 - Geometry Optimization:
 
   - `geomeTRIC <https://github.com/leeping/geomeTRIC>`_
+  - `Pyberny <https://github.com/jhrmnn/pyberny>`_
 
 Configuration Determination
 ---------------------------

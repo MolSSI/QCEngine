@@ -21,3 +21,7 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
+
+  - pip
+  - pip:
+    - pyberny
