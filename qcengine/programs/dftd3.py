@@ -144,7 +144,8 @@ class DFTD3Harness(ProgramHarness):
             command.append("-abc")
 
         # Append `-anal` for pairwise atomic analysis
-        command.append("-anal")
+        if input_model.driver != "gradient":
+            command.append("-anal")
 
         infiles = {
             ".dftd3par.local": dftd3_coeff_formatter(
@@ -246,7 +247,6 @@ class DFTD3Harness(ProgramHarness):
             calcinfo.append(qcel.Datum("DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
-            calcinfo.append(qcel.Datum("PAIRWISE DISPERSION CORRECTION ANALYSIS", "Eh", D3pairs))
 
             if input_model.driver == "gradient":
                 calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
@@ -262,7 +262,6 @@ class DFTD3Harness(ProgramHarness):
             calcinfo.append(qcel.Datum("2-BODY DISPERSION CORRECTION ENERGY", "Eh", ene))
             if qcvkey:
                 calcinfo.append(qcel.Datum(f"{qcvkey} DISPERSION CORRECTION ENERGY", "Eh", ene))
-                calcinfo.append(qcel.Datum(f"{qcvkey} PAIRWISE DISPERSION CORRECTION ANALYSIS", "Eh", D3pairs))
 
             if input_model.driver == "gradient":
                 calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
@@ -301,7 +300,8 @@ class DFTD3Harness(ProgramHarness):
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
-        output_data["extras"]["qcvars"]["PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
+        if input_model.driver != "gradient":
+            output_data["extras"]["qcvars"]["PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
         output_data["success"] = True
 
         return AtomicResult(**{**input_model.dict(), **output_data})

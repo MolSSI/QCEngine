@@ -71,10 +71,10 @@ ref["eneyne"]["MP2-DMP2"] = dict(
     zip(dmm, [0.00632174635953, 0.00265335573161, 0.00344334929607, 0.00265335573161, 0.00344334929607])
 )
 ref["eneyne"]["SAPT0-D3M(BJ)"] = dict(
-    zip(dmm, [-0.00959381, -0.00497584, -0.00295815, -0.00497584, -0.00295815])
+    zip(dmm, [-0.02804306, -0.01563670, -0.01015297, -0.01563670, -0.01015297])
 )
 ref["eneyne"]["SAPT0-D3M"] = dict(
-    zip(dmm, [-0.00391146, -0.00149780, -0.00068440, -0.00149780, -0.00068440])
+    zip(dmm, [-0.01098340, -0.00604255, -0.00262739, -0.00149780, -0.00068440])
 )
 ref["ne"] = {}
 ref["ne"]["B3LYP-D3(BJ)"] = {"atom": 0.0}
@@ -987,15 +987,16 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
         ({"parent": "eneyne", "name": "d3-PBE-D3zero", "subject": "mB", "lbl": "PBE-D3"}),
         ({"parent": "eneyne", "name": "d3-PBE-D3zero", "subject": "gAmB", "lbl": "PBE-D3"}),
         ({"parent": "eneyne", "name": "d3-PBE-D2", "subject": "mAgB", "lbl": "PBE-D2"}),
-        #({"parent": "eneyne", "name": "d3-SAPT0-D3M(BJ)", "subject": "dimer", "lbl": "SAPT0-D3M(BJ)"}),
-        #({"parent": "eneyne", "name": "d3-SAPT0-D3M", "subject": "mA", "lbl": "SAPT0-D3M"}),
+        ({"parent": "eneyne", "name": "d3-SAPT0-D3M(BJ)", "subject": "dimer", "lbl": "SAPT0-D3M(BJ)"}),
+        ({"parent": "eneyne", "name": "d3-SAPT0-D3M", "subject": "mA", "lbl": "SAPT0-D3M"}),
         ({"parent": "ne", "name": "d3-b3lyp-d3bj", "subject": "atom", "lbl": "B3LYP-D3(BJ)"}),
     ],
 )
 def test_dftd3__run_dftd3__2body(inp, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
-    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]].ravel()
+    if "sapt" not in inp["name"].lower():
+        gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]].ravel()
 
     if "qcmol" in request.node.name:
         mol = subject
@@ -1020,10 +1021,11 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
     assert compare_values(expected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
     assert compare_values(expected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
 
-    assert compare_values(gexpected, jrec["extras"]["qcvars"]["CURRENT GRADIENT"], atol=1.0e-7)
-    assert compare_values(gexpected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
-    assert compare_values(gexpected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
-    assert compare_values(
+    if "sapt" not in inp["name"].lower():
+        assert compare_values(gexpected, jrec["extras"]["qcvars"]["CURRENT GRADIENT"], atol=1.0e-7)
+        assert compare_values(gexpected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
+        assert compare_values(gexpected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
+        assert compare_values(
         gexpected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION GRADIENT"], atol=1.0e-7
     )
 
