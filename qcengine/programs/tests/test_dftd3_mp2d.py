@@ -70,12 +70,8 @@ ref["eneyne"]["ATM"] = dict(
 ref["eneyne"]["MP2-DMP2"] = dict(
     zip(dmm, [0.00632174635953, 0.00265335573161, 0.00344334929607, 0.00265335573161, 0.00344334929607])
 )
-ref["eneyne"]["SAPT0-D3M(BJ)"] = dict(
-    zip(dmm, [-0.02804306, -0.01563670, -0.01015297, -0.01563670, -0.01015297])
-)
-ref["eneyne"]["SAPT0-D3M"] = dict(
-    zip(dmm, [-0.01098340, -0.00604255, -0.00262739, -0.00149780, -0.00068440])
-)
+ref["eneyne"]["SAPT0-D3M(BJ)"] = dict(zip(dmm, [-0.02804306, -0.01563670, -0.01015297, -0.01563670, -0.01015297]))
+ref["eneyne"]["SAPT0-D3M"] = dict(zip(dmm, [-0.01098340, -0.00604255, -0.00262739, -0.00149780, -0.00068440]))
 ref["ne"] = {}
 ref["ne"]["B3LYP-D3(BJ)"] = {"atom": 0.0}
 ref["ne"]["MP2-DMP2"] = {"atom": 0.0}
@@ -1026,8 +1022,8 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
         assert compare_values(gexpected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
         assert compare_values(gexpected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
         assert compare_values(
-        gexpected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION GRADIENT"], atol=1.0e-7
-    )
+            gexpected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION GRADIENT"], atol=1.0e-7
+        )
 
 
 @using("dftd3_321")

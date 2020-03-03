@@ -196,14 +196,14 @@ class DFTD3Harness(ProgramHarness):
                 # Iterate over block
                 start = stdout.splitlines().index(ln) + 2
                 for l in stdout.splitlines()[start:]:
-                    data = l.replace('-', ' -').split()
-                    #print(data)
+                    data = l.replace("-", " -").split()
+                    # print(data)
                     if len(data) == 0:
                         break
                     atom1 = int(data[0]) - 1
                     atom2 = int(data[1]) - 1
                     Edisp = Decimal(data[-1])
-                    #print(atom1, atom2, Edisp)
+                    # print(atom1, atom2, Edisp)
                     D3pairs[atom1, atom2] = Edisp * Decimal(qcel.constants.conversion_factor("kcal/mol", "Eh"))
                     D3pairs[atom2, atom1] = Edisp * Decimal(qcel.constants.conversion_factor("kcal/mol", "Eh"))
 
