@@ -185,7 +185,6 @@ class DFTD3Harness(ProgramHarness):
         real_nat = np.sum(real)
 
         for ln in stdout.splitlines():
-            print(ln)
             if re.match(" Edisp /kcal,au", ln):
                 ene = Decimal(ln.split()[3])
             elif re.match(r" E6\(ABC\) \"   :", ln):  # c. v3.2.0
