@@ -70,6 +70,12 @@ ref["eneyne"]["ATM"] = dict(
 ref["eneyne"]["MP2-DMP2"] = dict(
     zip(dmm, [0.00632174635953, 0.00265335573161, 0.00344334929607, 0.00265335573161, 0.00344334929607])
 )
+ref["eneyne"]["SAPT0-D3M(BJ)"] = dict(
+    zip(dmm, [-0.00959381, -0.00497584, -0.00295815, -0.00497584, -0.00295815])
+)
+ref["eneyne"]["SAPT0-D3M"] = dict(
+    zip(dmm, [-0.00391146, -0.00149780, -0.00068440, -0.00149780, -0.00068440])
+)
 ref["ne"] = {}
 ref["ne"]["B3LYP-D3(BJ)"] = {"atom": 0.0}
 ref["ne"]["MP2-DMP2"] = {"atom": 0.0}
@@ -981,6 +987,8 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
         ({"parent": "eneyne", "name": "d3-PBE-D3zero", "subject": "mB", "lbl": "PBE-D3"}),
         ({"parent": "eneyne", "name": "d3-PBE-D3zero", "subject": "gAmB", "lbl": "PBE-D3"}),
         ({"parent": "eneyne", "name": "d3-PBE-D2", "subject": "mAgB", "lbl": "PBE-D2"}),
+        #({"parent": "eneyne", "name": "d3-SAPT0-D3M(BJ)", "subject": "dimer", "lbl": "SAPT0-D3M(BJ)"}),
+        #({"parent": "eneyne", "name": "d3-SAPT0-D3M", "subject": "mA", "lbl": "SAPT0-D3M"}),
         ({"parent": "ne", "name": "d3-b3lyp-d3bj", "subject": "atom", "lbl": "B3LYP-D3(BJ)"}),
     ],
 )

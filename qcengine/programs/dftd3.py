@@ -184,6 +184,7 @@ class DFTD3Harness(ProgramHarness):
         real_nat = np.sum(real)
 
         for ln in stdout.splitlines():
+            print(ln)
             if re.match(" Edisp /kcal,au", ln):
                 ene = Decimal(ln.split()[3])
             elif re.match(r" E6\(ABC\) \"   :", ln):  # c. v3.2.0
@@ -191,16 +192,18 @@ class DFTD3Harness(ProgramHarness):
             elif re.match(r""" E6\(ABC\) /kcal,au:""", ln):
                 atm = Decimal(ln.split()[-1])
             elif re.match(" analysis of pair-wise terms", ln):
-                D3pairs = np.zeros((real.shape[0], real.shape[0]))
+                D3pairs = np.zeros((full_nat, full_nat))
                 # Iterate over block
                 start = stdout.splitlines().index(ln) + 2
                 for l in stdout.splitlines()[start:]:
-                    data = l.split()
+                    data = l.replace('-', ' -').split()
+                    #print(data)
                     if len(data) == 0:
                         break
                     atom1 = int(data[0]) - 1
                     atom2 = int(data[1]) - 1
                     Edisp = Decimal(data[-1])
+                    #print(atom1, atom2, Edisp)
                     D3pairs[atom1, atom2] = Edisp * Decimal(qcel.constants.conversion_factor("kcal/mol", "Eh"))
                     D3pairs[atom2, atom1] = Edisp * Decimal(qcel.constants.conversion_factor("kcal/mol", "Eh"))
 
@@ -243,7 +246,7 @@ class DFTD3Harness(ProgramHarness):
             calcinfo.append(qcel.Datum("DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
-            calcinfo.append(qcel.Datum("PAIRWISE DISPERSION CORRECTION ANALYSIS", "kcal/mol", D3pairs))
+            calcinfo.append(qcel.Datum("PAIRWISE DISPERSION CORRECTION ANALYSIS", "Eh", D3pairs))
 
             if input_model.driver == "gradient":
                 calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
@@ -259,7 +262,7 @@ class DFTD3Harness(ProgramHarness):
             calcinfo.append(qcel.Datum("2-BODY DISPERSION CORRECTION ENERGY", "Eh", ene))
             if qcvkey:
                 calcinfo.append(qcel.Datum(f"{qcvkey} DISPERSION CORRECTION ENERGY", "Eh", ene))
-                calcinfo.append(qcel.Datum(f"{qcvkey} PAIRWISE DISPERSION CORRECTION ANALYSIS", "kcal/mol", D3pairs))
+                calcinfo.append(qcel.Datum(f"{qcvkey} PAIRWISE DISPERSION CORRECTION ANALYSIS", "Eh", D3pairs))
 
             if input_model.driver == "gradient":
                 calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
