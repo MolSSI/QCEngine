@@ -172,6 +172,7 @@ class DFTD3Harness(ProgramHarness):
     #   set to run with some dummy values, the 2-body values are no good.
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
+        Grimme_h2kcal = 627.509541
         stdout = outfiles.pop("stdout")
 
         for fl, contents in outfiles.items():
@@ -203,9 +204,8 @@ class DFTD3Harness(ProgramHarness):
                     atom1 = int(data[0]) - 1
                     atom2 = int(data[1]) - 1
                     Edisp = Decimal(data[-1])
-                    # print(atom1, atom2, Edisp)
-                    D3pairs[atom1, atom2] = Edisp * Decimal(qcel.constants.conversion_factor("kcal/mol", "Eh"))
-                    D3pairs[atom2, atom1] = Edisp * Decimal(qcel.constants.conversion_factor("kcal/mol", "Eh"))
+                    D3pairs[atom1, atom2] = Edisp / Decimal(Grimme_h2kcal)
+                    D3pairs[atom2, atom1] = D3pairs[atom1, atom2]
 
             elif re.match(" normal termination of dftd3", ln):
                 break
