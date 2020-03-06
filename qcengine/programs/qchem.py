@@ -183,6 +183,8 @@ class QChemHarness(ProgramHarness):
             keywords["JOBTYPE"] = "force"
         elif input_model.driver == "hessian":
             keywords["JOBTYPE"] = "freq"
+        elif input_model.extras.get("_procedure", False) == "optimization":
+            keywords["JOBTYPE"] = "opt"
         else:
             raise InputError(f"Driver of type {input_model.driver} is not yet supported.")
 
@@ -275,7 +277,7 @@ $end
 
         return AtomicResult(**{**input_model.dict(), **output_data})
 
-    def parse_logfile(self, outfiles: Dict[str, str]) -> AtomicResult:
+    def parse_logfile(self, outfiles: Dict[str, str], input_model: Optional[AtomicInput] = None) -> AtomicResult:
         """
         Parses a log file.
         """
@@ -289,8 +291,10 @@ $end
         if mobj:
             if int(mobj.group(1)) > 1:
                 raise InputError("Multi-job Q-Chem log files not supported.")
-
-        input_dict = self._parse_logfile_input(outtext)
+        if input_model is not None:
+            input_dict = input_model.dict()
+        else:
+            input_dict = self._parse_logfile_input(outtext)
 
         try:
             qcscr_result = self.parse_output(outfiles, AtomicInput(**input_dict)).dict()
@@ -546,7 +550,7 @@ $end
                 lines = rem_text.split("\n")
                 keywords = {}
                 for line in lines:
-                    s = re.sub(r"(^|[^\\])!.*", "", line).replace('=', '').split()
+                    s = re.sub(r"(^|[^\\])!.*", "", line).replace("=", "").split()
                     if len(s) == 0:
                         continue
                     keywords[s[0].lower()] = s[1].lower()
@@ -574,7 +578,8 @@ $end
                     "sp": "energy",
                     "force": "gradient",
                     "freq": "hessian",
-                }  # optimization intentionally not supported
+                    "opt": "opt",  # optimization must be handled by the procedureharness
+                }
                 try:
                     input_dict["driver"] = _jobtype_to_driver[jobtype]
                 except KeyError:
