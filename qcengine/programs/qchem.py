@@ -275,68 +275,6 @@ $end
 
         return AtomicResult(**{**input_model.dict(), **output_data})
 
-    def _parse_logfile_common(self, outtext: str, input_dict: Dict[str, Any]):
-        """
-        Parses fields from log file that are not parsed from QCSCRATCH in parse_output
-        """
-
-        properties = {}
-        provenance = provenance_stamp(__name__)
-        mobj = re.search(r"This is a multi-thread run using ([0-9]+) threads", outtext)
-        if mobj:
-            provenance["nthreads"] = int(mobj.group(1))
-
-        mobj = re.search(r"Total job time:\s*" + NUMBER + r"s\(wall\)", outtext)
-        if mobj:
-            provenance["wall_time"] = float(mobj.group(1))
-
-        mobj = re.search(r"Archival summary:\s*\n[0-9]+\\[0-9+]\\([\w\.\-]+)\\", outtext)
-        if mobj:
-            provenance["hostname"] = mobj.group(1)
-
-        mobj = re.search(r"\n\s*There are\s+(\d+) alpha and\s+(\d+) beta electrons\s*\n", outtext)
-        if mobj:
-            properties["calcinfo_nalpha"] = int(mobj.group(1))
-            properties["calcinfo_nbeta"] = int(mobj.group(2))
-
-        mobj = re.search(r"\n\s*There are\s+\d+ shells and\s+(\d+) basis functions\s*\n", outtext)
-        if mobj:
-            properties["calcinfo_nbasis"] = int(mobj.group(1))
-
-        mobj = re.search(r"\n\s*RI-MP2 CORRELATION ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        if mobj:
-            properties["mp2_correlation_energy"] = float(mobj.group(1))
-
-        mobj = re.search(r"\n\s*RI-MP2 SINGLES ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        if mobj:
-            properties["mp2_singles_energy"] = float(mobj.group(1))
-
-        mobj_aaaa = re.search(r"\n\s*RI-MP2 ENERGY \(aa\|aa\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        mobj_bbbb = re.search(r"\n\s*RI-MP2 ENERGY \(bb\|bb\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        if mobj_aaaa and mobj_bbbb:
-            properties["mp2_same_spin_correlation_energy"] = float(mobj_aaaa.group(1)) + float(mobj_bbbb.group(1))
-
-        mobj_aabb = re.search(r"\n\s*RI-MP2 ENERGY \(aa\|bb\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        mobj_bbaa = re.search(r"\n\s*RI-MP2 ENERGY \(bb\|aa\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
-        if mobj_aaaa and mobj_bbbb:
-            properties["mp2_opposite_spin_correlation_energy"] = float(mobj_aabb.group(1)) + float(mobj_bbaa.group(1))
-
-        properties["calcinfo_natom"] = len(input_dict["molecule"]["symbols"])
-
-        mobj = re.search(r"\n\s*(\d+)\s+" + NUMBER + "\s+" + NUMBER + r"\s+Convergence criterion met\s*\n", outtext)
-        if mobj:
-            properties["scf_iterations"] = int(mobj.group(1))
-
-        mobj = re.search(
-            r"\n\s+Dipole Moment \(Debye\)\s*\n\s+X\s+" + NUMBER + r"\s+Y\s+" + NUMBER + r"\s+Z\s+" + NUMBER + r"\s*\n",
-            outtext,
-        )
-        if mobj:
-            cf = constants.conversion_factor("debye", "e * bohr")
-            properties["scf_dipole_moment"] = [float(mobj.group(i)) * cf for i in range(1, 4)]
-
-        return properties, provenance
-
     def parse_logfile(self, outfiles: Dict[str, str]) -> AtomicResult:
         """
         Parses a log file.
@@ -352,67 +290,17 @@ $end
             if int(mobj.group(1)) > 1:
                 raise InputError("Multi-job Q-Chem log files not supported.")
 
-        input_dict = {}
-        mobj = re.search(r"\n-{20,}\nUser input:\n-{20,}\n(.+)\n-{20,}", outtext, re.DOTALL)
-        if mobj:
-            inputtext = mobj.group(1)
-
-            rem_match = re.search(r"\$rem\s*\n([^\$]+)\n\s*\$end", inputtext, re.DOTALL | re.IGNORECASE)
-            if rem_match:
-                rem_text = rem_match.group(1)
-                lines = rem_text.split("\n")
-                keywords = {}
-                for line in lines:
-                    s = re.sub(r"(^|[^\\])!.*", "", line).split()
-                    if len(s) == 0:
-                        continue
-                    keywords[s[0].lower()] = s[1].lower()
-                input_dict["model"] = {}
-                input_dict["model"]["method"] = keywords.pop("method").lower()
-                input_dict["model"]["basis"] = keywords.pop("basis").lower()
-                if "jobtype" in keywords:
-                    jobtype = keywords.pop("jobtype")
-                else:
-                    jobtype = "sp"
-                _jobtype_to_driver = {
-                    "sp": "energy",
-                    "force": "gradient",
-                    "freq": "hessian",
-                }  # optimization intentionally not supported
-                try:
-                    input_dict["driver"] = _jobtype_to_driver[jobtype]
-                except KeyError:
-                    raise KeyError(f"Jobtype {jobtype} not supported in qchem log file parser.")
-
-                for key in keywords:
-                    if keywords[key] == "false":
-                        keywords[key] = False
-                    if keywords[key] == "true":
-                        keywords[key] = True
-                input_dict["keywords"] = keywords
-
-            molecule_match = re.search(r"\$molecule\s*\n([^\$]+)\n\s*\$end", inputtext, re.DOTALL | re.IGNORECASE)
-            if molecule_match:
-                molecule_text = molecule_match.group(1)
-                if keywords.get("input_bohr", False):
-                    molecule_text += "\nunits au"
-                molecule = Molecule.from_data(molecule_text, dtype="psi4")
-                input_dict["molecule"] = molecule.dict()
-
-            _excluded_rem = {
-                "input_bohr",
-                "mem_total",
-                "mem_static",
-            }  # parts of the rem normally written by build_input, and which do not affect results
-            for item in _excluded_rem:
-                if item in input_dict["keywords"]:
-                    input_dict["keywords"].pop(item)
+        input_dict = self._parse_logfile_input(outtext)
 
         try:
             qcscr_result = self.parse_output(outfiles, AtomicInput(**input_dict)).dict()
         except KeyError:
             props, prov = self._parse_logfile_common(outtext, input_dict)
             qcscr_result = {"properties": props, "provenance": prov, **input_dict}
+
+        mobj = re.search(r"\n Q-Chem (\d+\.\d+\.\d+\.) for ", outtext)
+        if mobj and prov.get("version", None) is None:
+            prov["version"] = mobj.group(1)
 
         mobj = re.search(r"\n\s*Total\s+energy in the final basis set =\s+" + NUMBER + r"\s*\n", outtext)
         if mobj and qcscr_result["properties"].get("scf_total_energy", None) is None:
@@ -644,3 +532,138 @@ $end
             qcscr_result["return_result"] = qcscr_result["properties"]["return_energy"]
 
         return AtomicResult(**qcscr_result)
+
+    @staticmethod
+    def _parse_logfile_input(outtext):
+        input_dict = {}
+        mobj = re.search(r"\n-{20,}\nUser input:\n-{20,}\n(.+)\n-{20,}", outtext, re.DOTALL)
+        if mobj:
+            inputtext = mobj.group(1)
+
+            rem_match = re.search(r"\$rem\s*\n([^\$]+)\n\s*\$end", inputtext, re.DOTALL | re.IGNORECASE)
+            if rem_match:
+                rem_text = rem_match.group(1)
+                lines = rem_text.split("\n")
+                keywords = {}
+                for line in lines:
+                    s = re.sub(r"(^|[^\\])!.*", "", line).split()
+                    if len(s) == 0:
+                        continue
+                    keywords[s[0].lower()] = s[1].lower()
+                input_dict["model"] = {}
+                try:
+                    input_dict["model"]["method"] = keywords.pop("method").lower()
+                except KeyError:
+                    # For DFT methods, Q-Chem allows input using the "exchange" and "correlation" keywords.
+                    # However, most functionals (hybrids, RSH, etc.) cannot be specified in this manner.
+                    # Q-Chem chooses to use "exchange" to mean the same thing as method in these cases.
+                    correlation = keywords.get("correlation", None)
+                    if correlation is None or correlation.lower() in ["0", "none", "false"]:
+                        if correlation is not None:
+                            keywords.pop(correlation)
+                        input_dict["model"]["method"] = keywords.pop("exchange").lower()
+                    else:
+                        raise KeyError(f"Cannot parse method from input: {keywords}")
+
+                input_dict["model"]["basis"] = keywords.pop("basis").lower()
+                if "jobtype" in keywords:
+                    jobtype = keywords.pop("jobtype")
+                else:
+                    jobtype = "sp"
+                _jobtype_to_driver = {
+                    "sp": "energy",
+                    "force": "gradient",
+                    "freq": "hessian",
+                }  # optimization intentionally not supported
+                try:
+                    input_dict["driver"] = _jobtype_to_driver[jobtype]
+                except KeyError:
+                    raise KeyError(f"Jobtype {jobtype} not supported in qchem log file parser.")
+
+                for key in keywords:
+                    if keywords[key] == "false":
+                        keywords[key] = False
+                    if keywords[key] == "true":
+                        keywords[key] = True
+                input_dict["keywords"] = keywords
+
+            molecule_match = re.search(r"\$molecule\s*\n([^\$]+)\n\s*\$end", inputtext, re.DOTALL | re.IGNORECASE)
+            if molecule_match:
+                molecule_text = molecule_match.group(1)
+                if keywords.get("input_bohr", False):
+                    molecule_text += "\nunits au"
+                molecule = Molecule.from_data(molecule_text, dtype="psi4")
+                input_dict["molecule"] = molecule.dict()
+
+            _excluded_rem = {
+                "input_bohr",
+                "mem_total",
+                "mem_static",
+            }  # parts of the rem normally written by build_input, and which do not affect results
+            for item in _excluded_rem:
+                if item in input_dict["keywords"]:
+                    input_dict["keywords"].pop(item)
+        return input_dict
+
+    @staticmethod
+    def _parse_logfile_common(outtext: str, input_dict: Dict[str, Any]):
+        """
+        Parses fields from log file that are not parsed from QCSCRATCH in parse_output
+        """
+
+        properties = {}
+        provenance = provenance_stamp(__name__)
+        mobj = re.search(r"This is a multi-thread run using ([0-9]+) threads", outtext)
+        if mobj:
+            provenance["nthreads"] = int(mobj.group(1))
+
+        mobj = re.search(r"Total job time:\s*" + NUMBER + r"s\(wall\)", outtext)
+        if mobj:
+            provenance["wall_time"] = float(mobj.group(1))
+
+        mobj = re.search(r"Archival summary:\s*\n[0-9]+\\[0-9+]\\([\w\.\-]+)\\", outtext)
+        if mobj:
+            provenance["hostname"] = mobj.group(1)
+
+        mobj = re.search(r"\n\s*There are\s+(\d+) alpha and\s+(\d+) beta electrons\s*\n", outtext)
+        if mobj:
+            properties["calcinfo_nalpha"] = int(mobj.group(1))
+            properties["calcinfo_nbeta"] = int(mobj.group(2))
+
+        mobj = re.search(r"\n\s*There are\s+\d+ shells and\s+(\d+) basis functions\s*\n", outtext)
+        if mobj:
+            properties["calcinfo_nbasis"] = int(mobj.group(1))
+
+        mobj = re.search(r"\n\s*RI-MP2 CORRELATION ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        if mobj:
+            properties["mp2_correlation_energy"] = float(mobj.group(1))
+
+        mobj = re.search(r"\n\s*RI-MP2 SINGLES ENERGY\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        if mobj:
+            properties["mp2_singles_energy"] = float(mobj.group(1))
+
+        mobj_aaaa = re.search(r"\n\s*RI-MP2 ENERGY \(aa\|aa\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        mobj_bbbb = re.search(r"\n\s*RI-MP2 ENERGY \(bb\|bb\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        if mobj_aaaa and mobj_bbbb:
+            properties["mp2_same_spin_correlation_energy"] = float(mobj_aaaa.group(1)) + float(mobj_bbbb.group(1))
+
+        mobj_aabb = re.search(r"\n\s*RI-MP2 ENERGY \(aa\|bb\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        mobj_bbaa = re.search(r"\n\s*RI-MP2 ENERGY \(bb\|aa\)\s+=\s+" + NUMBER + r"\s+au\s*\n", outtext)
+        if mobj_aaaa and mobj_bbbb:
+            properties["mp2_opposite_spin_correlation_energy"] = float(mobj_aabb.group(1)) + float(mobj_bbaa.group(1))
+
+        properties["calcinfo_natom"] = len(input_dict["molecule"]["symbols"])
+
+        mobj = re.search(r"\n\s*(\d+)\s+" + NUMBER + "\s+" + NUMBER + r"\s+Convergence criterion met\s*\n", outtext)
+        if mobj:
+            properties["scf_iterations"] = int(mobj.group(1))
+
+        mobj = re.search(
+            r"\n\s+Dipole Moment \(Debye\)\s*\n\s+X\s+" + NUMBER + r"\s+Y\s+" + NUMBER + r"\s+Z\s+" + NUMBER + r"\s*\n",
+            outtext,
+        )
+        if mobj:
+            cf = constants.conversion_factor("debye", "e * bohr")
+            properties["scf_dipole_moment"] = [float(mobj.group(i)) * cf for i in range(1, 4)]
+
+        return properties, provenance
