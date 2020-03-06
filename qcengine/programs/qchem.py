@@ -546,7 +546,7 @@ $end
                 lines = rem_text.split("\n")
                 keywords = {}
                 for line in lines:
-                    s = re.sub(r"(^|[^\\])!.*", "", line).split()
+                    s = re.sub(r"(^|[^\\])!.*", "", line).replace('=', '').split()
                     if len(s) == 0:
                         continue
                     keywords[s[0].lower()] = s[1].lower()
@@ -560,7 +560,7 @@ $end
                     correlation = keywords.get("correlation", None)
                     if correlation is None or correlation.lower() in ["0", "none", "false"]:
                         if correlation is not None:
-                            keywords.pop(correlation)
+                            keywords.pop("correlation")
                         input_dict["model"]["method"] = keywords.pop("exchange").lower()
                     else:
                         raise KeyError(f"Cannot parse method from input: {keywords}")
