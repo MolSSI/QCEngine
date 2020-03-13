@@ -147,6 +147,7 @@ _programs = {
     "gamess": which("rungms", return_bool=True),
     "gcp": which("gcp", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
+    "berny": which_import("berny", return_bool=True),
     "mdi": which_import("mdi", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
