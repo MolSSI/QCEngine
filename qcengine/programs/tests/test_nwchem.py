@@ -1,9 +1,9 @@
 """Tests for NWChem functionality"""
+import numpy as np
 import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_values
 
-import numpy as np
 import qcengine as qcng
 from qcengine.testing import using
 

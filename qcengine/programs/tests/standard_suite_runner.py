@@ -1,9 +1,10 @@
 import pprint
 
 import pytest
-import qcengine as qcng
 from qcelemental.models import AtomicInput
 from qcelemental.testing import compare, compare_values
+
+import qcengine as qcng
 
 from .standard_suite_contracts import (
     contractual_ccsd,

@@ -6,7 +6,7 @@ from decimal import Decimal
 from typing import Any, Dict, Optional
 
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, Provenance, AtomicInput
+from qcelemental.models import AtomicInput, AtomicResult, Provenance
 from qcelemental.util import safe_version, unnp, which
 
 from ...exceptions import InputError
@@ -167,7 +167,7 @@ class GAMESSHarness(ProgramHarness):
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,
-            "success": True
+            "success": True,
         }
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list

@@ -162,7 +162,7 @@ class CFOURHarness(ProgramHarness):
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,
-            "success": True
+            "success": True,
         }
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list

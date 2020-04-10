@@ -6,8 +6,8 @@ import qcelemental as qcel
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
-from qcengine.testing import using, is_program_new_enough
 from qcengine.programs import empirical_dispersion_resources
+from qcengine.testing import is_program_new_enough, using
 
 
 @using("dftd3")

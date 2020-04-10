@@ -1,23 +1,23 @@
 """
 Calls the NWChem executable.
 """
-import re
 import copy
 import logging
 import pprint
+import re
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, Provenance, AtomicInput
+from qcelemental.models import AtomicInput, AtomicResult, Provenance
 from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 
 from ...exceptions import InputError
-from ...util import execute, create_mpi_invocation
+from ...util import create_mpi_invocation, execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
 from .germinate import muster_modelchem

@@ -6,12 +6,7 @@ Requires RDKit
 import datetime
 import hashlib
 import os
-
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..config import TaskConfig
-    from qcelemental.models import AtomicInput
 
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import which_import
@@ -20,6 +15,10 @@ from ..exceptions import InputError
 from ..util import capture_stdout
 from .model import ProgramHarness
 from .rdkit import RDKitHarness
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 
 class OpenMMHarness(ProgramHarness):
