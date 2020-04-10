@@ -172,7 +172,7 @@ class GAMESSHarness(ProgramHarness):
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         output_data["extras"]["qcvars"] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in unnp(qcvars, flat=True).items()
         }
 
         return AtomicResult(**{**input_model.dict(), **output_data})

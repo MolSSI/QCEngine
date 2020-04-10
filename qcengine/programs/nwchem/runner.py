@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import AtomicInput, AtomicResult, Provenance
-from qcelemental.util import safe_version, which, which_import
+from qcelemental.util import safe_version, unnp, which, which_import
 
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
@@ -265,7 +265,7 @@ task python
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
         output_data["extras"]["qcvars"] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in unnp(qcvars, flat=True).items()
         }
 
         return AtomicResult(**{**input_model.dict(), **output_data})

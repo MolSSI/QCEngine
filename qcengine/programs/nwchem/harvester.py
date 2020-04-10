@@ -7,7 +7,6 @@ from typing import Tuple
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import Molecule
-from qcelemental.models.results import AtomicResultProperties
 from qcelemental.molparse import regex
 
 from ..util import PreservingDict
