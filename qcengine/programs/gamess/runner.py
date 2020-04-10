@@ -5,7 +5,6 @@ import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
-import qcelemental as qcel
 from qcelemental.models import AtomicInput, AtomicResult, Provenance
 from qcelemental.util import safe_version, unnp, which
 

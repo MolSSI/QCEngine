@@ -24,7 +24,7 @@ if [ -d "$MINICONDA_HOME/bin" ]; then
 
     conda config --set always_yes yes --set changeps1 no
 else
-    MINICONDA_MD5=$(wget -qO- https://repo.continuum.io/miniconda/ | grep -A3 $MINICONDA | sed -n '4p' | sed -n 's/ *<td>\(.*\)<\/td> */\1/p')
+    MINICONDA_MD5=$(wget -qO- https://repo.anaconda.com/miniconda/ | grep -A3 $MINICONDA | sed -n '4p' | sed -n 's/ *<td>\(.*\)<\/td> */\1/p')
     echo "-- Miniconda latest version NOT FOUND in cache"
     wget -q https://repo.continuum.io/miniconda/$MINICONDA
     if [[ $MINICONDA_MD5 != $(md5sum $MINICONDA | cut -d ' ' -f 1) ]]; then

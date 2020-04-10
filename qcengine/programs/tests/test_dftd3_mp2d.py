@@ -880,27 +880,35 @@ def test_molecule__run_dftd3__23body(inp, subjects):
 
 @using("qcdb")
 def test_qcdb__energy_d3():
+    import qcdb
+
     eneyne = qcdb.set_molecule(seneyne)
     eneyne.update_geometry()
 
     E, jrec = qcdb.energy("d3-b3lyp-d2", return_wfn=True)
-    assert compare_values(ref["eneyne"]["B3LYP-D2"]["dimer"], E, 7, "P: Ethene-Ethyne -D2")
+    assert compare_values(ref["eneyne"]["B3LYP-D2"]["dimer"], E, "P: Ethene-Ethyne -D2", atol=1.0e-7)
     assert compare_values(
-        ref["eneyne"]["B3LYP-D2"]["dimer"], jrec["qcvars"]["DISPERSION CORRECTION ENERGY"].data, 7, tnm()
+        ref["eneyne"]["B3LYP-D2"]["dimer"], jrec["qcvars"]["DISPERSION CORRECTION ENERGY"].data, tnm(), atol=1.0e-7
     )
     assert compare_values(
-        ref["eneyne"]["B3LYP-D2"]["dimer"], jrec["qcvars"]["B3LYP-D2 DISPERSION CORRECTION ENERGY"].data, 7, tnm()
+        ref["eneyne"]["B3LYP-D2"]["dimer"],
+        jrec["qcvars"]["B3LYP-D2 DISPERSION CORRECTION ENERGY"].data,
+        tnm(),
+        atol=1.0e-7,
     )
 
     mA = eneyne.extract_subsets(1)
 
     E, jrec = qcdb.energy("d3-b3lyp-d3bj", return_wfn=True, molecule=mA)
-    assert compare_values(ref["eneyne"]["B3LYP-D3(BJ)"]["mA"], E, 7, tnm())
+    assert compare_values(ref["eneyne"]["B3LYP-D3(BJ)"]["mA"], E, tnm(), atol=1.0e-7)
     assert compare_values(
-        ref["eneyne"]["B3LYP-D3(BJ)"]["mA"], jrec["qcvars"]["DISPERSION CORRECTION ENERGY"].data, 7, tnm()
+        ref["eneyne"]["B3LYP-D3(BJ)"]["mA"], jrec["qcvars"]["DISPERSION CORRECTION ENERGY"].data, tnm(), atol=1.0e-7
     )
     assert compare_values(
-        ref["eneyne"]["B3LYP-D3(BJ)"]["mA"], jrec["qcvars"]["B3LYP-D3(BJ) DISPERSION CORRECTION ENERGY"].data, 7, tnm()
+        ref["eneyne"]["B3LYP-D3(BJ)"]["mA"],
+        jrec["qcvars"]["B3LYP-D3(BJ) DISPERSION CORRECTION ENERGY"].data,
+        tnm(),
+        atol=1.0e-7,
     )
 
 

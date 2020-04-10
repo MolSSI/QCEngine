@@ -9,7 +9,6 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-import qcelemental as qcel
 from qcelemental.models import AtomicInput, AtomicResult, Provenance
 from qcelemental.util import safe_version, unnp, which, which_import
 
