@@ -6,12 +6,13 @@ from decimal import Decimal
 from typing import Any, Dict, Optional
 
 import qcelemental as qcel
-from qcelemental.models import AtomicResult
+from qcelemental.models import AtomicResult, Provenance, AtomicInput
 from qcelemental.util import safe_version, unnp, which
 
 from ...exceptions import InputError
 from ...util import execute
 from ..model import ProgramHarness
+from ..qcvar_identities_resources import build_atomicproperties, build_out
 from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
@@ -68,7 +69,7 @@ class GAMESSHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_data: AtomicInput, config: "TaskConfig") -> AtomicResult:
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_data, config)
@@ -83,7 +84,7 @@ class GAMESSHarness(ProgramHarness):
             return self.parse_output(dexe["outfiles"], input_data)
 
     def build_input(
-        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
+        self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
         gamessrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -137,54 +138,41 @@ class GAMESSHarness(ProgramHarness):
         )
         return success, dexe
 
-    def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
+    def parse_output(self, outfiles: Dict[str, str], input_model: AtomicInput) -> AtomicResult:
+
+        # Get the stdout from the calculation (required)
+        stdout = outfiles.pop("stdout")
+        stderr = outfiles.pop("stderr")
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
-        qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, outfiles["stdout"])
+        qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
 
         if gamessgrad is not None:
             qcvars["CURRENT GRADIENT"] = gamessgrad
 
-        qcvars = unnp(qcvars, flat=True)
+        if input_model.driver.upper() == "PROPERTIES":
+            retres = qcvars[f"CURRENT ENERGY"]
+        else:
+            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+
+        build_out(qcvars)
+        atprop = build_atomicproperties(qcvars)
 
         output_data = {
-            "schema_name": "qcschema_output",
-            "molecule": gamessmol,
             "schema_version": 1,
-            "extras": {},
-            "properties": {"nuclear_repulsion_energy": gamessmol.nuclear_repulsion_energy()},
-            "return_result": qcvars[f"CURRENT {input_model.driver.upper()}"],
-            "stdout": outfiles["stdout"],
+            "molecule": gamessmol,
+            "extras": {"outfiles": outfiles, **input_model.extras},
+            "properties": atprop,
+            "provenance": Provenance(creator="GAMESS", version=self.get_version(), routine="rungms"),
+            "return_result": retres,
+            "stderr": stderr,
+            "stdout": stdout,
+            "success": True
         }
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         output_data["extras"]["qcvars"] = {
-            k.upper(): float(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
         }
-
-        # copy qcvars into schema where possible
-        qcvars_to_properties = {
-            "DFT XC ENERGY": "scf_xc_energy",
-            "ONE-ELECTRON ENERGY": "scf_one_electron_energy",
-            "TWO-ELECTRON ENERGY": "scf_two_electron_energy",
-            "SCF TOTAL ENERGY": "scf_total_energy",
-            "MP2 CORRELATION ENERGY": "mp2_correlation_energy",
-            "MP2 TOTAL ENERGY": "mp2_total_energy",
-            "CCSD CORRELATION ENERGY": "ccsd_correlation_energy",
-            "CCSD TOTAL ENERGY": "ccsd_total_energy",
-            "CCSD(T) CORRELATION ENERGY": "ccsd_prt_pr_correlation_energy",
-            "CCSD(T) TOTAL ENERGY": "ccsd_prt_pr_total_energy",
-        }
-        for qcvar in qcvars:
-            if qcvar in qcvars_to_properties:
-                output_data["properties"][qcvars_to_properties[qcvar]] = qcvars[qcvar]
-        if {"SCF DIPOLE X", "SCF DIPOLE Y", "SCF DIPOLE Z"} & set(qcvars.keys()):
-            conv = Decimal(qcel.constants.conversion_factor("debye", "e * bohr"))
-            output_data["properties"]["scf_dipole_moment"] = [
-                qcvars["SCF DIPOLE X"] * conv,
-                qcvars["SCF DIPOLE Y"] * conv,
-                qcvars["SCF DIPOLE Z"] * conv,
-            ]
-        output_data["success"] = True
 
         return AtomicResult(**{**input_model.dict(), **output_data})

@@ -141,10 +141,13 @@ def harvest_outfile_pass(outtext):
 
         # Process MP2 (Restricted, Unrestricted(RO n/a))
         # 1)SCF-MP2
-        mobj = re.search(r'^\s+' + r'SCF energy' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Correlation energy' +
-                         r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Singlet pairs' + r'\s+' + NUMBER + r'\s*' + r'^\s+' +
-                         r'Triplet pairs' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Total MP2 energy' + r'\s+' +
-                         NUMBER + r'\s*$', outtext, re.MULTILINE)  # MP2
+        mobj = re.search(
+            r'^\s+' + r'SCF energy' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Correlation energy' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Singlet pairs' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Triplet pairs' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Total MP2 energy' + r'\s+' + NUMBER + r'\s*$', 
+            outtext, re.MULTILINE)  # MP2
         if mobj:
             logger.debug('matched scf-mp2')
             psivar['HF TOTAL ENERGY'] = mobj.group(1)
@@ -152,15 +155,18 @@ def harvest_outfile_pass(outtext):
             psivar['MP2 TOTAL ENERGY'] = mobj.group(5)
         # SCS-MP2
         mobj = re.search(
-            r'^\s+' + r'Same spin pairs' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Same spin scaling factor' + r'\s+' +
-            NUMBER + r'\s*' + r'^\s+' + r'Opposite spin pairs' + r'\s+' + NUMBER + r'\s*' + r'^\s+' +
-            r'Opposite spin scaling fact.' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'SCS-MP2 correlation energy' +
-            r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Total SCS-MP2 energy' + r'\s+' + NUMBER + r'\s*$', outtext,
+            r'^\s+' + r'Same spin pairs' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'Same spin scaling factor' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'Opposite spin pairs' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Opposite spin scaling fact.' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'SCS-MP2 correlation energy' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Total SCS-MP2 energy' + r'\s+' + NUMBER + r'\s*$', outtext,
             re.MULTILINE)
         if mobj:
             logger.debug('matched scs-mp2')
-            psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(1)) * Decimal(mobj.group(2))
-            psivar['MP2 OPPOSITE-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) * Decimal(mobj.group(4))
+            print('matched scs-mp2', mobj.groups())
+            psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = mobj.group(1)  #Decimal(mobj.group(1)) * Decimal(mobj.group(2))
+            psivar['MP2 OPPOSITE-SPIN CORRELATION ENERGY'] = mobj.group(3)  #Decimal(mobj.group(3)) * Decimal(mobj.group(4))
 
             logger.debug(mobj.group(1))  # ess
             logger.debug(mobj.group(2))  # fss
@@ -191,6 +197,11 @@ def harvest_outfile_pass(outtext):
             psivar['MP2 CORRELATION ENERGY'] = mobj.group(2)
             psivar['MP2 TOTAL ENERGY'] = mobj.group(3)
 
+            mobj3 = re.search(
+                r'Final RHF  results', outtext)
+            if mobj3:
+                psivar["MP2 DOUBLES ENERGY"] = mobj.group(2)
+
         # 4) Direct MP2
 
         # 5) RI-MP2
@@ -207,7 +218,16 @@ def harvest_outfile_pass(outtext):
                 logger.debug(f'matched tce mbpt {mbpt_plain}', mobj.groups())
 
                 if mbpt_plain == 'MP2':
-                    psivar[f'{mbpt_plain} CORRELATION ENERGY'] = mobj.group(1)
+                    mobj3 = re.search(
+                        r'Wavefunction type : Restricted open-shell Hartree-Fock',
+                        outtext, re.MULTILINE)
+                    if mobj3:
+                        psivar[f'{mbpt_plain} DOUBLES ENERGY'] = mobj.group(1)
+                        psivar[f'CURRENT CORRELATION ENERGY'] = mobj.group(1)
+                        psivar[f'CURRENT ENERGY'] = Decimal(mobj.group(1)) + psivar[f'HF TOTAL ENERGY']
+                    else:
+                        psivar[f'{mbpt_plain} DOUBLES ENERGY'] = mobj.group(1)
+                        psivar[f'{mbpt_plain} CORRELATION ENERGY'] = mobj.group(1)
                 else:
                     psivar[f'{mbpt_plain} CORRECTION ENERGY'] = mobj.group(1)
                 psivar[f'{mbpt_plain} TOTAL ENERGY'] = mobj.group(2)
@@ -224,9 +244,7 @@ def harvest_outfile_pass(outtext):
                 mbpt_plain = cc_name.replace('\\', '').replace('MBPT', 'MP').replace('(', '').replace(')', '')
                 print(f'matched tce {mbpt_plain} dipole moment')
                 #only pulling Debye
-                psivar[f'{mbpt_plain} DIPOLE X'] = mobj2.group(2)
-                psivar[f'{mbpt_plain} DIPOLE Y'] = mobj2.group(4)
-                psivar[f'{mbpt_plain} DIPOLE Z'] = mobj2.group(6)
+                psivar[f'{mbpt_plain} DIPOLE'] = np.array([mobj2.group(1), mobj2.group(3), mobj2.group(5)])
 
         #TCE with () or [] 
         for cc_name in [r'CCSD\(T\)', r'CCSD\[T\]', r'CCSD\(2\)_T', r'CCSD\(2\)', r'CCSDT\(2\)_Q', r'CR-CCSD\[T\]', r'CR-CCSD\(T\)', r'LR-CCSD\(T\)', r'LR-CCSD\(TQ\)-1', r'CREOMSD\(T\)']:
@@ -258,9 +276,7 @@ def harvest_outfile_pass(outtext):
                 print(f'matched tce {cc_plain} dipole moment')
 
                 #only pulling Debye
-                psivar[f'{cc_plain} DIPOLE X'] = mobj2.group(2)
-                psivar[f'{cc_plain} DIPOLE Y'] = mobj2.group(4)
-                psivar[f'{cc_plain} DIPOLE Z'] = mobj2.group(6)
+                psivar[f'{cc_plain} DIPOLE'] = np.array([mobj2.group(1), mobj2.group(3), mobj2.group(5)])
         
         #Process other TCE cases
         for cc_name in [r'CISD', r'CISDT', r'CISDTQ', r'CCD', r'CC2', r'CCSD', r'CCSDT', r'CCSDTQ', r'LCCSD', r'LCCD', r'CCSDTA']:
@@ -271,7 +287,14 @@ def harvest_outfile_pass(outtext):
 
             if mobj:
                 logger.debug(f'matched {cc_name}')
-                logger.debug(mobj)
+                mobj3 = re.search(
+                    r'Wavefunction type : Restricted open-shell Hartree-Fock',
+                    outtext, re.MULTILINE)
+                print(f'matched {cc_name}', mobj.groups())
+                if mobj3:
+                    pass
+                else:
+                    psivar[f'{cc_name} DOUBLES ENERGY'] = mobj.group(1)
                 psivar[f'{cc_name} CORRELATION ENERGY'] = mobj.group(1)
                 psivar[f'{cc_name} TOTAL ENERGY'] = mobj.group(2)
         #TCE dipole
@@ -286,20 +309,22 @@ def harvest_outfile_pass(outtext):
                 print(f'matched tce dipole moment')
 
                 #only pulling Debye
-                psivar[f'CURRENT DIPOLE X'] = mobj2.group(2)
-                psivar[f'CURRENT DIPOLE Y'] = mobj2.group(4)
-                psivar[f'CURRENT DIPOLE Z'] = mobj2.group(6)
+                psivar[f'CURRENT DIPOLE'] = np.array([mobj2.group(1), mobj2.group(3), mobj2.group(5)])
 
         # Process CCSD/CCSD(T) using nwchem CCSD/CCSD(T) [dertype] command
 
         mobj = re.search(
-            r'^\s+' + r'-----------' + r'\s*' + r'^\s+' + r'CCSD Energy' + r'\s*' + r'^\s+' + r'-----------' + r'\s*' +
-            r'^\s+' + r'Reference energy:' + r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'CCSD corr\. energy:' + r'\s+' +
-            NUMBER + r'\s*' + r'^\s+' + r'Total CCSD energy:' + r'\s+' + NUMBER + r'\s*$', outtext,
-            re.MULTILINE | re.DOTALL)
+            r'^\s+' + r'-----------' + r'\s*' + 
+            r'^\s+' + r'CCSD Energy' + r'\s*' + 
+            r'^\s+' + r'-----------' + r'\s*' +
+            r'^\s+' + r'Reference energy:' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'CCSD corr\. energy:' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Total CCSD energy:' + r'\s+' + NUMBER + r'\s*$', 
+            outtext, re.MULTILINE | re.DOTALL)
 
         if mobj:
             logger.debug('matched ccsd')
+            print('matched ccsd')
             psivar['CCSD CORRELATION ENERGY'] = mobj.group(2)
             psivar['CCSD TOTAL ENERGY'] = mobj.group(3)
 
@@ -315,23 +340,30 @@ def harvest_outfile_pass(outtext):
             psivar['CCSD(T) TOTAL ENERGY'] = mobj.group(2)
 
         mobj = re.search(
-            r'^\s+' + r'Spin Component Scaled (SCS) CCSD' + r'\s*' + r'(?:.*?)' + r'^\s+' + r'Same spin contribution' +
-            r'\s+' + NUMBER + r'\s*' + r'^\s+' + r'Same spin scaling factor' + r'\s+' + NUMBER + r'\s*'
-            r'^\s+' + r'Opposite spin contribution' + r'\s+' + NUMBER + r'\s*' + r'^\s+' +
-            r'Opposite spin scaling factor' + r'\s+' + NUMBER + r'\s*'
-            r'\^s+' + r'SCS-CCSD correlation energy' + r'\s+' + NUMBER + r'\s*' + r'\^s+' + r'Total SCS-CCSD energy' +
-            r'\s+' + NUMBER + r'\s*$', outtext, re.MULTILINE | re.DOTALL)
+            r'^\s+' + r'Spin Component Scaled \(SCS\) CCSD' + r'\s*' + 
+            r'^\s+' + r'-*' + r'\s*' +
+            r'^\s+' + r'Same spin contribution:' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Same spin scaling factor:' + r'\s+' + NUMBER + r'\s*'
+            r'^\s+' + r'Opposite spin contribution:' + r'\s+' + NUMBER + r'\s*' + 
+            #r'^\s+' + r'Opposite spin scaling factor' + r'\s+' + NUMBER + r'\s*'
+            r'^\s+' + r'Opposite spin scaling fact.:' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'SCS-CCSD correlation energy:' + r'\s+' + NUMBER + r'\s*' + 
+            r'^\s+' + r'Total SCS-CCSD energy:' + r'\s+' + NUMBER + r'\s*$', 
+            outtext, re.MULTILINE | re.DOTALL)
         # SCS-CCSD included
         if mobj:
             logger.debug('matched scs-ccsd')
-            psivar['CCSD SAME-SPIN CORRELATION ENERGY'] = psivar['SCS-CCSD SAME-SPIN CORRELATION ENERGY'] = (
-                Decimal(mobj.group(1)) * Decimal(mobj.group(2)))
-            psivar['CCSD OPPOSITE-SPIN CORRELATION ENERGY'] = psivar['SCS-CCSD OPPOSITE-SPIN CORRELATION ENERGY'] = (
-                Decimal(mobj.group(4)) * Decimal(mobj.group(3)))
-            psivar['SCS-CCSD CORRELATION ENERGY'] = mobj.group(5)
-            psivar['SCS-CCSD TOTAL ENERGY'] = mobj.group(6)
-            psivar['CUSTOM SCS-CCSD CORRELATION ENERGY'] = 0.5 * (float(
-                psivar['CCSD SAME-SPIN CORRELATION ENERGY']) + float(psivar['CCSD OPPOSITE-SPIN CORRELATION ENERGY']))
+            print('matched scs-ccsd', mobj.groups())
+            psivar['CCSD SAME-SPIN CORRELATION ENERGY'] = mobj.group(1)
+            psivar['CCSD OPPOSITE-SPIN CORRELATION ENERGY'] = mobj.group(3)
+            #psivar['CCSD SAME-SPIN CORRELATION ENERGY'] = psivar['SCS-CCSD SAME-SPIN CORRELATION ENERGY'] = (
+            #    Decimal(mobj.group(1)) * Decimal(mobj.group(2)))
+            #psivar['CCSD OPPOSITE-SPIN CORRELATION ENERGY'] = psivar['SCS-CCSD OPPOSITE-SPIN CORRELATION ENERGY'] = (
+            #    Decimal(mobj.group(4)) * Decimal(mobj.group(3)))
+            #psivar['SCS-CCSD CORRELATION ENERGY'] = mobj.group(5)
+            #psivar['SCS-CCSD TOTAL ENERGY'] = mobj.group(6)
+            #psivar['CUSTOM SCS-CCSD CORRELATION ENERGY'] = 0.5 * (float(
+            #    psivar['CCSD SAME-SPIN CORRELATION ENERGY']) + float(psivar['CCSD OPPOSITE-SPIN CORRELATION ENERGY']))
             # psivar['CUSTOM SCS-CCSD TOTAL ENERGY'] = float(mobj.group(6)) + float(
             #   psivar['CUSTOM SCS-CCSD CORRERLATION ENERGY'])
 
@@ -581,9 +613,7 @@ def harvest_outfile_pass(outtext):
             logger.debug('matched total dipole')
 
             # UNIT = DEBYE(S)
-            psivar['CURRENT DIPOLE X'] = mobj.group(7)
-            psivar['CURRENT DIPOLE Y'] = mobj.group(8)
-            psivar['CURRENT DIPOLE Z'] = mobj.group(9)
+            psivar[f'CURRENT DIPOLE'] = d2au * np.array([mobj.group(7), mobj.group(8), mobj.group(9)])
             # total?
 
             # Process error code
@@ -655,8 +685,8 @@ def harvest_outfile_pass(outtext):
 
     mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
-        psivar["N MO"] = mobj.group(2)
-        psivar["N BASIS"] = mobj.group(1)
+        psivar["N MOLECULAR ORBITALS"] = mobj.group(2)
+        psivar["N BASIS FUNCTIONS"] = mobj.group(1)
 
     # Search for Center of charge
     mobj = re.search(
@@ -705,6 +735,7 @@ def harvest_outfile_pass(outtext):
     if "MP2 TOTAL ENERGY" in psivar and "MP2 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP2 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP2 TOTAL ENERGY"]
+
     if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP3 TOTAL ENERGY"]
@@ -766,48 +797,6 @@ def harvest_hessian(hess: str) -> np.ndarray:
     hess_arr[np.tril_indices(n)] = hess_tri
 
     return hess_arr.T  # So that the array is listed in C-order, needed by some alignment routines
-
-
-def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultProperties:
-    """Get named properties out of the general variables extracted out of the result file
-
-    Args:
-        psivars (PreservingDict): Dictionary of the output results
-    Returns:
-        (AtomicResultProperties) Properties in a standard format
-    """
-    # TODO (wardlt): Get more of the named variables out of the NWChem file
-
-    # Initialize the output
-    output = dict()
-
-    # Extract the Calc Info
-    output.update(
-        {
-            "calcinfo_nbasis": psivars.get("N BASIS", None),
-            "calcinfo_nmo": psivars.get("N MO", None),
-            "calcinfo_natom": psivars.get("N ATOMS", None),
-            "calcinfo_nalpha": psivars.get("N ALPHA ELECTRONS", None),
-            "calcinfo_nbeta": psivars.get("N BETA ELECTRONS", None),
-        }
-    )
-
-    # Get the "canonical" properties
-    output["return_energy"] = psivars["CURRENT ENERGY"]
-    output["nuclear_repulsion_energy"] = psivars["NUCLEAR REPULSION ENERGY"]
-
-    # Get the SCF properties
-    output["scf_total_energy"] = psivars.get("HF TOTAL ENERGY", None)
-    output["scf_one_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
-    output["scf_two_electron_energy"] = psivars.get("TWO-ELECTRON ENERGY", None)
-    output["scf_dispersion_correction_energy"] = psivars.get("DFT DISPERSION ENERGY", None)
-
-    # Get the MP2 properties
-    output["mp2_total_correlation_energy"] = psivars.get("MP2 CORRELATION ENERGY", None)
-    output["mp2_total_energy"] = psivars.get("MP2 TOTAL ENERGY", None)
-    output["mp2_same_spin_correlation_energy"] = psivars.get("MP2 SAME-SPIN CORRELATION ENERGY", None)
-    output["mp2_opposite_spin_correlation_energy"] = psivars.get("MP2 OPPOSITE-SPIN CORRELATION ENERGY", None)
-    return AtomicResultProperties(**output)
 
 
 def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, None, list, Molecule, str, str]:

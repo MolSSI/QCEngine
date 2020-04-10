@@ -8,11 +8,12 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models import AtomicInput, AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
 from ...util import execute
 from ..model import ProgramHarness
+from ..qcvar_identities_resources import build_atomicproperties, build_out
 from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
@@ -63,7 +64,7 @@ class CFOURHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_model: AtomicInput, config: "TaskConfig") -> AtomicResult:
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
@@ -75,7 +76,7 @@ class CFOURHarness(ProgramHarness):
             return self.parse_output(dexe["outfiles"], input_model)
 
     def build_input(
-        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
+        self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
         cfourrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
@@ -125,10 +126,11 @@ class CFOURHarness(ProgramHarness):
         return success, dexe
 
     def parse_output(
-        self, outfiles: Dict[str, str], input_model: "AtomicInput"
-    ) -> "AtomicResult":  # lgtm: [py/similar-function]
+        self, outfiles: Dict[str, str], input_model: AtomicInput
+    ) -> AtomicResult:  # lgtm: [py/similar-function]
 
         stdout = outfiles.pop("stdout")
+        stderr = outfiles.pop("stderr")
 
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
@@ -139,20 +141,28 @@ class CFOURHarness(ProgramHarness):
         if c4hess is not None:
             qcvars["CURRENT HESSIAN"] = c4hess
 
-        retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        if input_model.driver.upper() == "PROPERTIES":
+            retres = qcvars[f"CURRENT ENERGY"]
+        else:
+            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()
 
+        build_out(qcvars)
+        atprop = build_atomicproperties(qcvars)
+
         output_data = {
-            "schema_name": "qcschema_output",
             "schema_version": 1,
-            "extras": {"outfiles": outfiles},
-            "properties": {},
+            "extras": {"outfiles": outfiles, **input_model.extras},
+            "properties": atprop,
             "provenance": Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour"),
             "return_result": retres,
+            "stderr": stderr,
             "stdout": stdout,
+            "success": True
         }
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
@@ -161,5 +171,4 @@ class CFOURHarness(ProgramHarness):
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
         }
 
-        output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})

@@ -4,6 +4,7 @@ import logging
 import pprint
 import re
 from decimal import Decimal
+from typing import Tuple
 
 import numpy as np
 import qcelemental as qcel
@@ -16,13 +17,14 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
 
 
-def harvest(p4Mol, gamessout, **largs):
+def harvest(p4Mol, gamessout: str, **largs) -> Tuple[PreservingDict, Molecule, list]:
     """Parses all the pieces of output from gamess: the stdout in
     *gamessout* Scratch files are not yet considered at this moment.
     """
     outqcvar, outMol, outGrad = harvest_output(gamessout)
 
     if outMol:
+        outqcvar["NUCLEAR REPULSION ENERGY"] = outMol.nuclear_repulsion_energy()
         if p4Mol:
             if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
@@ -99,6 +101,7 @@ def harvest_outfile_pass(outtext):
 
         # Process MP2
         mobj = re.search(
+            r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE\n'
             r'^\s+' + r'E\(0\)' + r'=\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'E\(1\)' + r'=\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'E\(2\)' + r'=\s+' + NUMBER + r'\s*' +
@@ -106,10 +109,10 @@ def harvest_outfile_pass(outtext):
             ,outtext, re.MULTILINE)
         if mobj:
             logger.debug('matched mp2')
+            print('matched mp2 a')
             qcvar['MP2 CORRELATION ENERGY'] = mobj.group(3)
             qcvar['MP2 TOTAL ENERGY'] = mobj.group(4)
 
-        # Process MP2
         mobj = re.search(
             r'^\s+' + r'RESULTS OF 2ND-ORDER ZAPT CORRECTION' + r'\s*' +
             r'^\s+' + r'E\(HF\)   ' + r'=\s+' + NUMBER + r'\s*' +
@@ -118,14 +121,58 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'E\(MP2\)  ' + r'=\s+' + NUMBER + r'\s*$'
             ,outtext, re.MULTILINE)
         if mobj:
-            logger.debug('matched mp2')
+            logger.debug('matched mp2 b')
+            print('matched mp2 b')
             qcvar['MP2 CORRELATION ENERGY'] = mobj.group(2)
             qcvar['MP2 TOTAL ENERGY'] = mobj.group(3)
 
+        mobj = re.search(
+            r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE\n'
+            r'^\s+' + r'E\(0\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(1\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(MP2\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'SPIN-COMPONENT-SCALED MP2 RESULTS ARE' + r'\s*' +
+            r'^\s+' + r'E\(2S\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2T\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2ST\)=' + r'\s+' + NUMBER + r'\s*',
+            outtext, re.MULTILINE)
+        if mobj:
+            logger.debug('matched mp2 rhf c')
+            print('matched mp2 c', mobj.groups())
+            qcvar['HF TOTAL ENERGY'] = mobj.group(1)
+            qcvar['MP2 SINGLES ENERGY'] = mobj.group(2)
+            qcvar['MP2 DOUBLES ENERGY'] = mobj.group(3)
+            qcvar['MP2 TOTAL ENERGY'] = mobj.group(4)
+            qcvar['MP2 OPPOSITE-SPIN CORRELATION ENERGY'] = mobj.group(5)
+            qcvar['MP2 SAME-SPIN CORRELATION ENERGY'] = mobj.group(6)
+
+        mobj = re.search(
+            r'^\s+' + r'SINGLE EXCITATION CONTRIBUTION' + r'\s*' +
+            r'^\s+' + r'ALPHA' + r'\s*' + NUMBER + r'\s*' +
+            r'^\s+' + r'BETA' + r'\s*' + NUMBER + r'\s*' +
+            r'^\s+' + r'DOUBLE EXCITATION CONTRIBUTION' + r'\s*' +
+            r'^\s+' + NUMBER + r'\s*' +
+            r'^\s+' +
+            r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE' + r'\s*$',
+            outtext, re.MULTILINE)
+        if mobj:
+            logger.debug('matched mp2 rohf d')
+            print('matched mp2 rohf d', mobj.groups())
+            qcvar['MP2 SINGLES ENERGY'] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
+            qcvar['MP2 DOUBLES ENERGY'] = mobj.group(3)
+
+        mobj = re.search(
+            r'^\s+' + 'UHF-MP2 CALCULATION',
+            outtext, re.MULTILINE)
+        if mobj:
+            logger.debug('matched mp2 uhf e')
+            print('matched mp2 uhf e')
+            qcvar['MP2 SINGLES ENERGY'] = '0.0'
+
         # Process CCSD
         mobj = re.search(
-            r'^\s+' + r'SUMMARY OF RESULTS' +
-            r'\s+' + r'\n' +
+            r'^\s+' + r'SUMMARY OF RESULTS' + r'\s+' + r'\n' +
             r'^\s+' + r'REFERENCE ENERGY:' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'MBPT\(2\) ENERGY:' + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CCSD    ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*$',
@@ -135,13 +182,14 @@ def harvest_outfile_pass(outtext):
             qcvar['HF TOTAL ENERGY'] = mobj.group(1)
             qcvar['SCF TOTAL ENERGY'] = mobj.group(1)
             qcvar['MP2 CORRELATION ENERGY'] = mobj.group(3)
+            qcvar['MP2 DOUBLES ENERGY'] = mobj.group(3)
             qcvar['MP2 TOTAL ENERGY'] = mobj.group(2)
+            qcvar['CCSD DOUBLES ENERGY'] = mobj.group(5)
             qcvar['CCSD CORRELATION ENERGY'] = mobj.group(5)
             qcvar['CCSD TOTAL ENERGY'] = mobj.group(4)
 
         mobj = re.search(
-            r'^\s+' + r'SUMMARY OF CCSD RESULTS' +
-            r'\s+' + r'\n' +
+            r'^\s+' + r'SUMMARY OF CCSD RESULTS' + r'\s+' + r'\n' +
             r'^\s+' + r'REFERENCE ENERGY:' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CCSD ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR. E=\s+' + r'\s+' + NUMBER + r'\s*$',
             outtext, re.MULTILINE)
@@ -168,8 +216,7 @@ def harvest_outfile_pass(outtext):
 
         # Process CCSD(T)
         mobj = re.search(
-            r'^\s+' + r'SUMMARY OF RESULTS' +
-            r'\s+' + r'\n' +
+            r'^\s+' + r'SUMMARY OF RESULTS' + r'\s+' + r'\n' +
             r'^\s+' + r'REFERENCE ENERGY:' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'MBPT\(2\) ENERGY:' + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'CCSD    ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
@@ -311,9 +358,8 @@ def harvest_outfile_pass(outtext):
                 r'\s*'+NUMBER+'\s+'+NUMBER+'\s+'+NUMBER+'\s+'+NUMBER+r'\s*\n',
                 prop_block)
             if mobj_dipole:
-                qcvar["SCF DIPOLE X"] = mobj_dipole.group(1)
-                qcvar["SCF DIPOLE Y"] = mobj_dipole.group(2)
-                qcvar["SCF DIPOLE Z"] = mobj_dipole.group(3)
+                d2au = Decimal(qcel.constants.conversion_factor("debye", "e * bohr"))
+                qcvar["SCF DIPOLE"] = d2au * np.array([Decimal(mobj_dipole.group(1)), Decimal(mobj_dipole.group(2)), Decimal(mobj_dipole.group(3))])
 
     # fmt: on
 

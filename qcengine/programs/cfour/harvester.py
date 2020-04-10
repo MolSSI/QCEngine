@@ -142,6 +142,11 @@ def harvest_outfile_pass(outtext):
         psivar['MP2 TOTAL ENERGY'] = mobj.group(5)
 
     mobj = re.search(
+        # particularly, want to avoid capture when following line present:
+        #  "MP2 energies are correct only for semicanonical orbitals."
+        r'Singles contribution will be calculated.' + r'\s*' +
+        r'^\s+' + r'-*' + r'\s*' +
+        r'^\s+' + r'(?:E\(SCF\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:E2\(AA\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:E2\(BB\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
         r'^\s+' + r'(?:E2\(AB\))' + r'\s+=\s+' + NUMBER + r'\s+a.u.\s*' +
@@ -151,12 +156,12 @@ def harvest_outfile_pass(outtext):
         outtext, re.MULTILINE)
     if mobj:
         print('matched mp2ro')
-        psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
-        psivar['MP2 OPPOSITE-SPIN CORRELATION ENERGY'] = mobj.group(3)
-        psivar['MP2 SINGLES ENERGY'] = mobj.group(4)
-        psivar['MP2 CORRELATION ENERGY'] = Decimal(mobj.group(1)) + \
+        psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(2)) + Decimal(mobj.group(3))
+        psivar['MP2 OPPOSITE-SPIN CORRELATION ENERGY'] = mobj.group(4)
+        psivar['MP2 SINGLES ENERGY'] = mobj.group(5)
+        psivar['MP2 CORRELATION ENERGY'] = Decimal(mobj.group(5)) + \
             Decimal(mobj.group(2)) + Decimal(mobj.group(3)) + Decimal(mobj.group(4))
-        psivar['MP2 TOTAL ENERGY'] = mobj.group(6)
+        psivar['MP2 TOTAL ENERGY'] = mobj.group(7)
 
     mobj = re.search(
         r'^\s+' + r'(?:S-MBPT\(2\))' + r'\s+' + r'(?P<sgl>' + NUMBER + r')' + r'\s+' + NUMBER + r'\s*' +
@@ -295,6 +300,11 @@ def harvest_outfile_pass(outtext):
         psivar['%s CORRELATION ENERGY' % (mobj.group('iterCC'))] = mobj.group(3)
         psivar['%s TOTAL ENERGY' % (mobj.group('iterCC'))] = mobj.group(4)
 
+        mobj3 = re.search(
+            r'SCF reference function:  RHF', outtext)
+        if mobj3:
+            psivar[f"{mobj.group('iterCC')} DOUBLES ENERGY"] = mobj.group(3)
+
     mobj = re.search(
         r'^\s+' + r'(?:\d+)' + r'\s+' + r'(?P<corl>' + NUMBER + r')\s+' +
                   #NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
@@ -307,7 +317,9 @@ def harvest_outfile_pass(outtext):
         outtext, re.MULTILINE | re.DOTALL)
     if mobj:
         print('matched ncc cc iter')
+        # looks like ncc is rhf-only
         psivar['{} CORRELATION ENERGY'.format(mobj.group('iterCC'))] = mobj.group('corl')
+        psivar['{} DOUBLES ENERGY'.format(mobj.group('iterCC'))] = mobj.group('corl')
         psivar['{} TOTAL ENERGY'.format(mobj.group('iterCC'))] = mobj.group('tot')
 
     # Process CC(T)
@@ -444,10 +456,38 @@ def harvest_outfile_pass(outtext):
         outtext, re.MULTILINE | re.DOTALL)
     if mobj:  # PRINT=2 to get SCS components
         print('matched scscc2')
-        psivar['%s SAME-SPIN CORRELATION ENERGY' %
-               (mobj.group('iterCC'))] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
-        psivar['%s OPPOSITE-SPIN CORRELATION ENERGY' % (mobj.group('iterCC'))] = mobj.group(5)
+        mobj3 = re.search(
+            r'The reference state is a ROHF wave function.', outtext)
+        mobj4 = re.search(
+            r'executable xvcc finished', outtext)
+        if mobj4:  # vcc
+            psivar['%s OPPOSITE-SPIN CORRELATION ENERGY' % (mobj.group('iterCC'))] = mobj.group(5)
+            if not mobj3:
+                psivar[f'{mobj.group("iterCC")} SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
+        else:  # ecc
+            psivar[f'{mobj.group("iterCC")} SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
+            if not mobj3:
+                psivar['%s OPPOSITE-SPIN CORRELATION ENERGY' % (mobj.group('iterCC'))] = mobj.group(5)
         psivar['%s CORRELATION ENERGY' % (mobj.group('iterCC'))] = mobj.group(6)
+
+    mobj = re.search(
+        r'^\s+' + r'(?P<fullCC>(?P<iterCC>CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
+        r'(?:.*?)' +
+        r'^\s+' + r'Amplitude equations converged in' + r'\s*\d+\s*' + r'iterations.\s*' +
+        r'(?:.*?)' +
+        r'^\s+' + r'The AA contribution to the correlation energy is:\s+' + NUMBER + r'\s+a.u.\s*' +
+        r'^\s+' + r'The AB contribution to the correlation energy is:\s+' + NUMBER + r'\s+a.u.\s*' +
+        r'^\s+' + r'The total correlation energy is\s+' + NUMBER + r'\s+a.u.\s*' +
+        r'(?:.*?)' +
+        # r'^\s+' + r'The CC iterations have converged.' + r'\s*$',
+        r'^\s+' + r'(?:A miracle come to pass. )?' + r'The CC iterations have converged.' + r'\s*$',
+        outtext, re.MULTILINE | re.DOTALL)
+    if mobj:  # PRINT=2 to get SCS components
+        print('matched scscc rhf', mobj.groups())
+        psivar['%s SAME-SPIN CORRELATION ENERGY' %
+               (mobj.group('iterCC'))] = 2 * Decimal(mobj.group(3))
+        psivar['%s OPPOSITE-SPIN CORRELATION ENERGY' % (mobj.group('iterCC'))] = mobj.group(4)
+        psivar['%s CORRELATION ENERGY' % (mobj.group('iterCC'))] = mobj.group(5)
 
     # Process gradient
     mobj = re.search(
