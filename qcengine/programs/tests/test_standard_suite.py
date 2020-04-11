@@ -159,8 +159,8 @@ def _trans_key(qc, bas, key):
 
         pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_conv": 12},                                        }, id="mp2 rohf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "rohf", "fcae": "ae", "keywords": {"contrl__scftyp": "rohf", "mp2__nacore": 0, "mp2__ospt": "RMP"},             }, id="mp2 rohf ae: gamess",     marks=using("gamess")),
-        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"qc_module": "tce", "scf__rohf": True, "scf__thresh": 8,
-                                                                                         "tce__thresh": 8, "tce__freeze": 0, "scf__tol2e": 10},          "wrong": _w1}, id="mp2 rohf ae: nwchem-tce", marks=using("nwchem")),
+        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"qc_module": "tce", "scf__rohf": True, "scf__thresh": 1.e-8,
+                                                                                         "tce__thresh": 1.e-8, "tce__freeze": 0, "scf__tol2e": 1.e-10},  "wrong": _w1}, id="mp2 rohf ae: nwchem-tce", marks=using("nwchem")),
         pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"scf__rohf": True},                                              "error": _q1}, id="mp2 rohf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "mp2_type": "conv"},                                    }, id="mp2 rohf ae: psi4",       marks=using("psi4_mp2qcsk")),
 
