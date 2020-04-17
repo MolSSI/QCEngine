@@ -184,3 +184,24 @@ def test_homo_lumo(h20v2):
     # Make sure Dipole Moment and center of charge parsed correctly
     assert compare_values(-0.2636515, float(res["extras"]["qcvars"]["HOMO"][0]), atol=1e-5)
     assert compare_values(0.08207131, float(res["extras"]["qcvars"]["LUMO"][0]), atol=1e-5)
+
+
+@pytest.mark.parametrize("mol,charge", [
+    (nh2, 0),
+    (h20v2, 1)
+])
+@using("nwcherm")
+def test_mp2_charged(mol: qcel.models.Molecule, charge: int):
+    """Tests an error in that MP2 in NWChem does not support ROHF"""
+    # Make a charged version
+    xyz = mol.to_string('xyz')
+    mol = qcel.models.Molecule.from_data(xyz, molecular_charge=1)
+
+    # Run the calculation
+    resi = {
+        "molecule": mol,
+        "driver": "energy",
+        "model": {"method": "mp2", "basis": "6-31g(2df,p)"},
+    }
+    qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+
