@@ -20,6 +20,7 @@ from ..exceptions import InputError
 from ..util import capture_stdout
 from .model import ProgramHarness
 from .rdkit import RDKitHarness
+import numpy as np
 
 
 class OpenMMHarness(ProgramHarness):
@@ -133,12 +134,20 @@ class OpenMMHarness(ProgramHarness):
             ff_file = input_data.model.method + ".offxml"
             off_forcefield = self._get_off_forcefield(ff_file, ff_file)
 
-            # Process molecule with RDKit
-            rdkit_mol = RDKitHarness._process_molecule_rdkit(input_data.molecule)
-
             with capture_stdout():
-                # Create an Open Force Field `Molecule` from the RDKit Molecule
-                off_mol = offtop.Molecule(rdkit_mol)
+                # try and make the molecule from the cmiles
+                cmiles = input_data.molecule.extras.get('cmiles', None)
+                if cmiles is not None:
+                    off_mol = offtop.Molecule.from_mapped_smiles(mapped_smiles=cmiles['canonical_isomeric_explicit_hydrogen_mapped_smiles'])
+                    # add the conformer
+                    conformer = unit.Quantity(value=np.array(input_data.molecule.geometry), unit=unit.bohr)
+                    off_mol.add_conformer(conformer)
+                else:
+                    # Process molecule with RDKit
+                    rdkit_mol = RDKitHarness._process_molecule_rdkit(input_data.molecule)
+
+                    # Create an Open Force Field `Molecule` from the RDKit Molecule
+                    off_mol = offtop.Molecule(rdkit_mol)
 
                 # Create OpenMM system in vacuum from forcefield, molecule
                 off_top = off_mol.to_topology()
