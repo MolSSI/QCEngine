@@ -136,9 +136,14 @@ class OpenMMHarness(ProgramHarness):
 
             with capture_stdout():
                 # try and make the molecule from the cmiles
-                cmiles = input_data.molecule.extras.get('cmiles', None)
+                if input_data.molecule.extras is not None:
+                    cmiles = input_data.molecule.extras.get("cmiles", None)
+                else:
+                    cmiles = None
                 if cmiles is not None:
-                    off_mol = offtop.Molecule.from_mapped_smiles(mapped_smiles=cmiles['canonical_isomeric_explicit_hydrogen_mapped_smiles'])
+                    off_mol = offtop.Molecule.from_mapped_smiles(
+                        mapped_smiles=cmiles["canonical_isomeric_explicit_hydrogen_mapped_smiles"]
+                    )
                     # add the conformer
                     conformer = unit.Quantity(value=np.array(input_data.molecule.geometry), unit=unit.bohr)
                     off_mol.add_conformer(conformer)
