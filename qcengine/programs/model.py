@@ -123,9 +123,23 @@ class ProgramHarness(BaseModel, abc.ABC):
 class ErrorCorrectionProgramHarness(ProgramHarness):
     """Bases class for Harnesses that include logic to correct common errors
 
-    Errors from the program being executed that are ``KnownError``s can be corrected.
-
+    Implementation Guide
+    --------------------
     Each subclass should implement the ``_compute`` and ``build_input`` methods.
+
+    These method should raise :class:`KnownErrorException`s when a task fails
+    due to an error that your harness will be able to correct.
+    The ``compute`` method for this class catches that exception,
+    determines whether a correction is permitted based on the task configuration,
+    and re-submits the computation with the details of the observed error.
+    Your implementations of ``_build_input`` or ``_compute`` should alter
+    their execution of the harnessed code based on the error details.
+
+    The list of known errors for each class must be defined in the ``known_errors``
+    class attribute of the harness.
+    We recommend splitting error detection logic into many separate subclasses
+    to make implementing the ``detect`` method for each error and any error
+    mitigation logic simpler.
     """
 
     known_errors: List[KnownErrorException.__class__] = Field(None,
@@ -154,7 +168,6 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
                 previously_run = e.error_name in observed_errors
 
                 # Run only if allowed and this error has not been seen before
-
                 if correction_allowed and not previously_run:
                     logger.info("Adding error and restarting")
                     observed_errors[e.error_name] = e.details
@@ -188,7 +201,7 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
         AtomicResult
             Result of the calculation
         """
-        # TODO (wardlt): Is there a standard implementation of _compute: "build_inputs" -> "execute" -> parse_output"?
+        # TODO (wardlt): Should there be a default implementation of _compute: "build_inputs", "execute", parse_output"?
 
     @abc.abstractmethod
     def build_input(

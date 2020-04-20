@@ -6,7 +6,7 @@ import copy
 import logging
 import pprint
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple, List
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
@@ -14,7 +14,7 @@ from qcelemental.models import AtomicResult, Provenance, AtomicInput
 from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
-from qcengine.exceptions import UnknownError, KnownErrorException
+from qcengine.exceptions import UnknownError
 
 from .errors import all_errors
 from ...exceptions import InputError
@@ -29,11 +29,12 @@ logger = logging.getLogger(__name__)
 
 
 class NWChemHarness(ErrorCorrectionProgramHarness):
-    """
+    """Harness for performing NWChem calculations
 
     Notes
     -----
-    * To use the TCE, specify ``AtomicInput.model.method`` as usual, then also include ``qc_module = True`` in ``AtomicInput.keywords``.
+    * To use the TCE, specify ``AtomicInput.model.method`` as usual,
+    then also include ``qc_module = True`` in ``AtomicInput.keywords``.
 
     """
 
@@ -54,7 +55,8 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
-        """Whether NWChem harness is ready for operation, with both the QC program and any particular dependencies found.
+        """Whether NWChem harness is ready for operation,
+         with both the QC program and any particular dependencies found.
 
         Parameters
         ----------
@@ -66,7 +68,8 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         bool
             If both nwchem and its harness dependency networkx are found, returns True.
             If raise_error is False and nwchem or networkx are missing, returns False.
-            If raise_error is True and nwchem or networkx are missing, the error message for the first missing one is raised.
+            If raise_error is True and nwchem or networkx are missing,
+             the error message for the first missing one is raised.
 
         """
         qc = which(
@@ -114,7 +117,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def _compute(self, input_data: AtomicInput, config: "TaskConfig", observed_errors: List[str]) -> AtomicResult:
+    def _compute(self, input_data: AtomicInput, config: "TaskConfig", observed_errors: Dict[str, dict]) -> AtomicResult:
         self.found(raise_error=True)
 
         # Make an input file with the mitigations
