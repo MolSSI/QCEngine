@@ -191,3 +191,45 @@ def test_dipole(h20):
     assert compare_values(-0.00, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][0]), atol=1e-3)
     assert compare_values(-0.00, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][1]), atol=1e-3)
     assert compare_values(-0.272949872, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][2]), atol=1e-5)
+
+
+@pytest.fixture
+def h20v2():
+    water = """
+O 0 0 0
+H 0 0 1
+H 0 1 0
+    """
+    return qcel.models.Molecule.from_data(water)
+
+
+@using("nwchem")
+def test_homo_lumo(h20v2):
+    # Run NH2
+    resi = {
+        "molecule": h20v2,
+        "driver": "energy",
+        "model": {"method": "dft", "basis": "3-21g"},
+        "keywords": {"dft__xc": "b3lyp"},
+    }
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+
+    # Make sure the calculation completed successfully
+    assert compare_values(-75.968095, res["return_result"], atol=1e-3)
+    assert res["driver"] == "energy"
+    assert "provenance" in res
+    assert res["success"] is True
+
+    # Check the other status information
+    assert res["extras"]["qcvars"]["N ALPHA ELECTRONS"] == "5"
+    assert res["extras"]["qcvars"]["N ATOMS"] == "3"
+    assert res["extras"]["qcvars"]["N BASIS"] == "13"
+
+    # Make sure the properties parsed correctly
+    assert compare_values(-75.968095, res["properties"]["return_energy"], atol=1e-3)
+    assert res["properties"]["calcinfo_natom"] == 3
+    assert res["properties"]["calcinfo_nalpha"] == 5
+    assert res["properties"]["calcinfo_nbasis"] == 13
+    # Make sure Dipole Moment and center of charge parsed correctly
+    assert compare_values(-0.2636515, float(res["extras"]["qcvars"]["HOMO"][0]), atol=1e-5)
+    assert compare_values(0.08207131, float(res["extras"]["qcvars"]["LUMO"][0]), atol=1e-5)

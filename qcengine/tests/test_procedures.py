@@ -76,6 +76,21 @@ def test_geometric_stdout(input_data):
     assert "Converged!" in ret.stdout
 
 
+@using("psi4")
+@using("berny")
+def test_berny_stdout(input_data):
+
+    input_data["initial_molecule"] = qcng.get_molecule("water")
+    input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
+    input_data["keywords"]["program"] = "psi4"
+
+    input_data = OptimizationInput(**input_data)
+
+    ret = qcng.compute_procedure(input_data, "berny", raise_error=True)
+    assert ret.success is True
+    assert "All criteria matched" in ret.stdout
+
+
 @using("geometric")
 @using("rdkit")
 def test_geometric_rdkit_error(input_data):
