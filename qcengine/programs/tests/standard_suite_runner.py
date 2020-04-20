@@ -155,26 +155,22 @@ def _asserter(asserter_args, contractual_args, contractual_fn):
 
     for obj in qcvar_stores:
         for rpv, pv, present in contractual_fn(*contractual_args):
+            label = tnm + " " + pv
 
             if present:
                 # verify exact match to method (may be df) and near match to conventional (non-df) method
                 tf, errmsg = compare_values(
-                    ref_block[rpv], query_qcvar(obj, pv), tnm + " " + pv, atol=atol, return_message=True, quiet=True
+                    ref_block[rpv], query_qcvar(obj, pv), label, atol=atol, return_message=True, quiet=True
                 )
-                assert compare_values(ref_block[rpv], query_qcvar(obj, pv), tnm + " " + pv, atol=atol), errmsg
+                assert compare_values(ref_block[rpv], query_qcvar(obj, pv), label, atol=atol), errmsg
                 tf, errmsg = compare_values(
-                    ref_block_conv[rpv],
-                    query_qcvar(obj, pv),
-                    tnm + " " + pv,
-                    atol=atol_conv,
-                    return_message=True,
-                    quiet=True,
+                    ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv, return_message=True, quiet=True,
                 )
-                assert compare_values(ref_block_conv[rpv], query_qcvar(obj, pv), tnm + " " + pv, atol=atol_conv), errmsg
+                assert compare_values(ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv), errmsg
 
                 # Note that the double compare_values lines are to collect the errmsg in the first for assertion in the second.
                 #   If the errmsg isn't present in the assert, the string isn't accessible through `e.value`.
                 #   If a plain bool is compared in the assert, the printed message will show booleans and not numbers.
             else:
                 # verify and forgive known contract violations
-                assert compare(False, query_has_qcvar(obj, pv), tnm + " " + pv + " SKIP")
+                assert compare(False, query_has_qcvar(obj, pv), label + " SKIP")

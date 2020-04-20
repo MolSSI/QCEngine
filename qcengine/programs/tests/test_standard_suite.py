@@ -73,44 +73,35 @@ def _trans_key(qc, bas, key):
         if lkey == "cfour_basis":
             return "pvdz"
         elif lkey == "qcng_basis":
-            if qc == "cfour":
-                return "pvdz", {}
-            elif qc == "gamess":
-                return "ccd", {"contrl__ispher": 1}
-            elif qc == "nwchem":
-                return "cc-pvdz", {"basis__spherical": True}
-            elif qc == "psi4":
-                return bas, {}
-            elif qc == "qchem":
-                return "cc-pvdz", {}
+            return {
+                "cfour": ("pvdz", {}),
+                "gamess": ("ccd", {"contrl__ispher": 1}),
+                "nwchem": ("cc-pvdz", {"basis__spherical": True}),
+                "psi4": (bas, {}),
+                "qchem": ("cc-pvdz", {}),
+            }[qc]
     elif bas.lower() == "aug-cc-pvdz":
         if lkey == "cfour_basis":
             return "aug-pvdz"
         elif lkey == "qcng_basis":
-            if qc == "cfour":
-                return "aug-pvdz", {}
-            elif qc == "gamess":
-                return "accd", {"contrl__ispher": 1}
-            elif qc == "nwchem":
-                return "aug-cc-pvdz", {"basis__spherical": True}
-            elif qc == "psi4":
-                return bas, {}
-            elif qc == "qchem":
-                return "aug-cc-pvdz", {}
+            return {
+                "cfour": ("aug-pvdz", {}),
+                "gamess": ("accd", {"contrl__ispher": 1}),
+                "nwchem": ("aug-cc-pvdz", {"basis__spherical": True}),
+                "psi4": (bas, {}),
+                "qchem": ("aug-cc-pvdz", {}),
+            }[qc]
     elif bas.lower() == "cfour-qz2p":
         if lkey == "cfour_basis":
             return "qz2p"
         elif lkey == "qcng_basis":
-            if qc == "cfour":
-                return "qz2p", {}
-            elif qc == "gamess":
-                return None, {}  # not in GAMESS-US library
-            elif qc == "nwchem":
-                return None, {}  # not in NWChem library
-            elif qc == "psi4":
-                return bas, {}
-            elif qc == "qchem":
-                return None, {}  # not in Q-Chem library
+            return {
+                "cfour": ("qz2p", {}),
+                "gamess": (None, {}),  # not in GAMESS-US library
+                "nwchem": (None, {}),  # not in NWChem library
+                "psi4": (bas, {}),
+                "qchem": (None, {}),  # not in Q-Chem library
+            }[qc]
 
     sys.exit(1)
 
@@ -190,12 +181,7 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
     inpcopy["scf_type"] = "pk"
     inpcopy["corl_type"] = "conv"
     inpcopy["qc_module"] = "-".join(
-        [
-            qcprog,
-            inp["keywords"].get(
-                "qc_module", inp["keywords"].get("cfour_cc_program", inp["keywords"].get("cc_program", ""))
-            ),
-        ]
+        [qcprog, inp["keywords"].get("qc_module", inp["keywords"].get("cc_program", "")),]
     ).strip("-")
     print("INP", inpcopy)
 
@@ -286,12 +272,7 @@ def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
     inpcopy["scf_type"] = "pk"
     inpcopy["corl_type"] = "conv"
     inpcopy["qc_module"] = "-".join(
-        [
-            qcprog,
-            inp["keywords"].get(
-                "qc_module", inp["keywords"].get("cfour_cc_program", inp["keywords"].get("cc_program", ""))
-            ),
-        ]
+        [qcprog, inp["keywords"].get("qc_module", inp["keywords"].get("cc_program", "")),]
     ).strip("-")
     print("INP", inpcopy)
 
@@ -317,19 +298,6 @@ def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 # pytest.param("qchem", "AUG-CC-PVDZ", {"UNRESTRICTED": False}, marks=using("qchem")),
 # TODO Molpro has frozen-core on by default. For this to pass need new keyword frozen_core = False
 # pytest.param('molpro', 'aug-cc-pvdz', {}, marks=using("molpro")),
-
-
-# def test_sp_ccsd_rohf_ae(method, basis, keywords, nh2):
-#
-#    # mp2 terms (only printed for c4)
-#
-##    cfour isn't splitting out the singles from OS. and psi4 isn't incl the singles in either so SS + OS != corl
-##    and maybe singles moved from SS to OS in Cfour btwn 2010 and 2014 versions (change in ref)
-##    if not (method in ['gms-ccsd', 'nwc-ccsd']):
-##        'cfour_PRINT': 2
-##        assert compare_values(osccsd_corl, qcdb.variable('ccsd opposite-spin correlation energy'), tnm() + ' CCSD OS corl', atol=atol)
-##        assert compare_values(ssccsd_corl, qcdb.variable('ccsd same-spin correlation energy'), tnm() + ' CCSD SS corl', atol=atol)
-
 
 # def test_sp_ccsd_rohf_fc(method, keywords, nh2):
 #    # differing std/semicanonical

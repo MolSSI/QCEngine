@@ -156,6 +156,11 @@ def contractual_mp2(
                 and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY",]
             )
             or (
+                ((qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"]))
+                and method == "ccsd"
+                and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
+            )
+            or (
                 (
                     (qc_module == "psi4-ccenergy" and reference == "rohf")
                     or (qc_module == "nwchem-tce")
@@ -236,6 +241,7 @@ def contractual_ccsd(
                     (qc_module == "gamess" and reference == "rhf")
                     or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"])
                     or (qc_module in ["cfour-ncc", "cfour-ecc"] and reference in ["rhf"])
+                    or (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"])
                 )
                 and pv in ["CCSD SAME-SPIN CORRELATION ENERGY", "CCSD OPPOSITE-SPIN CORRELATION ENERGY"]
             )
