@@ -1,5 +1,5 @@
-import sys
 import logging
+import sys
 import traceback
 from io import StringIO
 from typing import Any, Dict, Union
