@@ -130,6 +130,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.208743643,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857419039,
+            "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.001989217717, 0.0, 0.0, -0.001989217717,]).reshape((-1, 3)),
         },
     },
     {
@@ -152,6 +153,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.2294105794,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.050177977945205,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.007512595487, 0.0, 0.004613769715, -0.003756297743, 0.0, -0.004613769715, -0.003756297743,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -174,6 +178,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.275705491773,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.058006927914493,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, -0.003374258422, 0.0, -0.002334452569, 0.001687129211, 0.0, 0.002334452569, 0.001687129211,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -209,6 +216,22 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.08217287869,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.002377557359,
+            "CCSD TOTAL GRADIENT": np.array(
+                [
+                    0.0,
+                    0.0,
+                    0.005209606766,
+                    0.0,
+                    0.0,
+                    -0.005071403517,
+                    0.0,
+                    0.014880198292,
+                    -0.000069101625,
+                    0.0,
+                    -0.014880198292,
+                    -0.000069101625,
+                ]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -231,6 +254,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.17387203707017695,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033935818857082,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.029278727285, 0.0, 0.015813927533, -0.014639363642, 0.0, -0.015813927533, -0.014639363642,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -253,6 +279,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.213298055172,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.039907245914335,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.016842165003, 0.0, 0.007150136873, -0.008421082502, 0.0, -0.007150136873, -0.008421082502,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -289,6 +318,22 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.08357160616,
             "CCSD SINGLES ENERGY": -0.0011743271,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.00244892164,
+            "CCSD TOTAL GRADIENT": np.array(
+                [
+                    0.0,
+                    0.0,
+                    0.005568141758,
+                    0.0,
+                    0.0,
+                    -0.005430974166,
+                    0.0,
+                    0.014884143028,
+                    -0.000068583796,
+                    0.0,
+                    -0.014884143028,
+                    -0.000068583796,
+                ]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -311,6 +356,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.178236032911,
             "CCSD SINGLES ENERGY": -0.00327524740575,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033982707798170,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.029273628227, 0.0, 0.015808308241, -0.014636814114, 0.0, -0.015808308241, -0.014636814114,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -333,6 +381,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.217849506326,
             "CCSD SINGLES ENERGY": -0.00338286103325,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.039891470497466,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.016833254665, 0.0, 0.007144029475, -0.008416627332, 0.0, -0.007144029475, -0.008416627332,]
+            ).reshape((-1, 3)),
         },
     },
     # <<<  CONV-FC-CONV  >>>
@@ -363,6 +414,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.2068152041,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.0478712079,
+            "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.002335204281, 0.0, 0.0, -0.002335204281,]).reshape((-1, 3)),
         },
     },
     {
@@ -385,6 +437,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.2271733460,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.049398348010672,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.008118157882, 0.0, 0.004988381189, -0.004059078941, 0.0, -0.004988381189, -0.004059078941,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -407,6 +462,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.250330548844,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.054051928864870,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, -0.002486174824, 0.0, -0.001923330621, 0.001243087412, 0.0, 0.001923330621, 0.001243087412,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -443,6 +501,22 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.08117105566,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.002231965267,
+            "CCSD TOTAL GRADIENT": np.array(
+                [
+                    0.0,
+                    0.0,
+                    0.00496423512,
+                    0.0,
+                    0.0,
+                    -0.004814203262,
+                    0.0,
+                    0.014877060204,
+                    -0.000075015929,
+                    0.0,
+                    -0.014877060204,
+                    -0.000075015929,
+                ]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -465,6 +539,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.1716495276680232,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033248190929062,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.030055915902, 0.0, 0.016307167756, -0.015027957951, 0.0, -0.016307167756, -0.015027957951,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -487,6 +564,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.188317222733,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.036526852874970,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.017883390799, 0.0, 0.00765987541, -0.0089416954, 0.0, -0.00765987541, -0.0089416954,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -523,6 +603,22 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.08256719,
             "CCSD SINGLES ENERGY": -0.00117001688,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.00230304,
+            "CCSD TOTAL GRADIENT": np.array(
+                [
+                    0.0,
+                    0.0,
+                    0.005323074361,
+                    0.0,
+                    0.0,
+                    -0.005174249172,
+                    0.0,
+                    0.014881203442,
+                    -0.000074412594,
+                    0.0,
+                    -0.014881203442,
+                    -0.000074412594,
+                ]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -545,6 +641,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.175988485854028,
             "CCSD SINGLES ENERGY": -0.003256808469230,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033291143258924,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.030051791297, 0.0, 0.016301545337, -0.015025895649, 0.0, -0.016301545337, -0.015025895649,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -567,6 +666,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.19282621471297376,
             "CCSD SINGLES ENERGY": -0.003354603508621,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.036502859698546,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.017873897449, 0.0, 0.007653541045, -0.008936948724, 0.0, -0.007653541045, -0.008936948724,]
+            ).reshape((-1, 3)),
         },
     },
     # <<<  CONV-AE-CD  >>>
@@ -2032,6 +2134,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20886884012911314,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04845491,
+            "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.001970675302, 0.0, 0.0, -0.001970675302,]).reshape((-1, 3)),
         },
     },
     {
@@ -2064,6 +2167,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22953289,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05009877,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.007518759967, 0.0, 0.004613106602, -0.003759379983, 0.0, -0.004613106602, -0.003759379983,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -2096,6 +2202,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.27568236,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05800380,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, -0.003408844165, 0.0, -0.002343169064, 0.001704422083, 0.0, 0.002343169064, 0.001704422083]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -2306,6 +2415,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20694032546082639,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04775171,
+            "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.002316563628, 0.0, 0.0, -0.002316563628,]).reshape((-1, 3)),
         },
     },
     {
@@ -2338,6 +2448,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22729554,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04931891,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, 0.008124347934, 0.0, 0.004987676555, -0.004062173967, 0.0, -0.004987676555, -0.004062173967,]
+            ).reshape((-1, 3)),
         },
     },
     {
@@ -2370,6 +2483,9 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.25031508,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05404876,
+            "CCSD TOTAL GRADIENT": np.array(
+                [0.0, 0.0, -0.002520920562, 0.0, -0.001932133533, 0.001260460281, 0.0, 0.001932133533, 0.001260460281,]
+            ).reshape((-1, 3)),
         },
     },
     {

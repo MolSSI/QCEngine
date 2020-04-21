@@ -124,7 +124,7 @@ def contractual_mp2(
         "MP2 DOUBLES ENERGY",
         "MP2 OPPOSITE-SPIN CORRELATION ENERGY",
     ]
-    if driver == "gradient":
+    if driver == "gradient" and method == "mp2":
         contractual_qcvars.append("MP2 TOTAL GRADIENT")
 
     for pv in contractual_qcvars:
@@ -243,14 +243,17 @@ def contractual_ccsd(
                     or (qc_module in ["cfour-ncc", "cfour-ecc"] and reference in ["rhf"])
                     or (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"])
                 )
+                and method == "ccsd"
                 and pv in ["CCSD SAME-SPIN CORRELATION ENERGY", "CCSD OPPOSITE-SPIN CORRELATION ENERGY"]
             )
             or (
                 (qc_module == "cfour-vcc" and reference in ["rohf"])
+                and method == "ccsd"
                 and pv in ["CCSD SAME-SPIN CORRELATION ENERGY", "CCSD SINGLES ENERGY", "CCSD DOUBLES ENERGY",]
             )
             or (
                 (qc_module == "cfour-ecc" and reference in ["rohf"])
+                and method == "ccsd"
                 and pv in ["CCSD OPPOSITE-SPIN CORRELATION ENERGY", "CCSD SINGLES ENERGY", "CCSD DOUBLES ENERGY",]
             )
             or (
@@ -258,6 +261,7 @@ def contractual_ccsd(
                     (qc_module == "gamess" and reference in ["rohf"])
                     or (qc_module == "nwchem-tce" and reference in ["rohf"])
                 )
+                and method == "ccsd"
                 and pv
                 in [
                     "CCSD SAME-SPIN CORRELATION ENERGY",
