@@ -80,6 +80,19 @@ def model_wrapper(input_data: Dict[str, Any], model: "BaseModel") -> "BaseModel"
 
 
 @contextmanager
+def capture_stdout():
+    oldout, olderr = sys.stdout, sys.stderr
+    try:
+        out = [io.StringIO(), io.StringIO()]
+        sys.stdout, sys.stderr = out
+        yield out
+    finally:
+        sys.stdout, sys.stderr = oldout, olderr
+        out[0] = out[0].getvalue()
+        out[1] = out[1].getvalue()
+
+
+@contextmanager
 def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> Dict[str, Any]:
     """Wraps compute for timing, output capturing, and raise protection
     """
@@ -375,11 +388,12 @@ def execute(
     interupt_after: Optional[int] = None,
     environment: Optional[Dict[str, str]] = None,
     shell: Optional[bool] = False,
+    exit_code: Optional[int] = 0,
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
 
-    Returns True if exit code zero
+    Returns True if exit code <= exit_code (default 0)
 
     Parameters
     ----------
@@ -412,6 +426,8 @@ def execute(
         The environment to run in
     shell : bool, optional
         Run command through the shell.
+    exit_code: int, optional
+        The exit code above which the process is considered failure.
 
     Raises
     ------
@@ -467,7 +483,7 @@ def execute(
         proc["outfiles"] = extrafiles
     proc["scratch_directory"] = scrdir
 
-    return retcode == 0, proc
+    return retcode <= exit_code, proc
 
 
 @contextmanager

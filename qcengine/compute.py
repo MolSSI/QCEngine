@@ -115,7 +115,7 @@ def compute_procedure(
     ----------
     input_data : dict or qcelemental.models.OptimizationInput
         A JSON input specific to the procedure executed in dictionary or model from QCElemental.models
-    procedure : {"geometric"}
+    procedure : {"geometric", "berny"}
         The name of the procedure to run
     raise_error : bool, option
         Determines if compute should raise an error or not.

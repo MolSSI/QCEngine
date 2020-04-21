@@ -76,11 +76,26 @@ def test_geometric_stdout(input_data):
     assert "Converged!" in ret.stdout
 
 
+@using("psi4")
+@using("berny")
+def test_berny_stdout(input_data):
+
+    input_data["initial_molecule"] = qcng.get_molecule("water")
+    input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
+    input_data["keywords"]["program"] = "psi4"
+
+    input_data = OptimizationInput(**input_data)
+
+    ret = qcng.compute_procedure(input_data, "berny", raise_error=True)
+    assert ret.success is True
+    assert "All criteria matched" in ret.stdout
+
+
 @using("geometric")
 @using("rdkit")
 def test_geometric_rdkit_error(input_data):
 
-    input_data["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity"})
+    input_data["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity_"})
     input_data["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     input_data["keywords"]["program"] = "rdkit"
 
@@ -150,6 +165,18 @@ def test_geometric_retries(failure_engine, input_data):
             "rdkit", {"method": "UFF"}, [1.87130923886072, 2.959448636243545, 104.5099642579023], marks=using("rdkit")
         ),
         pytest.param(
+            "rdkit",
+            {"method": "mmff94"},
+            [1.8310842343589573, 2.884612338953529, 103.93822919865106],
+            marks=using("rdkit"),
+        ),
+        pytest.param(
+            "rdkit",
+            {"method": "MMFF94s"},
+            [1.8310842343589573, 2.884612338953529, 103.93822919865106],
+            marks=using("rdkit"),
+        ),
+        pytest.param(
             "torchani",
             {"method": "ANI1x"},
             [1.82581873750194, 2.866376526793269, 103.4332610730292],
@@ -160,6 +187,24 @@ def test_geometric_retries(failure_engine, input_data):
             {"method": "PM6"},
             [1.7927843431811934, 2.893333237502448, 107.60441967992045],
             marks=using("mopac"),
+        ),
+        pytest.param(
+            "openmm",
+            {"method": "openff-1.0.0", "basis": "smirnoff"},
+            [1.889726881670907, 3.10070288709234, 110.25177977849998],
+            marks=using("openmm"),
+        ),
+        pytest.param(
+            "openmm",
+            {"method": "openff_unconstrained-1.0.0", "basis": "smirnoff"},
+            [1.8344994291195869, 3.0100994772976124, 110.25259556886984],
+            marks=using("openmm"),
+        ),
+        pytest.param(
+            "openmm",
+            {"method": "smirnoff99Frosst-1.1.0", "basis": "smirnoff"},
+            [1.8897269787924604, 3.1516330703676063, 112.9999999990053],
+            marks=using("openmm"),
         ),
     ],
 )

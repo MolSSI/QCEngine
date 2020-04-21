@@ -14,10 +14,14 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.12.0
+  - qcelemental >=0.13.0
   - pydantic>=1.0.0
 
     # Testing
   - pytest
   - pytest-cov
   - codecov
+
+  - pip
+  - pip:
+    - pyberny
