@@ -19,9 +19,9 @@ from qcengine.exceptions import UnknownError
 from ...exceptions import InputError
 from ...util import execute, create_mpi_invocation
 from ..model import ProgramHarness
-from .germinate import muster_modelchem
-from .harvester import extract_formatted_properties, harvest
-from .keywords import format_keywords
+#from .germinate import muster_modelchem
+#from .harvester import extract_formatted_properties, harvest
+#from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
@@ -29,90 +29,87 @@ logger = logging.getLogger(__name__)
 
 class MadnessHarness(ProgramHarness):
     """
+     Notes
+     -----
+     * To use the TCE, specify ``AtomicInput.model.method`` as usual, then also include ``qc_module = True`` in ``AtomicInput.keywords``.
+     """
 
-#     Notes
-#     -----
-#     * To use the TCE, specify ``AtomicInput.model.method`` as usual, then also include ``qc_module = True`` in ``AtomicInput.keywords``.
+    _defaults = {
+        "name": "Madness",
+        "scratch": True,
+        "thread_safe": True,
+        "thread_parallel": True,
+        "node_parallel": True,
+        "managed_memory": True,
+    }
+    # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
+    version_cache: Dict[str, str] = {}
 
-#     """
+    class Config(ProgramHarness.Config):
+        pass
 
-#     _defaults = {
-#         "name": "NWChem",
-#         "scratch": True,
-#         "thread_safe": False,
-#         "thread_parallel": False,
-#         "node_parallel": True,
-#         "managed_memory": True,
-#     }
-#     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
-#     version_cache: Dict[str, str] = {}
+    @staticmethod
+    def found(raise_error: bool = False) -> bool:
+        """Whether Madness harness is ready for operation, with both the QC program and any particular dependencies found.
 
-#     class Config(ProgramHarness.Config):
-#         pass
+        Parameters
+        ----------
+        raise_error: bool
+            Passed on to control negative return between False and ModuleNotFoundError raised.
 
-#     @staticmethod
-#     def found(raise_error: bool = False) -> bool:
-#         """Whether NWChem harness is ready for operation, with both the QC program and any particular dependencies found.
+         Returns
+         -------
+         bool
+             If both nwchem and its harness dependency networkx are found, returns True.
+             If raise_error is False and nwchem or networkx are missing, returns False.
+             If raise_error is True and nwchem or networkx are missing, the error message for the first missing one is raised.
 
-#         Parameters
-#         ----------
-#         raise_error: bool
-#             Passed on to control negative return between False and ModuleNotFoundError raised.
+       """
+        qc = which(
+            "nwchem",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via https://github.com/m-a-d-n-e-s-s/madness",
+        )
+        #         dep = which_import(
+        #             "networkx",
+        #             return_bool=True,
+        #             raise_error=raise_error,
+        #             raise_msg="For NWChem harness, please install via `conda install networkx -c conda-forge`.",
+        #         )
+        return qc  # and dep
 
-#         Returns
-#         -------
-#         bool
-#             If both nwchem and its harness dependency networkx are found, returns True.
-#             If raise_error is False and nwchem or networkx are missing, returns False.
-#             If raise_error is True and nwchem or networkx are missing, the error message for the first missing one is raised.
 
-#         """
-#         qc = which(
-#             "nwchem",
-#             return_bool=True,
-#             raise_error=raise_error,
-#             raise_msg="Please install via http://www.nwchem-sw.org/index.php/Download",
-#         )
+    def get_version(self) -> str:
+         self.found(raise_error=True)
 
-#         dep = which_import(
-#             "networkx",
-#             return_bool=True,
-#             raise_error=raise_error,
-#             raise_msg="For NWChem harness, please install via `conda install networkx -c conda-forge`.",
-#         )
+         # Get the node configuration
+         config = get_config()
 
-#         return qc and dep
+         # Run MADNESS
+         which_prog = which("madness")
+         if config.use_mpiexec:
+             command = create_mpi_invocation(which_prog, config)
+         else:
+             command = [which_prog]
+         command.append("v.nw")
 
-#     def get_version(self) -> str:
-#         self.found(raise_error=True)
+         if which_prog not in self.version_cache:
+             success, output = execute(command, {"v.nw": ""}, scratch_directory=config.scratch_directory)
 
-#         # Get the node configuration
-#         config = get_config()
+             if success:
+                 for line in output["stdout"].splitlines():
+                     if "nwchem branch" in line:
+                         branch = line.strip().split()[-1]
+                     if "nwchem revision" in line:
+                         revision = line.strip().split()[-1]
+                 self.version_cache[which_prog] = safe_version(branch + "+" + revision)
+             else:
+                 raise UnknownError(output["stderr"])
 
-#         # Run NWChem
-#         which_prog = which("nwchem")
-#         if config.use_mpiexec:
-#             command = create_mpi_invocation(which_prog, config)
-#         else:
-#             command = [which_prog]
-#         command.append("v.nw")
+         return self.version_cache[which_prog]
 
-#         if which_prog not in self.version_cache:
-#             success, output = execute(command, {"v.nw": ""}, scratch_directory=config.scratch_directory)
-
-#             if success:
-#                 for line in output["stdout"].splitlines():
-#                     if "nwchem branch" in line:
-#                         branch = line.strip().split()[-1]
-#                     if "nwchem revision" in line:
-#                         revision = line.strip().split()[-1]
-#                 self.version_cache[which_prog] = safe_version(branch + "+" + revision)
-#             else:
-#                 raise UnknownError(output["stderr"])
-
-#         return self.version_cache[which_prog]
-
-#     def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
 #         """
 #         Runs NWChem in executable mode
 #         """
