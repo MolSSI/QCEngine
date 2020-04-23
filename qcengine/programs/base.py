@@ -13,6 +13,7 @@ from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
 from .nwchem import NWChemHarness
+from .madness import MadnessHarness
 from .openmm import OpenMMHarness
 from .psi4 import Psi4Harness
 from .qchem import QChemHarness
