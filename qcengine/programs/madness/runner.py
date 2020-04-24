@@ -19,9 +19,10 @@ from qcengine.exceptions import UnknownError
 from ...exceptions import InputError
 from ...util import execute, create_mpi_invocation
 from ..model import ProgramHarness
-#from .germinate import muster_modelchem
-#from .harvester import extract_formatted_properties, harvest
-#from .keywords import format_keywords
+
+# from .germinate import muster_modelchem
+# from .harvester import extract_formatted_properties, harvest
+# from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
@@ -79,61 +80,66 @@ class MadnessHarness(ProgramHarness):
         #         )
         return qc  # and dep
 
-
+    ## gotta figure out which input file and from where
     def get_version(self) -> str:
-         self.found(raise_error=True)
+        self.found(raise_error=True)
 
-         # Get the node configuration
-         config = get_config()
+        # Get the node configuration
+        config = get_config()
 
-         # Run MADNESS
-         which_prog = which("madness")
-         if config.use_mpiexec:
-             command = create_mpi_invocation(which_prog, config)
-         else:
-             command = [which_prog]
-         command.append("v.nw")
+        # Run MADNESS
+        which_prog = which("madness")
+        if config.use_mpiexec:
+            command = create_mpi_invocation(which_prog, config)
+        else:
+            command = [which_prog]
+        command.append("v.moldft")
 
-         if which_prog not in self.version_cache:
-             success, output = execute(command, {"v.nw": ""}, scratch_directory=config.scratch_directory)
+        if which_prog not in self.version_cache:
+            success, output = execute(
+                command,
+                {
+                    "v.moldft": "dft\nxc hf\nend\n\ngeometry\n H                     0.00000000     0.00000000    -0.36579425\n H                     0.00000000     0.00000000     0.36579425\nend\n"
+                },
+                scratch_directory=config.scratch_directory,
+            )
 
-             if success:
-                 for line in output["stdout"].splitlines():
-                     if "nwchem branch" in line:
-                         branch = line.strip().split()[-1]
-                     if "nwchem revision" in line:
-                         revision = line.strip().split()[-1]
-                 self.version_cache[which_prog] = safe_version(branch + "+" + revision)
-             else:
-                 raise UnknownError(output["stderr"])
+            if success:
+                for line in output["stdout"].splitlines():
+                    if "multiresolution suite" in line:
+                        version = line.strip().split()[1]
+                self.version_cache[which_prog] = safe_version(version)
+            else:
+                raise UnknownError(output["stderr"])
 
-         return self.version_cache[which_prog]
+        return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
-#         """
-#         Runs NWChem in executable mode
-#         """
-#         self.found(raise_error=True)
 
-#         job_inputs = self.build_input(input_model, config)
-#         success, dexe = self.execute(job_inputs)
+#     def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+#          """
+#          Runs madness in executable mode
+#          """
+#          self.found(raise_error=True)
 
-#         if "There is an error in the input file" in dexe["stdout"]:
-#             raise InputError(dexe["stdout"])
-#         if "not compiled" in dexe["stdout"]:
-#             # recoverable with a different compilation with optional modules
-#             raise InputError(dexe["stdout"])
+#          job_inputs = self.build_input(input_model, config)
+#          success, dexe = self.execute(job_inputs)
 
-#         if success:
-#             dexe["outfiles"]["stdout"] = dexe["stdout"]
-#             dexe["outfiles"]["stderr"] = dexe["stderr"]
-#             return self.parse_output(dexe["outfiles"], input_model)
-#         else:
-#             raise UnknownError(dexe["stderr"])
+#          if "There is an error in the input file" in dexe["stdout"]:
+#              raise InputError(dexe["stdout"])
+#          if "not compiled" in dexe["stdout"]:
+#              # recoverable with a different compilation with optional modules
+#              raise InputError(dexe["stdout"])
+
+#          if success:
+#              dexe["outfiles"]["stdout"] = dexe["stdout"]
+#              dexe["outfiles"]["stderr"] = dexe["stderr"]
+#              return self.parse_output(dexe["outfiles"], input_model)
+#          else:
+#              raise UnknownError(dexe["stderr"])
 
 #     def build_input(
 #         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
-#     ) -> Dict[str, Any]:
+#      ) -> Dict[str, Any]:
 #         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
 #         opts = copy.deepcopy(input_model.keywords)
@@ -147,60 +153,60 @@ class MadnessHarness(ProgramHarness):
 #             memory_size //= config.nnodes * config.ncores // config.cores_per_rank
 #         opts["memory"] = memory_size
 
-#         # Handle molecule
-#         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
-#         opts.update(moldata["keywords"])
+#          # Handle molecule
+#          molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
+#          opts.update(moldata["keywords"])
 
-#         # Handle calc type and quantum chemical method
-#         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
-#         opts.update(mdcopts)
+#          # Handle calc type and quantum chemical method
+#          mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
+#          opts.update(mdcopts)
 
-#         # Handle basis set
-#         # * for nwchem, still needs sph and ghost
-#         for el in set(input_model.molecule.symbols):
-#             opts[f"basis__{el}"] = f"library {input_model.model.basis}"
+#          # Handle basis set
+#          # * for nwchem, still needs sph and ghost
+#          for el in set(input_model.molecule.symbols):
+#              opts[f"basis__{el}"] = f"library {input_model.model.basis}"
 
-#         # Log the job settings
-#         logger.debug("JOB_OPTS")
-#         logger.debug(pp.pformat(opts))
+#          # Log the job settings
+#          logger.debug("JOB_OPTS")
+#          logger.debug(pp.pformat(opts))
 
 #         # Handle conversion from schema (flat key/value) keywords into local format
-#         optcmd = format_keywords(opts)
+#          optcmd = format_keywords(opts)
 
-#         # Combine the molecule description, options and method command together
-#         nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
+#          # Combine the molecule description, options and method command together
+#          nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
 
-#         # For gradient methods, add a Python command to save the gradients in higher precision
-#         #  Note: The Hessian is already stored in high precision in a file named "*.hess"
-#         if input_model.driver == "gradient":
-#             # Get the name of the theory used for computing the gradients
-#             theory = re.search("^task (\w+) ", mdccmd, re.MULTILINE).group(1)
-#             logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
+#          # For gradient methods, add a Python command to save the gradients in higher precision
+#          #  Note: The Hessian is already stored in high precision in a file named "*.hess"
+#          if input_model.driver == "gradient":
+#              # Get the name of the theory used for computing the gradients
+#              theory = re.search("^task (\w+) ", mdccmd, re.MULTILINE).group(1)
+#              logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
 
-#             # Create a Python function to get the gradient from NWChem's checkpoint file (rtdb)
-#             #  and save it to a JSON file. The stdout for NWChem only prints 6 _decimal places_
-#             #  (not 6 significant figures)
-#             pycmd = f"""
-# python
-#   grad = rtdb_get('{theory}:gradient')
-#   if ga_nodeid() == 0:
-#       import json
-#       with open('nwchem.grad', 'w') as fp:
-#           json.dump(grad, fp)
-# end
+#              # Create a Python function to get the gradient from NWChem's checkpoint file (rtdb)
+#              #  and save it to a JSON file. The stdout for NWChem only prints 6 _decimal places_
+#              #  (not 6 significant figures)
+#              pycmd = f"""
+#  python
+#    grad = rtdb_get('{theory}:gradient')
+#    if ga_nodeid() == 0:
+#        import json
+#        with open('nwchem.grad', 'w') as fp:
+#            json.dump(grad, fp)
+#  end
 
-# task python
-#             """
-#             nwchemrec["infiles"]["nwchem.nw"] += pycmd
+#  task python
+# #             """
+#              nwchemrec["infiles"]["nwchem.nw"] += pycmd
 
-#         # Determine the command
-#         if config.use_mpiexec:
-#             nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
-#             logger.info(f"Launching with mpiexec: {' '.join(nwchemrec['command'])}")
-#         else:
-#             nwchemrec["command"] = [which("nwchem")]
+#          # Determine the command
+#          if config.use_mpiexec:
+#              nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
+#              logger.info(f"Launching with mpiexec: {' '.join(nwchemrec['command'])}")
+#          else:
+#              nwchemrec["command"] = [which("nwchem")]
 
-#         return nwchemrec
+#          return nwchemrec
 
 #     def execute(
 #         self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
