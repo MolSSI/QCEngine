@@ -115,7 +115,7 @@ class MadnessHarness(ProgramHarness):
         return self.version_cache[which_prog]
 
 
-#     def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult": pass
 #          """
 #          Runs madness in executable mode
 #          """
@@ -137,94 +137,45 @@ class MadnessHarness(ProgramHarness):
 #          else:
 #              raise UnknownError(dexe["stderr"])
 
-#     def build_input(
-#         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
-#      ) -> Dict[str, Any]:
-#         nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
+    def build_input(
+         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+     ) -> Dict[str, Any]:
+        #     
+        madnessrec={"infiles":{},"scratch_directory":config.scratch_directory}
 
-#         opts = copy.deepcopy(input_model.keywords)
-#         opts = {k.lower(): v for k, v in opts.items()}
+        opts=copy.deepcopy(input_model.keywords)
+        opts = {k.lower(): v for k, v in opts.items()}
+    
 
-#         # Handle memory
-#         # for nwchem, [GiB] --> [B]
-#         # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
-#         memory_size = int(config.memory * (1024 ** 3))
-#         if config.use_mpiexec:  # It is the memory per MPI rank
-#             memory_size //= config.nnodes * config.ncores // config.cores_per_rank
-#         opts["memory"] = memory_size
+        molcmd, moldata = input_model.molecule.to_string(dtype="madness", units="bohr", return_data=True)
 
-#          # Handle molecule
-#          molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
-#          opts.update(moldata["keywords"])
+        opts.update(moldata["keywords"])
+        optcmd="dft\n xc hf \nend\n"
+        madnessrec["infiles"]["mad_input"]=optcmd+molcmd
+        ## Determine the command
+           # Determine the command
+        madnessrec["command"] = [which("madness")]
 
-#          # Handle calc type and quantum chemical method
-#          mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
-#          opts.update(mdcopts)
+        return madnessrec
 
-#          # Handle basis set
-#          # * for nwchem, still needs sph and ghost
-#          for el in set(input_model.molecule.symbols):
-#              opts[f"basis__{el}"] = f"library {input_model.model.basis}"
 
-#          # Log the job settings
-#          logger.debug("JOB_OPTS")
-#          logger.debug(pp.pformat(opts))
+    def execute(
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+    ) -> Tuple[bool, Dict]: 
 
-#         # Handle conversion from schema (flat key/value) keywords into local format
-#          optcmd = format_keywords(opts)
+        success, dexe = execute(
+            inputs["command"],
+            inputs["infiles"],
+            ["nwchem.hess", "nwchem.grad"],
+            scratch_messy=False,
+            scratch_exist_ok=True,
+            scratch_directory=inputs["scratch_directory"],
+        )
+        return success, dexe
 
-#          # Combine the molecule description, options and method command together
-#          nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
-
-#          # For gradient methods, add a Python command to save the gradients in higher precision
-#          #  Note: The Hessian is already stored in high precision in a file named "*.hess"
-#          if input_model.driver == "gradient":
-#              # Get the name of the theory used for computing the gradients
-#              theory = re.search("^task (\w+) ", mdccmd, re.MULTILINE).group(1)
-#              logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
-
-#              # Create a Python function to get the gradient from NWChem's checkpoint file (rtdb)
-#              #  and save it to a JSON file. The stdout for NWChem only prints 6 _decimal places_
-#              #  (not 6 significant figures)
-#              pycmd = f"""
-#  python
-#    grad = rtdb_get('{theory}:gradient')
-#    if ga_nodeid() == 0:
-#        import json
-#        with open('nwchem.grad', 'w') as fp:
-#            json.dump(grad, fp)
-#  end
-
-#  task python
-# #             """
-#              nwchemrec["infiles"]["nwchem.nw"] += pycmd
-
-#          # Determine the command
-#          if config.use_mpiexec:
-#              nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
-#              logger.info(f"Launching with mpiexec: {' '.join(nwchemrec['command'])}")
-#          else:
-#              nwchemrec["command"] = [which("nwchem")]
-
-#          return nwchemrec
-
-#     def execute(
-#         self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
-#     ) -> Tuple[bool, Dict]:
-
-#         success, dexe = execute(
-#             inputs["command"],
-#             inputs["infiles"],
-#             ["nwchem.hess", "nwchem.grad"],
-#             scratch_messy=False,
-#             scratch_exist_ok=True,
-#             scratch_directory=inputs["scratch_directory"],
-#         )
-#         return success, dexe
-
-#     def parse_output(
-#         self, outfiles: Dict[str, str], input_model: "AtomicInput"
-#     ) -> "AtomicResult":  # lgtm: [py/similar-function]
+    def parse_output(
+        self, outfiles: Dict[str, str], input_model: "AtomicInput"
+    ) -> "AtomicResult": pass # lgtm: [py/similar-function]
 
 #         # Get the stdout from the calculation (required)
 #         stdout = outfiles.pop("stdout")
