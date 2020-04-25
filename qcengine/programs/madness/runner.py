@@ -151,7 +151,7 @@ class MadnessHarness(ProgramHarness):
 
         opts.update(moldata["keywords"])
         optcmd="dft\n xc hf \nend\n"
-        madnessrec["infiles"]["mad_input"]=optcmd+molcmd
+        madnessrec["infiles"]["input"]=optcmd+molcmd
         ## Determine the command
            # Determine the command
         madnessrec["command"] = [which("madness")]
@@ -160,16 +160,11 @@ class MadnessHarness(ProgramHarness):
 
 
     def execute(
-        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
-    ) -> Tuple[bool, Dict]: 
-
+        self,inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+    ) -> Tuple[bool, Dict]:
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["nwchem.hess", "nwchem.grad"],
-            scratch_messy=False,
-            scratch_exist_ok=True,
-            scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
 
