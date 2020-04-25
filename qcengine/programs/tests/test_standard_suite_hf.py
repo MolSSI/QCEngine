@@ -155,3 +155,25 @@ def test_sp_hf_rohf(program, basis, keywords, nh2):
 
     atol = 1.0e-6
     assert compare_values(scf_tot, res["return_result"], atol=atol)
+
+@pytest.mark.parametrize(
+    "program,keywords",
+    [
+        pytest.param("madness",  {"dft__xc__hf": True } ),
+    ],
+)
+def test_mad_hf(program, keywords, h2o):
+    resi = {"molecule": h2o, "driver": "energy", "model": {"method": "dft",  "keywords": keywords}}
+
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+
+    assert res["driver"] == "energy"
+    assert "provenance" in res
+    assert res["success"] is True
+
+    # aug-cc-pvdz
+    scf_tot = -76.06718642
+
+    atol = 1.0e-6
+    assert compare_values(scf_tot, res["return_result"], atol=atol)
+
