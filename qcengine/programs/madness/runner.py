@@ -146,11 +146,34 @@ class MadnessHarness(ProgramHarness):
         opts=copy.deepcopy(input_model.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
     
+        # Handle memory (ROBERT)  Look in keywords as well
+        # for nwchem, [GiB] --> [B]
+        # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
+        #memory_size = int(config.memory * (1024 ** 3))
+        #if config.use_mpiexec:  # It is the memory per MPI rank
+        #    memory_size //= config.nnodes * config.ncores // config.cores_per_rank
+        #opts["memory"] = memory_size
 
+        # Handle Molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="madness", units="bohr", return_data=True)
-
         opts.update(moldata["keywords"])
-        optcmd="dft\n xc hf \nend\n"
+        
+        ## Handle Calc Type (ROBERT)
+        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
+        opts.update(mdcopts)
+
+        ## Handle the basis set (ROBERT) the question is what value of k 
+
+        # Log the job settings (LORI)  Not sure if i need this
+        logger.debug("JOB_OPTS")
+        logger.debug(pp.pformat(opts))
+  
+        # Handle conversion from schema (flat key/value) keywords into local format
+        optcmd = format_keywords(opts)
+
+        #optcmd="dft\n xc hf \nend\n"
+
+
         madnessrec["infiles"]["input"]=optcmd+molcmd
         ## Determine the command
            # Determine the command
