@@ -117,7 +117,7 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
      ## default in energy
          # do nothing
      if method =="optimization":
-          opts["dft__gopts"]= True
+          opts["dft__gopt"]= True
      elif method == "response":
           opts["dft__response"]= True
      elif method.split()[0] in _xc_functionals:
