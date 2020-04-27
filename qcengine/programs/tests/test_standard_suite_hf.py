@@ -17,6 +17,17 @@ def h2o():
 """
     return qcel.models.Molecule.from_data(smol)
 
+@pytest.fixture
+def h2oMAD():
+    smol = """
+ H                  0.000000000000     1.431430901356     0.984293362719
+ O                  0.000000000000     0.000000000000    -0.124038860300
+ H                  0.000000000000    -1.431430901356     0.984293362719
+ units au
+"""
+    return qcel.models.Molecule.from_data(smol)
+
+
 
 @pytest.fixture
 def nh2():
@@ -156,24 +167,26 @@ def test_sp_hf_rohf(program, basis, keywords, nh2):
     atol = 1.0e-6
     assert compare_values(scf_tot, res["return_result"], atol=atol)
 
+
 @pytest.mark.parametrize(
-    "program,keywords",
-    [
-        pytest.param("madness",  {"dft__xc__hf": True } ),
+    "program,basis,keywords", [
+        pytest.param("madness", None, {"dft__aobasis":"sto-3g","dft__econv": 1.0000e-05}),
+ 
     ],
 )
-def test_mad_hf(program, keywords, h2o):
-    resi = {"molecule": h2o, "driver": "energy", "model": {"method": "dft",  "keywords": keywords}}
+def test_mad_hf(program, basis, keywords, h2oMAD):
+    resi = {"molecule": h2oMAD, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
+
 
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    print(res["stdout"])
 
     assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
 
-    # aug-cc-pvdz
-    scf_tot = -76.06718642
+    # k=7
+    scf_tot = -76.06718632
 
-    atol = 1.0e-6
+    atol = 1.0e-5
     assert compare_values(scf_tot, res["return_result"], atol=atol)
-
