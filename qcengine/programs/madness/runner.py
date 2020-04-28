@@ -114,8 +114,7 @@ class MadnessHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-
-    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult": 
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
          Runs madness in executable mode
          """
@@ -125,9 +124,9 @@ class MadnessHarness(ProgramHarness):
         success, dexe = self.execute(job_inputs)
 
         if "There is an error in the input file" in dexe["stdout"]:
-             raise InputError(dexe["stdout"])
+            raise InputError(dexe["stdout"])
         if "not compiled" in dexe["stdout"]:
-             # recoverable with a different compilation with optional modules
+            # recoverable with a different compilation with optional modules
             raise InputError(dexe["stdout"])
 
         if success:
@@ -138,102 +137,95 @@ class MadnessHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
-     ) -> Dict[str, Any]:
-        #     
-        madnessrec={"infiles":{},"scratch_directory":config.scratch_directory}
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+    ) -> Dict[str, Any]:
+        #
+        madnessrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
 
-        opts=copy.deepcopy(input_model.keywords)
+        opts = copy.deepcopy(input_model.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
-    
 
         # Handle Molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="madness", units="bohr", return_data=True)
-        molData={}
-        for k,v in moldata["keywords"].items():
-            molData['dft__'+k]=v
+        molData = {}
+        for k, v in moldata["keywords"].items():
+            molData["dft__" + k] = v
         opts.update(molData)
-        
+
         ## Handle Calc Type (ROBERT)
         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
         opts.update(mdcopts)
 
-        ## Handle the basis set (ROBERT) the question is what value of k 
+        ## Handle the basis set (ROBERT) the question is what value of k
 
         # Log the job settings (LORI)  Not sure if i need this
         logger.debug("JOB_OPTS")
         logger.debug(pp.pformat(opts))
-  
+
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 
-        #optcmd="dft\n xc hf \nend\n"
+        # optcmd="dft\n xc hf \nend\n"
 
-
-        madnessrec["infiles"]["input"]=optcmd+molcmd
+        madnessrec["infiles"]["input"] = optcmd + molcmd
         ## Determine the command
-           # Determine the command
+        # Determine the command
         madnessrec["command"] = [which("madness")]
         print(madnessrec["infiles"]["input"])
         return madnessrec
 
-
     def execute(
-        self,inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
-        success, dexe = execute(
-            inputs["command"],
-            inputs["infiles"],
-        )
+        success, dexe = execute(inputs["command"], inputs["infiles"],)
         return success, dexe
 
     def parse_output(
         self, outfiles: Dict[str, str], input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
-
-       # Get the stdout from the calculation (required)
+        # Get the stdout from the calculation (required)
         stdout = outfiles.pop("stdout")
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
         qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
         if nwgrad is not None:
-           qcvars["CURRENT GRADIENT"] = nwgrad
+            qcvars["CURRENT GRADIENT"] = nwgrad
 
         if nwhess is not None:
-           qcvars["CURRENT HESSIAN"] = nwhess
+            qcvars["CURRENT HESSIAN"] = nwhess
 
         # Normalize the output as a float or list of floats
         if input_model.driver.upper() == "PROPERTIES":
-           retres = qcvars[f"CURRENT ENERGY"]
+            retres = qcvars[f"CURRENT ENERGY"]
         else:
-           print(qcvars)
-           retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            print(qcvars)
+            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
 
         if isinstance(retres, Decimal):
-           retres = float(retres)
+            retres = float(retres)
         elif isinstance(retres, np.ndarray):
-           retres = retres.tolist()
+            retres = retres.tolist()
 
-      # Get the formatted properties
+        # Get the formatted properties
         qcprops = extract_formatted_properties(qcvars)
 
-      # Format them inout an output
+        # Format them inout an output
         output_data = {
-           "schema_name": "qcschema_output",
-           "schema_version": 1,
-           "extras": {"outfiles": outfiles, **input_model.extras},
-           "properties": qcprops,
-           "provenance": Provenance(creator="MADNESS", version=self.get_version(), routine="madness"),
-           "return_result": retres,
-           "stdout": stdout,
+            "schema_name": "qcschema_output",
+            "schema_version": 1,
+            "extras": {"outfiles": outfiles, **input_model.extras},
+            "properties": qcprops,
+            "provenance": Provenance(creator="MADNESS", version=self.get_version(), routine="madness"),
+            "return_result": retres,
+            "stdout": stdout,
         }
 
-      # got to even out who needs plump/flat/Decimal/float/ndarray/list
-      # Decimal --> str preserves precision
+        # got to even out who needs plump/flat/Decimal/float/ndarray/list
+        # Decimal --> str preserves precision
         output_data["extras"]["qcvars"] = {
-           k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
         }
 
         output_data["success"] = True

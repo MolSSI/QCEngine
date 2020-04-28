@@ -2,24 +2,22 @@ import collections
 from typing import Any, Dict, Tuple
 
 
-
-
 def format_keyword(keyword: str, val: Any, lop_off: bool = True) -> Tuple[str, str]:
     """Function to reformat value `val` for `keyword` from python into nwchem-speak."""
 
-   # Transform string booleans into " "
+    # Transform string booleans into " "
     if val is True:
         return keyword.lower(), "true"
     elif val is False:
         return keyword.lower(), "false"
 
-    # complete hack 
-    #if keyword.upper() == "MEMORY":
+    # complete hack
+    # if keyword.upper() == "MEMORY":
     #    return keyword.lower(), f"{val} byte"
 
-    elif isinstance(val, list): # if it is a list... join the list into a string ??? when is this in play
+    elif isinstance(val, list):  # if it is a list... join the list into a string ??? when is this in play
         text = " ".join([str(v) for v in val])
-    elif isinstance(val, dict): # val is a dict... text is list 
+    elif isinstance(val, dict):  # val is a dict... text is list
         text = []
         for k, v in val.items():
             merge = [k]
