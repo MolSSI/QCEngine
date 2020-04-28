@@ -18,8 +18,6 @@ def h2o():
     return qcel.models.Molecule.from_data(smol)
 
 
-
-
 @pytest.fixture
 def nh2():
     smol = """
@@ -160,14 +158,10 @@ def test_sp_hf_rohf(program, basis, keywords, nh2):
 
 
 @pytest.mark.parametrize(
-    "program,basis,keywords", [
-        pytest.param("madness", None, {"dft__aobasis":"sto-3g","dft__econv": 1.0000e-05}),
- 
-    ],
+    "program,basis,keywords", [pytest.param("madness", None, {"dft__aobasis": "sto-3g", "dft__econv": 1.0000e-05}),],
 )
 def test_mad_hf(program, basis, keywords, h2o):
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
-
 
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
     print(res["stdout"])
