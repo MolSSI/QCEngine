@@ -132,7 +132,7 @@ class NWChemHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
         else:
-            raise UnknownError(dexe["stderr"])
+            raise UnknownError(dexe["stdout"])
 
     def build_input(
         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
