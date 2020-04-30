@@ -131,6 +131,7 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857419039,
             "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.001989217717, 0.0, 0.0, -0.001989217717,]).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.0019363896542312043,
         },
     },
     {
@@ -156,6 +157,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.007512595487, 0.0, 0.004613769715, -0.003756297743, 0.0, -0.004613769715, -0.003756297743,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00523856,
         },
     },
     {
@@ -181,6 +183,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, -0.003374258422, 0.0, -0.002334452569, 0.001687129211, 0.0, 0.002334452569, 0.001687129211,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.007263596331,
         },
     },
     {
@@ -232,6 +235,7 @@ _std_suite = [
                     -0.000069101625,
                 ]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00062614,
         },
     },
     {
@@ -257,6 +261,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.029278727285, 0.0, 0.015813927533, -0.014639363642, 0.0, -0.015813927533, -0.014639363642,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00384378,
         },
     },
     {
@@ -282,6 +287,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.016842165003, 0.0, 0.007150136873, -0.008421082502, 0.0, -0.007150136873, -0.008421082502,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00516659,
         },
     },
     {
@@ -334,6 +340,7 @@ _std_suite = [
                     -0.000068583796,
                 ]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.000713766189,
         },
     },
     {
@@ -359,6 +366,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.029273628227, 0.0, 0.015808308241, -0.014636814114, 0.0, -0.015808308241, -0.014636814114,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.003901085777,
         },
     },
     {
@@ -384,6 +392,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.016833254665, 0.0, 0.007144029475, -0.008416627332, 0.0, -0.007144029475, -0.008416627332,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.005233938447,
         },
     },
     # <<<  CONV-FC-CONV  >>>
@@ -415,6 +424,7 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.0478712079,
             "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.002335204281, 0.0, 0.0, -0.002335204281,]).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.0019205007159748158,
         },
     },
     {
@@ -440,6 +450,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.008118157882, 0.0, 0.004988381189, -0.004059078941, 0.0, -0.004988381189, -0.004059078941,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00521238,
         },
     },
     {
@@ -465,6 +476,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, -0.002486174824, 0.0, -0.001923330621, 0.001243087412, 0.0, 0.001923330621, 0.001243087412,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.007096579721,
         },
     },
     {
@@ -517,6 +529,7 @@ _std_suite = [
                     -0.000075015929,
                 ]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00060401,
         },
     },
     {
@@ -542,6 +555,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.030055915902, 0.0, 0.016307167756, -0.015027957951, 0.0, -0.016307167756, -0.015027957951,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00381116,
         },
     },
     {
@@ -567,6 +581,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.017883390799, 0.0, 0.00765987541, -0.0089416954, 0.0, -0.00765987541, -0.0089416954,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00498265,
         },
     },
     {
@@ -689,6 +704,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20874537,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 86,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00193646,
         },
     },
     {
@@ -708,6 +724,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22941330,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 85,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00523874,
         },
     },
     {
@@ -727,6 +744,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.27570541,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 84,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00726403,
         },
     },
     {
@@ -843,6 +861,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20681721,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 83,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00192057,
         },
     },
     {
@@ -862,6 +881,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22717646,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 82,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00521255,
         },
     },
     {
@@ -881,6 +901,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.25033052,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 81,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00709694,
         },
     },
     {
@@ -1000,6 +1021,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20888438,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 79,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00193859,
         },
     },
     {
@@ -1019,6 +1041,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22730597,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 79,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00521769,
         },
     },
     {
@@ -1038,6 +1061,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.25033030,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 79,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00709666,
         },
     },
     {
@@ -1157,6 +1181,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20695586,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 78,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00192267,
         },
     },
     {
@@ -1176,6 +1201,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22954333,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 78,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00524393,
         },
     },
     {
@@ -1195,6 +1221,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.27570207,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": 78,  # can't calc
+            "(T) CORRECTION ENERGY": -0.00726375,
         },
     },
     {
@@ -1315,9 +1342,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20873986012771106,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857381,
-            # "CCSD(T) TOTAL ENERGY": -100.23006887311104,       # TEST
-            "(T) CORRECTION ENERGY": -0.0019363109218456449,  # TEST
-            # "CCSD(T) CORRELATION ENERGY": -0.21067617104955672 # TEST
+            "(T) CORRECTION ENERGY": -0.0019363109218456449,
         },
     },
     {
@@ -1341,6 +1366,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22941290,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05017955,
+            "(T) CORRECTION ENERGY": -0.00523867,
         },
     },
     {
@@ -1364,6 +1390,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.27570421,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05801141,
+            "(T) CORRECTION ENERGY": -0.00726395,
         },
     },
     {
@@ -1557,9 +1584,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.2068117080298787,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04787083,
-            # "CCSD(T) TOTAL ENERGY": -100.22812483046566,       # TEST
-            "(T) CORRECTION ENERGY": -0.0019204203743072874,  # TEST
-            # "CCSD(T) CORRELATION ENERGY": -0.20873212840418598 # TEST
+            "(T) CORRECTION ENERGY": -0.0019204203743072874,
         },
     },
     {
@@ -1583,6 +1608,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22717607,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04939986,
+            "(T) CORRECTION ENERGY": -0.00521248,
         },
     },
     {
@@ -1606,6 +1632,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.25032939,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05405638,
+            "(T) CORRECTION ENERGY": -0.00709686,
         },
     },
     {
@@ -1812,6 +1839,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20887885,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04845784,
+            "(T) CORRECTION ENERGY": -0.00193844,
         },
     },
     {
@@ -1831,6 +1859,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22954292,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05010092,
+            "(T) CORRECTION ENERGY": -0.00524386,
         },
     },
     {
@@ -1850,6 +1879,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.27570087,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05800702,
+            "(T) CORRECTION ENERGY": -0.00726367,
         },
     },
     {
@@ -1970,6 +2000,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20695033,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04775464,
+            "(T) CORRECTION ENERGY": -0.00192252,
         },
     },
     {
@@ -1989,6 +2020,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.22730558,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04932106,
+            "(T) CORRECTION ENERGY": -0.00521762,
         },
     },
     {
@@ -2008,6 +2040,7 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.25032917,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05405189,
+            "(T) CORRECTION ENERGY": -0.00709658,
         },
     },
     {
@@ -2135,6 +2168,7 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04845491,
             "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.001970675302, 0.0, 0.0, -0.001970675302,]).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.0019380186429220421,
         },
     },
     {
@@ -2170,6 +2204,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.007518759967, 0.0, 0.004613106602, -0.003759379983, 0.0, -0.004613106602, -0.003759379983,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00524345,
         },
     },
     {
@@ -2205,6 +2240,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, -0.003408844165, 0.0, -0.002343169064, 0.001704422083, 0.0, 0.002343169064, 0.001704422083]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00726213,
         },
     },
     {
@@ -2416,6 +2452,7 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04775171,
             "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.002316563628, 0.0, 0.0, -0.002316563628,]).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.001922093564526723,
         },
     },
     {
@@ -2451,6 +2488,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.008124347934, 0.0, 0.004987676555, -0.004062173967, 0.0, -0.004987676555, -0.004062173967,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00521721,
         },
     },
     {
@@ -2486,6 +2524,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, -0.002520920562, 0.0, -0.001932133533, 0.001260460281, 0.0, 0.001932133533, 0.001260460281,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00709505,
         },
     },
     {
@@ -2921,21 +2960,24 @@ _std_suite = [
 
 for calc in _std_suite:
     if calc["data"]:
-        calc["data"]["MP2 TOTAL ENERGY"] = calc["data"]["MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-        calc["data"]["MP2 DOUBLES ENERGY"] = calc["data"]["MP2 CORRELATION ENERGY"] - calc["data"]["MP2 SINGLES ENERGY"]
-        calc["data"]["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-            calc["data"]["MP2 CORRELATION ENERGY"]
-            - calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
-            - calc["data"]["MP2 SINGLES ENERGY"]
-        )
-        calc["data"]["SCS-MP2 CORRELATION ENERGY"] = (
-            (1 / 3) * calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
-            + (6 / 5) * calc["data"]["MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
-            + calc["data"]["MP2 SINGLES ENERGY"]
-        )
-        calc["data"]["SCS-MP2 TOTAL ENERGY"] = (
-            calc["data"]["SCS-MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-        )
+        if "MP2 CORRELATION ENERGY" in calc["data"]:
+            calc["data"]["MP2 TOTAL ENERGY"] = calc["data"]["MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            calc["data"]["MP2 DOUBLES ENERGY"] = (
+                calc["data"]["MP2 CORRELATION ENERGY"] - calc["data"]["MP2 SINGLES ENERGY"]
+            )
+            calc["data"]["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                calc["data"]["MP2 CORRELATION ENERGY"]
+                - calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
+                - calc["data"]["MP2 SINGLES ENERGY"]
+            )
+            calc["data"]["SCS-MP2 CORRELATION ENERGY"] = (
+                (1 / 3) * calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
+                + (6 / 5) * calc["data"]["MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
+                + calc["data"]["MP2 SINGLES ENERGY"]
+            )
+            calc["data"]["SCS-MP2 TOTAL ENERGY"] = (
+                calc["data"]["SCS-MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
 
         if "CCSD CORRELATION ENERGY" in calc["data"]:
             calc["data"]["CCSD TOTAL ENERGY"] = (
@@ -2948,6 +2990,14 @@ for calc in _std_suite:
                 calc["data"]["CCSD CORRELATION ENERGY"]
                 - calc["data"]["CCSD SAME-SPIN CORRELATION ENERGY"]
                 - calc["data"]["CCSD SINGLES ENERGY"]
+            )
+
+        if "(T) CORRECTION ENERGY" in calc["data"]:
+            calc["data"]["CCSD(T) CORRELATION ENERGY"] = (
+                calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["(T) CORRECTION ENERGY"]
+            )
+            calc["data"]["CCSD(T) TOTAL ENERGY"] = (
+                calc["data"]["CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
             )
 
 

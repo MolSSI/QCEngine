@@ -487,6 +487,8 @@ def harvest_outfile_pass(outtext):
         print("matched ccsd(t) ncc v2")
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
         psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
+        psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
+        psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
 
     # Process DBOC
     mobj = re.search(
@@ -516,9 +518,16 @@ def harvest_outfile_pass(outtext):
     )
     if mobj:  # PRINT=2 to get SCS-CC components
         print("matched scscc")
-        psivar["%s SAME-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = Decimal(mobj.group(3)) + Decimal(
-            mobj.group(4)
-        )
+        if float(mobj.group(4)) == 0.0:
+            ss = 2 * Decimal(mobj.group(3))
+        else:
+            ss = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
+
+        if not (
+            re.search(r"executable xvcc finished", outtext)
+            and re.search(r"The reference state is a ROHF wave function.", outtext)
+        ):
+            psivar["%s SAME-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = ss
         psivar["%s OPPOSITE-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(5)
         psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(6)
 
@@ -848,10 +857,11 @@ def harvest(p4Mol, c4out, **largs):
     retMol = None if p4Mol else grdMol
 
     if oriDip is not None:
+        outPsivar["CURRENT DIPOLE"] = oriDip
         oriDip *= qcel.constants.dipmom_au2debye
-        outPsivar["CURRENT DIPOLE X"] = oriDip[0]
-        outPsivar["CURRENT DIPOLE Y"] = oriDip[1]
-        outPsivar["CURRENT DIPOLE Z"] = oriDip[2]
+        # outPsivar["CURRENT DIPOLE X"] = oriDip[0]
+        # outPsivar["CURRENT DIPOLE Y"] = oriDip[1]
+        # outPsivar["CURRENT DIPOLE Z"] = oriDip[2]
         # outPsivar['CURRENT DIPOLE X'] = str(oriDip[0] * psi_dipmom_au2debye)
         # outPsivar['CURRENT DIPOLE Y'] = str(oriDip[1] * psi_dipmom_au2debye)
         # outPsivar['CURRENT DIPOLE Z'] = str(oriDip[2] * psi_dipmom_au2debye)
