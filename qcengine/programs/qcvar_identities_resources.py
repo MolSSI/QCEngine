@@ -1,5 +1,7 @@
 from decimal import Decimal as Dm
 from typing import Any, Dict, List
+import numpy as np
+from .util import PreservingDict
 
 from qcelemental.models import AtomicResultProperties
 
