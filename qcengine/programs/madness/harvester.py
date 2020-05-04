@@ -158,6 +158,7 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
 
     # Get the SCF properties
     output["scf_total_energy"] = psivars.get("TOTAL SCF ENERGY", None)
+    output["scf_xc_energy"] = psivars.get("EXCHANGE-CORRELATION")
     #output["scf_one_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
     #output["scf_two_electron_energy"] = psivars.get("TWO-ELECTRON ENERGY", None)
     #output["scf_dispersion_correction_energy"] = psivars.get("DFT DISPERSION ENERGY", None)
