@@ -177,7 +177,12 @@ class MadnessHarness(ProgramHarness):
     def execute(
         self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
-        success, dexe = execute(inputs["command"], inputs["infiles"],)
+        success, dexe = execute(
+            inputs["command"], 
+            inputs["infiles"],
+            scratch_directory=inputs["scratch_directory"],
+           
+        )
         return success, dexe
 
     def parse_output(
