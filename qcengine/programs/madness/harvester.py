@@ -32,7 +32,6 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
     """
 
     # Loop over all steps
-    # TODO (wardlt): Is it only necessary to read the last two steps?
     pass_psivar = []
     pass_coord = []
     pass_grad = []
@@ -77,8 +76,10 @@ def harvest_outfile_pass(outtext):
 
     # 2)Calculation converged
     else:
-        OPTIONS=[r'kinetic',r'nonlocal psp',r'nuclear attraction',r'coulomb',r'PCM',r'exchange-correlation',r'nuclear-repulsion',r'total']
-        PSIVAR=['KINETIC ENERGY','NONLOCAL PSP','NUCLEAR ATTRACTION ENERGY','COULOMB','PCM','EXCHANGE-CORRELATION','NUCLEAR REPULSION ENERGY','TOTAL SCF ENERGY']
+        OPTIONS=[r'exchange-correlation',r'nuclear-repulsion',r'total']
+        PSIVAR=['EXCHANGE-CORRELATION','NUCLEAR REPULSION ENERGY','TOTAL SCF ENERGY']
+        #OPTIONS=[r'kinetic',r'nonlocal psp',r'nuclear attraction',r'coulomb',r'PCM',r'exchange-correlation',r'nuclear-repulsion',r'total']
+        #PSIVAR=['KINETIC ENERGY','NONLOCAL PSP','NUCLEAR ATTRACTION ENERGY','COULOMB','PCM','EXCHANGE-CORRELATION','NUCLEAR REPULSION ENERGY','TOTAL SCF ENERGY']
         optDict=dict(zip(OPTIONS,PSIVAR)) 
 
         for var,VAR in optDict.items():
