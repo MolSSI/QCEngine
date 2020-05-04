@@ -697,32 +697,7 @@ def harvest_outfile_pass(outtext):
         psivar["DIPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
         psivar["TOTAL DIPOLE MOMENT"] = mobj.group(4)
 
-    mobj = re.search(
-        r"Quadrupole moments in atomic units\s+"
-        + r"Component\s+"
-        + r"Electronic\+nuclear\s+"
-        + r"Point charges\s+"
-        + r"Total\s+"
-        + r"-+\s+"
-        + r"XX\s+([+-]?\d+[.]\d+)\s+"
-        + r".*\s+.*\s+"
-        + r"YY\s+([+-]?\d+[.]\d+)\s+"
-        + r".*\s+.*\s+"
-        + r"ZZ\s+([+-]?\d+[.]\d+)\s+"
-        + r".*\s+.*\s+"
-        + r"XY\s+([+-]?\d+[.]\d+)\s+"
-        + r".*\s+.*\s+"
-        + r"XZ\s+([+-]?\d+[.]\d+)\s+"
-        + r".*\s+.*\s+"
-        + r"YZ\s+([+-]?\d+[.]\d+)\s+",
-        outtext,
-        re.MULTILINE,
-    )
-
-    if mobj:
-        psivar["QUADRUPOLE MOMENT"] = np.array(
-            [mobj.group(1), mobj.group(2), mobj.group(3), mobj.group(4), mobj.group(5), mobj.group(6)]
-        )
+    
 
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
