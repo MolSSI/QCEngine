@@ -67,7 +67,7 @@ class MadnessHarness(ProgramHarness):
 
        """
         qc = which(
-            "nwchem",
+            "madness",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via https://github.com/m-a-d-n-e-s-s/madness",
@@ -99,7 +99,7 @@ class MadnessHarness(ProgramHarness):
             success, output = execute(
                 command,
                 {
-                    "v.moldft": "dft\nxc hf\nend\n\ngeometry\n H                     0.00000000     0.00000000    -0.36579425\n H                     0.00000000     0.00000000     0.36579425\nend\n"
+                    "v.moldft": "dft\nxc hf\nend\n\ngeometry\n He    0.00000000      0.00000000     0.00000000    \n end\n"
                 },
                 scratch_directory=config.scratch_directory,
             )
