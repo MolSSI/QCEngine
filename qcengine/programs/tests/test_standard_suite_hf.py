@@ -155,5 +155,3 @@ def test_sp_hf_rohf(program, basis, keywords, nh2):
 
     atol = 1.0e-6
     assert compare_values(scf_tot, res["return_result"], atol=atol)
-
-

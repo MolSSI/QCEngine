@@ -18,7 +18,6 @@ def h2o():
     return qcel.models.Molecule.from_data(smol)
 
 
-
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [pytest.param("madness", None, {"dft__k": 7, "dft__aobasis": "sto-3g", "dft__econv": 1.0000e-05}),],
