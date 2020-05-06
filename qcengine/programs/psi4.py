@@ -5,11 +5,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..config import TaskConfig
-    from qcelemental.models import AtomicInput
+from typing import TYPE_CHECKING, Dict
 
 from qcelemental.models import AtomicResult
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
@@ -17,6 +13,10 @@ from qcelemental.util import deserialize, parse_version, safe_version, which, wh
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from ..util import execute, popen, temporary_directory
 from .model import ProgramHarness
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 
 class Psi4Harness(ProgramHarness):

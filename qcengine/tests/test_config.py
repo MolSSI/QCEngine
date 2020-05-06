@@ -6,10 +6,10 @@ import copy
 
 import pydantic
 import pytest
-from qcengine.config import NodeDescriptor
 
 import qcengine as qcng
-from qcengine.util import environ_context, create_mpi_invocation
+from qcengine.config import NodeDescriptor
+from qcengine.util import create_mpi_invocation, environ_context
 
 
 def test_node_blank():
