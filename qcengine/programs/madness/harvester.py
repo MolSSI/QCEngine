@@ -37,12 +37,12 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
     pass_grad = []
     for outpass in re.split(r"Converged!", outtext, re.MULTILINE):
         psivar, madcoord, madgrad, version, error = harvest_outfile_pass(outpass)
-        pass_psivar.append(psivar)## all the variables extracted
+        pass_psivar.append(psivar)  ## all the variables extracted
         pass_coord.append(madcoord)
         pass_grad.append(madgrad)
 
     # Determine which segment contained the last geometry
-    retindx = -1 #if pass_coord[-1] else -2
+    retindx = -1  # if pass_coord[-1] else -2
     return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
 
 
@@ -64,42 +64,46 @@ def harvest_outfile_pass(outtext):
     mobj = re.search(
         r'^\s+' + r'MADNESS' + r'\s+' + r'(\d+.\d\d+.\d)' +r'\s'+ r'multiresolution suite'+r'\s*$',
         outtext, re.MULTILINE)
+    # fmt: on
     if mobj:
-        logger.debug('matched version')
+        logger.debug("matched version")
         version = mobj.group(1)
 
     # Process SCF
     # 1)Fail to converge (TODO Robert ask for failed convergence)
+    # fmt: off
     mobj = re.search(r'^\s+' + r'(?:Calculation failed to converge)' + r'\s*$', outtext, re.MULTILINE)
+    # fmt: on
     if mobj:
-        logger.debug('failed to converge')
+        logger.debug("failed to converge")
 
     # 2)Calculation converged
     else:
-        OPTIONS=[r'exchange-correlation',r'nuclear-repulsion',r'total']
-        PSIVAR=['EXCHANGE-CORRELATION','NUCLEAR REPULSION ENERGY','TOTAL SCF ENERGY']
-        #OPTIONS=[r'kinetic',r'nonlocal psp',r'nuclear attraction',r'coulomb',r'PCM',r'exchange-correlation',r'nuclear-repulsion',r'total']
-        #PSIVAR=['KINETIC ENERGY','NONLOCAL PSP','NUCLEAR ATTRACTION ENERGY','COULOMB','PCM','EXCHANGE-CORRELATION','NUCLEAR REPULSION ENERGY','TOTAL SCF ENERGY']
-        optDict=dict(zip(OPTIONS,PSIVAR)) 
+        OPTIONS = [r"exchange-correlation", r"nuclear-repulsion", r"total"]
+        PSIVAR = ["EXCHANGE-CORRELATION", "NUCLEAR REPULSION ENERGY", "TOTAL SCF ENERGY"]
+        # OPTIONS=[r'kinetic',r'nonlocal psp',r'nuclear attraction',r'coulomb',r'PCM',r'exchange-correlation',r'nuclear-repulsion',r'total']
+        # PSIVAR=['KINETIC ENERGY','NONLOCAL PSP','NUCLEAR ATTRACTION ENERGY','COULOMB','PCM','EXCHANGE-CORRELATION','NUCLEAR REPULSION ENERGY','TOTAL SCF ENERGY']
+        optDict = dict(zip(OPTIONS, PSIVAR))
 
-        for var,VAR in optDict.items():
-            mobj = re.search(r'^\s+' + var + r'\s*' + NUMBER + r's*$', outtext, re.MULTILINE)
+        for var, VAR in optDict.items():
+            mobj = re.search(r"^\s+" + var + r"\s*" + NUMBER + r"s*$", outtext, re.MULTILINE)
             if mobj:
-                logger.debug('matched SCF')## not sure what this means
+                logger.debug("matched SCF")  ## not sure what this means
                 psivar[VAR] = mobj.group(1)
     # Other options
-
 
     # Process CURRENT energies (TODO: needs better way)
     if "TOTAL SCF ENERGY" in psivar:
         psivar["CURRENT REFERENCE ENERGY"] = psivar["TOTAL SCF ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["TOTAL SCF ENERGY"]
 
-
     return psivar, psivar_coord, psivar_grad, version, error
 
 
-def harvest_hessian(hess: str) -> np.ndarray: pass 
+def harvest_hessian(hess: str) -> np.ndarray:
+    pass
+
+
 #    """Parses the contents of the NWChem hess file into a hessian array.
 
 #     Args:
@@ -108,7 +112,7 @@ def harvest_hessian(hess: str) -> np.ndarray: pass
 #         (np.ndarray) Hessian matrix as a 2D array
 #     """
 
-    # Change the "D[+-]" notation of Fortran output to "E[+-]" used by Python
+# Change the "D[+-]" notation of Fortran output to "E[+-]" used by Python
 #     hess_conv = hess.replace("D", "E")
 
 #     # Parse all of the float values
@@ -144,10 +148,10 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     # Extract the Calc Info
     output.update(
         {
-            "calcinfo_nbasis": psivars.get("N BASIS", None), ## Not a thing in madness
-            "calcinfo_nmo": psivars.get("N MO", None), ## Number of Mo orbitals
-            "calcinfo_natom": psivars.get("N ATOMS", None), ## Get madness to print this out
-            "calcinfo_nalpha": psivars.get("N ALPHA ELECTRONS", None), ## TODO (figure out how to read)
+            "calcinfo_nbasis": psivars.get("N BASIS", None),  ## Not a thing in madness
+            "calcinfo_nmo": psivars.get("N MO", None),  ## Number of Mo orbitals
+            "calcinfo_natom": psivars.get("N ATOMS", None),  ## Get madness to print this out
+            "calcinfo_nalpha": psivars.get("N ALPHA ELECTRONS", None),  ## TODO (figure out how to read)
             "calcinfo_nbeta": psivars.get("N BETA ELECTRONS", None),
         }
     )
@@ -158,11 +162,11 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
 
     # Get the SCF properties
     output["scf_total_energy"] = psivars.get("TOTAL SCF ENERGY", None)
-    output["scf_xc_energy"] = psivars.get("EXCHANGE-CORRELATION",None)
-    # TODO AdrianH right madness to output these variables 
-    #output["scf_one_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
-    #output["scf_two_electron_energy"] = psivars.get("TWO-ELECTRON ENERGY", None)
-    #output["scf_dispersion_correction_energy"] = psivars.get("DFT DISPERSION ENERGY", None)
+    output["scf_xc_energy"] = psivars.get("EXCHANGE-CORRELATION", None)
+    # TODO AdrianH right madness to output these variables
+    # output["scf_one_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
+    # output["scf_two_electron_energy"] = psivars.get("TWO-ELECTRON ENERGY", None)
+    # output["scf_dispersion_correction_energy"] = psivars.get("DFT DISPERSION ENERGY", None)
 
     return AtomicResultProperties(**output)
 
@@ -186,8 +190,7 @@ def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, 
 
     # Parse the Madness output
     out_psivar, out_mol, out_grad, version, error = harvest_output(madout)
-    
-    
+
     # If available, read higher-accuracy gradients
     #  These were output using a Python Task in NWChem to read them out of the database
     if outfiles.get("mad.grad") is not None:
@@ -207,15 +210,15 @@ def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, 
                     """Madness outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
                     % (out_mol.nuclear_repulsion_energy(), in_mol.nuclear_repulsion_energy())
                 )
-    #else:
+    # else:
     #    raise ValueError("""No coordinate information extracted from Madness output.""")
 
     # If present, align the gradients and hessian with the original molecular coordinates
     #  Madness rotates the coordinates of the input molecule. `out_mol` contains the coordinates for the
     #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
-    #amol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
+    # amol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
 
-   # mill = data["mill"]  # Retrieve tool with alignment routines
+    # mill = data["mill"]  # Retrieve tool with alignment routines
 
     if out_grad is not None:
         out_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
