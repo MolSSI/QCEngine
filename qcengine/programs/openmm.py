@@ -7,7 +7,7 @@ import datetime
 import hashlib
 import os
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from ..config import TaskConfig
@@ -55,13 +55,13 @@ class OpenMMHarness(ProgramHarness):
 
         return off_forcefield
 
-    def _get_openmm_system(self, off_forcefield, off_top):
-
-        # key = f"{mol_hash}-{input_model.method}-{hash(forcefield_schema)}"
-
-        openmm_system = off_forcefield.create_openmm_system(off_top)
-
-        return openmm_system
+    # def _get_openmm_system(self, off_forcefield, off_top):
+    #
+    #     # key = f"{mol_hash}-{input_model.method}-{hash(forcefield_schema)}"
+    #
+    #     openmm_system = off_forcefield.create_openmm_system(off_top)
+    #
+    #     return openmm_system
 
     def _get_cache(self, key):
         return self._CACHE[key]["value"]
@@ -107,7 +107,62 @@ class OpenMMHarness(ProgramHarness):
             raise_msg="Please install via `conda install openmm -c omnia`.",
         )
 
-        return rdkit_found and openff_found and openmm_found
+        openmmff_found = which_import(
+            ".generators",
+            return_bool=True,
+            raise_error=raise_error,
+            package="openmmforcefields",
+            raise_msg="Please install via `conda install openmmforcefields -c conda-forge`",
+        )
+
+        return rdkit_found and openff_found and openmm_found and openmmff_found
+
+    def _generate_openmm_sysetm(
+        self, molecule: "offtop.Molecule", method: str, keywords: Dict = None
+    ) -> "openmm.System":
+        """
+        Generate an OpenMM System object from the input molecule method and basis.
+        """
+        from openmmforcefields.generators import SystemGenerator
+        from simtk.openmm import app
+        from simtk import unit
+
+        _constraint_types = {"hbonds": app.HBonds, "allbonds": app.AllBonds, "hangles": app.HAngles}
+        _periodic_nonbond_types = {"ljpme": app.LJPME, "pme": app.PME, "ewald": app.Ewald}
+        _non_periodic_nonbond_types = {"nocutoff": app.NoCutoff, "cutoffnonperiodic": app.CutoffNonPeriodic}
+
+        constraints = keywords.get("constraints", None)
+        if constraints is not None:
+            forcefield_kwargs = {"constraints": _constraint_types[constraints.lower()]}
+        else:
+            forcefield_kwargs = None
+
+        nonbondedmethod = keywords.get("nonbondedMethod", None)
+        if nonbondedmethod is not None:
+            if nonbondedmethod.lower() in _periodic_nonbond_types:
+                periodic_forcefield_kwargs = {"nonbondedMethod": _periodic_nonbond_types[nonbondedmethod.lower()]}
+                nonperiodic_forcefield_kwargs = None
+            else:
+                periodic_forcefield_kwargs = None
+                nonperiodic_forcefield_kwargs = {
+                    "nonbondedMethod": _non_periodic_nonbond_types[nonbondedmethod.lower()]
+                }
+        else:
+            periodic_forcefield_kwargs = None
+            nonperiodic_forcefield_kwargs = None
+
+        # now start the system generator
+        system_generator = SystemGenerator(
+            small_molecule_forcefield=method,
+            forcefield_kwargs=forcefield_kwargs,
+            nonperiodic_forcefield_kwargs=nonperiodic_forcefield_kwargs,
+            periodic_forcefield_kwargs=periodic_forcefield_kwargs,
+        )
+        topology = molecule.to_topology()
+        # TODO remove this once openmmforcefields updates charge checking.
+        molecule.partial_charges = unit.Quantity(np.zeros((molecule.n_atoms,)), unit=unit.elementary_charge)
+        system = system_generator.create_system(topology=topology.to_openmm(), molecules=[molecule])
+        return system
 
     def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
@@ -128,22 +183,25 @@ class OpenMMHarness(ProgramHarness):
         if not input_data.model.basis:
             raise InputError("Method must contain a basis set.")
 
-        # Build a system based off input
-        if input_data.model.basis.lower() == "smirnoff":
-
-            ff_file = input_data.model.method + ".offxml"
-            off_forcefield = self._get_off_forcefield(ff_file, ff_file)
+        # Make sure we are using smirnoff or antechamber
+        basis = input_data.model.basis.lower()
+        if basis == "smirnoff" or basis == "antechamber":
 
             with capture_stdout():
                 # try and make the molecule from the cmiles
                 if input_data.molecule.extras is not None:
-                    cmiles = input_data.molecule.extras.get("cmiles", None)
-                else:
-                    cmiles = None
+                    try:
+                        cmiles = input_data.molecule.extras["canonical_isomeric_explicit_hydrogen_mapped_smiles"]
+                    except KeyError:
+                        try:
+                            cmiles = input_data.molecule.extras["cmiles"][
+                                "canonical_isomeric_explicit_hydrogen_mapped_smiles"
+                            ]
+                        except KeyError:
+                            cmiles = None
+
                 if cmiles is not None:
-                    off_mol = offtop.Molecule.from_mapped_smiles(
-                        mapped_smiles=cmiles["canonical_isomeric_explicit_hydrogen_mapped_smiles"]
-                    )
+                    off_mol = offtop.Molecule.from_mapped_smiles(mapped_smiles=cmiles)
                     # add the conformer
                     conformer = unit.Quantity(value=np.array(input_data.molecule.geometry), unit=unit.bohr)
                     off_mol.add_conformer(conformer)
@@ -154,11 +212,12 @@ class OpenMMHarness(ProgramHarness):
                     # Create an Open Force Field `Molecule` from the RDKit Molecule
                     off_mol = offtop.Molecule(rdkit_mol)
 
-                # Create OpenMM system in vacuum from forcefield, molecule
-                off_top = off_mol.to_topology()
-                openmm_system = self._get_openmm_system(off_forcefield, off_top)
+            # now we need to create the system
+            openmm_system = self._generate_openmm_sysetm(
+                molecule=off_mol, method=input_data.model.method, keywords=input_data.keywords
+            )
         else:
-            raise InputError("Accepted bases are: {'smirnoff', }")
+            raise InputError("Accepted bases are: {'smirnoff', antechamber, }")
 
         # Need an integrator for simulation even if we don't end up using it really
         integrator = openmm.VerletIntegrator(1.0 * unit.femtoseconds)
