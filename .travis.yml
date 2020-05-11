@@ -67,6 +67,12 @@ install:
     if [ $PROG == "PSI4DEV" ]; then
       conda remove qcengine --force
     fi
+
+  - conda list
+
+    # Build and install package
+  - python setup.py develop --no-deps
+  
   - which psi4
   - psi4 --version
   - python -c "import psi4; print(psi4.__version__)"
@@ -74,11 +80,6 @@ install:
   - python -c "import qcengine as qcng; print(qcng.get_program('psi4').get_version())"
   - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
   - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
-  - conda list
-
-    # Build and install package
-  - python setup.py develop --no-deps
-
 
 script:
     # Get a bit of info first
