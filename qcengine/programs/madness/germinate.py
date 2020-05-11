@@ -91,7 +91,7 @@ _xc_functionals = [
 
 # def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict[str, Any]]:
 def muster_modelchem(method: str,) -> Tuple[str, Dict[str, Any]]:
-    """Converts the QC method into NWChem keywords
+    """Converts the QC method into MADNESS keywords
 
      Args:
         method (str): Name of the QC method to use

@@ -153,7 +153,7 @@ class MadnessHarness(ProgramHarness):
         opts.update(molData)
 
         ## Handle Calc Type (ROBERT)
-        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
+        mdccmd, mdcopts = muster_modelchem(input_model.model.method)
         opts.update(mdcopts)
 
         ## Handle the basis set (ROBERT) the question is what value of k
