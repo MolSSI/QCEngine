@@ -39,20 +39,20 @@ class OpenMMHarness(ProgramHarness):
     class Config(ProgramHarness.Config):
         pass
 
-    def _get_off_forcefield(self, hashstring, offxml):
-
-        from openforcefield.typing.engines import smirnoff
-
-        key = hashlib.sha256(hashstring.encode()).hexdigest()
-
-        # get forcefield from cache, build new one if not present
-        off_forcefield = self._get_cache(key) if key in self._CACHE else smirnoff.ForceField(offxml)
-
-        # cache forcefield, no matter what
-        # handles updating time touched, dropping items if cache too large
-        self._cache_it(key, off_forcefield)
-
-        return off_forcefield
+    # def _get_off_forcefield(self, hashstring, offxml):
+    #
+    #     from openforcefield.typing.engines import smirnoff
+    #
+    #     key = hashlib.sha256(hashstring.encode()).hexdigest()
+    #
+    #     # get forcefield from cache, build new one if not present
+    #     off_forcefield = self._get_cache(key) if key in self._CACHE else smirnoff.ForceField(offxml)
+    #
+    #     # cache forcefield, no matter what
+    #     # handles updating time touched, dropping items if cache too large
+    #     self._cache_it(key, off_forcefield)
+    #
+    #     return off_forcefield
 
     # def _get_openmm_system(self, off_forcefield, off_top):
     #
@@ -126,41 +126,52 @@ class OpenMMHarness(ProgramHarness):
         from simtk.openmm import app
         from simtk import unit
 
-        _constraint_types = {"hbonds": app.HBonds, "allbonds": app.AllBonds, "hangles": app.HAngles}
-        _periodic_nonbond_types = {"ljpme": app.LJPME, "pme": app.PME, "ewald": app.Ewald}
-        _non_periodic_nonbond_types = {"nocutoff": app.NoCutoff, "cutoffnonperiodic": app.CutoffNonPeriodic}
+        # create a hash based on the input options
+        hashstring = molecule.to_smiles(isomeric=True, explicit_hydrogens=True, mapped=True) + method
+        for value in keywords.values():
+            hashstring += value
+        key = hashlib.sha256(hashstring.encode()).hexdigest()
+        # now look for the system?
+        try:
+            system = self._get_cache(key)
+        except KeyError:
+            # make the system from the inputs
+            _constraint_types = {"hbonds": app.HBonds, "allbonds": app.AllBonds, "hangles": app.HAngles}
+            _periodic_nonbond_types = {"ljpme": app.LJPME, "pme": app.PME, "ewald": app.Ewald}
+            _non_periodic_nonbond_types = {"nocutoff": app.NoCutoff, "cutoffnonperiodic": app.CutoffNonPeriodic}
 
-        constraints = keywords.get("constraints", None)
-        if constraints is not None:
-            forcefield_kwargs = {"constraints": _constraint_types[constraints.lower()]}
-        else:
-            forcefield_kwargs = None
+            constraints = keywords.get("constraints", None)
+            if constraints is not None:
+                forcefield_kwargs = {"constraints": _constraint_types[constraints.lower()]}
+            else:
+                forcefield_kwargs = None
 
-        nonbondedmethod = keywords.get("nonbondedMethod", None)
-        if nonbondedmethod is not None:
-            if nonbondedmethod.lower() in _periodic_nonbond_types:
-                periodic_forcefield_kwargs = {"nonbondedMethod": _periodic_nonbond_types[nonbondedmethod.lower()]}
-                nonperiodic_forcefield_kwargs = None
+            nonbondedmethod = keywords.get("nonbondedMethod", None)
+            if nonbondedmethod is not None:
+                if nonbondedmethod.lower() in _periodic_nonbond_types:
+                    periodic_forcefield_kwargs = {"nonbondedMethod": _periodic_nonbond_types[nonbondedmethod.lower()]}
+                    nonperiodic_forcefield_kwargs = None
+                else:
+                    periodic_forcefield_kwargs = None
+                    nonperiodic_forcefield_kwargs = {
+                        "nonbondedMethod": _non_periodic_nonbond_types[nonbondedmethod.lower()]
+                    }
             else:
                 periodic_forcefield_kwargs = None
-                nonperiodic_forcefield_kwargs = {
-                    "nonbondedMethod": _non_periodic_nonbond_types[nonbondedmethod.lower()]
-                }
-        else:
-            periodic_forcefield_kwargs = None
-            nonperiodic_forcefield_kwargs = None
+                nonperiodic_forcefield_kwargs = None
 
-        # now start the system generator
-        system_generator = SystemGenerator(
-            small_molecule_forcefield=method,
-            forcefield_kwargs=forcefield_kwargs,
-            nonperiodic_forcefield_kwargs=nonperiodic_forcefield_kwargs,
-            periodic_forcefield_kwargs=periodic_forcefield_kwargs,
-        )
-        topology = molecule.to_topology()
-        # TODO remove this once openmmforcefields updates charge checking.
-        molecule.partial_charges = unit.Quantity(np.zeros((molecule.n_atoms,)), unit=unit.elementary_charge)
-        system = system_generator.create_system(topology=topology.to_openmm(), molecules=[molecule])
+            # now start the system generator
+            system_generator = SystemGenerator(
+                small_molecule_forcefield=method,
+                forcefield_kwargs=forcefield_kwargs,
+                nonperiodic_forcefield_kwargs=nonperiodic_forcefield_kwargs,
+                periodic_forcefield_kwargs=periodic_forcefield_kwargs,
+            )
+            topology = molecule.to_topology()
+            # TODO remove this once openmmforcefields updates charge checking.
+            molecule.partial_charges = unit.Quantity(np.zeros((molecule.n_atoms,)), unit=unit.elementary_charge)
+            system = system_generator.create_system(topology=topology.to_openmm(), molecules=[molecule])
+            self._cache_it(key, system)
         return system
 
     def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
