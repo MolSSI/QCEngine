@@ -67,13 +67,14 @@ install:
     if [ $PROG == "PSI4DEV" ]; then
       conda remove qcengine --force
     fi
-  - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
-  - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
   - conda list
 
     # Build and install package
   - python setup.py develop --no-deps
 
+  - qcengine info
+  - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
+  - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
 
 script:
     # Get a bit of info first
