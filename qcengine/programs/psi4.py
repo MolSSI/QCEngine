@@ -87,6 +87,8 @@ class Psi4Harness(ProgramHarness):
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
+            print(self.version_cache)
+            print(exc["stdout"])
             self.version_cache[which_prog] = safe_version(exc["stdout"].split()[-1])
 
         candidate_version = self.version_cache[which_prog]
