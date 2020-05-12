@@ -5,11 +5,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..config import TaskConfig
-    from qcelemental.models import AtomicInput
+from typing import TYPE_CHECKING, Dict
 
 from qcelemental.models import AtomicResult
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
@@ -17,6 +13,10 @@ from qcelemental.util import deserialize, parse_version, safe_version, which, wh
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from ..util import execute, popen, temporary_directory
 from .model import ProgramHarness
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 
 class Psi4Harness(ProgramHarness):
@@ -193,7 +193,7 @@ class Psi4Harness(ProgramHarness):
                     psi4.core.set_num_threads(config.ncores, quiet=True)
                     psi4.set_memory(f"{config.memory}GB", quiet=True)
                     # psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
-                    if pversion < parse_version("1.4a2.dev500"):  # adjust to where DDD merged
+                    if pversion < parse_version("1.4a2.dev650"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
                         output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()

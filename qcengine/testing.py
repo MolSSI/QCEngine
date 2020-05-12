@@ -156,6 +156,7 @@ _programs = {
     "madness": which("madness", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
+    "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.2"),
     "rdkit": which_import("rdkit", return_bool=True),

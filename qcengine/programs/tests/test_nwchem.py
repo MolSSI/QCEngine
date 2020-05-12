@@ -1,9 +1,9 @@
 """Tests for NWChem functionality"""
+import numpy as np
 import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_values
 
-import numpy as np
 import qcengine as qcng
 from qcengine.testing import using
 
@@ -37,7 +37,7 @@ def test_b3lyp(nh2):
     # Check the other status information
     assert res["extras"]["qcvars"]["N ALPHA ELECTRONS"] == "5"
     assert res["extras"]["qcvars"]["N ATOMS"] == "3"
-    assert res["extras"]["qcvars"]["N BASIS"] == "13"
+    assert res["extras"]["qcvars"]["N BASIS FUNCTIONS"] == "13"
 
     # Make sure the properties parsed correctly
     assert compare_values(-55.554037, res["properties"]["return_energy"], atol=1e-3)
@@ -130,7 +130,7 @@ def test_dipole(h20):
     # Check the other status information
     assert res["extras"]["qcvars"]["N ALPHA ELECTRONS"] == "6"
     assert res["extras"]["qcvars"]["N ATOMS"] == "3"
-    assert res["extras"]["qcvars"]["N BASIS"] == "13"
+    assert res["extras"]["qcvars"]["N BASIS FUNCTIONS"] == "13"
 
     # Make sure the properties parsed correctly
     assert compare_values(-75.764944, res["properties"]["return_energy"], atol=1e-3)
@@ -142,3 +142,4 @@ def test_dipole(h20):
     assert compare_values(-0.00, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][0]), atol=1e-3)
     assert compare_values(-0.00, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][1]), atol=1e-3)
     assert compare_values(-0.272949872, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][2]), atol=1e-5)
+
