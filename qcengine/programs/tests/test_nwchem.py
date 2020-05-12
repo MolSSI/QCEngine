@@ -142,4 +142,3 @@ def test_dipole(h20):
     assert compare_values(-0.00, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][0]), atol=1e-3)
     assert compare_values(-0.00, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][1]), atol=1e-3)
     assert compare_values(-0.272949872, float(res["extras"]["qcvars"]["DIPOLE MOMENT"][2]), atol=1e-5)
-
