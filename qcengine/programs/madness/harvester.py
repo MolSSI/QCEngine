@@ -1,11 +1,13 @@
 import re
 import json
 import logging
-from decimal import Decimal
+
+# from decimal import Decimal
 from typing import Tuple
 
 import numpy as np
-import qcelemental as qcel
+
+# import qcelemental as qcel
 from qcelemental.models import Molecule
 from qcelemental.models.results import AtomicResultProperties
 from qcelemental.molparse import regex

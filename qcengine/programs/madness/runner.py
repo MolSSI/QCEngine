@@ -1,7 +1,7 @@
 """
 Calls the Madness moldft executable.
 """
-import re
+# import re
 import copy
 import logging
 import pprint
@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import AtomicResult, Provenance, AtomicInput
-from qcelemental.util import safe_version, which, which_import
+from qcelemental.util import safe_version, which
 
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError

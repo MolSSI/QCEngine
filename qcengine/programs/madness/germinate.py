@@ -127,6 +127,3 @@ def muster_modelchem(method: str,) -> Tuple[str, Dict[str, Any]]:
         raise InputError(f"Method not recognized: {method}")
 
     return mdccmd, opts
-
-
-# # # #
