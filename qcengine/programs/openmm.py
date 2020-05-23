@@ -131,11 +131,13 @@ class OpenMMHarness(ProgramHarness):
         for value in keywords.values():
             hashstring += value
         key = hashlib.sha256(hashstring.encode()).hexdigest()
+
         # now look for the system?
-        try:
+        if key in self._CACHE:
             system = self._get_cache(key)
-        except KeyError:
+        else:
             # make the system from the inputs
+            # set up available options for openmm
             _constraint_types = {"hbonds": app.HBonds, "allbonds": app.AllBonds, "hangles": app.HAngles}
             _periodic_nonbond_types = {"ljpme": app.LJPME, "pme": app.PME, "ewald": app.Ewald}
             _non_periodic_nonbond_types = {"nocutoff": app.NoCutoff, "cutoffnonperiodic": app.CutoffNonPeriodic}
@@ -151,11 +153,13 @@ class OpenMMHarness(ProgramHarness):
                 if nonbondedmethod.lower() in _periodic_nonbond_types:
                     periodic_forcefield_kwargs = {"nonbondedMethod": _periodic_nonbond_types[nonbondedmethod.lower()]}
                     nonperiodic_forcefield_kwargs = None
-                else:
+                elif nonbondedmethod.lower() in _non_periodic_nonbond_types:
                     periodic_forcefield_kwargs = None
                     nonperiodic_forcefield_kwargs = {
                         "nonbondedMethod": _non_periodic_nonbond_types[nonbondedmethod.lower()]
                     }
+                else:
+                    raise ValueError(f"nonbondedmethod '{nonbondedmethod}' not supported")
             else:
                 periodic_forcefield_kwargs = None
                 nonperiodic_forcefield_kwargs = None
@@ -168,6 +172,7 @@ class OpenMMHarness(ProgramHarness):
                 periodic_forcefield_kwargs=periodic_forcefield_kwargs,
             )
             topology = molecule.to_topology()
+
             # TODO remove this once openmmforcefields updates charge checking.
             molecule.partial_charges = unit.Quantity(np.zeros((molecule.n_atoms,)), unit=unit.elementary_charge)
             system = system_generator.create_system(topology=topology.to_openmm(), molecules=[molecule])
