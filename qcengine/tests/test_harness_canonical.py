@@ -64,35 +64,6 @@ def test_compute_gradient(program, model):
     assert "mytag" in ret.extras, ret.extras
 
 
-def test_openmm_cmiles_gradient():
-    program = "openmm"
-    if not has_program(program):
-        pytest.skip("Program '{}' not found.".format(program))
-
-    water = _get_molecule(program)
-    water_dict = water.dict()
-    # add ethane cmiles to the molecule
-    water_dict["extras"] = {
-        "cmiles": {
-            "canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:3][C:1]([H:4])([H:5])[C:2]([H:6])([H:7])[H:8]"
-        }
-    }
-
-    molecule = Molecule.from_data(water_dict)
-
-    model = {"method": "openff-1.0.0", "basis": "smirnoff"}
-
-    inp = AtomicInput(molecule=molecule, driver="gradient", model=model)
-    ret = qcng.compute(inp, program, raise_error=False)
-
-    # if we correctly find the cmiles this should fail as the molecule and cmiles are different
-    assert ret.success is False
-    assert (
-        "molecule.add_conformer given input of the wrong shape: Given (3, 3), expected (8, 3)"
-        in ret.error.error_message
-    )
-
-
 @pytest.mark.parametrize(
     "program, model",
     [
