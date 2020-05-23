@@ -214,6 +214,8 @@ class OpenMMHarness(ProgramHarness):
                             ]
                         except KeyError:
                             cmiles = None
+                else:
+                    cmiles = None
 
                 if cmiles is not None:
                     off_mol = offtop.Molecule.from_mapped_smiles(mapped_smiles=cmiles)
