@@ -129,7 +129,7 @@ class OpenMMHarness(ProgramHarness):
         # create a hash based on the input options
         hashstring = molecule.to_smiles(isomeric=True, explicit_hydrogens=True, mapped=True) + method
         for value in keywords.values():
-            hashstring += value
+            hashstring += str(value)
         key = hashlib.sha256(hashstring.encode()).hexdigest()
 
         # now look for the system?
