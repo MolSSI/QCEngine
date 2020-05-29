@@ -199,8 +199,10 @@ class Psi4Harness(ProgramHarness):
                         output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
                     else:
                         output_data = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
-                    output_data["extras"]["psiapi_evaluated"] = True
+                    # success here means execution returned. output_data may yet be qcel.models.AtomicResult or qcel.models.FailedOperation
                     success = True
+                    if output_data["success"]:
+                        output_data["extras"]["psiapi_evaluated"] = True
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)
                 else:
                     run_cmd = [

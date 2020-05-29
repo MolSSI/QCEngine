@@ -62,6 +62,24 @@ symmetry c1  # TODO for nwchem, manage another way
 }
 std_molecules["bh3p-xyz"] = std_molecules["bh3p"]
 
+_std_generics = {
+    "hf_cc-pvdz_ae": (19, 19, 5, 5),
+    "hf_cc-pvdz_fc": (19, 19, 5, 5),
+    "bh3p_cc-pvdz_ae": (29, 29, 4, 3),
+    "bh3p_cc-pvdz_fc": (29, 29, 4, 3),
+    "h2o_aug-cc-pvdz_ae": (41, 41, 5, 5),
+    "h2o_aug-cc-pvdz_fc": (41, 41, 5, 5),
+    "nh2_aug-cc-pvdz_ae": (41, 41, 5, 4),
+    "nh2_aug-cc-pvdz_fc": (41, 41, 5, 4),
+    "h2o_cfour-qz2p_ae": (48, 48, 5, 5),
+    "h2o_cfour-qz2p_fc": (48, 48, 5, 5),
+    "nh2_cfour-qz2p_ae": (48, 48, 5, 4),
+    "nh2_cfour-qz2p_fc": (48, 48, 5, 4),
+}
+_std_generics = {
+    k: dict(zip(["N BASIS FUNCTIONS", "N MOLECULAR ORBITALS", "N ALPHA ELECTRONS", "N BETA ELECTRONS"], v))
+    for k, v in _std_generics.items()
+}
 
 _scf_hf_dz_pk_rhf = -100.01941126902270
 _scf_bh3p_dz_pk_uhf = -25.94513842869638
@@ -2999,6 +3017,8 @@ for calc in _std_suite:
             calc["data"]["CCSD(T) TOTAL ENERGY"] = (
                 calc["data"]["CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
             )
+
+    calc["data"].update(_std_generics[f"{calc['meta']['system']}_{calc['meta']['basis']}_{calc['meta']['fcae']}"])
 
 
 def answer_hash(**kwargs):
