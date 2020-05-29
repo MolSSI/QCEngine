@@ -119,7 +119,6 @@ _scf_h2o_adz_cd_rhf = -76.04132169763341
 _scf_nh2_adz_cd_uhf = -55.57506886675886
 _scf_nh2_adz_cd_rohf = -55.57065536578708
 
-
 _std_suite = [
     # <<<  CONV-AE-CONV  >>>
     {
@@ -149,6 +148,9 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2099060277,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.048339903547,  # fnocc
+            "LCCSD CORRELATION ENERGY": -0.2107436391,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.048460183760,  # fnocc
             "CCSD CORRELATION ENERGY": -0.208743643,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857419039,
@@ -176,6 +178,9 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2318870702,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.049937236558,  # fnocc
+            "LCCSD CORRELATION ENERGY": -0.2341051403,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.050442387759,  # fnocc
             "CCSD CORRELATION ENERGY": -0.2294105794,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.050177977945205,
@@ -205,6 +210,9 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2786913134,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.057792990490,  # fnocc
+            "LCCSD CORRELATION ENERGY": -0.2808517417,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.058297242512,  # fnocc
             "CCSD CORRELATION ENERGY": -0.275705491773,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.058006927914493,
@@ -247,6 +255,8 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.0834347185,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0024003297,  # occ
+            "LCCSD CORRELATION ENERGY": -0.0848110820,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
             "CCSD CORRELATION ENERGY": -0.08217287869,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.002377557359,
@@ -289,6 +299,8 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.1770086091,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0341268118,  # occ
+            "LCCSD CORRELATION ENERGY": -0.1786081472,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
             "CCSD CORRELATION ENERGY": -0.17387203707017695,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033935818857082,
@@ -318,6 +330,8 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2167878305,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0401306050,  # occ
+            "LCCSD CORRELATION ENERGY": -0.2185061347,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
             "CCSD CORRELATION ENERGY": -0.213298055172,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.039907245914335,
@@ -358,6 +372,8 @@ _std_suite = [
                     -0.000233556107879,
                 ]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.0834094914,  # p4n
+            "LCCSD CORRELATION ENERGY": -0.0861427228,  # p4n
             "CCSD CORRELATION ENERGY": -0.08357160616,
             "CCSD SINGLES ENERGY": -0.0011743271,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.00244892164,
@@ -397,6 +413,8 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.025609525826, 0.0, 0.013506941035, -0.012804762913, 0.0, -0.013506941035, -0.012804762913,]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.1791714105,  # p4n
+            "LCCSD CORRELATION ENERGY": -0.1830545845,  # p4n
             "CCSD CORRELATION ENERGY": -0.178236032911,
             "CCSD SINGLES ENERGY": -0.00327524740575,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033982707798170,
@@ -423,6 +441,8 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.0138883429, 0.0, 0.005389090661, -0.00694417145, 0.0, -0.005389090661, -0.00694417145,]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.2191039411,  # p4n
+            "LCCSD CORRELATION ENERGY": -0.2231241199,  # p4n
             "CCSD CORRELATION ENERGY": -0.217849506326,
             "CCSD SINGLES ENERGY": -0.00338286103325,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.039891470497466,
@@ -460,6 +480,9 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2079585027,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.047635656759,  # fnocc
+            "LCCSD CORRELATION ENERGY": -0.2087915976,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.047754723454,  # fnocc
             "CCSD CORRELATION ENERGY": -0.2068152041,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.0478712079,
@@ -487,6 +510,9 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2296135965,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.049154543318,  # fnocc
+            "LCCSD CORRELATION ENERGY": -0.2318316308,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.049659952324,  # fnocc
             "CCSD CORRELATION ENERGY": -0.2271733460,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.049398348010672,
@@ -516,6 +542,9 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2531942099,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.053842594884,  # fnocc
+            "LCCSD CORRELATION ENERGY": -0.2553008820,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.054321637599,  # fnocc
             "CCSD CORRELATION ENERGY": -0.250330548844,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.054051928864870,
@@ -559,6 +588,8 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.0824313452,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0022532590,  # occ
+            "LCCSD CORRELATION ENERGY": -0.0837903430,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
             "CCSD CORRELATION ENERGY": -0.08117105566,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.002231965267,
@@ -601,6 +632,8 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.1747537294,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0334378864,  # occ
+            "LCCSD CORRELATION ENERGY": -0.1763496376,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
             "CCSD CORRELATION ENERGY": -0.1716495276680232,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033248190929062,
@@ -630,6 +663,8 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.1917024115,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0367596656,  # occ
+            "LCCSD CORRELATION ENERGY": -0.1933416962,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
             "CCSD CORRELATION ENERGY": -0.188317222733,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.036526852874970,
@@ -670,6 +705,8 @@ _std_suite = [
                     -0.000240521034770,
                 ]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.0824056198,  # p4n
+            "LCCSD CORRELATION ENERGY": -0.0851177481,  # p4n
             "CCSD CORRELATION ENERGY": -0.08256719,
             "CCSD SINGLES ENERGY": -0.00117001688,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.00230304,
@@ -708,6 +745,8 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.026398091851, 0.0, 0.014012163884, -0.013199045925, 0.0, -0.014012163884, -0.013199045925,]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.1769020687,  # p4n
+            "LCCSD CORRELATION ENERGY": -0.1807707740,  # p4n
             "CCSD CORRELATION ENERGY": -0.175988485854028,
             "CCSD SINGLES ENERGY": -0.003256808469230,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033291143258924,
@@ -733,6 +772,8 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.014894057335, 0.0, 0.005886660707, -0.007447028667, 0.0, -0.005886660707, -0.007447028667,]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.1939920915,  # p4n
+            "LCCSD CORRELATION ENERGY": -0.1979175937,  # p4n
             "CCSD CORRELATION ENERGY": -0.19282621471297376,
             "CCSD SINGLES ENERGY": -0.003354603508621,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.036502859698546,
@@ -2906,6 +2947,9 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2098900858,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.048336089041,  # fnocc
+            "LCCSD CORRELATION ENERGY": -0.2107275173,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.048456320034,  # fnocc
             "CCSD CORRELATION ENERGY": -0.20872812,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857038,
@@ -2931,6 +2975,9 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.2099004485,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.048339111990,  # fnocc
+            "LCCSD CORRELATION ENERGY": -0.2107380019,  # p4n
+            "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.048459381537,  # fnocc
             "CCSD CORRELATION ENERGY": -0.20873814,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857333,
@@ -3044,14 +3091,29 @@ for calc in _std_suite:
             calc["data"]["LCCD TOTAL ENERGY"] = (
                 calc["data"]["LCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
             )
-            calc["data"]["LCCD DOUBLES ENERGY"] = (
-                calc["data"]["LCCD CORRELATION ENERGY"] - calc["data"]["LCCD SINGLES ENERGY"]
+            if "LCCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["LCCD DOUBLES ENERGY"] = (
+                    calc["data"]["LCCD CORRELATION ENERGY"] - calc["data"]["LCCD SINGLES ENERGY"]
+                )
+                calc["data"]["LCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                    calc["data"]["LCCD CORRELATION ENERGY"]
+                    - calc["data"]["LCCD SAME-SPIN CORRELATION ENERGY"]
+                    - calc["data"]["LCCD SINGLES ENERGY"]
+                )
+
+        if "LCCSD CORRELATION ENERGY" in calc["data"]:
+            calc["data"]["LCCSD TOTAL ENERGY"] = (
+                calc["data"]["LCCSD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
             )
-            calc["data"]["LCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                calc["data"]["LCCD CORRELATION ENERGY"]
-                - calc["data"]["LCCD SAME-SPIN CORRELATION ENERGY"]
-                - calc["data"]["LCCD SINGLES ENERGY"]
-            )
+            if "LCCSD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["LCCSD DOUBLES ENERGY"] = (
+                    calc["data"]["LCCSD CORRELATION ENERGY"] - calc["data"]["LCCSD SINGLES ENERGY"]
+                )
+                calc["data"]["LCCSD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                    calc["data"]["LCCSD CORRELATION ENERGY"]
+                    - calc["data"]["LCCSD SAME-SPIN CORRELATION ENERGY"]
+                    - calc["data"]["LCCSD SINGLES ENERGY"]
+                )
 
         if "CCSD CORRELATION ENERGY" in calc["data"]:
             calc["data"]["CCSD TOTAL ENERGY"] = (
