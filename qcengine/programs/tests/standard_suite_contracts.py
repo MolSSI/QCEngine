@@ -185,6 +185,56 @@ def contractual_mp2(
 #        # TODO check CUSTOM SCS-MP2 _absent_
 
 
+def contractual_lccd(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal LCCD should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    Parameters
+    ----------
+    qc_module : str
+        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
+    driver : {"energy", "gradient", "hessian"}
+        The derivative level that should be expected.
+    reference: {"rhf", "uhf", "rohf"}
+        The SCF reference since programs often output differently based on it.
+    method: str
+        The target AtomicInput.model.method since "free" methods may not always be
+        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
+    corl_type: {"conv", "df", "cd"}
+        The algorithm for the target method since programs often output differently
+        based on it.
+    fcae: {"ae", "fc"}
+        The all-electron vs. frozen-orbital aspect.
+
+    Returns
+    -------
+    (rpv, pv, expected)
+        Of all the QCVariables `pv` that should be available, returns tuple of
+        whether `expected` and what key `rpv` in the reference `pv` should match.
+
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "LCCD CORRELATION ENERGY",
+        "LCCD TOTAL ENERGY",
+        "LCCD SAME-SPIN CORRELATION ENERGY",
+        "LCCD SINGLES ENERGY",
+        "LCCD DOUBLES ENERGY",
+        "LCCD OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "lccd":
+        contractual_qcvars.append("LCCD TOTAL GRADIENT")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if False:
+            expected = False
+
+        yield (pv, pv, expected)
+
+
 def contractual_ccsd(
     qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
 ) -> Tuple[str, str, bool]:
