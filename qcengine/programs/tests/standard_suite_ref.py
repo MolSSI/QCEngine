@@ -244,6 +244,9 @@ _std_suite = [
                     -0.00022012333306,
                 ]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.0834347185,  # p4n
+            "LCCD SINGLES ENERGY": 0.0,
+            "LCCD SAME-SPIN CORRELATION ENERGY": -0.0024003297,  # occ
             "CCSD CORRELATION ENERGY": -0.08217287869,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.002377557359,
@@ -283,6 +286,9 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.025490652204, 0.0, 0.013491755791, -0.012745326102, 0.0, -0.013491755791, -0.012745326102,]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.1770086091,  # p4n
+            "LCCD SINGLES ENERGY": 0.0,
+            "LCCD SAME-SPIN CORRELATION ENERGY": -0.0341268118,  # occ
             "CCSD CORRELATION ENERGY": -0.17387203707017695,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033935818857082,
@@ -309,6 +315,9 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.013731673196, 0.0, 0.005352105826, -0.006865836598, 0.0, -0.005352105826, -0.006865836598,]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.2167878305,  # p4n
+            "LCCD SINGLES ENERGY": 0.0,
+            "LCCD SAME-SPIN CORRELATION ENERGY": -0.0401306050,  # occ
             "CCSD CORRELATION ENERGY": -0.213298055172,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.039907245914335,
@@ -547,6 +556,9 @@ _std_suite = [
                     -0.000226972977580,
                 ]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.0824313452,  # p4n
+            "LCCD SINGLES ENERGY": 0.0,
+            "LCCD SAME-SPIN CORRELATION ENERGY": -0.0022532590,  # occ
             "CCSD CORRELATION ENERGY": -0.08117105566,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.002231965267,
@@ -586,6 +598,9 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.026279427993, 0.0, 0.013998590506, -0.013139713997, 0.0, -0.013998590506, -0.013139713997,]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.1747537294,  # p4n
+            "LCCD SINGLES ENERGY": 0.0,
+            "LCCD SAME-SPIN CORRELATION ENERGY": -0.0334378864,  # occ
             "CCSD CORRELATION ENERGY": -0.1716495276680232,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033248190929062,
@@ -612,6 +627,9 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.014740098324, 0.0, 0.005852228009, -0.007370049162, 0.0, -0.005852228009, -0.007370049162,]
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.1917024115,  # p4n
+            "LCCD SINGLES ENERGY": 0.0,
+            "LCCD SAME-SPIN CORRELATION ENERGY": -0.0367596656,  # occ
             "CCSD CORRELATION ENERGY": -0.188317222733,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.036526852874970,
@@ -2885,6 +2903,9 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.00281165, 0.0, 0.0, -0.00281165]  # occ findif-5 ae df+conv
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.2098900858,  # p4n
+            "LCCD SINGLES ENERGY": 0.0,
+            "LCCD SAME-SPIN CORRELATION ENERGY": -0.048336089041,  # fnocc
             "CCSD CORRELATION ENERGY": -0.20872812,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857038,
@@ -2907,6 +2928,9 @@ _std_suite = [
             "MP2 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.00281136, 0.0, 0.0, -0.00281136]  # occ findif-5 ae cd+conv
             ).reshape((-1, 3)),
+            "LCCD CORRELATION ENERGY": -0.2099004485,  # p4n
+            "LCCD SINGLES ENERGY": 0.0,
+            "LCCD SAME-SPIN CORRELATION ENERGY": -0.048339111990,  # fnocc
             "CCSD CORRELATION ENERGY": -0.20873814,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857333,
