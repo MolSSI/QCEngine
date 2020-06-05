@@ -185,7 +185,7 @@ def test_xtb_task_gfn1xtb_m05():
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert atomic_result.return_result == return_result
+    assert pytest.approx(atomic_result.return_result, thr) == return_result
     assert "xtb" in atomic_result.extras
 
 
@@ -358,7 +358,7 @@ def test_xtb_task_gfn2xtb_m05():
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert atomic_result.return_result == return_result
+    assert pytest.approx(atomic_result.return_result, thr) == return_result
     assert "xtb" in atomic_result.extras
 
 

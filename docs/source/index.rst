@@ -66,6 +66,7 @@ Currently available compute backends for single results are as follow:
 - Semi-Emperical:
 
   - `MOPAC <http://www.petachem.com>`_
+  - `xtb <https://xtb-docs.readthedocs.io>`_
 
 - AI Potential:
 
