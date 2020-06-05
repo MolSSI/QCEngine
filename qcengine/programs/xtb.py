@@ -12,7 +12,7 @@ visit `its documentation <https://xtb-python.readthedocs.io>`_.
 from typing import Dict
 
 from qcelemental.models import AtomicInput, AtomicResult
-from qcelemental.util import which_import
+from qcelemental.util import which_import, safe_version
 
 from .model import ProgramHarness
 from ..config import TaskConfig
