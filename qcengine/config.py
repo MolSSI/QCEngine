@@ -49,7 +49,7 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
         _global_values["nnodes"] = 1
 
         _global_values["cpuinfo"] = cpuinfo.get_cpu_info()
-        _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand"]
+        _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand_raw"]
 
     if key is None:
         return _global_values.copy()
