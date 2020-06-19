@@ -119,6 +119,7 @@ _scf_h2o_adz_cd_rhf = -76.04132169763341
 _scf_nh2_adz_cd_uhf = -55.57506886675886
 _scf_nh2_adz_cd_rohf = -55.57065536578708
 
+
 _std_suite = [
     # <<<  CONV-AE-CONV  >>>
     {
@@ -156,6 +157,9 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857419039,
             "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.001989217717, 0.0, 0.0, -0.001989217717,]).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.0019363896542312043,
+            "OLCCD REFERENCE CORRECTION ENERGY": 0.0005522939,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.2104417743,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0484443079,  # occ
         },
     },
     {
@@ -188,6 +192,9 @@ _std_suite = [
                 [0.0, 0.0, 0.007512595487, 0.0, 0.004613769715, -0.003756297743, 0.0, -0.004613769715, -0.003756297743,]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00523856,
+            "OLCCD REFERENCE CORRECTION ENERGY": 0.0011895155,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.2330452995,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0503175223,  # occ
         },
     },
     {
@@ -220,6 +227,9 @@ _std_suite = [
                 [0.0, 0.0, -0.003374258422, 0.0, -0.002334452569, 0.001687129211, 0.0, 0.002334452569, 0.001687129211,]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.007263596331,
+            "OLCCD REFERENCE CORRECTION ENERGY": 0.0013521561,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.2800053174,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0582676514,  # occ
         },
     },
     {
@@ -277,6 +287,9 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00062614,
+            "OLCCD REFERENCE CORRECTION ENERGY": 0.0014842084,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.0847413506,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
         },
     },
     {
@@ -308,6 +321,9 @@ _std_suite = [
                 [0.0, 0.0, 0.029278727285, 0.0, 0.015813927533, -0.014639363642, 0.0, -0.015813927533, -0.014639363642,]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00384378,
+            "OLCCD REFERENCE CORRECTION ENERGY": 0.0011118724,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.1781057943,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
         },
     },
     {
@@ -339,6 +355,9 @@ _std_suite = [
                 [0.0, 0.0, 0.016842165003, 0.0, 0.007150136873, -0.008421082502, 0.0, -0.007150136873, -0.008421082502,]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00516659,
+            "OLCCD REFERENCE CORRECTION ENERGY": 0.0012856903,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.2180560836,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
         },
     },
     {
@@ -394,6 +413,9 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.000713766189,
+            "OLCCD REFERENCE CORRECTION ENERGY": -0.0000399018,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.0862654609,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
         },
     },
     {
@@ -422,6 +444,9 @@ _std_suite = [
                 [0.0, 0.0, 0.029273628227, 0.0, 0.015808308241, -0.014636814114, 0.0, -0.015808308241, -0.014636814114,]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.003901085777,
+            "OLCCD REFERENCE CORRECTION ENERGY": -0.0033018315,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.1825194982,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
         },
     },
     {
@@ -450,6 +475,9 @@ _std_suite = [
                 [0.0, 0.0, 0.016833254665, 0.0, 0.007144029475, -0.008416627332, 0.0, -0.007144029475, -0.008416627332,]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.005233938447,
+            "OLCCD REFERENCE CORRECTION ENERGY": -0.0033240178,  # p4n
+            "OLCCD CORRELATION ENERGY": -0.2226657917,  # p4n
+            "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
         },
     },
     # <<<  CONV-FC-CONV  >>>
@@ -3134,6 +3162,16 @@ for calc in _std_suite:
             )
             calc["data"]["CCSD(T) TOTAL ENERGY"] = (
                 calc["data"]["CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
+
+        if "OLCCD CORRELATION ENERGY" in calc["data"]:
+            calc["data"]["OLCCD TOTAL ENERGY"] = (
+                calc["data"]["OLCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
+            calc["data"]["OLCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                calc["data"]["OLCCD CORRELATION ENERGY"]
+                - calc["data"]["OLCCD REFERENCE CORRECTION ENERGY"]
+                - calc["data"]["OLCCD SAME-SPIN CORRELATION ENERGY"]
             )
 
     calc["data"].update(_std_generics[f"{calc['meta']['system']}_{calc['meta']['basis']}_{calc['meta']['fcae']}"])

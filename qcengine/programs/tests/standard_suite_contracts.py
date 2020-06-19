@@ -155,6 +155,10 @@ def contractual_mp2(
                 ]
             )
             or (
+                ((qc_module == "psi4-occ" and reference == "rohf" and method in ["olccd"]))
+                and pv in ["MP2 CORRELATION ENERGY", "MP2 TOTAL ENERGY", "MP2 SINGLES ENERGY",]
+            )
+            or (
                 (
                     (qc_module == "psi4-ccenergy" and reference == "rohf" and method == "ccsd")
                     or (qc_module == "nwchem-tce" and method in ["ccsd", "ccsd(t)"])
@@ -429,9 +433,33 @@ def contractual_ccsd_prt_pr(
         contractual_qcvars.append("CCSD(T) TOTAL GRADIENT")
 
     for pv in contractual_qcvars:
-        print("WW", qc_module, driver, reference, method, corl_type, fcae, pv)
+        # print("WW", qc_module, driver, reference, method, corl_type, fcae, pv)
         expected = True
         if False:
             expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_olccd(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal OLCCD should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "OLCCD CORRELATION ENERGY",
+        "OLCCD TOTAL ENERGY",
+        "OLCCD REFERENCE CORRECTION ENERGY",
+        "OLCCD SAME-SPIN CORRELATION ENERGY",
+        "OLCCD OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "olccd":
+        contractual_qcvars.append("OLCCD TOTAL GRADIENT")
+
+    for pv in contractual_qcvars:
+        expected = True
 
         yield (pv, pv, expected)
