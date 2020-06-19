@@ -162,6 +162,7 @@ _programs = {
     "terachem": which("terachem", return_bool=True),
     "torchani": is_program_new_enough("torchani", "0.9"),
     "turbomole": which("define", return_bool=True),
+    "xtb": which_import("xtb", return_bool=True),
 }
 _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 
