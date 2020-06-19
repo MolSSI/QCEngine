@@ -19,7 +19,7 @@ from qcengine.testing import using
 @using("xtb")
 def test_xtb_task_gfn1xtb_m01():
 
-    thr = 1.0e-8
+    thr = 1.0e-7
 
     return_result = np.array(
         [
@@ -192,7 +192,7 @@ def test_xtb_task_gfn1xtb_m05():
 @using("xtb")
 def test_xtb_task_gfn2xtb_m01():
 
-    thr = 1.0e-8
+    thr = 1.0e-7
 
     return_result = np.array(
         [
