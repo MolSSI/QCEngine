@@ -754,6 +754,7 @@ _std_suite = [
                     -0.000074412594,
                 ]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00068823,  # cfour only
         },
     },
     {
@@ -781,6 +782,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.030051791297, 0.0, 0.016301545337, -0.015025895649, 0.0, -0.016301545337, -0.015025895649,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.003863167899,  # cfour only
         },
     },
     {
@@ -808,6 +810,7 @@ _std_suite = [
             "CCSD TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.017873897449, 0.0, 0.007653541045, -0.008936948724, 0.0, -0.007653541045, -0.008936948724,]
             ).reshape((-1, 3)),
+            "(T) CORRECTION ENERGY": -0.00504351,  # cfour only
         },
     },
     # <<<  CONV-AE-CD  >>>
