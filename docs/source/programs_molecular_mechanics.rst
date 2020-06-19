@@ -63,3 +63,16 @@ RDKit force fields currently do not require a typing engine and the basis is omi
 +----------------------------+------------+
 | MMFF94s                    | None       |
 +----------------------------+------------+
+
+
+xtb
+---
+
+Experimental access to force fields are available with the ``xtb`` engine.
+Note that the ``xtb`` engine will not require nor use a topology information provided in the input schema.
+
+=========== ======== ==============================
+ Method      Basis    Reference
+=========== ======== ==============================
+ GFN-FF      None     10.1002/anie.202004239
+=========== ======== ==============================

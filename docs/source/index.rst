@@ -182,6 +182,7 @@ Index
     :caption: Programs
 
     program_overview
+    programs_semiempirical
     programs_molecular_mechanics
 
 
