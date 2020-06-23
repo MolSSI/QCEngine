@@ -303,6 +303,30 @@ def test_openmm_cmiles_gradient():
     water = qcng.get_molecule("water")
 
     water_dict = water.dict()
+    # add water cmiles to the molecule
+    water_dict["extras"] = {
+        "cmiles": {
+            "canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:2][O:1][H:3]",
+        }
+    }
+
+    molecule = Molecule.from_data(water_dict)
+
+    model = {"method": "openff-1.0.0", "basis": "smirnoff"}
+
+    inp = AtomicInput(molecule=molecule, driver="gradient", model=model)
+    ret = qcng.compute(inp, program, raise_error=False)
+
+    assert ret.success is True
+
+
+@using("openmm")
+def test_openmm_cmiles_gradient_nomatch():
+    program = "openmm"
+
+    water = qcng.get_molecule("water")
+
+    water_dict = water.dict()
     # add ethane cmiles to the molecule
     water_dict["extras"] = {
         "cmiles": {
