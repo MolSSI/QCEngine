@@ -304,11 +304,7 @@ def test_openmm_cmiles_gradient():
 
     water_dict = water.dict()
     # add water cmiles to the molecule
-    water_dict["extras"] = {
-        "cmiles": {
-            "canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:2][O:1][H:3]",
-        }
-    }
+    water_dict["extras"] = {"cmiles": {"canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:2][O:1][H:3]"}}
 
     molecule = Molecule.from_data(water_dict)
 
