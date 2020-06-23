@@ -1,11 +1,10 @@
 name: test
 channels:
   - conda-forge
-  - omnia-dev
   - omnia
 dependencies:
   - conda-forge::rdkit
-  - omnia-dev::openmm
+  - omnia::openmm
   - omnia::openforcefield
   - omnia::openforcefields
   - omnia::openmmforcefields
