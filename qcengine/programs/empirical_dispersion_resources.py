@@ -324,6 +324,10 @@ dashcoeff = {
                 "params": {"s6": 0.66, "s8": 0.7529, "sr6": 1.5527, "alpha6": 14.0, "sr8": 1.000},
                 "citation": "    L. Goerigk, A. Hansen, C. Bauer, S. Ehrlich, A. Najibi, S. Grimme, Phys. Chem. Chem. Phys. 19, 32184-32215, 2017\n",
             },
+            "pbe0-dh": {
+                "params": {"s6": 0.840, "s8": 0.748, "sr6": 1.394, "alpha6": 14.0, "sr8": 1.000},
+                "citation": "    D. Bousquet, E. Bremond, J. C. Sancho-Garcia, I. Ciofini, C. Adamo, Theor. Chem. Acc. 134, 1602, 2015\n",
+            },
             # https://www.chemie.uni-bonn.de/pctc/mulliken-center/software/dft-d3/functionals
             "pwb6k": {"params": {"s6": 1.0, "s8": 0.550, "sr6": 1.660, "alpha6": 14.0, "sr8": 1.000}},
             "revpbe": {"params": {"s6": 1.0, "s8": 1.010, "sr6": 0.923, "alpha6": 14.0, "sr8": 1.000}},
@@ -582,6 +586,10 @@ dashcoeff = {
             "mpw2plyp": {
                 "params": {"s6": 1.000, "s8": 0.6223, "a1": 0.4105, "a2": 5.0136},
                 "citation": "    L. Goerigk, A. Hansen, C. Bauer, S. Ehrlich, A. Najibi, S. Grimme, Phys. Chem. Chem. Phys. 19, 32184-32215, 2017\n",
+            },
+            "pbe0-dh": {
+                "params": {"s6": 0.840, "s8": 0.095, "a1": 0.000, "a2": 6.102},
+                "citation": "    D. Bousquet, E. Bremond, J. C. Sancho-Garcia, I. Ciofini, C. Adamo, Theor. Chem. Acc. 134, 1602, 2015\n",
             },
             # https://www.chemie.u{'params': ni-bonn.de/pctc/mulliken-center/software/dft-d3/functiona}lsbj
             "bop": {"params": {"s6": 1.000, "s8": 3.295, "a1": 0.4870, "a2": 3.5043}},

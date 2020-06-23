@@ -22,6 +22,10 @@ matrix:
       env:
         - PYTHON_VER=3.6
         - PROG=OPENMM
+    - os: linux
+      env:
+        - PYTHON_VER=3.6
+        - PROG=XTB
 
     - os: linux
       addons: &1
@@ -56,6 +60,8 @@ install:
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/openmm.yaml
     elif [ $PROG == "NWCHEM" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/nwchem.yaml
+    elif [ $PROG == "XTB" ]; then
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/xtb.yaml
     else
       echo "ERROR: No match for PROG ($PROG)."
       exit 1
