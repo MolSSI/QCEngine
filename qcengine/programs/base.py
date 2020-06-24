@@ -21,6 +21,7 @@ from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
 from .torchani import TorchANIHarness
 from .turbomole import TurbomoleHarness
+from .xtb import XTBHarness
 
 __all__ = ["register_program", "get_program", "list_all_programs", "list_available_programs"]
 
@@ -110,6 +111,7 @@ register_program(TurbomoleHarness())
 
 # Semi-empirical
 register_program(MopacHarness())
+register_program(XTBHarness())
 
 # AI
 register_program(TorchANIHarness())
