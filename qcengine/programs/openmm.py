@@ -181,8 +181,6 @@ class OpenMMHarness(ProgramHarness):
             )
             topology = molecule.to_topology()
 
-            # TODO remove this once openmmforcefields updates charge checking.
-            molecule.partial_charges = unit.Quantity(np.zeros((molecule.n_atoms,)), unit=unit.elementary_charge)
             system = system_generator.create_system(topology=topology.to_openmm(), molecules=[molecule])
             self._cache_it(key, system)
         return system
