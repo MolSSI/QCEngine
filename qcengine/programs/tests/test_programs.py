@@ -343,3 +343,42 @@ def test_openmm_cmiles_gradient_nomatch():
         "molecule.add_conformer given input of the wrong shape: Given (3, 3), expected (8, 3)"
         in ret.error.error_message
     )
+
+
+@using("openmm")
+@pytest.mark.parametrize(
+    "gaff_settings",
+    [
+        pytest.param(({}, None, 0.0013904199062156914), id="gaff no keywords"),
+        pytest.param(({"constraints": "ALLBONDS"}, None, 8.108238580315493e-05), id="constraints allbonds"),
+        pytest.param(({"nonbondedMethod": "LjPmE"}, None, 0.0013904199062156914), id="nonbonded ljpme"),
+        pytest.param(
+            ({"nonbondedMethod": "PME", "constraints": "Hbonds"}, None, 8.108238580315493e-05),
+            id="nonbonded pme constraints hbonds",
+        ),
+        pytest.param(({"constraints": "badmethod"}, ValueError, 0), id="incorrect constraint"),
+        pytest.param(({"nonbondedMethod": "badmethod"}, ValueError, 0), id="incorrect nonbondedmethod"),
+    ],
+)
+def test_openmm_gaff_keywords(gaff_settings):
+    """
+    Test the different running settings with gaff.
+    """
+    program = "openmm"
+    water = qcng.get_molecule("water")
+
+    water_dict = water.dict()
+    # add water cmiles to the molecule
+    water_dict["extras"] = {"cmiles": {"canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:2][O:1][H:3]"}}
+
+    molecule = Molecule.from_data(water_dict)
+    keywords, error, expected_result = gaff_settings
+    model = {"method": "gaff-2.1", "basis": "antechamber"}
+    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    if error is not None:
+        with pytest.raises(error):
+            _ = qcng.compute(inp, program, raise_error=True)
+    else:
+        ret = qcng.compute(inp, program, raise_error=False)
+        assert ret.success is True
+        assert ret.return_result == pytest.approx(expected_result, rel=1e-6)

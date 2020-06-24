@@ -116,7 +116,7 @@ class OpenMMHarness(ProgramHarness):
 
         return rdkit_found and openff_found and openmm_found and openmmff_found
 
-    def _generate_openmm_sysetm(
+    def _generate_openmm_system(
         self, molecule: "offtop.Molecule", method: str, keywords: Dict = None
     ) -> "openmm.System":
         """
@@ -144,7 +144,12 @@ class OpenMMHarness(ProgramHarness):
 
             constraints = keywords.get("constraints", None)
             if constraints is not None:
-                forcefield_kwargs = {"constraints": _constraint_types[constraints.lower()]}
+                if constraints.lower() in _constraint_types:
+                    forcefield_kwargs = {"constraints": _constraint_types[constraints.lower()]}
+                else:
+                    raise ValueError(
+                        f"constraint '{constraints}' not supported, valid constraints are {_constraint_types.keys()}"
+                    )
             else:
                 forcefield_kwargs = None
 
@@ -159,7 +164,10 @@ class OpenMMHarness(ProgramHarness):
                         "nonbondedMethod": _non_periodic_nonbond_types[nonbondedmethod.lower()]
                     }
                 else:
-                    raise ValueError(f"nonbondedmethod '{nonbondedmethod}' not supported")
+                    raise ValueError(
+                        f"nonbondedmethod '{nonbondedmethod}' not supported, valid nonbonded methods are periodic: {_periodic_nonbond_types.keys()}"
+                        f"or non_periodic: {_non_periodic_nonbond_types.keys()}."
+                    )
             else:
                 periodic_forcefield_kwargs = None
                 nonperiodic_forcefield_kwargs = None
@@ -230,11 +238,11 @@ class OpenMMHarness(ProgramHarness):
                     off_mol = offtop.Molecule(rdkit_mol)
 
             # now we need to create the system
-            openmm_system = self._generate_openmm_sysetm(
+            openmm_system = self._generate_openmm_system(
                 molecule=off_mol, method=input_data.model.method, keywords=input_data.keywords
             )
         else:
-            raise InputError("Accepted bases are: {'smirnoff', antechamber, }")
+            raise InputError("Accepted bases are: {'smirnoff', 'antechamber', }")
 
         # Need an integrator for simulation even if we don't end up using it really
         integrator = openmm.VerletIntegrator(1.0 * unit.femtoseconds)
