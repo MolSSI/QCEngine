@@ -166,7 +166,7 @@ class OpenMMHarness(ProgramHarness):
                 else:
                     raise ValueError(
                         f"nonbondedmethod '{nonbondedmethod}' not supported, valid nonbonded methods are periodic: {_periodic_nonbond_types.keys()}"
-                        f"or non_periodic: {_non_periodic_nonbond_types.keys()}."
+                        f" or non_periodic: {_non_periodic_nonbond_types.keys()}."
                     )
             else:
                 periodic_forcefield_kwargs = None

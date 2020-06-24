@@ -5,7 +5,7 @@ Tests the DQM compute dispatch module
 
 import numpy as np
 import pytest
-from qcelemental.models import AtomicInput, Molecule
+from qcelemental.models import AtomicInput
 
 import qcengine as qcng
 from qcengine.testing import has_program
