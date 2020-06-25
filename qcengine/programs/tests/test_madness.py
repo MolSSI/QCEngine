@@ -18,10 +18,12 @@ def h2o():
     return qcel.models.Molecule.from_data(smol)
 
 
+@using("madness")
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [pytest.param("madness", None, {"dft__k": 7, "dft__aobasis": "sto-3g", "dft__econv": 1.0000e-05}),],
 )
+@using("madness")
 def test_mad_hf(program, basis, keywords, h2o):
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
