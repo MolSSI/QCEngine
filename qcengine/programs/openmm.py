@@ -142,11 +142,11 @@ class OpenMMHarness(ProgramHarness):
             _periodic_nonbond_types = {"ljpme": app.LJPME, "pme": app.PME, "ewald": app.Ewald}
             _non_periodic_nonbond_types = {"nocutoff": app.NoCutoff, "cutoffnonperiodic": app.CutoffNonPeriodic}
 
-            constraints = keywords.get("constraints", None)
-            if constraints is not None:
-                if constraints.lower() in _constraint_types:
+            if "constraints" in keywords:
+                constraints = keywords["constraints"]
+                try:
                     forcefield_kwargs = {"constraints": _constraint_types[constraints.lower()]}
-                else:
+                except (KeyError, AttributeError):
                     raise ValueError(
                         f"constraint '{constraints}' not supported, valid constraints are {_constraint_types.keys()}"
                     )
@@ -206,22 +206,17 @@ class OpenMMHarness(ProgramHarness):
 
         # Make sure we are using smirnoff or antechamber
         basis = input_data.model.basis.lower()
-        if basis == "smirnoff" or basis == "antechamber":
+        if basis in ["smirnoff", "antechamber"]:
 
             with capture_stdout():
                 # try and make the molecule from the cmiles
-                if input_data.molecule.extras is not None:
-                    try:
-                        cmiles = input_data.molecule.extras["canonical_isomeric_explicit_hydrogen_mapped_smiles"]
-                    except KeyError:
-                        try:
-                            cmiles = input_data.molecule.extras["cmiles"][
-                                "canonical_isomeric_explicit_hydrogen_mapped_smiles"
-                            ]
-                        except KeyError:
-                            cmiles = None
-                else:
-                    cmiles = None
+                cmiles = None
+                if input_data.molecule.extras:
+                    cmiles = input_data.molecule.extras.get("canonical_isomeric_explicit_hydrogen_mapped_smiles", None)
+                    if cmiles is None:
+                        cmiles = input_data.molecule.extras.get("cmiles", {}).get(
+                            "canonical_isomeric_explicit_hydrogen_mapped_smiles", None
+                        )
 
                 if cmiles is not None:
                     off_mol = offtop.Molecule.from_mapped_smiles(mapped_smiles=cmiles)
