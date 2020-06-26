@@ -21,7 +21,9 @@ New Features
 
 Enhancements
 ++++++++++++
-- (:pr:`239`) OpenMM - extracts CMILES from ``AtomicInput`` if possible for consistent atom ordering
+- (:pr:`239`) OpenMM - OpenMM harness now looks for cmiles information in the
+  molecule extras field when typing. Also we allow for the use of gaff
+  forcefields.
 
 Bug Fixes
 +++++++++
