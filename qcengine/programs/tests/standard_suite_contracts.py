@@ -139,7 +139,7 @@ def contractual_mp2(
                         qc_module == "psi4-occ"
                         and reference == "rhf"
                         and corl_type in ["df", "cd"]
-                        and method in ["mp2", "ccsd", "ccsd(t)"]
+                        and method in ["mp2", "lccd", "ccsd", "ccsd(t)"]
                     )
                 )
                 and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
@@ -233,7 +233,9 @@ def contractual_lccd(
 
     for pv in contractual_qcvars:
         expected = True
-        if False:
+        if (
+            (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "lccd")
+        ) and pv in ["LCCD SAME-SPIN CORRELATION ENERGY", "LCCD OPPOSITE-SPIN CORRELATION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
