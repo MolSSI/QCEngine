@@ -27,6 +27,7 @@ Enhancements
 
 Bug Fixes
 +++++++++
+- (:pr:`245`) Added missing import to sys for ``test_standard_suite.py``
 
 
 v0.14.0 / 2020-02-06
