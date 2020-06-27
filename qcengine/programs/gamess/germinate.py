@@ -1,5 +1,7 @@
 from typing import Any, Dict
 
+from ...exceptions import InputError
+
 
 def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
     """Converts the QC method into GAMESS keywords."""
@@ -34,5 +36,11 @@ def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
 
     elif method == "ccsd(t)":
         opts["contrl__cctyp"] = "ccsd(t)"
+
+    elif method == "efp":
+        opts["contrl__coord"] = "fragonly"
+
+    else:
+        raise InputError(f"Unrecognized method type '{method}'.")
 
     return opts

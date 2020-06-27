@@ -107,7 +107,16 @@ class GAMESSHarness(ProgramHarness):
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 
-        gamessrec["infiles"]["gamess.inp"] = optcmd + molcmd
+        # Temporary hack: EFP command passed in as input_data.extras.efp
+        # In the future, should be passed in as input_data.molecule.extras.efp (or input_data.molecule.efp)
+        #
+        # Currently passing in the entire GAMESS-formatted EFP command (i.e. the $EFRAG section)
+        # In the future, should be passed in as actual data fragments, coordinates, etc.)
+        if "efp" in input_model.molecule.extras:
+            efpcmd = input_model.molecule.extras["efp"]
+            gamessrec["infiles"]["gamess.inp"] = optcmd + efpcmd + molcmd
+        else:
+            gamessrec["infiles"]["gamess.inp"] = optcmd + molcmd
         gamessrec["command"] = [which("rungms"), "gamess"]  # rungms JOB VERNO NCPUS >& JOB.log &
 
         return gamessrec

@@ -26,7 +26,10 @@ def harvest(p4Mol, gamessout: str, **largs) -> Tuple[PreservingDict, Molecule, l
     if outMol:
         outqcvar["NUCLEAR REPULSION ENERGY"] = outMol.nuclear_repulsion_energy()
         if p4Mol:
-            if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
+            # temporary hack until qcel lets us do EFP with an 'empty' QM molecule
+            if "efp" in p4Mol.extras:
+                outMol = p4Mol
+            elif abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
                     """gamess outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
                     % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
@@ -319,6 +322,56 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched dft xc")
             qcvar["DFT XC ENERGY"] = mobj.group(1)
 
+        # Process EFP
+        mobj = re.search(
+            r'^\s+' + r'ELECTROSTATIC ENERGY  =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'REPULSION ENERGY      =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'POLARIZATION ENERGY   =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'--------------------------------------' + r'\s*'
+            r'^\s+' + r'FINAL EFP ENERGY      =' + r'\s+' + NUMBER + r'\s*',
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched efp")
+            print("matched efp")
+            qcvar["EFP ELECTROSTATIC ENERGY"] = mobj.group(1)
+            qcvar["EFP REPULSION ENERGY"] = mobj.group(2)
+            qcvar["EFP POLARIZATION ENERGY"] = mobj.group(3)
+            qcvar["EFP DISPERSION ENERGY"] = 0.0
+            qcvar["EFP CHARGE TRANSFER ENERGY"] = 0.0
+            qcvar["EFP TOTAL ENERGY"] = mobj.group(4)
+            qcvar_coord = Molecule(
+                validate=False, symbols=[], geometry=[]
+            )
+
+        mobj = re.search(
+            r'^\s+' + r'ELECTROSTATIC ENERGY  =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'REPULSION ENERGY      =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'POLARIZATION ENERGY   =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'TOTAL DISPERSION ENERGY\(E6\+E7\+E8\) =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'E7 DISPERSION ENERGY     =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'E6 DISPERSION ENERGY     =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'CHARGE TRANSFER ENRGY =' + r'\s+' + NUMBER + r'\s*' +  
+            r'^\s+' + r'--------------------------------------' + r'\s*'
+            r'^\s+' + r'FINAL EFP ENERGY      =' + r'\s+' + NUMBER + r'\s*',
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched efp")
+            print("matched efp")
+            qcvar["EFP ELECTROSTATIC ENERGY"] = mobj.group(1)
+            qcvar["EFP REPULSION ENERGY"] = mobj.group(2)
+            qcvar["EFP POLARIZATION ENERGY"] = mobj.group(3)
+            qcvar["EFP DISPERSION ENERGY"] = mobj.group(4)
+            qcvar["EFP CHARGE TRANSFER ENERGY"] = mobj.group(7)
+            qcvar["EFP TOTAL ENERGY"] = mobj.group(8)
+            qcvar_coord = Molecule(
+                validate=False, symbols=[], geometry=[]
+            )
+
+
         # Process Geometry
         mobj = re.search(
             # fmt: off
@@ -444,6 +497,10 @@ def harvest_outfile_pass(outtext):
     if "DFT TOTAL ENERGY" in qcvar:
         qcvar["CURRENT REFERENCE ENERGY"] = qcvar["DFT TOTAL ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["DFT TOTAL ENERGY"]
+
+    if "EFP TOTAL ENERGY" in qcvar:
+        qcvar["CURRENT REFERENCE ENERGY"] = qcvar["EFP TOTAL ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["EFP TOTAL ENERGY"]
 
     if "FCI TOTAL ENERGY" in qcvar:  # and 'FCI CORRELATION ENERGY' in qcvar:
         qcvar["CURRENT ENERGY"] = qcvar["FCI TOTAL ENERGY"]
