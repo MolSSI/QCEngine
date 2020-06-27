@@ -109,7 +109,7 @@ class TorchANIHarness(ProgramHarness):
             raise InputError("TorchANI only accepts the ANI1x, ANI1ccx or ANI2x methods.")
 
         # Build species
-        species = "".join(input_data.molecule.symbols)
+        species = input_data.molecule.symbols
         unknown_sym = set(species) - {"H", "C", "N", "O"}
         if unknown_sym:
             raise InputError(f"TorchANI model '{input_data.model.method}' does not support symbols: {unknown_sym}.")
