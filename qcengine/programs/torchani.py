@@ -76,6 +76,9 @@ class TorchANIHarness(ProgramHarness):
         elif name == "ani1ccx":
             self._CACHE[name] = torchani.models.ANI1ccx()
 
+        elif name == "ani2x":
+            self._CACHE[name] = torchani.models.ANI2x()
+
         else:
             return False
 
@@ -105,7 +108,7 @@ class TorchANIHarness(ProgramHarness):
         # Build model
         model = self.get_model(input_data.model.method)
         if model is False:
-            raise InputError("TorchANI only accepts the ANI1x or ANI1ccx method.")
+            raise InputError("TorchANI only accepts the ANI1x, ANI1ccx or ANI2x methods.")
 
         # Build species
         species = "".join(input_data.molecule.symbols)
