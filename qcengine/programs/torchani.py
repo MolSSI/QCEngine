@@ -91,10 +91,8 @@ class TorchANIHarness(ProgramHarness):
 
         # Check if existings and version
         self.found(raise_error=True)
-        if parse_version(self.get_version()) < parse_version("0.9"):
-            raise ResourceError("QCEngine's TorchANI wrapper requires version 0.9 or greater.")
-        if parse_version(self.get_version()) >= parse_version("2.0"):
-            raise ResourceError("QCEngine's TorchANI adaptor requires lesser than version 2.0.")
+        if parse_version(self.get_version()) < parse_version("2.1.1"):
+            raise ResourceError("QCEngine's TorchANI wrapper requires version 2.1.1 or greater.")
 
         import torch
         import torchani

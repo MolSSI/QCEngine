@@ -160,7 +160,7 @@ _programs = {
     "qchem": is_program_new_enough("qchem", "5.2"),
     "rdkit": which_import("rdkit", return_bool=True),
     "terachem": which("terachem", return_bool=True),
-    "torchani": is_program_new_enough("torchani", "0.9"),
+    "torchani": is_program_new_enough("torchani", "2.1.1"),
     "turbomole": which("define", return_bool=True),
     "xtb": which_import("xtb", return_bool=True),
 }
