@@ -324,11 +324,25 @@ def harvest_outfile_pass(outtext):
 
         # Process EFP
         mobj = re.search(
-            r'^\s+' + r'ELECTROSTATIC ENERGY  =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'REPULSION ENERGY      =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'POLARIZATION ENERGY   =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'--------------------------------------' + r'\s*'
-            r'^\s+' + r'FINAL EFP ENERGY      =' + r'\s+' + NUMBER + r'\s*',
+            r"^\s+"
+            + r"ELECTROSTATIC ENERGY  ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"REPULSION ENERGY      ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"POLARIZATION ENERGY   ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"--------------------------------------"
+            + r"\s*"
+            r"^\s+" + r"FINAL EFP ENERGY      =" + r"\s+" + NUMBER + r"\s*",
             outtext,
             re.MULTILINE,
         )
@@ -341,20 +355,48 @@ def harvest_outfile_pass(outtext):
             qcvar["EFP DISPERSION ENERGY"] = 0.0
             qcvar["EFP CHARGE TRANSFER ENERGY"] = 0.0
             qcvar["EFP TOTAL ENERGY"] = mobj.group(4)
-            qcvar_coord = Molecule(
-                validate=False, symbols=[], geometry=[]
-            )
+            qcvar_coord = Molecule(validate=False, symbols=[], geometry=[])
 
         mobj = re.search(
-            r'^\s+' + r'ELECTROSTATIC ENERGY  =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'REPULSION ENERGY      =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'POLARIZATION ENERGY   =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'TOTAL DISPERSION ENERGY\(E6\+E7\+E8\) =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'E7 DISPERSION ENERGY     =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'E6 DISPERSION ENERGY     =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'CHARGE TRANSFER ENRGY =' + r'\s+' + NUMBER + r'\s*' +  
-            r'^\s+' + r'--------------------------------------' + r'\s*'
-            r'^\s+' + r'FINAL EFP ENERGY      =' + r'\s+' + NUMBER + r'\s*',
+            r"^\s+"
+            + r"ELECTROSTATIC ENERGY  ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"REPULSION ENERGY      ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"POLARIZATION ENERGY   ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"TOTAL DISPERSION ENERGY\(E6\+E7\+E8\) ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"E7 DISPERSION ENERGY     ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"E6 DISPERSION ENERGY     ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"CHARGE TRANSFER ENRGY ="
+            + r"\s+"
+            + NUMBER
+            + r"\s*"
+            + r"^\s+"
+            + r"--------------------------------------"
+            + r"\s*"
+            r"^\s+" + r"FINAL EFP ENERGY      =" + r"\s+" + NUMBER + r"\s*",
             outtext,
             re.MULTILINE,
         )
@@ -367,10 +409,7 @@ def harvest_outfile_pass(outtext):
             qcvar["EFP DISPERSION ENERGY"] = mobj.group(4)
             qcvar["EFP CHARGE TRANSFER ENERGY"] = mobj.group(7)
             qcvar["EFP TOTAL ENERGY"] = mobj.group(8)
-            qcvar_coord = Molecule(
-                validate=False, symbols=[], geometry=[]
-            )
-
+            qcvar_coord = Molecule(validate=False, symbols=[], geometry=[])
 
         # Process Geometry
         mobj = re.search(
