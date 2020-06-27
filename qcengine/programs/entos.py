@@ -3,22 +3,21 @@ The entos QCEngine Harness
 """
 
 import json
-import numpy as np
 import string
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
+import numpy as np
 from qcelemental.models import AtomicResult, BasisSet
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
 from ..util import execute, popen
 from .model import ProgramHarness
-
 from .util import (
-    reorder_column_ao_indices,
-    reorder_row_and_column_ao_indices,
     cca_ao_order_spherical,
     get_ao_conversion,
+    reorder_column_ao_indices,
+    reorder_row_and_column_ao_indices,
 )
 
 if TYPE_CHECKING:

@@ -155,12 +155,14 @@ _programs = {
     "nwchem": which("nwchem", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
+    "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.2"),
     "rdkit": which_import("rdkit", return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "torchani": is_program_new_enough("torchani", "0.9"),
     "turbomole": which("define", return_bool=True),
+    "xtb": which_import("xtb", return_bool=True),
 }
 _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 

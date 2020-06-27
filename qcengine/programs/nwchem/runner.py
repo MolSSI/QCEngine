@@ -1,27 +1,27 @@
 """
 Calls the NWChem executable.
 """
-import re
 import copy
 import logging
 import pprint
+import re
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-import qcelemental as qcel
-from qcelemental.models import AtomicResult, Provenance, AtomicInput
-from qcelemental.util import safe_version, which, which_import
+from qcelemental.models import AtomicInput, AtomicResult, Provenance
+from qcelemental.util import safe_version, unnp, which, which_import
 
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 
 from .errors import all_errors
 from ...exceptions import InputError
-from ...util import execute, create_mpi_invocation
+from ...util import create_mpi_invocation, execute
 from ..model import ErrorCorrectionProgramHarness
+from ..qcvar_identities_resources import build_atomicproperties, build_out
 from .germinate import muster_modelchem
-from .harvester import extract_formatted_properties, harvest
+from .harvester import harvest
 from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -145,7 +145,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         # If not, and no recoverable errors raise
         else:
-            raise UnknownError(dexe["stderr"])
+            raise UnknownError(dexe["stdout"])
 
     def build_input(
         self,
@@ -249,17 +249,18 @@ task python
 
     def parse_output(
         self, outfiles: Dict[str, str], input_model: "AtomicInput"
-    ) -> "AtomicResult":  # lgtm: [py/similar-function]
+    ) -> AtomicResult:  # lgtm: [py/similar-function]
 
         # Get the stdout from the calculation (required)
         stdout = outfiles.pop("stdout")
+        stderr = outfiles.pop("stderr")
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
         qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
         if nwgrad is not None:
+            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
             qcvars["CURRENT GRADIENT"] = nwgrad
-
         if nwhess is not None:
             qcvars["CURRENT HESSIAN"] = nwhess
 
@@ -268,31 +269,31 @@ task python
             retres = qcvars[f"CURRENT ENERGY"]
         else:
             retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
-
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.tolist()
 
         # Get the formatted properties
-        qcprops = extract_formatted_properties(qcvars)
+        build_out(qcvars)
+        atprop = build_atomicproperties(qcvars)
 
         # Format them inout an output
         output_data = {
-            "schema_name": "qcschema_output",
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
-            "properties": qcprops,
+            "properties": atprop,
             "provenance": Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
             "return_result": retres,
+            "stderr": stderr,
             "stdout": stdout,
+            "success": True,
         }
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
         output_data["extras"]["qcvars"] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in unnp(qcvars, flat=True).items()
         }
 
-        output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})

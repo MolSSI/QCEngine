@@ -1,6 +1,7 @@
 """Tests for NWChem functionality"""
 from typing import Tuple
 
+import numpy as np
 import pytest
 import logging
 import qcelemental as qcel
@@ -8,7 +9,6 @@ from qcelemental.testing import compare_values
 from qcelemental.molparse import from_string, to_schema
 from qcelemental.models import Molecule
 
-import numpy as np
 import qcengine as qcng
 from qcengine.testing import using
 
@@ -72,7 +72,7 @@ def test_b3lyp(nh2):
     # Check the other status information
     assert res["extras"]["qcvars"]["N ALPHA ELECTRONS"] == "5"
     assert res["extras"]["qcvars"]["N ATOMS"] == "3"
-    assert res["extras"]["qcvars"]["N BASIS"] == "13"
+    assert res["extras"]["qcvars"]["N BASIS FUNCTIONS"] == "13"
 
     # Make sure the properties parsed correctly
     assert compare_values(-55.554037, res["properties"]["return_energy"], atol=1e-3)
@@ -179,7 +179,7 @@ def test_dipole(h20):
     # Check the other status information
     assert res["extras"]["qcvars"]["N ALPHA ELECTRONS"] == "6"
     assert res["extras"]["qcvars"]["N ATOMS"] == "3"
-    assert res["extras"]["qcvars"]["N BASIS"] == "13"
+    assert res["extras"]["qcvars"]["N BASIS FUNCTIONS"] == "13"
 
     # Make sure the properties parsed correctly
     assert compare_values(-75.764944, res["properties"]["return_energy"], atol=1e-3)
@@ -223,7 +223,7 @@ def test_homo_lumo(h20v2):
     # Check the other status information
     assert res["extras"]["qcvars"]["N ALPHA ELECTRONS"] == "5"
     assert res["extras"]["qcvars"]["N ATOMS"] == "3"
-    assert res["extras"]["qcvars"]["N BASIS"] == "13"
+    assert res["extras"]["qcvars"]["N BASIS FUNCTIONS"] == "13"
 
     # Make sure the properties parsed correctly
     assert compare_values(-75.968095, res["properties"]["return_energy"], atol=1e-3)

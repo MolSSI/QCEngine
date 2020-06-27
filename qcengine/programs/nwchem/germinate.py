@@ -46,7 +46,7 @@ _xc_functionals = [
     "m06-hf",
     "m06-L",
     "m06-2x",
-    "HFexch",
+    "hfexch",
     "becke88",
     "xperdew91",
     "xpbe96",
