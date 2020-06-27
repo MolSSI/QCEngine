@@ -90,8 +90,9 @@ class KnownErrorException(QCEngineException):
 
     error_name: str = Field(None, description="Unique name for this error. Used in autodetection logic")
     description: str = Field(None, description="Human-readable description of the error.")
-    details: Optional[Dict[str, Any]] = Field(None, description="Any details for this error. Used for user feedback"
-                                                                " and autocorrection logic")
+    details: Optional[Dict[str, Any]] = Field(
+        None, description="Any details for this error. Used for user feedback and autocorrection logic"
+    )
 
     def __init__(self, details: Optional[dict] = None):
         super().__init__(self.description)

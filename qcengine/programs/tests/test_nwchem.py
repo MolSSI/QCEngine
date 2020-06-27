@@ -148,6 +148,7 @@ def test_autosym_recovery(problematic_mols, caplog):
 
     assert error in result.extras["observed_errors"]
 
+
 @pytest.fixture
 def h20():
     water = """

@@ -6,9 +6,12 @@ from qcengine.exceptions import SimpleKnownErrorException
 
 class SymGeomProjectError(SimpleKnownErrorException):
     """sym_center_map is inconsistent with requested accuracy"""
-    error_name = 'sym_geom_project'
-    description = 'sym_center_map is inconsistent with requested accuracy. Occurs when geometry is loaded' \
-                  ' and is resolved by lowering the tolerance when detecting symmetry.'
+
+    error_name = "sym_geom_project"
+    description = (
+        "sym_center_map is inconsistent with requested accuracy. Occurs when geometry is loaded"
+        " and is resolved by lowering the tolerance when detecting symmetry."
+    )
 
     @classmethod
     def _detect(cls, outputs):
@@ -17,8 +20,9 @@ class SymGeomProjectError(SimpleKnownErrorException):
 
 class SymMapError(SimpleKnownErrorException):
     """sym_map: no match"""
-    error_name = 'sym_map'
-    description = 'Occurs when geometry is loaded and is resolved by lowering the tolerance when detecting symmetry.'
+
+    error_name = "sym_map"
+    description = "Occurs when geometry is loaded and is resolved by lowering the tolerance when detecting symmetry."
 
     @classmethod
     def _detect(cls, outputs):
@@ -28,8 +32,8 @@ class SymMapError(SimpleKnownErrorException):
 class GeomBinvrError(SimpleKnownErrorException):
     """GeomBinvr Error"""
 
-    error_name = 'geom_binvr'
-    description = 'Error when generating redundant atomic coordinates. Fixed by turning this feature off (`noautoz`)'
+    error_name = "geom_binvr"
+    description = "Error when generating redundant atomic coordinates. Fixed by turning this feature off (`noautoz`)"
 
     @classmethod
     def _detect(cls, outputs: Dict[str, str]) -> bool:

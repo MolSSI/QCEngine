@@ -123,8 +123,8 @@ class ProgramHarness(BaseModel, abc.ABC):
 class ErrorCorrectionProgramHarness(ProgramHarness):
     """Bases class for Harnesses that include logic to correct common errors
 
-    Implementation Guide
-    --------------------
+    **Implementation Guide**
+
     Each subclass should implement the ``_compute`` and ``build_input`` methods.
 
     These method should raise :class:`KnownErrorException`s when a task fails
@@ -142,9 +142,9 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
     mitigation logic simpler.
     """
 
-    known_errors: List[KnownErrorException.__class__] = Field(None,
-                                                              description="List of classes that can recognize certain"
-                                                                          " correctable errors from this Harness")
+    known_errors: List[KnownErrorException.__class__] = Field(
+        None, description="List of classes that can recognize certain correctable errors from this Harness"
+    )
 
     def compute(self, input_data: AtomicInput, config: "TaskConfig") -> AtomicResult:
         # Get the error correction configuration
@@ -157,7 +157,7 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
                 result = self._compute(input_data, config, observed_errors)
                 break
             except KnownErrorException as e:
-                logger.info(f'Caught a {type(e)} error.')
+                logger.info(f"Caught a {type(e)} error.")
 
                 # Determine whether this specific type of error is allowed
                 correction_allowed = error_policy.allows(e.error_name)
@@ -172,8 +172,9 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
                     logger.info("Adding error and restarting")
                     observed_errors[e.error_name] = e.details
                 else:
-                    logger.info('Error has been observed before '
-                                'and mitigation did not fix the issue. Raising exception')
+                    logger.info(
+                        "Error has been observed before and mitigation did not fix the issue. Raising exception"
+                    )
                     raise e
 
         # Add the errors observed and corrected for, if any
@@ -182,8 +183,7 @@ class ErrorCorrectionProgramHarness(ProgramHarness):
         return result
 
     @abc.abstractmethod
-    def _compute(self, input_data: AtomicInput, config: "TaskConfig",
-                 observed_errors: Dict[str, dict]) -> AtomicResult:
+    def _compute(self, input_data: AtomicInput, config: "TaskConfig", observed_errors: Dict[str, dict]) -> AtomicResult:
         """Private method describing how to perform a computation given specification
         that includes a list of previously-observed errors
 

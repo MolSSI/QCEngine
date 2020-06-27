@@ -45,7 +45,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         "thread_parallel": False,
         "node_parallel": True,
         "managed_memory": True,
-        "known_errors": all_errors
+        "known_errors": all_errors,
     }
     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
     version_cache: Dict[str, str] = {}
