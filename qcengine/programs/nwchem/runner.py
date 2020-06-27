@@ -231,6 +231,7 @@ task python
         qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
         if nwgrad is not None:
+            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
             qcvars["CURRENT GRADIENT"] = nwgrad
         if nwhess is not None:
             qcvars["CURRENT HESSIAN"] = nwhess

@@ -107,6 +107,18 @@ def _trans_key(qc, bas, key):
     sys.exit(1)
 
 
+# http://patorjk.com/software/taag/#p=display&c=bash&f=Soft&t=MP3
+
+
+#
+#  ,--.   ,--.,------.  ,---.     ,------.
+#  |   `.'   ||  .--. ''.-.  \    |  .---',--,--,  ,---. ,--.--. ,---.,--. ,--.
+#  |  |'.'|  ||  '--' | .-' .'    |  `--, |      \| .-. :|  .--'| .-. |\  '  /
+#  |  |   |  ||  | --' /   '-.    |  `---.|  ||  |\   --.|  |   ' '-' ' \   '
+#  `--'   `--'`--'     '-----'    `------'`--''--' `----'`--'   .`-  /.-'  /
+#                                                               `---' `---'
+
+
 @pytest.mark.parametrize("dertype", [0,], ids=["ene0"])
 @pytest.mark.parametrize(
     "basis, subjects",
@@ -187,6 +199,15 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
     print("INP", inpcopy)
 
     runner_asserter(inpcopy, subject, method, basis, tnm)
+
+
+#
+#   ,-----. ,-----. ,---.  ,------.      ,------.
+#  '  .--./'  .--./'   .-' |  .-.  \     |  .---',--,--,  ,---. ,--.--. ,---.,--. ,--.
+#  |  |    |  |    `.  `-. |  |  \  :    |  `--, |      \| .-. :|  .--'| .-. |\  '  /
+#  '  '--'\'  '--'\.-'    ||  '--'  /    |  `---.|  ||  |\   --.|  |   ' '-' ' \   '
+#   `-----' `-----'`-----' `-------'     `------'`--''--' `----'`--'   .`-  /.-'  /
+#                                                                      `---' `---'
 
 
 @pytest.mark.parametrize("dertype", [0,], ids=["ene0"])

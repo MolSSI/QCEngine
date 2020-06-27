@@ -136,8 +136,10 @@ class CFOURHarness(ProgramHarness):
 
         if c4grad is not None:
             qcvars["CURRENT GRADIENT"] = c4grad
+            qcvars[f"{input_model.model.method.upper()[3:]} TOTAL GRADIENT"] = c4grad
 
         if c4hess is not None:
+            qcvars[f"{input_model.model.method.upper()[3:]} TOTAL HESSIAN"] = c4hess
             qcvars["CURRENT HESSIAN"] = c4hess
 
         if input_model.driver.upper() == "PROPERTIES":
