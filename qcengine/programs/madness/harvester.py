@@ -58,7 +58,6 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
         else:
             print("empty")
 
-    print(pass_psivar)
     return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
 
 
