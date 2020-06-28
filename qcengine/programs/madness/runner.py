@@ -67,7 +67,7 @@ class MadnessHarness(ProgramHarness):
 
        """
         qc = which(
-            "madness",
+            "moldft",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via https://github.com/m-a-d-n-e-s-s/madness",
@@ -171,7 +171,7 @@ class MadnessHarness(ProgramHarness):
         ## Determine the command
         # Determine the command
         madnessrec["command"] = [which("madness")]
-        print(madnessrec["infiles"]["input"])
+        # print(madnessrec["infiles"]["input"])
         return madnessrec
 
     def execute(
@@ -187,14 +187,14 @@ class MadnessHarness(ProgramHarness):
         # Get the stdout from the calculation (required)
         stdout = outfiles.pop("stdout")
 
-        # Read the NWChem stdout file and, if needed, the hess or grad files
-        qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        # Read the MADNESj stdout file and, if needed, the hess or grad files
+        qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
-        if nwgrad is not None:
-            qcvars["CURRENT GRADIENT"] = nwgrad
+        if madgrad is not None:
+            qcvars["CURRENT GRADIENT"] = madgrad
 
-        if nwhess is not None:
-            qcvars["CURRENT HESSIAN"] = nwhess
+        if madhess is not None:
+            qcvars["CURRENT HESSIAN"] = madhess
 
         # Normalize the output as a float or list of floats
         if input_model.driver.upper() == "PROPERTIES":
