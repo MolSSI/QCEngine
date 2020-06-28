@@ -33,7 +33,7 @@ def test_mad_hf(program, basis, keywords, h2o):
     assert res["success"] is True
 
     # k=7
-    scf_tot = -76.06718632
+    scf_tot = -76.06720262
 
     atol = 1.0e-5
     assert compare_values(scf_tot, res["return_result"], atol=atol)
