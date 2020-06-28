@@ -12,7 +12,7 @@ dependencies:
   - qcelemental >=0.12.0
   - pydantic>=1.0.0
 
-  - pytorch-nightly::pytorch cpuonly
+  - pytorch cpuonly -c pytorch-nightly
 
     # Testing
   - pytest
