@@ -37,7 +37,14 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
     pass_psivar = []
     pass_coord = []
     pass_grad = []
+    # Write now we split at Converge
+    counter = 1
     for outpass in re.split(r"Converged!", outtext, re.MULTILINE):
+        # for outpass in re.split(r"Iteration" + r"\s*" + r"[0 - 256]", outtext, re.MULTILINE):
+
+        print("This is outpass ", counter)
+        print(outpass)
+        counter = counter + 1
         psivar, madcoord, madgrad, version, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)  ## all the variables extracted
         pass_coord.append(madcoord)
@@ -45,6 +52,13 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
 
     # Determine which segment contained the last geometry
     retindx = -1  # if pass_coord[-1] else -2
+    for qvars in pass_psivar:
+        if "TOTAL SCF ENERGY" in qvars.keys():
+            print(qvars["TOTAL SCF ENERGY"])
+        else:
+            print("empty")
+
+    print(pass_psivar)
     return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
 
 
@@ -209,7 +223,7 @@ def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, 
         if in_mol:
             if abs(out_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
-                    """Madness outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
+                    """Madness outfile (NRE: %f) inconsistent with MADNESS input (NRE: %f)."""
                     % (out_mol.nuclear_repulsion_energy(), in_mol.nuclear_repulsion_energy())
                 )
     # else:
@@ -222,9 +236,9 @@ def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, 
 
     # mill = data["mill"]  # Retrieve tool with alignment routines
 
-    if out_grad is not None:
-        out_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
-    if out_hess is not None:
-        out_hess = mill.align_hessian(np.array(out_hess))
+    # if out_grad is not None:
+    #    out_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
+    # if out_hess is not None:
+    #    out_hess = mill.align_hessian(np.array(out_hess))
 
     return out_psivar, out_hess, out_grad, out_mol, version, error
