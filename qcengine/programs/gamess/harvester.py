@@ -355,7 +355,7 @@ def harvest_outfile_pass(outtext):
             r"^\s+" + r"E6 DISPERSION ENERGY     =" + r"\s+" + NUMBER + r"\s*" + 
             r"^\s+" + r"CHARGE TRANSFER ENRGY =" + r"\s+" + NUMBER + r"\s*" + 
             r"^\s+" + r"--------------------------------------" + r"\s*" +
-            r"^\s+" + r"FINAL EFP ENERGY      =" + r"\s+" + NUMBER + r"\s*",            
+            r"^\s+" + r"FINAL EFP ENERGY      =" + r"\s+" + NUMBER + r"\s*",
             # fmt: on
             outtext,
             re.MULTILINE,
