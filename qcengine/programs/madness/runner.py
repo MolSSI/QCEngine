@@ -170,7 +170,7 @@ class MadnessHarness(ProgramHarness):
         madnessrec["infiles"]["input"] = optcmd + molcmd
         ## Determine the command
         # Determine the command
-        madnessrec["command"] = [which("madness")]
+        madnessrec["command"] = [which("moldft")]
         # print(madnessrec["infiles"]["input"])
         return madnessrec
 
