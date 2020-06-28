@@ -85,7 +85,7 @@ class GAMESSHarness(ProgramHarness):
     def build_input(
         self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
-        gamessrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
+        gamessrec = {"infiles": {}, "outfiles": [], "scratch_directory": config.scratch_directory}
 
         opts = copy.deepcopy(input_model.keywords)
 
@@ -109,11 +109,16 @@ class GAMESSHarness(ProgramHarness):
 
         # Currently passing in the entire GAMESS-formatted EFP command (i.e. the $EFRAG section)
         # In the future, should be passed in as actual data fragments, coordinates, etc.)
-        if "efp" in input_model.molecule.extras:
+        if input_model.molecule.extras is not None and "efp" in input_model.molecule.extras:
             efpcmd = input_model.molecule.extras["efp"]
             gamessrec["infiles"]["gamess.inp"] = optcmd + efpcmd + molcmd
         else:
             gamessrec["infiles"]["gamess.inp"] = optcmd + molcmd
+
+        # Store the generated efp if running makefp
+        if opts["contrl__runtyp"] == "makefp":
+            gamessrec["outfiles"].append("gamess.efp")
+
         gamessrec["command"] = [which("rungms"), "gamess"]  # rungms JOB VERNO NCPUS >& JOB.log &
 
         return gamessrec
@@ -139,7 +144,11 @@ class GAMESSHarness(ProgramHarness):
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
         success, dexe = execute(
-            inputs["command"], inputs["infiles"], [], scratch_messy=False, scratch_directory=inputs["scratch_directory"]
+            inputs["command"],
+            inputs["infiles"],
+            inputs["outfiles"],
+            scratch_messy=False,
+            scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
 

@@ -27,7 +27,7 @@ def harvest(p4Mol, gamessout: str, **largs) -> Tuple[PreservingDict, Molecule, l
         outqcvar["NUCLEAR REPULSION ENERGY"] = outMol.nuclear_repulsion_energy()
         if p4Mol:
             # temporary hack until qcel lets us do EFP with an 'empty' QM molecule
-            if "efp" in p4Mol.extras:
+            if p4Mol.extras is not None and "efp" in p4Mol.extras:
                 outMol = p4Mol
             elif abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
