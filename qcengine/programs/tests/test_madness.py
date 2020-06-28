@@ -28,7 +28,7 @@ def test_mad_hf(program, basis, keywords, h2o):
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
-    print(res["stdout"])
+    # print(res["stdout"])
 
     assert res["driver"] == "energy"
     assert "provenance" in res

@@ -42,8 +42,6 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
     for outpass in re.split(r"Converged!", outtext, re.MULTILINE):
         # for outpass in re.split(r"Iteration" + r"\s*" + r"[0 - 256]", outtext, re.MULTILINE):
 
-        print("This is outpass ", counter)
-        print(outpass)
         counter = counter + 1
         psivar, madcoord, madgrad, version, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)  ## all the variables extracted
@@ -52,11 +50,6 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
 
     # Determine which segment contained the last geometry
     retindx = -1  # if pass_coord[-1] else -2
-    for qvars in pass_psivar:
-        if "TOTAL SCF ENERGY" in qvars.keys():
-            print(qvars["TOTAL SCF ENERGY"])
-        else:
-            print("empty")
 
     return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
 
