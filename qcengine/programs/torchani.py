@@ -110,7 +110,7 @@ class TorchANIHarness(ProgramHarness):
 
         # Build species
         species = input_data.molecule.symbols
-        unknown_sym = set(species) - {"H", "C", "N", "O"}
+        unknown_sym = set(species) - {"H", "C", "N", "O", "S", "F", "CL"}
         if unknown_sym:
             raise InputError(f"TorchANI model '{input_data.model.method}' does not support symbols: {unknown_sym}.")
 
