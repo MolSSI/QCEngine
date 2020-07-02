@@ -112,7 +112,7 @@ class TorchANIHarness(ProgramHarness):
         species = input_data.molecule.symbols
 
         known_sym = {"H", "C", "N", "O"}
-        if method.lower() == 'ani2x':
+        if method.lower() == "ani2x":
             known_sym.update({"S", "F", "CL"})
 
         unknown_sym = set(species) - known_sym
