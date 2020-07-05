@@ -113,7 +113,7 @@ class TorchANIHarness(ProgramHarness):
 
         known_sym = {"H", "C", "N", "O"}
         if method.lower() == "ani2x":
-            known_sym.update({"S", "F", "CL"})
+            known_sym.update({"S", "F", "Cl"})
 
         unknown_sym = set(species) - known_sym
         if unknown_sym:
