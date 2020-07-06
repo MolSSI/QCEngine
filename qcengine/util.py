@@ -13,13 +13,14 @@ import tempfile
 import time
 import traceback
 from contextlib import contextmanager
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 from threading import Thread
-from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO, TextIO
+from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 from pydantic import ValidationError
 from qcelemental.models import FailedOperation
+
 from qcengine.config import TaskConfig
 
 from .config import LOGGER, get_provenance_augments
