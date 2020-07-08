@@ -2,18 +2,18 @@
 Calls the RDKit package.
 """
 
-from qcelemental.models import AtomicResult, Provenance
-from qcelemental.util import which_import
-
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from ..config import TaskConfig
-    from qcelemental.models import AtomicInput
+from qcelemental.models import AtomicResult, Provenance
+from qcelemental.util import which_import
 
 from ..exceptions import InputError
 from ..units import ureg
 from .model import ProgramHarness
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 
 class RDKitHarness(ProgramHarness):
@@ -101,8 +101,12 @@ class RDKitHarness(ProgramHarness):
         if input_data.model.method.lower() == "uff":
             ff = AllChem.UFFGetMoleculeForceField(mol)
             all_params = AllChem.UFFHasAllMoleculeParams(mol)
+        elif input_data.model.method.lower() in ["mmff94", "mmff94s"]:
+            props = AllChem.MMFFGetMoleculeProperties(mol, mmffVariant=input_data.model.method)
+            ff = AllChem.MMFFGetMoleculeForceField(mol, props)
+            all_params = AllChem.MMFFHasAllMoleculeParams(mol)
         else:
-            raise InputError("RDKit only supports the UFF method currently.")
+            raise InputError("RDKit only supports the UFF, MMFF94, and MMFF94s methods currently.")
 
         if all_params is False:
             raise InputError("RDKit parameters not found for all atom types in molecule.")

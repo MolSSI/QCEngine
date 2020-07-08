@@ -38,10 +38,12 @@ def test_program_avail_bounce():
 def test_list_procedures():
 
     r = qcng.list_all_procedures()
-    assert r >= {"geometric"}
+    assert r >= {"geometric", "berny"}
 
 
-@pytest.mark.parametrize("procedure", [pytest.param("geometric", marks=using("geometric"))])
+@pytest.mark.parametrize(
+    "procedure", [pytest.param("geometric", marks=using("geometric")), pytest.param("berny", marks=using("berny"))]
+)
 def test_check_procedure_avail(procedure):
 
     assert procedure in qcng.list_available_procedures()

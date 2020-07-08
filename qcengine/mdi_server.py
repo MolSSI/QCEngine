@@ -13,8 +13,9 @@ from .compute import compute
 try:
     from mdi import MDI_Init, MDI_Accept_Communicator, MDI_Recv_Command
     from mdi import MDI_Recv, MDI_Send, MDI_Get_Intra_Code_MPI_Comm
-    from mdi import MDI_DOUBLE, MDI_CHAR, MDI_INT, MDI_DOUBLE_NUMPY
-    from mdi import MDI_COMMAND_LENGTH
+    from mdi import MDI_Register_Node, MDI_Register_Command
+    from mdi import MDI_DOUBLE, MDI_CHAR, MDI_INT
+    from mdi import MDI_COMMAND_LENGTH, MDI_MAJOR_VERSION
 
     use_mdi = True
 except ImportError:
@@ -58,6 +59,12 @@ class MDIServer:
         local_options : Optional[Dict[str, Any]], optional
             A dictionary of local configuration options
         """
+
+        if not use_mdi:
+            raise Exception("Trying to run as an MDI engine, but the MDI Library was not found")
+
+        if MDI_MAJOR_VERSION < 1:
+            raise Exception("QCEngine requires version 1.0.0 or higher of the MDI Library")
 
         # Confirm that the MDI library has been located
         which_import("mdi", raise_error=True, raise_msg="Please install via 'conda install pymdi -c conda-forge'")
@@ -108,23 +115,33 @@ class MDIServer:
 
         # Dictionary of all supported MDI commands
         self.commands = {
+            "<@": self.send_node,
             "<NATOMS": self.send_natoms,
             "<COORDS": self.send_coords,
             "<ENERGY": self.send_energy,
             "<FORCES": self.send_forces,
             ">COORDS": self.recv_coords,
             "SCF": self.run_energy,
-            "<NCOMMANDS": self.send_ncommands,
-            "<COMMANDS": self.send_commands,
             "<ELEMENTS": self.send_elements,
             ">ELEMENTS": self.recv_elements,
             "<MASSES": self.send_masses,
+            ">MASSES": self.recv_masses,
             "<TOTCHARGE": self.send_total_charge,
             ">TOTCHARGE": self.recv_total_charge,
             "<ELEC_MULT": self.send_multiplicity,
             ">ELEC_MULT": self.recv_multiplicity,
             "EXIT": self.stop,
         }
+
+        # Register the @DEFAULT node
+        MDI_Register_Node("@DEFAULT")
+
+        # Register all supported commands
+        for c in self.commands.keys():
+            MDI_Register_Command("@DEFAULT", c)
+
+        # Set the current node
+        self.current_node = "@DEFAULT"
 
         # Accept a communicator to the driver code
         self.comm = MDI_Accept_Communicator()
@@ -166,6 +183,19 @@ class MDIServer:
                     # This update caused the validation error
                     raise Exception("MDI command caused a validation error")
 
+    # Respond to the <@ command
+    def send_node(self) -> str:
+        """ Send the name of the current node through MDI
+
+        Returns
+        -------
+        node : str
+            Name of the current node
+        """
+        node = self.current_node
+        MDI_Send(node, MDI_COMMAND_LENGTH, MDI_CHAR, self.comm)
+        return node
+
     # Respond to the <NATOMS command
     def send_natoms(self) -> int:
         """ Send the number of atoms through MDI
@@ -191,7 +221,7 @@ class MDIServer:
         natom = len(self.molecule.geometry)
 
         coords = np.reshape(self.molecule.geometry, (3 * natom))
-        MDI_Send(coords, 3 * natom, MDI_DOUBLE_NUMPY, self.comm)
+        MDI_Send(coords, 3 * natom, MDI_DOUBLE, self.comm)
 
         return coords
 
@@ -206,7 +236,8 @@ class MDIServer:
         """
         natom = len(self.molecule.geometry)
         if coords is None:
-            coords = MDI_Recv(3 * natom, MDI_DOUBLE_NUMPY, self.comm)
+            coords = np.zeros(3 * natom)
+            MDI_Recv(3 * natom, MDI_DOUBLE, self.comm, buf=coords)
         new_geometry = np.reshape(coords, (-1, 3))
         self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{"geometry": new_geometry}})
 
@@ -248,7 +279,7 @@ class MDIServer:
         )
 
         forces = self.compute_return.return_result
-        MDI_Send(forces, len(forces), MDI_DOUBLE_NUMPY, self.comm)
+        MDI_Send(forces, len(forces), MDI_DOUBLE, self.comm)
         return forces
 
     # Respond to the SCF command
@@ -261,37 +292,6 @@ class MDIServer:
         self.compute_return = compute(
             input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
         )
-
-    # Respond to the <NCOMMANDS command
-    def send_ncommands(self) -> int:
-        """ Send the number of supported MDI commands through MDI
-
-        Returns
-        -------
-        ncommands : int
-            Number of supported commands
-        """
-        ncommands = len(self.commands)
-        MDI_Send(ncommands, 1, MDI_INT, self.comm)
-        return ncommands
-
-    # Respond to the <COMMANDS command
-    def send_commands(self) -> str:
-        """ Send the supported MDI commands through MDI
-
-        Returns
-        -------
-        command_string : str
-            String containing the name of each supported command
-        """
-        command_string = "".join([f"{c:{MDI_COMMAND_LENGTH}}" for c in self.commands.keys()])
-
-        # confirm that command_string is the correct length
-        if len(command_string) != len(self.commands) * MDI_COMMAND_LENGTH:
-            raise Exception("Programming error: MDI command_string is incorrect length")
-
-        MDI_Send(command_string, len(command_string), MDI_CHAR, self.comm)
-        return command_string
 
     # Respond to the <ELEMENTS command
     def send_elements(self):
@@ -336,7 +336,7 @@ class MDIServer:
         """
         natom = len(self.molecule.geometry)
         masses = self.molecule.masses
-        MDI_Send(masses, natom, MDI_DOUBLE_NUMPY, self.comm)
+        MDI_Send(masses, natom, MDI_DOUBLE, self.comm)
         return masses
 
     # Respond to the >MASSES command

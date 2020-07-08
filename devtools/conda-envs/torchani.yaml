@@ -1,6 +1,7 @@
 name: test
 channels:
   - conda-forge
+  - pytorch-nightly
 dependencies:
 
     # Core
@@ -12,7 +13,11 @@ dependencies:
   - qcelemental >=0.12.0
   - pydantic>=1.0.0
 
+  - pytorch
+
     # Testing
   - pytest
   - pytest-cov
   - codecov
+  - pip:
+    - torchani

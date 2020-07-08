@@ -7,11 +7,7 @@ import re
 import socket
 import sys
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..config import TaskConfig
-    from qcelemental.models import AtomicInput
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
@@ -22,6 +18,11 @@ from ..exceptions import InputError, ResourceError, UnknownError
 from ..util import execute
 from . import empirical_dispersion_resources
 from .model import ProgramHarness
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
+
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 

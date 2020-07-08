@@ -59,7 +59,7 @@ def test_psi4_hf3c_task():
     assert ret.model.basis is None
 
 
-@using("psi4_14")
+@using("psi4_runqcsk")
 def test_psi4_interactive_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -76,7 +76,7 @@ def test_psi4_interactive_task():
     assert ret.extras.pop("psiapi_evaluated", False)
 
 
-@using("psi4_14")
+@using("psi4_runqcsk")
 def test_psi4_wavefunction_task():
     input_data = {
         "molecule": qcng.get_molecule("water"),
@@ -131,11 +131,12 @@ def test_psi4_ref_switch():
 
 
 @using("rdkit")
-def test_rdkit_task():
+@pytest.mark.parametrize("method", ["UFF", "MMFF94", "MMFF94s"])
+def test_rdkit_task(method):
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "gradient",
-        "model": {"method": "UFF"},
+        "model": {"method": method},
         "keywords": {},
     }
 
@@ -147,11 +148,12 @@ def test_rdkit_task():
 @using("rdkit")
 def test_rdkit_connectivity_error():
     input_data = {
-        "molecule": qcng.get_molecule("water").dict(exclude={"connectivity"}),
-        "driver": "gradient",
+        "molecule": qcng.get_molecule("water").dict(),
+        "driver": "energy",
         "model": {"method": "UFF", "basis": ""},
         "keywords": {},
     }
+    del input_data["molecule"]["connectivity"]
 
     ret = qcng.compute(input_data, "rdkit")
     assert ret.success is False
@@ -240,13 +242,13 @@ def test_random_failure_with_success(failure_engine):
 
 
 @using("openmm")
-def test_openmm_task_offxml_basis():
+def test_openmm_task_smirnoff():
     from qcengine.programs.openmm import OpenMMHarness
 
     input_data = {
         "molecule": qcng.get_molecule("water"),
         "driver": "energy",
-        "model": {"method": "openmm", "basis": "openff-1.0.0", "offxml": "openff-1.0.0.offxml"},
+        "model": {"method": "openff-1.0.0", "basis": "smirnoff"},
         "keywords": {},
     }
 
@@ -265,31 +267,6 @@ def test_openmm_task_offxml_basis():
 
 
 @pytest.mark.skip("`basis` must be explicitly specified at this time")
-@using("openmm")
-def test_openmm_task_offxml_nobasis():
-    from qcengine.programs.openmm import OpenMMHarness
-
-    input_data = {
-        "molecule": qcng.get_molecule("water"),
-        "driver": "energy",
-        "model": {"method": "openmm", "basis": None, "offxml": "openff-1.0.0.offxml"},
-        "keywords": {},
-    }
-
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
-
-    cachelength = len(OpenMMHarness._CACHE)
-
-    assert cachelength > 0
-    assert ret.success is True
-
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
-
-    # ensure cache has not grown
-    assert len(OpenMMHarness._CACHE) == cachelength
-    assert ret.success is True
-
-
 @using("openmm")
 def test_openmm_task_url_basis():
     from qcengine.programs.openmm import OpenMMHarness
@@ -319,31 +296,89 @@ def test_openmm_task_url_basis():
     assert ret.success is True
 
 
-@pytest.mark.skip("`basis` must be explicitly specified at this time")
 @using("openmm")
-def test_openmm_task_url_nobasis():
-    from qcengine.programs.openmm import OpenMMHarness
+def test_openmm_cmiles_gradient():
+    program = "openmm"
 
-    input_data = {
-        "molecule": qcng.get_molecule("water"),
-        "driver": "energy",
-        "model": {
-            "method": "openmm",
-            "basis": None,
-            "url": "https://raw.githubusercontent.com/openforcefield/openforcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
-        },
-        "keywords": {},
+    water = qcng.get_molecule("water")
+
+    water_dict = water.dict()
+    # add water cmiles to the molecule
+    water_dict["extras"] = {"cmiles": {"canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:2][O:1][H:3]"}}
+
+    molecule = Molecule.from_data(water_dict)
+
+    model = {"method": "openff-1.0.0", "basis": "smirnoff"}
+
+    inp = AtomicInput(molecule=molecule, driver="gradient", model=model)
+    ret = qcng.compute(inp, program, raise_error=False)
+
+    assert ret.success is True
+
+
+@using("openmm")
+def test_openmm_cmiles_gradient_nomatch():
+    program = "openmm"
+
+    water = qcng.get_molecule("water")
+
+    water_dict = water.dict()
+    # add ethane cmiles to the molecule
+    water_dict["extras"] = {
+        "cmiles": {
+            "canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:3][C:1]([H:4])([H:5])[C:2]([H:6])([H:7])[H:8]"
+        }
     }
 
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
+    molecule = Molecule.from_data(water_dict)
 
-    cachelength = len(OpenMMHarness._CACHE)
+    model = {"method": "openff-1.0.0", "basis": "smirnoff"}
 
-    assert cachelength > 0
-    assert ret.success is True
+    inp = AtomicInput(molecule=molecule, driver="gradient", model=model)
+    ret = qcng.compute(inp, program, raise_error=False)
 
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
+    # if we correctly find the cmiles this should fail as the molecule and cmiles are different
+    assert ret.success is False
+    assert (
+        "molecule.add_conformer given input of the wrong shape: Given (3, 3), expected (8, 3)"
+        in ret.error.error_message
+    )
 
-    # ensure cache has not grown
-    assert len(OpenMMHarness._CACHE) == cachelength
-    assert ret.success is True
+
+@using("openmm")
+@pytest.mark.parametrize(
+    "gaff_settings",
+    [
+        pytest.param(({}, None, 0.0013904199062156914), id="gaff no keywords"),
+        pytest.param(({"constraints": "ALLBONDS"}, None, 8.108238580315493e-05), id="constraints allbonds"),
+        pytest.param(({"nonbondedMethod": "LjPmE"}, None, 0.0013904199062156914), id="nonbonded ljpme"),
+        pytest.param(
+            ({"nonbondedMethod": "PME", "constraints": "Hbonds"}, None, 8.108238580315493e-05),
+            id="nonbonded pme constraints hbonds",
+        ),
+        pytest.param(({"constraints": "badmethod"}, ValueError, 0), id="incorrect constraint"),
+        pytest.param(({"nonbondedMethod": "badmethod"}, ValueError, 0), id="incorrect nonbondedmethod"),
+    ],
+)
+def test_openmm_gaff_keywords(gaff_settings):
+    """
+    Test the different running settings with gaff.
+    """
+    program = "openmm"
+    water = qcng.get_molecule("water")
+
+    water_dict = water.dict()
+    # add water cmiles to the molecule
+    water_dict["extras"] = {"cmiles": {"canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:2][O:1][H:3]"}}
+
+    molecule = Molecule.from_data(water_dict)
+    keywords, error, expected_result = gaff_settings
+    model = {"method": "gaff-2.1", "basis": "antechamber"}
+    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    if error is not None:
+        with pytest.raises(error):
+            _ = qcng.compute(inp, program, raise_error=True)
+    else:
+        ret = qcng.compute(inp, program, raise_error=False)
+        assert ret.success is True
+        assert ret.return_result == pytest.approx(expected_result, rel=1e-6)

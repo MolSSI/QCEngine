@@ -6,10 +6,10 @@ import copy
 
 import pydantic
 import pytest
-from qcengine.config import NodeDescriptor
 
 import qcengine as qcng
-from qcengine.util import environ_context, create_mpi_invocation
+from qcengine.config import NodeDescriptor
+from qcengine.util import create_mpi_invocation, environ_context
 
 
 def test_node_blank():
@@ -197,7 +197,7 @@ def test_config_local_nnodes(opt_state_basic):
     assert create_mpi_invocation("hello_world", config) == [
         "mpirun",
         "-n",
-        "20",
+        "10",
         "-N",
         "2",
         "--cpus-per-slot",

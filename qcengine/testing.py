@@ -147,22 +147,25 @@ _programs = {
     "gamess": which("rungms", return_bool=True),
     "gcp": which("gcp", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
+    "berny": which_import("berny", return_bool=True),
     "mdi": which_import("mdi", return_bool=True),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
     "mp2d": which("mp2d", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),
-    "openmm": which_import(".openmm", package="simtk", return_bool=True),
     "optking": which_import("optking", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
-    "psi4_14": is_program_new_enough("psi4", "1.4a2.dev250"),
+    "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
+    "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.2"),
     "rdkit": which_import("rdkit", return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "torchani": is_program_new_enough("torchani", "0.9"),
     "turbomole": which("define", return_bool=True),
+    "xtb": which_import("xtb", return_bool=True),
 }
+_programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 
 
 def has_program(name):

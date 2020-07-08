@@ -5,6 +5,7 @@ Imports the various procedure backends
 from typing import Set
 
 from ..exceptions import InputError, ResourceError
+from .berny import BernyProcedure
 from .geometric import GeometricProcedure
 from .optking import OptKingProcedure
 
@@ -64,3 +65,5 @@ def list_available_procedures() -> Set[str]:
 
 register_procedure(GeometricProcedure())
 register_procedure(OptKingProcedure())
+register_procedure(BernyProcedure())
+

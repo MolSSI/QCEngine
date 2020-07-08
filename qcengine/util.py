@@ -13,13 +13,14 @@ import tempfile
 import time
 import traceback
 from contextlib import contextmanager
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 from threading import Thread
-from typing import Any, Dict, List, Optional, Tuple, Union, BinaryIO, TextIO
+from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 from pydantic import ValidationError
 from qcelemental.models import FailedOperation
+
 from qcengine.config import TaskConfig
 
 from .config import LOGGER, get_provenance_augments
@@ -43,7 +44,7 @@ def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]
     mpirun_str = task_config.mpiexec_command.format(
         nnodes=task_config.nnodes,
         ranks_per_node=task_config.ncores // task_config.cores_per_rank,
-        total_ranks=task_config.nnodes * task_config.ncores,
+        total_ranks=task_config.nnodes * task_config.ncores // task_config.cores_per_rank,
         cores_per_rank=task_config.cores_per_rank,
     )
     command = mpirun_str.split()
@@ -77,6 +78,19 @@ def model_wrapper(input_data: Dict[str, Any], model: "BaseModel") -> "BaseModel"
         input_data = input_data.copy(update={"extras": {}})
 
     return input_data
+
+
+@contextmanager
+def capture_stdout():
+    oldout, olderr = sys.stdout, sys.stderr
+    try:
+        out = [io.StringIO(), io.StringIO()]
+        sys.stdout, sys.stderr = out
+        yield out
+    finally:
+        sys.stdout, sys.stderr = oldout, olderr
+        out[0] = out[0].getvalue()
+        out[1] = out[1].getvalue()
 
 
 @contextmanager
@@ -375,11 +389,12 @@ def execute(
     interupt_after: Optional[int] = None,
     environment: Optional[Dict[str, str]] = None,
     shell: Optional[bool] = False,
+    exit_code: Optional[int] = 0,
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
 
-    Returns True if exit code zero
+    Returns True if exit code <= exit_code (default 0)
 
     Parameters
     ----------
@@ -412,6 +427,8 @@ def execute(
         The environment to run in
     shell : bool, optional
         Run command through the shell.
+    exit_code: int, optional
+        The exit code above which the process is considered failure.
 
     Raises
     ------
@@ -467,7 +484,7 @@ def execute(
         proc["outfiles"] = extrafiles
     proc["scratch_directory"] = scrdir
 
-    return retcode == 0, proc
+    return retcode <= exit_code, proc
 
 
 @contextmanager

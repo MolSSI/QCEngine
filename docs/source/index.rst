@@ -20,17 +20,17 @@ A simple example of QCEngine's capabilities is as follows:
     >>> import qcelemental as qcel
 
     >>> mol = qcel.models.Molecule.from_data("""
-    O  0.0  0.000  -0.129
-    H  0.0 -1.494  1.027
-    H  0.0  1.494  1.027
-    """)
+    >>>     O  0.0  0.000  -0.129
+    >>>     H  0.0 -1.494  1.027
+    >>>     H  0.0  1.494  1.027
+    >>> """)
 
-    >>> input = qcel.models.AtomicInput(
-        molecule=mol,
-        driver="energy",
-        model={"method": "SCF", "basis": "sto-3g"},
-        keywords={"scf_type": "df"}
-        )
+    >>> model = qcel.models.AtomicInput(
+    >>>     molecule=mol,
+    >>>     driver="energy",
+    >>>     model={"method": "SCF", "basis": "sto-3g"},
+    >>>     keywords={"scf_type": "df"}
+    >>> )
 
 These input specifications can be executed with the ``compute`` syntax along with a program specifier:
 
@@ -66,6 +66,7 @@ Currently available compute backends for single results are as follow:
 - Semi-Emperical:
 
   - `MOPAC <http://www.petachem.com>`_
+  - `xtb <https://xtb-docs.readthedocs.io>`_
 
 - AI Potential:
 
@@ -84,6 +85,7 @@ In addition, several procedures are available:
 - Geometry Optimization:
 
   - `geomeTRIC <https://github.com/leeping/geomeTRIC>`_
+  - `Pyberny <https://github.com/jhrmnn/pyberny>`_
 
 Configuration Determination
 ---------------------------
@@ -172,6 +174,7 @@ Index
 **Programs**
 
 * :doc:`program_overview`
+* :doc:`programs_molecular_mechanics`
 
 .. toctree::
     :maxdepth: 1
@@ -179,6 +182,8 @@ Index
     :caption: Programs
 
     program_overview
+    programs_semiempirical
+    programs_molecular_mechanics
 
 
 **Developer Documentation**

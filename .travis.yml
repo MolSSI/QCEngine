@@ -9,23 +9,32 @@ matrix:
     - os: linux
       env:
         - PYTHON_VER=3.6
-        - PROG=RDKIT
-    - os: linux
-      env:
-        - PYTHON_VER=3.6
         - PROG=PSI4
     - os: linux
       env:
         - PYTHON_VER=3.7
         - PROG=PSI4DEV  # py37 not avail for latest release
-#    - os: linux
-#      env:
-#        - PYTHON_VER=3.6
-#        - PROG=ANI
+    - os: linux
+      env:
+        - PYTHON_VER=3.6
+        - PROG=ANI
     - os: linux
       env:
         - PYTHON_VER=3.6
         - PROG=OPENMM
+    - os: linux
+      env:
+        - PYTHON_VER=3.6
+        - PROG=XTB
+
+    - os: linux
+      addons: &1
+        apt:
+          packages:
+          - nwchem
+      env:
+        - PYTHON_VER=3.6
+        - PROG=NWCHEM
 
 before_install:
     # Additional info about the build
@@ -41,9 +50,7 @@ install:
 
     # Create test environment for package
   - |
-    if [ $PROG == "RDKIT" ]; then
-      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/rdkit.yaml
-    elif [ $PROG == "PSI4" ]; then
+    if [ $PROG == "PSI4" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/psi.yaml
     elif [ $PROG == "PSI4DEV" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/psi-nightly.yaml
@@ -51,6 +58,10 @@ install:
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/torchani.yaml
     elif [ $PROG == "OPENMM" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/openmm.yaml
+    elif [ $PROG == "NWCHEM" ]; then
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/nwchem.yaml
+    elif [ $PROG == "XTB" ]; then
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/xtb.yaml
     else
       echo "ERROR: No match for PROG ($PROG)."
       exit 1
@@ -61,17 +72,15 @@ install:
   - |
     if [ $PROG == "PSI4DEV" ]; then
       conda remove qcengine --force
-    elif [ $PROG == "ANI" ]; then
-      pip install torch_nightly -q -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
-      pip install torchani -q
     fi
-  - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
-  - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
   - conda list
 
     # Build and install package
   - python setup.py develop --no-deps
 
+  - qcengine info
+  - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
+  - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
 
 script:
     # Get a bit of info first
