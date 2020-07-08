@@ -20,8 +20,7 @@ def input_data():
 
 @using("psi4")
 @pytest.mark.parametrize(
-    "optimizer",
-    [pytest.param("geometric", marks=using("geometric")), pytest.param("optking", marks=using("optking"))],
+    "optimizer", [pytest.param("geometric", marks=using("geometric")), pytest.param("optking", marks=using("optking"))],
 )
 def test_geometric_psi4(input_data, optimizer):
 

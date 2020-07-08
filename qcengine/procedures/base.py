@@ -66,4 +66,3 @@ def list_available_procedures() -> Set[str]:
 register_procedure(GeometricProcedure())
 register_procedure(OptKingProcedure())
 register_procedure(BernyProcedure())
-
