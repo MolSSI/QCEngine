@@ -201,7 +201,7 @@ H      -0.52288871       1.72555240       0.89907326
 H       0.44142019      -0.33354425      -0.77152059"""
     mol = qcel.models.Molecule.from_data(xyz)
     qcng.compute(
-        {"molecule": mol, "model": {"method": "b3lyp", "basis": "6-31g(2df,p)"}, "driver": "gradient"},
+        {"molecule": mol, "model": {"method": "b3lyp", "basis": "6-31g"}, "driver": "gradient"},
         "nwchem",
         raise_error=True,
     )
