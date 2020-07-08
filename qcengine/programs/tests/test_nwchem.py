@@ -234,3 +234,24 @@ def test_homo_lumo(h20v2):
     # Make sure Dipole Moment and center of charge parsed correctly
     assert compare_values(-0.2636515, float(res["extras"]["qcvars"]["HOMO"][0]), atol=1e-5)
     assert compare_values(0.08207131, float(res["extras"]["qcvars"]["LUMO"][0]), atol=1e-5)
+
+
+@using("nwchem")
+def test_geometry_bug():
+    """Make sure that the harvester does not crash if NWChem's autosym moves atoms too far"""
+
+    # Example molecule that has an RMSD of 2e-4 after NWChem symmetrizes the coordinates
+    xyz = """6
+Properties=species:S:1:pos:R:3 unique_id=2da214efcf4e4c277fabc5b2b6ca6f32 pbc="F F F"
+C      -0.00828817       1.39046978      -0.00560069
+O      -0.00797038      -0.02504537       0.02030606
+H       1.00658338       1.81556366       0.00348335
+H      -0.54657475       1.79916975      -0.87390126
+H      -0.52288871       1.72555240       0.89907326
+H       0.44142019      -0.33354425      -0.77152059"""
+    mol = qcel.models.Molecule.from_data(xyz)
+    qcng.compute(
+        {"molecule": mol, "model": {"method": "b3lyp", "basis": "6-31g"}, "driver": "gradient"},
+        "nwchem",
+        raise_error=True,
+    )
