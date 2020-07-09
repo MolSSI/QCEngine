@@ -1,7 +1,7 @@
 from typing import Any, Dict, Union
 
 from qcelemental.models import OptimizationResult, OptimizationInput
-from qcelemental.util import which_import
+from qcelemental.util import which_import, safe_version
 
 from .model import ProcedureHarness
 
@@ -9,6 +9,8 @@ from .model import ProcedureHarness
 class OptKingProcedure(ProcedureHarness):
 
     _defaults = {"name": "OptKing", "procedure": "optimization"}
+
+    version_cache: Dict[str, str] = {}
 
     class Config(ProcedureHarness.Config):
         pass
@@ -24,11 +26,20 @@ class OptKingProcedure(ProcedureHarness):
     def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
         return self._build_model(data, OptimizationInput)
 
-    def compute(self, input_model: "OptimizationInput", config: "JobConfig") -> "Optimization":
-        try:
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        which_prog = which_import("optking")
+        if which_prog not in self.version_cache:
             import optking
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError("Could not find optking in the Python path.")
+
+            self.version_cache[which_prog] = safe_version(optking.__version__)
+
+        return self.version_cache[which_prog]
+
+    def compute(self, input_model: "OptimizationInput", config: "JobConfig") -> "Optimization":
+        if self.found(raise_error=True):
+            import optking
 
         input_data = input_model.dict()
 
