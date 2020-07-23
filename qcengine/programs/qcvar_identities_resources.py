@@ -155,8 +155,20 @@ def qcvar_identities() -> List[Dict[str, Any]]:
     #    'func': sum,
     #    'args': ['HF TOTAL ENERGY', 'DW-MP2 CORRELATION ENERGY']})
 
+    # MP3
+    pv0.extend(_solve_in_turn(args=["MP3 TOTAL ENERGY", "HF TOTAL ENERGY", "MP3 CORRELATION ENERGY"], coeff=[-1, 1, 1]))
+    pv0.extend(
+        _solve_in_turn(
+            args=["MP3 DOUBLES ENERGY", "MP3 SAME-SPIN CORRELATION ENERGY", "MP3 OPPOSITE-SPIN CORRELATION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(args=["MP3 CORRELATION ENERGY", "MP3 DOUBLES ENERGY", "MP3 SINGLES ENERGY"], coeff=[-1, 1, 1])
+    )
+
     # MPN
-    for mpn in range(3, 20):
+    for mpn in range(4, 20):
         pv0.extend(
             _solve_in_turn(
                 args=["MP{} TOTAL ENERGY".format(mpn), "HF TOTAL ENERGY", "MP{} CORRELATION ENERGY".format(mpn)],
