@@ -14,6 +14,22 @@ Changelog
 .. +++++++++
 
 
+v0.16.0 / 2020-MM-DD
+--------------------
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`241`) NWChem - improved performance by turning on ``atoms_map=True``, which does seem to be true.
+- (:pr:`257`) TorchANI - learned the ANI2x model and to work with v2.
+- (:pr:`259`) Added MP2.5 & MP3 energies and HF, MP2.5, MP3, LCCD gradients reference data to stdsuite.
+
+Bug Fixes
++++++++++
+
+
 v0.15.0 / 2020-06-26
 --------------------
 
