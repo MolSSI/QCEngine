@@ -21,8 +21,9 @@ from .util import (
 )
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 def entos_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:

@@ -145,7 +145,12 @@ def contractual_mp2(
                 and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
             )
             or (
-                ((qc_module == "psi4-detci" and method == "mp2"))
+                (
+                    (qc_module == "psi4-detci" and method == "mp2")
+                    or (
+                        qc_module == "qchem" and method == "mp2"
+                    )  # for structured -- can probably get these from parsing
+                )
                 and pv
                 in [
                     "MP2 SAME-SPIN CORRELATION ENERGY",

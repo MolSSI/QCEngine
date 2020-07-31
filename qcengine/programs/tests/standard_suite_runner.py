@@ -81,7 +81,9 @@ def runner_asserter(inp, subject, method, basis, tnm):
     # <<<  Comparison Tests  >>>
 
     assert wfn["success"] is True
-    assert wfn["provenance"]["creator"].lower() == qcprog
+    assert (
+        wfn["provenance"]["creator"].lower() == qcprog
+    ), f'Creator ({wfn["provenance"]["creator"].lower()}) not expected ({qcprog})'
 
     ref_block = std_suite[chash]
 

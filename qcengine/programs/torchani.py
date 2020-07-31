@@ -12,8 +12,9 @@ from ..units import ureg
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 class TorchANIHarness(ProgramHarness):
@@ -95,9 +96,9 @@ class TorchANIHarness(ProgramHarness):
         if parse_version(self.get_version()) < parse_version("0.9"):
             raise ResourceError("QCEngine's TorchANI wrapper requires version 0.9 or greater.")
 
+        import numpy as np
         import torch
         import torchani
-        import numpy as np
 
         device = torch.device("cpu")
 
