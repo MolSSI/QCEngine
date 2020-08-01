@@ -18,7 +18,7 @@ from qcelemental.util import parse_version, safe_version, which
 from qcengine.config import TaskConfig, get_config
 
 from ..exceptions import InputError, UnknownError
-from ..util import disk_files, execute, popen, temporary_directory
+from ..util import disk_files, execute, temporary_directory
 from .model import ProgramHarness
 
 NUMBER = r"(?x:" + regex.NUMBER + ")"
@@ -61,6 +61,11 @@ class QChemHarness(ProgramHarness):
         return paths
 
     def get_version(self) -> str:
+        # excuse missing Q-Chem for QCEngineRecords tests
+        found = self.found()
+        if not found:
+            return safe_version("0.0.0")
+
         self.found(raise_error=True)
 
         # Get the node configuration
@@ -94,7 +99,7 @@ class QChemHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Check qchem version
-        qceng_ver = "5.2"
+        qceng_ver = "5.1"
         if parse_version(self.get_version()) < parse_version(qceng_ver):
             raise TypeError(f"Q-Chem version <{qceng_ver} not supported (found version {self.get_version()})")
 
