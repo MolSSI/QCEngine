@@ -106,10 +106,9 @@
         {
             "@type": "Person",
             "givenName": "Jan",
-            "additionalName": "XXXX.",
             "familyName": "Hermann",
-            "affiliation": "XXXX",
-            "@id": "https://orcid.org/XXXX",
+            "affiliation": "Free University of Berlin",
+            "@id": "https://orcid.org/0000-0002-2779-0749",
             "identifier": "https://github.com/jhrmnn"
         },
         {
