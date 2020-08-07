@@ -220,11 +220,10 @@
         },
         {
             "@type": "Person",
-            "givenName": "Johannes",
-            "additionalName": "XXXX.",
+            "givenName": "Johannes", 
             "familyName": "Steinmetzer",
             "affiliation": "Friedrich-Schiller-University Jena",
-            "@id": "https://orcid.org/XXXX",
+            "@id": "https://orcid.org/0000-0003-2493-6893",
             "identifier": "https://github.com/eljost"
         },
         {
