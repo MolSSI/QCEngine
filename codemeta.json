@@ -62,10 +62,10 @@
         {
             "@type": "Person",
             "givenName": "David",
-            "additionalName": "XXXX.",
+            "additionalName": "L.",
             "familyName": "Dotson",
-            "affiliation": "XXXX OpenFF",
-            "@id": "https://orcid.org/XXXX",
+            "affiliation": "Open Force Field Initiative",
+            "@id": "https://orcid.org/0000-0001-5879-2942",
             "identifier": "https://github.com/dotsdl"
         },
         {
