@@ -238,8 +238,7 @@
             "@type": "Person",
             "givenName": "Matthew",
             "familyName": "Welborn",
-            "affiliation": "The Molecular Sciences Software Institute",
-            "@id": "https://orcid.org/XXXX",
+            "affiliation": "Entos, Inc.",
             "identifier": "https://github.com/mattwelborn"
         },
         {
