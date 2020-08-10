@@ -264,7 +264,7 @@ H                    20.850425490000     3.414376060000     2.960577230000"""
             "molecule": mol,
             "model": {"method": "hf", "basis": "sto-3g"},
             "driver": "energy",
-            "keywords": {"noautoz": True},
+            "keywords": {"geometry__noautoz": True},
         },
         "nwchem",
         raise_error=False,
