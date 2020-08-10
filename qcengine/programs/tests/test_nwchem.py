@@ -209,6 +209,7 @@ H       0.44142019      -0.33354425      -0.77152059"""
 
 @using("nwchem")
 def test_autoz_error():
+    """Test ability to turn off autoz"""
     # Large molecule that leads to an AutoZ error
     xyz = """C                    15.204188380000    -3.519180270000   -10.798726560000
 C                    15.097645630000    -2.650246400000    -8.505033680000
@@ -255,14 +256,18 @@ H                    20.850425490000     3.414376060000     2.960577230000"""
     )
 
     assert not result.success
-    assert 'insufficient internal variables' in result.error.error_message
+    assert "insufficient internal variables" in result.error.error_message
 
     # Turn off autoz
     result = qcng.compute(
-        {"molecule": mol, "model": {"method": "hf", "basis": "sto-3g"}, "driver": "energy",
-         "keywords": {"noautoz": True}},
+        {
+            "molecule": mol,
+            "model": {"method": "hf", "basis": "sto-3g"},
+            "driver": "energy",
+            "keywords": {"noautoz": True},
+        },
         "nwchem",
         raise_error=False,
     )
 
-    assert 'insufficient internal variables' not in result.error.error_message  # Ok if it crashes for other reasons
+    assert "insufficient internal variables" not in result.error.error_message  # Ok if it crashes for other reasons
