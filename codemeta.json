@@ -97,10 +97,10 @@
         {
             "@type": "Person",
             "givenName": "Alex",
-            "additionalName": "XXXX.",
+            "additionalName": "G.",
             "familyName": "Heide",
             "affiliation": "Center for Computational Quantum Chemistry, University of Georgia",
-            "@id": "https://orcid.org/XXXX",
+            "@id": "https://orcid.org/0000-0002-9780-8123",
             "identifier": "https://github.com/AlexHeide"
         },
         {
