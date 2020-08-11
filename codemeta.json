@@ -113,6 +113,14 @@
         },
         {
             "@type": "Person",
+            "givenName": "Josh",
+            "familyName": "Horton",
+            "affiliation": "Department of Chemistry, Lancaster University; Open Force Field Inititive",
+            "@id": "https://orcid.org/0000-0001-8694-7200",
+            "identifier": "https://github.com/jthorton"
+        },
+        {
+            "@type": "Person",
             "givenName": "Adrian",
             "additionalName": "XXXX.",
             "familyName": "Hurtado",
@@ -190,6 +198,14 @@
             "affiliation": "The Molecular Sciences Software Institute",
             "@id": "https://orcid.org/XXXX",
             "identifier": "https://github.com/Lnaden"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Farhad",
+            "familyName": "Ramezanghorbani",
+            "affiliation": "University of Florida",
+            "@id": "http://orcid.org/0000-0002-7545-4416",
+            "identifier": "https://github.com/farhadrgh"
         },
         {
             "@type": "Person",
