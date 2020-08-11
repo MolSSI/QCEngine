@@ -154,6 +154,9 @@ class NWChemHarness(ProgramHarness):
         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
         opts.update(moldata["keywords"])
 
+        if opts.pop("geometry__noautoz", False):
+            molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 noautoz", molcmd)
+
         # Handle calc type and quantum chemical method
         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
         opts.update(mdcopts)
