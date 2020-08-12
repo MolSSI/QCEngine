@@ -91,8 +91,7 @@
             "additionalName": "S.",
             "familyName": "Gordon",
             "affiliation": "Department of Chemistry, Iowa State University",
-            "@id": "https://orcid.org/0000-0003-2371-1318",
-            "identifier": "https://github.com/XXXX"
+            "@id": "https://orcid.org/0000-0003-2371-1318"
         },
         {
             "@type": "Person",
