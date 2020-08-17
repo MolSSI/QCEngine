@@ -2,18 +2,18 @@
 Calls the TorchANI package.
 """
 
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import parse_version, safe_version, which_import
 
-if TYPE_CHECKING:
-    from ..config import TaskConfig
-    from qcelemental.models import AtomicInput
-
 from ..exceptions import InputError, ResourceError
 from ..units import ureg
 from .model import ProgramHarness
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
+    from qcelemental.models import AtomicInput
 
 
 class TorchANIHarness(ProgramHarness):
@@ -70,14 +70,18 @@ class TorchANIHarness(ProgramHarness):
 
         torchani.nn.Ensemble.forward = ensemble_forward
 
-        if name == "ani1x":
-            self._CACHE[name] = torchani.models.ANI1x()
+        ani_models = {
+            "ani1x": torchani.models.ANI1x(),
+            "ani1ccx": torchani.models.ANI1ccx(),
+        }
 
-        elif name == "ani1ccx":
-            self._CACHE[name] = torchani.models.ANI1ccx()
+        if parse_version(self.get_version()) >= parse_version("2.0"):
+            ani_models["ani2x"] = torchani.models.ANI2x()
 
-        else:
-            return False
+        try:
+            self._CACHE[name] = ani_models[name]
+        except KeyError:
+            raise InputError(f"TorchANI only accepts methods: {ani_models.keys()}")
 
         return self._CACHE[name]
 
@@ -101,15 +105,19 @@ class TorchANIHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # Build model
-        model = self.get_model(input_data.model.method)
-        if model is False:
-            raise InputError("TorchANI only accepts the ANI1x or ANI1ccx method.")
+        method = input_data.model.method
+        model = self.get_model(method)
 
         # Build species
-        species = "".join(input_data.molecule.symbols)
-        unknown_sym = set(species) - {"H", "C", "N", "O"}
+        species = input_data.molecule.symbols
+
+        known_sym = {"H", "C", "N", "O"}
+        if method.lower() == "ani2x":
+            known_sym.update({"S", "F", "Cl"})
+
+        unknown_sym = set(species) - known_sym
         if unknown_sym:
-            raise InputError(f"TorchANI model '{input_data.model.method}' does not support symbols: {unknown_sym}.")
+            raise InputError(f"TorchANI model '{method}' does not support symbols: {unknown_sym}.")
 
         num_atoms = len(species)
         species = model.species_to_tensor(species).to(device).unsqueeze(0)

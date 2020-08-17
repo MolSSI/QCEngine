@@ -5,8 +5,8 @@ Imports the various procedure backends
 from typing import Set
 
 from ..exceptions import InputError, ResourceError
-from .geometric import GeometricProcedure
 from .berny import BernyProcedure
+from .geometric import GeometricProcedure
 
 __all__ = ["register_procedure", "get_procedure", "list_all_procedures", "list_available_procedures"]
 
