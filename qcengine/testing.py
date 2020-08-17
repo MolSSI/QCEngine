@@ -153,6 +153,7 @@ _programs = {
     "mopac": is_program_new_enough("mopac", "2016"),
     "mp2d": which("mp2d", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),
+    "madness": which("madness", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),

@@ -866,6 +866,7 @@ def harvest_outfile_pass(outtext):
     if mobj:
         psivar["DIPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
         psivar["TOTAL DIPOLE MOMENT"] = mobj.group(4)
+
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
         psivar["SCF TOTAL ENERGY"] = psivar["HF TOTAL ENERGY"]
