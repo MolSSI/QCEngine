@@ -37,7 +37,7 @@ class OptKingProcedure(ProcedureHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "OptimizationInput", config: "JobConfig") -> "Optimization":
+    def compute(self, input_model: "OptimizationInput", config: "TaskConfig") -> "Optimization":
         if self.found(raise_error=True):
             import optking
 
