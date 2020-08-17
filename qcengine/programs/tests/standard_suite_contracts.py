@@ -71,7 +71,6 @@ def contractual_current(
         whether `expected` and what key `rpv` in the reference `pv` should match.
 
     """
-
     contractual_qcvars = [
         ("HF TOTAL ENERGY", "SCF TOTAL ENERGY"),
         ("HF TOTAL ENERGY", "CURRENT REFERENCE ENERGY"),
@@ -132,16 +131,21 @@ def contractual_mp2(
         if (
             (
                 (
-                    (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"])
-                    or (qc_module == "gamess" and reference in ["uhf", "rohf"])
-                    or (qc_module == "nwchem-tce")
+                    (qc_module == "gamess" and reference in ["uhf", "rohf"] and method == "mp2")
+                    or (qc_module == "gamess" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
+                    or (qc_module == "nwchem-tce" and method == "mp2")
+                    or (qc_module == "nwchem" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
+                    or (
+                        qc_module == "psi4-occ"
+                        and reference == "rhf"
+                        and corl_type in ["df", "cd"]
+                        and method in ["mp2", "lccd", "ccsd", "ccsd(t)"]
+                    )
                 )
-                and method == "mp2"
                 and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
             )
             or (
-                ((qc_module == "psi4-detci"))
-                and method == "mp2"
+                ((qc_module == "psi4-detci" and method == "mp2"))
                 and pv
                 in [
                     "MP2 SAME-SPIN CORRELATION ENERGY",
@@ -151,25 +155,21 @@ def contractual_mp2(
                 ]
             )
             or (
-                ((qc_module == "gamess" and reference in ["rhf"]) or (qc_module == "nwchem" and reference in ["rhf"]))
-                and method == "ccsd"
-                and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY",]
-            )
-            or (
-                ((qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"]))
-                and method == "ccsd"
-                and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
+                ((qc_module == "psi4-occ" and reference == "rohf" and method in ["olccd"]))
+                and pv in ["MP2 CORRELATION ENERGY", "MP2 TOTAL ENERGY", "MP2 SINGLES ENERGY",]
             )
             or (
                 (
-                    (qc_module == "psi4-ccenergy" and reference == "rohf")
-                    or (qc_module == "nwchem-tce")
-                    or (qc_module == "gamess" and reference == "rohf")
+                    (qc_module == "psi4-ccenergy" and reference == "rohf" and method == "ccsd")
+                    or (qc_module == "nwchem-tce" and method in ["ccsd", "ccsd(t)"])
+                    or (qc_module == "gamess" and reference == "rohf" and method == "ccsd")
                     or (
-                        qc_module.startswith("cfour") and reference == "rohf" and fcae == "fc"
+                        qc_module.startswith("cfour")
+                        and reference == "rohf"
+                        and fcae == "fc"
+                        and method in ["ccsd", "ccsd(t)"]
                     )  # this is a cop out as c4 perfectly able to produce good rohf mp2 but not with same orbitals as ref definition on ccsd
                 )
-                and method == "ccsd"
                 and pv
                 in [
                     "MP2 CORRELATION ENERGY",
@@ -187,6 +187,108 @@ def contractual_mp2(
 
 
 #        # TODO check CUSTOM SCS-MP2 _absent_
+
+
+def contractual_lccd(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal LCCD should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    Parameters
+    ----------
+    qc_module : str
+        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
+    driver : {"energy", "gradient", "hessian"}
+        The derivative level that should be expected.
+    reference: {"rhf", "uhf", "rohf"}
+        The SCF reference since programs often output differently based on it.
+    method: str
+        The target AtomicInput.model.method since "free" methods may not always be
+        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
+    corl_type: {"conv", "df", "cd"}
+        The algorithm for the target method since programs often output differently
+        based on it.
+    fcae: {"ae", "fc"}
+        The all-electron vs. frozen-orbital aspect.
+
+    Returns
+    -------
+    (rpv, pv, expected)
+        Of all the QCVariables `pv` that should be available, returns tuple of
+        whether `expected` and what key `rpv` in the reference `pv` should match.
+
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "LCCD CORRELATION ENERGY",
+        "LCCD TOTAL ENERGY",
+        "LCCD SAME-SPIN CORRELATION ENERGY",
+        "LCCD SINGLES ENERGY",
+        "LCCD DOUBLES ENERGY",
+        "LCCD OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "lccd":
+        contractual_qcvars.append("LCCD TOTAL GRADIENT")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if (
+            (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "lccd")
+        ) and pv in ["LCCD SAME-SPIN CORRELATION ENERGY", "LCCD OPPOSITE-SPIN CORRELATION ENERGY"]:
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_lccsd(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal LCCSD should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    Parameters
+    ----------
+    qc_module : str
+        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
+    driver : {"energy", "gradient", "hessian"}
+        The derivative level that should be expected.
+    reference: {"rhf", "uhf", "rohf"}
+        The SCF reference since programs often output differently based on it.
+    method: str
+        The target AtomicInput.model.method since "free" methods may not always be
+        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
+    corl_type: {"conv", "df", "cd"}
+        The algorithm for the target method since programs often output differently
+        based on it.
+    fcae: {"ae", "fc"}
+        The all-electron vs. frozen-orbital aspect.
+
+    Returns
+    -------
+    (rpv, pv, expected)
+        Of all the QCVariables `pv` that should be available, returns tuple of
+        whether `expected` and what key `rpv` in the reference `pv` should match.
+
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "LCCSD CORRELATION ENERGY",
+        "LCCSD TOTAL ENERGY",
+        "LCCSD SAME-SPIN CORRELATION ENERGY",
+        "LCCSD SINGLES ENERGY",
+        "LCCSD DOUBLES ENERGY",
+        "LCCSD OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "lccd":
+        contractual_qcvars.append("LCCSD TOTAL GRADIENT")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if False:
+            expected = False
+
+        yield (pv, pv, expected)
 
 
 def contractual_ccsd(
@@ -219,8 +321,6 @@ def contractual_ccsd(
         whether `expected` and what key `rpv` in the reference `pv` should match.
 
     """
-    """For CCSD, check that the expected QCVars are present in P::e.globals and wfn and match expected ref_block."""
-
     contractual_qcvars = [
         "HF TOTAL ENERGY",
         "CCSD CORRELATION ENERGY",
@@ -230,7 +330,7 @@ def contractual_ccsd(
         "CCSD DOUBLES ENERGY",
         "CCSD OPPOSITE-SPIN CORRELATION ENERGY",
     ]
-    if driver == "gradient":
+    if driver == "gradient" and method == "ccsd":
         contractual_qcvars.append("CCSD TOTAL GRADIENT")
 
     for pv in contractual_qcvars:
@@ -238,30 +338,35 @@ def contractual_ccsd(
         if (
             (
                 (
-                    (qc_module == "gamess" and reference == "rhf")
-                    or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"])
-                    or (qc_module in ["cfour-ncc", "cfour-ecc"] and reference in ["rhf"])
-                    or (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"])
+                    (qc_module == "gamess" and reference == "rhf" and method in ["ccsd", "ccsd(t)"])
+                    or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method in ["ccsd", "ccsd(t)"])
+                    or (
+                        qc_module in ["cfour-ncc", "cfour-ecc"]
+                        and reference in ["rhf"]
+                        and method in ["ccsd", "ccsd(t)"]
+                    )
+                    or (
+                        qc_module == "psi4-occ"
+                        and reference == "rhf"
+                        and corl_type in ["df", "cd"]
+                        and method in ["ccsd", "ccsd(t)"]
+                    )
                 )
-                and method == "ccsd"
                 and pv in ["CCSD SAME-SPIN CORRELATION ENERGY", "CCSD OPPOSITE-SPIN CORRELATION ENERGY"]
             )
             or (
-                (qc_module == "cfour-vcc" and reference in ["rohf"])
-                and method == "ccsd"
+                (qc_module == "cfour-vcc" and reference in ["rohf"] and method in ["ccsd", "ccsd(t)"])
                 and pv in ["CCSD SAME-SPIN CORRELATION ENERGY", "CCSD SINGLES ENERGY", "CCSD DOUBLES ENERGY",]
             )
             or (
-                (qc_module == "cfour-ecc" and reference in ["rohf"])
-                and method == "ccsd"
+                (qc_module == "cfour-ecc" and reference in ["rohf"] and method in ["ccsd", "ccsd(t)"])
                 and pv in ["CCSD OPPOSITE-SPIN CORRELATION ENERGY", "CCSD SINGLES ENERGY", "CCSD DOUBLES ENERGY",]
             )
             or (
                 (
-                    (qc_module == "gamess" and reference in ["rohf"])
-                    or (qc_module == "nwchem-tce" and reference in ["rohf"])
+                    (qc_module == "gamess" and reference in ["rohf"] and method == "ccsd")
+                    or (qc_module == "nwchem-tce" and reference in ["rohf"] and method in ["ccsd", "ccsd(t)"])
                 )
-                and method == "ccsd"
                 and pv
                 in [
                     "CCSD SAME-SPIN CORRELATION ENERGY",
@@ -271,8 +376,7 @@ def contractual_ccsd(
                 ]
             )
             or (
-                ()
-                and method == "ccsd(t)"
+                (False)
                 and pv
                 in [
                     "CCSD CORRELATION ENERGY",
@@ -289,3 +393,75 @@ def contractual_ccsd(
         yield (pv, pv, expected)
 
     # TODO check CUSTOM SCS-CCSD _absent_
+
+
+def contractual_ccsd_prt_pr(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal CCSD(T) should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    Parameters
+    ----------
+    qc_module : str
+        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
+    driver : {"energy", "gradient", "hessian"}
+        The derivative level that should be expected.
+    reference: {"rhf", "uhf", "rohf"}
+        The SCF reference since programs often output differently based on it.
+    method: str
+        The target AtomicInput.model.method since "free" methods may not always be
+        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
+    corl_type: {"conv", "df", "cd"}
+        The algorithm for the target method since programs often output differently
+        based on it.
+    fcae: {"ae", "fc"}
+        The all-electron vs. frozen-orbital aspect.
+
+    Returns
+    -------
+    (rpv, pv, expected)
+        Of all the QCVariables `pv` that should be available, returns tuple of
+        whether `expected` and what key `rpv` in the reference `pv` should match.
+
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "(T) CORRECTION ENERGY",
+        "CCSD(T) CORRELATION ENERGY",
+        "CCSD(T) TOTAL ENERGY",
+    ]
+    if driver == "gradient":
+        contractual_qcvars.append("CCSD(T) TOTAL GRADIENT")
+
+    for pv in contractual_qcvars:
+        # print("WW", qc_module, driver, reference, method, corl_type, fcae, pv)
+        expected = True
+        if False:
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_olccd(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal OLCCD should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "OLCCD CORRELATION ENERGY",
+        "OLCCD TOTAL ENERGY",
+        "OLCCD REFERENCE CORRECTION ENERGY",
+        "OLCCD SAME-SPIN CORRELATION ENERGY",
+        "OLCCD OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "olccd":
+        contractual_qcvars.append("OLCCD TOTAL GRADIENT")
+
+    for pv in contractual_qcvars:
+        expected = True
+
+        yield (pv, pv, expected)

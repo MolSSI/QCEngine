@@ -130,7 +130,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
     if driver == "energy":
         compare_values(ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["return_result"], tnm + " wfn", atol=atol)
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["properties"]["return_energy"], tnm + " prop"
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["properties"]["return_energy"], tnm + " prop", atol=atol
         )
 
     elif driver == "gradient":
@@ -138,7 +138,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
             ref_block[f"{method.upper()} TOTAL GRADIENT"], wfn["return_result"], tnm + " grad wfn", atol=atol
         )
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["properties"]["return_energy"], tnm + " prop"
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["properties"]["return_energy"], tnm + " prop", atol=atol
         )
         assert compare_values(
             ref_block[f"{method.upper()} TOTAL GRADIENT"],
