@@ -14,6 +14,41 @@ Changelog
 .. +++++++++
 
 
+v0.15.0 / 2020-06-26
+--------------------
+
+New Features
+++++++++++++
+- (:pr:`232`) PyBerny - new geometry optimizer procedure harness.
+- (:pr:`238`) Set up testing infrastructure, "stdsuite", where method reference values and expected results names (e.g.,
+  total energy and correlation energy from MP2) are stored here in QCEngine but may be used from anywhere (presently,
+  Psi4). Earlier MP2 and CCSD tests here converted to new scheme, removing ``test_standard_suite_mp2.py`` and ``ccsd``.
+- (:pr:`249`, :pr:`254`) XTB - new harness for xtb-python that natively speaks QCSchema.
+
+Enhancements
+++++++++++++
+- (:pr:`230`) NWChem - improved dipole, HOMO, LUMO harvesting.
+- (:pr:`233`) ``qcng.util.execute`` learned argument ``exit_code`` above which to fail, rather than just ``!= 0``.
+- (:pr:`234`) MDI - harness updated to support release verion v1.0.0 .
+- (:pr:`238`) Cfour, GAMESS, NWChem -- harnesses updated to collect available spin components for MP2 and CCSD.
+  Also updated to set appropriate ``qcel.models.AtomicProperties`` from collected QCVariables.
+- (:pr:`239`) OpenMM - OpenMM harness now looks for cmiles information in the
+  molecule extras field when typing. Also we allow for the use of gaff
+  forcefields.
+- (:pr:`243`) NWChem - more useful stdout error return.
+- (:pr:`244`) Added CCSD(T), LCCD, and LCCSD reference data to stdsuite.
+- (:pr:`246`) TorchANI - harness does not support v2 releases.
+- (:pr:`251`) DFTD3 - added D3(0) and D3(BJ) parameters for PBE0-DH functional.
+
+Bug Fixes
++++++++++
+- (:pr:`244`) Psi4 - fixed bug in ``extras["psiapi"] == True`` mode where if calc failed, error not handled by QCEngine.
+- (:pr:`245`) Added missing import to sys for ``test_standard_suite.py``
+- (:pr:`248`) NWChem - fix HFexch specification bug.
+- Psi4 -- QCFractal INCOMPLETE state bug https://github.com/MolSSI/QCEngine/issues/250 fixed by https://github.com/psi4/psi4/pull/1933 .
+- (:pr:`253`) Make compatible with both py-cpuinfo 5 & 6, fixing issue 252.
+
+
 v0.14.0 / 2020-02-06
 --------------------
 

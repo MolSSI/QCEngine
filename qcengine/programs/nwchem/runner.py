@@ -154,6 +154,9 @@ class NWChemHarness(ProgramHarness):
         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
         opts.update(moldata["keywords"])
 
+        if opts.pop("geometry__noautoz", False):
+            molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 noautoz", molcmd)
+
         # Handle calc type and quantum chemical method
         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
         opts.update(mdcopts)
@@ -177,7 +180,7 @@ class NWChemHarness(ProgramHarness):
         #  Note: The Hessian is already stored in high precision in a file named "*.hess"
         if input_model.driver == "gradient":
             # Get the name of the theory used for computing the gradients
-            theory = re.search("^task (\w+) ", mdccmd, re.MULTILINE).group(1)
+            theory = re.search(r"^task (\w+) ", mdccmd, re.MULTILINE).group(1)
             logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
 
             # Create a Python function to get the gradient from NWChem's checkpoint file (rtdb)
@@ -231,6 +234,7 @@ task python
         qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
         if nwgrad is not None:
+            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
             qcvars["CURRENT GRADIENT"] = nwgrad
         if nwhess is not None:
             qcvars["CURRENT HESSIAN"] = nwhess
