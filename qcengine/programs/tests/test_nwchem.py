@@ -271,4 +271,3 @@ H                    20.850425490000     3.414376060000     2.960577230000"""
     )
 
     assert "insufficient internal variables" not in result.error.error_message  # Ok if it crashes for other reasons
-
