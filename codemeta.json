@@ -243,6 +243,15 @@
         },
         {
             "@type": "Person",
+            "givenName": "Jeffrey",
+            "additionalName": "R.",
+            "familyName": "Wagner",
+            "affiliation": "Open Force Field Initiative",
+            "@id": "https://orcid.org/0000-0001-6448-0873",
+            "identifier": "https://github.com/j-wags"
+        },
+        {
+            "@type": "Person",
             "givenName": "Logan",
             "familyName": "Ward",
             "affiliation": "Data Science and Learning Division, Argonne National Laboratory",
