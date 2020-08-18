@@ -31,9 +31,10 @@
 #   result: runner checks assertion fails at expected result and triggers pytest.xfail
 
 
+import sys
+
 import pytest
 import qcelemental as qcel
-import sys
 
 import qcengine as qcng
 from qcengine.programs.tests.standard_suite_ref import std_molecules, std_refs

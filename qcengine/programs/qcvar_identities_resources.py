@@ -1,9 +1,10 @@
 from decimal import Decimal as Dm
 from typing import Any, Dict, List
-import numpy as np
-from .util import PreservingDict
 
+import numpy as np
 from qcelemental.models import AtomicResultProperties
+
+from .util import PreservingDict
 
 
 def _difference(args):

@@ -8,6 +8,7 @@ import hashlib
 import os
 from typing import TYPE_CHECKING, Dict
 
+import numpy as np
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import which_import
 
@@ -15,11 +16,11 @@ from ..exceptions import InputError
 from ..util import capture_stdout
 from .model import ProgramHarness
 from .rdkit import RDKitHarness
-import numpy as np
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 class OpenMMHarness(ProgramHarness):
@@ -123,8 +124,8 @@ class OpenMMHarness(ProgramHarness):
         Generate an OpenMM System object from the input molecule method and basis.
         """
         from openmmforcefields.generators import SystemGenerator
-        from simtk.openmm import app
         from simtk import unit
+        from simtk.openmm import app
 
         # create a hash based on the input options
         hashstring = molecule.to_smiles(isomeric=True, explicit_hydrogens=True, mapped=True) + method
@@ -191,11 +192,10 @@ class OpenMMHarness(ProgramHarness):
         """
         self.found(raise_error=True)
 
-        from simtk import openmm
-        from simtk import unit
+        from simtk import openmm, unit
 
         with capture_stdout():
-            import openforcefield.topology as offtop
+            from openforcefield import topology as offtop
 
         # Failure flag
         ret_data = {"success": False}

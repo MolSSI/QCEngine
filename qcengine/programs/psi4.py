@@ -15,8 +15,9 @@ from ..util import execute, popen, temporary_directory
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 class Psi4Harness(ProgramHarness):
