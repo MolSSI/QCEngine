@@ -32,7 +32,6 @@ class MadnessHarness(ProgramHarness):
     """
      Notes
      -----
-     * To use the TCE, specify ``AtomicInput.model.method`` as usual, then also include ``qc_module = True`` in ``AtomicInput.keywords``.
      """
 
     _defaults = {
@@ -61,9 +60,8 @@ class MadnessHarness(ProgramHarness):
          Returns
          -------
          bool
-             If both nwchem and its harness dependency networkx are found, returns True.
-             If raise_error is False and nwchem or networkx are missing, returns False.
-             If raise_error is True and nwchem or networkx are missing, the error message for the first missing one is raised.
+             If Madness is found returns True.
+             If raise_error is False and Madness are missing, returns False.
 
        """
         qc = which(
@@ -85,14 +83,18 @@ class MadnessHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Get the node configuration
+        # We don't always need mpi to run madness...Instead we use threads and define
+        # MAD_NUM_THREADS=NUM... a call to moldft or madness will use the environment variable
         config = get_config()
 
         # Run MADNESS
-        which_prog = which("madness")
-        if config.use_mpiexec:
-            command = create_mpi_invocation(which_prog, config)
-        else:
-            command = [which_prog]
+        which_prog = which("moldft")
+        # we get the mpi comand but we don't use it..(Ask Robert about running madness with MPI)
+        # if config.use_mpiexec:
+        #    command = create_mpi_invocation(which_prog, config)
+        # else:
+        #    command = [which_prog]
+        command = [which_prog]
         command.append("v.moldft")
 
         if which_prog not in self.version_cache:
@@ -170,6 +172,7 @@ class MadnessHarness(ProgramHarness):
         madnessrec["infiles"]["input"] = optcmd + molcmd
         ## Determine the command
         # Determine the command
+        # (TODO ) how can i be smart about choosing MAD_NUM_THREADS for a specific calculation
         madnessrec["command"] = [which("moldft")]
         # print(madnessrec["infiles"]["input"])
         return madnessrec
