@@ -5,6 +5,7 @@ from qcengine.exceptions import InputError
 # List of XC functionals known to NWChem
 _xc_functionals = [
     "hf",
+    "lda",
     "acm",
     "b3lyp",
     "beckehandh",
