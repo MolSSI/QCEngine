@@ -121,10 +121,10 @@
         {
             "@type": "Person",
             "givenName": "Adrian",
-            "additionalName": "XXXX.",
+            "additionalName": "G.",
             "familyName": "Hurtado",
             "affiliation": "Institute for Advanced Computational Science, Stony Brook University",
-            "@id": "https://orcid.org/XXXX",
+            "@id": "https://orcid.org/0000-0002-2460-8059",
             "identifier": "https://github.com/ahurta92"
         },
         {
