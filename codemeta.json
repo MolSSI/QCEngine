@@ -141,8 +141,8 @@
             "givenName": "Jiyoung",
             "familyName": "Lee",
             "affiliation": "Department of Chemistry, Iowa State University",
-            "@id": "https://orcid.org/XXXX",
-            "identifier": "https://github.com/jygrace"
+            "@id": "https://orcid.org/0000-0002-5216-2859",
+            "identifier": "https://github.com/jygrace2"
         },
         {
             "@type": "Person",
