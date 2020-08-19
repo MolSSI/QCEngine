@@ -14,7 +14,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental=0.12.0  # test minimum stated version.
+  - qcelemental=0.13.0  # test minimum stated version.
   - pydantic=1.2.0  # test minimun stated version. actually min is 1.0 but no py38 builds
 
     # Testing
