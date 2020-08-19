@@ -14,7 +14,7 @@ Changelog
 .. +++++++++
 
 
-v0.16.0 / 2020-08-18
+v0.16.0 / 2020-08-19
 --------------------
 
 New Features
@@ -30,7 +30,7 @@ Enhancements
 
 Bug Fixes
 +++++++++
-- (:pr:`261`) Molpro - learned to error cleanly if version too old fro XML parsing.
+- (:pr:`261`) Molpro - learned to error cleanly if version too old for XML parsing.
 - (:pr:`261`) Q-Chem - learned to extract version from output file instead of ``qchem -h`` since command isn't available
   from a source install.
 
