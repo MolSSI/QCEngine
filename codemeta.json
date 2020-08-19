@@ -156,10 +156,9 @@
         {
             "@type": "Person",
             "givenName": "Fang",
-            "additionalName": "XXXX.",
             "familyName": "Liu",
-            "affiliation": "Massachusetts Institute of Technology",
-            "@id": "https://orcid.org/XXXX",
+            "affiliation": "Emory University",
+            "@id": "https://orcid.org/0000-0003-1322-4997",
             "identifier": "https://github.com/ffangliu"
         },
         {
