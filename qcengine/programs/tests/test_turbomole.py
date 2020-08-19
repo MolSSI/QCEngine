@@ -76,6 +76,7 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o):
 
     assert res.driver == "gradient"
     assert res.success is True
+    assert res.properties.return_energy
 
     grad = res.return_result
     grad_norm = np.linalg.norm(grad)
@@ -138,6 +139,7 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
 
     assert res.driver == "hessian"
     assert res.success is True
+    assert res.properties.return_energy
     assert_hessian(H, ref_eigvals, size)
 
 
@@ -166,4 +168,5 @@ def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp)
 
     assert res.driver == "hessian"
     assert res.success is True
+    assert res.properties.return_energy
     assert_hessian(H, ref_eigvals, size)
