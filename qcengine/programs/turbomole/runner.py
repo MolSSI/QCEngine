@@ -71,7 +71,6 @@ class TurbomoleHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
-
     def sub_control(self, control, pattern, repl, **kwargs):
         control_subbed = re.sub(pattern, repl, control, **kwargs)
         return control_subbed
@@ -82,7 +81,11 @@ class TurbomoleHarness(ProgramHarness):
     def build_input(
         self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
-        turbomolerec = {"infiles": {}, "outfiles": {"control": "control"}, "scratch_directory": config.scratch_directory}
+        turbomolerec = {
+            "infiles": {},
+            "outfiles": {"control": "control"},
+            "scratch_directory": config.scratch_directory,
+        }
 
         # Handle molecule
         # TODO: what's up with moldata? Do I need it?
@@ -143,7 +146,7 @@ class TurbomoleHarness(ProgramHarness):
         control = turbomolerec["infiles"]["control"]
 
         # Calculate total available memory in MB
-        mem_mb = config.memory * (1024**3) / 1e6
+        mem_mb = config.memory * (1024 ** 3) / 1e6
         ri_fraction = 0.25
         # Total amount of memory allocated to ricore
         ricore = 0
@@ -152,10 +155,7 @@ class TurbomoleHarness(ProgramHarness):
             ricore = mem_mb * ri_fraction
             ri_per_core = int(ricore / config.ncores)
             # Update $ricore entry in the control file
-            control = self.sub_control(
-                            control, "\$ricore\s+(\d+)",
-                            f"$ricore {ri_per_core} MiB per_core"
-            )
+            control = self.sub_control(control, "\$ricore\s+(\d+)", f"$ricore {ri_per_core} MiB per_core")
         # Calculate remaining memory
         maxcor = mem_mb - ricore
         assert maxcor > 0, "Not enough memory for maxcor! Need {-maxcor} MB more!"
@@ -163,27 +163,23 @@ class TurbomoleHarness(ProgramHarness):
         # maxcore per_core
         per_core = int(maxcor / config.ncores)
         # Update $maxcor entry in the control file
-        control = self.sub_control(
-                        control,
-                        "\$maxcor\s+(\d+)\s+MiB\s+per_core",
-                        f"$maxcor {per_core} MiB per_core"
-        )
+        control = self.sub_control(control, "\$maxcor\s+(\d+)\s+MiB\s+per_core", f"$maxcor {per_core} MiB per_core")
 
         ############################
         # DETERMINE SHELL COMMANDS #
         ############################
 
-        #----------------------#
-        #| Energy calculations |
-        #----------------------#
+        # ----------------------#
+        # | Energy calculations |
+        # ----------------------#
 
         # Set appropriate commands. We always need a reference wavefunction
         # so the first command will be dscf or ridft to converge the SCF.
         commands = ["ridft"] if ri_calculation else ["dscf"]
 
-        #------------------------#
-        #| Gradient calculations |
-        #------------------------#
+        # ------------------------#
+        # | Gradient calculations |
+        # ------------------------#
 
         # Keep the gradient file for parsing
         if input_model.driver.derivative_int() == 1:
@@ -199,9 +195,9 @@ class TurbomoleHarness(ProgramHarness):
             grad_command = "rdgrad" if ri_calculation else "grad"
             commands.append(grad_command)
 
-        #-----------------------#
-        #| Hessian calculations |
-        #-----------------------#
+        # -----------------------#
+        # | Hessian calculations |
+        # -----------------------#
 
         if input_model.driver.derivative_int() == 2:
             freq_command = "NumForce -level cc2" if ricc2_calculation else "aoforce"

@@ -26,7 +26,7 @@ def h2o_ricc2_def2svp():
     can be used to run NumForce with ricc2.  """
 
     mol = qcelemental.models.Molecule.from_data(
-    """
+        """
         O     0.0000000    0.0000000   -0.0835835
         H     0.7501772    0.0000000    0.5210589
         H    -0.7501772    0.0000000    0.5210589
@@ -117,19 +117,16 @@ def assert_hessian(H, ref_eigvals, ref_size):
 @pytest.mark.parametrize(
     "method, keywords, ref_eigvals",
     [
-        ("hf", {}, (2.00771683e-01,  7.77977644e-01, 9.91091318e-01)),
-        ("pbe0", {"grid": "m5"}, (1.72092719e-01,  7.38603449e-01, 9.73783598e-01)),
-        ("b-p", {"grid": "m5", "ri": True}, (1.59729409e-01,  7.21364827e-01, 9.63399519e-01)),
+        ("hf", {}, (2.00771683e-01, 7.77977644e-01, 9.91091318e-01)),
+        ("pbe0", {"grid": "m5"}, (1.72092719e-01, 7.38603449e-01, 9.73783598e-01)),
+        ("b-p", {"grid": "m5", "ri": True}, (1.59729409e-01, 7.21364827e-01, 9.63399519e-01)),
     ],
 )
 def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
     resi = {
         "molecule": h2o,
         "driver": "hessian",
-        "model": {
-            "method": method,
-            "basis": "def2-SVP",
-        },
+        "model": {"method": method, "basis": "def2-SVP",},
         "keywords": keywords,
     }
 
@@ -145,19 +142,13 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
 
 @using("turbomole")
 @pytest.mark.parametrize(
-    "method, keywords, ref_eigvals",
-    [
-        ("ricc2", {}, (1.65405531e-01,  9.63690706e-01, 1.24676634e+00)),
-    ],
+    "method, keywords, ref_eigvals", [("ricc2", {}, (1.65405531e-01, 9.63690706e-01, 1.24676634e00)),],
 )
 def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp):
     resi = {
         "molecule": h2o_ricc2_def2svp,
         "driver": "hessian",
-        "model": {
-            "method": method,
-            "basis": "def2-SVP",
-        },
+        "model": {"method": method, "basis": "def2-SVP",},
         "keywords": keywords,
     }
 
