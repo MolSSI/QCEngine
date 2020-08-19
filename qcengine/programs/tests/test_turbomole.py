@@ -43,7 +43,7 @@ def test_turbomole_energy(method, keywords, ref_energy, h2o):
     "method, keywords, ref_norm",
     [
         pytest.param("hf", {}, 0.099340, marks=using("turbomole")),
-        pytest.param("pbe0", {"grid": "m5"}, 0.060631, marks=using("turbomole")),
+        pytest.param("pbe0", {"grid": "m5"}, 0.0606266, marks=using("turbomole")),
         pytest.param("ricc2", {}, 0.059378, marks=using("turbomole")),
         pytest.param("rimp2", {}, 0.061576, marks=using("turbomole")),
     ],
