@@ -117,44 +117,97 @@ class TurbomoleHarness(ProgramHarness):
                     continue
                 with open(full_fn) as handle:
                     turbomolerec["infiles"][fn] = handle.read()
-        # Central file that controls Turbomole. We assing it to the "control" variable
-        # as we may need to modify it.
-        control = turbomolerec["infiles"]["control"]
 
         env = os.environ.copy()
         env["PARA_ARCH"] = "SMP"
         env["PARNODES"] = str(config.ncores)
         env["SMPCPUS"] = str(config.ncores)
-        # TODO: set memory
-
         turbomolerec["environment"] = env
+        # Memory is set in the control file
 
         keywords = input_model.keywords
+
+        ########################
+        # DETERMINE SOME FLAGS #
+        ########################
+
         ri_calculation = any([keywords.get(ri_kw, False) for ri_kw in KEYWORDS["ri"]])
+        ricc2_calculation = model.method in METHODS["ricc2"]
+
+        ###################
+        # MEMORY HANDLING #
+        ###################
+
+        # Central file that controls Turbomole. We assign it here to the "control"
+        # variable as we may need to modify it, e.g. for a Hessian calculation.
+        control = turbomolerec["infiles"]["control"]
+
+        # Calculate total available memory in MB
+        mem_mb = config.memory * (1024**3) / 1e6
+        ri_fraction = 0.25
+        # Total amount of memory allocated to ricore
+        ricore = 0
+        if ri_calculation:
+            # This is the default given by Turbomole
+            ricore = mem_mb * ri_fraction
+            ri_per_core = int(ricore / config.ncores)
+            # Update $ricore entry in the control file
+            control = self.sub_control(
+                            control, "\$ricore\s+(\d+)",
+                            f"$ricore {ri_per_core} MiB per_core"
+            )
+        # Calculate remaining memory
+        maxcor = mem_mb - ricore
+        assert maxcor > 0, "Not enough memory for maxcor! Need {-maxcor} MB more!"
+
+        # maxcore per_core
+        per_core = int(maxcor / config.ncores)
+        # Update $maxcor entry in the control file
+        control = self.sub_control(
+                        control,
+                        "\$maxcor\s+(\d+)\s+MiB\s+per_core",
+                        f"$maxcor {per_core} MiB per_core"
+        )
+
+        ############################
+        # DETERMINE SHELL COMMANDS #
+        ############################
+
+        #----------------------#
+        #| Energy calculations |
+        #----------------------#
 
         # Set appropriate commands. We always need a reference wavefunction
-        # so the first command will be dscf or ridft.
+        # so the first command will be dscf or ridft to converge the SCF.
         commands = ["ridft"] if ri_calculation else ["dscf"]
-        ricc2_method = model.method in METHODS["ricc2"]
 
-        # Set appropriate commands for gradient calculations
-        #
+        #------------------------#
+        #| Gradient calculations |
+        #------------------------#
+
+        # Keep the gradient file for parsing
+        if input_model.driver.derivative_int() == 1:
+            turbomolerec["outfiles"]["gradient"] = "gradient"
+
         # ricc2 will also calculate the gradient. But this requires setting
         # 'geoopt (state)' in the control file. This is currently handled in the
         # 'define' call.
-        if ricc2_method:
+        if ricc2_calculation:
             commands.append("ricc2")
         # Gradient calculation for DFT/HF
         elif input_model.driver.derivative_int() == 1:
             grad_command = "rdgrad" if ri_calculation else "grad"
             commands.append(grad_command)
 
-        # Set appropriate commands for Hessian calculations
+        #-----------------------#
+        #| Hessian calculations |
+        #-----------------------#
+
         if input_model.driver.derivative_int() == 2:
-            freq_command = "NumForce -level cc2" if ricc2_method else "aoforce"
+            freq_command = "NumForce -level cc2" if ricc2_calculation else "aoforce"
             # NumForce seems to ignore the nprhessian command and will always
             # write to hessian
-            hessian_outfile = "hessian" if ricc2_method else "nprhessian"
+            hessian_outfile = "hessian" if ricc2_calculation else "nprhessian"
             commands.append(freq_command)
             # Add some keywords to the control file
             #   noproj: Don't project out translation and rotation
@@ -162,8 +215,7 @@ class TurbomoleHarness(ProgramHarness):
             control = self.append_control(control, "$noproj\n$nprhessian file=nprhessian")
             turbomolerec["outfiles"][hessian_outfile] = None
 
-        if input_model.driver.derivative_int() == 1:
-            turbomolerec["outfiles"]["gradient"] = "gradient"
+        # Build the full shell command and set it
         command = ["; ".join(commands)]
         turbomolerec["command"] = command
         # Re-assign the potentially modified control file, e.g. for a Hessian calculation
