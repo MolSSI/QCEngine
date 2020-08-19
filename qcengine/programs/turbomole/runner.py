@@ -12,6 +12,7 @@ from qcelemental.util import safe_version, which
 
 from ...util import execute, temporary_directory
 from ..model import ProgramHarness
+from ..qcvar_identities_resources import build_atomicproperties, build_out
 from .define import execute_define, prepare_stdin
 from .harvester import harvest
 from .methods import KEYWORDS, METHODS
@@ -168,7 +169,6 @@ class TurbomoleHarness(ProgramHarness):
 
         stdout = outfiles.pop("stdout")
 
-        # nwmol, if it exists, is dinky, just a clue to geometry of nwchem results
         qcvars, gradient, hessian = harvest(input_model.molecule, stdout, **outfiles)
 
         if gradient is not None:
@@ -181,9 +181,12 @@ class TurbomoleHarness(ProgramHarness):
         if isinstance(retres, Decimal):
             retres = float(retres)
 
+        build_out(qcvars)
+        atprop = build_atomicproperties(qcvars)
+
         output_data = input_model.dict()
         output_data["extras"]["outfiles"] = outfiles
-        output_data["properties"] = {}
+        output_data["properties"] = atprop
         output_data["provenance"] = Provenance(creator="Turbomole", version=self.get_version(), routine="turbomole")
         output_data["return_result"] = retres
         output_data["stdout"] = stdout
