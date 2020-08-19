@@ -118,6 +118,7 @@ def assert_hessian(H, ref_eigvals, ref_size):
     [
         ("hf", {}, (2.00771683e-01,  7.77977644e-01, 9.91091318e-01)),
         ("pbe0", {"grid": "m5"}, (1.72092719e-01,  7.38603449e-01, 9.73783598e-01)),
+        ("b-p", {"grid": "m5", "ri": True}, (1.59729409e-01,  7.21364827e-01, 9.63399519e-01)),
     ],
 )
 def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
