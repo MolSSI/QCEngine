@@ -14,6 +14,27 @@ Changelog
 .. +++++++++
 
 
+v0.16.0 / 2020-08-19
+--------------------
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`241`) NWChem - improved performance by turning on ``atoms_map=True``, which does seem to be true.
+- (:pr:`257`) TorchANI - learned the ANI2x model and to work with v2.
+- (:pr:`259`) Added MP2.5 & MP3 energies and HF, MP2.5, MP3, LCCD gradients reference data to stdsuite.
+- (:pr:`261`) Q-Chem - learned to return more informative Provenance, learned to work with v5.1.
+- (:pr:`263`) NWChem - learned how to turn off automatic Z-Matrix coordinates with ``geometry__noautoz = True``.
+
+Bug Fixes
++++++++++
+- (:pr:`261`) Molpro - learned to error cleanly if version too old for XML parsing.
+- (:pr:`261`) Q-Chem - learned to extract version from output file instead of ``qchem -h`` since command isn't available
+  from a source install.
+
+
 v0.15.0 / 2020-06-26
 --------------------
 

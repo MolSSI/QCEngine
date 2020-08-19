@@ -208,6 +208,8 @@ def harvest_outfile_pass(outtext):
         psivar["MP3 TOTAL ENERGY"] = mobj.group(4)
         psivar["MP2.5 CORRELATION ENERGY"] = dmp2 + Decimal("0.500000000000") * dmp3
         psivar["MP2.5 TOTAL ENERGY"] = psivar["MP2.5 CORRELATION ENERGY"] + psivar["SCF TOTAL ENERGY"]
+        psivar["MP3 SINGLES ENERGY"] = Decimal("0.0")
+        psivar["MP3 DOUBLES ENERGY"] = dmp2 + dmp3
 
     mobj = re.search(
         # fmt: off
@@ -227,6 +229,8 @@ def harvest_outfile_pass(outtext):
         psivar["MP3 TOTAL ENERGY"] = mobj.group(8)
         psivar["MP2.5 CORRELATION ENERGY"] = dmp2 + Decimal("0.500000000000") * dmp3
         psivar["MP2.5 TOTAL ENERGY"] = psivar["MP2.5 CORRELATION ENERGY"] + psivar["SCF TOTAL ENERGY"]
+        psivar["MP3 SINGLES ENERGY"] = Decimal(mobj.group(1)) + Decimal(mobj.group(5))
+        psivar["MP3 DOUBLES ENERGY"] = Decimal(mobj.group(3)) + Decimal(mobj.group(7))
 
     # Process MP4
     mobj = re.search(
