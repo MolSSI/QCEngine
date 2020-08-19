@@ -19,6 +19,22 @@ def h2o():
     return mol
 
 
+@pytest.fixture
+def h2o_ricc2_def2svp():
+    """NumForce calls only make sense for stationary points. So this
+    geometry was optimized at the ricc2/def2-svp level of theory and
+    can be used to run NumForce with ricc2.  """
+
+    mol = qcelemental.models.Molecule.from_data(
+    """
+        O     0.0000000    0.0000000   -0.0835835
+        H     0.7501772    0.0000000    0.5210589
+        H    -0.7501772    0.0000000    0.5210589
+    """
+    )
+    return mol
+
+
 @pytest.mark.parametrize(
     "method, keywords, ref_energy",
     [
@@ -83,3 +99,70 @@ def test_turbomole_ri_dsp(h2o):
     energy = res.return_result
     ref_energy = -76.36275642866
     assert compare_values(ref_energy, energy)
+
+
+def assert_hessian(H, ref_eigvals, ref_size):
+    w, v = np.linalg.eigh(H)
+    last_eigvals = w[-3:]
+    # Hessian must be symmetric
+    np.testing.assert_allclose(H, H.T)
+    # Check eigenvalues
+    np.testing.assert_allclose(last_eigvals, ref_eigvals)
+    # Hessian must be of shape (3N x 3N)
+    assert H.shape == (ref_size, ref_size)
+
+
+@using("turbomole")
+@pytest.mark.parametrize(
+    "method, keywords, ref_eigvals",
+    [
+        ("hf", {}, (2.00771683e-01,  7.77977644e-01, 9.91091318e-01)),
+        ("pbe0", {"grid": "m5"}, (1.72092719e-01,  7.38603449e-01, 9.73783598e-01)),
+    ],
+)
+def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
+    resi = {
+        "molecule": h2o,
+        "driver": "hessian",
+        "model": {
+            "method": method,
+            "basis": "def2-SVP",
+        },
+        "keywords": keywords,
+    }
+
+    res = qcng.compute(resi, "turbomole", raise_error=True)
+    H = res.return_result
+    size = h2o.geometry.size
+
+    assert res.driver == "hessian"
+    assert res.success is True
+    assert_hessian(H, ref_eigvals, size)
+
+
+@using("turbomole")
+@pytest.mark.parametrize(
+    "method, keywords, ref_eigvals",
+    [
+        ("ricc2", {}, (1.65405531e-01,  9.63690706e-01, 1.24676634e+00)),
+    ],
+)
+def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp):
+    resi = {
+        "molecule": h2o_ricc2_def2svp,
+        "driver": "hessian",
+        "model": {
+            "method": method,
+            "basis": "def2-SVP",
+        },
+        "keywords": keywords,
+    }
+
+    res = qcng.compute(resi, "turbomole", raise_error=True)
+    H = res.return_result
+
+    size = h2o_ricc2_def2svp.geometry.size
+
+    assert res.driver == "hessian"
+    assert res.success is True
+    assert_hessian(H, ref_eigvals, size)

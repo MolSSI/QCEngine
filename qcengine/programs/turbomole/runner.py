@@ -71,10 +71,18 @@ class TurbomoleHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
 
+
+    def sub_control(self, control, pattern, repl, **kwargs):
+        control_subbed = re.sub(pattern, repl, control, **kwargs)
+        return control_subbed
+
+    def append_control(self, control, to_append):
+        return self.sub_control(control, "\$end", f"{to_append}\n$end")
+
     def build_input(
         self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
-        turbomolrec = {"infiles": {}, "outfiles": {"control": "control"}, "scratch_directory": config.scratch_directory}
+        turbomolerec = {"infiles": {}, "outfiles": {"control": "control"}, "scratch_directory": config.scratch_directory}
 
         # Handle molecule
         # TODO: what's up with moldata? Do I need it?
@@ -108,7 +116,10 @@ class TurbomoleHarness(ProgramHarness):
                 if not full_fn.exists():
                     continue
                 with open(full_fn) as handle:
-                    turbomolrec["infiles"][fn] = handle.read()
+                    turbomolerec["infiles"][fn] = handle.read()
+        # Central file that controls Turbomole. We assing it to the "control" variable
+        # as we may need to modify it.
+        control = turbomolerec["infiles"]["control"]
 
         env = os.environ.copy()
         env["PARA_ARCH"] = "SMP"
@@ -116,7 +127,7 @@ class TurbomoleHarness(ProgramHarness):
         env["SMPCPUS"] = str(config.ncores)
         # TODO: set memory
 
-        turbomolrec["environment"] = env
+        turbomolerec["environment"] = env
 
         keywords = input_model.keywords
         ri_calculation = any([keywords.get(ri_kw, False) for ri_kw in KEYWORDS["ri"]])
@@ -124,30 +135,43 @@ class TurbomoleHarness(ProgramHarness):
         # Set appropriate commands. We always need a reference wavefunction
         # so the first command will be dscf or ridft.
         commands = ["ridft"] if ri_calculation else ["dscf"]
-        # ricc2 will also calculate the gradient
-        if model.method in METHODS["ricc2"]:
+        ricc2_method = model.method in METHODS["ricc2"]
+
+        # Set appropriate commands for gradient calculations
+        #
+        # ricc2 will also calculate the gradient. But this requires setting
+        # 'geoopt (state)' in the control file. This is currently handled in the
+        # 'define' call.
+        if ricc2_method:
             commands.append("ricc2")
         # Gradient calculation for DFT/HF
         elif input_model.driver.derivative_int() == 1:
             grad_command = "rdgrad" if ri_calculation else "grad"
             commands.append(grad_command)
-        elif input_model.driver.derivative_int() == 2:
-            freq_command = "aoforce"
+
+        # Set appropriate commands for Hessian calculations
+        if input_model.driver.derivative_int() == 2:
+            freq_command = "NumForce -level cc2" if ricc2_method else "aoforce"
+            # NumForce seems to ignore the nprhessian command and will always
+            # write to hessian
+            hessian_outfile = "hessian" if ricc2_method else "nprhessian"
             commands.append(freq_command)
-            # Add
-            #   $noproj
-            #   $nprhessian file=nprhessian
-            # to control file.
-            turbomolrec["outfiles"]["hessian"] = "nprhessian"
+            # Add some keywords to the control file
+            #   noproj: Don't project out translation and rotation
+            #   nprhessian: Set filename of un-projected hessian
+            control = self.append_control(control, "$noproj\n$nprhessian file=nprhessian")
+            turbomolerec["outfiles"][hessian_outfile] = None
 
         if input_model.driver.derivative_int() == 1:
-            turbomolrec["outfiles"]["gradient"] = "gradient"
+            turbomolerec["outfiles"]["gradient"] = "gradient"
         command = ["; ".join(commands)]
-        turbomolrec["command"] = command
+        turbomolerec["command"] = command
+        # Re-assign the potentially modified control file, e.g. for a Hessian calculation
+        turbomolerec["infiles"]["control"] = control
 
         # TODO: check if the chosen commands are available with which()?
 
-        return turbomolrec
+        return turbomolerec
 
     def execute(
         self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
