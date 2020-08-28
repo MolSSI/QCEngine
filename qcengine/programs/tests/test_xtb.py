@@ -5,10 +5,8 @@ Most of the tests use mindless molecules for the diversity of element species
 to test as much different interactions as possible.
 """
 
-import pytest
-
 import numpy as np
-
+import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 

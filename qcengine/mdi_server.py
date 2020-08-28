@@ -11,11 +11,21 @@ from qcelemental.util import which_import
 from .compute import compute
 
 try:
-    from mdi import MDI_Init, MDI_Accept_Communicator, MDI_Recv_Command
-    from mdi import MDI_Recv, MDI_Send, MDI_Get_Intra_Code_MPI_Comm
-    from mdi import MDI_Register_Node, MDI_Register_Command
-    from mdi import MDI_DOUBLE, MDI_CHAR, MDI_INT
-    from mdi import MDI_COMMAND_LENGTH, MDI_MAJOR_VERSION
+    from mdi import (
+        MDI_CHAR,
+        MDI_COMMAND_LENGTH,
+        MDI_DOUBLE,
+        MDI_INT,
+        MDI_MAJOR_VERSION,
+        MDI_Accept_Communicator,
+        MDI_Get_Intra_Code_MPI_Comm,
+        MDI_Init,
+        MDI_Recv,
+        MDI_Recv_Command,
+        MDI_Register_Command,
+        MDI_Register_Node,
+        MDI_Send,
+    )
 
     use_mdi = True
 except ImportError:

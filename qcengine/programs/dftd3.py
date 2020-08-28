@@ -20,8 +20,9 @@ from . import empirical_dispersion_resources
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)

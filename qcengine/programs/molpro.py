@@ -3,8 +3,8 @@ Calls the Molpro executable.
 """
 
 import string
-import xml.etree.ElementTree as ET
 from typing import Any, Dict, List, Optional, Set, Tuple
+from xml.etree import ElementTree as ET
 
 from qcelemental.models import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
@@ -88,6 +88,12 @@ class MolproHarness(ProgramHarness):
                 tree = ET.ElementTree(ET.fromstring(output["outfiles"]["version.xml"]))
                 root = tree.getroot()
                 version_tree = root.find("molpro_uri:job/molpro_uri:platform/molpro_uri:version", name_space)
+                if version_tree is None:
+                    # some older schema
+                    name_space = {"molpro_uri": "http://www.molpro.net/schema/molpro2006"}
+                    version_tree = root.find("molpro_uri:job//molpro_uri:version", name_space)
+                if version_tree is None:
+                    return safe_version("0.0.0")
                 year = version_tree.attrib["major"]
                 minor = version_tree.attrib["minor"]
                 molpro_version = year + "." + minor

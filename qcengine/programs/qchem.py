@@ -11,12 +11,14 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from qcelemental import constants
-from qcelemental.models import AtomicInput, AtomicResult, Molecule
+from qcelemental.models import AtomicInput, AtomicResult, Molecule, Provenance
 from qcelemental.molparse import regex
-from qcelemental.util import parse_version, provenance_stamp, safe_version, which
+from qcelemental.util import parse_version, safe_version, which
+
+from qcengine.config import TaskConfig, get_config
 
 from ..exceptions import InputError, UnknownError
-from ..util import disk_files, execute, popen, temporary_directory
+from ..util import disk_files, execute, temporary_directory
 from .model import ProgramHarness
 
 NUMBER = r"(?x:" + regex.NUMBER + ")"
@@ -59,21 +61,37 @@ class QChemHarness(ProgramHarness):
         return paths
 
     def get_version(self) -> str:
+        # excuse missing Q-Chem for QCEngineRecords tests
+        found = self.found()
+        if not found:
+            return safe_version("0.0.0")
+
         self.found(raise_error=True)
+
+        # Get the node configuration
+        config = get_config()
 
         which_prog = which("qchem")
         if which_prog not in self.version_cache:
-            with popen([which_prog, "-h"], popen_kwargs={"env": self._get_qc_path()}) as exc:
-                exc["proc"].wait(timeout=15)
+            success, exc = execute(
+                [which_prog, "v.in"],
+                {"v.in": "$rem\n"},
+                scratch_directory=config.scratch_directory,
+                environment=self._get_qc_path(),
+                timeout=15,
+            )
 
-            if "QC not defined" in exc["stdout"]:
+            mobj = re.search(r"Q-Chem\s+([\d.]+)\s+for", exc["stdout"])
+            if mobj:
+                self.version_cache[which_prog] = safe_version(mobj.group(1))
+
+            # if "QC not defined" in exc["stdout"]:
+            else:
                 return safe_version("0.0.0")
-
-            self.version_cache[which_prog] = safe_version(exc["stdout"].splitlines()[0].split()[-1])
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: TaskConfig) -> "AtomicResult":
         """
         Run qchem
         """
@@ -81,7 +99,7 @@ class QChemHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Check qchem version
-        qceng_ver = "5.2"
+        qceng_ver = "5.1"
         if parse_version(self.get_version()) < parse_version(qceng_ver):
             raise TypeError(f"Q-Chem version <{qceng_ver} not supported (found version {self.get_version()})")
 
@@ -165,7 +183,7 @@ class QChemHarness(ProgramHarness):
         return exe_success, proc
 
     def build_input(
-        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
+        self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
 
         # Check some bounds on what cannot be parsed
@@ -257,9 +275,20 @@ $end
             "return_energy": bdata["99.0"][-1],
         }
 
+        qcvars = {}
         _mp2_methods = {"mp2", "rimp2"}
         if input_model.model.method.lower() in _mp2_methods:
-            properties["mp2_total_energy"] = properties["return_energy"]
+            emp2 = bdata["99.0"][-1]
+            properties["mp2_total_energy"] = emp2
+            qcvars["MP2 TOTAL ENERGY"] = emp2
+            qcvars["CURRENT ENERGY"] = emp2
+            ehf = bdata["99.0"][1]
+            qcvars["HF TOTAL ENERGY"] = ehf
+            qcvars["SCF TOTAL ENERGY"] = ehf
+            qcvars["CURRENT REFERENCE ENERGY"] = ehf
+            qcvars["MP2 CORRELATION ENERGY"] = emp2 - ehf
+            qcvars["CURRENT CORRELATION ENERGY"] = emp2 - ehf
+            properties["mp2_correlation_energy"] = emp2 - ehf
 
         # Correct CCSD because its odd?
         # if input_model.model.method.lower() == "ccsd":
@@ -273,7 +302,10 @@ $end
         output_data["stdout"] = outfiles["dispatch.out"]
         output_data["success"] = True
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        merged_data = {**input_model.dict(), **output_data}
+        merged_data["extras"]["qcvars"] = qcvars
+
+        return AtomicResult(**merged_data)
 
     def _parse_logfile_common(self, outtext: str, input_dict: Dict[str, Any]):
         """
@@ -281,7 +313,7 @@ $end
         """
 
         properties = {}
-        provenance = provenance_stamp(__name__)
+        provenance = Provenance(creator="QChem", version=self.get_version(), routine="qchem").dict()
         mobj = re.search(r"This is a multi-thread run using ([0-9]+) threads", outtext)
         if mobj:
             provenance["nthreads"] = int(mobj.group(1))
