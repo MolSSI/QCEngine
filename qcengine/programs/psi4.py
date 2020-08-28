@@ -165,18 +165,21 @@ class Psi4Harness(ProgramHarness):
                             output_data["extras"]["qcvars"] = local_qcvars
 
                     if output_data.get("success", False) is False:
-                        if "error_message" not in output_data["error"]:
-                            error_message = output_data["error"]
-                            error_type = "internal_error"
+                        if "error" in output_data["error"]:
+                            if "error_message" not in output_data["error"]:
+                                error_message = output_data["error"]
+                                error_type = "internal_error"
+                            else:
+                                error_message = output_data["error"]["error_message"]
+                                error_type = output_data["error"].get("error_type", "unknown_error")
                         else:
-                            error_message = output_data["error"]["error_message"]
-                            error_type = output_data["error"]["error_type"]
-
+                            error_message = "Unknown error, error message is not found"
+                            error_type = "internal_error"
                     else:
                         compute_success = True
 
                 else:
-                    error_message = output["stderr"]
+                    error_message = output.get("stderr", "No STDERR output")
                     error_type = "execution_error"
 
                 # Reset the schema if required
@@ -228,12 +231,20 @@ class Psi4Harness(ProgramHarness):
 
                 if success:
                     if output_data.get("success", False) is False:
-                        error_message = output_data["error"]["error_message"]
-                        error_type = output_data["error"]["error_type"]
+                        if "error" in output_data:
+                            if "error_message" not in output_data["error"]:
+                                error_message = output_data["error"]
+                                error_type = "internal_error"
+                            else:
+                                error_message = output_data["error"]["error_message"]
+                                error_type = output_data["error"]["error_type"]
+                        else:
+                            error_message = "Unknown error, error message is not found"
+                            error_type = "internal_error"
                     else:
                         compute_success = True
                 else:
-                    error_message = output["stderr"]
+                    error_message = output.get("stderr", "No STDERR output")
                     error_type = "execution_error"
 
         # Dispatch errors, PSIO Errors are not recoverable for future runs
