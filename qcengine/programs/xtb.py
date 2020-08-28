@@ -68,4 +68,9 @@ class XTBHarness(ProgramHarness):
         import xtb
         from xtb.qcschema.harness import run_qcschema
 
-        return run_qcschema(input_data)
+        # Run the Harness
+        output = run_qcschema(input_data)
+
+        # Make sure all keys from the initial input spec are sent along
+        output.extras.update(input_data.extras)
+        return output
