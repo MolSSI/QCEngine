@@ -67,9 +67,7 @@ class OpenMMHarness(ProgramHarness):
         return self._CACHE[key]["value"]
 
     def _cache_it(self, key, value):
-        """Add to our LRU cache, possibly popping off least used key.
-
-        """
+        """Add to our LRU cache, possibly popping off least used key."""
         self._CACHE[key] = {"value": value, "last_used": datetime.datetime.utcnow()}
 
         # if cache is beyond max size, whittle it down by dropping entry least

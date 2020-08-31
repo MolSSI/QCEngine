@@ -50,7 +50,7 @@ class MDIServer:
         raise_error: bool = False,
         local_options: Optional[Dict[str, Any]] = None,
     ):
-        """ Initialize an MDIServer object for communication with MDI
+        """Initialize an MDIServer object for communication with MDI
 
         Parameters
         ----------
@@ -157,7 +157,7 @@ class MDIServer:
         self.comm = MDI_Accept_Communicator()
 
     def update_molecule(self, key: str, value):
-        """ Update the molecule
+        """Update the molecule
 
         Parameters
         ----------
@@ -195,7 +195,7 @@ class MDIServer:
 
     # Respond to the <@ command
     def send_node(self) -> str:
-        """ Send the name of the current node through MDI
+        """Send the name of the current node through MDI
 
         Returns
         -------
@@ -208,7 +208,7 @@ class MDIServer:
 
     # Respond to the <NATOMS command
     def send_natoms(self) -> int:
-        """ Send the number of atoms through MDI
+        """Send the number of atoms through MDI
 
         Returns
         -------
@@ -221,7 +221,7 @@ class MDIServer:
 
     # Respond to the <COORDS command
     def send_coords(self) -> np.ndarray:
-        """ Send the nuclear coordinates through MDI
+        """Send the nuclear coordinates through MDI
 
         Returns
         -------
@@ -237,7 +237,7 @@ class MDIServer:
 
     # Respond to the >COORDS command
     def recv_coords(self, coords: Optional[np.ndarray] = None) -> None:
-        """ Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule
+        """Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule
 
         Parameters
         ----------
@@ -253,7 +253,7 @@ class MDIServer:
 
     # Respond to the <ENERGY command
     def send_energy(self) -> float:
-        """ Send the total energy through MDI
+        """Send the total energy through MDI
 
         Returns
         -------
@@ -270,7 +270,7 @@ class MDIServer:
 
     # Respond to the <FORCES command
     def send_forces(self) -> np.ndarray:
-        """ Send the nuclear forces through MDI
+        """Send the nuclear forces through MDI
 
         Returns
         -------
@@ -294,8 +294,7 @@ class MDIServer:
 
     # Respond to the SCF command
     def run_energy(self) -> None:
-        """ Run an energy calculation
-        """
+        """Run an energy calculation"""
         input = qcel.models.AtomicInput(
             molecule=self.molecule, driver="energy", model=self.model, keywords=self.keywords
         )
@@ -305,7 +304,7 @@ class MDIServer:
 
     # Respond to the <ELEMENTS command
     def send_elements(self):
-        """ Send the atomic number of each nucleus through MDI
+        """Send the atomic number of each nucleus through MDI
 
         Returns
         -------
@@ -319,7 +318,7 @@ class MDIServer:
 
     # Respond to the >ELEMENTS command
     def recv_elements(self, elements: Optional[List[int]] = None):
-        """ Receive a set of atomic numbers through MDI and assign them to the atoms in the current molecule
+        """Receive a set of atomic numbers through MDI and assign them to the atoms in the current molecule
 
         Parameters
         ----------
@@ -337,7 +336,7 @@ class MDIServer:
 
     # Respond to the <MASSES command
     def send_masses(self) -> np.ndarray:
-        """ Send the nuclear masses through MDI
+        """Send the nuclear masses through MDI
 
         Returns
         -------
@@ -351,7 +350,7 @@ class MDIServer:
 
     # Respond to the >MASSES command
     def recv_masses(self, masses: Optional[List[float]] = None) -> None:
-        """ Receive a set of nuclear masses through MDI and assign them to the atoms in the current molecule
+        """Receive a set of nuclear masses through MDI and assign them to the atoms in the current molecule
 
         Parameters
         ----------
@@ -365,7 +364,7 @@ class MDIServer:
 
     # Respond to the <TOTCHARGE command
     def send_total_charge(self) -> float:
-        """ Send the total system charge through MDI
+        """Send the total system charge through MDI
 
         Returns
         -------
@@ -378,7 +377,7 @@ class MDIServer:
 
     # Respond to the >TOTCHARGE command
     def recv_total_charge(self, charge: Optional[float] = None) -> None:
-        """ Receive the total system charge through MDI
+        """Receive the total system charge through MDI
 
         Parameters
         ----------
@@ -397,7 +396,7 @@ class MDIServer:
 
     # Respond to the <ELEC_MULT command
     def send_multiplicity(self) -> int:
-        """ Send the electronic multiplicity through MDI
+        """Send the electronic multiplicity through MDI
 
         Returns
         -------
@@ -410,7 +409,7 @@ class MDIServer:
 
     # Respond to the >ELEC_MULT command
     def recv_multiplicity(self, multiplicity: Optional[int] = None) -> None:
-        """ Receive the electronic multiplicity through MDI
+        """Receive the electronic multiplicity through MDI
 
         Parameters
         ----------
@@ -429,14 +428,12 @@ class MDIServer:
 
     # Respond to the EXIT command
     def stop(self) -> None:
-        """ Stop listening for MDI commands
-        """
+        """Stop listening for MDI commands"""
         self.stop_listening = True
 
     # Enter server mode, listening for commands from the driver
     def start(self) -> None:
-        """ Receive commands through MDI and respond to them as defined by the MDI Standard
-        """
+        """Receive commands through MDI and respond to them as defined by the MDI Standard"""
 
         while not self.stop_listening:
             if self.world_rank == 0:
