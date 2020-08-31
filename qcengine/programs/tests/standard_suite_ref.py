@@ -202,7 +202,16 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.208743643,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857419039,
-            "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.001989217717, 0.0, 0.0, -0.001989217717,]).reshape((-1, 3)),
+            "CCSD TOTAL GRADIENT": np.array(
+                [
+                    0.0,
+                    0.0,
+                    0.001989217717,
+                    0.0,
+                    0.0,
+                    -0.001989217717,
+                ]
+            ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.0019363896542312043,
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0005522939,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2104417743,  # p4n
@@ -226,7 +235,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05669988343022163,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.009624481085, 0.0, 0.005505796371, -0.004812240542, 0.0, -0.005505796371, -0.004812240542,]
+                [
+                    0.0,
+                    0.0,
+                    0.009624481085,
+                    0.0,
+                    0.005505796371,
+                    -0.004812240542,
+                    0.0,
+                    -0.005505796371,
+                    -0.004812240542,
+                ]
             ).reshape((-1, 3)),
             "MP3 SAME-SPIN CORRELATION ENERGY": -0.051851951707,  # fnocc
             "MP3 SINGLES ENERGY": 0.0,
@@ -247,7 +266,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.050177977945205,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.007512595487, 0.0, 0.004613769715, -0.003756297743, 0.0, -0.004613769715, -0.003756297743,]
+                [
+                    0.0,
+                    0.0,
+                    0.007512595487,
+                    0.0,
+                    0.004613769715,
+                    -0.003756297743,
+                    0.0,
+                    -0.004613769715,
+                    -0.003756297743,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00523856,
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011895155,  # p4n
@@ -272,7 +301,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.06530131,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, -0.000531535533, 0.0, -0.000960201925, 0.000265767766, 0.0, 0.000960201925, 0.000265767766,]
+                [
+                    0.0,
+                    0.0,
+                    -0.000531535533,
+                    0.0,
+                    -0.000960201925,
+                    0.000265767766,
+                    0.0,
+                    0.000960201925,
+                    0.000265767766,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.27294451,  # fnocc
             "MP3 SINGLES ENERGY": 0.0,
@@ -293,7 +332,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.058006927914493,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, -0.003374258422, 0.0, -0.002334452569, 0.001687129211, 0.0, 0.002334452569, 0.001687129211,]
+                [
+                    0.0,
+                    0.0,
+                    -0.003374258422,
+                    0.0,
+                    -0.002334452569,
+                    0.001687129211,
+                    0.0,
+                    0.002334452569,
+                    0.001687129211,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.007263596331,
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0013521561,  # p4n
@@ -415,7 +464,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03520162545964887,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.025490652204, 0.0, 0.013491755791, -0.012745326102, 0.0, -0.013491755791, -0.012745326102,]
+                [
+                    0.0,
+                    0.0,
+                    0.025490652204,
+                    0.0,
+                    0.013491755791,
+                    -0.012745326102,
+                    0.0,
+                    -0.013491755791,
+                    -0.012745326102,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.17091690,  # occ
             "MP3 SINGLES ENERGY": 0.0,
@@ -435,7 +494,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033935818857082,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.029278727285, 0.0, 0.015813927533, -0.014639363642, 0.0, -0.015813927533, -0.014639363642,]
+                [
+                    0.0,
+                    0.0,
+                    0.029278727285,
+                    0.0,
+                    0.015813927533,
+                    -0.014639363642,
+                    0.0,
+                    -0.015813927533,
+                    -0.014639363642,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00384378,
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011118724,  # p4n
@@ -460,7 +529,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04161633,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.013731673196, 0.0, 0.005352105826, -0.006865836598, 0.0, -0.005352105826, -0.006865836598,]
+                [
+                    0.0,
+                    0.0,
+                    0.013731673196,
+                    0.0,
+                    0.005352105826,
+                    -0.006865836598,
+                    0.0,
+                    -0.005352105826,
+                    -0.006865836598,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.21084677,  # occ
             "MP3 SINGLES ENERGY": 0.0,
@@ -480,7 +559,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.039907245914335,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.016842165003, 0.0, 0.007150136873, -0.008421082502, 0.0, -0.007150136873, -0.008421082502,]
+                [
+                    0.0,
+                    0.0,
+                    0.016842165003,
+                    0.0,
+                    0.007150136873,
+                    -0.008421082502,
+                    0.0,
+                    -0.007150136873,
+                    -0.008421082502,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00516659,
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0012856903,  # p4n
@@ -567,7 +656,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": -0.0028296307982793997,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03541709278508698,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.025609525826, 0.0, 0.013506941035, -0.012804762913, 0.0, -0.013506941035, -0.012804762913,]
+                [
+                    0.0,
+                    0.0,
+                    0.025609525826,
+                    0.0,
+                    0.013506941035,
+                    -0.012804762913,
+                    0.0,
+                    -0.013506941035,
+                    -0.012804762913,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.17571623051,  # cfour
             "MP3 SINGLES ENERGY": -0.003236109562,  # cfour
@@ -577,7 +676,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": -0.00327524740575,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033982707798170,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.029273628227, 0.0, 0.015808308241, -0.014636814114, 0.0, -0.015808308241, -0.014636814114,]
+                [
+                    0.0,
+                    0.0,
+                    0.029273628227,
+                    0.0,
+                    0.015808308241,
+                    -0.014636814114,
+                    0.0,
+                    -0.015808308241,
+                    -0.014636814114,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.003901085777,
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033018315,  # p4n
@@ -602,7 +711,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": -0.00298375,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04178535,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.0138883429, 0.0, 0.005389090661, -0.00694417145, 0.0, -0.005389090661, -0.00694417145,]
+                [
+                    0.0,
+                    0.0,
+                    0.0138883429,
+                    0.0,
+                    0.005389090661,
+                    -0.00694417145,
+                    0.0,
+                    -0.005389090661,
+                    -0.00694417145,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.215858882347,  # cfour
             "MP3 SINGLES ENERGY": -0.003348697377,  # cfour
@@ -612,7 +731,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": -0.00338286103325,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.039891470497466,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.016833254665, 0.0, 0.007144029475, -0.008416627332, 0.0, -0.007144029475, -0.008416627332,]
+                [
+                    0.0,
+                    0.0,
+                    0.016833254665,
+                    0.0,
+                    0.007144029475,
+                    -0.008416627332,
+                    0.0,
+                    -0.007144029475,
+                    -0.008416627332,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.005233938447,
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033240178,  # p4n
@@ -661,7 +790,16 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.2068152041,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.0478712079,
-            "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.002335204281, 0.0, 0.0, -0.002335204281,]).reshape((-1, 3)),
+            "CCSD TOTAL GRADIENT": np.array(
+                [
+                    0.0,
+                    0.0,
+                    0.002335204281,
+                    0.0,
+                    0.0,
+                    -0.002335204281,
+                ]
+            ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.0019205007159748158,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
         },
@@ -682,7 +820,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.055833980855745646,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.010245839621, 0.0, 0.005893268945, -0.00512291981, 0.0, -0.005893268945, -0.00512291981,]
+                [
+                    0.0,
+                    0.0,
+                    0.010245839621,
+                    0.0,
+                    0.005893268945,
+                    -0.00512291981,
+                    0.0,
+                    -0.005893268945,
+                    -0.00512291981,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.224155670726,  # fnocc
             "MP3 SINGLES ENERGY": 0.0,
@@ -703,7 +851,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.049398348010672,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.008118157882, 0.0, 0.004988381189, -0.004059078941, 0.0, -0.004988381189, -0.004059078941,]
+                [
+                    0.0,
+                    0.0,
+                    0.008118157882,
+                    0.0,
+                    0.004988381189,
+                    -0.004059078941,
+                    0.0,
+                    -0.004988381189,
+                    -0.004059078941,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00521238,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
@@ -725,7 +883,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.06126410,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.00033347691, 0.0, -0.00056224437, -0.000166738455, 0.0, 0.00056224437, -0.000166738455,]
+                [
+                    0.0,
+                    0.0,
+                    0.00033347691,
+                    0.0,
+                    -0.00056224437,
+                    -0.000166738455,
+                    0.0,
+                    0.00056224437,
+                    -0.000166738455,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.24747734,  # fnocc
             "MP3 SINGLES ENERGY": 0.0,
@@ -746,7 +914,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.054051928864870,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, -0.002486174824, 0.0, -0.001923330621, 0.001243087412, 0.0, 0.001923330621, 0.001243087412,]
+                [
+                    0.0,
+                    0.0,
+                    -0.002486174824,
+                    0.0,
+                    -0.001923330621,
+                    0.001243087412,
+                    0.0,
+                    0.001923330621,
+                    0.001243087412,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.007096579721,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
@@ -863,7 +1041,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03445360441348938,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.026279427993, 0.0, 0.013998590506, -0.013139713997, 0.0, -0.013998590506, -0.013139713997,]
+                [
+                    0.0,
+                    0.0,
+                    0.026279427993,
+                    0.0,
+                    0.013998590506,
+                    -0.013139713997,
+                    0.0,
+                    -0.013998590506,
+                    -0.013139713997,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.16862935,  # occ
             "MP3 SINGLES ENERGY": 0.0,
@@ -883,7 +1071,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033248190929062,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.030055915902, 0.0, 0.016307167756, -0.015027957951, 0.0, -0.016307167756, -0.015027957951,]
+                [
+                    0.0,
+                    0.0,
+                    0.030055915902,
+                    0.0,
+                    0.016307167756,
+                    -0.015027957951,
+                    0.0,
+                    -0.016307167756,
+                    -0.015027957951,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00381116,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
@@ -905,7 +1103,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03822454,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.014740098324, 0.0, 0.005852228009, -0.007370049162, 0.0, -0.005852228009, -0.007370049162,]
+                [
+                    0.0,
+                    0.0,
+                    0.014740098324,
+                    0.0,
+                    0.005852228009,
+                    -0.007370049162,
+                    0.0,
+                    -0.005852228009,
+                    -0.007370049162,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.18575628,  # occ
             "MP3 SINGLES ENERGY": 0.0,
@@ -925,7 +1133,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.036526852874970,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.017883390799, 0.0, 0.00765987541, -0.0089416954, 0.0, -0.00765987541, -0.0089416954,]
+                [
+                    0.0,
+                    0.0,
+                    0.017883390799,
+                    0.0,
+                    0.00765987541,
+                    -0.0089416954,
+                    0.0,
+                    -0.00765987541,
+                    -0.0089416954,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00498265,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
@@ -1006,7 +1224,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": -0.0028059971624814647,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03466304269235235,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.026398091851, 0.0, 0.014012163884, -0.013199045925, 0.0, -0.014012163884, -0.013199045925,]
+                [
+                    0.0,
+                    0.0,
+                    0.026398091851,
+                    0.0,
+                    0.014012163884,
+                    -0.013199045925,
+                    0.0,
+                    -0.014012163884,
+                    -0.013199045925,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.173406218947,  # cfour
             "MP3 SINGLES ENERGY": -0.003217654547,  # cfour
@@ -1016,7 +1244,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": -0.003256808469230,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.033291143258924,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.030051791297, 0.0, 0.016301545337, -0.015025895649, 0.0, -0.016301545337, -0.015025895649,]
+                [
+                    0.0,
+                    0.0,
+                    0.030051791297,
+                    0.0,
+                    0.016301545337,
+                    -0.015025895649,
+                    0.0,
+                    -0.016301545337,
+                    -0.015025895649,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.003863167899,  # cfour only
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
@@ -1038,7 +1276,17 @@ _std_suite = [
             "MP2 SINGLES ENERGY": -0.00294339,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03837483,
             "MP2 TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.014894057335, 0.0, 0.005886660707, -0.007447028667, 0.0, -0.005886660707, -0.007447028667,]
+                [
+                    0.0,
+                    0.0,
+                    0.014894057335,
+                    0.0,
+                    0.005886660707,
+                    -0.007447028667,
+                    0.0,
+                    -0.005886660707,
+                    -0.007447028667,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.190735179201,  # cfour
             "MP3 SINGLES ENERGY": -0.003322599961,  # cfour
@@ -1048,7 +1296,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": -0.003354603508621,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.036502859698546,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.017873897449, 0.0, 0.007653541045, -0.008936948724, 0.0, -0.007653541045, -0.008936948724,]
+                [
+                    0.0,
+                    0.0,
+                    0.017873897449,
+                    0.0,
+                    0.007653541045,
+                    -0.008936948724,
+                    0.0,
+                    -0.007653541045,
+                    -0.008936948724,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00504351,  # cfour only
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
@@ -1918,7 +2176,17 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05670210,
             "MP2 TOTAL GRADIENT": np.array(
                 # dfocc findif-5 ae cd+cd
-                [0.0, 0.0, 0.009643414073, 0.0, 0.005501440694, -0.004821707036, 0.0, -0.005501440694, -0.004821707036,]
+                [
+                    0.0,
+                    0.0,
+                    0.009643414073,
+                    0.0,
+                    0.005501440694,
+                    -0.004821707036,
+                    0.0,
+                    -0.005501440694,
+                    -0.004821707036,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.22643303,  # dfocc
             "MP3 SINGLES ENERGY": 0.0,
@@ -1948,7 +2216,17 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.06530655,
             "MP2 TOTAL GRADIENT": np.array(
                 # dfocc findif-5 ae cd+cd
-                [0.0, 0.0, -0.000546229785, 0.0, -0.000967320028, 0.000273114892, 0.0, 0.000967320028, 0.000273114892,]
+                [
+                    0.0,
+                    0.0,
+                    -0.000546229785,
+                    0.0,
+                    -0.000967320028,
+                    0.000273114892,
+                    0.0,
+                    0.000967320028,
+                    0.000273114892,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.27294416,  # dfocc
             "MP3 SINGLES ENERGY": 0.0,
@@ -2240,7 +2518,17 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05583617,
             "MP2 TOTAL GRADIENT": np.array(
                 # dfocc findif-5 fc cd+cd
-                [0.0, 0.0, 0.010264703011, 0.0, 0.00588885358, -0.005132351506, 0.0, -0.00588885358, -0.005132351506,]
+                [
+                    0.0,
+                    0.0,
+                    0.010264703011,
+                    0.0,
+                    0.00588885358,
+                    -0.005132351506,
+                    0.0,
+                    -0.00588885358,
+                    -0.005132351506,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.22415794,  # dfocc
             "MP3 SINGLES ENERGY": 0.0,
@@ -2270,7 +2558,17 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.06126931,
             "MP2 TOTAL GRADIENT": np.array(
                 # dfocc findif-5 fc cd+cd
-                [0.0, 0.0, 0.000318778691, 0.0, -0.000569356625, -0.000159389346, 0.0, 0.000569356625, -0.000159389346,]
+                [
+                    0.0,
+                    0.0,
+                    0.000318778691,
+                    0.0,
+                    -0.000569356625,
+                    -0.000159389346,
+                    0.0,
+                    0.000569356625,
+                    -0.000159389346,
+                ]
             ).reshape((-1, 3)),
             "MP3 CORRELATION ENERGY": -0.24747710,  # dfocc
             "MP3 SINGLES ENERGY": 0.0,
@@ -2988,7 +3286,16 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20886884012911314,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04845491,
-            "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.001970675302, 0.0, 0.0, -0.001970675302,]).reshape((-1, 3)),
+            "CCSD TOTAL GRADIENT": np.array(
+                [
+                    0.0,
+                    0.0,
+                    0.001970675302,
+                    0.0,
+                    0.0,
+                    -0.001970675302,
+                ]
+            ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.0019380186429220421,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
         },
@@ -3035,7 +3342,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05009877,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.007518759967, 0.0, 0.004613106602, -0.003759379983, 0.0, -0.004613106602, -0.003759379983,]
+                [
+                    0.0,
+                    0.0,
+                    0.007518759967,
+                    0.0,
+                    0.004613106602,
+                    -0.003759379983,
+                    0.0,
+                    -0.004613106602,
+                    -0.003759379983,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00524345,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
@@ -3382,7 +3699,16 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.20694032546082639,
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04775171,
-            "CCSD TOTAL GRADIENT": np.array([0.0, 0.0, 0.002316563628, 0.0, 0.0, -0.002316563628,]).reshape((-1, 3)),
+            "CCSD TOTAL GRADIENT": np.array(
+                [
+                    0.0,
+                    0.0,
+                    0.002316563628,
+                    0.0,
+                    0.0,
+                    -0.002316563628,
+                ]
+            ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.001922093564526723,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
         },
@@ -3429,7 +3755,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04931891,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, 0.008124347934, 0.0, 0.004987676555, -0.004062173967, 0.0, -0.004987676555, -0.004062173967,]
+                [
+                    0.0,
+                    0.0,
+                    0.008124347934,
+                    0.0,
+                    0.004987676555,
+                    -0.004062173967,
+                    0.0,
+                    -0.004987676555,
+                    -0.004062173967,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00521721,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
@@ -3477,7 +3813,17 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05404876,
             "CCSD TOTAL GRADIENT": np.array(
-                [0.0, 0.0, -0.002520920562, 0.0, -0.001932133533, 0.001260460281, 0.0, 0.001932133533, 0.001260460281,]
+                [
+                    0.0,
+                    0.0,
+                    -0.002520920562,
+                    0.0,
+                    -0.001932133533,
+                    0.001260460281,
+                    0.0,
+                    0.001932133533,
+                    0.001260460281,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00709505,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),

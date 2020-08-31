@@ -920,9 +920,7 @@ def harvest_GRD(grd):
 
 
 def harvest_DIPOL(dipol):
-    """Parses the contents *dipol* of the Cfour DIPOL file into a dipol vector.
-
-    """
+    """Parses the contents *dipol* of the Cfour DIPOL file into a dipol vector."""
     dipol = dipol.splitlines()
     lline = dipol[0].split()
     dip = [float(lline[0]), float(lline[1]), float(lline[2])]

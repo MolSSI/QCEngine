@@ -44,13 +44,23 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     atol = 1.0e-6
     chash = answer_hash(
-        system=subject.name, basis=basis, fcae=fcae, scf_type=scf_type, reference=reference, corl_type=corl_type,
+        system=subject.name,
+        basis=basis,
+        fcae=fcae,
+        scf_type=scf_type,
+        reference=reference,
+        corl_type=corl_type,
     )
 
     # check all calcs against conventional reference to looser tolerance
     atol_conv = 1.0e-4
     chash_conv = answer_hash(
-        system=subject.name, basis=basis, fcae=fcae, reference=reference, corl_type="conv", scf_type="pk",
+        system=subject.name,
+        basis=basis,
+        fcae=fcae,
+        reference=reference,
+        corl_type="conv",
+        scf_type="pk",
     )
     ref_block_conv = std_suite[chash_conv]
 
@@ -60,7 +70,10 @@ def runner_asserter(inp, subject, method, basis, tnm):
         **{
             "molecule": subject,
             "driver": driver,
-            "model": {"method": method, "basis": inp.get("basis", "(auto)"),},
+            "model": {
+                "method": method,
+                "basis": inp.get("basis", "(auto)"),
+            },
             "keywords": inp["keywords"],
         }
     )
@@ -166,7 +179,12 @@ def _asserter(asserter_args, contractual_args, contractual_fn):
                 )
                 assert compare_values(ref_block[rpv], query_qcvar(obj, pv), label, atol=atol), errmsg
                 tf, errmsg = compare_values(
-                    ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv, return_message=True, quiet=True,
+                    ref_block_conv[rpv],
+                    query_qcvar(obj, pv),
+                    label,
+                    atol=atol_conv,
+                    return_message=True,
+                    quiet=True,
                 )
                 assert compare_values(ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv), errmsg
 
