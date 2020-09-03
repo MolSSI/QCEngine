@@ -7,11 +7,12 @@ import sys
 from pathlib import Path
 import pprint
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Any
+from typing import TYPE_CHECKING, Dict, Any
+from collections import Counter
 
 import numpy as np
 from qcelemental.models import AtomicResult
-from qcelemental.util import parse_version, safe_version, which, which_import
+from qcelemental.util import parse_version, safe_version, which
 from qcelemental.molparse import from_schema
 from qcelemental.molparse.to_string import _atoms_formatter
 
@@ -93,7 +94,6 @@ class MRChemHarness(ProgramHarness):
         Runs MRChem in executable mode
         """
         self.found(raise_error=True)
-        pversion = parse_version(self.get_version())
 
         # Location resolution order config.scratch_dir, /tmp
         parent = config.scratch_directory
@@ -128,19 +128,52 @@ class MRChemHarness(ProgramHarness):
             )
 
             if success:
+                output_data["stdout"] = output["stdout"]
                 # get data from the MRChem JSON output and transfer it to the QCSchema output
                 mrchem_output = json.loads(output["outfiles"]["data.json"])["output"]
                 output_data["success"] = mrchem_output["success"]
-                # FIXME implemenet other drivers
+                output_data["driver"] = input_model.driver
+                # Fill up properties
+                occs = Counter(mrchem_output["properties"]["orbital_energies"]["spin"])
+                output_data["properties"] = {
+                    "calcinfo_nmo": len(mrchem_output["properties"]["orbital_energies"]["occupation"]),
+                    "calcinfo_nalpha": occs["p"] + occs["a"],
+                    "calcinfo_nbeta": occs["p"] + occs["b"],
+                    "calcinfo_natom": len(input_model.molecule.masses),
+                    "return_energy": mrchem_output["properties"]["scf_energy"]["E_tot"],
+                    "scf_one_electron_energy":
+                       mrchem_output["properties"]["scf_energy"]["E_kin"] +
+                       mrchem_output["properties"]["scf_energy"]["E_en"] +
+                       mrchem_output["properties"]["scf_energy"]["E_next"] +
+                       mrchem_output["properties"]["scf_energy"]["E_eext"],
+                    "scf_two_electron_energy":
+                       mrchem_output["properties"]["scf_energy"]["E_ee"] +
+                       mrchem_output["properties"]["scf_energy"]["E_x"] +
+                       mrchem_output["properties"]["scf_energy"]["E_xc"],
+                    "nuclear_repulsion_energy": mrchem_output["properties"]["scf_energy"]["E_nn"],
+                    "scf_xc_energy": mrchem_output["properties"]["scf_energy"]["E_xc"],
+                    "scf_total_energy": mrchem_output["properties"]["scf_energy"]["E_tot"],
+                    "scf_iterations": len(mrchem_output["scf_calculation"]["scf_solver"]["cycles"]),
+                }
+
                 if input_model.driver == "energy":
-                    output_data["driver"] = "energy"
                     output_data["return_result"] = mrchem_output["properties"]["scf_energy"]["E_tot"]
+                elif input_model.driver == "properties":
+                    # we probably want a loop over properties known to MRChem here
+                    output_data["return_result"] = mrchem_output["properties"]["dipole_moment"]["dip-1"]["vector"]
+                    output_data["properties"]["scf_dipole_moment"] = mrchem_output["properties"]["dipole_moment"]["dip-1"]["vector"]
+                else:
+                    raise RuntimeError(f"MRChem cannot run with {input_model.driver} driver")
+
 
                 compute_success = mrchem_output["success"]
 
             else:
-                error_message = output["stderr"]
-                error_type = "execution_error"
+                output_data["stderr"] = output["stderr"]
+                output_data["error"] = {
+                    "error_message": output["stderr"],
+                    "error_type": "execution_error",
+                }
 
         # Dispatch errors, PSIO Errors are not recoverable for future runs
         if compute_success is False:
