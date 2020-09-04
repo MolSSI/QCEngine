@@ -3,21 +3,22 @@ Calls the MRChem executable.
 """
 import copy
 import json
-import sys
-from pathlib import Path
-import pprint
 import logging
-from typing import TYPE_CHECKING, Dict, Any
+import pprint
+import sys
 from collections import Counter
+from functools import reduce
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 import numpy as np
 from qcelemental.models import AtomicResult
-from qcelemental.util import parse_version, safe_version, which
 from qcelemental.molparse import from_schema
 from qcelemental.molparse.to_string import _atoms_formatter
+from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, RandomError, UnknownError
-from ..util import execute, popen, temporary_directory, create_mpi_invocation
+from ..util import create_mpi_invocation, execute, popen, temporary_directory
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
@@ -57,7 +58,7 @@ class MRChemHarness(ProgramHarness):
         -------
         bool
             If mrchem and mrchem.x are found, returns True.
-            If raise_error is False and MRCHem is missing, returns False.
+            If raise_error is False and MRChem is missing, returns False.
             If raise_error is True and MRChem is missing, the error message is raised.
 
         """
@@ -110,7 +111,17 @@ class MRChemHarness(ProgramHarness):
             "schema_version": 1,
             "model": input_model.model,
             "molecule": input_model.molecule,
-            "properties": {},
+            "driver": input_model.driver,
+            "provenance": {
+                "creator": "MRChem",
+                "version": self.get_version(),
+                "routine": which("mrchem.x"),
+                "nthreads": config.cores_per_rank,
+                "mpi_processes": config.nnodes,
+                "total_cores": config.nnodes * config.cores_per_rank,
+                "mpiexec_command": config.mpiexec_command,
+                "memory": round(config.memory, 3),
+            },
         }
 
         with temporary_directory(parent=parent, suffix="_mrchem_scratch") as tmpdir:
@@ -130,41 +141,47 @@ class MRChemHarness(ProgramHarness):
             if success:
                 output_data["stdout"] = output["stdout"]
                 # get data from the MRChem JSON output and transfer it to the QCSchema output
-                mrchem_output = json.loads(output["outfiles"]["data.json"])["output"]
+                mrchem_json = json.loads(output["outfiles"]["data.json"])
+                mrchem_output = mrchem_json["output"]
                 output_data["success"] = mrchem_output["success"]
-                output_data["driver"] = input_model.driver
-                # Fill up properties
-                occs = Counter(mrchem_output["properties"]["orbital_energies"]["spin"])
-                output_data["properties"] = {
-                    "calcinfo_nmo": len(mrchem_output["properties"]["orbital_energies"]["occupation"]),
-                    "calcinfo_nalpha": occs["p"] + occs["a"],
-                    "calcinfo_nbeta": occs["p"] + occs["b"],
-                    "calcinfo_natom": len(input_model.molecule.masses),
-                    "return_energy": mrchem_output["properties"]["scf_energy"]["E_tot"],
-                    "scf_one_electron_energy":
-                       mrchem_output["properties"]["scf_energy"]["E_kin"] +
-                       mrchem_output["properties"]["scf_energy"]["E_en"] +
-                       mrchem_output["properties"]["scf_energy"]["E_next"] +
-                       mrchem_output["properties"]["scf_energy"]["E_eext"],
-                    "scf_two_electron_energy":
-                       mrchem_output["properties"]["scf_energy"]["E_ee"] +
-                       mrchem_output["properties"]["scf_energy"]["E_x"] +
-                       mrchem_output["properties"]["scf_energy"]["E_xc"],
-                    "nuclear_repulsion_energy": mrchem_output["properties"]["scf_energy"]["E_nn"],
-                    "scf_xc_energy": mrchem_output["properties"]["scf_energy"]["E_xc"],
-                    "scf_total_energy": mrchem_output["properties"]["scf_energy"]["E_tot"],
-                    "scf_iterations": len(mrchem_output["scf_calculation"]["scf_solver"]["cycles"]),
+
+                # prepare a list of computed properties
+                known_rsp_props = [
+                    ("dipole_moment", "vector"),
+                    ("quadrupole_moment", "tensor"),
+                    ("polarizability", "tensor"),
+                    ("magnetizability", "tensor"),
+                    ("nmr_shielding", "tensor"),
+                ]
+                computed_rsp_props = [
+                    ("properties", x, y, z)
+                    for x, z in known_rsp_props
+                    if x in mrchem_output["properties"]
+                    for y in mrchem_output["properties"][x].keys()
+                ]
+
+                # fill up properties
+                output_data["properties"] = extract_properties(mrchem_output)
+
+                # fill up extras:
+                # * under "raw_output" the whole JSON output from MRChem
+                # * under "properties" all the properties computed by MRChem
+                output_data["extras"] = {
+                    "raw_output": mrchem_json,
+                    "properties": {
+                        f"{ks[1]}": {f"{ks[2]}": _nested_get(mrchem_output, ks)} for ks in computed_rsp_props
+                    },
                 }
 
+                # fill up return_result
                 if input_model.driver == "energy":
                     output_data["return_result"] = mrchem_output["properties"]["scf_energy"]["E_tot"]
                 elif input_model.driver == "properties":
-                    # we probably want a loop over properties known to MRChem here
-                    output_data["return_result"] = mrchem_output["properties"]["dipole_moment"]["dip-1"]["vector"]
-                    output_data["properties"]["scf_dipole_moment"] = mrchem_output["properties"]["dipole_moment"]["dip-1"]["vector"]
+                    output_data["return_result"] = {
+                        f"{ks[1]}": {f"{ks[2]}": _nested_get(mrchem_output, ks)} for ks in computed_rsp_props
+                    }
                 else:
                     raise RuntimeError(f"MRChem cannot run with {input_model.driver} driver")
-
 
                 compute_success = mrchem_output["success"]
 
@@ -183,16 +200,13 @@ class MRChemHarness(ProgramHarness):
             else:
                 raise UnknownError(error_message)
 
-        output_data["provenance"] = mrchem_output["provenance"]
-        output_data["provenance"]["memory"] = round(config.memory, 3)
-
         return AtomicResult(**output_data)
 
     def build_input(self, input_model: "AtomicInput", config: "TaskConfig") -> Dict[str, Any]:
         with popen([which("mrchem"), "--module"]) as exc:
             exc["proc"].wait(timeout=30)
         sys.path.append(exc["stdout"].split()[-1])
-        from mrchem import validate, translate_input
+        from mrchem import translate_input, validate
 
         mrchemrec = {
             "scratch_directory": config.scratch_directory,
@@ -202,8 +216,7 @@ class MRChemHarness(ProgramHarness):
 
         # Handle molecule
         # TODO move to qcelemental
-        # How to handle units? units = opts.get("world_units", "bohr")
-        # 'Molecule': {'charge': 0, 'multiplicity': 1, 'translate': False, 'coords': 'O       0.0000  0.0000  -0.1250\nH      -1.4375  0.0000   1.0250\nH       1.4375  0.0000   1.0250\n'},
+        # TODO handle unit conversion
         atom_format = "{elem}"
         ghost_format = "@{elem}"
         molrec = from_schema(input_model.molecule.dict(), nonphysical=True)
@@ -260,3 +273,60 @@ class MRChemHarness(ProgramHarness):
             mrchemrec["command"] = [which("mrchem.x")]
 
         return mrchemrec
+
+
+def extract_properties(mrchem_output: Dict[str, Any]) -> Dict[str, Any]:
+    """Translate MRChem output to QCSChema properties.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    """
+
+    occs = Counter(mrchem_output["properties"]["orbital_energies"]["spin"])
+    properties = {
+        "calcinfo_nmo": len(mrchem_output["properties"]["orbital_energies"]["occupation"]),
+        "calcinfo_nalpha": occs["p"] + occs["a"],
+        "calcinfo_nbeta": occs["p"] + occs["b"],
+        "calcinfo_natom": len(mrchem_output["properties"]["geometry"]),
+        "return_energy": mrchem_output["properties"]["scf_energy"]["E_tot"],
+        "scf_one_electron_energy": mrchem_output["properties"]["scf_energy"]["E_kin"]
+        + mrchem_output["properties"]["scf_energy"]["E_en"]
+        + mrchem_output["properties"]["scf_energy"]["E_next"]
+        + mrchem_output["properties"]["scf_energy"]["E_eext"],
+        "scf_two_electron_energy": mrchem_output["properties"]["scf_energy"]["E_ee"]
+        + mrchem_output["properties"]["scf_energy"]["E_x"]
+        + mrchem_output["properties"]["scf_energy"]["E_xc"],
+        "nuclear_repulsion_energy": mrchem_output["properties"]["scf_energy"]["E_nn"],
+        "scf_xc_energy": mrchem_output["properties"]["scf_energy"]["E_xc"],
+        "scf_total_energy": mrchem_output["properties"]["scf_energy"]["E_tot"],
+        "scf_iterations": len(mrchem_output["scf_calculation"]["scf_solver"]["cycles"]),
+        "scf_dipole_moment": mrchem_output["properties"]["dipole_moment"]["dip-1"]["vector"],
+    }
+
+    return properties
+
+
+def _nested_get(d: Dict[str, Any], ks: Tuple[str, ...]) -> Optional[Any]:
+    """Get value from a nested dictionary.
+
+    Parameters
+    ----------
+    d : Dict[str, Any]
+    ks : str
+
+    Returns
+    -------
+    v : Optional[Any]
+
+    Notes
+    -----
+    Adapted from: https://stackoverflow.com/a/40675868/2528668
+    """
+
+    def _func(x: Dict[str, Any], k: str) -> Optional[Dict[str, Any]]:
+        return x.get(k, None) if isinstance(x, dict) else None
+
+    return reduce(_func, ks, d)  # type: ignore
