@@ -15,7 +15,8 @@ import numpy as np
 from qcelemental.models import AtomicResult
 from qcelemental.molparse import from_schema
 from qcelemental.molparse.to_string import _atoms_formatter
-from qcelemental.util import parse_version, safe_version, which
+from qcelemental.physical_constants import constants
+from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, RandomError, UnknownError
 from ..util import create_mpi_invocation, execute, popen, temporary_directory
@@ -99,7 +100,6 @@ class MRChemHarness(ProgramHarness):
         # Location resolution order config.scratch_dir, /tmp
         parent = config.scratch_directory
 
-        error_type = None
         error_message = None
         compute_success = False
 
@@ -112,16 +112,6 @@ class MRChemHarness(ProgramHarness):
             "model": input_model.model,
             "molecule": input_model.molecule,
             "driver": input_model.driver,
-            "provenance": {
-                "creator": "MRChem",
-                "version": self.get_version(),
-                "routine": which("mrchem.x"),
-                "nthreads": config.cores_per_rank,
-                "mpi_processes": config.nnodes,
-                "total_cores": config.nnodes * config.cores_per_rank,
-                "mpiexec_command": config.mpiexec_command,
-                "memory": round(config.memory, 3),
-            },
         }
 
         with temporary_directory(parent=parent, suffix="_mrchem_scratch") as tmpdir:
@@ -144,6 +134,7 @@ class MRChemHarness(ProgramHarness):
                 mrchem_json = json.loads(output["outfiles"]["data.json"])
                 mrchem_output = mrchem_json["output"]
                 output_data["success"] = mrchem_output["success"]
+                output_data["provenance"] = mrchem_output["provenance"]
 
                 # prepare a list of computed properties
                 known_rsp_props = [
@@ -216,11 +207,24 @@ class MRChemHarness(ProgramHarness):
 
         # Handle molecule
         # TODO move to qcelemental
-        # TODO handle unit conversion
+        molrec = from_schema(input_model.molecule.dict(), nonphysical=True)
+        units_req = opts.get("world_unit", "bohr")
+        if molrec["units"] == "Angstrom" and units_req.capitalize() == "Angstrom":
+            factor = 1.0
+        elif molrec["units"] == "Angstrom" and units_req.capitalize() == "Bohr":
+            if "input_units_to_au" in molrec:
+                factor = molrec["input_units_to_au"]
+            else:
+                factor = 1.0 / constants.bohr2angstroms
+        elif molrec["units"] == "Bohr" and units_req.capitalize() == "Angstrom":
+            factor = constants.bohr2angstroms
+        elif molrec["units"] == "Bohr" and units_req.capitalize() == "Bohr":
+            factor = 1.0
+        else:
+            factor = constants.conversion_factor(molrec["units"], units_req)
+        geom = np.asarray(molrec["geom"]).reshape((-1, 3)) * factor
         atom_format = "{elem}"
         ghost_format = "@{elem}"
-        molrec = from_schema(input_model.molecule.dict(), nonphysical=True)
-        geom = np.asarray(molrec["geom"]).reshape((-1, 3))
         atoms = _atoms_formatter(molrec, geom, atom_format, ghost_format, width=7, prec=12, sp=2)
         opts["Molecule"] = {
             "charge": int(molrec["molecular_charge"]),
