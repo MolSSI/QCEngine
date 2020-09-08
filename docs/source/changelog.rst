@@ -13,19 +13,6 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
-v0.15.0 / 2020-06-26
---------------------
-
-New Features
-++++++++++++
-
-Enhancements
-++++++++++++
-- (:pr:`239`) OpenMM - extracts CMILES from ``AtomicInput`` if possible for consistent atom ordering
-
-Bug Fixes
-+++++++++
-
 
 v0.16.0 / 2020-08-19
 --------------------
