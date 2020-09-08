@@ -14,6 +14,20 @@ Changelog
 .. +++++++++
 
 
+v0.17.0 / 2020-??-??
+--------------------
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+
+Bug Fixes
++++++++++
+- (:pr:`270`) `TorchANIHarness` now lazily loads models as requested for compute.
+
+
 v0.16.0 / 2020-08-19
 --------------------
 
