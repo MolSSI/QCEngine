@@ -11,11 +11,7 @@ from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
-import numpy as np
 from qcelemental.models import AtomicResult
-from qcelemental.molparse import from_schema
-from qcelemental.molparse.to_string import _atoms_formatter
-from qcelemental.physical_constants import constants
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, RandomError, UnknownError
@@ -135,8 +131,13 @@ class MRChemHarness(ProgramHarness):
                 mrchem_output = mrchem_json["output"]
                 output_data["success"] = mrchem_output["success"]
                 output_data["provenance"] = mrchem_output["provenance"]
+                # update the "routine" under "provenance"
+                output_data["provenance"]["routine"] = " ".join(job_input["command"])
 
-                # prepare a list of computed properties
+                # fill up properties
+                output_data["properties"] = extract_properties(mrchem_output)
+
+                # prepare a list of computed response properties
                 known_rsp_props = [
                     ("dipole_moment", "vector"),
                     ("quadrupole_moment", "tensor"),
@@ -150,9 +151,6 @@ class MRChemHarness(ProgramHarness):
                     if x in mrchem_output["properties"]
                     for y in mrchem_output["properties"][x].keys()
                 ]
-
-                # fill up properties
-                output_data["properties"] = extract_properties(mrchem_output)
 
                 # fill up extras:
                 # * under "raw_output" the whole JSON output from MRChem
@@ -206,32 +204,10 @@ class MRChemHarness(ProgramHarness):
         opts = copy.deepcopy(input_model.keywords)
 
         # Handle molecule
-        # TODO move to qcelemental
-        molrec = from_schema(input_model.molecule.dict(), nonphysical=True)
-        units_req = opts.get("world_unit", "bohr")
-        if molrec["units"] == "Angstrom" and units_req.capitalize() == "Angstrom":
-            factor = 1.0
-        elif molrec["units"] == "Angstrom" and units_req.capitalize() == "Bohr":
-            if "input_units_to_au" in molrec:
-                factor = molrec["input_units_to_au"]
-            else:
-                factor = 1.0 / constants.bohr2angstroms
-        elif molrec["units"] == "Bohr" and units_req.capitalize() == "Angstrom":
-            factor = constants.bohr2angstroms
-        elif molrec["units"] == "Bohr" and units_req.capitalize() == "Bohr":
-            factor = 1.0
-        else:
-            factor = constants.conversion_factor(molrec["units"], units_req)
-        geom = np.asarray(molrec["geom"]).reshape((-1, 3)) * factor
-        atom_format = "{elem}"
-        ghost_format = "@{elem}"
-        atoms = _atoms_formatter(molrec, geom, atom_format, ghost_format, width=7, prec=12, sp=2)
-        opts["Molecule"] = {
-            "charge": int(molrec["molecular_charge"]),
-            "multiplicity": molrec["molecular_multiplicity"],
-            "translate": molrec["fix_com"],
-            "coords": "\n".join(atoms),
-        }
+        _, moldict = input_model.molecule.to_string(
+            dtype="mrchem", units=opts.get("world_unit", "bohr"), return_data=True
+        )
+        opts["Molecule"] = moldict["keywords"]
 
         if "WaveFunction" in opts.keys():
             opts["WaveFunction"]["method"] = input_model.model.method
@@ -291,7 +267,7 @@ def extract_properties(mrchem_output: Dict[str, Any]) -> Dict[str, Any]:
 
     occs = Counter(mrchem_output["properties"]["orbital_energies"]["spin"])
     properties = {
-        "calcinfo_nmo": len(mrchem_output["properties"]["orbital_energies"]["occupation"]),
+        "calcinfo_nmo": 2 * occs["p"] + occs["a"] + occs["b"],
         "calcinfo_nalpha": occs["p"] + occs["a"],
         "calcinfo_nbeta": occs["p"] + occs["b"],
         "calcinfo_natom": len(mrchem_output["properties"]["geometry"]),
