@@ -36,7 +36,7 @@ These input specifications can be executed with the ``compute`` syntax along wit
 
 .. code:: python
 
-    >>> ret = qcng.compute(input, "psi4")
+    >>> ret = qcng.compute(model, "psi4")
 
 The results contain a complete record of the computation:
 
