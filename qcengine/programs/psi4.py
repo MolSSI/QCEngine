@@ -99,6 +99,20 @@ class Psi4Harness(ProgramHarness):
 
         return candidate_version
 
+    def _handle_errors(self, output_data):
+        if "error" in output_data:
+            if "error_message" not in output_data["error"]:
+                error_message = output_data["error"]
+                error_type = "internal_error"
+            else:
+                error_message = output_data["error"]["error_message"]
+                error_type = output_data["error"].get("error_type", "unknown_error")
+        else:
+            error_message = "Unknown error, error message is not found"
+            error_type = "internal_error"
+
+        return error_message, error_type
+
     def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs Psi4 in API mode
@@ -165,16 +179,7 @@ class Psi4Harness(ProgramHarness):
                             output_data["extras"]["qcvars"] = local_qcvars
 
                     if output_data.get("success", False) is False:
-                        if "error" in output_data["error"]:
-                            if "error_message" not in output_data["error"]:
-                                error_message = output_data["error"]
-                                error_type = "internal_error"
-                            else:
-                                error_message = output_data["error"]["error_message"]
-                                error_type = output_data["error"].get("error_type", "unknown_error")
-                        else:
-                            error_message = "Unknown error, error message is not found"
-                            error_type = "internal_error"
+                        error_message, error_type = self._handle_errors(output_data)
                     else:
                         compute_success = True
 
@@ -231,16 +236,7 @@ class Psi4Harness(ProgramHarness):
 
                 if success:
                     if output_data.get("success", False) is False:
-                        if "error" in output_data:
-                            if "error_message" not in output_data["error"]:
-                                error_message = output_data["error"]
-                                error_type = "internal_error"
-                            else:
-                                error_message = output_data["error"]["error_message"]
-                                error_type = output_data["error"]["error_type"]
-                        else:
-                            error_message = "Unknown error, error message is not found"
-                            error_type = "internal_error"
+                        error_message, error_type = self._handle_errors(output_data)
                     else:
                         compute_success = True
                 else:
