@@ -23,6 +23,7 @@ _canonical_methods = [
     ("rdkit", {"method": "UFF"}),
     ("torchani", {"method": "ANI1x"}),
     ("turbomole", {"method": "pbe", "basis": "6-31G"}),
+    ("xtb", {"method": "GFN2-xTB"}),
 ]
 
 
