@@ -99,6 +99,20 @@ class Psi4Harness(ProgramHarness):
 
         return candidate_version
 
+    def _handle_errors(self, output_data):
+        if "error" in output_data:
+            if "error_message" not in output_data["error"]:
+                error_message = output_data["error"]
+                error_type = "internal_error"
+            else:
+                error_message = output_data["error"]["error_message"]
+                error_type = output_data["error"].get("error_type", "unknown_error")
+        else:
+            error_message = "Unknown error, error message is not found"
+            error_type = "internal_error"
+
+        return error_message, error_type
+
     def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs Psi4 in API mode
@@ -164,19 +178,13 @@ class Psi4Harness(ProgramHarness):
                         else:
                             output_data["extras"]["qcvars"] = local_qcvars
 
-                    if output_data["success"] is False:
-                        if "error_message" not in output_data["error"]:
-                            error_message = output_data["error"]
-                            error_type = "internal_error"
-                        else:
-                            error_message = output_data["error"]["error_message"]
-                            error_type = output_data["error"]["error_type"]
-
+                    if output_data.get("success", False) is False:
+                        error_message, error_type = self._handle_errors(output_data)
                     else:
                         compute_success = True
 
                 else:
-                    error_message = output["stderr"]
+                    error_message = output.get("stderr", "No STDERR output")
                     error_type = "execution_error"
 
                 # Reset the schema if required
@@ -202,7 +210,7 @@ class Psi4Harness(ProgramHarness):
                         output_data = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
                     # success here means execution returned. output_data may yet be qcel.models.AtomicResult or qcel.models.FailedOperation
                     success = True
-                    if output_data["success"]:
+                    if output_data.get("success", False):
                         output_data["extras"]["psiapi_evaluated"] = True
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)
                 else:
@@ -227,13 +235,12 @@ class Psi4Harness(ProgramHarness):
                         output_data = input_model.dict()
 
                 if success:
-                    if output_data["success"] is False:
-                        error_message = output_data["error"]["error_message"]
-                        error_type = output_data["error"]["error_type"]
+                    if output_data.get("success", False) is False:
+                        error_message, error_type = self._handle_errors(output_data)
                     else:
                         compute_success = True
                 else:
-                    error_message = output["stderr"]
+                    error_message = output.get("stderr", "No STDERR output")
                     error_type = "execution_error"
 
         # Dispatch errors, PSIO Errors are not recoverable for future runs
