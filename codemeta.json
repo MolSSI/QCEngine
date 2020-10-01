@@ -225,12 +225,12 @@
         },
         {
             "@type": "Person",
-            "givenName": "John",
-            "additionalName": "F.",
-            "familyName": "Stanton",
-            "affiliation": "Quantum Theory Project, The University of Florida",
-            "@id": "https://orcid.org/0000-0003-2345-9781",
-            "identifier": "https://github.com/XXXX"
+            "givenName": "Andrew",
+            "additionalName": "C.",
+            "familyName": "Simmonett",
+            "affiliation": "National Institutes of Health -- National Heart, Lung and Blood Institute",
+            "@id": "https://orcid.org/0000-0002-5921-9272",
+            "identifier": "https://github.com/andysim"
         },
         {
             "@type": "Person",
@@ -239,6 +239,15 @@
             "affiliation": "Friedrich-Schiller-University Jena",
             "@id": "https://orcid.org/0000-0003-2493-6893",
             "identifier": "https://github.com/eljost"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Justin",
+            "additionalName": "M.",
+            "familyName": "Turney",
+            "affiliation": "Center for Computational Quantum Chemistry, University of Georgia",
+            "@id": "https://orcid.org/0000-0003-3659-0711",
+            "identifier": "https://github.com/jturney"
         },
         {
             "@type": "Person",
