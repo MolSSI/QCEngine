@@ -1,0 +1,298 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "description": "QCEngine: computational molecular sciences program executor and IO standardizer (QCSchema)",
+    "name": "QCEngine",
+    "codeRepository": "https://github.com/MolSSI/QCEngine",
+    "issueTracker": "https://github.com/MolSSI/QCEngine/issues",
+    "license": "https://opensource.org/licenses/BSD-3-Clause",
+    "version": "0.15",
+    "author": [
+        {
+            "@type": "Person",
+            "givenName": "Daniel",
+            "additionalName": "G. A.",
+            "familyName": "Smith",
+            "affiliation": "The Molecular Sciences Software Institute",
+            "@id": "https://orcid.org/0000-0001-8626-0900",
+            "identifier": "https://github.com/dgasmith"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Asem",
+            "familyName": "Alenaizan",
+            "affiliation": "Center for Computational Molecular Science and Technology, Georgia Institute of Technology",
+            "@id": "https://orcid.org/0000-0002-0871-664X",
+            "identifier": "https://github.com/alenaizan"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Doaa",
+            "familyName": "Altarawy",
+            "affiliation": "The Molecular Sciences Software Institute",
+            "@id": "https://orcid.org/0000-0002-7795-4422",
+            "identifier": "https://github.com/doaa-altarawy"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Taylor",
+            "additionalName": "A.",
+            "familyName": "Barnes",
+            "affiliation": "The Molecular Sciences Software Institute",
+            "@id": "https://orcid.org/0000-0001-9396-1094",
+            "identifier": "https://github.com/taylor-a-barnes"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Lori",
+            "additionalName": "A.",
+            "familyName": "Burns",
+            "affiliation": "Center for Computational Molecular Science and Technology, Georgia Institute of Technology",
+            "@id": "https://orcid.org/0000-0003-2852-5864",
+            "identifier": "https://github.com/loriab"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Nuwan",
+            "familyName": "De Silva",
+            "affiliation": "Department of Physical and Biological Sciences, Western New England University",
+            "@id": "https://orcid.org/0000-0002-1443-5764",
+            "identifier": "https://github.com/nuwandesilva"
+        },
+        {
+            "@type": "Person",
+            "givenName": "David",
+            "additionalName": "L.",
+            "familyName": "Dotson",
+            "affiliation": "Open Force Field Initiative",
+            "@id": "https://orcid.org/0000-0001-5879-2942",
+            "identifier": "https://github.com/dotsdl"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Sebastian",
+            "familyName": "Ehlert",
+            "affiliation": "Mulliken Center for Theoretical Chemistry, Institut für Physikalische und Theoretische Chemie, Universität Bonn",
+            "@id": "https://orcid.org/0000-0001-7809-771X",
+            "identifier": "https://github.com/awvwgk"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Zachary",
+            "additionalName": "L.",
+            "familyName": "Glick",
+            "affiliation": "Center for Computational Molecular Science and Technology, Georgia Institute of Technology",
+            "@id": "https://orcid.org/0000-0003-0900-2849",
+            "identifier": "https://github.com/zachglick"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Mark",
+            "additionalName": "S.",
+            "familyName": "Gordon",
+            "affiliation": "Department of Chemistry, Iowa State University",
+            "@id": "https://orcid.org/0000-0003-2371-1318"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Alex",
+            "additionalName": "G.",
+            "familyName": "Heide",
+            "affiliation": "Center for Computational Quantum Chemistry, University of Georgia",
+            "@id": "https://orcid.org/0000-0002-9780-8123",
+            "identifier": "https://github.com/AlexHeide"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jan",
+            "familyName": "Hermann",
+            "affiliation": "Free University of Berlin",
+            "@id": "https://orcid.org/0000-0002-2779-0749",
+            "identifier": "https://github.com/jhrmnn"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Josh",
+            "familyName": "Horton",
+            "affiliation": "Department of Chemistry, Lancaster University; Open Force Field Inititive",
+            "@id": "https://orcid.org/0000-0001-8694-7200",
+            "identifier": "https://github.com/jthorton"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Adrian",
+            "additionalName": "G.",
+            "familyName": "Hurtado",
+            "affiliation": "Institute for Advanced Computational Science, Stony Brook University",
+            "@id": "https://orcid.org/0000-0002-2460-8059",
+            "identifier": "https://github.com/ahurta92"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Rollin",
+            "additionalName": "A.",
+            "familyName": "King",
+            "affiliation": "Department of Chemistry, Bethel University",
+            "@id": "https://orcid.org/0000-0002-1173-4187",
+            "identifier": "https://github.com/psi-rking"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jiyoung",
+            "familyName": "Lee",
+            "affiliation": "Department of Chemistry, Iowa State University",
+            "@id": "https://orcid.org/0000-0002-5216-2859",
+            "identifier": "https://github.com/jygrace2"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Sebastian",
+            "additionalName": "J. R.",
+            "familyName": "Lee",
+            "affiliation": "Division of Chemistry and Chemical Engineering, California Institute of Technology",
+            "@id": "https://orcid.org/0000-0001-7006-9378",
+            "identifier": "https://github.com/sjrl"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Fang",
+            "familyName": "Liu",
+            "affiliation": "Emory University",
+            "@id": "https://orcid.org/0000-0003-1322-4997",
+            "identifier": "https://github.com/ffangliu"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Annabelle",
+            "additionalName": "T.",
+            "familyName": "Lolinco",
+            "affiliation": "Department of Chemistry, Iowa State University",
+            "@id": "https://orcid.org/0000-0002-1686-778X",
+            "identifier": "https://github.com/vivacebelles"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Devin",
+            "additionalName": "A.",
+            "familyName": "Matthews",
+            "affiliation": "Department of Chemistry, Southern Methodist University",
+            "@id": "https://orcid.org/0000-0003-2795-5483",
+            "identifier": "https://github.com/devinamatthews"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jonathon",
+            "additionalName": "P.",
+            "familyName": "Misiewicz",
+            "affiliation": "Center for Computational Quantum Chemistry, University of Georgia",
+            "@id": "https://orcid.org/0000-0002-6425-9551",
+            "identifier": "https://github.com/JonathonMisiewicz"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Levi",
+            "additionalName": "N.",
+            "familyName": "Naden",
+            "affiliation": "The Molecular Sciences Software Institute",
+            "@id": "https://orcid.org/0000-0002-3692-5027",
+            "identifier": "https://github.com/Lnaden"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Farhad",
+            "familyName": "Ramezanghorbani",
+            "affiliation": "University of Florida",
+            "@id": "http://orcid.org/0000-0002-7545-4416",
+            "identifier": "https://github.com/farhadrgh"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jeffrey",
+            "additionalName": "B.",
+            "familyName": "Schriber",
+            "affiliation": "Center for Computational Molecular Science and Technology, Georgia Institute of Technology",
+            "@id": "https://orcid.org/0000-0001-6906-8191",
+            "identifier": "https://github.com/jeffschriber"
+        },
+        {
+            "@type": "Person",
+            "givenName": "C.",
+            "additionalName": "David",
+            "familyName": "Sherrill",
+            "affiliation": "Center for Computational Molecular Science and Technology, Georgia Institute of Technology",
+            "@id": "https://orcid.org/0000-0002-5570-7666",
+            "identifier": "https://github.com/CDSherrill"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Andrew",
+            "additionalName": "C.",
+            "familyName": "Simmonett",
+            "affiliation": "National Institutes of Health -- National Heart, Lung and Blood Institute",
+            "@id": "https://orcid.org/0000-0002-5921-9272",
+            "identifier": "https://github.com/andysim"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Johannes", 
+            "familyName": "Steinmetzer",
+            "affiliation": "Friedrich-Schiller-University Jena",
+            "@id": "https://orcid.org/0000-0003-2493-6893",
+            "identifier": "https://github.com/eljost"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Justin",
+            "additionalName": "M.",
+            "familyName": "Turney",
+            "affiliation": "Center for Computational Quantum Chemistry, University of Georgia",
+            "@id": "https://orcid.org/0000-0003-3659-0711",
+            "identifier": "https://github.com/jturney"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Jeffrey",
+            "additionalName": "R.",
+            "familyName": "Wagner",
+            "affiliation": "Open Force Field Initiative",
+            "@id": "https://orcid.org/0000-0001-6448-0873",
+            "identifier": "https://github.com/j-wags"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Logan",
+            "familyName": "Ward",
+            "affiliation": "Data Science and Learning Division, Argonne National Laboratory",
+            "@id": "https://orcid.org/0000-0002-1323-5939",
+            "identifier": "https://github.com/WardLT"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Matthew",
+            "familyName": "Welborn",
+            "affiliation": "Entos, Inc.",
+            "identifier": "https://github.com/mattwelborn"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Theresa",
+            "additionalName": "L.",
+            "familyName": "Windus",
+            "affiliation": "Department of Chemistry, Iowa State University",
+            "@id": "https://orcid.org/0000-0001-6065-3167",
+            "identifier": "https://github.com/twindus"
+        }
+    ],
+    "developmentStatus": "active",
+    "downloadUrl": "https://github.com/MolSSI/QCEngine",
+    "keywords": [
+        "quantum-chemistry",
+        "computational-chemistry",
+        "chemistry",
+        "physics"
+    ],
+    "maintainer": "https://orcid.org/0000-0002-7961-7016",
+    "programmingLanguage": [
+        "Python",
+    ]
+}
