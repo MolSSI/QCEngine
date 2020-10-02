@@ -23,7 +23,7 @@ def h2o():
 def h2o_ricc2_def2svp():
     """NumForce calls only make sense for stationary points. So this
     geometry was optimized at the ricc2/def2-svp level of theory and
-    can be used to run NumForce with ricc2.  """
+    can be used to run NumForce with ricc2."""
 
     mol = qcelemental.models.Molecule.from_data(
         """
@@ -126,7 +126,10 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
     resi = {
         "molecule": h2o,
         "driver": "hessian",
-        "model": {"method": method, "basis": "def2-SVP",},
+        "model": {
+            "method": method,
+            "basis": "def2-SVP",
+        },
         "keywords": keywords,
     }
 
@@ -142,13 +145,19 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
 
 @using("turbomole")
 @pytest.mark.parametrize(
-    "method, keywords, ref_eigvals", [("ricc2", {}, (1.65405531e-01, 9.63690706e-01, 1.24676634e00)),],
+    "method, keywords, ref_eigvals",
+    [
+        ("ricc2", {}, (1.65405531e-01, 9.63690706e-01, 1.24676634e00)),
+    ],
 )
 def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp):
     resi = {
         "molecule": h2o_ricc2_def2svp,
         "driver": "hessian",
-        "model": {"method": method, "basis": "def2-SVP",},
+        "model": {
+            "method": method,
+            "basis": "def2-SVP",
+        },
         "keywords": keywords,
     }
 
