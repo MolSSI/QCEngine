@@ -14,18 +14,23 @@ Changelog
 .. +++++++++
 
 
-v0.17.0 / 2020-??-??
+v0.17.0 / 2020-10-02
 --------------------
 
 New Features
 ++++++++++++
+- (:pr:`262`) Add project authors information.
 
 Enhancements
 ++++++++++++
+- (:pr:`264`) Turbomole - add analytic and finite difference Hessians.
+- (:pr:`266`) Psi4- error messages from Psi4Harness no longer swallowed by `KeyError`.
 
 Bug Fixes
 +++++++++
-- (:pr:`270`) `TorchANIHarness` now lazily loads models as requested for compute.
+- (:pr:`264`) Turbomole - fix output properties handling.
+- (:pr:`265`) xtb - ensure extra tags are preserved in XTB harness.
+- (:pr:`270`) TorchANI - now lazily loads models as requested for compute.
 
 
 v0.16.0 / 2020-08-19
