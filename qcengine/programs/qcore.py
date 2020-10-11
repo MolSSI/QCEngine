@@ -3,15 +3,13 @@ The qcore QCEngine Harness
 """
 
 import json
-import string
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Set, TYPE_CHECKING
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError, UnknownError
-from ..util import execute, popen
 from .model import ProgramHarness
 from .util import (
     cca_ao_order_spherical,
@@ -137,8 +135,6 @@ class QcoreHarness(ProgramHarness):
             raise KeyError(f"Method is not valid: {method}")
         method["details"] = input_data.keywords
 
-        import codex
-
         qcore_input = {
             # "schema_name": "single_input",
             "molecule": {
@@ -154,120 +150,44 @@ class QcoreHarness(ProgramHarness):
         print()
         print(input_data)
         print(qcore_input)
-        result = qcore.run(qcore_input, ncores=config.ncores)
-        print(result)
-        raise
+        try:
+            result = qcore.run(qcore_input, ncores=config.ncores)
+        except Exception as exc:
+            return UnknownError(str(exc))
 
-        # Setup the job
-        # job_inputs = self.build_input(input_data, config)
+        return self.parse_output(result.dict(), input_data)
 
-        # Run qcore
-        # exe_success, proc = self.execute(job_inputs)
+    def parse_output(self, output: Dict[str, Any], input_model: "AtomicInput") -> "AtomicResult":
 
-        # Determine whether the calculation succeeded
-        if exe_success:
-            # If execution succeeded, collect results
-            result = self.parse_output(proc["outfiles"], input_data)
-            return result
-        else:
-            # Return UnknownError for error propagation
-            return UnknownError(proc["stderr"])
-
-    def execute(
-        self,
-        inputs: Dict[str, Any],
-        extra_infiles: Optional[Dict[str, str]] = None,
-        extra_outfiles: Optional[List[str]] = None,
-        extra_commands: Optional[List[str]] = None,
-        scratch_name: Optional[str] = None,
-        scratch_messy: bool = False,
-        timeout: Optional[int] = None,
-    ) -> Tuple[bool, Dict[str, Any]]:
-        """
-        For option documentation go look at qcengine/util.execute
-        """
-
-        # Collect all input files and update with extra_infiles
-        infiles = inputs["infiles"]
-        if extra_infiles is not None:
-            infiles.update(extra_infiles)
-
-        # Collect all output files and extend with with extra_outfiles
-        outfiles = ["dispatch.out", "results.json"]
-        if extra_outfiles is not None:
-            outfiles.extend(extra_outfiles)
-
-        # Replace commands with extra_commands if present
-        commands = inputs["commands"]
-        if extra_commands is not None:
-            commands = extra_commands
-
-        # Run the qcore program
-        exe_success, proc = execute(
-            commands,
-            infiles=infiles,
-            outfiles=outfiles,
-            scratch_name=scratch_name,
-            scratch_directory=inputs["scratch_directory"],
-            scratch_messy=scratch_messy,
-            timeout=timeout,
-        )
-
-        # Entos does not create an output file and only prints to stdout
-        proc["outfiles"]["results.json"] = proc["stdout"]
-        return exe_success, proc
-
-    def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
-
-        scf_map = {"energy": "scf_total_energy", "n_iter": "scf_iterations"}
-        dft_map = scf_map.copy()
-        hf_map = scf_map.copy()
-        xtb_map = scf_map.copy()
-
-        energy_command_map = {"dft": dft_map, "hf": hf_map, "xtb": xtb_map}
-        extras_map = {"converged": "scf_converged"}
         wavefunction_map = {
-            "restricted": {
-                "orbitals": "scf_orbitals_a",
-                "density": "scf_density_a",
-                "fock": "scf_fock_a",
-                "eigenvalues": "scf_eigenvalues_a",
-                "occupations": "scf_occupations_a",
-            },
-            "unrestricted": {
-                "orbitals_alpha": "scf_orbitals_a",
-                "orbitals_beta": "scf_orbitals_b",
-                "density_alpha": "scf_density_a",
-                "density_beta": "scf_density_b",
-                "fock_alpha": "scf_fock_a",
-                "fock_beta": "scf_fock_b",
-                "eigenvalues_alpha": "scf_eigenvalues_a",
-                "eigenvalues_beta": "scf_eigenvalues_b",
-                "occupations_alpha": "scf_occupations_a",
-                "occupations_beta": "scf_occupations_b",
-            },
+            "orbitals_alpha": "scf_orbitals_a",
+            "orbitals_beta": "scf_orbitals_b",
+            "density_alpha": "scf_density_a",
+            "density_beta": "scf_density_b",
+            "fock_alpha": "scf_fock_a",
+            "fock_beta": "scf_fock_b",
+            "eigenvalues_alpha": "scf_eigenvalues_a",
+            "eigenvalues_beta": "scf_eigenvalues_b",
+            "occupations_alpha": "scf_occupations_a",
+            "occupations_beta": "scf_occupations_b",
         }
 
-        # Determine the energy_command
-        energy_command = self.determine_energy_command(input_model.model.method)
+        output_data = input_model.dict()
 
-        gradient_map = {"gradient": "gradient"}
-        gradient_map.update({"energy": "scf_total_energy"})
-        # TODO Uncomment once qcore adds scf_map to gradient json results
-        # gradient_map.update(energy_command_map[energy_command])
+        output_data["return_result"] = output[input_model.driver.value]
 
-        hessian_map = {"hessian": "hessian"}
-        hessian_map.update(energy_command_map[energy_command])
+        properties = {
+            "return_energy": output["energy"],
+        }
+        output_data["properties"] = properties
+        # if input_model.protocols.wavefunction != "none":
+        #     output_data["wavefunction"] = wavefunction
+        # output_data["extras"].update(extras)
+        output_data["schema_name"] = "qcschema_output"
+        output_data["success"] = True
+        print(output_data)
 
-        # Determine whether to use the energy map or the gradient map
-        if input_model.driver == "energy":
-            qcore_map = energy_command_map[energy_command]
-        elif input_model.driver == "gradient":
-            qcore_map = gradient_map
-        elif input_model.driver == "hessian":
-            qcore_map = hessian_map
-        else:
-            raise NotImplementedError(f"Driver {input_model.driver} not implemented for qcore.")
+        return AtomicResult(**output_data)
 
         # Parse the results.json output from qcore
         properties = {}
