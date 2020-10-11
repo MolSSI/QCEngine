@@ -33,9 +33,9 @@ def entos_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
     return ao_order
 
 
-class EntosHarness(ProgramHarness):
+class QcoreHarness(ProgramHarness):
     _defaults: Dict[str, Any] = {
-        "name": "entos",
+        "name": "qcore",
         "scratch": True,
         "thread_safe": False,
         "thread_parallel": True,
@@ -507,3 +507,13 @@ class EntosHarness(ProgramHarness):
             raise InputError(f"The energy method {method} is not implemented in QCEngine for entos.")
 
         return energy_command
+
+class EntosHarness(QcoreHarness):
+    _defaults: Dict[str, Any] = {
+        "name": "entos",
+        "scratch": True,
+        "thread_safe": False,
+        "thread_parallel": True,
+        "node_parallel": False,
+        "managed_memory": True,
+    }
