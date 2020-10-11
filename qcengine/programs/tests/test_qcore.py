@@ -32,6 +32,7 @@ def test_qcore_methods(method, energy, gradient_norm):
     assert atomic_result.wavefunction is None
 
 
+@using("qcore")
 def test_qcore_wavefunction():
 
     atomic_input = qcel.models.AtomicInput(
