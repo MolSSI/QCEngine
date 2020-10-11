@@ -2,12 +2,11 @@
 The qcore QCEngine Harness
 """
 
-import json
 from typing import Any, Dict, List, Set, TYPE_CHECKING
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet
-from qcelemental.util import parse_version, safe_version, which_import, serialize
+from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError, UnknownError
 from .model import ProgramHarness
@@ -180,14 +179,14 @@ class QcoreHarness(ProgramHarness):
             # Convert basis set, cannot handle arrays
             for shell in center["electron_shells"]:
                 shell.pop("normalized_primitives", None)
-                for k in ["coefficients", "exponents", "angular_momentum"]:
-                    shell[k] = shell[k].tolist()
+                for el_k in ["coefficients", "exponents", "angular_momentum"]:
+                    shell[el_k] = shell[el_k].tolist()
 
             if center["ecp_potentials"] is not None:
                 for shell in center["ecp_potentials"]:
                     shell.pop("ecp_potentials", None)
-                    for k in ["angular_momentum", "r_exponents", "gaussian_exponents", "coefficients"]:
-                        shell[k] = shell[k].tolist()
+                    for ecp_k in ["angular_momentum", "r_exponents", "gaussian_exponents", "coefficients"]:
+                        shell[ecp_k] = shell[ecp_k].tolist()
 
         basis_set = BasisSet(
             name=str(input_model.model.basis), center_data=obas["center_data"], atom_map=obas["atom_map"]
