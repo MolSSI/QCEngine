@@ -206,6 +206,12 @@ def test_geometric_retries(failure_engine, input_data):
             [1.8897269787924604, 3.1516330703676063, 112.9999999990053],
             marks=using("openmm"),
         ),
+        pytest.param(
+            "qcore",
+            {"method": "GFN1"},
+            [1.8104763949897031, 2.9132449420655213, 107.13403040879244],
+            marks=using("qcore"),
+        ),
     ],
 )
 def test_geometric_generic(input_data, program, model, bench):

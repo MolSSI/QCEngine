@@ -132,7 +132,8 @@ class QcoreHarness(ProgramHarness):
         elif method in self._xtb_models:
             method = {"kind": "xtb", "model": method}
         else:
-            raise KeyError(f"Method is not valid: {method}")
+            raise InputError(f"Method is not valid: {method}")
+
         method["details"] = input_data.keywords
 
         qcore_input = {
@@ -174,12 +175,19 @@ class QcoreHarness(ProgramHarness):
         output_data["return_result"] = output[input_model.driver.value]
 
         # Always build a wavefunction, it will be stripped
-        # Convert basis set
-        obas = json.loads(serialize(output["wavefunction"]["ao_basis"], encoding="json"))
+        obas = output["wavefunction"]["ao_basis"]
         for k, center in obas["center_data"].items():
+            # Convert basis set, cannot handle arrays
             for shell in center["electron_shells"]:
                 shell.pop("normalized_primitives", None)
-                shell["coefficients"] = [shell["coefficients"]]
+                for k in ["coefficients", "exponents", "angular_momentum"]:
+                    shell[k] = shell[k].tolist()
+
+            if center["ecp_potentials"] is not None:
+                for shell in center["ecp_potentials"]:
+                    shell.pop("ecp_potentials", None)
+                    for k in ["angular_momentum", "r_exponents", "gaussian_exponents", "coefficients"]:
+                        shell[k] = shell[k].tolist()
 
         basis_set = BasisSet(
             name=str(input_model.model.basis), center_data=obas["center_data"], atom_map=obas["atom_map"]
