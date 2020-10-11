@@ -1,5 +1,5 @@
 """
-The entos QCEngine Harness
+The qcore QCEngine Harness
 """
 
 import json
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from ..config import TaskConfig
 
 
-def entos_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
+def qcore_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
     ao_order = {}
     for ang_mom in range(max_angular_momentum):
         ao_order[ang_mom] = [x for x in range(ang_mom, -1 * ang_mom - 1, -1)]
@@ -105,22 +105,22 @@ class QcoreHarness(ProgramHarness):
         "xtb": _xtb_keywords_extra,
     }
 
-    # This map order converts entos ordering to CCA ordering
+    # This map order converts qcore ordering to CCA ordering
     # Entos spherical basis ordering for each angular momentum. Follows reverse order of CCA.
-    _entos_to_cca_ao_order = {"spherical": get_ao_conversion(cca_ao_order_spherical(10), entos_ao_order_spherical(10))}
+    _qcore_to_cca_ao_order = {"spherical": get_ao_conversion(cca_ao_order_spherical(10), qcore_ao_order_spherical(10))}
 
     class Config(ProgramHarness.Config):
         pass
 
     def found(self, raise_error: bool = False) -> bool:
         return which(
-            "entos", return_bool=True, raise_error=raise_error, raise_msg="Please install via https://www.entos.info/"
+            "qcore", return_bool=True, raise_error=raise_error, raise_msg="Please install via https://www.qcore.info/"
         )
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which("entos")
+        which_prog = which("qcore")
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=15)
@@ -130,19 +130,19 @@ class QcoreHarness(ProgramHarness):
 
     def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
-        Run entos
+        Run qcore
         """
-        # Check if entos executable is found
+        # Check if qcore executable is found
         self.found(raise_error=True)
 
-        # Check entos version
+        # Check qcore version
         if parse_version(self.get_version()) < parse_version("0.7.1"):
-            raise TypeError(f"entos version {self.get_version()} not supported")
+            raise TypeError(f"qcore version {self.get_version()} not supported")
 
         # Setup the job
         job_inputs = self.build_input(input_data, config)
 
-        # Run entos
+        # Run qcore
         exe_success, proc = self.execute(job_inputs)
 
         # Determine whether the calculation succeeded
@@ -183,7 +183,7 @@ class QcoreHarness(ProgramHarness):
         if extra_commands is not None:
             commands = extra_commands
 
-        # Run the entos program
+        # Run the qcore program
         exe_success, proc = execute(
             commands,
             infiles=infiles,
@@ -203,7 +203,7 @@ class QcoreHarness(ProgramHarness):
     ) -> Dict[str, Any]:
 
         # Write the geom xyz file with unit au
-        # TODO Make entos dtype in QCElemental
+        # TODO Make qcore dtype in QCElemental
         xyz_file = input_model.molecule.to_string(dtype="xyz", units="Angstrom")
 
         # Create input file
@@ -259,11 +259,11 @@ class QcoreHarness(ProgramHarness):
                     }
                 }
             else:
-                raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
+                raise NotImplementedError(f"Driver {input_model.driver} not implemented for qcore.")
 
             # Write input file
             input_file = [
-                f"entos_policy(version = '{self.get_version()}')",
+                f"qcore_policy(version = '{self.get_version()}')",
                 "json_results := ",
             ] + self.write_input_recursive(input_dict)
             input_file = "\n".join(input_file)
@@ -288,7 +288,7 @@ class QcoreHarness(ProgramHarness):
             input_file = str_template.substitute()
 
         return {
-            "commands": ["entos", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
+            "commands": ["qcore", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
             "infiles": {"dispatch.in": input_file, "geometry.xyz": xyz_file},
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
@@ -348,7 +348,7 @@ class QcoreHarness(ProgramHarness):
 
         gradient_map = {"gradient": "gradient"}
         gradient_map.update({"energy": "scf_total_energy"})
-        # TODO Uncomment once entos adds scf_map to gradient json results
+        # TODO Uncomment once qcore adds scf_map to gradient json results
         # gradient_map.update(energy_command_map[energy_command])
 
         hessian_map = {"hessian": "hessian"}
@@ -356,39 +356,39 @@ class QcoreHarness(ProgramHarness):
 
         # Determine whether to use the energy map or the gradient map
         if input_model.driver == "energy":
-            entos_map = energy_command_map[energy_command]
+            qcore_map = energy_command_map[energy_command]
         elif input_model.driver == "gradient":
-            entos_map = gradient_map
+            qcore_map = gradient_map
         elif input_model.driver == "hessian":
-            entos_map = hessian_map
+            qcore_map = hessian_map
         else:
-            raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
+            raise NotImplementedError(f"Driver {input_model.driver} not implemented for qcore.")
 
-        # Parse the results.json output from entos
+        # Parse the results.json output from qcore
         properties = {}
         load_results = json.loads(outfiles["results.json"])
-        entos_results = load_results["json_results"]
-        for key in entos_map.keys():
-            if key in entos_results:
-                properties[entos_map[key]] = entos_results[key]
+        qcore_results = load_results["json_results"]
+        for key in qcore_map.keys():
+            if key in qcore_results:
+                properties[qcore_map[key]] = qcore_results[key]
 
         # Parse calcinfo_* properties from the results.json
-        if "ao_basis" in entos_results.keys():
-            properties["calcinfo_nbasis"] = entos_results["ao_basis"]["__Basis"]["n_functions"]
-        if "structure" in entos_results.keys():
-            properties["calcinfo_natom"] = len(entos_results["structure"]["__Atoms"]["atoms"])
+        if "ao_basis" in qcore_results.keys():
+            properties["calcinfo_nbasis"] = qcore_results["ao_basis"]["__Basis"]["n_functions"]
+        if "structure" in qcore_results.keys():
+            properties["calcinfo_natom"] = len(qcore_results["structure"]["__Atoms"]["atoms"])
 
-        # Parse wavefunction quantities from entos_results
+        # Parse wavefunction quantities from qcore_results
         wavefunction = {}
         if input_model.protocols.wavefunction != "none":
 
             # First parse basis set information
-            if "ao_basis" in entos_results.keys():
-                atom_map = [item[0] for item in entos_results["structure"]["__Atoms"]["atoms"]]
+            if "ao_basis" in qcore_results.keys():
+                atom_map = [item[0] for item in qcore_results["structure"]["__Atoms"]["atoms"]]
 
                 # Each item in electron_shells is a dictionary containing info for one basis function
                 electron_shells_by_center = {}
-                for basis_item in entos_results["ao_basis"]["__Basis"]["electron_shells"]:
+                for basis_item in qcore_results["ao_basis"]["__Basis"]["electron_shells"]:
                     center_index = basis_item["center_index"]
 
                     electron_shell_info = {
@@ -412,10 +412,10 @@ class QcoreHarness(ProgramHarness):
                 # Construct BasisSet
                 basis_info = {
                     "name": input_model.model.basis,
-                    # "description": "", # None provided by entos
+                    # "description": "", # None provided by qcore
                     "center_data": center_data,
                     "atom_map": atom_map,
-                    "nbf": entos_results["ao_basis"]["__Basis"]["n_functions"],
+                    "nbf": qcore_results["ao_basis"]["__Basis"]["n_functions"],
                 }
                 basis_set = BasisSet(**basis_info)
                 wavefunction["basis"] = basis_set
@@ -425,44 +425,44 @@ class QcoreHarness(ProgramHarness):
                 )
 
             # Now parse wavefunction information
-            n_channels = entos_results["n_channels"]
+            n_channels = qcore_results["n_channels"]
             if n_channels == 1:
                 wavefunction["restricted"] = True
                 for key in wavefunction_map["restricted"].keys():
-                    if key in entos_results:
+                    if key in qcore_results:
                         if "orbitals" in key:
                             orbitals_transposed = reorder_column_ao_indices(
-                                np.array(entos_results[key]), basis_set, self._entos_to_cca_ao_order
+                                np.array(qcore_results[key]), basis_set, self._qcore_to_cca_ao_order
                             )
                             wavefunction[wavefunction_map["restricted"][key]] = orbitals_transposed.transpose()
                         elif "density" in key or "fock" in key:
                             wavefunction[wavefunction_map["restricted"][key]] = reorder_row_and_column_ao_indices(
-                                entos_results[key], basis_set, self._entos_to_cca_ao_order
+                                qcore_results[key], basis_set, self._qcore_to_cca_ao_order
                             )
                         else:
-                            wavefunction[wavefunction_map["restricted"][key]] = entos_results[key]
+                            wavefunction[wavefunction_map["restricted"][key]] = qcore_results[key]
             # TODO Add a test in QCEngineRecords
             elif n_channels == 2:
                 wavefunction["restricted"] = False
                 for key in wavefunction_map["unrestricted"].keys():
-                    if key in entos_results:
+                    if key in qcore_results:
                         if "orbitals" in key:
                             orbitals_transposed = reorder_column_ao_indices(
-                                np.array(entos_results[key]), basis_set, self._entos_to_cca_ao_order
+                                np.array(qcore_results[key]), basis_set, self._qcore_to_cca_ao_order
                             )
                             wavefunction[wavefunction_map["restricted"][key]] = orbitals_transposed.transpose()
                         elif "density" in key or "fock" in key:
                             wavefunction[wavefunction_map["restricted"][key]] = reorder_row_and_column_ao_indices(
-                                entos_results[key], basis_set, self._entos_to_cca_ao_order
+                                qcore_results[key], basis_set, self._qcore_to_cca_ao_order
                             )
                         else:
-                            wavefunction[wavefunction_map["restricted"][key]] = entos_results[key]
+                            wavefunction[wavefunction_map["restricted"][key]] = qcore_results[key]
 
         # Parse results for the extras_map from results.json
         extras = {}
         for key in extras_map.keys():
-            if key in entos_results:
-                extras[extras_map[key]] = entos_results[key]
+            if key in qcore_results:
+                extras[extras_map[key]] = qcore_results[key]
 
         # Initialize output_data by copying over input_model.dict()
         output_data = input_model.dict()
@@ -479,7 +479,7 @@ class QcoreHarness(ProgramHarness):
             else:
                 raise KeyError(f"{input_model.driver} not found.")
         else:
-            raise NotImplementedError(f"Driver {input_model.driver} not implemented for entos.")
+            raise NotImplementedError(f"Driver {input_model.driver} not implemented for qcore.")
 
         output_data["properties"] = properties
         if input_model.protocols.wavefunction != "none":
@@ -493,7 +493,7 @@ class QcoreHarness(ProgramHarness):
     # Determine the energy_command
     def determine_energy_command(self, method: str) -> str:
         """
-        Determine the energy command in entos
+        Determine the energy command in qcore
         """
 
         if method.upper() in self._dft_functionals:
@@ -504,7 +504,7 @@ class QcoreHarness(ProgramHarness):
         # Check method is supported
         energy_commands = [key for key in self._energy_commands]
         if energy_command not in energy_commands:
-            raise InputError(f"The energy method {method} is not implemented in QCEngine for entos.")
+            raise InputError(f"The energy method {method} is not implemented in QCEngine for qcore.")
 
         return energy_command
 
