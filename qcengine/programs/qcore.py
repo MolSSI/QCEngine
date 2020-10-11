@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet
-from qcelemental.util import parse_version, safe_version, which
+from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError, UnknownError
 from ..util import execute, popen
@@ -85,25 +85,7 @@ class QcoreHarness(ProgramHarness):
         "WB97XD3",
     }
 
-    # Available keywords for each of the energy commands
-    _scf_keywords_extra: Set[str] = {
-        "ansatz",
-        "df",
-        "orbital_grad_threshold",
-        "energy_threshold",
-        "coulomb_method",
-        "exchange_method",
-    }
-    _dft_keywords_extra: Set[str] = _scf_keywords_extra.copy()
-    _hf_keywords_extra: Set[str] = _scf_keywords_extra.copy()
-    _xtb_keywords_extra: Set[str] = {}
-
-    # Energy commands that are currently supported and their available keywords
-    _energy_commands: Dict[str, Any] = {
-        "dft": _dft_keywords_extra,
-        "hf": _hf_keywords_extra,
-        "xtb": _xtb_keywords_extra,
-    }
+    _xtb_models: Set[str] = {"GFN1", "GFN0"}
 
     # This map order converts qcore ordering to CCA ordering
     # Entos spherical basis ordering for each angular momentum. Follows reverse order of CCA.
@@ -113,18 +95,21 @@ class QcoreHarness(ProgramHarness):
         pass
 
     def found(self, raise_error: bool = False) -> bool:
-        return which(
-            "qcore", return_bool=True, raise_error=raise_error, raise_msg="Please install via https://www.qcore.info/"
+        return which_import(
+            "qcore",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install py-qcore -c entos -c conda-forge`.",
         )
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which("qcore")
+        which_prog = which_import("qcore")
         if which_prog not in self.version_cache:
-            with popen([which_prog, "--version"]) as exc:
-                exc["proc"].wait(timeout=15)
-            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[2])
+            import qcore
+
+            self.version_cache[which_prog] = safe_version(qcore.__version__)
 
         return self.version_cache[which_prog]
 
@@ -136,14 +121,48 @@ class QcoreHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # Check qcore version
-        if parse_version(self.get_version()) < parse_version("0.7.1"):
+        if parse_version(self.get_version()) < parse_version("0.8.9"):
             raise TypeError(f"qcore version {self.get_version()} not supported")
 
+        import qcore
+
+        method = input_data.model.method.upper()
+        if method in self._dft_functionals:
+            method = {"kind": "dft", "xc": method, "ao": input_data.model.basis}
+        elif method == "HF":
+            method = {"kind": "hf", "ao": input_data.model.basis}
+        elif method in self._xtb_models:
+            method = {"kind": "xtb", "model": method}
+        else:
+            raise KeyError(f"Method is not valid: {method}")
+        method["details"] = input_data.keywords
+
+        import codex
+
+        qcore_input = {
+            # "schema_name": "single_input",
+            "molecule": {
+                "geometry": input_data.molecule.geometry,
+                "atomic_numbers": input_data.molecule.atomic_numbers,
+                "charge": input_data.molecule.molecular_charge,
+                "multiplicity": input_data.molecule.molecular_multiplicity,
+            },
+            "method": method,
+            "result_contract": {"wavefunction": "all"},
+            "result_type": input_data.driver,
+        }
+        print()
+        print(input_data)
+        print(qcore_input)
+        result = qcore.run(qcore_input, ncores=config.ncores)
+        print(result)
+        raise
+
         # Setup the job
-        job_inputs = self.build_input(input_data, config)
+        # job_inputs = self.build_input(input_data, config)
 
         # Run qcore
-        exe_success, proc = self.execute(job_inputs)
+        # exe_success, proc = self.execute(job_inputs)
 
         # Determine whether the calculation succeeded
         if exe_success:
@@ -197,120 +216,6 @@ class QcoreHarness(ProgramHarness):
         # Entos does not create an output file and only prints to stdout
         proc["outfiles"]["results.json"] = proc["stdout"]
         return exe_success, proc
-
-    def build_input(
-        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
-    ) -> Dict[str, Any]:
-
-        # Write the geom xyz file with unit au
-        # TODO Make qcore dtype in QCElemental
-        xyz_file = input_model.molecule.to_string(dtype="xyz", units="Angstrom")
-
-        # Create input file
-        if template is None:
-
-            # Determine the energy_command
-            energy_command = self.determine_energy_command(input_model.model.method)
-
-            # Define base options for the energy command (options that can be taken directly from input_model)
-            scf_keywords_from_input_model = {
-                "ao": input_model.model.basis,
-                "charge": input_model.molecule.molecular_charge,
-                "spin": float(input_model.molecule.molecular_multiplicity - 1),
-            }
-            energy_keywords_from_input_model = {
-                "dft": {"xc": input_model.model.method.upper(), **scf_keywords_from_input_model},
-                "hf": {**scf_keywords_from_input_model},
-                "xtb": {"charge": input_model.molecule.molecular_charge},
-            }
-
-            # Resolve keywords (extra options) for the energy command
-            caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
-            energy_keywords_extra = {}
-            for key in caseless_keywords.keys():
-                if key in self._energy_commands[energy_command]:
-                    energy_keywords_extra[key] = caseless_keywords[key]
-
-            # Additional sub trees
-            structure = {"structure": {"file": "geometry.xyz"}}  # Structure sub tree
-
-            # Create the input dictionary for a energy call
-            if input_model.driver == "energy":
-                input_dict = {
-                    energy_command: {
-                        **structure,
-                        **energy_keywords_from_input_model[energy_command],
-                        **energy_keywords_extra,
-                    }
-                }
-            # Create the input dictionary for a gradient call
-            elif input_model.driver == "gradient":
-                input_dict = {
-                    "gradient": {
-                        **structure,
-                        energy_command: {**energy_keywords_from_input_model[energy_command], **energy_keywords_extra},
-                    }
-                }
-            elif input_model.driver == "hessian":
-                input_dict = {
-                    "hessian": {
-                        **structure,
-                        energy_command: {**energy_keywords_from_input_model[energy_command], **energy_keywords_extra},
-                    }
-                }
-            else:
-                raise NotImplementedError(f"Driver {input_model.driver} not implemented for qcore.")
-
-            # Write input file
-            input_file = [
-                f"qcore_policy(version = '{self.get_version()}')",
-                "json_results := ",
-            ] + self.write_input_recursive(input_dict)
-            input_file = "\n".join(input_file)
-
-        # Use the template input file if present
-        else:
-            # Some of the potential different template options
-            # (A) ordinary build_input (need to define a base template)
-            # (B) user wants to add stuff after normal template (A)
-            # (C) user knows their domain language (doesn't use any QCSchema quantities)
-
-            # # Build dictionary for substitute
-            # sub_dict = {
-            #     "method": input_model.model.method,
-            #     "basis": input_model.model.basis,
-            #     "df_basis": input_model.keywords["df_basis"].upper(),
-            #     "charge": input_model.molecule.molecular_charge
-            # }
-
-            # Perform substitution to create input file
-            str_template = string.Template(template)
-            input_file = str_template.substitute()
-
-        return {
-            "commands": ["qcore", "-n", str(config.ncores), "-o", "dispatch.out", "--json-results", "dispatch.in"],
-            "infiles": {"dispatch.in": input_file, "geometry.xyz": xyz_file},
-            "scratch_directory": config.scratch_directory,
-            "input_result": input_model.copy(deep=True),
-        }
-
-    def write_input_recursive(self, d: Dict[str, Any]) -> List:
-        input_file = []
-        for key, value in d.items():
-            if isinstance(value, dict):
-                input_file.append(key + "(")
-                rec_input = self.write_input_recursive(value)
-                indented_line = map(lambda x: "  " + x, rec_input)
-                input_file.extend(indented_line)
-                input_file.append(")")
-            else:
-                if isinstance(value, str):
-                    input_file.append("{0} = '{1}'".format(key, value))
-                elif isinstance(value, bool):
-                    input_file.append("{0} = {1}".format(key, str(value).lower()))
-                else:
-                    input_file.append("{0} = {1}".format(key, value))
-        return input_file
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
 
@@ -507,6 +412,7 @@ class QcoreHarness(ProgramHarness):
             raise InputError(f"The energy method {method} is not implemented in QCEngine for qcore.")
 
         return energy_command
+
 
 class EntosHarness(QcoreHarness):
     _defaults: Dict[str, Any] = {

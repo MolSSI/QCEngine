@@ -98,7 +98,7 @@ def list_available_programs() -> Set[str]:
 
 # Quantum
 register_program(CFOURHarness())
-register_program(EntosHarness()) # Duplicate of Qcore harness to transition the namespace, to be deprecated
+register_program(EntosHarness())  # Duplicate of Qcore harness to transition the namespace, to be deprecated
 register_program(GAMESSHarness())
 register_program(MolproHarness())
 register_program(NWChemHarness())
