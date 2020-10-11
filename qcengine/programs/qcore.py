@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Set, TYPE_CHECKING
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet
-from qcelemental.util import parse_version, safe_version, which_import
+from qcelemental.util import parse_version, safe_version, which_import, serialize
 
 from ..exceptions import InputError, UnknownError
 from .model import ProgramHarness
@@ -147,9 +147,6 @@ class QcoreHarness(ProgramHarness):
             "result_contract": {"wavefunction": "all"},
             "result_type": input_data.driver,
         }
-        print()
-        print(input_data)
-        print(qcore_input)
         try:
             result = qcore.run(qcore_input, ncores=config.ncores)
         except Exception as exc:
@@ -176,140 +173,66 @@ class QcoreHarness(ProgramHarness):
 
         output_data["return_result"] = output[input_model.driver.value]
 
+        # Always build a wavefunction, it will be stripped
+        # Convert basis set
+        obas = json.loads(serialize(output["wavefunction"]["ao_basis"], encoding="json"))
+        for k, center in obas["center_data"].items():
+            for shell in center["electron_shells"]:
+                shell.pop("normalized_primitives", None)
+                shell["coefficients"] = [shell["coefficients"]]
+
+        basis_set = BasisSet(
+            name=str(input_model.model.basis), center_data=obas["center_data"], atom_map=obas["atom_map"]
+        )
+
+        wavefunction = {"basis": basis_set}
+        for key, qcschema_key in wavefunction_map.items():
+            qcore_data = output["wavefunction"].get(key, None)
+            if qcore_data is None:
+                continue
+
+            if ("density" in key) or ("fock" in key):
+                qcore_data = reorder_row_and_column_ao_indices(qcore_data, basis_set, self._qcore_to_cca_ao_order)
+            # Handles orbitals and 1D
+            elif "orbitals" in key:
+                qcore_data = reorder_column_ao_indices(qcore_data, basis_set, self._qcore_to_cca_ao_order)
+            elif "eigenvalues" in key:
+                qcore_data = reorder_column_ao_indices(
+                    qcore_data.reshape(1, -1), basis_set, self._qcore_to_cca_ao_order
+                ).ravel()
+
+            elif "occupations" in key:
+                tmp = np.zeros(basis_set.nbf)
+                tmp[: qcore_data.shape[0]] = qcore_data
+                qcore_data = reorder_column_ao_indices(
+                    tmp.reshape(1, -1), basis_set, self._qcore_to_cca_ao_order
+                ).ravel()
+            else:
+                raise KeyError("Wavefunction conversion key not understood")
+
+            wavefunction[qcschema_key] = qcore_data
+
+        wavefunction["restricted"] = True
+        if "scf_eigenvalues_b" in wavefunction:
+            wavefunction["restricted"] = False
+
+        output_data["wavefunction"] = wavefunction
+
+        # Handle remaining top level keys
         properties = {
+            "calcinfo_nbasis": basis_set.nbf,
+            "calcinfo_nmo": basis_set.nbf,
+            "calcinfo_nalpha": np.sum(wavefunction["scf_occupations_a"] > 0),
+            "calcinfo_natom": input_model.molecule.symbols.shape[0],
             "return_energy": output["energy"],
         }
-        output_data["properties"] = properties
-        # if input_model.protocols.wavefunction != "none":
-        #     output_data["wavefunction"] = wavefunction
-        # output_data["extras"].update(extras)
-        output_data["schema_name"] = "qcschema_output"
-        output_data["success"] = True
-        print(output_data)
-
-        return AtomicResult(**output_data)
-
-        # Parse the results.json output from qcore
-        properties = {}
-        load_results = json.loads(outfiles["results.json"])
-        qcore_results = load_results["json_results"]
-        for key in qcore_map.keys():
-            if key in qcore_results:
-                properties[qcore_map[key]] = qcore_results[key]
-
-        # Parse calcinfo_* properties from the results.json
-        if "ao_basis" in qcore_results.keys():
-            properties["calcinfo_nbasis"] = qcore_results["ao_basis"]["__Basis"]["n_functions"]
-        if "structure" in qcore_results.keys():
-            properties["calcinfo_natom"] = len(qcore_results["structure"]["__Atoms"]["atoms"])
-
-        # Parse wavefunction quantities from qcore_results
-        wavefunction = {}
-        if input_model.protocols.wavefunction != "none":
-
-            # First parse basis set information
-            if "ao_basis" in qcore_results.keys():
-                atom_map = [item[0] for item in qcore_results["structure"]["__Atoms"]["atoms"]]
-
-                # Each item in electron_shells is a dictionary containing info for one basis function
-                electron_shells_by_center = {}
-                for basis_item in qcore_results["ao_basis"]["__Basis"]["electron_shells"]:
-                    center_index = basis_item["center_index"]
-
-                    electron_shell_info = {
-                        "angular_momentum": [basis_item["angular_momentum"]],
-                        "harmonic_type": basis_item["function_type"].split("_")[-1],
-                        "exponents": basis_item["exponents"],
-                        "coefficients": basis_item["coefficients"],
-                    }
-                    if center_index not in electron_shells_by_center:
-                        electron_shells_by_center[center_index] = [electron_shell_info]
-                    else:
-                        electron_shells_by_center[center_index].append(electron_shell_info)
-
-                # Construct center_data from electron_shells_by_center
-                # Note: Duplicate atoms will over write each other
-                center_data = {}
-                for i in range(len(electron_shells_by_center)):
-                    basis_center_info = {"electron_shells": electron_shells_by_center[i]}
-                    center_data[atom_map[i]] = basis_center_info
-
-                # Construct BasisSet
-                basis_info = {
-                    "name": input_model.model.basis,
-                    # "description": "", # None provided by qcore
-                    "center_data": center_data,
-                    "atom_map": atom_map,
-                    "nbf": qcore_results["ao_basis"]["__Basis"]["n_functions"],
-                }
-                basis_set = BasisSet(**basis_info)
-                wavefunction["basis"] = basis_set
-            else:
-                raise KeyError(
-                    f"Basis set information not found so wavefunction protocol {input_model.protocols.wavefunction} is not available."
-                )
-
-            # Now parse wavefunction information
-            n_channels = qcore_results["n_channels"]
-            if n_channels == 1:
-                wavefunction["restricted"] = True
-                for key in wavefunction_map["restricted"].keys():
-                    if key in qcore_results:
-                        if "orbitals" in key:
-                            orbitals_transposed = reorder_column_ao_indices(
-                                np.array(qcore_results[key]), basis_set, self._qcore_to_cca_ao_order
-                            )
-                            wavefunction[wavefunction_map["restricted"][key]] = orbitals_transposed.transpose()
-                        elif "density" in key or "fock" in key:
-                            wavefunction[wavefunction_map["restricted"][key]] = reorder_row_and_column_ao_indices(
-                                qcore_results[key], basis_set, self._qcore_to_cca_ao_order
-                            )
-                        else:
-                            wavefunction[wavefunction_map["restricted"][key]] = qcore_results[key]
-            # TODO Add a test in QCEngineRecords
-            elif n_channels == 2:
-                wavefunction["restricted"] = False
-                for key in wavefunction_map["unrestricted"].keys():
-                    if key in qcore_results:
-                        if "orbitals" in key:
-                            orbitals_transposed = reorder_column_ao_indices(
-                                np.array(qcore_results[key]), basis_set, self._qcore_to_cca_ao_order
-                            )
-                            wavefunction[wavefunction_map["restricted"][key]] = orbitals_transposed.transpose()
-                        elif "density" in key or "fock" in key:
-                            wavefunction[wavefunction_map["restricted"][key]] = reorder_row_and_column_ao_indices(
-                                qcore_results[key], basis_set, self._qcore_to_cca_ao_order
-                            )
-                        else:
-                            wavefunction[wavefunction_map["restricted"][key]] = qcore_results[key]
-
-        # Parse results for the extras_map from results.json
-        extras = {}
-        for key in extras_map.keys():
-            if key in qcore_results:
-                extras[extras_map[key]] = qcore_results[key]
-
-        # Initialize output_data by copying over input_model.dict()
-        output_data = input_model.dict()
-
-        # Determine the correct return_result
-        if input_model.driver == "energy":
-            if "scf_total_energy" in properties:
-                output_data["return_result"] = properties["scf_total_energy"]
-            else:
-                raise KeyError(f"Could not find {input_model.model} total energy")
-        elif input_model.driver == "gradient" or input_model.driver == "hessian":
-            if input_model.driver in properties:
-                output_data["return_result"] = properties.pop(input_model.driver)
-            else:
-                raise KeyError(f"{input_model.driver} not found.")
+        if wavefunction["restricted"]:
+            properties["calcinfo_nbeta"] = properties["calcinfo_nalpha"]
         else:
-            raise NotImplementedError(f"Driver {input_model.driver} not implemented for qcore.")
+            properties["calcinfo_nbeta"] = np.sum(wavefunction["scf_occupations_b"] > 0)
 
         output_data["properties"] = properties
-        if input_model.protocols.wavefunction != "none":
-            output_data["wavefunction"] = wavefunction
-        output_data["extras"].update(extras)
+
         output_data["schema_name"] = "qcschema_output"
         output_data["success"] = True
 
