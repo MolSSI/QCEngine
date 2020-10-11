@@ -78,6 +78,8 @@ install:
   - |
     if [ $PROG == "PSI4DEV" ]; then
       conda remove qcengine --force
+    elif [ $PROG == "QCORE" ]; then
+      qcore --accept-license
     fi
   - conda list
 
