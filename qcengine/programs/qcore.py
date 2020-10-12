@@ -32,7 +32,7 @@ def qcore_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
 
 class QcoreHarness(ProgramHarness):
     _defaults: Dict[str, Any] = {
-        "name": "qcore",
+        "name": "Qcore",
         "scratch": True,
         "thread_safe": False,
         "thread_parallel": True,
@@ -245,28 +245,10 @@ class QcoreHarness(ProgramHarness):
 
         return AtomicResult(**output_data)
 
-    # Determine the energy_command
-    def determine_energy_command(self, method: str) -> str:
-        """
-        Determine the energy command in qcore
-        """
-
-        if method.upper() in self._dft_functionals:
-            energy_command = "dft"
-        else:
-            energy_command = method.lower()
-
-        # Check method is supported
-        energy_commands = [key for key in self._energy_commands]
-        if energy_command not in energy_commands:
-            raise InputError(f"The energy method {method} is not implemented in QCEngine for qcore.")
-
-        return energy_command
-
 
 class EntosHarness(QcoreHarness):
     _defaults: Dict[str, Any] = {
-        "name": "entos",
+        "name": "Entos",
         "scratch": True,
         "thread_safe": False,
         "thread_parallel": True,
