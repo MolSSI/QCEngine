@@ -97,6 +97,7 @@ class TeraChemHarness(ProgramHarness):
 
         input_file.append("\n# model")
         input_file.append("basis " + str(input_model.model.basis))
+        input_file.append("method " + str(input_model.model.method))
 
         input_file.append("\n# driver")
         input_file.append("run " + input_model.driver)
