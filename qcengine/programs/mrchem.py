@@ -170,7 +170,7 @@ class MRChemHarness(ProgramHarness):
                         f"{ks[1]}": {f"{ks[2]}": _nested_get(mrchem_output, ks)} for ks in computed_rsp_props
                     }
                 else:
-                    raise RuntimeError(f"MRChem cannot run with {input_model.driver} driver")
+                    raise InputError(f"MRChem cannot run with {input_model.driver} driver")
 
                 compute_success = mrchem_output["success"]
 
