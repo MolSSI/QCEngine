@@ -34,10 +34,10 @@ matrix:
       env:
         - PYTHON_VER=3.6
         - PROG=NWCHEM
-    #- os: linux
-    #  env:
-    #    - PYTHON_VER=3.6
-    #    - PROG=MRCHEM
+    - os: linux
+      env:
+        - PYTHON_VER=3.6
+        - PROG=MRCHEM
 
 before_install:
     # Additional info about the build
