@@ -140,6 +140,7 @@ def failure_engine():
 
 # Figure out what is imported
 _programs = {
+    "adcc": is_program_new_enough("adcc", "0.15.1"),
     "cfour": which("xcfour", return_bool=True),
     "dftd3": which("dftd3", return_bool=True),
     "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),

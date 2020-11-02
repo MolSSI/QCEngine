@@ -5,6 +5,7 @@ Imports the various compute backends
 from typing import Set
 
 from ..exceptions import InputError, ResourceError
+from .adcc import AdccHarness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
 from .qcore import QcoreHarness, EntosHarness
@@ -98,6 +99,7 @@ def list_available_programs() -> Set[str]:
 
 
 # Quantum
+register_program(AdccHarness())
 register_program(CFOURHarness())
 register_program(EntosHarness())  # Duplicate of Qcore harness to transition the namespace, to be deprecated
 register_program(GAMESSHarness())

@@ -1,0 +1,21 @@
+name: test
+channels:
+  - adcc
+  - psi4/label/dev
+  - conda-forge
+dependencies:
+  - adcc=0.15.1
+  - psi4
+
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental=0.13.0  # test minimum stated version.
+  - pydantic=1.2.0  # test minimun stated version. actually min is 1.0 but no py38 builds
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
