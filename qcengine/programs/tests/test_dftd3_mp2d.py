@@ -54,7 +54,7 @@ def test_dftd3_error():
     assert "correction level" in str(exc.value)
 
 
-## Resources
+# Resources
 
 ref = {}
 dmm = ["dimer", "mA", "mB", "mAgB", "gAmB"]
@@ -73,11 +73,13 @@ ref["eneyne"]["MP2-DMP2"] = dict(
 )
 ref["eneyne"]["SAPT0-D3M(BJ)"] = dict(zip(dmm, [-0.06896506, -0.03995152, -0.02689133, -0.03995152, -0.02689133]))
 ref["eneyne"]["SAPT0-D3M"] = dict(zip(dmm, [-0.04486853, -0.02659896, -0.01614236, -0.02659896, -0.01614236]))
+ref["eneyne"]["GCP"] = dict(zip(dmm, [0.0159608596, -0.0018710542, 0.0012920388, 0.0049560054, 0.0103950441]))
 
 ref["ne"] = {}
 ref["ne"]["B3LYP-D3(BJ)"] = {"atom": 0.0}
 ref["ne"]["MP2-DMP2"] = {"atom": 0.0}
 ref["ne"]["ATM"] = {"atom": 0.0}
+ref["ne"]["GCP"] = {"atom": 0.0}
 
 gref = {}
 gref["eneyne"] = {}
@@ -753,10 +755,81 @@ gref["eneyne"]["SAPT0-D3M(BJ)"] = dict(
         ],
     )
 )
+
+gref["eneyne"]["GCP"] = dict(
+    zip(
+        dmm,
+        [
+            np.array(
+                [
+                    [-0.32710379543888e-19, -0.69172406585692e-04, 0.10982631419040e-03],
+                    [0.37383290907300e-19, 0.69172406585692e-04, 0.10982631419040e-03],
+                    [-0.15254697454698e-02, 0.11030956605292e-02, 0.28014891183255e-04],
+                    [0.15254697454698e-02, 0.11030956605292e-02, 0.28014891183255e-04],
+                    [0.15254697454698e-02, -0.11030956605292e-02, 0.28014891183255e-04],
+                    [-0.15254697454698e-02, -0.11030956605292e-02, 0.28014891183255e-04],
+                    [0.22816950016663e-23, -0.13690170009998e-22, 0.18237229624453e-03],
+                    [0.00000000000000e00, 0.14602848010664e-21, -0.25950727860856e-03],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.14756310364428e-02],
+                    [0.00000000000000e00, -0.11408475008331e-23, -0.17302082471926e-02],
+                ]
+            ),
+            np.array(
+                [
+                    [0.34266209661404e-18, -0.20208529257725e-01, 0.10107213710498e-04],
+                    [-0.33566899260151e-18, 0.20208529257725e-01, 0.10107213710498e-04],
+                    [0.27231252084318e-02, -0.14200517748742e-02, -0.50536068552489e-05],
+                    [-0.27231252084318e-02, -0.14200517748742e-02, -0.50536068552489e-05],
+                    [-0.27231252084318e-02, 0.14200517748742e-02, -0.50536068552489e-05],
+                    [0.27231252084318e-02, 0.14200517748742e-02, -0.50536068552489e-05],
+                ]
+            ),
+            np.array(
+                [
+                    [0.00000000000000e00, 0.00000000000000e00, 0.68069703161428e-04],
+                    [0.00000000000000e00, 0.00000000000000e00, -0.67416294638677e-04],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.34846719859829e-03],
+                    [0.00000000000000e00, 0.00000000000000e00, -0.34912060712104e-03],
+                ]
+            ),
+            np.array(
+                [
+                    [0.00000000000000e00, 0.17633567333202e-02, 0.74522722040174e-06],
+                    [0.00000000000000e00, -0.17633567333202e-02, 0.74522722040174e-06],
+                    [0.22552670725250e-03, 0.33585712825095e-03, -0.37261361020087e-06],
+                    [-0.22552670725250e-03, 0.33585712825095e-03, -0.37261361020087e-06],
+                    [-0.22552670725250e-03, -0.33585712825095e-03, -0.37261361020087e-06],
+                    [0.22552670725250e-03, -0.33585712825095e-03, -0.37261361020087e-06],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                ]
+            ),
+            np.array(
+                [
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.00000000000000e00],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.63749053662728e-03],
+                    [0.00000000000000e00, 0.00000000000000e00, -0.62817584877172e-03],
+                    [0.00000000000000e00, 0.00000000000000e00, 0.31837548471878e-02],
+                    [0.00000000000000e00, 0.00000000000000e00, -0.31930695350433e-02],
+                ]
+            ),
+        ],
+    )
+)
+
+
 gref["ne"] = {}
 gref["ne"]["B3LYP-D3(BJ)"] = {"atom": np.zeros((1, 3))}
 gref["ne"]["MP2-DMP2"] = {"atom": np.zeros((1, 3))}
 gref["ne"]["ATM"] = {"atom": np.zeros((1, 3))}
+gref["ne"]["GCP"] = {"atom": np.zeros((1, 3))}
 
 seneyne = """
 C   0.000000  -0.667578  -2.124659
@@ -871,7 +944,7 @@ def _compute_key(pjrec):
     return pjrec["fctldash"].upper()
 
 
-## Tests
+# Tests
 
 
 @pytest.mark.parametrize(
@@ -1396,4 +1469,64 @@ def test_dftd3_sapt_pairwise(request, subjects):
     assert compare_values(expected, jrec["extras"]["qcvars"]["SAPT0-D3M DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
     assert compare_values(
         expected_pairwise, jrec["extras"]["qcvars"]["PAIRWISE DISPERSION CORRECTION ANALYSIS"], atol=1.0e-7
+    )
+
+
+@using("gcp")
+@pytest.mark.parametrize(
+    "subjects",
+    [
+        pytest.param(eneyne_ne_psi4mols, marks=using("psi4")),
+        pytest.param(
+            eneyne_ne_qcdbmols, marks=using("psi4")
+        ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_qcschemamols),
+    ],
+    ids=["qmol", "pmol", "qcmol"],
+)
+@pytest.mark.parametrize(
+    "inp",
+    [
+        ({"parent": "eneyne", "name": "hf/sv", "subject": "dimer", "lbl": "GCP"}),
+        ({"parent": "eneyne", "name": "hf3c", "subject": "mA", "lbl": "GCP"}),
+        ({"parent": "eneyne", "name": "dft/def2-tzvp", "subject": "mB", "lbl": "GCP"}),
+        ({"parent": "eneyne", "name": "dft/def2-SV(P)", "subject": "gAmB", "lbl": "GCP"}),
+        ({"parent": "eneyne", "name": "pbeh3c", "subject": "mAgB", "lbl": "GCP"}),
+        ({"parent": "ne", "name": "hf/minis", "subject": "atom", "lbl": "GCP"}),
+    ],
+)
+def test_gcp(inp, subjects, request):
+    subject = subjects()[inp["parent"]][inp["subject"]]
+    expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
+    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]].ravel()
+
+    if "qcmol" in request.node.name:
+        mol = subject
+    else:
+        mol = subject.to_schema(dtype=2)
+
+    resinp = {
+        "schema_name": "qcschema_input",
+        "schema_version": 1,
+        "molecule": mol,
+        "driver": "gradient",
+        "model": {"method": inp["name"]},
+        "keywords": {},
+    }
+    jrec = qcng.compute(resinp, "gcp", raise_error=True)
+    jrec = jrec.dict()
+
+    # assert len(jrec["extras"]["qcvars"]) == 8
+    print(jrec["extras"]["qcvars"])
+
+    assert compare_values(expected, jrec["extras"]["qcvars"]["CURRENT ENERGY"], atol=1.0e-7)
+    assert compare_values(expected, jrec["extras"]["qcvars"]["GCP CORRECTION ENERGY"], atol=1.0e-7)
+    assert compare_values(
+        expected, jrec["extras"]["qcvars"][inp["name"].upper() + " GCP CORRECTION ENERGY"], atol=1.0e-7
+    )
+
+    assert compare_values(gexpected, jrec["extras"]["qcvars"]["CURRENT GRADIENT"], atol=1.0e-7)
+    assert compare_values(gexpected, jrec["extras"]["qcvars"]["GCP CORRECTION GRADIENT"], atol=1.0e-7)
+    assert compare_values(
+        gexpected, jrec["extras"]["qcvars"][inp["name"].upper() + " GCP CORRECTION GRADIENT"], atol=1.0e-7
     )

@@ -7,6 +7,7 @@ from typing import Set
 from ..exceptions import InputError, ResourceError
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
+from .gcp import GCPHarness
 from .qcore import QcoreHarness, EntosHarness
 from .gamess import GAMESSHarness
 from .molpro import MolproHarness
@@ -123,4 +124,5 @@ register_program(OpenMMHarness())
 
 # Analytical Corrections
 register_program(DFTD3Harness())
+register_program(GCPHarness())
 register_program(MP2DHarness())
