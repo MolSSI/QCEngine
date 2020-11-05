@@ -1,28 +1,24 @@
 """
 Calls adcc
 """
-import json
-import os
-import sys
-from pathlib import Path
-import importlib
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
-import numpy as np
+from typing import Dict, TYPE_CHECKING
 
-from qcelemental.models import AtomicResult, AtomicResultProperties, Provenance
-from qcelemental.util import deserialize, parse_version, safe_version, which_import
+from qcelemental.util import safe_version, which_import
+from qcelemental.models import (AtomicResult, AtomicResultProperties,
+                                Provenance)
 
-from ..exceptions import InputError, RandomError, ResourceError, UnknownError
 from .model import ProgramHarness
+from ..exceptions import InputError, UnknownError
 
 if TYPE_CHECKING:
     from qcelemental.models import AtomicInput
 
     from ..config import TaskConfig
 
+#
+
 
 class AdccHarness(ProgramHarness):
-
     _defaults = {
         "name": "adcc",
         "scratch": False,
@@ -46,16 +42,23 @@ class AdccHarness(ProgramHarness):
         Returns
         -------
         bool
-            If adcc is found, returns True.
-            If raise_error is False and adcc is missing, returns False.
-            If raise_error is True and adcc is missing, the error message is raised.
+            If adcc and psi4 are found, returns True.
+            If raise_error is False and adcc or psi4 is missing, returns False.
+            If raise_error is True and adcc or psi4 are missing, the error message is raised.
         """
-        return which_import(
+        found_adcc = which_import(
             "adcc",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via `conda install adcc -c adcc`.",
         )
+        found_psi4 = which_import(
+            "psi4",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install psi4 for adcc harness via `conda install psi4 -c psi4`.",
+        )
+        return found_adcc and found_psi4
 
     def get_version(self) -> str:
         """Return the currently used version of adcc"""
@@ -73,28 +76,37 @@ class AdccHarness(ProgramHarness):
         Runs adcc
         """
         self.found(raise_error=True)
+
         import adcc
+        import psi4
 
         mol = input_model.molecule
         model = input_model.model
-        kws = input_model.keywords
-        xyz = mol.to_string(dtype="xyz+", units="Bohr")
-        xyz = "\n".join(xyz.split("\n")[2:])
-        scfres = adcc.backends.run_hf(
-            backend=None,  # auto-select available backend
-            xyz=xyz,
-            multiplicity=mol.molecular_multiplicity,
-            charge=mol.molecular_charge,
-            basis=model.basis,
-            #   conv_tol=model.scf_conv,
-            #   max_iter=,
-        )
+        conv_tol = input_model.keywords.get("conv_tol", 1e-6)
 
-        # handle defaults nicely...
-        n_singlets = kws.pop("n_singlets", 3)
+        psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.dict(), fix_symmetry="c1"))
+        psi4.core.clean()
+        psi4.core.be_quiet()
+        psi4.set_options(
+            {
+                "basis": model.basis,
+                "scf_type": "pk",
+                "e_convergence": conv_tol / 100,
+                "d_convergence": conv_tol / 10,
+                # 'maxiter': max_iter,
+                "reference": "RHF" if mol.molecular_multiplicity == 1 else "UHF",
+            }
+        )
+        _, wfn = psi4.energy("HF", return_wfn=True, molecule=psi4_molecule)
 
         adcc.set_n_threads(config.ncores)
-        adcc_state = adcc.run_adc(scfres, method=model.method, n_singlets=n_singlets)
+        try:
+            adcc_state = adcc.run_adc(wfn, method=model.method, **input_model.keywords)
+        except ValueError as e:
+            # TODO Once the new adcc is realeased switch to "adcc.InputError as e"
+            raise InputError(str(e))
+        except Exception as e:
+            raise UnknownError(str(e))
 
         input_data = input_model.dict(encoding="json")
         output_data = input_data.copy()
@@ -115,9 +127,8 @@ class AdccHarness(ProgramHarness):
         NAME = name.upper()
         is_cvs_adc3 = state.method.level >= 3 and state.ground_state.has_core_occupied_space
         mp = state.ground_state
-        mp_energy = mp.energy(state.method.level if not is_cvs_adc3 else 2)
         mp_corr = 0.0
-        qcvars[f"HF TOTAL ENERGY"] = mp.reference_state.energy_scf
+        qcvars["HF TOTAL ENERGY"] = mp.reference_state.energy_scf
         if state.method.level > 1:
             for level in range(2, state.method.level + 1):
                 if level >= 3 and is_cvs_adc3:

@@ -58,6 +58,7 @@ Currently available compute backends for single results are as follow:
 
 - Quantum Chemistry:
 
+  - `adcc <https://adc-connect.org>`_
   - `Entos <https://www.entos.info>`_
   - `Molpro <https://www.molpro.net>`_
   - `Psi4 <http://www.psicode.org>`_
