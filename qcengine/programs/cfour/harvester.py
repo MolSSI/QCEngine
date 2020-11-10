@@ -78,6 +78,30 @@ def harvest_outfile_pass(outtext):
         print("matched nre")
         psivar["NUCLEAR REPULSION ENERGY"] = mobj.group(1)
 
+    # Process calcinfo
+    mobj = re.search(
+        r"^\s*" + r"There are" + r"\s+" + r"(?P<nbf>\d+)" + r"\s+" + r"functions in the AO basis." + r"\s*$",
+        outtext,
+        re.MULTILINE,
+    )
+    if mobj:
+        print("matched nbf", mobj.groups())
+        psivar["N BASIS FUNCTIONS"] = mobj.group("nbf")
+        psivar["N MOLECULAR ORBITALS"] = mobj.group("nbf")  # TODO BAD
+
+    mobj = re.search(
+        # fmt: off
+        r"^\s*" + "Alpha population by irrep:" + r"(?P<aocc>[\d\s]+)" + r"\s*" +
+        r"^\s*" + "Beta population by irrep:" + r"(?P<bocc>[\d\s]+)" + r"\s*",
+        # fmt: on
+        outtext,
+        re.MULTILINE,
+    )
+    if mobj:
+        print("matched occ", mobj.groups())
+        psivar["N ALPHA ELECTRONS"] = sum([int(d) for d in mobj.group("aocc").split()])
+        psivar["N BETA ELECTRONS"] = sum([int(d) for d in mobj.group("bocc").split()])
+
     # Process SCF
     mobj = re.search(r"^\s+" + r"(?:E\(SCF\))" + r"\s+=\s+" + NUMBER + r"\s+a\.u\.\s*$", outtext, re.MULTILINE)
     if mobj:

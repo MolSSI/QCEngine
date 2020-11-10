@@ -190,6 +190,14 @@ def runner_asserter(inp, subject, method, basis, tnm):
         #     atol=atol,
         # )
 
+    # generics
+    # yapf: disable
+    assert compare(ref_block["N BASIS FUNCTIONS"], wfn.properties.calcinfo_nbasis, tnm + " nbasis wfn"), f"nbasis {wfn.properties.calcinfo_nbasis} != {ref_block['N BASIS FUNCTIONS']}"
+    assert compare(ref_block["N MOLECULAR ORBITALS"], wfn.properties.calcinfo_nmo, tnm + " nmo wfn"), f"nmo {wfn.properties.calcinfo_nmo} != {ref_block['N MOLECULAR ORBITALS']}"
+    assert compare(ref_block["N ALPHA ELECTRONS"], wfn.properties.calcinfo_nalpha, tnm + " nalpha wfn"), f"nalpha {wfn.properties.calcinfo_nalpha} != {ref_block['N ALPHA ELECTRONS']}"
+    assert compare(ref_block["N BETA ELECTRONS"], wfn.properties.calcinfo_nbeta, tnm + " nbeta wfn"), f"nbeta {wfn.properties.calcinfo_nbeta} != {ref_block['N BETA ELECTRONS']}"
+    # yapf: enable
+
 
 def _asserter(asserter_args, contractual_args, contractual_fn):
     """For expectations in `contractual_fn`, check that the QCVars are present in P::e.globals and wfn and match expected ref_block."""

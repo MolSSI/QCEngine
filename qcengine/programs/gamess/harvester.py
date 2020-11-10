@@ -101,6 +101,35 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched NRE")
             qcvar["NUCLEAR REPULSION ENERGY"] = mobj.group(1)
 
+        # Process calcinfo
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"NUMBER OF OCCUPIED ORBITALS \(ALPHA\)" + r"\s+=\s+" + r"(?P<nao>\d+)" + r"\s*" +
+            r"^\s+" + r"NUMBER OF OCCUPIED ORBITALS \(BETA \)" + r"\s+=\s+" + r"(?P<nbo>\d+)" + r"\s*" +
+            r"^\s+" + r"TOTAL NUMBER OF ATOMS" + r"\s+=\s+" + r"(?P<nat>\d+)" + r"\s*",
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched calcinfo")
+            print("matched calcinfo", mobj.groups())
+            qcvar["N ALPHA ELECTRONS"] = mobj.group("nao")
+            qcvar["N BETA ELECTRONS"] = mobj.group("nbo")
+
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"TOTAL NUMBER OF MOS IN VARIATION SPACE=" + r"\s+" + r"(?P<nmo>\d+)" + r"\s*$",
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched calcinfo 2")
+            print("matched calcinfo 2", mobj.groups())
+            qcvar["N MOLECULAR ORBITALS"] = mobj.group("nmo")
+            qcvar["N BASIS FUNCTIONS"] = mobj.group("nmo")  # TODO BAD
+
         # Process MP2
         mobj = re.search(
             # fmt: off
