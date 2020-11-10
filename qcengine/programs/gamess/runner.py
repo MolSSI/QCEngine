@@ -147,6 +147,7 @@ class GAMESSHarness(ProgramHarness):
         qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
 
         if gamessgrad is not None:
+            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = gamessgrad
             qcvars["CURRENT GRADIENT"] = gamessgrad
 
         if input_model.driver.upper() == "PROPERTIES":
@@ -170,8 +171,9 @@ class GAMESSHarness(ProgramHarness):
         }
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
+        # * formerly unnp(qcvars, flat=True).items()
         output_data["extras"]["qcvars"] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
         return AtomicResult(**{**input_model.dict(), **output_data})

@@ -369,6 +369,9 @@ def build_out(rawvars: Dict[str, Any], verbose: int = 1) -> None:
             if verbose >= 1:
                 print("""{}SUCCESS""".format(buildline))
 
+            if pvar == "CURRENT CORRELATION ENERGY" and abs(float(rawvars[pvar])) < 1.0e-16:
+                rawvars.pop(pvar)
+
 
 qcvars_to_atomicproperties = {
     # calcinfo

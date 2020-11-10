@@ -56,7 +56,7 @@ def compute(
     local_options : Optional[Dict[str, Any]], optional
         A dictionary of local configuration options
     return_dict : bool, optional
-        Returns a dict instead of qcelemental.models.AtomicInput
+        Returns a dict instead of qcelemental.models.AtomicResult
 
     Returns
     -------

@@ -22,8 +22,11 @@ def query_qcvar(obj: Any, pv: str) -> Any:
             # qcel.AtomicResult.extras["qcvars"]
             vval = obj.get(pv)
             if vval is None:
-                # qcel.AtomicResult.properties
+                # qcel.AtomicResult.properties dict
                 vval = obj.get(qcvars_to_atomicproperties[pv])
+        except TypeError:
+            # qcel.AtomicResult.properties object
+            vval = getattr(obj, qcvars_to_atomicproperties[pv])
 
     return vval
 
@@ -249,10 +252,13 @@ def contractual_mp2p5(
         expected = True
         if (
             (
-                qc_module == "psi4-occ"
-                and reference == "rhf"
-                and corl_type in ["df", "cd"]
-                and method in ["mp2.5", "mp3"]
+                (qc_module.startswith("cfour") and method == "mp3")
+                or (
+                    qc_module == "psi4-occ"
+                    and reference == "rhf"
+                    and corl_type in ["df", "cd"]
+                    and method in ["mp2.5", "mp3"]
+                )
             )
             and pv in ["MP2.5 SAME-SPIN CORRELATION ENERGY", "MP2.5 OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (

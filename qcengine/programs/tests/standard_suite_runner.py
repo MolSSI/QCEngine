@@ -7,9 +7,13 @@ from qcelemental.testing import compare, compare_values
 import qcengine as qcng
 
 from .standard_suite_contracts import (
-    contractual_ccsd,
-    contractual_current,
+    contractual_hf,
     contractual_mp2,
+    # contractual_mp2p5,
+    # contractual_mp3,
+    contractual_ccsd,
+    # contractual_ccsd_prt_pr,
+    contractual_current,
     query_has_qcvar,
     query_qcvar,
 )
@@ -33,8 +37,16 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     # ? precedence on next two
     mp2_type = inp.get("corl_type", inp["keywords"].get("mp2_type", "df"))  # hard-code of read_options.cc MP2_TYPE
+    # mp_type = inp.get("corl_type", inp["keywords"].get("mp_type", "conv"))  # hard-code of read_options.cc MP_TYPE
     cc_type = inp.get("corl_type", inp["keywords"].get("cc_type", "conv"))  # hard-code of read_options.cc CC_TYPE
     corl_natural_values = {"mp2": mp2_type, "ccsd": cc_type}
+    corl_natural_values = {
+        "hf": "conv",  # dummy to assure df/cd/conv scf_type refs available
+        "mp2": mp2_type,
+        # "mp3": mp_type,
+        "ccsd": cc_type,
+        # "ccsd(t)": cc_type
+    }
     corl_type = corl_natural_values[method]
 
     natural_ref = {"conv": "pk", "df": "df", "cd": "cd"}
@@ -86,17 +98,17 @@ def runner_asserter(inp, subject, method, basis, tnm):
         assert errmsg in str(e.value)
         return
 
-    wfn = qcng.compute(atin, qcprog, raise_error=True, return_dict=True)
+    wfn = qcng.compute(atin, qcprog, raise_error=True)
 
     print("WFN")
-    pp.pprint(wfn)
+    pp.pprint(wfn.dict())
 
     # <<<  Comparison Tests  >>>
 
-    assert wfn["success"] is True
+    assert wfn.success is True
     assert (
-        wfn["provenance"]["creator"].lower() == qcprog
-    ), f'Creator ({wfn["provenance"]["creator"].lower()}) not expected ({qcprog})'
+        wfn.provenance.creator.lower() == qcprog
+    ), f"Creator ({wfn.provenance.creator.lower()}) not expected ({qcprog})"
 
     ref_block = std_suite[chash]
 
@@ -110,7 +122,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
         fcae,
     ]
     asserter_args = [
-        [wfn["extras"]["qcvars"], wfn["properties"]],
+        [wfn.extras["qcvars"], wfn.properties],
         ref_block,
         atol,
         ref_block_conv,
@@ -143,24 +155,40 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     # returns
     if driver == "energy":
-        compare_values(ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["return_result"], tnm + " wfn", atol=atol)
+        compare_values(ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.return_result, tnm + " wfn", atol=atol)
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["properties"]["return_energy"], tnm + " prop", atol=atol
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol
         )
 
     elif driver == "gradient":
-        assert compare_values(
-            ref_block[f"{method.upper()} TOTAL GRADIENT"], wfn["return_result"], tnm + " grad wfn", atol=atol
-        )
-        assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["properties"]["return_energy"], tnm + " prop", atol=atol
-        )
-        assert compare_values(
+        tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL GRADIENT"],
-            wfn["properties"]["return_gradient"],
-            tnm + " grad prop",
+            wfn.return_result,
+            tnm + " grad wfn",
             atol=atol,
+            return_message=True,
+            quiet=True,
         )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL GRADIENT"], wfn.return_result, tnm + " grad wfn", atol=atol
+        ), errmsg
+        tf, errmsg = compare_values(
+            ref_block[f"{method.upper()} TOTAL ENERGY"],
+            wfn.properties.return_energy,
+            tnm + " prop",
+            atol=atol,
+            return_message=True,
+            quiet=True,
+        )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol
+        ), errmsg
+        # assert compare_values(
+        #     ref_block[f"{method.upper()} TOTAL GRADIENT"],
+        #     wfn["properties"]["return_gradient"],
+        #     tnm + " grad prop",
+        #     atol=atol,
+        # )
 
 
 def _asserter(asserter_args, contractual_args, contractual_fn):
