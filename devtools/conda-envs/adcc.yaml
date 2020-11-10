@@ -6,16 +6,22 @@ channels:
 dependencies:
   - adcc=0.15.1
   - psi4
+  - dftd3 3.2.1
+  - mp2d >=1.1
+  - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
+  - intel-openmp!=2019.5
 
-    # Core
+  # Core
   - python
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental=0.13.0  # test minimum stated version.
-  - pydantic=1.2.0  # test minimun stated version. actually min is 1.0 but no py38 builds
+  - qcelemental >=0.13.0
+  - pydantic>=1.0.0
+  - msgpack-python
 
     # Testing
   - pytest
   - pytest-cov
   - codecov
+

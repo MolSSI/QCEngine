@@ -4,8 +4,7 @@ Calls adcc
 from typing import Dict, TYPE_CHECKING
 
 from qcelemental.util import safe_version, which_import
-from qcelemental.models import (AtomicResult, AtomicResultProperties,
-                                Provenance)
+from qcelemental.models import AtomicResult, AtomicResultProperties, Provenance
 
 from .model import ProgramHarness
 from ..exceptions import InputError, UnknownError
@@ -98,10 +97,11 @@ class AdccHarness(ProgramHarness):
             }
         )
         _, wfn = psi4.energy("HF", return_wfn=True, molecule=psi4_molecule)
-
         adcc.set_n_threads(config.ncores)
+        compute_success = False
         try:
             adcc_state = adcc.run_adc(wfn, method=model.method, **input_model.keywords)
+            compute_success = adcc_state.converged
         except ValueError as e:
             # TODO Once the new adcc is realeased switch to "adcc.InputError as e"
             raise InputError(str(e))
@@ -110,15 +110,19 @@ class AdccHarness(ProgramHarness):
 
         input_data = input_model.dict(encoding="json")
         output_data = input_data.copy()
-        output_data["success"] = adcc_state.converged
+        output_data["success"] = compute_success
+
+        if compute_success:
+            output_data["properties"] = AtomicResultProperties()
+            output_data["return_result"] = adcc_state.excitation_energy
+
+            extract_props = input_model.driver == "properties"
+            output_data["extras"]["qcvars"] = self._extract_qcvars(adcc_state, extract_props)
+
         provenance = Provenance(creator="adcc", version=self.get_version()).dict()
         provenance["nthreads"] = adcc.get_n_threads()
         output_data["provenance"] = provenance
-        output_data["properties"] = AtomicResultProperties()
-        output_data["return_result"] = adcc_state.excitation_energy
 
-        extract_props = input_model.driver == "properties"
-        output_data["extras"]["qcvars"] = self._extract_qcvars(adcc_state, extract_props)
         return AtomicResult(**output_data)
 
     def _extract_qcvars(self, state, extract_props=False):
