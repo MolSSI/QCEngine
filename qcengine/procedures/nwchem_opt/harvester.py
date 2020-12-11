@@ -2,8 +2,7 @@ from decimal import Decimal
 from typing import Tuple, List
 import re
 
-import numpy as np
-from qcelemental.models import Molecule, AtomicResult, OptimizationInput, Provenance, AlignmentMill
+from qcelemental.models import Molecule, AtomicResult, OptimizationInput, Provenance
 from qcelemental.util import unnp
 
 from qcengine.programs.nwchem.harvester import harvest_outfile_pass
@@ -49,6 +48,14 @@ def harvest_output(outtext: str) -> Tuple[List[PreservingDict], List[Molecule], 
 
 
 def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List[AtomicResult]:
+    """Parse each step in the geometry relaxation as a separate AtomicResult
+
+    Args:
+        input_model: Input specification for the relaxation
+        nwout: Standard out from the NWChem simulation
+    Returns:
+        A list of the results at each step
+    """
     # Parse the files
     out_psivars, out_mols, out_grads, version, error = harvest_output(nwout)
 
