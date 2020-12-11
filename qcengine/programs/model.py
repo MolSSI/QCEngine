@@ -138,8 +138,7 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
                 keyword_updates = e.create_keyword_update(local_input_data)
                 new_keywords = local_input_data.keywords.copy()
                 new_keywords.update(keyword_updates)
-                local_input_data = AtomicInput(**local_input_data.dict(exclude={"keywords"}),
-                                               keywords=new_keywords)
+                local_input_data = AtomicInput(**local_input_data.dict(exclude={"keywords"}), keywords=new_keywords)
 
                 # Store the error details and mitigations employed
                 observed_errors[e.error_name] = {"details": e.details, "keyword_updates": keyword_updates}

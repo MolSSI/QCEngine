@@ -253,8 +253,12 @@ def test_autoz_error():
     # Large molecule that leads to an AutoZ error
     mol = qcel.models.Molecule.from_data(_auto_z_problem)
     result = qcng.compute(
-        {"molecule": mol, "model": {"method": "hf", "basis": "sto-3g"}, "driver": "energy",
-         "protocols": {"error_correction": {"default_policy": False}}},  # Turn off error correction
+        {
+            "molecule": mol,
+            "model": {"method": "hf", "basis": "sto-3g"},
+            "driver": "energy",
+            "protocols": {"error_correction": {"default_policy": False}},
+        },  # Turn off error correction
         "nwchem",
         raise_error=False,
     )
@@ -285,8 +289,12 @@ def test_error_correction():
     # Large molecule that leads to an AutoZ error
     mol = qcel.models.Molecule.from_data(_auto_z_problem)
     result = qcng.compute(
-        {"molecule": mol, "model": {"method": "hf", "basis": "sto-3g"}, "driver": "energy",
-         "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-2}},
+        {
+            "molecule": mol,
+            "model": {"method": "hf", "basis": "sto-3g"},
+            "driver": "energy",
+            "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-2},
+        },
         "nwchem",
         raise_error=True,
     )

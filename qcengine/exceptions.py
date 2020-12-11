@@ -124,7 +124,7 @@ class KnownErrorException(QCEngineException):
 class SimpleKnownErrorException(KnownErrorException):
     """Subclass for errors with simple detection logic.
 
-     Most useful for error types that do not need any additional details to correct."""
+    Most useful for error types that do not need any additional details to correct."""
 
     @classmethod
     def detect_error(cls, outputs: Dict[str, str]):
