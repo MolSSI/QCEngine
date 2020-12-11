@@ -102,8 +102,7 @@ class AdccHarness(ProgramHarness):
         try:
             adcc_state = adcc.run_adc(wfn, method=model.method, **input_model.keywords)
             compute_success = adcc_state.converged
-        except ValueError as e:
-            # TODO Once the new adcc is realeased switch to "adcc.InputError as e"
+        except adcc.InputError as e:
             raise InputError(str(e))
         except Exception as e:
             raise UnknownError(str(e))
@@ -117,44 +116,10 @@ class AdccHarness(ProgramHarness):
             output_data["return_result"] = adcc_state.excitation_energy
 
             extract_props = input_model.driver == "properties"
-            output_data["extras"]["qcvars"] = self._extract_qcvars(adcc_state, extract_props)
+            output_data["extras"]["qcvars"] = adcc_state.to_qcvars(recurse=True, properties=extract_props)
 
-        provenance = Provenance(creator="adcc", version=self.get_version()).dict()
+        provenance = Provenance(creator="adcc", version=self.get_version(), routine="adcc").dict()
         provenance["nthreads"] = adcc.get_n_threads()
         output_data["provenance"] = provenance
 
         return AtomicResult(**output_data)
-
-    def _extract_qcvars(self, state, extract_props=False):
-        qcvars = {}
-        name = state.method.name
-        NAME = name.upper()
-        is_cvs_adc3 = state.method.level >= 3 and state.ground_state.has_core_occupied_space
-        mp = state.ground_state
-        mp_corr = 0.0
-        qcvars["HF TOTAL ENERGY"] = mp.reference_state.energy_scf
-        if state.method.level > 1:
-            for level in range(2, state.method.level + 1):
-                if level >= 3 and is_cvs_adc3:
-                    continue
-                energy = mp.energy_correction(level)
-                mp_corr += energy
-                qcvars[f"MP{level} CORRELATION ENERGY"] = energy
-                qcvars[f"MP{level} TOTAL ENERGY"] = mp.energy(level)
-        qcvars["EXCITATION KIND"] = state.kind.upper()
-        qcvars[f"{NAME} ITERATIONS"] = state.n_iter
-        qcvars[NAME + " EXCITATION ENERGIES"] = state.excitation_energy
-        qcvars["NUMBER OF EXCITED STATES"] = len(state.excitation_energy)
-        if extract_props:
-            qcvars["HF DIPOLE"] = mp.reference_state.dipole_moment
-            if state.method.level > 1:
-                qcvars["MP2 DIPOLE"] = mp.dipole_moment(2)
-            # transition properties
-            qcvars[f"{NAME} TRANSITION DIPOLES (LEN)"] = state.transition_dipole_moment
-            qcvars[f"{NAME} TRANSITION DIPOLES (VEL)"] = state.transition_dipole_moment_velocity
-            qcvars[f"{NAME} OSCILLATOR STRENGTHS (LEN)"] = state.oscillator_strength
-            qcvars[f"{NAME} OSCILLATOR STRENGTHS (VEL)"] = state.oscillator_strength_velocity
-            qcvars[f"{NAME} ROTATIONAL STRENGTHS (VEL)"] = state.rotatory_strength
-            # state properties
-            qcvars[f"{NAME} STATE DIPOLES"] = state.state_dipole_moment
-        return qcvars
