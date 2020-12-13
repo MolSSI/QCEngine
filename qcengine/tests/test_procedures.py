@@ -240,7 +240,7 @@ def test_geometric_generic(input_data, program, model, bench):
 def test_nwchem_relax():
     # Make the input file
     input_data = {
-        "input_specification": {"model": {"method": "HF", "basis": "sto-3g"}},
+        "input_specification": {"model": {"method": "HF", "basis": "sto-3g", "keywords": {"driver:linopt": 0}}},
         "initial_molecule": qcng.get_molecule("hydrogen"),
     }
     input_data = OptimizationInput(**input_data)
