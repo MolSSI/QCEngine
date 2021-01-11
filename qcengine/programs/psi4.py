@@ -136,7 +136,7 @@ class Psi4Harness(ProgramHarness):
         old_basis = input_model.model.basis
         input_model.model.__dict__["basis"] = old_basis or ""
 
-        with temporary_directory(parent=parent, suffix="_psi_scratch") as tmpdir:
+        with temporary_directory(parent=parent, suffix="_psi_scratch", messy=config.messy) as tmpdir:
 
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
             if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in caseless_keywords):

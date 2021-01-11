@@ -153,6 +153,7 @@ class TaskConfig(pydantic.BaseModel):
     mpiexec_command: Optional[str]  # Command used to launch MPI tasks, see NodeDescriptor
     use_mpiexec: bool = False  # Whether it is necessary to use MPI to run an executable
     cores_per_rank: int = pydantic.Field(1, description="Number of cores per MPI rank")
+    messy: bool = False # If True, leave scratch files behind in scratch_directory
 
     class Config:
         extra = "forbid"
