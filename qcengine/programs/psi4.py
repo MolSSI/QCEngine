@@ -156,11 +156,16 @@ class Psi4Harness(ProgramHarness):
                     input_data["schema_name"] = "qc_schema_input"
 
                 # Execute the program
+                cmdopts = ["--scratch", tmpdir, "--json", "data.json"]
+                if config.messy:
+                    cmdopts.append("--messy")
+
                 success, output = execute(
-                    [which("psi4"), "--scratch", tmpdir, "--json", "data.json"],
+                    [which("psi4")] + cmdopts,
                     {"data.json": json.dumps(input_data)},
                     ["data.json"],
                     scratch_directory=tmpdir,
+                    scratch_messy=config.messy
                 )
 
                 output_data = input_data.copy()
@@ -214,20 +219,24 @@ class Psi4Harness(ProgramHarness):
                         output_data["extras"]["psiapi_evaluated"] = True
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)
                 else:
-                    run_cmd = [
-                        which("psi4"),
-                        "--scratch",
-                        str(tmpdir),
-                        "--nthread",
-                        str(config.ncores),
-                        "--memory",
-                        f"{config.memory}GB",
-                        "--qcschema",
-                        "data.msgpack",
-                    ]
+                    cmdopts = [
+                            "--scratch",
+                            str(tmpdir),
+                            "--nthread",
+                            str(config.ncores),
+                            "--memory",
+                            f"{config.memory}GB",
+                            "--qcschema",
+                            "data.msgpack",
+                            ]
+                    if config.messy:
+                        cmdopts.append("--messy")
+
+                    run_cmd = [which("psi4")] + cmdopts
                     input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
                     success, output = execute(
-                        run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
+                        run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"],
+                        scratch_directory=tmpdir, scratch_messy=config.messy
                     )
                     if success:
                         output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
