@@ -217,6 +217,11 @@ class Psi4Harness(ProgramHarness):
                     success = True
                     if output_data.get("success", False):
                         output_data["extras"]["psiapi_evaluated"] = True
+
+                    if config.messy:
+                        with open(os.path.join(tmpdir, 'data.json'), 'w') as f:
+                            json.dump(output_data, f)
+
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)
                 else:
                     cmdopts = [
