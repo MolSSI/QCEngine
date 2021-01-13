@@ -146,7 +146,7 @@ class DFTD3Harness(ProgramHarness):
             command.append("-abc")
 
         # Append `-anal` for pairwise atomic analysis
-        if input_model.keywords.get('save_pairwise_dispersion') == True:
+        if input_model.keywords.get("save_pairwise_dispersion") == True:
             command.append("-anal")
 
         infiles = {
@@ -300,7 +300,7 @@ class DFTD3Harness(ProgramHarness):
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
-        if input_model.keywords.get('save_pairwise_dispersion') == True:
+        if input_model.keywords.get("save_pairwise_dispersion") == True:
             output_data["extras"]["qcvars"]["PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
         output_data["success"] = True
 
