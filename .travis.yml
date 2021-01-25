@@ -27,6 +27,10 @@ matrix:
         - PYTHON_VER=3.6
         - PROG=XTB
     - os: linux
+      env:
+        - PYTHON_VER=3.7
+        - PROG=QCORE
+    - os: linux
       addons: &1
         apt:
           packages:
@@ -67,6 +71,8 @@ install:
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/xtb.yaml
     elif [ $PROG == "MRCHEM" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/mrchem.yaml
+    elif [ $PROG == "QCORE" ]; then
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/qcore.yaml
     else
       echo "ERROR: No match for PROG ($PROG)."
       exit 1
@@ -77,6 +83,8 @@ install:
   - |
     if [ $PROG == "PSI4DEV" ]; then
       conda remove qcengine --force
+    elif [ $PROG == "QCORE" ]; then
+      qcore --accept-license
     fi
   - conda list
 

@@ -7,7 +7,7 @@ from typing import Set
 from ..exceptions import InputError, ResourceError
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
-from .entos import EntosHarness
+from .qcore import QcoreHarness, EntosHarness
 from .gamess import GAMESSHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
@@ -99,13 +99,14 @@ def list_available_programs() -> Set[str]:
 
 # Quantum
 register_program(CFOURHarness())
-register_program(EntosHarness())
+register_program(EntosHarness())  # Duplicate of Qcore harness to transition the namespace, to be deprecated
 register_program(GAMESSHarness())
 register_program(MRChemHarness())
 register_program(MolproHarness())
 register_program(NWChemHarness())
 register_program(Psi4Harness())
 register_program(QChemHarness())
+register_program(QcoreHarness())
 register_program(TeraChemHarness())
 register_program(TurbomoleHarness())
 
