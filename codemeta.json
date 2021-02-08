@@ -281,6 +281,14 @@
             "affiliation": "Department of Chemistry, Iowa State University",
             "@id": "https://orcid.org/0000-0001-6065-3167",
             "identifier": "https://github.com/twindus"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Roberto",
+            "familyName": "Di Remigio",
+            "affiliation": "Hylleraas Centre for Quantum Molecular Sciences, UiT -- The Arctic University of Norway",
+            "@id": "https://orcid.org/0000-0002-5452-9239",
+            "identifier": "https://github.com/robertodr"
         }
     ],
     "developmentStatus": "active",

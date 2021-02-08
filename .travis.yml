@@ -30,7 +30,6 @@ matrix:
       env:
         - PYTHON_VER=3.7
         - PROG=QCORE
-
     - os: linux
       addons: &1
         apt:
@@ -39,6 +38,10 @@ matrix:
       env:
         - PYTHON_VER=3.6
         - PROG=NWCHEM
+    - os: linux
+      env:
+        - PYTHON_VER=3.6
+        - PROG=MRCHEM
 
 before_install:
     # Additional info about the build
@@ -66,6 +69,8 @@ install:
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/nwchem.yaml
     elif [ $PROG == "XTB" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/xtb.yaml
+    elif [ $PROG == "MRCHEM" ]; then
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/mrchem.yaml
     elif [ $PROG == "QCORE" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/qcore.yaml
     else

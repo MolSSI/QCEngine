@@ -12,6 +12,7 @@ from .gamess import GAMESSHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
+from .mrchem import MRChemHarness
 from .nwchem import NWChemHarness
 from .openmm import OpenMMHarness
 from .psi4 import Psi4Harness
@@ -100,6 +101,7 @@ def list_available_programs() -> Set[str]:
 register_program(CFOURHarness())
 register_program(EntosHarness())  # Duplicate of Qcore harness to transition the namespace, to be deprecated
 register_program(GAMESSHarness())
+register_program(MRChemHarness())
 register_program(MolproHarness())
 register_program(NWChemHarness())
 register_program(Psi4Harness())
