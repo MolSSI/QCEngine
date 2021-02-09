@@ -1,0 +1,204 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      matrix:
+        cfg:
+          - conda-env: psi
+            python-version: 3.6
+            label: PSI4-RELEASE
+
+          - conda-env: psi-nightly
+            python-version: 3.9
+            label: PSI4-NIGHTLY
+
+          - conda-env: torchani
+            python-version: 3.6
+            label: ANI
+
+          - conda-env: openmm
+            python-version: 3.6
+            label: OPENMM
+
+          - conda-env: xtb
+            python-version: 3.6
+            label: XTB
+
+          - conda-env: qcore
+            python-version: 3.7
+            label: QCORE
+
+          - conda-env: nwchem
+            python-version: 3.6
+            label: NWCHEM
+
+          - conda-env: mrchem
+            python-version: 3.6
+            label: MRCHEM
+
+          #- conda-env:
+          #  python-version:
+          #  label:
+
+      #addons: &1
+      #  apt:
+      #    packages:
+      #    - nwchem
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
+        python-version: ${{ matrix.cfg.python-version }}
+        #condarc-file: etc/example-condarc.yml
+        auto-activate-base: false
+
+    - run: |
+        conda info
+        conda list
+
+    - name: Install
+      shell: bash
+      run: |
+#        eval "$(conda shell.bash hook)" && conda activate test
+        python -m pip install . --no-deps
+
+    - name: Environment Information
+      shell: bash
+      run: |
+#        eval "$(conda shell.bash hook)" && conda activate test
+        conda list --show-channel-urls
+
+    - name: PyTest
+      shell: bash
+      run: |
+#        eval "$(conda shell.bash hook)" && conda activate test
+        pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
+
+    - name: CodeCov  
+      uses: codecov/codecov-action@v1
+
+####
+#jobs:
+#  # This is the "main" test suite, which tests a large number of different
+#  # versions of default compilers and Python versions in GitHub Actions.
+#  standard:
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        runs-on: [ubuntu-latest, windows-latest, macos-latest]
+#        python:
+#        - 3.6
+#        - 3.9
+#
+#        include:
+#          # Just add a key
+#          - runs-on: ubuntu-latest
+#            python: 3.6
+#            args: >
+#              -DPYBIND11_FINDPYTHON=ON
+#          - runs-on: windows-latest
+#            python: 3.6
+#            args: >
+#              -DPYBIND11_FINDPYTHON=ON
+#        # These items will be removed from the build matrix, keys must match.
+#        exclude:
+#          # TODO: PyPy2 7.3.3 segfaults, while 7.3.2 was fine.
+#          - runs-on: ubuntu-latest
+#            python: pypy2
+#
+#    name: "🐍 ${{ matrix.python }} • ${{ matrix.runs-on }} • x64 ${{ matrix.args }}"
+#    runs-on: ${{ matrix.runs-on }}
+#
+#    steps:
+#    - uses: actions/checkout@v2
+#
+######
+######
+#
+#    steps:
+#    - uses: actions/checkout@v1
+#
+#    - name: Setup Information
+#      shell: bash
+#      run: |
+#        uname -a
+#        df -h
+#        ulimit -a
+#        conda --version
+#
+#    - name: Create Environment
+#      shell: bash
+#      run: |
+#        eval "$(conda shell.bash hook)" && conda activate
+#        python devtools/scripts/create_conda_env.py -n=test -p=$PYVER devtools/conda-envs/$CONDA_ENV.yaml
+#
+#    - name: Install
+#      shell: bash
+#      run: |
+#        eval "$(conda shell.bash hook)" && conda activate test
+#        python -m pip install . --no-deps
+#
+#    - name: Environment Information
+#      shell: bash
+#      run: |
+#        eval "$(conda shell.bash hook)" && conda activate test
+#        conda list --show-channel-urls
+#
+#    - name: PyTest
+#      shell: bash
+#      run: |
+#        eval "$(conda shell.bash hook)" && conda activate test
+#        pytest -rws -v --cov=qcelemental --color=yes --cov-report=xml qcelemental/
+#
+#    - name: PyTest Validate
+#      shell: bash
+#      if: matrix.cfg.label == 'full'
+#      run: |
+#        eval "$(conda shell.bash hook)" && conda activate test
+#        pytest -rws -v --color=yes --validate qcelemental/
+#
+#    - name: CodeCov  
+#      uses: codecov/codecov-action@v1
+
+#####
+
+#    # Any kind of post env ceation
+#  - |
+#    if [ $PROG == "PSI4DEV" ]; then
+#      conda remove qcengine --force
+#    elif [ $PROG == "QCORE" ]; then
+#      qcore --accept-license
+#    fi
+#  - conda list
+#
+#    # Build and install package
+#  - python setup.py develop --no-deps
+#
+#  - qcengine info
+#  - export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
+#  - pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
+#
+#script:
+#    # Get a bit of info first
+#  - python -c "import qcengine; print(qcengine.config.global_repr())"
+#
+#    # Run canonical tests
+#  - pytest -rsx -v --cov=qcengine/ qcengine/
+
