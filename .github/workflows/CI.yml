@@ -76,19 +76,16 @@ jobs:
     - name: Install
       shell: bash
       run: |
-#        eval "$(conda shell.bash hook)" && conda activate test
         python -m pip install . --no-deps
 
     - name: Environment Information
       shell: bash
       run: |
-#        eval "$(conda shell.bash hook)" && conda activate test
         conda list --show-channel-urls
 
     - name: PyTest
       shell: bash
       run: |
-#        eval "$(conda shell.bash hook)" && conda activate test
         pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov  
