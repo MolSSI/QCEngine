@@ -93,6 +93,8 @@ class NWChemRelaxProcedure(ProcedureHarness):
             final_molecule=final_step.molecule,
             trajectory=atomic_results,
             energies=[float(r.extras["qcvars"]["CURRENT ENERGY"]) for r in atomic_results],
+            stdout=stdout,
+            stderr=stderr,
             success=True,
             provenance=Provenance(creator="NWChemRelax", version=self.get_version(), routine="nwchem_opt"),
         )

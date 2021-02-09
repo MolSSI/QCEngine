@@ -79,6 +79,8 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
                     lines.append(line)
         if group == "aaaglobal":
             grouped_lines[group] = "\n".join(lines) + "\n"
+        elif group.lower() == "set":
+            grouped_lines[group] = "\n".join(f"set {l}" for l in lines) + "\n"
         else:
             grouped_lines[group] = (
                 f"{group.lower()} " + " ".join(group_level_lines) + "\n  " + "\n  ".join(lines) + "\nend\n"
