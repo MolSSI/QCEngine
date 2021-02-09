@@ -3,7 +3,7 @@ from typing import Union, Dict, Any
 from qcelemental.models import OptimizationInput, AtomicInput, OptimizationResult, Provenance
 
 from qcengine.config import TaskConfig
-from qcengine.exceptions import UnknownError
+from qcengine.exceptions import UnknownError, InputError
 from qcengine.procedures.nwchem_opt.harvester import harvest_as_atomic_result
 from qcengine.programs.nwchem.runner import NWChemHarness
 from qcengine.procedures.model import ProcedureHarness
@@ -12,7 +12,7 @@ from qcengine.procedures.model import ProcedureHarness
 class NWChemRelaxProcedure(ProcedureHarness):
     """Structural relaxation using NWChem's optimizer"""
 
-    _defaults = {"name": "nwchem_relax", "procedure": "optimization"}
+    _defaults = {"name": "NWChemDriver", "procedure": "optimization"}
 
     class Config(ProcedureHarness.Config):
         pass
@@ -20,6 +20,10 @@ class NWChemRelaxProcedure(ProcedureHarness):
     def found(self, raise_error: bool = False) -> bool:
         nwc_harness = NWChemHarness()
         return nwc_harness.found(raise_error)
+
+    def get_version(self) -> str:
+        nwc_harness = NWChemHarness()
+        return nwc_harness.get_version()
 
     def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> OptimizationInput:
         return self._build_model(data, OptimizationInput)
@@ -32,6 +36,8 @@ class NWChemRelaxProcedure(ProcedureHarness):
         #  Optimization input will override, but don't tell users this as it seems unnecessary
         keywords = input_data.keywords.copy()
         keywords.update(input_data.input_specification.keywords)
+        if keywords.get("program", "nwchem").lower() != "nwchem":
+            raise InputError("NWChemDriver procedure only works with NWChem")
 
         # Make an atomic input
         atomic_input = AtomicInput(
@@ -53,6 +59,13 @@ class NWChemRelaxProcedure(ProcedureHarness):
 
         # Run it!
         success, dexe = nwc_harness.execute(job_inputs)
+
+        # Check for common errors
+        if "There is an error in the input file" in dexe["stdout"]:
+            raise InputError(dexe["stdout"])
+        if "not compiled" in dexe["stdout"]:
+            # recoverable with a different compilation with optional modules
+            raise InputError(dexe["stdout"])
 
         # Parse it
         if success:

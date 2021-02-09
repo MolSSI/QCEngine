@@ -6,7 +6,7 @@ import pytest
 from qcelemental.models import OptimizationInput
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import failure_engine, using
 
 
 @pytest.fixture(scope="function")
@@ -246,7 +246,7 @@ def test_nwchem_relax():
     input_data = OptimizationInput(**input_data)
 
     # Run the relaxation
-    ret = qcng.compute_procedure(input_data, "nwchem_relax", raise_error=True)
+    ret = qcng.compute_procedure(input_data, "nwchemdriver", raise_error=True)
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
