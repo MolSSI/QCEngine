@@ -76,12 +76,10 @@ jobs:
         conda list --show-channel-urls
 
     - name: Install
-      shell: bash
       run: |
         python -m pip install . --no-deps
 
     - name: PyTest
-      shell: bash
       run: |
         pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
 
