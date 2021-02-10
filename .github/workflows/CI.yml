@@ -10,8 +10,6 @@ on:
 
 jobs:
   build:
-    #runs-on: ubuntu-latest
-    runs-on: ubuntu-16.04
     defaults:
       run:
         shell: bash -l {0}
@@ -21,38 +19,45 @@ jobs:
           - conda-env: psi
             python-version: 3.6
             label: PSI4-RELEASE
+            runs-on: ubuntu-latest
 
           - conda-env: psi-nightly
             python-version: 3.9
             label: PSI4-NIGHTLY
+            runs-on: ubuntu-latest
 
           - conda-env: torchani
             python-version: 3.6
             label: ANI
+            runs-on: ubuntu-latest
 
           - conda-env: openmm
             python-version: 3.6
             label: OPENMM
+            runs-on: ubuntu-latest
 
           - conda-env: xtb
             python-version: 3.6
             label: XTB
+            runs-on: ubuntu-latest
 
           - conda-env: qcore
             python-version: 3.7
             label: QCORE
+            runs-on: ubuntu-latest
 
           - conda-env: nwchem
             python-version: 3.6
             label: NWCHEM
+            runs-on: ubuntu-16.04
 
           - conda-env: mrchem
             python-version: 3.6
             label: MRCHEM
+            runs-on: ubuntu-latest
 
-          #- conda-env:
-          #  python-version:
-          #  label:
+    name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
+    runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
     - uses: actions/checkout@v2
