@@ -277,7 +277,7 @@ def test_openmm_task_url_basis():
         "model": {
             "method": "openmm",
             "basis": "openff-1.0.0",
-            "url": "https://raw.githubusercontent.com/openforcefield/openforcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
+            "url": "https://raw.githubusercontent.com/openforcefield/openff-forcefields/1.0.0/openforcefields/offxml/openff-1.0.0.offxml",
         },
         "keywords": {},
     }

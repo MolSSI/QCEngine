@@ -42,7 +42,7 @@ class OpenMMHarness(ProgramHarness):
 
     # def _get_off_forcefield(self, hashstring, offxml):
     #
-    #     from openforcefield.typing.engines import smirnoff
+    #     from openff.toolkit.typing.engines import smirnoff
     #
     #     key = hashlib.sha256(hashstring.encode()).hexdigest()
     #
@@ -91,10 +91,10 @@ class OpenMMHarness(ProgramHarness):
         rdkit_found = RDKitHarness.found(raise_error=raise_error)
 
         openff_found = which_import(
-            "openforcefield",
+            "openff.toolkit",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install openforcefield -c omnia`.",
+            raise_msg="Please install via `conda install openff-toolkit`.",
         )
 
         openmm_found = which_import(
@@ -193,7 +193,7 @@ class OpenMMHarness(ProgramHarness):
         from simtk import openmm, unit
 
         with capture_stdout():
-            from openforcefield import topology as offtop
+            from openff.toolkit import topology as offtop
 
         # Failure flag
         ret_data = {"success": False}
