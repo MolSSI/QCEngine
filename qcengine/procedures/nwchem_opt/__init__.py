@@ -9,7 +9,7 @@ from qcengine.programs.nwchem.runner import NWChemHarness
 from qcengine.procedures.model import ProcedureHarness
 
 
-class NWChemRelaxProcedure(ProcedureHarness):
+class NWChemDriverProcedure(ProcedureHarness):
     """Structural relaxation using NWChem's optimizer"""
 
     _defaults = {"name": "NWChemDriver", "procedure": "optimization"}

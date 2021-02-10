@@ -7,7 +7,7 @@ from typing import Set
 from ..exceptions import InputError, ResourceError
 from .berny import BernyProcedure
 from .geometric import GeometricProcedure
-from .nwchem_opt import NWChemRelaxProcedure
+from .nwchem_opt import NWChemDriverProcedure
 
 __all__ = ["register_procedure", "get_procedure", "list_all_procedures", "list_available_procedures"]
 
@@ -65,4 +65,4 @@ def list_available_procedures() -> Set[str]:
 
 register_procedure(GeometricProcedure())
 register_procedure(BernyProcedure())
-register_procedure(NWChemRelaxProcedure())
+register_procedure(NWChemDriverProcedure())
