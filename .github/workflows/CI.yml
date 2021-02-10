@@ -79,6 +79,16 @@ jobs:
       run: |
         python -m pip install . --no-deps
 
+    - name: Special Config - QCORE
+      if: "(${{ matrix.cfg.label }} == 'QCORE')"
+      run: |
+        qcore --accept-license
+
+    - name: Special Config - QCEngine Dep
+      if: "(${{ matrix.cfg.label }} == 'PSI4-NIGHTLY')"
+      run: |
+        conda remove qcengine --force
+
     - name: PyTest
       run: |
         pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
