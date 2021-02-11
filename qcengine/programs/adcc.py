@@ -113,12 +113,7 @@ class AdccHarness(ProgramHarness):
         output_data["success"] = compute_success
 
         if compute_success:
-            mp = adcc_state.ground_state
-            # MP(3) energy for CVS-ADC(3) calculations is still a missing feature in adcc
-            # ... we store this variant here to be able to fall back to MP(2) energies.
-            is_cvs_adc3 = adcc_state.method.level >= 3 and mp.has_core_occupied_space
-            mp_energy = mp.energy(adcc_state.method.level if not is_cvs_adc3 else 2)
-            output_data["return_result"] = mp_energy
+            output_data["return_result"] = adcc_state.excitation_energy[0]
 
             extract_props = input_model.driver == "properties"
             qcvars = adcc_state.to_qcvars(recurse=True, properties=extract_props)

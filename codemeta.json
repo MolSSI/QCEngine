@@ -303,7 +303,7 @@
             "givenName": "Michael",
             "additionalName": "F.",
             "familyName": "Herbst",
-            "affiliation": "Inria Paris and CERMICS, École des Ponts ParisTech",
+            "affiliation": "Inria Paris and CERMICS, \u00C9cole des Ponts ParisTech",
             "@id": "https://orcid.org/0000-0003-0378-7921",
             "identifier": "https://github.com/mfherbst"
         }

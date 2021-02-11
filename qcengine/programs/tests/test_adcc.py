@@ -34,7 +34,7 @@ def test_run(h2o):
     qcvars = ret["extras"]["qcvars"]
 
     assert qcvars["EXCITATION KIND"] == "SINGLET"
-    assert compare_values(ref_mp2_energy, ret["return_result"])
+    assert compare_values(ref_excitations[0], ret["return_result"])
     assert compare_values(ref_hf_energy, ret["properties"]["scf_total_energy"])
     assert compare_values(ref_mp2_energy, ret["properties"]["mp2_total_energy"])
     assert compare_values(ref_excitations, qcvars["ADC2 EXCITATION ENERGIES"])
