@@ -56,7 +56,17 @@ jobs:
             label: MRChem
             runs-on: ubuntu-latest
 
-    name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
+          - conda-env: adcc
+            python-version: 3.8
+            label: ADCC
+            runs-on: ubuntu-latest
+
+          # - conda-env:
+          #   python-version:
+          #   label:
+          #   runs-on: ubuntu-latest
+
+    name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }}" # • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
@@ -81,7 +91,7 @@ jobs:
         qcore --accept-license
 
     - name: Special Config - QCEngine Dep
-      if: "(matrix.cfg.label == 'Psi4-nightly')"
+      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC')"
       run: |
         conda remove qcengine --force
 
@@ -94,10 +104,16 @@ jobs:
       run: |
         python -m pip install . --no-deps
 
+    - name: QCEngineRecords
+      run: |
+        qcengine info
+        export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
+        pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
+        python -c "import qcengine; print(qcengine.config.global_repr())"
+
     - name: PyTest
       run: |
         pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v1
-
