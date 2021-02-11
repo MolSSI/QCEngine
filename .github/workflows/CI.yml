@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      matrix:
+        cfg:
+          - conda-env: psi
+            python-version: 3.6
+            label: Psi4-release
+            runs-on: ubuntu-latest
+
+          - conda-env: psi-nightly
+            python-version: 3.9
+            label: Psi4-nightly
+            runs-on: ubuntu-latest
+
+          - conda-env: torchani
+            python-version: 3.6
+            label: ANI
+            runs-on: ubuntu-latest
+
+          - conda-env: openmm
+            python-version: 3.6
+            label: OpenMM
+            runs-on: ubuntu-latest
+
+          - conda-env: xtb
+            python-version: 3.6
+            label: xTB
+            runs-on: ubuntu-latest
+
+          - conda-env: qcore
+            python-version: 3.7
+            label: QCore
+            runs-on: ubuntu-latest
+
+          - conda-env: nwchem
+            python-version: 3.6
+            label: NWChem
+            runs-on: ubuntu-16.04
+
+          - conda-env: mrchem
+            python-version: 3.6
+            label: MRChem
+            runs-on: ubuntu-latest
+
+          - conda-env: adcc
+            python-version: 3.8
+            label: ADCC
+            runs-on: ubuntu-latest
+
+          # - conda-env:
+          #   python-version:
+          #   label:
+          #   runs-on: ubuntu-latest
+
+    name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }}" # • ${{ matrix.cfg.runs-on }}"
+    runs-on: ${{ matrix.cfg.runs-on }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Create Environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: test
+        environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
+        python-version: ${{ matrix.cfg.python-version }}
+        auto-activate-base: false
+
+    - name: Special Config - NWChem
+      if: "(matrix.cfg.label == 'NWChem')"
+      run: |
+        sudo apt-get -y install nwchem
+
+    - name: Special Config - QCore
+      if: "(matrix.cfg.label == 'QCore')"
+      run: |
+        qcore --accept-license
+
+    - name: Special Config - QCEngine Dep
+      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC')"
+      run: |
+        conda remove qcengine --force
+
+    - name: Environment Information
+      run: |
+        conda info
+        conda list --show-channel-urls
+
+    - name: Install QCEngine
+      run: |
+        python -m pip install . --no-deps
+
+    - name: QCEngineRecords
+      run: |
+        qcengine info
+        export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
+        pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
+        python -c "import qcengine; print(qcengine.config.global_repr())"
+
+    - name: PyTest
+      run: |
+        pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
+
+    - name: CodeCov
+      uses: codecov/codecov-action@v1
