@@ -297,6 +297,15 @@
             "affiliation": "Interdisciplinary Center for Scientific Computing, Heidelberg University",
             "@id": "https://orcid.org/0000-0003-0592-3464",
             "identifier": "https://github.com/maxscheurer"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Michael",
+            "additionalName": "F.",
+            "familyName": "Herbst",
+            "affiliation": "Inria Paris and CERMICS, École des Ponts ParisTech",
+            "@id": "https://orcid.org/0000-0003-0378-7921",
+            "identifier": "https://github.com/mfherbst"
         }
     ],
     "developmentStatus": "active",

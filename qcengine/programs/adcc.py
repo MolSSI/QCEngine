@@ -4,7 +4,7 @@ Calls adcc
 from typing import Dict, TYPE_CHECKING
 
 from qcelemental.util import safe_version, which_import
-from qcelemental.models import AtomicResult, AtomicResultProperties, Provenance
+from qcelemental.models import AtomicResult, Provenance
 from .qcvar_identities_resources import build_atomicproperties
 
 from .model import ProgramHarness
