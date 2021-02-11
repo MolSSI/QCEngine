@@ -21,9 +21,9 @@ New Features
 ++++++++++++
 .. - (:pr:`206`) OptKing - new procedure harness for OptKing optimizer.
 - (:pr:`269`) MRChem - new multiresolution chemistry program harness.
-.. - (:pr:`277`) ADCC - new program harness for ADC-connect. (Requires Psi4 for SCF.)
-.. - (:pr:`278`) gCP - new program harness for geometric counterpoise.
-.. - (:pr:`280`) Add framework to register identifying known outfile errors, modify input schema, and rerun.
+- (:pr:`277`) ADCC - new program harness for ADC-connect. (Requires Psi4 for SCF.)
+- (:pr:`278`) gCP - new program harness for geometric counterpoise.
+- (:pr:`280`) Add framework to register identifying known outfile errors, modify input schema, and rerun.
 - (:pr:`281`) NWChem - new procedure harness to use NWChem's DRIVER geometry optimizer with NWChem's program harness gradients.
 - (:pr:`282`) DFTD3 - added D3m and D3m(bj) parameters for SAPT0/HF. Allow pairwise analysis to be returned.
 .. - (:pr:`xxx`) TeraChem - new harness for "Server Mode".

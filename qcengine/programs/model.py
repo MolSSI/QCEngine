@@ -84,7 +84,7 @@ class ProgramHarness(BaseModel, abc.ABC):
 class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
     """Base class for Harnesses that include logic to correct common errors
 
-    Classes which implement this Hardness must override the :meth:`_compute` method
+    Classes which implement this Harness must override the :meth:`_compute` method
     rather than :meth:`compute`. The ``compute`` method from this class will make
     calls to ``_compute`` with different actions as it attempts to correct errors in the
     input files.

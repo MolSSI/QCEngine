@@ -306,6 +306,14 @@
             "affiliation": "Inria Paris and CERMICS, \u00C9cole des Ponts ParisTech",
             "@id": "https://orcid.org/0000-0003-0378-7921",
             "identifier": "https://github.com/mfherbst"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Holger",
+            "familyName": "Kruse",
+            "affiliation": "Institute of Biophysics of the CAS, v.v.i., Czech Republic",
+            "@id": "https://orcid.org/0000-0002-0560-1513",
+            "identifier": "https://github.com/hokru"
         }
     ],
     "developmentStatus": "active",
