@@ -32,7 +32,7 @@ Enhancements
 ++++++++++++
 - (:pr:`274`) Entos/Qcore - renamed harness and updated to new Python bindings.
 - (:pr:`283`) OpenMM - transition harness from `openforcefield` packages on omnia channel to `openff.toolkit` packages on conda-forge channel.
-.. - (:pr:`286`) CI - moves from Travis-CI to GHA for open-source testing.
+- (:pr:`286`) CI - moves from Travis-CI to GHA for open-source testing.
 
 Bug Fixes
 +++++++++
