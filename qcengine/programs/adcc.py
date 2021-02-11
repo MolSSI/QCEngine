@@ -5,6 +5,7 @@ from typing import Dict, TYPE_CHECKING
 
 from qcelemental.util import safe_version, which_import
 from qcelemental.models import AtomicResult, AtomicResultProperties, Provenance
+from .qcvar_identities_resources import build_atomicproperties
 
 from .model import ProgramHarness
 from ..exceptions import InputError, UnknownError
@@ -112,11 +113,18 @@ class AdccHarness(ProgramHarness):
         output_data["success"] = compute_success
 
         if compute_success:
-            output_data["properties"] = AtomicResultProperties()
-            output_data["return_result"] = adcc_state.excitation_energy
+            mp = adcc_state.ground_state
+            # MP(3) energy for CVS-ADC(3) calculations is still a missing feature in adcc
+            # ... we store this variant here to be able to fall back to MP(2) energies.
+            is_cvs_adc3 = adcc_state.method.level >= 3 and mp.has_core_occupied_space
+            mp_energy = mp.energy(adcc_state.method.level if not is_cvs_adc3 else 2)
+            output_data["return_result"] = mp_energy
 
             extract_props = input_model.driver == "properties"
-            output_data["extras"]["qcvars"] = adcc_state.to_qcvars(recurse=True, properties=extract_props)
+            qcvars = adcc_state.to_qcvars(recurse=True, properties=extract_props)
+            atprop = build_atomicproperties(qcvars)
+            output_data["extras"]["qcvars"] = qcvars
+            output_data["properties"] = atprop
 
         provenance = Provenance(creator="adcc", version=self.get_version(), routine="adcc").dict()
         provenance["nthreads"] = adcc.get_n_threads()

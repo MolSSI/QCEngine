@@ -289,6 +289,14 @@
             "affiliation": "Hylleraas Centre for Quantum Molecular Sciences, UiT -- The Arctic University of Norway",
             "@id": "https://orcid.org/0000-0002-5452-9239",
             "identifier": "https://github.com/robertodr"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Maximilian",
+            "familyName": "Scheurer",
+            "affiliation": "Interdisciplinary Center for Scientific Computing, Heidelberg University",
+            "@id": "https://orcid.org/0000-0003-0592-3464",
+            "identifier": "https://github.com/maxscheurer"
         }
     ],
     "developmentStatus": "active",
