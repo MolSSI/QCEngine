@@ -20,6 +20,10 @@ matrix:
         - PROG=ANI
     - os: linux
       env:
+        - PYTHON_VER=3.7
+        - PROG=ADCC
+    - os: linux
+      env:
         - PYTHON_VER=3.6
         - PROG=OPENMM
     - os: linux
@@ -63,6 +67,8 @@ install:
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/psi-nightly.yaml
     elif [ $PROG == "ANI" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/torchani.yaml
+    elif [ $PROG == "ADCC" ]; then
+      python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/adcc.yaml
     elif [ $PROG == "OPENMM" ]; then
       python devtools/scripts/conda_env.py -n=test -p=$PYTHON_VER devtools/conda-envs/openmm.yaml
     elif [ $PROG == "NWCHEM" ]; then
@@ -81,7 +87,7 @@ install:
 
     # Any kind of post env ceation
   - |
-    if [ $PROG == "PSI4DEV" ]; then
+    if [[ $PROG == "PSI4DEV" || $PROG == "ADCC" ]]; then
       conda remove qcengine --force
     elif [ $PROG == "QCORE" ]; then
       qcore --accept-license
