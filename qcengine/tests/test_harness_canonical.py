@@ -26,7 +26,7 @@ _canonical_methods = [
     ("xtb", {"method": "GFN2-xTB"}, {}),
     ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
     ("gcp", {"method": "hf3c"}, {}),
-    ("mrchem", {"method": "blyp"}, {"world_prec": 1.e-3}),
+    ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
 ]
 
 
@@ -58,7 +58,9 @@ def test_compute_gradient(program, model, keywords):
 
     molecule = _get_molecule(program)
 
-    inp = AtomicInput(molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"}, keywords=keywords)
+    inp = AtomicInput(
+        molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"}, keywords=keywords
+    )
     if program in ["adcc"]:
         with pytest.raises(qcng.exceptions.InputError) as e:
             ret = qcng.compute(inp, program, raise_error=True)
