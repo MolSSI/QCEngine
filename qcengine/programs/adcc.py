@@ -84,7 +84,6 @@ class AdccHarness(ProgramHarness):
         model = input_model.model
         conv_tol = input_model.keywords.get("conv_tol", 1e-6)
 
-
         if input_model.driver not in ["energy", "properties"]:
             raise InputError(f"Driver {input_model.driver} not implemented for ADCC.")
 
