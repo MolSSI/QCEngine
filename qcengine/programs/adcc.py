@@ -84,6 +84,16 @@ class AdccHarness(ProgramHarness):
         model = input_model.model
         conv_tol = input_model.keywords.get("conv_tol", 1e-6)
 
+        need_one_of_states = {'n_spin_flip', 'n_triplets', 'n_states', 'n_singlets'}
+        if not (need_one_of_states & set(input_model.keywords)):
+            input_model.keywords["n_states"] = 1
+
+        if input_model.driver not in ["energy", "properties"]:
+            raise InputError(f"Driver {input_model.driver} not implemented for ADCC.")
+
+        if not input_model.model.basis:
+            raise InputError("Method must contain a basis set.")
+
         psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.dict(), fix_symmetry="c1"))
         psi4.core.clean()
         psi4.core.be_quiet()

@@ -59,13 +59,20 @@ def test_compute_gradient(program, model):
     molecule = _get_molecule(program)
 
     inp = AtomicInput(molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"})
-    ret = qcng.compute(inp, program, raise_error=True)
+    if program in ["adcc"]:
+        with pytest.raises(qcng.exceptions.InputError) as e:
+            ret = qcng.compute(inp, program, raise_error=True)
 
-    assert ret.success is True
-    assert isinstance(ret.return_result, np.ndarray)
-    assert len(ret.return_result.shape) == 2
-    assert ret.return_result.shape[1] == 3
-    assert "mytag" in ret.extras, ret.extras
+        assert "Driver gradient not implemented" in str(e)
+
+    else:
+        ret = qcng.compute(inp, program, raise_error=True)
+
+        assert ret.success is True
+        assert isinstance(ret.return_result, np.ndarray)
+        assert len(ret.return_result.shape) == 2
+        assert ret.return_result.shape[1] == 3
+        assert "mytag" in ret.extras, ret.extras
 
 
 @pytest.mark.parametrize(
