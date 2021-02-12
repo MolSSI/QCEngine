@@ -1,12 +1,12 @@
-from decimal import Decimal
-from typing import Tuple, List
 import re
+from decimal import Decimal
+from typing import List, Tuple
 
-from qcelemental.models import Molecule, AtomicResult, OptimizationInput, Provenance
+from qcelemental.models import AtomicResult, Molecule, OptimizationInput, Provenance
 from qcelemental.util import unnp
 
 from qcengine.programs.nwchem.harvester import harvest_outfile_pass
-from qcengine.programs.qcvar_identities_resources import build_out, build_atomicproperties
+from qcengine.programs.qcvar_identities_resources import build_atomicproperties, build_out
 from qcengine.programs.util import PreservingDict
 
 

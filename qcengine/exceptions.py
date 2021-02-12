@@ -1,5 +1,5 @@
 import traceback
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 from qcelemental.models import AtomicInput
 

@@ -8,6 +8,7 @@ import os.path
 import sys
 from typing import Any, Dict
 
+from . import get_program  # run and run-procedure; info
 from . import (
     __version__,
     compute,
@@ -19,8 +20,6 @@ from . import (
     list_available_programs,
 )
 from .config import global_repr  # info
-
-from . import get_program  # run and run-procedure; info
 
 __all__ = ["main"]
 

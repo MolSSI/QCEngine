@@ -1,14 +1,14 @@
 """
 Calls adcc
 """
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
-from qcelemental.util import safe_version, which_import
 from qcelemental.models import AtomicResult, Provenance
-from .qcvar_identities_resources import build_atomicproperties
+from qcelemental.util import safe_version, which_import
 
-from .model import ProgramHarness
 from ..exceptions import InputError, UnknownError
+from .model import ProgramHarness
+from .qcvar_identities_resources import build_atomicproperties
 
 if TYPE_CHECKING:
     from qcelemental.models import AtomicInput
@@ -84,7 +84,7 @@ class AdccHarness(ProgramHarness):
         model = input_model.model
         conv_tol = input_model.keywords.get("conv_tol", 1e-6)
 
-        need_one_of_states = {'n_spin_flip', 'n_triplets', 'n_states', 'n_singlets'}
+        need_one_of_states = {"n_spin_flip", "n_triplets", "n_states", "n_singlets"}
         if not (need_one_of_states & set(input_model.keywords)):
             input_model.keywords["n_states"] = 1
 

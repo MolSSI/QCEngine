@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from decimal import Decimal
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel

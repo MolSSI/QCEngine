@@ -2,7 +2,7 @@
 The qcore QCEngine Harness
 """
 
-from typing import Any, Dict, List, Set, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Set
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet

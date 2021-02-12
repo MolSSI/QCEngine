@@ -7,7 +7,6 @@ from qcelemental.testing import compare_values
 import qcengine as qcng
 from qcengine.testing import using
 
-
 # Molecule where autoz fails
 _auto_z_problem = xyz = """C                    15.204188380000    -3.519180270000   -10.798726560000
 C                    15.097645630000    -2.650246400000    -8.505033680000

@@ -1,5 +1,5 @@
 """Known errors for NWChem"""
-from typing import Dict, Any
+from typing import Any, Dict
 
 from qcelemental.models import AtomicInput
 

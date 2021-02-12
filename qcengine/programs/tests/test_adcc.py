@@ -1,11 +1,11 @@
 """Tests for adcc functionality"""
-import pytest
 import numpy as np
-import qcengine as qcng
+import pytest
 import qcelemental as qcel
-
-from qcengine.testing import using
 from qcelemental.testing import compare_values
+
+import qcengine as qcng
+from qcengine.testing import using
 
 
 @pytest.fixture
