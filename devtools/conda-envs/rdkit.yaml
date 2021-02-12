@@ -5,6 +5,9 @@ channels:
 dependencies:
   - rdkit
 
+    # Mixed Tests
+  - geometric
+
     # Core
   - python
   - pyyaml

@@ -24,6 +24,9 @@ _canonical_methods = [
     ("torchani", {"method": "ANI1x"}),
     ("turbomole", {"method": "pbe", "basis": "6-31G"}),
     ("xtb", {"method": "GFN2-xTB"}),
+    ("adcc", {"method": "adc2", "basis": "6-31G"}),
+    ("gcp", {"method": "hf3c"}),
+    ("mrchem", {"method": "blyp"}),
 ]
 
 
@@ -79,6 +82,9 @@ def test_compute_gradient(program, model):
         ("rdkit", {"method": "bad"}),
         ("torchani", {"method": "bad"}),
         ("turbomole", {"method": "bad"}),
+        ("adcc", {"method": "bad"}),
+        ("gcp", {"method": "bad"}),
+        ("mrchem", {"method": "bad"}),
     ],
 )
 def test_compute_bad_models(program, model):
