@@ -11,22 +11,22 @@ import qcengine as qcng
 from qcengine.testing import has_program
 
 _canonical_methods = [
-    ("dftd3", {"method": "b3lyp-d3"}),
-    ("qcore", {"method": "pbe", "basis": "6-31G"}),
-    ("molpro", {"method": "hf", "basis": "6-31G"}),
-    ("mopac", {"method": "PM6"}),
-    ("mp2d", {"method": "MP2-DMP2"}),
-    ("nwchem", {"method": "hf", "basis": "6-31G"}),
-    ("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}),
-    ("psi4", {"method": "hf", "basis": "6-31G"}),
-    ("qchem", {"method": "hf", "basis": "6-31G"}),
-    ("rdkit", {"method": "UFF"}),
-    ("torchani", {"method": "ANI1x"}),
-    ("turbomole", {"method": "pbe", "basis": "6-31G"}),
-    ("xtb", {"method": "GFN2-xTB"}),
-    ("adcc", {"method": "adc2", "basis": "6-31G"}),
-    ("gcp", {"method": "hf3c"}),
-    ("mrchem", {"method": "blyp"}),
+    ("dftd3", {"method": "b3lyp-d3"}, {}),
+    ("qcore", {"method": "pbe", "basis": "6-31G"}, {}),
+    ("molpro", {"method": "hf", "basis": "6-31G"}, {}),
+    ("mopac", {"method": "PM6"}, {}),
+    ("mp2d", {"method": "MP2-DMP2"}, {}),
+    ("nwchem", {"method": "hf", "basis": "6-31G"}, {}),
+    ("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}),
+    ("psi4", {"method": "hf", "basis": "6-31G"}, {}),
+    ("qchem", {"method": "hf", "basis": "6-31G"}, {}),
+    ("rdkit", {"method": "UFF"}, {}),
+    ("torchani", {"method": "ANI1x"}, {}),
+    ("turbomole", {"method": "pbe", "basis": "6-31G"}, {}),
+    ("xtb", {"method": "GFN2-xTB"}, {}),
+    ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
+    ("gcp", {"method": "hf3c"}, {}),
+    ("mrchem", {"method": "blyp"}, {"world_prec": 1.e-3}),
 ]
 
 
@@ -37,28 +37,28 @@ def _get_molecule(program):
         return qcng.get_molecule("hydrogen")
 
 
-@pytest.mark.parametrize("program, model", _canonical_methods)
-def test_compute_energy(program, model):
+@pytest.mark.parametrize("program, model, keywords", _canonical_methods)
+def test_compute_energy(program, model, keywords):
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
     molecule = _get_molecule(program)
 
-    inp = AtomicInput(molecule=molecule, driver="energy", model=model)
+    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
     ret = qcng.compute(inp, program, raise_error=True)
 
     assert ret.success is True
     assert isinstance(ret.return_result, float)
 
 
-@pytest.mark.parametrize("program, model", _canonical_methods)
-def test_compute_gradient(program, model):
+@pytest.mark.parametrize("program, model, keywords", _canonical_methods)
+def test_compute_gradient(program, model, keywords):
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
     molecule = _get_molecule(program)
 
-    inp = AtomicInput(molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"})
+    inp = AtomicInput(molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"}, keywords=keywords)
     if program in ["adcc"]:
         with pytest.raises(qcng.exceptions.InputError) as e:
             ret = qcng.compute(inp, program, raise_error=True)

@@ -52,9 +52,6 @@ class MopacHarness(ProgramHarness):
         return "2016"
 
     def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
-        """
-        Runs Psi4 in API mode
-        """
         self.found(raise_error=True)
 
         exec_command = self.build_input(input_model, config)
