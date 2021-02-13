@@ -140,10 +140,11 @@ def failure_engine():
 
 # Figure out what is imported
 _programs = {
+    "adcc": is_program_new_enough("adcc", "0.15.7"),
     "cfour": which("xcfour", return_bool=True),
     "dftd3": which("dftd3", return_bool=True),
     "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),
-    "entos": is_program_new_enough("entos", "0.7.1"),
+    "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
     "gcp": which("gcp", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
@@ -158,12 +159,13 @@ _programs = {
     "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
     "qcdb": which_import("qcdb", return_bool=True),
-    "qchem": is_program_new_enough("qchem", "5.2"),
+    "qchem": is_program_new_enough("qchem", "5.1"),
     "rdkit": which_import("rdkit", return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "torchani": is_program_new_enough("torchani", "0.9"),
     "turbomole": which("define", return_bool=True),
     "xtb": which_import("xtb", return_bool=True),
+    "mrchem": is_program_new_enough("mrchem", "1.0.0"),
 }
 _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 

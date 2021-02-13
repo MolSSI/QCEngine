@@ -12,8 +12,9 @@ from ..units import ureg
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 class RDKitHarness(ProgramHarness):

@@ -1,3 +1,4 @@
+import itertools as it
 import re
 from decimal import Decimal
 
@@ -82,6 +83,39 @@ def parse_gradient(gradient):
     return grad
 
 
+def parse_nprhessian(nprhessian):
+    lines = [l.strip() for l in nprhessian.strip().split("\n")]
+    assert lines[0] == "$nprhessian"
+    assert lines[-1] == "$end"
+
+    hess_lines = [line.split()[2:] for line in lines[1:-1]]
+    atom_num = int(lines[-2].split()[0])
+    hessian = np.array(list(it.chain(*hess_lines)), dtype=float)
+    hessian = hessian.reshape(atom_num, atom_num)
+
+    return hessian
+
+
+def parse_hessian(hessian, size):
+    lines = [l.strip() for l in hessian.strip().split("\n")]
+    assert lines[0] == "$hessian"
+    assert lines[-1] == "$end"
+
+    hess_lines = list()
+    for line in lines[1:-1]:
+        line = line.strip()
+        if line == "$hessian (projected)":
+            break
+        hess_lines.append(line.split()[2:])
+    else:
+        raise Exception("'$hessian (projected)' line was not encountered!")
+
+    hessian = np.array(list(it.chain(*hess_lines)), dtype=float)
+    hessian = hessian.reshape(size, size)
+
+    return hessian
+
+
 def harvest(input_model, stdout, **outfiles):
     qcvars = PreservingDict()
 
@@ -97,4 +131,10 @@ def harvest(input_model, stdout, **outfiles):
         gradient = parse_gradient(outfiles["gradient"])
 
     hessian = None
+    if "nprhessian" in outfiles:
+        hessian = parse_nprhessian(outfiles["nprhessian"])
+    if "hessian" in outfiles:
+        size = input_model.geometry.size
+        hessian = parse_hessian(outfiles["hessian"], size)
+
     return qcvars, gradient, hessian

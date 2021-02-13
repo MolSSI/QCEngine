@@ -20,8 +20,9 @@ from . import empirical_dispersion_resources
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -144,6 +145,10 @@ class DFTD3Harness(ProgramHarness):
         if input_model.extras["info"]["dashlevel"] == "atmgr":
             command.append("-abc")
 
+        # Append `-anal` for pairwise atomic analysis
+        if input_model.keywords.get("save_pairwise_dispersion") is True:
+            command.append("-anal")
+
         infiles = {
             ".dftd3par.local": dftd3_coeff_formatter(
                 input_model.extras["info"]["dashlevel"], input_model.extras["info"]["dashparams"]
@@ -169,6 +174,7 @@ class DFTD3Harness(ProgramHarness):
     #   set to run with some dummy values, the 2-body values are no good.
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
+        Grimme_h2kcal = 627.509541
         stdout = outfiles.pop("stdout")
 
         for fl, contents in outfiles.items():
@@ -180,7 +186,6 @@ class DFTD3Harness(ProgramHarness):
         real = np.array(input_model.molecule.real)
         full_nat = real.shape[0]
         real_nat = np.sum(real)
-
         for ln in stdout.splitlines():
             if re.match(" Edisp /kcal,au", ln):
                 ene = Decimal(ln.split()[3])
@@ -188,6 +193,21 @@ class DFTD3Harness(ProgramHarness):
                 raise ResourceError("Cannot process ATM results from DFTD3 prior to v3.2.1.")
             elif re.match(r""" E6\(ABC\) /kcal,au:""", ln):
                 atm = Decimal(ln.split()[-1])
+            elif re.match(" analysis of pair-wise terms", ln):
+                D3pairs = np.zeros((full_nat, full_nat))
+                # Iterate over block
+                start = stdout.splitlines().index(ln) + 2
+                for l in stdout.splitlines()[start:]:
+                    data = l.replace("-", " -").split()
+                    # print(data)
+                    if len(data) == 0:
+                        break
+                    atom1 = int(data[0]) - 1
+                    atom2 = int(data[1]) - 1
+                    Edisp = Decimal(data[-1])
+                    D3pairs[atom1, atom2] = Edisp / Decimal(Grimme_h2kcal)
+                    D3pairs[atom2, atom1] = D3pairs[atom1, atom2]
+
             elif re.match(" normal termination of dftd3", ln):
                 break
         else:
@@ -280,8 +300,10 @@ class DFTD3Harness(ProgramHarness):
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
-
+        if input_model.keywords.get("save_pairwise_dispersion") is True:
+            output_data["extras"]["qcvars"]["PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
         output_data["success"] = True
+
         return AtomicResult(**{**input_model.dict(), **output_data})
 
 

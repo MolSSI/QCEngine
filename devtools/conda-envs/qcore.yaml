@@ -1,12 +1,9 @@
 name: test
 channels:
+  - entos
   - conda-forge
 dependencies:
-  - rdkit
-  - openmm
-  - openff-toolkit
-  - openff-forcefields
-  - openmmforcefields
+  - py-qcore
 
     # Core
   - python

@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2020-MM-DD
+.. vX.Y.0 / 2021-MM-DD
 .. --------------------
 ..
 .. New Features
@@ -12,6 +12,71 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+
+
+v0.18.0 / 2021-MM-DD
+--------------------
+
+New Features
+++++++++++++
+.. - (:pr:`206`) OptKing - new procedure harness for OptKing optimizer.
+- (:pr:`269`) MRChem - new multiresolution chemistry program harness.
+- (:pr:`277`) ADCC - new program harness for ADC-connect. (Requires Psi4 for SCF.)
+- (:pr:`278`) gCP - new program harness for geometric counterpoise.
+- (:pr:`280`) Add framework to register identifying known outfile errors, modify input schema, and rerun.
+- (:pr:`281`) NWChem - new procedure harness to use NWChem's DRIVER geometry optimizer with NWChem's program harness gradients.
+- (:pr:`282`) DFTD3 - added D3m and D3m(bj) parameters for SAPT0/HF. Allow pairwise analysis to be returned.
+.. - (:pr:`xxx`) TeraChem - new harness for "Server Mode".
+
+Enhancements
+++++++++++++
+- (:pr:`274`) Entos/Qcore - renamed harness and updated to new Python bindings.
+- (:pr:`283`) OpenMM - transition harness from `openforcefield` packages on omnia channel to `openff.toolkit` packages on conda-forge channel.
+- (:pr:`286`) CI - moves from Travis-CI to GHA for open-source testing.
+
+Bug Fixes
++++++++++
+- (:pr:`273`) TeraChem - fixed bug of missing method field.
+
+
+v0.17.0 / 2020-10-02
+--------------------
+
+New Features
+++++++++++++
+- (:pr:`262`) Add project authors information.
+
+Enhancements
+++++++++++++
+- (:pr:`264`) Turbomole - add analytic and finite difference Hessians.
+- (:pr:`266`) Psi4- error messages from Psi4Harness no longer swallowed by `KeyError`.
+
+Bug Fixes
++++++++++
+- (:pr:`264`) Turbomole - fix output properties handling.
+- (:pr:`265`) xtb - ensure extra tags are preserved in XTB harness.
+- (:pr:`270`) TorchANI - now lazily loads models as requested for compute.
+
+
+v0.16.0 / 2020-08-19
+--------------------
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`241`) NWChem - improved performance by turning on ``atoms_map=True``, which does seem to be true.
+- (:pr:`257`) TorchANI - learned the ANI2x model and to work with v2.
+- (:pr:`259`) Added MP2.5 & MP3 energies and HF, MP2.5, MP3, LCCD gradients reference data to stdsuite.
+- (:pr:`261`) Q-Chem - learned to return more informative Provenance, learned to work with v5.1.
+- (:pr:`263`) NWChem - learned how to turn off automatic Z-Matrix coordinates with ``geometry__noautoz = True``.
+
+Bug Fixes
++++++++++
+- (:pr:`261`) Molpro - learned to error cleanly if version too old for XML parsing.
+- (:pr:`261`) Q-Chem - learned to extract version from output file instead of ``qchem -h`` since command isn't available
+  from a source install.
 
 
 v0.15.0 / 2020-06-26

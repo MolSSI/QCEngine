@@ -17,7 +17,8 @@ from qcengine.exceptions import UnknownError
 
 from ...exceptions import InputError
 from ...util import create_mpi_invocation, execute
-from ..model import ProgramHarness
+from ..model import ErrorCorrectionProgramHarness
+from .errors import all_errors
 from ..qcvar_identities_resources import build_atomicproperties, build_out
 from .germinate import muster_modelchem
 from .harvester import harvest
@@ -27,7 +28,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
 
 
-class NWChemHarness(ProgramHarness):
+class NWChemHarness(ErrorCorrectionProgramHarness):
     """
 
     Notes
@@ -47,7 +48,7 @@ class NWChemHarness(ProgramHarness):
     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
+    class Config(ErrorCorrectionProgramHarness.Config):
         pass
 
     @staticmethod
@@ -112,7 +113,7 @@ class NWChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: AtomicInput, config: "TaskConfig") -> AtomicResult:
+    def _compute(self, input_model: AtomicInput, config: "TaskConfig") -> AtomicResult:
         """
         Runs NWChem in executable mode
         """
@@ -132,6 +133,9 @@ class NWChemHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
         else:
+            # Check if any of the errors are known
+            for error in all_errors:
+                error.detect_error(dexe)
             raise UnknownError(dexe["stdout"])
 
     def build_input(
@@ -153,6 +157,9 @@ class NWChemHarness(ProgramHarness):
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
         opts.update(moldata["keywords"])
+
+        if opts.pop("geometry__noautoz", False):
+            molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 noautoz", molcmd)
 
         # Handle calc type and quantum chemical method
         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))

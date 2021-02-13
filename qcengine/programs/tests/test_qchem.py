@@ -14,6 +14,8 @@ qchem_forgive = [
     "root.molecule.provenance.routine",
     "root.provenance.version",
     "root.provenance.routine",
+    "root.provenance.creator",
+    "root.extras",
 ]
 
 
@@ -30,6 +32,8 @@ def test_qchem_output_parser(test_case):
 
     output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
     output_ref.pop("provenance", None)
+    output_ref.pop("extras", None)
+    output.pop("extras", None)
 
     check, message = compare_recursive(output_ref, output, return_message=True)
     assert check, message

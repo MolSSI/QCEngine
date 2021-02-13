@@ -2,21 +2,23 @@ name: test
 channels:
   - conda-forge
 dependencies:
-  - rdkit
-  - openmm
-  - openff-toolkit
-  - openff-forcefields
-  - openmmforcefields
+  - mrchem=1=*openmpi*_1
+  - geometric
 
     # Core
+  - python
   - python
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.11.1
-  - pydantic >=0.30.1
+  - qcelemental>=0.17
+  - pydantic 
 
     # Testing
   - pytest
   - pytest-cov
   - codecov
+
+  - pip
+  - pip:
+    - pyberny

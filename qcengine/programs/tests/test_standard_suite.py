@@ -31,9 +31,10 @@
 #   result: runner checks assertion fails at expected result and triggers pytest.xfail
 
 
+import sys
+
 import pytest
 import qcelemental as qcel
-import sys
 
 import qcengine as qcng
 from qcengine.programs.tests.standard_suite_ref import std_molecules, std_refs
@@ -119,7 +120,13 @@ def _trans_key(qc, bas, key):
 #                                                               `---' `---'
 
 
-@pytest.mark.parametrize("dertype", [0,], ids=["ene0"])
+@pytest.mark.parametrize(
+    "dertype",
+    [
+        0,
+    ],
+    ids=["ene0"],
+)
 @pytest.mark.parametrize(
     "basis, subjects",
     [
@@ -194,7 +201,10 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
     inpcopy["scf_type"] = "pk"
     inpcopy["corl_type"] = "conv"
     inpcopy["qc_module"] = "-".join(
-        [qcprog, inp["keywords"].get("qc_module", inp["keywords"].get("cc_program", "")),]
+        [
+            qcprog,
+            inp["keywords"].get("qc_module", inp["keywords"].get("cc_program", "")),
+        ]
     ).strip("-")
     print("INP", inpcopy)
 
@@ -210,7 +220,13 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #                                                                      `---' `---'
 
 
-@pytest.mark.parametrize("dertype", [0,], ids=["ene0"])
+@pytest.mark.parametrize(
+    "dertype",
+    [
+        0,
+    ],
+    ids=["ene0"],
+)
 @pytest.mark.parametrize(
     "basis, subjects",
     [
@@ -294,7 +310,10 @@ def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
     inpcopy["scf_type"] = "pk"
     inpcopy["corl_type"] = "conv"
     inpcopy["qc_module"] = "-".join(
-        [qcprog, inp["keywords"].get("qc_module", inp["keywords"].get("cc_program", "")),]
+        [
+            qcprog,
+            inp["keywords"].get("qc_module", inp["keywords"].get("cc_program", "")),
+        ]
     ).strip("-")
     print("INP", inpcopy)
 

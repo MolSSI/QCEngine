@@ -44,8 +44,8 @@ def harvest(p4Mol, gamessout: str, **largs) -> Tuple[PreservingDict, Molecule, l
 
 def harvest_output(outtext):
     """Function to separate portions of a gamess output file *outtext*,
-        divided by "Step".
-        """
+    divided by "Step".
+    """
     pass_qcvar = []
     pass_coord = []
     pass_grad = []

@@ -12,7 +12,7 @@ from qcengine.testing import has_program
 
 _canonical_methods = [
     ("dftd3", {"method": "b3lyp-d3"}),
-    ("entos", {"method": "pbe", "basis": "6-31G"}),
+    ("qcore", {"method": "pbe", "basis": "6-31G"}),
     ("molpro", {"method": "hf", "basis": "6-31G"}),
     ("mopac", {"method": "PM6"}),
     ("mp2d", {"method": "MP2-DMP2"}),
@@ -23,6 +23,7 @@ _canonical_methods = [
     ("rdkit", {"method": "UFF"}),
     ("torchani", {"method": "ANI1x"}),
     ("turbomole", {"method": "pbe", "basis": "6-31G"}),
+    ("xtb", {"method": "GFN2-xTB"}),
 ]
 
 
@@ -69,7 +70,7 @@ def test_compute_gradient(program, model):
     [
         ("dftd3", {"method": "bad"}),
         ("dftd3", {"method": "b3lyp-d3", "driver": "hessian"}),
-        ("entos", {"method": "bad"}),
+        ("qcore", {"method": "bad"}),
         ("mopac", {"method": "bad"}),
         ("mp2d", {"method": "bad"}),
         ("openmm", {"method": "bad"}),

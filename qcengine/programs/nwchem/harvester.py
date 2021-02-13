@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from decimal import Decimal
-from typing import Tuple
+from typing import Tuple, Optional
 
 import numpy as np
 import qcelemental as qcel
@@ -939,7 +939,9 @@ def harvest_hessian(hess: str) -> np.ndarray:
     return hess_arr.T  # So that the array is listed in C-order, needed by some alignment routines
 
 
-def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, None, list, Molecule, str, str]:
+def harvest(
+    in_mol: Molecule, nwout: str, **outfiles
+) -> Tuple[PreservingDict, Optional[np.ndarray], list, Molecule, str, str]:
     """Parses all the pieces of output from NWChem: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 
