@@ -202,7 +202,7 @@ class QChemHarness(ProgramHarness):
         elif input_model.driver == "hessian":
             keywords["JOBTYPE"] = "freq"
         else:
-            raise InputError(f"Driver of type {input_model.driver} is not yet supported.")
+            raise InputError(f"Driver {input_model.driver} not implemented for Q-Chem.")
 
         if input_model.molecule.fix_com or input_model.molecule.fix_orientation:
             keywords["SYM_IGNORE"] = "TRUE"

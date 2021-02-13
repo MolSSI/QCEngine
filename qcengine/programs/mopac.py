@@ -132,7 +132,7 @@ class MopacHarness(ProgramHarness):
             raise InputError(f"MOPAC does not have method: {method.upper()}")
 
         if input_model.driver not in ["energy", "gradient"]:
-            raise InputError(f"MOPAC can only compute energies and gradients, found {input_model.driver}")
+            raise InputError(f"Driver {input_model.driver} not implemented for MOPAC.")
 
         input_file = []
 

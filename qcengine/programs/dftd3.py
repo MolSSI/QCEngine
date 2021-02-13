@@ -112,7 +112,7 @@ class DFTD3Harness(ProgramHarness):
             mtd = mtd[3:]
 
         if (input_model.driver.derivative_int() > 1) or (input_model.driver == "properties"):
-            raise InputError(f"""DFTD3 valid driver options are 'energy' and 'gradient', not {input_model.driver}""")
+            raise InputError(f"Driver {input_model.driver} not implemented for DFTD3.")
 
         # temp until actual options object
         input_model.extras["info"] = empirical_dispersion_resources.from_arrays(

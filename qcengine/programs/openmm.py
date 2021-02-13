@@ -284,7 +284,7 @@ class OpenMMHarness(ProgramHarness):
             # Force to gradient
             ret_data["return_result"] = -1 * q
         else:
-            raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
+            raise InputError(f"Driver {input_model.driver} not implemented for OpenMM.")
 
         ret_data["success"] = True
         ret_data["extras"] = input_data.extras
