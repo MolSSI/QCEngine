@@ -17,6 +17,7 @@ from .mp2d import MP2DHarness
 from .mrchem import MRChemHarness
 from .nwchem import NWChemHarness
 from .openmm import OpenMMHarness
+from .orca import OrcaHarness
 from .psi4 import Psi4Harness
 from .qchem import QChemHarness
 from .rdkit import RDKitHarness
@@ -107,6 +108,7 @@ register_program(GAMESSHarness())
 register_program(MRChemHarness())
 register_program(MolproHarness())
 register_program(NWChemHarness())
+register_program(OrcaHarness())
 register_program(Psi4Harness())
 register_program(QChemHarness())
 register_program(QcoreHarness())
