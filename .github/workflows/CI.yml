@@ -62,7 +62,7 @@ jobs:
             label: ADCC
             runs-on: ubuntu-latest
 
-          - conda-env: opt-disp-psi
+          - conda-env: opt-disp
             python-version: 3.8
             label: optimization-dispersion
             runs-on: ubuntu-latest
