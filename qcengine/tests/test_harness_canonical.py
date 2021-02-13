@@ -65,7 +65,7 @@ def test_compute_gradient(program, model, keywords):
         with pytest.raises(qcng.exceptions.InputError) as e:
             ret = qcng.compute(inp, program, raise_error=True)
 
-        assert "Driver gradient not implemented" in str(e)
+        assert "Driver gradient not implemented" in str(e.value)
 
     else:
         ret = qcng.compute(inp, program, raise_error=True)
