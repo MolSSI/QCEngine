@@ -1,7 +1,7 @@
 from typing import Any, Dict, Union
 
-from qcelemental.models import OptimizationResult, OptimizationInput
-from qcelemental.util import which_import, safe_version
+from qcelemental.models import OptimizationInput, OptimizationResult
+from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
 

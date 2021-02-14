@@ -19,7 +19,7 @@ v0.18.0 / 2021-MM-DD
 
 New Features
 ++++++++++++
-.. - (:pr:`206`) OptKing - new procedure harness for OptKing optimizer.
+- (:pr:`206`) OptKing - new procedure harness for OptKing optimizer.
 - (:pr:`269`) MRChem - new multiresolution chemistry program harness.
 - (:pr:`277`) ADCC - new program harness for ADC-connect. (Requires Psi4 for SCF.)
 - (:pr:`278`) gCP - new program harness for geometric counterpoise.
@@ -32,7 +32,7 @@ Enhancements
 ++++++++++++
 - (:pr:`274`) Entos/Qcore - renamed harness and updated to new Python bindings.
 - (:pr:`283`) OpenMM - transition harness from `openforcefield` packages on omnia channel to `openff.toolkit` packages on conda-forge channel.
-- (:pr:`286`) CI - moves from Travis-CI to GHA for open-source testing.
+- (:pr:`286`, :pr:`287`) CI - moves from Travis-CI to GHA for open-source testing.
 
 Bug Fixes
 +++++++++

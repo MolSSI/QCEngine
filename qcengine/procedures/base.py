@@ -7,8 +7,8 @@ from typing import Set
 from ..exceptions import InputError, ResourceError
 from .berny import BernyProcedure
 from .geometric import GeometricProcedure
-from .optking import OptKingProcedure
 from .nwchem_opt import NWChemDriverProcedure
+from .optking import OptKingProcedure
 
 __all__ = ["register_procedure", "get_procedure", "list_all_procedures", "list_available_procedures"]
 
