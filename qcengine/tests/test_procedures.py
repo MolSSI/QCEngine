@@ -19,8 +19,10 @@ def input_data():
 
 
 @using("psi4")
-@using("geometric")
-def test_geometric_psi4(input_data):
+@pytest.mark.parametrize(
+    "optimizer", [pytest.param("geometric", marks=using("geometric")), pytest.param("optking", marks=using("optking"))],
+)
+def test_geometric_psi4(input_data, optimizer):
 
     input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
@@ -29,11 +31,11 @@ def test_geometric_psi4(input_data):
 
     input_data = OptimizationInput(**input_data)
 
-    ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
+    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True)
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
-    assert ret.provenance.creator.lower() == "geometric"
+    assert ret.provenance.creator.lower() == optimizer
     assert ret.trajectory[0].provenance.creator.lower() == "psi4"
 
     # Check keywords passing

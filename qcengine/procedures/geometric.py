@@ -24,24 +24,24 @@ class GeometricProcedure(ProcedureHarness):
     def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
         return self._build_model(data, OptimizationInput)
 
-    def compute(self, input_data: "OptimizationInput", config: "TaskConfig") -> "OptimizationResult":
+    def compute(self, input_model: "OptimizationInput", config: "TaskConfig") -> "OptimizationResult":
         try:
             import geometric
         except ModuleNotFoundError:
             raise ModuleNotFoundError("Could not find geomeTRIC in the Python path.")
 
-        geometric_input = input_data.dict()
+        input_data = input_model.dict()
 
         # Temporary patch for geomeTRIC
-        geometric_input["initial_molecule"]["symbols"] = list(geometric_input["initial_molecule"]["symbols"])
+        input_data["initial_molecule"]["symbols"] = list(input_data["initial_molecule"]["symbols"])
 
         # Set retries to two if zero while respecting local_config
         local_config = config.dict()
         local_config["retries"] = local_config.get("retries", 2) or 2
-        geometric_input["input_specification"]["extras"]["_qcengine_local_config"] = local_config
+        input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
-        output_data = geometric.run_json.geometric_run_json(geometric_input)
+        output_data = geometric.run_json.geometric_run_json(input_data)
 
         output_data["provenance"] = {
             "creator": "geomeTRIC",
