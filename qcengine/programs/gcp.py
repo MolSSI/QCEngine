@@ -61,10 +61,9 @@ class GCPHarness(ProgramHarness):
             command = [which_prog, "-version"]
             import subprocess
 
-            proc = subprocess.run(command, stdout=subprocess.PIPE)
+            proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             for ln in proc.stdout.decode("utf-8").splitlines():
                 if re.match(".*Version", ln):
-                    print(ln.split())
                     version = ln.split()[2]
 
             if version is None:
