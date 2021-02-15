@@ -3,7 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - mrchem=1=*openmpi*_1
-  - geometric
 
     # Core
   - python
@@ -18,7 +17,3 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
-
-  - pip
-  - pip:
-    - pyberny

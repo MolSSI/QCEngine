@@ -116,7 +116,7 @@ class GCPHarness(ProgramHarness):
     ) -> Dict[str, Any]:
 
         if (input_model.driver.derivative_int() > 1) or (input_model.driver == "properties"):
-            raise InputError(f"""GCP valid driver options are 'energy' and 'gradient', not {input_model.driver}""")
+            raise InputError(f"Driver {input_model.driver} not implemented for GCP.")
 
         # live somewhere else?
         available_levels = [

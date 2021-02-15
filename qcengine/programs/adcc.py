@@ -1,14 +1,14 @@
 """
 Calls adcc
 """
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
-from qcelemental.util import safe_version, which_import
 from qcelemental.models import AtomicResult, Provenance
-from .qcvar_identities_resources import build_atomicproperties
+from qcelemental.util import safe_version, which_import
 
-from .model import ProgramHarness
 from ..exceptions import InputError, UnknownError
+from .model import ProgramHarness
+from .qcvar_identities_resources import build_atomicproperties
 
 if TYPE_CHECKING:
     from qcelemental.models import AtomicInput
@@ -83,6 +83,12 @@ class AdccHarness(ProgramHarness):
         mol = input_model.molecule
         model = input_model.model
         conv_tol = input_model.keywords.get("conv_tol", 1e-6)
+
+        if input_model.driver not in ["energy", "properties"]:
+            raise InputError(f"Driver {input_model.driver} not implemented for ADCC.")
+
+        if not input_model.model.basis:
+            raise InputError("Method must contain a basis set.")
 
         psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.dict(), fix_symmetry="c1"))
         psi4.core.clean()

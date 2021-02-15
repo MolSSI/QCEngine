@@ -6,6 +6,15 @@ dependencies:
   - psi4
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
   - intel-openmp!=2019.5
+  - rdkit
+
+    # Mixed Tests
+  - dftd3 3.2.1
+  - mp2d >=1.1
+  - gcp
+  - geometric
+  - optking
+  - pymdi
 
     # Core
   - python
@@ -20,3 +29,7 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
+
+  - pip
+  - pip:
+    - pyberny

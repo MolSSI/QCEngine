@@ -122,7 +122,7 @@ class RDKitHarness(ProgramHarness):
             coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
             ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
         else:
-            raise InputError(f"RDKit can only compute energy and gradient driver methods. Found {input_data.driver}.")
+            raise InputError(f"Driver {input_model.driver} not implemented for RDKit.")
 
         ret_data["provenance"] = Provenance(
             creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField"

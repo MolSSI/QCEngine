@@ -8,9 +8,8 @@ from ..exceptions import InputError, ResourceError
 from .adcc import AdccHarness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
-from .gcp import GCPHarness
-from .qcore import QcoreHarness, EntosHarness
 from .gamess import GAMESSHarness
+from .gcp import GCPHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
@@ -19,6 +18,7 @@ from .nwchem import NWChemHarness
 from .openmm import OpenMMHarness
 from .psi4 import Psi4Harness
 from .qchem import QChemHarness
+from .qcore import EntosHarness, QcoreHarness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
 from .torchani import TorchANIHarness
