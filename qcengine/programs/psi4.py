@@ -94,7 +94,7 @@ class Psi4Harness(ProgramHarness):
 
         if "undef" in candidate_version:
             raise TypeError(
-                "Using custom build without tags. Please pull git tags with `git pull origin master --tags`."
+                """Using custom build without tags. Please pull git tags with `git pull origin master --tags`. If building from source, `git fetch upstream "refs/tags/*:refs/tags/*"`."""
             )
 
         return candidate_version

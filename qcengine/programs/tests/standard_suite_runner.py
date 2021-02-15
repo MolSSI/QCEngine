@@ -6,7 +6,9 @@ from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 
-from .standard_suite_contracts import (
+from .standard_suite_ref import answer_hash, std_suite
+
+from .standard_suite_contracts import (  # isort:skip
     contractual_hf,
     contractual_mp2,
     # contractual_mp2p5,
@@ -17,7 +19,6 @@ from .standard_suite_contracts import (
     query_has_qcvar,
     query_qcvar,
 )
-from .standard_suite_ref import answer_hash, std_suite
 
 pp = pprint.PrettyPrinter(width=120)
 

@@ -117,7 +117,7 @@ def _trans_key(qc, bas, key):
 #  |  |  |  ||  |`       |  `---.|  ||  |\   --.|  |   ' '-' ' \   '
 #  `--'  `--'`--'        `------'`--''--' `----'`--'   .`-  /.-'  /
 #                                                      `---' `---'
-#  HF Energy
+#  <<<  HF Energy
 
 
 @pytest.mark.parametrize(
@@ -190,7 +190,7 @@ def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reques
 #  |  |  |  ||  |`       '  '--'  ||  |   \ '-'  |\ `-' ||  |\   --.|  ||  |  |  |
 #  `--'  `--'`--'         `------' `--'    `--`--' `---' `--' `----'`--''--'  `--'
 #
-#  HF Gradient
+#  <<<  HF Gradient
 
 
 @pytest.mark.parametrize(
@@ -264,7 +264,7 @@ def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 #  |  |   |  ||  | --' /   '-.    |  `---.|  ||  |\   --.|  |   ' '-' ' \   '
 #  `--'   `--'`--'     '-----'    `------'`--''--' `----'`--'   .`-  /.-'  /
 #                                                               `---' `---'
-#  MP2 Energy
+#  <<<  MP2 Energy
 
 
 @pytest.mark.parametrize(
@@ -365,7 +365,7 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  '  '--'\'  '--'\.-'    ||  '--'  /    |  `---.|  ||  |\   --.|  |   ' '-' ' \   '
 #   `-----' `-----'`-----' `-------'     `------'`--''--' `----'`--'   .`-  /.-'  /
 #                                                                      `---' `---'
-#  CCSD Energy
+#  <<<  CCSD Energy
 
 
 @pytest.mark.parametrize(

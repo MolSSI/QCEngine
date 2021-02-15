@@ -163,7 +163,7 @@ def contractual_mp2(
                 (
                     (qc_module == "gamess" and reference in ["uhf", "rohf"] and method == "mp2")
                     or (qc_module == "gamess" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
-                    or (qc_module == "nwchem-tce" and method == "mp2")
+                    or (qc_module == "nwchem-tce" and method in ["mp2", "mp3"])
                     or (qc_module == "nwchem" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
                     or (
                         qc_module == "psi4-occ"
@@ -259,6 +259,7 @@ def contractual_mp2p5(
                     and corl_type in ["df", "cd"]
                     and method in ["mp2.5", "mp3"]
                 )
+                or (qc_module.startswith("nwchem") and method == "mp3")
             )
             and pv in ["MP2.5 SAME-SPIN CORRELATION ENERGY", "MP2.5 OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (
@@ -308,6 +309,7 @@ def contractual_mp3(
                     and corl_type in ["df", "cd"]
                     and method in ["mp2.5", "mp3"]
                 )
+                or (qc_module.startswith("nwchem") and method == "mp3")
             )
             and pv in ["MP3 SAME-SPIN CORRELATION ENERGY", "MP3 OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (

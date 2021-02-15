@@ -239,6 +239,7 @@ def harvest_outfile_pass(outtext):
         # 5) RI-MP2
 
         # Process calculation through tce [dertype] command
+        tce_cumm_corl = 0.0
         for cc_name in [r"MBPT\(2\)", r"MBPT\(3\)", r"MBPT\(4\)"]:
             mobj = re.search(
                 # fmt: off
@@ -249,9 +250,13 @@ def harvest_outfile_pass(outtext):
                 re.MULTILINE,
             )
 
+            mobj3 = re.search(r"Wavefunction type : Restricted open-shell Hartree-Fock", outtext, re.MULTILINE)
+
             if mobj:
                 mbpt_plain = cc_name.replace("\\", "").replace("MBPT", "MP").replace("(", "").replace(")", "")
                 logger.debug(f"matched tce mbpt {mbpt_plain}", mobj.groups())
+                print(f"matched tce mbpt {mbpt_plain}", mobj.groups())
+                tce_cumm_corl += float(mobj.group(1))
 
                 if mbpt_plain == "MP2":
                     mobj3 = re.search(r"Wavefunction type : Restricted open-shell Hartree-Fock", outtext, re.MULTILINE)
@@ -264,6 +269,8 @@ def harvest_outfile_pass(outtext):
                         psivar[f"{mbpt_plain} CORRELATION ENERGY"] = mobj.group(1)
                 else:
                     psivar[f"{mbpt_plain} CORRECTION ENERGY"] = mobj.group(1)
+                    if not mobj3:
+                        psivar[f"{mbpt_plain} DOUBLES ENERGY"] = tce_cumm_corl
                 psivar[f"{mbpt_plain} TOTAL ENERGY"] = mobj.group(2)
             # TCE dipole- MBPT(n)
             mobj2 = re.search(
@@ -966,9 +973,10 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP2 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP2 TOTAL ENERGY"]
 
-    if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRELATION ENERGY" in psivar:
-        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"]
+    if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRECTION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 TOTAL ENERGY"] - psivar["HF TOTAL ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP3 TOTAL ENERGY"]
+
     if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
