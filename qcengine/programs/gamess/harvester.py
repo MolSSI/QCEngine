@@ -439,7 +439,7 @@ def harvest_outfile_pass(outtext):
                 r'\s*POINT\s+1\s+X\s+Y\s+Z\s+\(BOHR\)\s+CHARGE\s*\n'
                 r'.*\n'
                 r'\s*DX\s+DY\s+DZ\s+/D/\s+\(DEBYE\)\s*\n'
-                r'\s*' + NUMBER + '\s+' + NUMBER + '\s+' + NUMBER + '\s+' + NUMBER + r'\s*\n',
+                r'\s*' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*\n',
                 # fmt: on
                 prop_block
             )
