@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 from qcelemental.models import AtomicInput, AtomicResult, Provenance
-from qcelemental.util import safe_version, unnp, which
+from qcelemental.util import safe_version, which
 
 from ...util import execute
 from ..model import ProgramHarness

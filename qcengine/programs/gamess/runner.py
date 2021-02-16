@@ -6,7 +6,7 @@ from decimal import Decimal
 from typing import Any, Dict, Optional
 
 from qcelemental.models import AtomicInput, AtomicResult, Provenance
-from qcelemental.util import safe_version, unnp, which
+from qcelemental.util import safe_version, which
 
 from ...exceptions import InputError
 from ...util import execute

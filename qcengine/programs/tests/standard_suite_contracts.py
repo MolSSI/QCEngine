@@ -162,6 +162,7 @@ def contractual_mp2(
             (
                 (
                     (qc_module == "gamess" and reference in ["uhf", "rohf"] and method == "mp2")
+                    or (qc_module == "gamess" and reference == "rhf" and method == "mp2" and driver == "gradient")
                     or (qc_module == "gamess" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
                     or (qc_module == "nwchem-tce" and method in ["mp2", "mp3"])
                     or (qc_module == "nwchem" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])

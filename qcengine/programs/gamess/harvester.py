@@ -143,10 +143,13 @@ def harvest_outfile_pass(outtext):
             re.MULTILINE,
         )
         if mobj:
-            logger.debug("matched mp2")
-            print("matched mp2 a")
+            logger.debug("matched mp2 a")
+            print("matched mp2 a", mobj.groups())
             qcvar["MP2 CORRELATION ENERGY"] = mobj.group(3)
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(4)
+            mobj3 = re.search(r"\s+[RU]HF\s*SCF\s*CALCULATION", outtext, re.MULTILINE)
+            if mobj3:
+                qcvar[f"MP2 DOUBLES ENERGY"] = mobj.group(3)
 
         mobj = re.search(
             # fmt: off
@@ -214,6 +217,22 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched mp2 uhf e")
             print("matched mp2 uhf e")
             qcvar["MP2 SINGLES ENERGY"] = "0.0"
+
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"E\(SCF\)" + r"\s*=\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"ZAPT E\(2\)" + r"\s*=\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"E\(MP2\)" + r"\s*=\s+" + NUMBER + r"\s*",
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched mp2 rohf f")
+            print("matched mp2 rohf f", mobj.groups())
+            qcvar["HF TOTAL ENERGY"] = mobj.group(1)
+            qcvar["MP2 CORRELATION ENERGY"] = mobj.group(2)
+            qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
 
         # Process CCSD
         mobj = re.search(
