@@ -13,6 +13,8 @@ from qcengine.testing import has_program, using
 
 qcsk_bs = BasisSet(name="custom_basis", center_data=center_data, atom_map=["bs_sto3g_h", "bs_sto3g_h"])
 
+qcsk_bs = BasisSet(name="custom_basis", center_data=center_data, atom_map=["bs_sto3g_h", "bs_sto3g_h"])
+
 _canonical_methods = [
     ("dftd3", {"method": "b3lyp-d3"}, {}),
     ("qcore", {"method": "pbe", "basis": "6-31G"}, {}),
