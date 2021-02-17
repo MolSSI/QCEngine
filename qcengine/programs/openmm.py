@@ -9,7 +9,7 @@ import os
 from typing import TYPE_CHECKING, Dict
 
 import numpy as np
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models import AtomicResult, BasisSet, Provenance
 from qcelemental.util import which_import
 
 from ..exceptions import InputError
