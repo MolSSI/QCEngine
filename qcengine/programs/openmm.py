@@ -203,7 +203,7 @@ class OpenMMHarness(ProgramHarness):
             raise InputError("Method must contain a basis set.")
 
         if isinstance(input_model.model.basis, BasisSet):
-            raise InputError("QCSchema BasisSet for model.basis not suitable for OpenMM.")
+            raise InputError("QCSchema BasisSet for model.basis not implemented since not suitable for OpenMM.")
 
         # Make sure we are using smirnoff or antechamber
         basis = input_model.model.basis.lower()

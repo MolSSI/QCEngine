@@ -108,7 +108,7 @@ def test_compute_energy_qcsk_basis(program, model, keywords):
     with pytest.raises(qcng.exceptions.InputError) as e:
         qcng.compute(inp, program, raise_error=True)
 
-    assert "QCSchema BasisSet for model.basis not implemented." in str(e.value)
+    assert "QCSchema BasisSet for model.basis not implemented" in str(e.value)
 
 
 @pytest.mark.parametrize(
