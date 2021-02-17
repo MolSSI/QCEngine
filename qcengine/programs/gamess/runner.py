@@ -5,7 +5,7 @@ import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
-from qcelemental.models import AtomicInput, AtomicResult, Provenance
+from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
 from ...exceptions import InputError
@@ -101,6 +101,11 @@ class GAMESSHarness(ProgramHarness):
         opts.update(muster_modelchem(input_model.model.method, input_model.driver.derivative_int()))
 
         # Handle basis set
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+        if input_model.model.basis is None:
+            raise InputError("None for model.basis is not useable.")
+
         # * for gamess, usually insufficient b/c either ngauss or ispher needed
         opts["basis__gbasis"] = input_model.model.basis
 

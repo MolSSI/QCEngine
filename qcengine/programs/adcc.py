@@ -3,7 +3,7 @@ Calls adcc
 """
 from typing import TYPE_CHECKING, Dict
 
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError, UnknownError
@@ -87,8 +87,10 @@ class AdccHarness(ProgramHarness):
         if input_model.driver not in ["energy", "properties"]:
             raise InputError(f"Driver {input_model.driver} not implemented for ADCC.")
 
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
         if not input_model.model.basis:
-            raise InputError("Method must contain a basis set.")
+            raise InputError("Model must contain a basis set.")
 
         psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.dict(), fix_symmetry="c1"))
         psi4.core.clean()

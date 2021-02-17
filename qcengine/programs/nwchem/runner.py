@@ -9,7 +9,7 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-from qcelemental.models import AtomicInput, AtomicResult, Provenance
+from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
@@ -166,6 +166,9 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         opts.update(mdcopts)
 
         # Handle basis set
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
             opts[f"basis__{el}"] = f"library {input_model.model.basis}"
