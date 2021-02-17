@@ -15,6 +15,7 @@ Changelog
 
 
 .. - (:pr:`288`) GAMESS, Cfour, NWChem - add calcinfo harvesting, HF and MP2 gradient harvesting
+.. - (:pr:`288`) Avert running model.basis = BasisSet schema even though they validate.
 .. - (:pr:`xxx`) TeraChem - new harness for "Server Mode".
 
 
