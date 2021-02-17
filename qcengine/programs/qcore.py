@@ -123,6 +123,9 @@ class QcoreHarness(ProgramHarness):
 
         import qcore
 
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+
         method = input_data.model.method.upper()
         if method in self._dft_functionals:
             method = {"kind": "dft", "xc": method, "ao": input_data.model.basis}

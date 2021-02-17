@@ -9,7 +9,7 @@ from qcelemental.models import AtomicInput, BasisSet
 from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
-from qcengine.testing import has_program
+from qcengine.testing import has_program, using
 
 qcsk_bs = BasisSet(name="custom_basis", center_data=center_data, atom_map=["bs_sto3g_h", "bs_sto3g_h"])
 
@@ -43,7 +43,7 @@ _canonical_methods_qcsk_basis = [
     ("molpro", {"method": "hf", "basis": qcsk_bs}, {}),
     ("nwchem", {"method": "hf", "basis": qcsk_bs}, {}),
     ("openmm", {"method": "openff-1.0.0", "basis": qcsk_bs}, {}),
-    ("psi4", {"method": "hf", "basis": qcsk_bs}, {}),
+    pytest.param("psi4", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("psi4_mp2qcsk")),
     ("qchem", {"method": "hf", "basis": qcsk_bs}, {}),
     ("qcore", {"method": "pbe", "basis": qcsk_bs}, {}),
     ("turbomole", {"method": "pbe", "basis": qcsk_bs}, {}),
@@ -60,7 +60,7 @@ def _get_molecule(program):
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
 def test_compute_energy(program, model, keywords):
     if not has_program(program):
-        pytest.skip("Program '{}' not found.".format(program))
+        pytest.skip(f"Program '{program}' not found.")
 
     molecule = _get_molecule(program)
 
