@@ -184,7 +184,7 @@ class OpenMMHarness(ProgramHarness):
             self._cache_it(key, system)
         return system
 
-    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs OpenMM on given structure, inputs, in vacuum.
         """
@@ -199,41 +199,41 @@ class OpenMMHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # generate basis, not given
-        if not input_data.model.basis:
+        if not input_model.model.basis:
             raise InputError("Method must contain a basis set.")
 
         if isinstance(input_model.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not suitable for OpenMM.")
 
         # Make sure we are using smirnoff or antechamber
-        basis = input_data.model.basis.lower()
+        basis = input_model.model.basis.lower()
         if basis in ["smirnoff", "antechamber"]:
 
             with capture_stdout():
                 # try and make the molecule from the cmiles
                 cmiles = None
-                if input_data.molecule.extras:
-                    cmiles = input_data.molecule.extras.get("canonical_isomeric_explicit_hydrogen_mapped_smiles", None)
+                if input_model.molecule.extras:
+                    cmiles = input_model.molecule.extras.get("canonical_isomeric_explicit_hydrogen_mapped_smiles", None)
                     if cmiles is None:
-                        cmiles = input_data.molecule.extras.get("cmiles", {}).get(
+                        cmiles = input_model.molecule.extras.get("cmiles", {}).get(
                             "canonical_isomeric_explicit_hydrogen_mapped_smiles", None
                         )
 
                 if cmiles is not None:
                     off_mol = offtop.Molecule.from_mapped_smiles(mapped_smiles=cmiles)
                     # add the conformer
-                    conformer = unit.Quantity(value=np.array(input_data.molecule.geometry), unit=unit.bohr)
+                    conformer = unit.Quantity(value=np.array(input_model.molecule.geometry), unit=unit.bohr)
                     off_mol.add_conformer(conformer)
                 else:
                     # Process molecule with RDKit
-                    rdkit_mol = RDKitHarness._process_molecule_rdkit(input_data.molecule)
+                    rdkit_mol = RDKitHarness._process_molecule_rdkit(input_model.molecule)
 
                     # Create an Open Force Field `Molecule` from the RDKit Molecule
                     off_mol = offtop.Molecule(rdkit_mol)
 
             # now we need to create the system
             openmm_system = self._generate_openmm_system(
-                molecule=off_mol, method=input_data.model.method, keywords=input_data.keywords
+                molecule=off_mol, method=input_model.model.method, keywords=input_model.keywords
             )
         else:
             raise InputError("Accepted bases are: {'smirnoff', 'antechamber', }")
@@ -271,10 +271,10 @@ class OpenMMHarness(ProgramHarness):
         ret_data["properties"] = {"return_energy": q}
 
         # Execute driver
-        if input_data.driver == "energy":
+        if input_model.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
 
-        elif input_data.driver == "gradient":
+        elif input_model.driver == "gradient":
             # Compute the forces
             state = context.getState(getForces=True)
 
@@ -290,9 +290,9 @@ class OpenMMHarness(ProgramHarness):
             raise InputError(f"Driver {input_model.driver} not implemented for OpenMM.")
 
         ret_data["success"] = True
-        ret_data["extras"] = input_data.extras
+        ret_data["extras"] = input_model.extras
 
         # Move several pieces up a level
         ret_data["provenance"] = Provenance(creator="openmm", version=openmm.__version__, nthreads=nthreads)
 
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**{**input_model.dict(), **ret_data})
