@@ -21,6 +21,7 @@ from .qchem import QChemHarness
 from .qcore import EntosHarness, QcoreHarness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
+from .terachem_pbs import TeraChemPBSHarness
 from .torchani import TorchANIHarness
 from .turbomole import TurbomoleHarness
 from .xtb import XTBHarness
@@ -112,6 +113,7 @@ register_program(QChemHarness())
 register_program(QcoreHarness())
 register_program(TeraChemHarness())
 register_program(TurbomoleHarness())
+register_program(TeraChemPBSHarness())
 
 # Semi-empirical
 register_program(MopacHarness())
