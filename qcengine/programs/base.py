@@ -9,7 +9,7 @@ from .adcc import AdccHarness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
 from .gamess import GAMESSHarness
-from .gcp import GCPHarness
+from .gcp import GCPHarness, MCTCGCPHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
@@ -127,4 +127,5 @@ register_program(OpenMMHarness())
 # Analytical Corrections
 register_program(DFTD3Harness())
 register_program(GCPHarness())
+register_program(MCTCGCPHarness())
 register_program(MP2DHarness())

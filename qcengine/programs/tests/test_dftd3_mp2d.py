@@ -1472,7 +1472,13 @@ def test_dftd3_sapt_pairwise(request, subjects):
     )
 
 
-@using("gcp")
+@pytest.mark.parametrize(
+    "program",
+    [
+        pytest.param("gcp", marks=using("gcp")),
+        pytest.param("mctc-gcp", marks=using("mctc-gcp")),
+    ],
+)
 @pytest.mark.parametrize(
     "subjects",
     [
@@ -1495,7 +1501,7 @@ def test_dftd3_sapt_pairwise(request, subjects):
         ({"parent": "ne", "name": "hf/minis", "subject": "atom", "lbl": "GCP"}),
     ],
 )
-def test_gcp(inp, subjects, request):
+def test_gcp(inp, subjects, program, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]].ravel()
@@ -1513,7 +1519,7 @@ def test_gcp(inp, subjects, request):
         "model": {"method": inp["name"]},
         "keywords": {},
     }
-    jrec = qcng.compute(resinp, "gcp", raise_error=True)
+    jrec = qcng.compute(resinp, program, raise_error=True)
     jrec = jrec.dict()
 
     # assert len(jrec["extras"]["qcvars"]) == 8

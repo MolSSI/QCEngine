@@ -167,10 +167,12 @@ class GCPHarness(ProgramHarness):
         # Need 'real' field later and that's only guaranteed for molrec
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
 
+        executable = self._defaults["name"].lower()
+
         if method == "FILE":
-            command = ["gcp", "gcp_geometry.xyz", "-local"]
+            command = [executable, "gcp_geometry.xyz", "-local"]
         else:
-            command = ["gcp", "gcp_geometry.xyz", "-level", method]
+            command = [executable, "gcp_geometry.xyz", "-level", method]
 
         if input_model.driver == "gradient":
             command.append("-grad")
@@ -204,7 +206,7 @@ class GCPHarness(ProgramHarness):
             elif re.match("     normal termination of gCP", ln):
                 break
         else:
-            if not ((real_nat == 1) and (input_model.driver == "gradient")):
+            if self._defaults["name"] == "GCP" and not ((real_nat == 1) and (input_model.driver == "gradient")):
                 raise UnknownError(
                     f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.model}"
                 )
@@ -267,3 +269,46 @@ class GCPHarness(ProgramHarness):
 
         output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})
+
+
+class MCTCGCPHarness(GCPHarness):
+
+    _defaults = {
+        "name": "MCTC-GCP",
+        "scratch": True,
+        "thread_safe": True,
+        "thread_parallel": False,
+        "node_parallel": False,
+        "managed_memory": False,
+    }
+    version_cache: Dict[str, str] = {}
+
+    @staticmethod
+    def found(raise_error: bool = False) -> bool:
+        return which(
+            "mctc-gcp",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install gcp -c psi4`.",
+        )
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        version = None
+        which_prog = which("mctc-gcp")
+        if which_prog not in self.version_cache:
+            # option not (yet) available, instead find in help output
+            command = [which_prog, "-version"]
+            import subprocess
+
+            proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            for ln in proc.stdout.decode("utf-8").splitlines():
+                if re.match("mctc-gcp version", ln):
+                    version = ln.split()[2]
+
+            if version is None:
+                raise UnknownError(f"Could not identify GCP version")
+            self.version_cache[which_prog] = safe_version(version)
+
+        return self.version_cache[which_prog]
