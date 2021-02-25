@@ -299,7 +299,7 @@ class MCTCGCPHarness(GCPHarness):
         which_prog = which("mctc-gcp")
         if which_prog not in self.version_cache:
             # option not (yet) available, instead find in help output
-            command = [which_prog, "-version"]
+            command = [which_prog, "--version"]
             import subprocess
 
             proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
