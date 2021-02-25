@@ -289,7 +289,7 @@ class MCTCGCPHarness(GCPHarness):
             "mctc-gcp",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install gcp -c psi4`.",
+            raise_msg="Please install via `conda install gcp-correction -c conda-forge`.",
         )
 
     def get_version(self) -> str:
