@@ -8,6 +8,7 @@ from ..exceptions import InputError, ResourceError
 from .adcc import AdccHarness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
+from .dftd4 import DFTD4Harness
 from .gamess import GAMESSHarness
 from .gcp import GCPHarness
 from .molpro import MolproHarness
@@ -126,5 +127,6 @@ register_program(OpenMMHarness())
 
 # Analytical Corrections
 register_program(DFTD3Harness())
+register_program(DFTD4Harness())
 register_program(GCPHarness())
 register_program(MP2DHarness())
