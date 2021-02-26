@@ -22,8 +22,7 @@ def test_dftd4_task_b97m_m01():
 
     atomic_input = qcel.models.AtomicInput(
         molecule=qcng.get_molecule("mindless-01"),
-        model={"method": "D4"},
-        keywords={"method": "b97m"},
+        model={"method": "b97m"},
         driver="energy",
     )
 
@@ -62,18 +61,19 @@ def test_dftd4_task_tpss_m02():
 
     atomic_input = qcel.models.AtomicInput(
         molecule=qcng.get_molecule("mindless-02"),
-        model={"method": "D4"},
+        model={"method": ""},
         keywords={
-            "s8": 1.76596355,
-            "a1": 0.42822303,
-            "a2": 4.54257102,
+            "params_tweaks": {
+                "s8": 1.76596355,
+                "a1": 0.42822303,
+                "a2": 4.54257102,
+            },
         },
         driver="gradient",
     )
 
     atomic_result = qcng.compute(atomic_input, "dftd4")
 
-    print(atomic_result.return_result)
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
@@ -106,9 +106,9 @@ def test_dftd4_task_r2scan_m03():
 
     atomic_input = qcel.models.AtomicInput(
         molecule=qcng.get_molecule("mindless-03"),
-        model={"method": "D4"},
+        keywords={"level_hint": "D4"},
         driver="gradient",
-        keywords={"method": "r2scan"},
+        model={"method": "r2scan"},
     )
 
     atomic_result = qcng.compute(atomic_input, "dftd4")
@@ -123,8 +123,8 @@ def test_dftd4_task_unknown_method():
 
     atomic_input = qcel.models.AtomicInput(
         molecule=qcng.get_molecule("water"),
-        model={"method": "D4"},
-        keywords={"method": "non-existent-method"},
+        keywords={"level_hint": "D4"},
+        model={"method": "non-existent-method"},
         driver="energy",
     )
     error = qcel.models.ComputeError(
@@ -152,8 +152,8 @@ def test_dftd4_task_cold_fusion():
             ],
             "validated": True,  # Force a nuclear fusion input, to make dftd4 fail
         },
-        model={"method": "D4"},
-        keywords={"method": "pbe"},
+        keywords={"level_hint": "D4"},
+        model={"method": "pbe"},
         driver="energy",
     )
     error = qcel.models.ComputeError(
