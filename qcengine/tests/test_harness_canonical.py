@@ -32,6 +32,7 @@ _canonical_methods = [
     ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
     ("cfour", {"method": "hf", "basis": "6-31G"}, {}),
     ("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}),
+    ("mctc-gcp", {"method": "dft/sv"}, {}),
     # add as programs available
     # ("terachem", {"method": "bad"}),
 ]
@@ -131,6 +132,7 @@ def test_compute_energy_qcsk_basis(program, model, keywords):
         ("adcc", {"method": "bad"}),
         ("gcp", {"method": "bad"}),
         ("mrchem", {"method": "bad"}),
+        ("mctc-gcp", {"method": "bad"}),
         # add as programs available
         # ("molpro", {"method": "bad"}),
         # ("terachem", {"method": "bad"}),

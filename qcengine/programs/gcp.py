@@ -168,14 +168,15 @@ class GCPHarness(ProgramHarness):
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
 
         executable = self._defaults["name"].lower()
+        calldash = {"gcp": "-", "mctc-gcp": "--"}[executable]
 
-        if method == "FILE":
+        if method == "FILE" and executable == "GCP":
             command = [executable, "gcp_geometry.xyz", "-local"]
         else:
-            command = [executable, "gcp_geometry.xyz", "-level", method]
+            command = [executable, "gcp_geometry.xyz", calldash + "level", method]
 
         if input_model.driver == "gradient":
-            command.append("-grad")
+            command.append(calldash + "grad")
 
         infiles = {
             "gcp_geometry.xyz": qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format=""),
@@ -298,17 +299,10 @@ class MCTCGCPHarness(GCPHarness):
         version = None
         which_prog = which("mctc-gcp")
         if which_prog not in self.version_cache:
-            # option not (yet) available, instead find in help output
             command = [which_prog, "--version"]
             import subprocess
 
-            proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            for ln in proc.stdout.decode("utf-8").splitlines():
-                if re.match("mctc-gcp version", ln):
-                    version = ln.split()[2]
-
-            if version is None:
-                raise UnknownError(f"Could not identify GCP version")
-            self.version_cache[which_prog] = safe_version(version)
+            proc = subprocess.run(command, stdout=subprocess.PIPE)
+            self.version_cache[which_prog] = safe_version(proc.stdout.decode("utf-8").strip().split()[-1])
 
         return self.version_cache[which_prog]

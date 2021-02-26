@@ -16,7 +16,8 @@ Changelog
 
 .. - (:pr:`288`) GAMESS, Cfour, NWChem - add calcinfo harvesting, HF and MP2 gradient harvesting
 .. - (:pr:`288`) Avert running model.basis = BasisSet schema even though they validate.
-.. - (:pr:`xxx`) TeraChem - new harness for "Server Mode".
+.. - (:pr:`289`) TeraChem - new harness for "Server Mode".
+.. - (:pr:`290`) MCTC-GCP - harness for new implementation of gCP, `mctc-gcp`, whose cmdline interface is drop-in replacement.
 
 
 v0.18.0 / 2021-02-16
