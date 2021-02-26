@@ -238,7 +238,10 @@ task python
         stderr = outfiles.pop("stderr")
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
-        qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        try:
+            qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        except Exception as e:
+            raise UnknownError(stdout)
 
         if nwgrad is not None:
             qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad

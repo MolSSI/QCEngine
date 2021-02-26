@@ -10,6 +10,7 @@ import numpy as np
 from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
+from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
@@ -137,7 +138,10 @@ class CFOURHarness(ProgramHarness):
         stderr = outfiles.pop("stderr")
 
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
-        qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        try:
+            qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        except Exception as e:
+            raise UnknownError(stdout)
 
         if c4grad is not None:
             qcvars["CURRENT GRADIENT"] = c4grad
