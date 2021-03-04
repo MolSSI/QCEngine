@@ -170,10 +170,7 @@ class GCPHarness(ProgramHarness):
         executable = self._defaults["name"].lower()
         calldash = {"gcp": "-", "mctc-gcp": "--"}[executable]
 
-        if method == "FILE" and executable == "GCP":
-            command = [executable, "gcp_geometry.xyz", "-local"]
-        else:
-            command = [executable, "gcp_geometry.xyz", calldash + "level", method]
+        command = [executable, "gcp_geometry.xyz", calldash + "level", method]
 
         if input_model.driver == "gradient":
             command.append(calldash + "grad")
