@@ -293,7 +293,6 @@ class MCTCGCPHarness(GCPHarness):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        version = None
         which_prog = which("mctc-gcp")
         if which_prog not in self.version_cache:
             command = [which_prog, "--version"]
