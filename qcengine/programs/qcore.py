@@ -110,7 +110,7 @@ class QcoreHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Run qcore
         """
@@ -123,36 +123,39 @@ class QcoreHarness(ProgramHarness):
 
         import qcore
 
-        method = input_data.model.method.upper()
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+
+        method = input_model.model.method.upper()
         if method in self._dft_functionals:
-            method = {"kind": "dft", "xc": method, "ao": input_data.model.basis}
+            method = {"kind": "dft", "xc": method, "ao": input_model.model.basis}
         elif method == "HF":
-            method = {"kind": "hf", "ao": input_data.model.basis}
+            method = {"kind": "hf", "ao": input_model.model.basis}
         elif method in self._xtb_models:
             method = {"kind": "xtb", "model": method}
         else:
             raise InputError(f"Method is not valid: {method}")
 
-        method["details"] = input_data.keywords
+        method["details"] = input_model.keywords
 
         qcore_input = {
             # "schema_name": "single_input",
             "molecule": {
-                "geometry": input_data.molecule.geometry,
-                "atomic_numbers": input_data.molecule.atomic_numbers,
-                "charge": input_data.molecule.molecular_charge,
-                "multiplicity": input_data.molecule.molecular_multiplicity,
+                "geometry": input_model.molecule.geometry,
+                "atomic_numbers": input_model.molecule.atomic_numbers,
+                "charge": input_model.molecule.molecular_charge,
+                "multiplicity": input_model.molecule.molecular_multiplicity,
             },
             "method": method,
             "result_contract": {"wavefunction": "all"},
-            "result_type": input_data.driver,
+            "result_type": input_model.driver,
         }
         try:
             result = qcore.run(qcore_input, ncores=config.ncores)
         except Exception as exc:
             return UnknownError(str(exc))
 
-        return self.parse_output(result.dict(), input_data)
+        return self.parse_output(result.dict(), input_model)
 
     def parse_output(self, output: Dict[str, Any], input_model: "AtomicInput") -> "AtomicResult":
 

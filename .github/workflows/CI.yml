@@ -99,7 +99,7 @@ jobs:
         qcore --accept-license
 
     - name: Special Config - QCEngine Dep
-      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC')"
+      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
         conda remove qcengine --force
 

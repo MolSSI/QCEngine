@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict
 
-from qcelemental.models import AtomicResult
+from qcelemental.models import AtomicResult, BasisSet
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
@@ -94,7 +94,7 @@ class Psi4Harness(ProgramHarness):
 
         if "undef" in candidate_version:
             raise TypeError(
-                "Using custom build without tags. Please pull git tags with `git pull origin master --tags`."
+                """Using custom build without tags. Please pull git tags with `git pull origin master --tags`. If building from source, `git fetch upstream "refs/tags/*:refs/tags/*"`."""
             )
 
         return candidate_version
@@ -131,6 +131,9 @@ class Psi4Harness(ProgramHarness):
         error_type = None
         error_message = None
         compute_success = False
+
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
 
         # Basis must not be None for HF3c
         old_basis = input_model.model.basis

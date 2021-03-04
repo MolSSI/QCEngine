@@ -5,10 +5,13 @@ Tests the DQM compute dispatch module
 
 import numpy as np
 import pytest
-from qcelemental.models import AtomicInput
+from qcelemental.models import AtomicInput, BasisSet
+from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
-from qcengine.testing import has_program
+from qcengine.testing import has_program, using
+
+qcsk_bs = BasisSet(name="custom_basis", center_data=center_data, atom_map=["bs_sto3g_h", "bs_sto3g_h"])
 
 _canonical_methods = [
     ("dftd3", {"method": "b3lyp-d3"}, {}),
@@ -27,6 +30,23 @@ _canonical_methods = [
     ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
     ("gcp", {"method": "hf3c"}, {}),
     ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
+    ("cfour", {"method": "hf", "basis": "6-31G"}, {}),
+    ("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}),
+    # add as programs available
+    # ("terachem", {"method": "bad"}),
+]
+
+_canonical_methods_qcsk_basis = [
+    ("adcc", {"method": "adc2", "basis": qcsk_bs}, {"n_triplets": 3}),
+    ("cfour", {"method": "hf", "basis": qcsk_bs}, {}),
+    ("gamess", {"method": "hf", "basis": qcsk_bs}, {}),
+    ("molpro", {"method": "hf", "basis": qcsk_bs}, {}),
+    ("nwchem", {"method": "hf", "basis": qcsk_bs}, {}),
+    ("openmm", {"method": "openff-1.0.0", "basis": qcsk_bs}, {}),
+    pytest.param("psi4", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("psi4_mp2qcsk")),
+    ("qchem", {"method": "hf", "basis": qcsk_bs}, {}),
+    ("qcore", {"method": "pbe", "basis": qcsk_bs}, {}),
+    ("turbomole", {"method": "pbe", "basis": qcsk_bs}, {}),
 ]
 
 
@@ -40,7 +60,7 @@ def _get_molecule(program):
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
 def test_compute_energy(program, model, keywords):
     if not has_program(program):
-        pytest.skip("Program '{}' not found.".format(program))
+        pytest.skip(f"Program '{program}' not found.")
 
     molecule = _get_molecule(program)
 
@@ -63,7 +83,7 @@ def test_compute_gradient(program, model, keywords):
     )
     if program in ["adcc", "mrchem"]:
         with pytest.raises(qcng.exceptions.InputError) as e:
-            ret = qcng.compute(inp, program, raise_error=True)
+            qcng.compute(inp, program, raise_error=True)
 
         assert "Driver gradient not implemented" in str(e.value)
 
@@ -77,14 +97,31 @@ def test_compute_gradient(program, model, keywords):
         assert "mytag" in ret.extras, ret.extras
 
 
+@pytest.mark.parametrize("program, model, keywords", _canonical_methods_qcsk_basis)
+def test_compute_energy_qcsk_basis(program, model, keywords):
+    if not has_program(program):
+        pytest.skip("Program '{}' not found.".format(program))
+
+    molecule = _get_molecule(program)
+    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+
+    with pytest.raises(qcng.exceptions.InputError) as e:
+        qcng.compute(inp, program, raise_error=True)
+
+    assert "QCSchema BasisSet for model.basis not implemented" in str(e.value)
+
+
 @pytest.mark.parametrize(
     "program, model",
     [
+        ("cfour", {"method": "bad"}),
         ("dftd3", {"method": "bad"}),
         ("dftd3", {"method": "b3lyp-d3", "driver": "hessian"}),
         ("qcore", {"method": "bad"}),
+        ("gamess", {"method": "bad"}),
         ("mopac", {"method": "bad"}),
         ("mp2d", {"method": "bad"}),
+        ("nwchem", {"method": "bad"}),
         ("openmm", {"method": "bad"}),
         ("psi4", {"method": "bad"}),
         ("qchem", {"method": "bad"}),
@@ -94,6 +131,10 @@ def test_compute_gradient(program, model, keywords):
         ("adcc", {"method": "bad"}),
         ("gcp", {"method": "bad"}),
         ("mrchem", {"method": "bad"}),
+        # add as programs available
+        # ("molpro", {"method": "bad"}),
+        # ("terachem", {"method": "bad"}),
+        # ("xtb", {"method": "bad"}),
     ],
 )
 def test_compute_bad_models(program, model):

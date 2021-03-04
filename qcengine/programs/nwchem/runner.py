@@ -9,8 +9,8 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-from qcelemental.models import AtomicInput, AtomicResult, Provenance
-from qcelemental.util import safe_version, unnp, which, which_import
+from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
@@ -166,6 +166,9 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         opts.update(mdcopts)
 
         # Handle basis set
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
             opts[f"basis__{el}"] = f"library {input_model.model.basis}"
@@ -271,8 +274,9 @@ task python
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
+        # * formerly unnp(qcvars, flat=True).items()
         output_data["extras"]["qcvars"] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
         return AtomicResult(**{**input_model.dict(), **output_data})

@@ -82,6 +82,9 @@ class QChemHarness(ProgramHarness):
             )
 
             mobj = re.search(r"Q-Chem\s+([\d.]+)\s+for", exc["stdout"])
+            if not mobj:
+                mobj = re.search(r"Q-Chem version:\s+([\d.]+)\s+", exc["stdout"])
+
             if mobj:
                 self.version_cache[which_prog] = safe_version(mobj.group(1))
 

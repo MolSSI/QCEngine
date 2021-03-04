@@ -14,7 +14,12 @@ Changelog
 .. +++++++++
 
 
-v0.18.0 / 2021-MM-DD
+.. - (:pr:`288`) GAMESS, Cfour, NWChem - add calcinfo harvesting, HF and MP2 gradient harvesting
+.. - (:pr:`288`) Avert running model.basis = BasisSet schema even though they validate.
+.. - (:pr:`xxx`) TeraChem - new harness for "Server Mode".
+
+
+v0.18.0 / 2021-02-16
 --------------------
 
 New Features
@@ -26,7 +31,6 @@ New Features
 - (:pr:`280`) Add framework to register identifying known outfile errors, modify input schema, and rerun.
 - (:pr:`281`) NWChem - new procedure harness to use NWChem's DRIVER geometry optimizer with NWChem's program harness gradients.
 - (:pr:`282`) DFTD3 - added D3m and D3m(bj) parameters for SAPT0/HF. Allow pairwise analysis to be returned.
-.. - (:pr:`xxx`) TeraChem - new harness for "Server Mode".
 
 Enhancements
 ++++++++++++
