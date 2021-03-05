@@ -167,13 +167,13 @@ class GCPHarness(ProgramHarness):
         # Need 'real' field later and that's only guaranteed for molrec
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
 
-        if method == "FILE":
-            command = ["gcp", "gcp_geometry.xyz", "-local"]
-        else:
-            command = ["gcp", "gcp_geometry.xyz", "-level", method]
+        executable = self._defaults["name"].lower()
+        calldash = {"gcp": "-", "mctc-gcp": "--"}[executable]
+
+        command = [executable, "gcp_geometry.xyz", calldash + "level", method]
 
         if input_model.driver == "gradient":
-            command.append("-grad")
+            command.append(calldash + "grad")
 
         infiles = {
             "gcp_geometry.xyz": qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format=""),
@@ -204,7 +204,7 @@ class GCPHarness(ProgramHarness):
             elif re.match("     normal termination of gCP", ln):
                 break
         else:
-            if not ((real_nat == 1) and (input_model.driver == "gradient")):
+            if self._defaults["name"] == "GCP" and not ((real_nat == 1) and (input_model.driver == "gradient")):
                 raise UnknownError(
                     f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.model}"
                 )
@@ -267,3 +267,38 @@ class GCPHarness(ProgramHarness):
 
         output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})
+
+
+class MCTCGCPHarness(GCPHarness):
+
+    _defaults = {
+        "name": "MCTC-GCP",
+        "scratch": True,
+        "thread_safe": True,
+        "thread_parallel": False,
+        "node_parallel": False,
+        "managed_memory": False,
+    }
+    version_cache: Dict[str, str] = {}
+
+    @staticmethod
+    def found(raise_error: bool = False) -> bool:
+        return which(
+            "mctc-gcp",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install gcp-correction -c conda-forge`.",
+        )
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        which_prog = which("mctc-gcp")
+        if which_prog not in self.version_cache:
+            command = [which_prog, "--version"]
+            import subprocess
+
+            proc = subprocess.run(command, stdout=subprocess.PIPE)
+            self.version_cache[which_prog] = safe_version(proc.stdout.decode("utf-8").strip().split()[-1])
+
+        return self.version_cache[which_prog]

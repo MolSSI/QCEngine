@@ -146,6 +146,7 @@ _programs = {
     "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),
     "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
+    "mctc-gcp": is_program_new_enough("mctc-gcp", "2.3.0"),
     "gcp": which("gcp", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
     "berny": which_import("berny", return_bool=True),

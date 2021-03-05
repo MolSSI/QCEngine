@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
-from ...exceptions import InputError
+from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
@@ -149,7 +149,10 @@ class GAMESSHarness(ProgramHarness):
         stderr = outfiles.pop("stderr")
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
-        qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
+        try:
+            qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
+        except Exception as e:
+            raise UnknownError(stdout)
 
         if gamessgrad is not None:
             qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = gamessgrad
