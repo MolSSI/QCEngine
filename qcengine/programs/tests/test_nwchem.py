@@ -292,7 +292,7 @@ def test_error_correction():
             "molecule": mol,
             "model": {"method": "hf", "basis": "sto-3g"},
             "driver": "energy",
-            "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-2},
+            "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-1},
         },
         "nwchem",
         raise_error=True,
@@ -300,3 +300,4 @@ def test_error_correction():
 
     assert result.success
     assert "geom_binvr" in result.extras["observed_errors"]
+    assert result.extras["observed_errors"]["geom_binvr"]["keyword_updates"] == {"geometry__noautoz": True}
