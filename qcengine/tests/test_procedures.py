@@ -240,10 +240,14 @@ def test_geometric_generic(input_data, program, model, bench):
 
 
 @using("nwchem")
-def test_nwchem_relax():
+@pytest.mark.parametrize("linopt", [0, 1])
+def test_nwchem_relax(linopt):
     # Make the input file
     input_data = {
-        "input_specification": {"model": {"method": "HF", "basis": "sto-3g", "keywords": {"driver:linopt": 0}}},
+        "input_specification": {
+            "model": {"method": "HF", "basis": "sto-3g"},
+            "keywords": {"set__driver:linopt": linopt},
+        },
         "initial_molecule": qcng.get_molecule("hydrogen"),
     }
     input_data = OptimizationInput(**input_data)
