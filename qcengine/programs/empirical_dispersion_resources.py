@@ -2,6 +2,7 @@
 
 import collections
 import copy
+from pathlib import Path
 
 from ..exceptions import InputError
 
@@ -795,7 +796,42 @@ dashcoeff = {
             "mp2": {"params": {"s8": 1.187, "a1": 0.944, "a2": 0.480, "rcut": 0.72, "w": 0.20}}  # Rezac:2018:4711
         },
     },
+    "d4bj": {
+        "formal": "D4(BJ)",
+        "alias": ["d4"],
+        "description": "    Grimme's -D4 (BJ-damping) Dispersion Correction with ATM",
+        "citation": "    Caldeweyher, E.; Ehlert, S.; Hansen, A.; Neugebauer, H.; Spicher, S.; Bannwarth, C.; Grimmme, S., J. Chem. Phys. 150, 154122 (2019)\n",
+        "bibtex": "Caldeweyher:2019:154122",
+        "doi": "10.1063/1.5090222150",
+        "default": collections.OrderedDict([("s8", 1.0), ("a1", 1.0), ("a2", 1.0), ("s9", 1.0)]),
+        "definitions": {
+            # D4 parameters loaded below from authoritative source below. Keep a couple for reference
+            # "b3lyp": {"params": {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 1.0}},
+            # "pbe": {"params": {"s8": 0.95948085, "a1": 0.38574991, "a2": 4.80688534, "s9": 1.0}},
+        },
+    },
 }
+
+try:
+    import dftd4
+    import toml
+except:
+    pass
+else:
+    d4params = toml.load(Path(dftd4.__file__).parent / "parameters.toml")
+
+    for fctl in d4params["parameter"]:
+        piece = d4params["parameter"][fctl]["d4"]["bj-eeq-atm"]
+        if "s6" in piece:
+            # skip double-hybrids for now
+            continue
+
+        citation = piece.pop("doi", None)
+        if citation is None:
+            citation = d4params["parameter"][fctl]["reference"]["doi"]
+        piece.update({"s9": 1.0})
+
+        dashcoeff["d4bj"]["definitions"][fctl] = {"params": piece, "citation": citation}
 
 
 def get_dispersion_aliases():
@@ -850,7 +886,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     dict
         Metadata defining dispersion calculation.
 
-        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'chg', 'das2009', 'das2010', 'nl'}
+        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'chg', 'das2009', 'das2010', 'nl', "d4bj"}
             Name (de-aliased, de-formalized, lowercase) of dispersion
             correction -- atom data, dispersion model, damping functional
             form -- to be applied. Resolved from `name_hint` and/or

@@ -4,6 +4,7 @@ import pprint
 import numpy as np
 import pytest
 import qcelemental as qcel
+from qcelemental.models import AtomicInput
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
@@ -74,12 +75,17 @@ ref["eneyne"]["MP2-DMP2"] = dict(
 ref["eneyne"]["SAPT0-D3M(BJ)"] = dict(zip(dmm, [-0.06896506, -0.03995152, -0.02689133, -0.03995152, -0.02689133]))
 ref["eneyne"]["SAPT0-D3M"] = dict(zip(dmm, [-0.04486853, -0.02659896, -0.01614236, -0.02659896, -0.01614236]))
 ref["eneyne"]["GCP"] = dict(zip(dmm, [0.0159608596, -0.0018710542, 0.0012920388, 0.0049560054, 0.0103950441]))
+ref["eneyne"]["B3LYP-D4(BJ)"] = dict(zip(dmm, [-0.00625445, -0.00306407, -0.00176150, -0.00306407, -0.00176150]))
+ref["eneyne"]["PBE-D4(BJ)"] = dict(zip(dmm, [-0.00399176, -0.00190682, -0.00108739, -0.00190682, -0.00108739]))
+ref["eneyne"]["B3LYP-D4(BJ)-2BODY"] = dict(zip(dmm, [-0.00625366, -0.00306413, -0.00176146, -0.00306413, -0.00176146]))
 
 ref["ne"] = {}
 ref["ne"]["B3LYP-D3(BJ)"] = {"atom": 0.0}
 ref["ne"]["MP2-DMP2"] = {"atom": 0.0}
 ref["ne"]["ATM"] = {"atom": 0.0}
 ref["ne"]["GCP"] = {"atom": 0.0}
+ref["ne"]["B3LYP-D4(BJ)"] = {"atom": 0.0}
+ref["ne"]["PBE-D4(BJ)"] = {"atom": 0.0}
 
 gref = {}
 gref["eneyne"] = {}
@@ -824,12 +830,491 @@ gref["eneyne"]["GCP"] = dict(
     )
 )
 
+gref["eneyne"]["B3LYP-D4(BJ)"] = dict(
+    zip(
+        dmm,
+        [
+            np.array(
+                [
+                    [-0.0, -0.000121388195, -0.000285720303],
+                    [0.0, 0.000121388195, -0.000285720303],
+                    [0.000013500589, -0.000035224119, -0.000051913946],
+                    [-0.000013500589, -0.000035224119, -0.000051913946],
+                    [-0.000013500589, 0.000035224119, -0.000051913946],
+                    [0.000013500589, 0.000035224119, -0.000051913946],
+                    [0.0, -0.0, 0.000162779428],
+                    [0.0, -0.0, 0.00042515118],
+                    [0.0, -0.0, 0.000180544011],
+                    [0.0, -0.0, 0.000010621775],
+                ]
+            ),
+            np.array(
+                [
+                    [-0.0, -0.000077703214, -0.000000117582],
+                    [0.0, 0.000077703214, -0.000000117582],
+                    [-0.000003720109, -0.000014373039, 0.000000058791],
+                    [0.000003720109, -0.000014373039, 0.000000058791],
+                    [0.000003720109, 0.000014373039, 0.000000058791],
+                    [-0.000003720109, 0.000014373039, 0.000000058791],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0, 0.0, 0.000044445504],
+                    [0.0, 0.0, -0.000044316404],
+                    [0.0, 0.0, -0.000011452466],
+                    [0.0, 0.0, 0.000011323366],
+                ]
+            ),
+            np.array(
+                [
+                    [-0.0, -0.000077703214, -0.000000117582],
+                    [0.0, 0.000077703214, -0.000000117582],
+                    [-0.000003720109, -0.000014373039, 0.000000058791],
+                    [0.000003720109, -0.000014373039, 0.000000058791],
+                    [0.000003720109, 0.000014373039, 0.000000058791],
+                    [-0.000003720109, 0.000014373039, 0.000000058791],
+                    [0.0, -0.0, 0.0],
+                    [0.0, -0.0, 0.0],
+                    [0.0, -0.0, 0.0],
+                    [0.0, -0.0, 0.0],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.000044445504],
+                    [0.0, 0.0, -0.000044316404],
+                    [0.0, 0.0, -0.000011452466],
+                    [0.0, 0.0, 0.000011323366],
+                ]
+            ),
+        ],
+    )
+)
+
+gref["eneyne"]["PBE-D4(BJ)"] = dict(
+    zip(
+        dmm,
+        [
+            np.array(
+                [
+                    [-0.0, -0.000075815381, -0.00017520537],
+                    [0.0, 0.000075815381, -0.00017520537],
+                    [0.000007491515, -0.000020129841, -0.000035107085],
+                    [-0.000007491515, -0.000020129841, -0.000035107085],
+                    [-0.000007491515, 0.000020129841, -0.000035107085],
+                    [0.000007491515, 0.000020129841, -0.000035107085],
+                    [0.0, -0.0, 0.000114234095],
+                    [0.0, -0.0, 0.000264656137],
+                    [0.0, -0.0, 0.00010600965],
+                    [0.0, -0.0, 0.000005939201],
+                ]
+            ),
+            np.array(
+                [
+                    [-0.0, -0.000048683304, -0.000000077468],
+                    [-0.0, 0.000048683304, -0.000000077468],
+                    [-0.000003585439, -0.000006613721, 0.000000038734],
+                    [0.000003585439, -0.000006613721, 0.000000038734],
+                    [0.000003585439, 0.000006613721, 0.000000038734],
+                    [-0.000003585439, 0.000006613721, 0.000000038734],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0, 0.0, 0.000027225998],
+                    [0.0, 0.0, -0.000027154133],
+                    [0.0, 0.0, -0.000005688871],
+                    [0.0, 0.0, 0.000005617006],
+                ]
+            ),
+            np.array(
+                [
+                    [-0.0, -0.000048683304, -0.000000077468],
+                    [-0.0, 0.000048683304, -0.000000077468],
+                    [-0.000003585439, -0.000006613721, 0.000000038734],
+                    [0.000003585439, -0.000006613721, 0.000000038734],
+                    [0.000003585439, 0.000006613721, 0.000000038734],
+                    [-0.000003585439, 0.000006613721, 0.000000038734],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.000027225998],
+                    [0.0, 0.0, -0.000027154133],
+                    [0.0, 0.0, -0.000005688871],
+                    [0.0, 0.0, 0.000005617006],
+                ]
+            ),
+        ],
+    )
+)
+
+gref["eneyne"]["B3LYP-D4(BJ)-2BODY"] = dict(
+    zip(
+        dmm,
+        [
+            np.array(
+                [
+                    [-2.37238242e-20, -1.20552026e-04, -2.85188070e-04],
+                    [1.77428629e-20, 1.20552026e-04, -2.85188070e-04],
+                    [1.29618968e-05, -3.48247508e-05, -5.24578644e-05],
+                    [-1.29618968e-05, -3.48247508e-05, -5.24578644e-05],
+                    [-1.29618968e-05, 3.48247508e-05, -5.24578644e-05],
+                    [1.29618968e-05, 3.48247508e-05, -5.24578644e-05],
+                    [1.52364928e-21, -2.22548925e-21, 1.64760284e-04],
+                    [9.68759086e-21, -1.90663898e-20, 4.23463450e-04],
+                    [5.52800316e-21, -1.28345778e-20, 1.79843750e-04],
+                    [3.79855004e-22, -4.55050785e-22, 1.21401127e-05],
+                ]
+            ),
+            np.array(
+                [
+                    [-1.49709758e-20, -7.76770859e-05, -1.17642905e-07],
+                    [6.65584060e-21, 7.76770859e-05, -1.17642905e-07],
+                    [-3.75026735e-06, -1.43576031e-05, 5.88214523e-08],
+                    [3.75026735e-06, -1.43576031e-05, 5.88214523e-08],
+                    [3.75026735e-06, 1.43576031e-05, 5.88214523e-08],
+                    [-3.75026735e-06, 1.43576031e-05, 5.88214523e-08],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0, 0.0, 4.44399748e-05],
+                    [0.0, 0.0, -4.43108715e-05],
+                    [0.0, 0.0, -1.14903043e-05],
+                    [0.0, 0.0, 1.13612010e-05],
+                ]
+            ),
+            np.array(
+                [
+                    [-1.49709758e-20, -7.76770859e-05, -1.17642905e-07],
+                    [6.65584060e-21, 7.76770859e-05, -1.17642905e-07],
+                    [-3.75026735e-06, -1.43576031e-05, 5.88214523e-08],
+                    [3.75026735e-06, -1.43576031e-05, 5.88214523e-08],
+                    [3.75026735e-06, 1.43576031e-05, 5.88214523e-08],
+                    [-3.75026735e-06, 1.43576031e-05, 5.88214523e-08],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 4.44399748e-05],
+                    [0.0, 0.0, -4.43108715e-05],
+                    [0.0, 0.0, -1.14903043e-05],
+                    [0.0, 0.0, 1.13612010e-05],
+                ]
+            ),
+        ],
+    )
+)
 
 gref["ne"] = {}
 gref["ne"]["B3LYP-D3(BJ)"] = {"atom": np.zeros((1, 3))}
 gref["ne"]["MP2-DMP2"] = {"atom": np.zeros((1, 3))}
 gref["ne"]["ATM"] = {"atom": np.zeros((1, 3))}
 gref["ne"]["GCP"] = {"atom": np.zeros((1, 3))}
+gref["ne"]["B3LYP-D4(BJ)"] = {"atom": np.zeros((1, 3))}
+gref["ne"]["PBE-D4(BJ)"] = {"atom": np.zeros((1, 3))}
+
+
+pref = {}
+pref["eneyne"] = {}
+pref["eneyne"]["SAPT0-D3M"] = dict(
+    zip(
+        dmm,
+        [
+            np.array(
+                [
+                    [
+                        0.00000000e00,
+                        -7.85678891e-03,
+                        -1.95928495e-03,
+                        -1.95928495e-03,
+                        -2.01222438e-03,
+                        -2.01222438e-03,
+                        -4.53698281e-05,
+                        -2.51948360e-04,
+                        -4.60630446e-04,
+                        -4.15929931e-06,
+                    ],
+                    [
+                        -7.85678891e-03,
+                        0.00000000e00,
+                        -2.01222438e-03,
+                        -2.01222438e-03,
+                        -1.95928495e-03,
+                        -1.95928495e-03,
+                        -4.53698281e-05,
+                        -2.51948360e-04,
+                        -4.60630446e-04,
+                        -4.15929931e-06,
+                    ],
+                    [
+                        -1.95928495e-03,
+                        -2.01222438e-03,
+                        0.00000000e00,
+                        -1.04060569e-03,
+                        -9.67953410e-05,
+                        -2.90146983e-04,
+                        -1.15854812e-05,
+                        -5.42143151e-05,
+                        -8.42058910e-05,
+                        -1.19520095e-06,
+                    ],
+                    [
+                        -1.95928495e-03,
+                        -2.01222438e-03,
+                        -1.04060569e-03,
+                        0.00000000e00,
+                        -2.90146983e-04,
+                        -9.67953410e-05,
+                        -1.15854812e-05,
+                        -5.42143151e-05,
+                        -8.42058910e-05,
+                        -1.19520095e-06,
+                    ],
+                    [
+                        -2.01222438e-03,
+                        -1.95928495e-03,
+                        -9.67953410e-05,
+                        -2.90146983e-04,
+                        0.00000000e00,
+                        -1.04060569e-03,
+                        -1.15854812e-05,
+                        -5.42143151e-05,
+                        -8.42058910e-05,
+                        -1.19520095e-06,
+                    ],
+                    [
+                        -2.01222438e-03,
+                        -1.95928495e-03,
+                        -2.90146983e-04,
+                        -9.67953410e-05,
+                        -1.04060569e-03,
+                        0.00000000e00,
+                        -1.15854812e-05,
+                        -5.42143151e-05,
+                        -8.42058910e-05,
+                        -1.19520095e-06,
+                    ],
+                    [
+                        -4.53698281e-05,
+                        -4.53698281e-05,
+                        -1.15854812e-05,
+                        -1.15854812e-05,
+                        -1.15854812e-05,
+                        -1.15854812e-05,
+                        0.00000000e00,
+                        -8.94451739e-03,
+                        -1.49243946e-03,
+                        -2.06978526e-03,
+                    ],
+                    [
+                        -2.51948360e-04,
+                        -2.51948360e-04,
+                        -5.42143151e-05,
+                        -5.42143151e-05,
+                        -5.42143151e-05,
+                        -5.42143151e-05,
+                        -8.94451739e-03,
+                        0.00000000e00,
+                        -2.07365771e-03,
+                        -1.50094929e-03,
+                    ],
+                    [
+                        -4.60630446e-04,
+                        -4.60630446e-04,
+                        -8.42058910e-05,
+                        -8.42058910e-05,
+                        -8.42058910e-05,
+                        -8.42058910e-05,
+                        -1.49243946e-03,
+                        -2.07365771e-03,
+                        0.00000000e00,
+                        -6.02859360e-05,
+                    ],
+                    [
+                        -4.15929931e-06,
+                        -4.15929931e-06,
+                        -1.19520095e-06,
+                        -1.19520095e-06,
+                        -1.19520095e-06,
+                        -1.19520095e-06,
+                        -2.06978526e-03,
+                        -1.50094929e-03,
+                        -6.02859360e-05,
+                        0.00000000e00,
+                    ],
+                ]
+            ),
+            np.zeros((6, 6)),
+            np.zeros((4, 4)),
+            np.zeros((10, 10)),
+            np.zeros((10, 10)),
+        ],
+    )
+)
+pref["eneyne"]["PBE-D4(BJ)"] = dict(
+    zip(
+        dmm,
+        [
+            np.array(
+                [
+                    [
+                        0.00000000e00,
+                        -2.64744008e-04,
+                        -7.32623305e-05,
+                        -7.32623305e-05,
+                        -7.01934088e-05,
+                        -7.01934088e-05,
+                        -2.69705044e-05,
+                        -1.06309035e-04,
+                        -5.46185898e-05,
+                        -1.67640345e-06,
+                    ],
+                    [
+                        -2.64744008e-04,
+                        0.00000000e00,
+                        -7.01934088e-05,
+                        -7.01934088e-05,
+                        -7.32623305e-05,
+                        -7.32623305e-05,
+                        -2.69705044e-05,
+                        -1.06309035e-04,
+                        -5.46185898e-05,
+                        -1.67640345e-06,
+                    ],
+                    [
+                        -7.32623305e-05,
+                        -7.01934088e-05,
+                        0.00000000e00,
+                        -1.90214207e-05,
+                        -1.14919996e-05,
+                        -1.67283942e-05,
+                        -4.39710997e-06,
+                        -1.70897298e-05,
+                        -1.03017176e-05,
+                        -2.96551988e-07,
+                    ],
+                    [
+                        -7.32623305e-05,
+                        -7.01934088e-05,
+                        -1.90214207e-05,
+                        0.00000000e00,
+                        -1.67283942e-05,
+                        -1.14919996e-05,
+                        -4.39710997e-06,
+                        -1.70897298e-05,
+                        -1.03017176e-05,
+                        -2.96551988e-07,
+                    ],
+                    [
+                        -7.01934088e-05,
+                        -7.32623305e-05,
+                        -1.14919996e-05,
+                        -1.67283942e-05,
+                        0.00000000e00,
+                        -1.90214207e-05,
+                        -4.39710997e-06,
+                        -1.70897298e-05,
+                        -1.03017176e-05,
+                        -2.96551988e-07,
+                    ],
+                    [
+                        -7.01934088e-05,
+                        -7.32623305e-05,
+                        -1.67283942e-05,
+                        -1.14919996e-05,
+                        -1.90214207e-05,
+                        0.00000000e00,
+                        -4.39710997e-06,
+                        -1.70897298e-05,
+                        -1.03017176e-05,
+                        -2.96551988e-07,
+                    ],
+                    [
+                        -2.69705044e-05,
+                        -2.69705044e-05,
+                        -4.39710997e-06,
+                        -4.39710997e-06,
+                        -4.39710997e-06,
+                        -4.39710997e-06,
+                        0.00000000e00,
+                        -2.70797078e-04,
+                        -6.64000329e-05,
+                        -7.15900093e-05,
+                    ],
+                    [
+                        -1.06309035e-04,
+                        -1.06309035e-04,
+                        -1.70897298e-05,
+                        -1.70897298e-05,
+                        -1.70897298e-05,
+                        -1.70897298e-05,
+                        -2.70797078e-04,
+                        0.00000000e00,
+                        -7.10525707e-05,
+                        -6.69658005e-05,
+                    ],
+                    [
+                        -5.46185898e-05,
+                        -5.46185898e-05,
+                        -1.03017176e-05,
+                        -1.03017176e-05,
+                        -1.03017176e-05,
+                        -1.03017176e-05,
+                        -6.64000329e-05,
+                        -7.10525707e-05,
+                        0.00000000e00,
+                        -8.31720277e-06,
+                    ],
+                    [
+                        -1.67640345e-06,
+                        -1.67640345e-06,
+                        -2.96551988e-07,
+                        -2.96551988e-07,
+                        -2.96551988e-07,
+                        -2.96551988e-07,
+                        -7.15900093e-05,
+                        -6.69658005e-05,
+                        -8.31720277e-06,
+                        0.00000000e00,
+                    ],
+                ]
+            ),
+            np.zeros((6, 6)),
+            np.zeros((4, 4)),
+            np.zeros((10, 10)),
+            np.zeros((10, 10)),
+        ],
+    )
+)
 
 seneyne = """
 C   0.000000  -0.667578  -2.124659
@@ -1182,7 +1667,13 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
     )
 
 
-@using("dftd3")
+_d3_b3lyp = {"s6": 1.0, "s8": 1.703, "sr6": 1.261, "alpha6": 14.0, "sr8": 1.000}
+_d3_pbe = {"s6": 1.0, "s8": 0.722, "sr6": 1.217, "alpha6": 14.0, "sr8": 1.000}
+_d4_b3lyp = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 1.0}
+_d4_pbe = {"s8": 0.95948085, "a1": 0.38574991, "a2": 4.80688534, "s9": 1.0}
+_d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0.0}
+
+
 @pytest.mark.parametrize(
     "subjects",
     [
@@ -1196,51 +1687,122 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
 )
 @pytest.mark.parametrize(
     "inp",
+    # fmt: off
     [
-        ({"parent": "eneyne", "name": "d3-b3lyp-d", "subject": "dimer", "lbl": "B3LYP-D2"}),
-        ({"parent": "eneyne", "name": "d3-b3lyp-d3bj", "subject": "mA", "lbl": "B3LYP-D3(BJ)"}),
-        ({"parent": "eneyne", "name": "d3-PBE-D3zero", "subject": "mB", "lbl": "PBE-D3"}),
-        ({"parent": "eneyne", "name": "d3-PBE-D3zero", "subject": "gAmB", "lbl": "PBE-D3"}),
-        ({"parent": "eneyne", "name": "d3-PBE-D2", "subject": "mAgB", "lbl": "PBE-D2"}),
-        ({"parent": "ne", "name": "d3-b3lyp-d3bj", "subject": "atom", "lbl": "B3LYP-D3(BJ)"}),
-        ({"parent": "eneyne", "name": "d3-SAPT0-D3M(BJ)", "subject": "dimer", "lbl": "SAPT0-D3M(BJ)"}),
-        ({"parent": "eneyne", "name": "d3-SAPT0-D3M", "subject": "mA", "lbl": "SAPT0-D3M"}),
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "d3-b3lyp-d"}, "keywords": {}}, "lbl": "B3LYP-D2"}, marks=using("dftd3")),
+        pytest.param({"parent": "eneyne", "subject": "mA", "qcsk": {"model": {"method": "d3-b3lyp-d3bj"}, "keywords": {}}, "lbl": "B3LYP-D3(BJ)"}, marks=using("dftd3")),
+        pytest.param({"parent": "eneyne", "subject": "mB", "qcsk": {"model": { "method": "d3-PBE-D3zero"}, "keywords": {}}, "lbl": "PBE-D3"}, marks=using("dftd3")),
+        pytest.param({ "parent": "eneyne", "subject": "gAmB", "qcsk": { "model": { "method": "d3-PBE-D3zero"}, "keywords": {}}, "lbl": "PBE-D3"}, marks=using("dftd3")),
+        pytest.param({ "parent": "eneyne", "subject": "mAgB", "qcsk": { "model": { "method": "d3-PBE-D2"}, "keywords": {}}, "lbl": "PBE-D2"}, marks=using("dftd3")),
+        pytest.param({ "parent": "ne", "subject": "atom", "qcsk": { "model": { "method": "d3-b3lyp-d3bj"}, "keywords": {}}, "lbl": "B3LYP-D3(BJ)"}, marks=using("dftd3")),
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "d3-SAPT0-D3M(BJ)"}, "keywords": {}}, "lbl": "SAPT0-D3M(BJ)"}, marks=using("dftd3")),
+        pytest.param({ "parent": "eneyne", "subject": "mA", "qcsk": { "model": { "method": "d3-SAPT0-D3M"}, "keywords": {}}, "lbl": "SAPT0-D3M"}, marks=using("dftd3")),
+
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4(BJ)"}, marks=using("dftd4")),
+        pytest.param({ "parent": "ne", "subject": "atom", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4(BJ)"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "mA", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4(BJ)"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "gAmB", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4(BJ)"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "mB", "qcsk": { "model": { "method": "d4-PBE-D4"}, "keywords": {}}, "lbl": "PBE-D4(BJ)"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "mAgB", "qcsk": { "model": { "method": "d4-PBE-D4"}, "keywords": {}}, "lbl": "PBE-D4(BJ)"}, marks=using("dftd4")),
+
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # params only
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "b3lyp-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # method reinforcing params
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # method contradicting params (D3: params win)
+
+        pytest.param({ "parent": "eneyne", "subject": "mAgB", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp_2body}}, "lbl": "B3LYP-D4(BJ)-2BODY"}, marks=using("dftd4")),  # params only
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4(BJ)"}, marks=using("dftd4")),  # params only
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "b3lyp-d4"}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4(BJ)"}, marks=using("dftd4")),  # method reinforcing params
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": { "model": {"method": "pbe-d4"}, "keywords": {"pair_resolved": True, "level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "PBE-D4(BJ)"}, marks=using("dftd4")),  # method contradicting params (D4: method wins)
     ],
+    # fmt: on
 )
 def test_dftd3__run_dftd3__2body(inp, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
-    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]].ravel()
+    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
         mol = subject.to_schema(dtype=2)
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": mol,
-        "driver": "gradient",
-        "model": {"method": inp["name"]},
-        "keywords": {},
-    }
-    jrec = qcng.compute(resinp, "dftd3", raise_error=True)
+    program = "dftd4" if ("D4(BJ)" in inp["lbl"]) else "dftd3"
+
+    atin = AtomicInput(
+        molecule=mol,
+        driver="gradient",
+        **inp["qcsk"],
+    )
+    jrec = qcng.compute(atin, program, raise_error=True)
     jrec = jrec.dict()
+    pprint.pprint(jrec)
 
-    assert len(jrec["extras"]["qcvars"]) == 8
-
+    assert compare_values(expected, jrec["properties"]["return_energy"], atol=1.0e-7)
     assert compare_values(expected, jrec["extras"]["qcvars"]["CURRENT ENERGY"], atol=1.0e-7)
     assert compare_values(expected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
-    assert compare_values(expected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
-    assert compare_values(expected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
+    if program == "dftd3":
+        assert compare_values(expected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
+    if inp["lbl"] != "B3LYP-D4(BJ)-2BODY":
+        assert compare_values(
+            expected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION ENERGY"], atol=1.0e-7
+        )
 
+    assert compare_values(gexpected, jrec["return_result"], atol=1.0e-7)
     assert compare_values(gexpected, jrec["extras"]["qcvars"]["CURRENT GRADIENT"], atol=1.0e-7)
     assert compare_values(gexpected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
-    assert compare_values(gexpected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
-    assert compare_values(
-        gexpected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION GRADIENT"], atol=1.0e-7
+    if program == "dftd3":
+        assert compare_values(gexpected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
+    if inp["lbl"] != "B3LYP-D4(BJ)-2BODY":
+        assert compare_values(
+            gexpected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION GRADIENT"], atol=1.0e-7
+        )
+
+
+@pytest.mark.parametrize(
+    "subjects",
+    [
+        pytest.param(eneyne_ne_psi4mols, marks=using("psi4")),
+        pytest.param(
+            eneyne_ne_qcdbmols, marks=using("psi4")
+        ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
+        pytest.param(eneyne_ne_qcschemamols),
+    ],
+    ids=["qmol", "pmol", "qcmol"],
+)
+@pytest.mark.parametrize(
+    "inp",
+    # fmt: off
+    [
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "PBE-D3"}, marks=using("dftd3")),  # wrong ref lbl
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "PBE-D3"}, marks=using("dftd3")),  # method contradicting params (D3: params win -> fail)
+
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "PBE-D4(BJ)"}, marks=using("dftd4")),  # wrong ref lbl
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d4"}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4(BJ)"}, marks=using("dftd4")),  # method contradicting params (D4: method wins -> fail)
+    ],
+    # fmt: on
+)
+def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
+    subject = subjects()[inp["parent"]][inp["subject"]]
+    expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
+    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
+
+    if "qcmol" in request.node.name:
+        mol = subject
+    else:
+        mol = subject.to_schema(dtype=2)
+
+    program = "dftd4" if inp["lbl"].endswith("D4(BJ)") else "dftd3"
+
+    atin = AtomicInput(
+        molecule=mol,
+        driver="gradient",
+        **inp["qcsk"],
     )
+    jrec = qcng.compute(atin, program, raise_error=True)
+    jrec = jrec.dict()
+
+    with pytest.raises(AssertionError) as exc:
+        assert compare_values(expected, jrec["properties"]["return_energy"], atol=1.0e-7)
 
 
 @using("dftd3_321")
@@ -1269,7 +1831,7 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
 def test_dftd3__run_dftd3__3body(inp, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
-    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]].ravel()
+    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
@@ -1304,7 +1866,6 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
     )
 
 
-@using("dftd3")
 @pytest.mark.parametrize(
     "subjects",
     [
@@ -1316,159 +1877,42 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
     ],
     ids=["qmol", "pmol", "qcmol"],
 )
-def test_dftd3_sapt_pairwise(request, subjects):
-    subject = subjects()["eneyne"]["dimer"]
-    expected = ref["eneyne"]["SAPT0-D3M"]["dimer"]
-
-    expected_pairwise = np.array(
-        [
-            [
-                0.00000000e00,
-                -7.85678891e-03,
-                -1.95928495e-03,
-                -1.95928495e-03,
-                -2.01222438e-03,
-                -2.01222438e-03,
-                -4.53698281e-05,
-                -2.51948360e-04,
-                -4.60630446e-04,
-                -4.15929931e-06,
-            ],
-            [
-                -7.85678891e-03,
-                0.00000000e00,
-                -2.01222438e-03,
-                -2.01222438e-03,
-                -1.95928495e-03,
-                -1.95928495e-03,
-                -4.53698281e-05,
-                -2.51948360e-04,
-                -4.60630446e-04,
-                -4.15929931e-06,
-            ],
-            [
-                -1.95928495e-03,
-                -2.01222438e-03,
-                0.00000000e00,
-                -1.04060569e-03,
-                -9.67953410e-05,
-                -2.90146983e-04,
-                -1.15854812e-05,
-                -5.42143151e-05,
-                -8.42058910e-05,
-                -1.19520095e-06,
-            ],
-            [
-                -1.95928495e-03,
-                -2.01222438e-03,
-                -1.04060569e-03,
-                0.00000000e00,
-                -2.90146983e-04,
-                -9.67953410e-05,
-                -1.15854812e-05,
-                -5.42143151e-05,
-                -8.42058910e-05,
-                -1.19520095e-06,
-            ],
-            [
-                -2.01222438e-03,
-                -1.95928495e-03,
-                -9.67953410e-05,
-                -2.90146983e-04,
-                0.00000000e00,
-                -1.04060569e-03,
-                -1.15854812e-05,
-                -5.42143151e-05,
-                -8.42058910e-05,
-                -1.19520095e-06,
-            ],
-            [
-                -2.01222438e-03,
-                -1.95928495e-03,
-                -2.90146983e-04,
-                -9.67953410e-05,
-                -1.04060569e-03,
-                0.00000000e00,
-                -1.15854812e-05,
-                -5.42143151e-05,
-                -8.42058910e-05,
-                -1.19520095e-06,
-            ],
-            [
-                -4.53698281e-05,
-                -4.53698281e-05,
-                -1.15854812e-05,
-                -1.15854812e-05,
-                -1.15854812e-05,
-                -1.15854812e-05,
-                0.00000000e00,
-                -8.94451739e-03,
-                -1.49243946e-03,
-                -2.06978526e-03,
-            ],
-            [
-                -2.51948360e-04,
-                -2.51948360e-04,
-                -5.42143151e-05,
-                -5.42143151e-05,
-                -5.42143151e-05,
-                -5.42143151e-05,
-                -8.94451739e-03,
-                0.00000000e00,
-                -2.07365771e-03,
-                -1.50094929e-03,
-            ],
-            [
-                -4.60630446e-04,
-                -4.60630446e-04,
-                -8.42058910e-05,
-                -8.42058910e-05,
-                -8.42058910e-05,
-                -8.42058910e-05,
-                -1.49243946e-03,
-                -2.07365771e-03,
-                0.00000000e00,
-                -6.02859360e-05,
-            ],
-            [
-                -4.15929931e-06,
-                -4.15929931e-06,
-                -1.19520095e-06,
-                -1.19520095e-06,
-                -1.19520095e-06,
-                -1.19520095e-06,
-                -2.06978526e-03,
-                -1.50094929e-03,
-                -6.02859360e-05,
-                0.00000000e00,
-            ],
-        ]
-    )
+@pytest.mark.parametrize(
+    "inp",
+    [
+        pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "SAPT0-D3M"}, marks=using("dftd3")),
+        pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "PBE-D4(BJ)"}, marks=using("dftd4")),
+    ],
+)
+def test_sapt_pairwise(inp, subjects, request):
+    subject = subjects()[inp["parent"]][inp["subject"]]
+    expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
+    expected_pairwise = pref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
         mol = subject.to_schema(dtype=2)
 
-    json_data = {
-        "molecule": mol,
-        "driver": "energy",
-        "model": {"method": "d3-sapt0-d3m"},
-        "keywords": {"save_pairwise_dispersion": True},
-    }
+    program = "dftd4" if ("D4(BJ)" in inp["lbl"]) else "dftd3"
 
-    # Test driver
-    jrec = qcng.compute(json_data, "dftd3", raise_error=True)
+    atin = AtomicInput(
+        molecule=mol,
+        driver="energy",
+        model={"method": inp["lbl"]},
+        keywords={
+            "pair_resolved": True,
+        },
+    )
+    jrec = qcng.compute(atin, program, raise_error=True)
     jrec = jrec.dict()
-
-    assert len(jrec["extras"]["qcvars"]) == 5
 
     assert compare_values(expected, jrec["extras"]["qcvars"]["CURRENT ENERGY"], atol=1.0e-7)
     assert compare_values(expected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
-    assert compare_values(expected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
-    assert compare_values(expected, jrec["extras"]["qcvars"]["SAPT0-D3M DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
+    # assert compare_values(expected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
+    assert compare_values(expected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
     assert compare_values(
-        expected_pairwise, jrec["extras"]["qcvars"]["PAIRWISE DISPERSION CORRECTION ANALYSIS"], atol=1.0e-7
+        expected_pairwise, jrec["extras"]["qcvars"]["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"], atol=1.0e-7
     )
 
 
