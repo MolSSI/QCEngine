@@ -389,6 +389,7 @@ def execute(
     environment: Optional[Dict[str, str]] = None,
     shell: Optional[bool] = False,
     exit_code: Optional[int] = 0,
+    outfiles_load: Optional[bool] = True,
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
@@ -428,7 +429,9 @@ def execute(
         Run command through the shell.
     exit_code: int, optional
         The exit code above which the process is considered failure.
-
+    outfiles_load: bool, optional
+        Load output file(s) contents in outfiles. If set to False,
+        outfiles stores the posix path(s) instead.
     Raises
     ------
     FileExistsError
@@ -471,7 +474,7 @@ def execute(
     ) as scrdir:
         popen_kwargs["cwd"] = scrdir
         popen_kwargs["shell"] = shell
-        with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
+        with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary, outfiles_load=outfiles_load) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
                 # Wait for the subprocess to complete or the timeout to expire
                 if interupt_after is None:
@@ -562,6 +565,7 @@ def disk_files(
     *,
     cwd: Optional[str] = None,
     as_binary: Optional[List[str]] = None,
+    outfiles_load: Optional[bool] = True,
 ) -> Dict[str, Union[str, bytes]]:
     """Write and collect files.
 
@@ -577,7 +581,9 @@ def disk_files(
         Directory to which to write and read files.
     as_binary : List[str] = None
         Keys in `infiles` (`outfiles`) to be written (read) as bytes, not decoded.
-
+    outfiles_load: bool = True
+        Load output file(s) contents in outfiles. If set to False
+        outfiles stores the posix path(s) instead.
     Yields
     ------
     Dict[str] = str
@@ -604,21 +610,32 @@ def disk_files(
 
     finally:
         for fl in outfiles.keys():
-            omode = "rb" if fl in as_binary else "r"
-            try:
-                filename = lwd / fl
-                with open(filename, omode) as fp:
-                    outfiles[fl] = fp.read()
-                    LOGGER.info(f"... Writing ({omode}): {filename}")
-            except (OSError, FileNotFoundError):
+            filename = lwd / fl
+            if outfiles_load:
+                omode = "rb" if fl in as_binary else "r"
+                try:
+                    with open(filename, omode) as fp:
+                        outfiles[fl] = fp.read()
+                        LOGGER.info(f"... Writing ({omode}): {filename}")
+                except (OSError, FileNotFoundError):
+                    if "*" in fl:
+                        gfls = {}
+                        for gfl in lwd.glob(fl):
+                            with open(gfl, omode) as fp:
+                                gfls[gfl.name] = fp.read()
+                                LOGGER.info(f"... Writing ({omode}): {gfl}")
+                        if not gfls:
+                            gfls = None
+                        outfiles[fl] = gfls
+                    else:
+                        outfiles[fl] = None
+            else:
                 if "*" in fl:
                     gfls = {}
                     for gfl in lwd.glob(fl):
-                        with open(gfl, omode) as fp:
-                            gfls[gfl.name] = fp.read()
-                            LOGGER.info(f"... Writing ({omode}): {gfl}")
+                        gfls[gfl.name] = gfl
                     if not gfls:
                         gfls = None
                     outfiles[fl] = gfls
                 else:
-                    outfiles[fl] = None
+                    outfiles[fl] = filename
