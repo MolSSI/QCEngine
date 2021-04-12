@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import pathlib
 
 import pytest
 from qcelemental.models import AtomicInput
@@ -64,17 +65,22 @@ def test_tmpdir():
         assert str(tmpdir).split(os.path.sep)[-1].endswith("this")
 
 
-def test_disk_files():
+@pytest.mark.parametrize("outfiles_load", [True, False])
+def test_disk_files(outfiles_load):
 
     infiles = {"thing1": "hello", "thing2": "world", "other": "everyone"}
     outfiles = {"thing*": None, "other": None}
     with util.temporary_directory(suffix="this") as tmpdir:
-        with util.disk_files(infiles=infiles, outfiles=outfiles, cwd=tmpdir):
+        with util.disk_files(infiles=infiles, outfiles=outfiles, cwd=tmpdir, outfiles_load=outfiles_load):
             pass
 
     assert outfiles.keys() == {"thing*", "other"}
-    assert outfiles["thing*"]["thing1"] == "hello"
-    assert outfiles["other"] == "everyone"
+    if outfiles_load:
+        assert outfiles["thing*"]["thing1"] == "hello"
+        assert outfiles["other"] == "everyone"
+    else:
+        assert isinstance(outfiles["thing*"]["thing1"], pathlib.PurePath)
+        assert isinstance(outfiles["other"], pathlib.PurePath)
 
 
 def test_popen_tee_output(capsys):
