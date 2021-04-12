@@ -431,7 +431,7 @@ def execute(
         The exit code above which the process is considered failure.
     outfiles_load: bool, optional
         Load output file(s) contents in outfiles. If set to False,
-        outfiles stores the posix path(s) instead.
+        outfiles stores the path(s) instead.
     Raises
     ------
     FileExistsError
@@ -583,7 +583,7 @@ def disk_files(
         Keys in `infiles` (`outfiles`) to be written (read) as bytes, not decoded.
     outfiles_load: bool = True
         Load output file(s) contents in outfiles. If set to False
-        outfiles stores the posix path(s) instead.
+        outfiles stores the path(s) instead.
     Yields
     ------
     Dict[str] = str
@@ -630,12 +630,15 @@ def disk_files(
                     else:
                         outfiles[fl] = None
             else:
-                if "*" in fl:
+                if filename.is_file():
+                    outfiles[fl] = filename
+                elif "*" in fl:
                     gfls = {}
                     for gfl in lwd.glob(fl):
-                        gfls[gfl.name] = gfl
+                        if gfl.is_file():
+                            gfls[gfl.name] = gfl
                     if not gfls:
                         gfls = None
                     outfiles[fl] = gfls
                 else:
-                    outfiles[fl] = filename
+                    outfiles[fl] = None
