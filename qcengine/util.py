@@ -566,7 +566,7 @@ def disk_files(
     cwd: Optional[str] = None,
     as_binary: Optional[List[str]] = None,
     outfiles_load: Optional[bool] = True,
-) -> Dict[str, Union[str, bytes]]:
+) -> Dict[str, Union[str, bytes, Path]]:
     """Write and collect files.
 
     Parameters
@@ -586,7 +586,7 @@ def disk_files(
         outfiles stores the path(s) instead.
     Yields
     ------
-    Dict[str] = str
+    Dict[str, Union[str, bytes, Path]]
         outfiles with RHS filled in.
 
     """
@@ -616,14 +616,14 @@ def disk_files(
                 try:
                     with open(filename, omode) as fp:
                         outfiles[fl] = fp.read()
-                        LOGGER.info(f"... Writing ({omode}): {filename}")
+                        LOGGER.info(f"... Reading ({omode}): {filename}")
                 except (OSError, FileNotFoundError):
                     if "*" in fl:
                         gfls = {}
                         for gfl in lwd.glob(fl):
                             with open(gfl, omode) as fp:
                                 gfls[gfl.name] = fp.read()
-                                LOGGER.info(f"... Writing ({omode}): {gfl}")
+                                LOGGER.info(f"... Reading ({omode}): {gfl}")
                         if not gfls:
                             gfls = None
                         outfiles[fl] = gfls
