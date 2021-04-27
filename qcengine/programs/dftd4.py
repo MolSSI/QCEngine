@@ -80,7 +80,7 @@ class DFTD4Harness(ProgramHarness):
         param_tweaks = None if mtd else input_model.keywords.get("params_tweaks", None)
         try:
             planinfo = from_arrays(
-                verbose=2,
+                verbose=1,
                 name_hint=mtd,
                 level_hint=input_model.keywords.get("level_hint", None),
                 param_tweaks=param_tweaks,
@@ -128,6 +128,7 @@ class DFTD4Harness(ProgramHarness):
                 if qcvkey:
                     calcinfo[f"{qcvkey} DISPERSION CORRECTION GRADIENT"] = grad
 
+            # output_data["extras"]["local_keywords"] = input_model.extras["info"]
             if input_model.keywords.get("pair_resolved") is True:
                 pw2 = output.extras["dftd4"]["additive pairwise energy"]
                 pw3 = output.extras["dftd4"]["non-additive pairwise energy"]

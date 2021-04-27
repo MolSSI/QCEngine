@@ -242,11 +242,8 @@ class GCPHarness(ProgramHarness):
 
         calcinfo = {info.label: info.data for info in calcinfo}
 
-        # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
-        calcinfo = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(calcinfo, flat=True).items()
-        }
+        calcinfo = {k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in calcinfo.items()}
 
         retres = calcinfo[f"CURRENT {input_model.driver.upper()}"]
         if isinstance(retres, Decimal):

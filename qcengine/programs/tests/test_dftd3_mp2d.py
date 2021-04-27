@@ -1636,7 +1636,7 @@ def test_qcdb__energy_d3():
 def test_mp2d__run_mp2d__2body(inp, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
-    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]].ravel()
+    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
@@ -1942,7 +1942,7 @@ def test_sapt_pairwise(inp, subjects, request):
 def test_gcp(inp, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
-    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]].ravel()
+    gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject

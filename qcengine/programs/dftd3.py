@@ -266,9 +266,7 @@ class DFTD3Harness(ProgramHarness):
         calcinfo = {info.label: info.data for info in calcinfo}
 
         # Decimal --> str preserves precision
-        calcinfo = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(calcinfo, flat=False).items()
-        }
+        calcinfo = {k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in calcinfo.items()}
 
         # jobrec['properties'] = {"return_energy": ene}
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
