@@ -377,6 +377,7 @@ def execute(
     infiles: Optional[Dict[str, str]] = None,
     outfiles: Optional[List[str]] = None,
     *,
+    outfiles_track: Optional[List[str]] = [],
     as_binary: Optional[List[str]] = None,
     scratch_name: Optional[str] = None,
     scratch_directory: Optional[str] = None,
@@ -389,7 +390,6 @@ def execute(
     environment: Optional[Dict[str, str]] = None,
     shell: Optional[bool] = False,
     exit_code: Optional[int] = 0,
-    outfiles_load: Optional[bool] = True,
 ) -> Tuple[bool, Dict[str, Any]]:
     """
     Runs a process in the background until complete.
@@ -405,6 +405,11 @@ def execute(
     outfiles : List[str] = None
         Output file names to be collected after execution into
         values. May be {}.
+    outfiles_track: List[str], optional
+        Keys of `outfiles` to keep track of without loading their contents in memory.
+        For specified filename in `outfiles_track`, the file path instead of contents
+        is stored in `outfiles`. To ensure tracked files are not deleted after execution,
+        you must set `scratch_messy=True`.
     as_binary : List[str] = None
         Keys of `infiles` or `outfiles` to be treated as bytes.
     scratch_name : str, optional
@@ -429,9 +434,6 @@ def execute(
         Run command through the shell.
     exit_code: int, optional
         The exit code above which the process is considered failure.
-    outfiles_load: bool, optional
-        Load output file(s) contents in outfiles. If set to False,
-        outfiles stores the path(s) instead.
     Raises
     ------
     FileExistsError
@@ -474,7 +476,9 @@ def execute(
     ) as scrdir:
         popen_kwargs["cwd"] = scrdir
         popen_kwargs["shell"] = shell
-        with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary, outfiles_load=outfiles_load) as extrafiles:
+        with disk_files(
+            infiles, outfiles, cwd=scrdir, as_binary=as_binary, outfiles_track=outfiles_track
+        ) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
                 # Wait for the subprocess to complete or the timeout to expire
                 if interupt_after is None:
@@ -565,7 +569,7 @@ def disk_files(
     *,
     cwd: Optional[str] = None,
     as_binary: Optional[List[str]] = None,
-    outfiles_load: Optional[bool] = True,
+    outfiles_track: Optional[List[str]] = [],
 ) -> Dict[str, Union[str, bytes, Path]]:
     """Write and collect files.
 
@@ -581,9 +585,10 @@ def disk_files(
         Directory to which to write and read files.
     as_binary : List[str] = None
         Keys in `infiles` (`outfiles`) to be written (read) as bytes, not decoded.
-    outfiles_load: bool = True
-        Load output file(s) contents in outfiles. If set to False
-        outfiles stores the path(s) instead.
+    outfiles_track: List[str], optional
+        Keys of `outfiles` to keep track of (i.e. file contents not loaded in memory).
+        For specified filename in `outfiles_track`, the file path instead of contents
+        is stored in `outfiles`.
     Yields
     ------
     Dict[str, Union[str, bytes, Path]]
@@ -611,7 +616,7 @@ def disk_files(
     finally:
         for fl in outfiles.keys():
             filename = lwd / fl
-            if outfiles_load:
+            if fl not in outfiles_track:
                 omode = "rb" if fl in as_binary else "r"
                 try:
                     with open(filename, omode) as fp:
