@@ -67,7 +67,6 @@ class DFTD4Harness(ProgramHarness):
         import dftd4
         from dftd4.qcschema import run_qcschema
 
-
         # strip engine hint
         input_data = input_model.dict()
         method = input_model.model.method
