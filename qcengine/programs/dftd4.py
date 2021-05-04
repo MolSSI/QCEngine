@@ -69,19 +69,19 @@ class DFTD4Harness(ProgramHarness):
 
         # strip engine hint
         input_data = input_model.dict()
-        mtd = input_model.model.method
-        if mtd.startswith("d4-"):
-            mtd = mtd[3:]
-            input_data["model"]["method"] = mtd
+        method = input_model.model.method
+        if method.startswith("d4-"):
+            method = method[3:]
+            input_data["model"]["method"] = method
 
         # send `from_arrays` the dftd4 behavior of functional specification overrides explicit parameters specification
         # * differs from dftd3 harness behavior where parameters extend or override functional
         # * stash the resolved plan in extras or, if errored, leave it for the proper dftd4 api to reject
-        param_tweaks = None if mtd else input_model.keywords.get("params_tweaks", None)
+        param_tweaks = None if method else input_model.keywords.get("params_tweaks", None)
         try:
             planinfo = from_arrays(
                 verbose=1,
-                name_hint=mtd,
+                name_hint=method,
                 level_hint=input_model.keywords.get("level_hint", None),
                 param_tweaks=param_tweaks,
                 dashcoeff_supplement=input_model.keywords.get("dashcoeff_supplement", None),
@@ -93,9 +93,9 @@ class DFTD4Harness(ProgramHarness):
 
         # strip dispersion level from method
         for alias, d4 in get_dispersion_aliases().items():
-            if d4 == "d4bj" and mtd.lower().endswith(alias):
-                mtd = mtd[: -(len(alias) + 1)]
-                input_data["model"]["method"] = mtd
+            if d4 == "d4bj" and method.lower().endswith(alias):
+                method = method[: -(len(alias) + 1)]
+                input_data["model"]["method"] = method
 
         # consolidate dispersion level aliases
         level_hint = input_model.keywords.get("level_hint", None)
@@ -107,9 +107,6 @@ class DFTD4Harness(ProgramHarness):
 
         # Run the Harness
         output = run_qcschema(input_model)
-
-        # Make sure all keys from the initial input spec are sent along
-        output.extras.update(input_model.extras)
 
         if "info" in input_model.extras:
             qcvkey = input_model.extras["info"]["fctldash"].upper()

@@ -812,26 +812,57 @@ dashcoeff = {
     },
 }
 
-try:
-    import dftd4
-    import toml
-except:
-    pass
-else:
-    d4params = toml.load(Path(dftd4.__file__).parent / "parameters.toml")
 
-    for fctl in d4params["parameter"]:
-        piece = d4params["parameter"][fctl]["d4"]["bj-eeq-atm"]
-        if "s6" in piece:
-            # skip double-hybrids for now
+def _get_d4bj_definitions(definitions: dict) -> None:
+    """DFTD4 provides access to damping parameters on per functional basis.
+    But we want all of them.
+
+    We let DFTD4 take care of finding and loading the parameter file,
+    but to get all parameters, we implement the logic to read those
+    parameters ourselves again.
+    """
+
+    from dftd4.parameters import get_data_file_name, load_data_base
+
+    def get_params(entry: dict, base: dict, defaults: list) -> dict:
+        """Retrive the parameters from the data base, make sure the default
+        values are applied correctly in the process. In case we have multiple
+        defaults search for the first of the list defined for this method."""
+
+        for default in defaults:
+            try:
+                params = base[default].copy()
+                params.update(**entry[default])
+                return params
+            except KeyError:
+                continue
+
+        raise KeyError("No entry for " + method + " in parameter data base")
+
+    _data_base = load_data_base(get_data_file_name())
+
+    _defaults = _data_base["default"]["d4"]
+    _base = _data_base["default"]["parameter"]["d4"]
+
+    for method in _data_base["parameter"]:
+        _entry = _data_base["parameter"][method]["d4"]
+
+        try:
+            params = get_params(_entry, _base, _defaults)
+
+            citation = piece.pop("doi", None)
+            definitions[method] = dict(
+                params=params,
+                citation=citation,
+            )
+        except KeyError:
             continue
 
-        citation = piece.pop("doi", None)
-        if citation is None:
-            citation = d4params["parameter"][fctl]["reference"]["doi"]
-        piece.update({"s9": 1.0})
 
-        dashcoeff["d4bj"]["definitions"][fctl] = {"params": piece, "citation": citation}
+try:
+    _get_d4bj_definitions(dashcoeff["d4bj"]["definitions"])
+except:
+    pass
 
 
 def get_dispersion_aliases():
