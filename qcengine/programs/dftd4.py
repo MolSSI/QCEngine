@@ -67,12 +67,14 @@ class DFTD4Harness(ProgramHarness):
         import dftd4
         from dftd4.qcschema import run_qcschema
 
+
         # strip engine hint
         input_data = input_model.dict()
         method = input_model.model.method
         if method.startswith("d4-"):
             method = method[3:]
             input_data["model"]["method"] = method
+        qcvkey = method.upper() if method is not None else None
 
         # send `from_arrays` the dftd4 behavior of functional specification overrides explicit parameters specification
         # * differs from dftd3 harness behavior where parameters extend or override functional
@@ -108,33 +110,32 @@ class DFTD4Harness(ProgramHarness):
         # Run the Harness
         output = run_qcschema(input_model)
 
-        if "info" in input_model.extras:
-            qcvkey = input_model.extras["info"]["fctldash"].upper()
+        if "info" in output.extras:
+            qcvkey = output.extras["info"]["fctldash"].upper()
 
-            calcinfo = {}
-            ene = output.properties.return_energy
-            calcinfo["CURRENT ENERGY"] = ene
-            calcinfo["DISPERSION CORRECTION ENERGY"] = ene
+        calcinfo = {}
+        energy = output.properties.return_energy
+        calcinfo["CURRENT ENERGY"] = energy
+        calcinfo["DISPERSION CORRECTION ENERGY"] = energy
+        if qcvkey:
+            calcinfo[f"{qcvkey} DISPERSION CORRECTION ENERGY"] = energy
+
+        if output.driver == "gradient":
+            gradient = output.return_result
+            calcinfo["CURRENT GRADIENT"] = gradient
+            calcinfo["DISPERSION CORRECTION GRADIENT"] = gradient
             if qcvkey:
-                calcinfo[f"{qcvkey} DISPERSION CORRECTION ENERGY"] = ene
+                calcinfo[f"{qcvkey} DISPERSION CORRECTION GRADIENT"] = gradient
 
-            if input_model.driver == "gradient":
-                grad = output.return_result
-                calcinfo["CURRENT GRADIENT"] = grad
-                calcinfo["DISPERSION CORRECTION GRADIENT"] = grad
-                if qcvkey:
-                    calcinfo[f"{qcvkey} DISPERSION CORRECTION GRADIENT"] = grad
+        if output.keywords.get("pair_resolved", False):
+            pw2 = output.extras["dftd4"]["additive pairwise energy"]
+            pw3 = output.extras["dftd4"]["non-additive pairwise energy"]
+            assert abs(pw2.sum() + pw3.sum() - energy) < 1.0e-8, f"{pw2.sum()} + {pw3.sum()} != {ene}"
+            calcinfo["2-BODY DISPERSION CORRECTION ENERGY"] = pw2.sum()
+            calcinfo["3-BODY DISPERSION CORRECTION ENERGY"] = pw3.sum()
+            calcinfo["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = pw2
+            calcinfo["3-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = pw3
 
-            # output_data["extras"]["local_keywords"] = input_model.extras["info"]
-            if input_model.keywords.get("pair_resolved") is True:
-                pw2 = output.extras["dftd4"]["additive pairwise energy"]
-                pw3 = output.extras["dftd4"]["non-additive pairwise energy"]
-                assert abs(pw2.sum() + pw3.sum() - ene) < 1.0e-8, f"{pw2.sum()} + {pw3.sum()} != {ene}"
-                calcinfo["2-BODY DISPERSION CORRECTION ENERGY"] = pw2.sum()
-                calcinfo["3-BODY DISPERSION CORRECTION ENERGY"] = pw3.sum()
-                calcinfo["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = pw2
-                calcinfo["3-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = pw3
-
-            output.extras["qcvars"] = calcinfo
+        output.extras["qcvars"] = calcinfo
 
         return output
