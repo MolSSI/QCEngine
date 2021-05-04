@@ -2,7 +2,6 @@
 
 import collections
 import copy
-from pathlib import Path
 
 from ..exceptions import InputError
 
