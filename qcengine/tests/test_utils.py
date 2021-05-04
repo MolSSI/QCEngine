@@ -65,22 +65,29 @@ def test_tmpdir():
         assert str(tmpdir).split(os.path.sep)[-1].endswith("this")
 
 
-@pytest.mark.parametrize("outfiles_load", [True, False])
-def test_disk_files(outfiles_load):
+@pytest.mark.parametrize("outfiles_track", [[], ["thing*"], ["thing*", "other"]])
+def test_disk_files(outfiles_track):
 
     infiles = {"thing1": "hello", "thing2": "world", "other": "everyone"}
     outfiles = {"thing*": None, "other": None}
     with util.temporary_directory(suffix="this") as tmpdir:
-        with util.disk_files(infiles=infiles, outfiles=outfiles, cwd=tmpdir, outfiles_load=outfiles_load):
+        with util.disk_files(infiles=infiles, outfiles=outfiles, cwd=tmpdir, outfiles_track=outfiles_track):
             pass
 
     assert outfiles.keys() == {"thing*", "other"}
-    if outfiles_load:
-        assert outfiles["thing*"]["thing1"] == "hello"
-        assert outfiles["other"] == "everyone"
-    else:
-        assert isinstance(outfiles["thing*"]["thing1"], pathlib.PurePath)
-        assert isinstance(outfiles["other"], pathlib.PurePath)
+    for ofile, ofile_val in outfiles.items():
+        if isinstance(ofile_val, dict):
+            if ofile in outfiles_track:
+                for fpath in ofile_val.values():
+                    assert isinstance(fpath, pathlib.PurePath)
+            else:
+                for key in ofile_val.keys():
+                    print(key)
+                    assert ofile_val[key] == infiles[key]
+        elif ofile in outfiles_track:
+            assert isinstance(ofile_val, pathlib.PurePath)
+        else:
+            assert ofile_val == infiles[ofile]
 
 
 def test_popen_tee_output(capsys):
