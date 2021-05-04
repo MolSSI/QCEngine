@@ -82,7 +82,6 @@ def test_disk_files(outfiles_track):
                     assert isinstance(fpath, pathlib.PurePath)
             else:
                 for key in ofile_val.keys():
-                    print(key)
                     assert ofile_val[key] == infiles[key]
         elif ofile in outfiles_track:
             assert isinstance(ofile_val, pathlib.PurePath)
