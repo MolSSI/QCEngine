@@ -7,7 +7,7 @@ dependencies:
   - dftd3
   - geometric
   - intel-openmp!=2019.5
-  - pymdi
+  - pymdi<1.2
 
     # Core
   - python
