@@ -813,7 +813,7 @@ dashcoeff = {
 }
 
 
-def _get_d4bj_definitions(definitions: dict) -> None:
+def _get_d4bj_definitions() -> dict:
     """DFTD4 provides access to damping parameters on per functional basis.
     But we want all of them.
 
@@ -822,7 +822,10 @@ def _get_d4bj_definitions(definitions: dict) -> None:
     parameters ourselves again.
     """
 
-    from dftd4.parameters import get_data_file_name, load_data_base
+    try:
+        from dftd4.parameters import get_data_file_name, load_data_base
+    except ModuleNotFoundError:
+        return {}
 
     def get_params(entry: dict, base: dict, defaults: list) -> dict:
         """Retrive the parameters from the data base, make sure the default
@@ -839,15 +842,23 @@ def _get_d4bj_definitions(definitions: dict) -> None:
 
         raise KeyError("No entry for " + method + " in parameter data base")
 
-    _data_base = load_data_base(get_data_file_name())
+    try:
+        _data_base = load_data_base(get_data_file_name())
+    except FileNotFoundError:
+        return {}
 
-    _defaults = _data_base["default"]["d4"]
-    _base = _data_base["default"]["parameter"]["d4"]
+    try:
+        _defaults = _data_base["default"]["d4"]
+        _base = _data_base["default"]["parameter"]["d4"]
+        _parameters = _data_base["parameter"]
+    except KeyError:
+        return {}
 
-    for method in _data_base["parameter"]:
-        _entry = _data_base["parameter"][method]["d4"]
+    definitions = {}
 
+    for method in _parameters:
         try:
+            _entry = _parameters[method]["d4"]
             params = get_params(_entry, _base, _defaults)
 
             citation = piece.pop("doi", None)
@@ -858,11 +869,10 @@ def _get_d4bj_definitions(definitions: dict) -> None:
         except KeyError:
             continue
 
+    return definitions
 
-try:
-    _get_d4bj_definitions(dashcoeff["d4bj"]["definitions"])
-except:
-    pass
+
+dashcoeff["d4bj"]["definitions"].update(_get_d4bj_definitions())
 
 
 def get_dispersion_aliases():
