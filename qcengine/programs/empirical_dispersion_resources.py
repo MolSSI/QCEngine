@@ -860,7 +860,7 @@ def _get_d4bj_definitions() -> dict:
             _entry = _parameters[method]["d4"]
             params = get_params(_entry, _base, _defaults)
 
-            citation = piece.pop("doi", None)
+            citation = params.pop("doi", None)
             definitions[method] = dict(
                 params=params,
                 citation=citation,
