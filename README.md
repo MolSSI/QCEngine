@@ -1,6 +1,6 @@
 QCEngine
 ========
-[![Travis build](https://img.shields.io/travis/MolSSI/QCEngine/master.svg?logo=linux&logoColor=white)](https://travis-ci.org/MolSSI/QCEngine)
+[![CI](https://github.com/MolSSI/QCEngine/actions/workflows/CI.yml/badge.svg)](https://github.com/MolSSI/QCEngine/actions/workflows/CI.yml)
 [![codecov](https://img.shields.io/codecov/c/github/MolSSI/QCEngine.svg?logo=Codecov&logoColor=white)](https://codecov.io/gh/MolSSI/QCEngine)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MolSSI/QCEngine.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MolSSI/QCEngine/context:python)
 [![Documentation Status](https://readthedocs.org/projects/qcengine/badge/?version=latest)](https://qcengine.readthedocs.io/en/latest/?badge=latest)
