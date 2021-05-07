@@ -18,8 +18,8 @@ try:
         MDI_INT,
         MDI_MAJOR_VERSION,
         MDI_Accept_Communicator,
-        MDI_Get_Intra_Code_MPI_Comm,
         MDI_Init,
+        MDI_MPI_get_world_comm,
         MDI_Recv,
         MDI_Recv_Command,
         MDI_Register_Command,
@@ -80,10 +80,7 @@ class MDIServer:
         which_import("mdi", raise_error=True, raise_msg="Please install via 'conda install pymdi -c conda-forge'")
 
         # Initialize MDI
-        mpi_world = None
-        if use_mpi4py:
-            mpi_world = MPI.COMM_WORLD
-        MDI_Init(mdi_options, mpi_world)
+        MDI_Init(mdi_options)
 
         # Input variables
         self.molecule = molecule
@@ -113,7 +110,7 @@ class MDIServer:
 
         # Get correct intra-code MPI communicator
         if use_mpi4py:
-            self.mpi_world = MDI_Get_Intra_Code_MPI_Comm()
+            self.mpi_world = MDI_MPI_get_world_comm()
             self.world_rank = self.mpi_world.Get_rank()
 
             # QCEngine does not currently support multiple MPI ranks
