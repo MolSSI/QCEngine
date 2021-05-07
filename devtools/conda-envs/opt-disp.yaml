@@ -14,7 +14,7 @@ dependencies:
   - gcp
   - geometric
   - optking
-  - pymdi<1.2
+  - pymdi
 
     # Core
   - python
