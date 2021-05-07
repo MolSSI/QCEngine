@@ -30,6 +30,7 @@ Enhancements
 Bug Fixes
 +++++++++
 - (:pr:`288`) Avert running model.basis = BasisSet schema even though they validate. @loriab
+- (:pr:`297`) Update MDI interface for v1.2. @loriab
 
 
 v0.18.0 / 2021-02-16
