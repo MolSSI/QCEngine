@@ -64,6 +64,15 @@ def is_program_new_enough(program, version_feature_introduced):
     return parse_version(candidate_version) >= parse_version(version_feature_introduced)
 
 
+def is_mdi_new_enough(version_feature_introduced):
+    if which_import("mdi", return_bool=True):
+        import mdi
+        candidate_version = ".".join([str(mdi.MDI_MAJOR_VERSION), str(mdi.MDI_MINOR_VERSION), str(mdi.MDI_PATCH_VERSION)])
+        return parse_version(candidate_version) >= parse_version(version_feature_introduced)
+    else:
+        return False
+
+
 @pytest.fixture(scope="function")
 def failure_engine():
     unique_name = "testing_random_name"
@@ -150,7 +159,7 @@ _programs = {
     "gcp": which("gcp", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
     "berny": which_import("berny", return_bool=True),
-    "mdi": which_import("mdi", return_bool=True),
+    "mdi": is_mdi_new_enough("1.2"),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
     "mp2d": which("mp2d", return_bool=True),
