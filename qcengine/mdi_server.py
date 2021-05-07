@@ -80,9 +80,6 @@ class MDIServer:
         which_import("mdi", raise_error=True, raise_msg="Please install via 'conda install pymdi -c conda-forge'")
 
         # Initialize MDI
-        mpi_world = None
-        if use_mpi4py:
-            mpi_world = MPI.COMM_WORLD
         MDI_Init(mdi_options)
 
         # Input variables
