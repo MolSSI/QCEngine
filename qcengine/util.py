@@ -377,7 +377,7 @@ def execute(
     infiles: Optional[Dict[str, str]] = None,
     outfiles: Optional[List[str]] = None,
     *,
-    outfiles_track: Optional[List[str]] = [],
+    outfiles_track: Optional[List[str]] = None,
     as_binary: Optional[List[str]] = None,
     scratch_name: Optional[str] = None,
     scratch_directory: Optional[str] = None,
@@ -569,7 +569,7 @@ def disk_files(
     *,
     cwd: Optional[str] = None,
     as_binary: Optional[List[str]] = None,
-    outfiles_track: Optional[List[str]] = [],
+    outfiles_track: Optional[List[str]] = None,
 ) -> Dict[str, Union[str, bytes, Path]]:
     """Write and collect files.
 
@@ -602,6 +602,8 @@ def disk_files(
     if as_binary is None:
         as_binary = []
     assert set(as_binary) <= (set(infiles) | set(outfiles))
+
+    outfiles_track = outfiles_track or []
 
     try:
         for fl, content in infiles.items():
