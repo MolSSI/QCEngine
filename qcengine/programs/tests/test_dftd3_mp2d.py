@@ -75,17 +75,17 @@ ref["eneyne"]["MP2-DMP2"] = dict(
 ref["eneyne"]["SAPT0-D3M(BJ)"] = dict(zip(dmm, [-0.06896506, -0.03995152, -0.02689133, -0.03995152, -0.02689133]))
 ref["eneyne"]["SAPT0-D3M"] = dict(zip(dmm, [-0.04486853, -0.02659896, -0.01614236, -0.02659896, -0.01614236]))
 ref["eneyne"]["GCP"] = dict(zip(dmm, [0.0159608596, -0.0018710542, 0.0012920388, 0.0049560054, 0.0103950441]))
-ref["eneyne"]["B3LYP-D4"] = dict(zip(dmm, [-0.00625445, -0.00306407, -0.00176150, -0.00306407, -0.00176150]))
-ref["eneyne"]["PBE-D4"] = dict(zip(dmm, [-0.00399176, -0.00190682, -0.00108739, -0.00190682, -0.00108739]))
-ref["eneyne"]["B3LYP-D4-2BODY"] = dict(zip(dmm, [-0.00625366, -0.00306413, -0.00176146, -0.00306413, -0.00176146]))
+ref["eneyne"]["B3LYP-D4(BJ,EEQ)ATM"] = dict(zip(dmm, [-0.00625445, -0.00306407, -0.00176150, -0.00306407, -0.00176150]))
+ref["eneyne"]["PBE-D4(BJ,EEQ)ATM"] = dict(zip(dmm, [-0.00399176, -0.00190682, -0.00108739, -0.00190682, -0.00108739]))
+ref["eneyne"]["B3LYP-D4(BJ)-2BODY"] = dict(zip(dmm, [-0.00625366, -0.00306413, -0.00176146, -0.00306413, -0.00176146]))
 
 ref["ne"] = {}
 ref["ne"]["B3LYP-D3(BJ)"] = {"atom": 0.0}
 ref["ne"]["MP2-DMP2"] = {"atom": 0.0}
 ref["ne"]["ATM"] = {"atom": 0.0}
 ref["ne"]["GCP"] = {"atom": 0.0}
-ref["ne"]["B3LYP-D4"] = {"atom": 0.0}
-ref["ne"]["PBE-D4"] = {"atom": 0.0}
+ref["ne"]["B3LYP-D4(BJ,EEQ)ATM"] = {"atom": 0.0}
+ref["ne"]["PBE-D4(BJ,EEQ)ATM"] = {"atom": 0.0}
 
 gref = {}
 gref["eneyne"] = {}
@@ -830,7 +830,7 @@ gref["eneyne"]["GCP"] = dict(
     )
 )
 
-gref["eneyne"]["B3LYP-D4"] = dict(
+gref["eneyne"]["B3LYP-D4(BJ,EEQ)ATM"] = dict(
     zip(
         dmm,
         [
@@ -898,7 +898,7 @@ gref["eneyne"]["B3LYP-D4"] = dict(
     )
 )
 
-gref["eneyne"]["PBE-D4"] = dict(
+gref["eneyne"]["PBE-D4(BJ,EEQ)ATM"] = dict(
     zip(
         dmm,
         [
@@ -966,7 +966,7 @@ gref["eneyne"]["PBE-D4"] = dict(
     )
 )
 
-gref["eneyne"]["B3LYP-D4-2BODY"] = dict(
+gref["eneyne"]["B3LYP-D4(BJ)-2BODY"] = dict(
     zip(
         dmm,
         [
@@ -1039,8 +1039,8 @@ gref["ne"]["B3LYP-D3(BJ)"] = {"atom": np.zeros((1, 3))}
 gref["ne"]["MP2-DMP2"] = {"atom": np.zeros((1, 3))}
 gref["ne"]["ATM"] = {"atom": np.zeros((1, 3))}
 gref["ne"]["GCP"] = {"atom": np.zeros((1, 3))}
-gref["ne"]["B3LYP-D4"] = {"atom": np.zeros((1, 3))}
-gref["ne"]["PBE-D4)"] = {"atom": np.zeros((1, 3))}
+gref["ne"]["B3LYP-D4(BJ,EEQ)ATM"] = {"atom": np.zeros((1, 3))}
+gref["ne"]["PBE-D4(BJ,EEQ)ATM"] = {"atom": np.zeros((1, 3))}
 
 
 pref = {}
@@ -1180,7 +1180,7 @@ pref["eneyne"]["SAPT0-D3M"] = dict(
         ],
     )
 )
-pref["eneyne"]["PBE-D4"] = dict(
+pref["eneyne"]["PBE-D4(BJ,EEQ)ATM"] = dict(
     zip(
         dmm,
         [
@@ -1669,9 +1669,9 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
 
 _d3_b3lyp = {"s6": 1.0, "s8": 1.703, "sr6": 1.261, "alpha6": 14.0, "sr8": 1.000}
 _d3_pbe = {"s6": 1.0, "s8": 0.722, "sr6": 1.217, "alpha6": 14.0, "sr8": 1.000}
-_d4_b3lyp = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 1.0}
-_d4_pbe = {"s8": 0.95948085, "a1": 0.38574991, "a2": 4.80688534, "s9": 1.0}
-_d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0.0}
+_d4_b3lyp = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 1.0, "s6": 1.0, "alp": 16.0}
+_d4_pbe = {"s8": 0.95948085, "a1": 0.38574991, "a2": 4.80688534, "s9": 1.0, "s6": 1.0, "alp": 16.0}
+_d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0.0, "s6": 1.0, "alp": 16.0}
 
 
 @pytest.mark.parametrize(
@@ -1698,21 +1698,21 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
         pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "d3-SAPT0-D3M(BJ)"}, "keywords": {}}, "lbl": "SAPT0-D3M(BJ)"}, marks=using("dftd3")),
         pytest.param({ "parent": "eneyne", "subject": "mA", "qcsk": { "model": { "method": "d3-SAPT0-D3M"}, "keywords": {}}, "lbl": "SAPT0-D3M"}, marks=using("dftd3")),
 
-        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4"}, marks=using("dftd4")),
-        pytest.param({ "parent": "ne", "subject": "atom", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4"}, marks=using("dftd4")),
-        pytest.param({ "parent": "eneyne", "subject": "mA", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4"}, marks=using("dftd4")),
-        pytest.param({ "parent": "eneyne", "subject": "gAmB", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4"}, marks=using("dftd4")),
-        pytest.param({ "parent": "eneyne", "subject": "mB", "qcsk": { "model": { "method": "d4-PBE-D4"}, "keywords": {}}, "lbl": "PBE-D4"}, marks=using("dftd4")),
-        pytest.param({ "parent": "eneyne", "subject": "mAgB", "qcsk": { "model": { "method": "d4-PBE-D4"}, "keywords": {}}, "lbl": "PBE-D4"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
+        pytest.param({ "parent": "ne", "subject": "atom", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "mA", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "gAmB", "qcsk": { "model": { "method": "d4-b3lyp-d4"}, "keywords": {}}, "lbl": "B3LYP-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "mB", "qcsk": { "model": { "method": "d4-PBE-D4"}, "keywords": {}}, "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
+        pytest.param({ "parent": "eneyne", "subject": "mAgB", "qcsk": { "model": { "method": "d4-PBE-D4"}, "keywords": {}}, "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
 
         pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # params only
         pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "b3lyp-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # method reinforcing params
         pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # method contradicting params (D3: params win)
 
-        pytest.param({ "parent": "eneyne", "subject": "mAgB", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp_2body}}, "lbl": "B3LYP-D4-2BODY"}, marks=using("dftd4")),  # params only
-        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4"}, marks=using("dftd4")),  # params only
-        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "b3lyp-d4"}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4"}, marks=using("dftd4")),  # method reinforcing params
-        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": { "model": {"method": "pbe-d4"}, "keywords": {"pair_resolved": True, "level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "PBE-D4"}, marks=using("dftd4")),  # method contradicting params (D4: method wins)
+        pytest.param({ "parent": "eneyne", "subject": "mAgB", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp_2body}}, "lbl": "B3LYP-D4(BJ)-2BODY"}, marks=using("dftd4")),  # params only
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),  # params only
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "b3lyp-d4"}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),  # method reinforcing params
+        pytest.param({ "parent": "eneyne", "subject": "dimer", "qcsk": { "model": {"method": "pbe-d4"}, "keywords": {"pair_resolved": True, "level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),  # method contradicting params (D4: method wins)
     ],
     # fmt: on
 )
@@ -1726,7 +1726,7 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    program = "dftd4" if ("D4" in inp["lbl"]) else "dftd3"
+    program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
     atin = AtomicInput(
         molecule=mol,
@@ -1776,8 +1776,8 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
         pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "PBE-D3"}, marks=using("dftd3")),  # wrong ref lbl
         pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "PBE-D3"}, marks=using("dftd3")),  # method contradicting params (D3: params win -> fail)
 
-        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "PBE-D4"}, marks=using("dftd4")),  # wrong ref lbl
-        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d4"}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4"}, marks=using("dftd4")),  # method contradicting params (D4: method wins -> fail)
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),  # wrong ref lbl
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d4"}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),  # method contradicting params (D4: method wins -> fail)
     ],
     # fmt: on
 )
@@ -1791,7 +1791,7 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    program = "dftd4" if inp["lbl"].endswith("D4") else "dftd3"
+    program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
     atin = AtomicInput(
         molecule=mol,
@@ -1881,7 +1881,7 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
     "inp",
     [
         pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "SAPT0-D3M"}, marks=using("dftd3")),
-        pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "PBE-D4"}, marks=using("dftd4")),
+        pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
     ],
 )
 def test_sapt_pairwise(inp, subjects, request):
@@ -1894,7 +1894,7 @@ def test_sapt_pairwise(inp, subjects, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    program = "dftd4" if ("D4" in inp["lbl"]) else "dftd3"
+    program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
     atin = AtomicInput(
         molecule=mol,

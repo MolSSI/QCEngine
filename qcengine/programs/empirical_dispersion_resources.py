@@ -795,20 +795,20 @@ dashcoeff = {
             "mp2": {"params": {"s8": 1.187, "a1": 0.944, "a2": 0.480, "rcut": 0.72, "w": 0.20}}  # Rezac:2018:4711
         },
     },
-    "d4bj": {
-        "formal": "D4(BJ)",
-        "alias": ["d4"],
+    "d4bjeeqatm": {
+        "formal": "D4(BJ,EEQ)ATM",
+        "alias": ["d4", "d4bj", "d4(bj)"],
         "description": "    Grimme's -D4 (BJ-damping) Dispersion Correction with ATM",
         "citation": "    Caldeweyher, E.; Ehlert, S.; Hansen, A.; Neugebauer, H.; Spicher, S.; Bannwarth, C.; Grimmme, S., J. Chem. Phys. 150, 154122 (2019)\n",
         "bibtex": "Caldeweyher:2019:154122",
         "doi": "10.1063/1.5090222150",
         "default": collections.OrderedDict(
-            [("s8", 1.0), ("a1", 1.0), ("a2", 1.0), ("s9", 1.0), ("s6", 1.0), ("alp", 16.0)]
+            [("a1", 1.0), ("a2", 1.0), ("alp", 16.0), ("s6", 1.0), ("s8", 1.0), ("s9", 1.0)]
         ),
         "definitions": {
             # D4 parameters loaded below from authoritative source below. Keep a couple for reference
-            # "b3lyp": {"params": {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 1.0}},
-            # "pbe": {"params": {"s8": 0.95948085, "a1": 0.38574991, "a2": 4.80688534, "s9": 1.0}},
+            # "b3lyp": {"params": {"a1": 0.40868035, "a2": 4.53807137, "alp": 16.0, "s6": 1.0, "s8": 2.02929367, "s9": 1.0}},
+            # "pbe":   {"params": {"a1": 0.38574991, "a2": 4.80688534, "alp": 16.0, "s6": 1.0, "s8": 0.95948085, "s9": 1.0}},
         },
     },
 }
@@ -838,6 +838,7 @@ def _get_d4bj_definitions() -> dict:
                 params = base[default].copy()
                 params.update(**entry[default])
                 params.pop("mbd", None)
+                params.pop("damping", None)
                 return params
             except KeyError:
                 continue
@@ -874,7 +875,7 @@ def _get_d4bj_definitions() -> dict:
     return definitions
 
 
-dashcoeff["d4bj"]["definitions"].update(_get_d4bj_definitions())
+dashcoeff["d4bjeeqatm"]["definitions"].update(_get_d4bj_definitions())
 
 
 def get_dispersion_aliases():
