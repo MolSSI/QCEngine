@@ -930,7 +930,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     dict
         Metadata defining dispersion calculation.
 
-        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'chg', 'das2009', 'das2010', 'nl', "d4bj"}
+        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'chg', 'das2009', 'das2010', 'nl', "d4bjeeqatm"}
             Name (de-aliased, de-formalized, lowercase) of dispersion
             correction -- atom data, dispersion model, damping functional
             form -- to be applied. Resolved from `name_hint` and/or
