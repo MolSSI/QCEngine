@@ -131,14 +131,6 @@ class DFTD3Harness(ProgramHarness):
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
         # jobrec['molecule']['real'] = molrec['real']
 
-        # env = {
-        #    'HOME': os.environ.get('HOME'),
-        #    'PATH': os.environ.get('PATH'),
-        #    #'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
-        #    #        os.pathsep + os.environ.get('PATH'),
-        #    #'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
-        # }
-
         command = ["dftd3", "dftd3_geometry.xyz"]
         if input_model.driver == "gradient":
             command.append("-grad")
@@ -146,7 +138,7 @@ class DFTD3Harness(ProgramHarness):
             command.append("-abc")
 
         # Append `-anal` for pairwise atomic analysis
-        if input_model.keywords.get("save_pairwise_dispersion") is True:
+        if input_model.keywords.get("pair_resolved", False):
             command.append("-anal")
 
         infiles = {
@@ -272,13 +264,9 @@ class DFTD3Harness(ProgramHarness):
 
         # LOGtext += qcel.datum.print_variables({info.label: info for info in calcinfo})
         calcinfo = {info.label: info.data for info in calcinfo}
-        # calcinfo = qcel.util.unnp(calcinfo, flat=True)
 
-        # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
-        calcinfo = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(calcinfo, flat=True).items()
-        }
+        calcinfo = {k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in calcinfo.items()}
 
         # jobrec['properties'] = {"return_energy": ene}
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
@@ -291,7 +279,9 @@ class DFTD3Harness(ProgramHarness):
 
         output_data = {
             "extras": input_model.extras,
-            "properties": {},
+            "properties": {
+                "return_energy": calcinfo[f"CURRENT ENERGY"],
+            },
             "provenance": Provenance(
                 creator="DFTD3", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
@@ -300,8 +290,8 @@ class DFTD3Harness(ProgramHarness):
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
-        if input_model.keywords.get("save_pairwise_dispersion") is True:
-            output_data["extras"]["qcvars"]["PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
+        if input_model.keywords.get("pair_resolved", False):
+            output_data["extras"]["qcvars"]["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
         output_data["success"] = True
 
         return AtomicResult(**{**input_model.dict(), **output_data})

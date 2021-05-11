@@ -10,6 +10,7 @@ dependencies:
 
     # Mixed Tests
   - dftd3 3.2.1
+  - dftd4-python
   - mp2d >=1.1
   - gcp
   - geometric

@@ -795,7 +795,90 @@ dashcoeff = {
             "mp2": {"params": {"s8": 1.187, "a1": 0.944, "a2": 0.480, "rcut": 0.72, "w": 0.20}}  # Rezac:2018:4711
         },
     },
+    "d4bjeeqatm": {
+        "formal": "D4(BJ,EEQ)ATM",
+        "alias": ["d4", "d4bj", "d4(bj)"],
+        "description": "    Grimme's -D4 (BJ-damping) Dispersion Correction with ATM",
+        "citation": "    Caldeweyher, E.; Ehlert, S.; Hansen, A.; Neugebauer, H.; Spicher, S.; Bannwarth, C.; Grimmme, S., J. Chem. Phys. 150, 154122 (2019)\n",
+        "bibtex": "Caldeweyher:2019:154122",
+        "doi": "10.1063/1.5090222150",
+        "default": collections.OrderedDict(
+            [("a1", 1.0), ("a2", 1.0), ("alp", 16.0), ("s6", 1.0), ("s8", 1.0), ("s9", 1.0)]
+        ),
+        "definitions": {
+            # D4 parameters loaded below from authoritative source below. Keep a couple for reference
+            # "b3lyp": {"params": {"a1": 0.40868035, "a2": 4.53807137, "alp": 16.0, "s6": 1.0, "s8": 2.02929367, "s9": 1.0}},
+            # "pbe":   {"params": {"a1": 0.38574991, "a2": 4.80688534, "alp": 16.0, "s6": 1.0, "s8": 0.95948085, "s9": 1.0}},
+        },
+    },
 }
+
+
+def _get_d4bj_definitions() -> dict:
+    """DFTD4 provides access to damping parameters on per functional basis.
+    But we want all of them.
+
+    We let DFTD4 take care of finding and loading the parameter file,
+    but to get all parameters, we implement the logic to read those
+    parameters ourselves again.
+    """
+
+    try:
+        from dftd4.parameters import get_data_file_name, load_data_base
+    except ModuleNotFoundError:
+        return {}
+
+    def get_params(entry: dict, base: dict, defaults: list) -> dict:
+        """Retrive the parameters from the data base, make sure the default
+        values are applied correctly in the process. In case we have multiple
+        defaults search for the first of the list defined for this method."""
+
+        for default in defaults:
+            try:
+                params = base[default].copy()
+                params.update(**entry[default])
+                params.pop("mbd", None)
+                params.pop("damping", None)
+                return params
+            except KeyError:
+                continue
+
+        raise KeyError("No entry for " + method + " in parameter data base")
+
+    try:
+        _data_base = load_data_base(get_data_file_name())
+    except FileNotFoundError:
+        return {}
+
+    try:
+        _defaults = _data_base["default"]["d4"]
+        _base = _data_base["default"]["parameter"]["d4"]
+        _parameters = _data_base["parameter"]
+    except KeyError:
+        return {}
+
+    definitions = {}
+
+    for method in _parameters:
+        try:
+            _entry = _parameters[method]["d4"]
+            params = get_params(_entry, _base, _defaults)
+
+            citation = params.pop("doi", None)
+            # Make Psi4's citation style checker happy
+            if citation is not None:
+                citation = "    " + citation + "\n"
+            definitions[method] = dict(
+                params=params,
+                citation=citation,
+            )
+        except KeyError:
+            continue
+
+    return definitions
+
+
+dashcoeff["d4bjeeqatm"]["definitions"].update(_get_d4bj_definitions())
 
 
 def get_dispersion_aliases():
@@ -850,7 +933,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     dict
         Metadata defining dispersion calculation.
 
-        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'chg', 'das2009', 'das2010', 'nl'}
+        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'chg', 'das2009', 'das2010', 'nl', "d4bjeeqatm"}
             Name (de-aliased, de-formalized, lowercase) of dispersion
             correction -- atom data, dispersion model, damping functional
             form -- to be applied. Resolved from `name_hint` and/or

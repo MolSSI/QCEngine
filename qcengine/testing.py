@@ -156,6 +156,7 @@ _programs = {
     "cfour": which("xcfour", return_bool=True),
     "dftd3": which("dftd3", return_bool=True),
     "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),
+    "dftd4": which_import("dftd4", return_bool=True),
     "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
     "mctc-gcp": is_program_new_enough("mctc-gcp", "2.3.0"),
