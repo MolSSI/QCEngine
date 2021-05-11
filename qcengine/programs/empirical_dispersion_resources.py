@@ -865,9 +865,12 @@ def _get_d4bj_definitions() -> dict:
             params = get_params(_entry, _base, _defaults)
 
             citation = params.pop("doi", None)
+            # Make Psi4's citation style checker happy
+            if citation is not None:
+                citation = "    " + citation + "\n"
             definitions[method] = dict(
                 params=params,
-                citation="    " + citation + "\n",
+                citation=citation,
             )
         except KeyError:
             continue
