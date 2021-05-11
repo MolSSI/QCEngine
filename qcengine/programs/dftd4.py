@@ -129,7 +129,7 @@ class DFTD4Harness(ProgramHarness):
         if output.keywords.get("pair_resolved", False):
             pw2 = output.extras["dftd4"]["additive pairwise energy"]
             pw3 = output.extras["dftd4"]["non-additive pairwise energy"]
-            assert abs(pw2.sum() + pw3.sum() - energy) < 1.0e-8, f"{pw2.sum()} + {pw3.sum()} != {ene}"
+            assert abs(pw2.sum() + pw3.sum() - energy) < 1.0e-8, f"{pw2.sum()} + {pw3.sum()} != {energy}"
             calcinfo["2-BODY DISPERSION CORRECTION ENERGY"] = pw2.sum()
             calcinfo["3-BODY DISPERSION CORRECTION ENERGY"] = pw3.sum()
             calcinfo["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = pw2
