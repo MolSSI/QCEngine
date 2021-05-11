@@ -867,7 +867,7 @@ def _get_d4bj_definitions() -> dict:
             citation = params.pop("doi", None)
             definitions[method] = dict(
                 params=params,
-                citation=citation,
+                citation="    " + citation + "\n",
             )
         except KeyError:
             continue
