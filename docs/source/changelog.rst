@@ -19,9 +19,9 @@ v0.19.0 / 2021-05-DD
 
 New Features
 ++++++++++++
+- (:pr:`290`) MCTC-GCP - harness for new implementation of gCP, `mctc-gcp`, whose cmdline interface is drop-in replacement. @loriab
+- (:pr:`291`) DFTD4 - new harness for standalone DFT-D4 executable. @awvwgk
 .. - (:pr:`289`) TeraChem - new harness for TeraChem Protocol Buffer Server mode. @coltonbh
-.. - (:pr:`290`) MCTC-GCP - harness for new implementation of gCP, `mctc-gcp`, whose cmdline interface is drop-in replacement. @loriab
-.. - (:pr:`291`) DFTD4 - new harness for standalone DFT-D4 executable. @awvwgk
 
 Enhancements
 ++++++++++++
@@ -30,7 +30,8 @@ Enhancements
 Bug Fixes
 +++++++++
 - (:pr:`288`) Avert running model.basis = BasisSet schema even though they validate. @loriab
-- (:pr:`297`) Update MDI interface for v1.2. @loriab
+- (:pr:`294`) NWChem - fixed bug where was retrieving only the first step in a geometry relaxation with line-search off. @WardLT
+- (:pr:`297`) MDI - Update interface for v1.2. @loriab
 
 
 v0.18.0 / 2021-02-16
