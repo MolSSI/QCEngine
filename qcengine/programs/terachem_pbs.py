@@ -84,12 +84,12 @@ class TeraChemPBSHarness(ProgramHarness):
         try:
             import tcpb
         except ModuleNotFoundError:
-            return "???"
+            return None
         else:
             try:
                 return tcpb.__version__
             except AttributeError:
-                return "???"
+                return None
 
     def compute(self, input_model: "AtomicInput", config: "TaskConfig" = None) -> "AtomicResult":
         """
