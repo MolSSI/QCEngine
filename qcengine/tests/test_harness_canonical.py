@@ -125,7 +125,7 @@ def test_compute_energy_qcsk_basis(program, model, keywords):
         ("psi4", {"method": "bad"}),
         ("qchem", {"method": "bad"}),
         ("rdkit", {"method": "bad"}),
-        ("gcp", {"method": "bad"}),
+        ("terachem_pbs", {"method": "bad"}),
         ("torchani", {"method": "bad"}),
         ("turbomole", {"method": "bad"}),
         ("adcc", {"method": "bad"}),
