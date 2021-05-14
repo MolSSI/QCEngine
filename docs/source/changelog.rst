@@ -21,7 +21,7 @@ New Features
 ++++++++++++
 - (:pr:`290`) MCTC-GCP - harness for new implementation of gCP, `mctc-gcp`, whose cmdline interface is drop-in replacement. @loriab
 - (:pr:`291`) DFTD4 - new harness for standalone DFT-D4 executable. @awvwgk
-.. - (:pr:`289`) TeraChem - new harness for TeraChem Protocol Buffer Server mode. @coltonbh
+- (:pr:`289`) TeraChem - new harness for TeraChem Protocol Buffer Server mode. @coltonbh
 
 Enhancements
 ++++++++++++
