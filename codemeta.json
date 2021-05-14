@@ -314,6 +314,14 @@
             "affiliation": "Institute of Biophysics of the CAS, v.v.i., Czech Republic",
             "@id": "https://orcid.org/0000-0002-0560-1513",
             "identifier": "https://github.com/hokru"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Colton",
+            "familyName": "Hicks",
+            "affiliation": "Stanford University",
+            "@id": "https://orcid.org/0000-0003-2834-318X",
+            "identifier": "https://github.com/coltonbh"
         }
     ],
     "developmentStatus": "active",
@@ -326,6 +334,6 @@
     ],
     "maintainer": "https://orcid.org/0000-0002-7961-7016",
     "programmingLanguage": [
-        "Python",
+        "Python"
     ]
 }
