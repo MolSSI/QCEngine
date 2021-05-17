@@ -323,6 +323,8 @@ def harvest_outfile_pass(outtext):
                 psivar[f"{cc_corr} CORRECTION ENERGY"] = mobj.group(1)
                 psivar[f"{cc_plain} CORRELATION ENERGY"] = mobj.group(2)
                 psivar[f"{cc_plain} TOTAL ENERGY"] = mobj.group(3)
+                module = "tce"
+
             # TCE dipole with () or []
             mobj2 = re.search(
                 # fmt: off

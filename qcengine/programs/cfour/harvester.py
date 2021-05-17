@@ -363,7 +363,7 @@ def harvest_outfile_pass(outtext):
         r'(?:.*?)' +
         r'^\s+' + r'(?:\d+)' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+DIIS\s*' +
         r'^\s*(?:-+)\s*' +
-        r'^\s*(?:A miracle (?:has come|come) to pass. The CC iterations have converged.)\s*$',
+        r'^\s*(?:A miracle (?P<ccprog>has come|come) to pass. The CC iterations have converged.)\s*$',
         # fmt: on
         outtext,
         re.MULTILINE | re.DOTALL,
@@ -372,6 +372,7 @@ def harvest_outfile_pass(outtext):
         print("matched cc with full %s iterating %s" % (mobj.group("fullCC"), mobj.group("iterCC")))
         psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(3)
         psivar["%s TOTAL ENERGY" % (mobj.group("iterCC"))] = mobj.group(4)
+        module = {"has come": "vcc", "come": "ecc"}[mobj.group("ccprog")]
 
         mobj3 = re.search(r"SCF reference function:  RHF", outtext)
         if mobj3:
@@ -397,6 +398,7 @@ def harvest_outfile_pass(outtext):
         psivar["{} CORRELATION ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
         psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
         psivar["{} TOTAL ENERGY".format(mobj.group("iterCC"))] = mobj.group("tot")
+        module = "ncc"
 
     # Process CC(T)
     mobj = re.search(
@@ -455,6 +457,7 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = mobj.group(3)
         psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(4)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(4)
+        module = "ecc"
 
     mobj = re.search(
         # fmt: off
@@ -525,6 +528,7 @@ def harvest_outfile_pass(outtext):
         psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
         psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        module = "ncc"
 
     # Process DBOC
     mobj = re.search(
