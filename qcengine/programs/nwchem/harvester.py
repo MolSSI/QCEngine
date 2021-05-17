@@ -36,7 +36,7 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
     pass_coord = []
     pass_grad = []
     for outpass in re.split(r" Line search:", outtext, re.MULTILINE):
-        psivar, nwcoord, nwgrad, version, error = harvest_outfile_pass(outpass)
+        psivar, nwcoord, nwgrad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
         pass_grad.append(nwgrad)
@@ -44,7 +44,7 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
     # Determine which segment contained the last geometry
     retindx = -1 if pass_coord[-1] else -2
 
-    return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
+    return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, module, error
 
 
 def harvest_outfile_pass(outtext):
@@ -56,6 +56,7 @@ def harvest_outfile_pass(outtext):
     psivar_coord = None
     psivar_grad = None
     version = ""
+    module = None
     error = ""  # TODO (wardlt): The error string is never used.
 
     NUMBER = r"(?x:" + regex.NUMBER + ")"
@@ -272,6 +273,8 @@ def harvest_outfile_pass(outtext):
                     if not mobj3:
                         psivar[f"{mbpt_plain} DOUBLES ENERGY"] = tce_cumm_corl
                 psivar[f"{mbpt_plain} TOTAL ENERGY"] = mobj.group(2)
+                module = "tce"
+
             # TCE dipole- MBPT(n)
             mobj2 = re.search(
                 # fmt: off
@@ -321,6 +324,8 @@ def harvest_outfile_pass(outtext):
                 psivar[f"{cc_corr} CORRECTION ENERGY"] = mobj.group(1)
                 psivar[f"{cc_plain} CORRELATION ENERGY"] = mobj.group(2)
                 psivar[f"{cc_plain} TOTAL ENERGY"] = mobj.group(3)
+                module = "tce"
+
             # TCE dipole with () or []
             mobj2 = re.search(
                 # fmt: off
@@ -376,6 +381,8 @@ def harvest_outfile_pass(outtext):
                     psivar[f"{cc_name} DOUBLES ENERGY"] = mobj.group(1)
                 psivar[f"{cc_name} CORRELATION ENERGY"] = mobj.group(1)
                 psivar[f"{cc_name} TOTAL ENERGY"] = mobj.group(2)
+                module = "tce"
+
             # TCE dipole
             mobj2 = re.search(
                 # fmt: off
@@ -414,6 +421,7 @@ def harvest_outfile_pass(outtext):
             print("matched ccsd")
             psivar["CCSD CORRELATION ENERGY"] = mobj.group(2)
             psivar["CCSD TOTAL ENERGY"] = mobj.group(3)
+            module = "cc"
 
         mobj = re.search(
             # fmt: off
@@ -432,6 +440,7 @@ def harvest_outfile_pass(outtext):
             psivar["(T) CORRECTION ENERGY"] = mobj.group(1)
             psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(2)) - psivar["HF TOTAL ENERGY"]
             psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(2)
+            module = "cc"
 
         mobj = re.search(
             # fmt: off
@@ -659,7 +668,7 @@ def harvest_outfile_pass(outtext):
             r"^\s+" + r"Basis functions"       + r"\s+=\s+" + r"(?P<nbf>\d+)" + r"\s*" +
             r"^\s+" + r"Molecular orbitals"    + r"\s+=\s+" + r"(?P<nmo>\d+)" + r"\s*" +
             r"^\s+" + r"Frozen core"           + r"\s+=\s+" + r"(?P<nfc>\d+)" + r"\s*" +
-            r"^\s+" + r"Frozen virtuals"       + f"\s+=\s+" + r"(?P<nfv>\d+)" + r"\s*" +
+            r"^\s+" + r"Frozen virtuals"       + r"\s+=\s+" + r"(?P<nfv>\d+)" + r"\s*" +
             r"^\s+" + r"Active alpha occupied" + r"\s+=\s+" + r"(?P<nao>\d+)" + r"\s*" +
             r"^\s+" + r"Active beta occupied"  + r"\s+=\s+" + r"(?P<nbo>\d+)" + r"\s*" +
             r"^\s+" + r"Active alpha virtual"  + r"\s+=\s+" + r"(?P<nav>\d+)" + r"\s*" +
@@ -1005,7 +1014,7 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT ENERGY"] = psivar["EOM-%s TOTAL ENERGY" % (cc_name)]
         psivar["CURRENT EXCITATION ENERGY"] = psivar["%s EXCITATION ENERGY" % (cc_name)]
 
-    return psivar, psivar_coord, psivar_grad, version, error
+    return psivar, psivar_coord, psivar_grad, version, module, error
 
 
 def harvest_hessian(hess: str) -> np.ndarray:
@@ -1057,7 +1066,7 @@ def harvest(
     """
 
     # Parse the NWChem output
-    out_psivar, out_mol, out_grad, version, error = harvest_output(nwout)
+    out_psivar, out_mol, out_grad, version, module, error = harvest_output(nwout)
 
     # If available, read higher-accuracy gradients
     #  These were output using a Python Task in NWChem to read them out of the database
@@ -1092,4 +1101,4 @@ def harvest(
     if out_hess is not None:
         out_hess = mill.align_hessian(np.array(out_hess))
 
-    return out_psivar, out_hess, out_grad, out_mol, version, error
+    return out_psivar, out_hess, out_grad, out_mol, version, module, error

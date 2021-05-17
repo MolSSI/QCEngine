@@ -55,19 +55,23 @@ def contractual_current(
 
     Parameters
     ----------
-    qc_module : str
+    qc_module
         The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver : {"energy", "gradient", "hessian"}
+    driver
+        {"energy", "gradient", "hessian"}
         The derivative level that should be expected.
-    reference: {"rhf", "uhf", "rohf"}
+    reference
+        {"rhf", "uhf", "rohf"}
         The SCF reference since programs often output differently based on it.
-    method: str
+    method
         The target AtomicInput.model.method since "free" methods may not always be
         output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type: {"conv", "df", "cd"}
+    corl_type
+        {"conv", "df", "cd"}
         The algorithm for the target method since programs often output differently
         based on it.
-    fcae: {"ae", "fc"}
+    fcae
+        {"ae", "fc"}
         The all-electron vs. frozen-orbital aspect.
 
     Returns
@@ -122,19 +126,23 @@ def contractual_mp2(
 
     Parameters
     ----------
-    qc_module : str
+    qc_module
         The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver : {"energy", "gradient", "hessian"}
+    driver
+        {"energy", "gradient", "hessian"}
         The derivative level that should be expected.
-    reference: {"rhf", "uhf", "rohf"}
+    reference
+        {"rhf", "uhf", "rohf"}
         The SCF reference since programs often output differently based on it.
-    method: str
+    method
         The target AtomicInput.model.method since "free" methods may not always be
         output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type: {"conv", "df", "cd"}
+    corl_type
+        {"conv", "df", "cd"}
         The algorithm for the target method since programs often output differently
         based on it.
-    fcae: {"ae", "fc"}
+    fcae
+        {"ae", "fc"}
         The all-electron vs. frozen-orbital aspect.
 
     Returns
@@ -165,7 +173,7 @@ def contractual_mp2(
                     or (qc_module == "gamess" and reference == "rhf" and method == "mp2" and driver == "gradient")
                     or (qc_module == "gamess" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
                     or (qc_module == "nwchem-tce" and method in ["mp2", "mp3"])
-                    or (qc_module == "nwchem" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
+                    or (qc_module == "nwchem-cc" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
                     or (
                         qc_module == "psi4-occ"
                         and reference == "rhf"

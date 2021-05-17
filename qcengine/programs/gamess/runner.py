@@ -154,14 +154,17 @@ class GAMESSHarness(ProgramHarness):
         except Exception as e:
             raise UnknownError(stdout)
 
-        if gamessgrad is not None:
-            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = gamessgrad
-            qcvars["CURRENT GRADIENT"] = gamessgrad
+        try:
+            if gamessgrad is not None:
+                qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = gamessgrad
+                qcvars["CURRENT GRADIENT"] = gamessgrad
 
-        if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
-        else:
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            if input_model.driver.upper() == "PROPERTIES":
+                retres = qcvars[f"CURRENT ENERGY"]
+            else:
+                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        except KeyError:
+            raise UnknownError(stdout)
 
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)

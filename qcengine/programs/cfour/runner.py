@@ -139,7 +139,7 @@ class CFOURHarness(ProgramHarness):
 
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         try:
-            qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+            qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
         except Exception as e:
             raise UnknownError(stdout)
 
@@ -164,11 +164,15 @@ class CFOURHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
+        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").dict()
+        if module is not None:
+            provenance["module"] = module
+
         output_data = {
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
-            "provenance": Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour"),
+            "provenance": provenance,
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,

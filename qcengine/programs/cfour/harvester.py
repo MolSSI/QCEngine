@@ -20,7 +20,7 @@ def harvest_output(outtext):
 
     # for outpass in re.split(r'--invoking executable xjoda', outtext, re.MULTILINE):
     for outpass in re.split(r"JODA beginning optimization cycle", outtext, re.MULTILINE):
-        psivar, c4coord, c4grad, version, error = harvest_outfile_pass(outpass)
+        psivar, c4coord, c4grad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(c4coord)
         pass_grad.append(c4grad)
@@ -42,7 +42,7 @@ def harvest_output(outtext):
     #    for item in pass_grad[retindx]:
     #        print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
 
-    return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
+    return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, module, error
 
 
 def harvest_outfile_pass(outtext):
@@ -54,6 +54,7 @@ def harvest_outfile_pass(outtext):
     psivar_coord = None
     psivar_grad = None
     version = ""
+    module = None
     error = ""
 
     #    TODO: BCC
@@ -359,7 +360,7 @@ def harvest_outfile_pass(outtext):
         r'(?:.*?)' +
         r'^\s+' + r'(?:\d+)' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+DIIS\s*' +
         r'^\s*(?:-+)\s*' +
-        r'^\s*(?:A miracle (?:has come|come) to pass. The CC iterations have converged.)\s*$',
+        r'^\s*(?:A miracle (?P<ccprog>has come|come) to pass. The CC iterations have converged.)\s*$',
         # fmt: on
         outtext,
         re.MULTILINE | re.DOTALL,
@@ -368,6 +369,7 @@ def harvest_outfile_pass(outtext):
         print("matched cc with full %s iterating %s" % (mobj.group("fullCC"), mobj.group("iterCC")))
         psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(3)
         psivar["%s TOTAL ENERGY" % (mobj.group("iterCC"))] = mobj.group(4)
+        module = {"has come": "vcc", "come": "ecc"}[mobj.group("ccprog")]
 
         mobj3 = re.search(r"SCF reference function:  RHF", outtext)
         if mobj3:
@@ -393,6 +395,7 @@ def harvest_outfile_pass(outtext):
         psivar["{} CORRELATION ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
         psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
         psivar["{} TOTAL ENERGY".format(mobj.group("iterCC"))] = mobj.group("tot")
+        module = "ncc"
 
     # Process CC(T)
     mobj = re.search(
@@ -413,6 +416,7 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(2))
         psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(3)
+        module = "vcc"
 
     mobj = re.search(
         # fmt: off
@@ -428,6 +432,7 @@ def harvest_outfile_pass(outtext):
         psivar["CCSD TOTAL ENERGY"] = mobj.group(1)
         psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(2)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(2)
+        module = "vcc"
 
     mobj = re.search(
         # fmt: off
@@ -449,6 +454,7 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = mobj.group(3)
         psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(4)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(4)
+        module = "ecc"
 
     mobj = re.search(
         # fmt: off
@@ -471,6 +477,7 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = mobj.group(3)
         psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(4)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(4)
+        module = "ecc"
 
     mobj = re.search(
         # fmt: off
@@ -502,6 +509,7 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
         psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group("ttot")
+        module = "ncc"
 
     mobj = re.search(
         # fmt: off
@@ -517,6 +525,7 @@ def harvest_outfile_pass(outtext):
         psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
         psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        module = "ncc"
 
     # Process DBOC
     mobj = re.search(
@@ -530,6 +539,7 @@ def harvest_outfile_pass(outtext):
     if mobj:
         print("matched dboc ecc")
         psivar["CCSD DBOC ENERGY"] = mobj.group("dboc")
+        module = "ecc"
 
     # Process SCS-CC
     mobj = re.search(
@@ -758,7 +768,7 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSDT TOTAL ENERGY"]
 
-    return psivar, psivar_coord, psivar_grad, version, error
+    return psivar, psivar_coord, psivar_grad, version, module, error
 
 
 def harvest(p4Mol, c4out, **largs):
@@ -771,7 +781,7 @@ def harvest(p4Mol, c4out, **largs):
 
     """
     # Collect results from output file and subsidiary files
-    outPsivar, outMol, outGrad, version, error = harvest_output(c4out)
+    outPsivar, outMol, outGrad, version, module, error = harvest_output(c4out)
 
     if largs.get("GRD"):
         grdMol, grdGrad = harvest_GRD(largs["GRD"])
@@ -911,7 +921,7 @@ def harvest(p4Mol, c4out, **largs):
     # else:
     #     retCoord = None
 
-    return outPsivar, retHess, retGrad, retMol, version, error
+    return outPsivar, retHess, retGrad, retMol, version, module, error
 
 
 def harvest_GRD(grd):
