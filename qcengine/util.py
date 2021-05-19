@@ -616,34 +616,31 @@ def disk_files(
         yield outfiles
 
     finally:
+        outfiles_track = [
+            fpath.name if "*" in track else track for track in outfiles_track for fpath in lwd.glob(track)
+        ]
         for fl in outfiles.keys():
             filename = lwd / fl
-            if fl not in outfiles_track:
-                omode = "rb" if fl in as_binary else "r"
-                try:
-                    with open(filename, omode) as fp:
+            omode = "rb" if fl in as_binary else "r"
+            try:
+                with open(filename, omode) as fp:
+                    if fl not in outfiles_track:
                         outfiles[fl] = fp.read()
                         LOGGER.info(f"... Reading ({omode}): {filename}")
-                except (OSError, FileNotFoundError):
-                    if "*" in fl:
-                        gfls = {}
-                        for gfl in lwd.glob(fl):
-                            with open(gfl, omode) as fp:
-                                gfls[gfl.name] = fp.read()
-                                LOGGER.info(f"... Reading ({omode}): {gfl}")
-                        if not gfls:
-                            gfls = None
-                        outfiles[fl] = gfls
                     else:
-                        outfiles[fl] = None
-            else:
-                if filename.is_file():
-                    outfiles[fl] = filename
-                elif "*" in fl:
+                        outfiles[fl] = filename
+                        LOGGER.info(f"... Tracking: {filename}")
+            except (OSError, FileNotFoundError):
+                if "*" in fl:
                     gfls = {}
                     for gfl in lwd.glob(fl):
-                        if gfl.is_file():
-                            gfls[gfl.name] = gfl
+                        with open(gfl, omode) as fp:
+                            if gfl.name not in outfiles_track:
+                                gfls[gfl.name] = fp.read()
+                                LOGGER.info(f"... Reading ({omode}): {gfl}")
+                            else:
+                                gfls[gfl.name] = gfl
+                                LOGGER.info(f"... Tracking: {gfl}")
                     if not gfls:
                         gfls = None
                     outfiles[fl] = gfls
