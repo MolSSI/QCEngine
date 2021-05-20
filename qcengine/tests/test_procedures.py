@@ -3,7 +3,7 @@ Tests the DQM compute dispatch module
 """
 
 import pytest
-from qcelemental.models import OptimizationInput
+from qcelemental.models import OptimizationInput, FailedOperation
 
 import qcengine as qcng
 from qcengine.testing import failure_engine, using
@@ -92,6 +92,23 @@ def test_berny_stdout(input_data):
     ret = qcng.compute_procedure(input_data, "berny", raise_error=True)
     assert ret.success is True
     assert "All criteria matched" in ret.stdout
+
+
+@using("psi4")
+@using("berny")
+def test_berny_failed_gradient_computation(input_data):
+
+    input_data["initial_molecule"] = qcng.get_molecule("water")
+    input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
+    input_data["input_specification"]["keywords"] = {"badpsi4key", "badpsi4value"}
+    input_data["keywords"]["program"] = "psi4"
+
+    input_data = OptimizationInput(**input_data)
+
+    ret = qcng.compute_procedure(input_data, "berny", raise_error=False)
+    assert isinstance(ret, FailedOperation)
+    assert ret.success is False
+    assert ret.error.error_type == qcng.exceptions.InputError.error_type
 
 
 @using("geometric")
