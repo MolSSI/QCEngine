@@ -106,7 +106,7 @@ def test_berny_failed_gradient_computation(input_data):
 
     input_data["initial_molecule"] = qcng.get_molecule("water")
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
-    input_data["input_specification"]["keywords"] = {"badpsi4key", "badpsi4value"}
+    input_data["input_specification"]["keywords"] = {"badpsi4key": "badpsi4value"}
     input_data["keywords"]["program"] = "psi4"
 
     input_data = OptimizationInput(**input_data)
