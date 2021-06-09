@@ -8,18 +8,19 @@ import hashlib
 import os
 from typing import TYPE_CHECKING, Dict
 
-from qcelemental.models import AtomicResult, Provenance
+import numpy as np
+from qcelemental.models import AtomicResult, BasisSet, Provenance
 from qcelemental.util import which_import
 
 from ..exceptions import InputError
 from ..util import capture_stdout
 from .model import ProgramHarness
 from .rdkit import RDKitHarness
-import numpy as np
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 class OpenMMHarness(ProgramHarness):
@@ -41,7 +42,7 @@ class OpenMMHarness(ProgramHarness):
 
     # def _get_off_forcefield(self, hashstring, offxml):
     #
-    #     from openforcefield.typing.engines import smirnoff
+    #     from openff.toolkit.typing.engines import smirnoff
     #
     #     key = hashlib.sha256(hashstring.encode()).hexdigest()
     #
@@ -66,9 +67,7 @@ class OpenMMHarness(ProgramHarness):
         return self._CACHE[key]["value"]
 
     def _cache_it(self, key, value):
-        """Add to our LRU cache, possibly popping off least used key.
-
-        """
+        """Add to our LRU cache, possibly popping off least used key."""
         self._CACHE[key] = {"value": value, "last_used": datetime.datetime.utcnow()}
 
         # if cache is beyond max size, whittle it down by dropping entry least
@@ -92,10 +91,10 @@ class OpenMMHarness(ProgramHarness):
         rdkit_found = RDKitHarness.found(raise_error=raise_error)
 
         openff_found = which_import(
-            "openforcefield",
+            "openff.toolkit",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install openforcefield -c omnia`.",
+            raise_msg="Please install via `conda install openff-toolkit`.",
         )
 
         openmm_found = which_import(
@@ -123,8 +122,8 @@ class OpenMMHarness(ProgramHarness):
         Generate an OpenMM System object from the input molecule method and basis.
         """
         from openmmforcefields.generators import SystemGenerator
-        from simtk.openmm import app
         from simtk import unit
+        from simtk.openmm import app
 
         # create a hash based on the input options
         hashstring = molecule.to_smiles(isomeric=True, explicit_hydrogens=True, mapped=True) + method
@@ -185,54 +184,56 @@ class OpenMMHarness(ProgramHarness):
             self._cache_it(key, system)
         return system
 
-    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs OpenMM on given structure, inputs, in vacuum.
         """
         self.found(raise_error=True)
 
-        from simtk import openmm
-        from simtk import unit
+        from simtk import openmm, unit
 
         with capture_stdout():
-            import openforcefield.topology as offtop
+            from openff.toolkit import topology as offtop
 
         # Failure flag
         ret_data = {"success": False}
 
         # generate basis, not given
-        if not input_data.model.basis:
+        if not input_model.model.basis:
             raise InputError("Method must contain a basis set.")
 
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented since not suitable for OpenMM.")
+
         # Make sure we are using smirnoff or antechamber
-        basis = input_data.model.basis.lower()
+        basis = input_model.model.basis.lower()
         if basis in ["smirnoff", "antechamber"]:
 
             with capture_stdout():
                 # try and make the molecule from the cmiles
                 cmiles = None
-                if input_data.molecule.extras:
-                    cmiles = input_data.molecule.extras.get("canonical_isomeric_explicit_hydrogen_mapped_smiles", None)
+                if input_model.molecule.extras:
+                    cmiles = input_model.molecule.extras.get("canonical_isomeric_explicit_hydrogen_mapped_smiles", None)
                     if cmiles is None:
-                        cmiles = input_data.molecule.extras.get("cmiles", {}).get(
+                        cmiles = input_model.molecule.extras.get("cmiles", {}).get(
                             "canonical_isomeric_explicit_hydrogen_mapped_smiles", None
                         )
 
                 if cmiles is not None:
                     off_mol = offtop.Molecule.from_mapped_smiles(mapped_smiles=cmiles)
                     # add the conformer
-                    conformer = unit.Quantity(value=np.array(input_data.molecule.geometry), unit=unit.bohr)
+                    conformer = unit.Quantity(value=np.array(input_model.molecule.geometry), unit=unit.bohr)
                     off_mol.add_conformer(conformer)
                 else:
                     # Process molecule with RDKit
-                    rdkit_mol = RDKitHarness._process_molecule_rdkit(input_data.molecule)
+                    rdkit_mol = RDKitHarness._process_molecule_rdkit(input_model.molecule)
 
                     # Create an Open Force Field `Molecule` from the RDKit Molecule
                     off_mol = offtop.Molecule(rdkit_mol)
 
             # now we need to create the system
             openmm_system = self._generate_openmm_system(
-                molecule=off_mol, method=input_data.model.method, keywords=input_data.keywords
+                molecule=off_mol, method=input_model.model.method, keywords=input_model.keywords
             )
         else:
             raise InputError("Accepted bases are: {'smirnoff', 'antechamber', }")
@@ -270,10 +271,10 @@ class OpenMMHarness(ProgramHarness):
         ret_data["properties"] = {"return_energy": q}
 
         # Execute driver
-        if input_data.driver == "energy":
+        if input_model.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
 
-        elif input_data.driver == "gradient":
+        elif input_model.driver == "gradient":
             # Compute the forces
             state = context.getState(getForces=True)
 
@@ -286,12 +287,12 @@ class OpenMMHarness(ProgramHarness):
             # Force to gradient
             ret_data["return_result"] = -1 * q
         else:
-            raise InputError(f"OpenMM can only compute energy and gradient driver methods. Found {input_data.driver}.")
+            raise InputError(f"Driver {input_model.driver} not implemented for OpenMM.")
 
         ret_data["success"] = True
-        ret_data["extras"] = input_data.extras
+        ret_data["extras"] = input_model.extras
 
         # Move several pieces up a level
         ret_data["provenance"] = Provenance(creator="openmm", version=openmm.__version__, nthreads=nthreads)
 
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**{**input_model.dict(), **ret_data})

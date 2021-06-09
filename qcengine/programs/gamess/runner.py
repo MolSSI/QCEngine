@@ -5,10 +5,10 @@ import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
-from qcelemental.models import AtomicInput, AtomicResult, Provenance
-from qcelemental.util import safe_version, unnp, which
+from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.util import safe_version, which
 
-from ...exceptions import InputError
+from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
@@ -101,6 +101,11 @@ class GAMESSHarness(ProgramHarness):
         opts.update(muster_modelchem(input_model.model.method, input_model.driver.derivative_int()))
 
         # Handle basis set
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+        if input_model.model.basis is None:
+            raise InputError("None for model.basis is not useable.")
+
         # * for gamess, usually insufficient b/c either ngauss or ispher needed
         opts["basis__gbasis"] = input_model.model.basis
 
@@ -144,9 +149,13 @@ class GAMESSHarness(ProgramHarness):
         stderr = outfiles.pop("stderr")
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
-        qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
+        try:
+            qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
+        except Exception as e:
+            raise UnknownError(stdout)
 
         if gamessgrad is not None:
+            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = gamessgrad
             qcvars["CURRENT GRADIENT"] = gamessgrad
 
         if input_model.driver.upper() == "PROPERTIES":
@@ -170,8 +179,9 @@ class GAMESSHarness(ProgramHarness):
         }
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
+        # * formerly unnp(qcvars, flat=True).items()
         output_data["extras"]["qcvars"] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
         return AtomicResult(**{**input_model.dict(), **output_data})

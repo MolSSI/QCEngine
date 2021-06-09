@@ -103,7 +103,7 @@ class MP2DHarness(ProgramHarness):
             mtd = mtd[5:]
 
         if input_model.driver.derivative_int() > 1:
-            raise InputError(f"""MP2D valid driver options are 'energy' and 'gradient', not {input_model.driver}""")
+            raise InputError(f"Driver {input_model.driver} not implemented for MP2D.")
 
         # temp until actual options object
         input_model.extras["info"] = empirical_dispersion_resources.from_arrays(
@@ -201,9 +201,7 @@ class MP2DHarness(ProgramHarness):
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
-        calcinfo = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(calcinfo, flat=True).items()
-        }
+        calcinfo = {k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in calcinfo.items()}
 
         # jobrec['properties'] = {"return_energy": ene}
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])

@@ -12,8 +12,9 @@ from ..units import ureg
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 class TorchANIHarness(ProgramHarness):
@@ -71,15 +72,15 @@ class TorchANIHarness(ProgramHarness):
         torchani.nn.Ensemble.forward = ensemble_forward
 
         ani_models = {
-            "ani1x": torchani.models.ANI1x(),
-            "ani1ccx": torchani.models.ANI1ccx(),
+            "ani1x": torchani.models.ANI1x,
+            "ani1ccx": torchani.models.ANI1ccx,
         }
 
         if parse_version(self.get_version()) >= parse_version("2.0"):
-            ani_models["ani2x"] = torchani.models.ANI2x()
+            ani_models["ani2x"] = torchani.models.ANI2x
 
         try:
-            self._CACHE[name] = ani_models[name]
+            self._CACHE[name] = ani_models[name]()
         except KeyError:
             raise InputError(f"TorchANI only accepts methods: {ani_models.keys()}")
 
@@ -95,9 +96,9 @@ class TorchANIHarness(ProgramHarness):
         if parse_version(self.get_version()) < parse_version("0.9"):
             raise ResourceError("QCEngine's TorchANI wrapper requires version 0.9 or greater.")
 
+        import numpy as np
         import torch
         import torchani
-        import numpy as np
 
         device = torch.device("cpu")
 

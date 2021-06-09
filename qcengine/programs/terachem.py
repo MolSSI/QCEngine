@@ -9,7 +9,7 @@ from qcelemental.models import AtomicResult, FailedOperation
 from qcelemental.molparse.regex import DECIMAL, NUMBER
 from qcelemental.util import parse_version, safe_version, which
 
-import qcengine.util as uti
+from qcengine import util as uti
 
 from ..exceptions import UnknownError
 from ..util import popen
@@ -97,6 +97,7 @@ class TeraChemHarness(ProgramHarness):
 
         input_file.append("\n# model")
         input_file.append("basis " + str(input_model.model.basis))
+        input_file.append("method " + str(input_model.model.method))
 
         input_file.append("\n# driver")
         input_file.append("run " + input_model.driver)

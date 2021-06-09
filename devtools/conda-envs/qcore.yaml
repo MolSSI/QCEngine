@@ -1,0 +1,19 @@
+name: test
+channels:
+  - entos
+  - conda-forge
+dependencies:
+  - py-qcore
+
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental >=0.19
+  - pydantic >=0.30.1
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov

@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-from qcelemental.models import AtomicInput, AtomicResult, Provenance
-from qcelemental.util import safe_version, unnp, which
+from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.util import safe_version, which
 
+from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
@@ -95,6 +96,11 @@ class CFOURHarness(ProgramHarness):
         opts.update(mdcopts)
 
         # Handle basis set
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+        if input_model.model.basis is None:
+            raise InputError("None for model.basis is not useable.")
+
         # * why, yes, this is highly questionable
         #   * assuming relative file location between xcfour exe and GENBAS file
         #   * reading a multi MB file into the inputs dict
@@ -132,7 +138,10 @@ class CFOURHarness(ProgramHarness):
         stderr = outfiles.pop("stderr")
 
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
-        qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        try:
+            qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        except Exception as e:
+            raise UnknownError(stdout)
 
         if c4grad is not None:
             qcvars["CURRENT GRADIENT"] = c4grad
@@ -168,8 +177,9 @@ class CFOURHarness(ProgramHarness):
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
+        # * formerly unnp(qcvars, flat=True).items()
         output_data["extras"]["qcvars"] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
         return AtomicResult(**{**input_model.dict(), **output_data})

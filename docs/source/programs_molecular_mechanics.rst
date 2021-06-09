@@ -35,7 +35,7 @@ OpenMM
 ------
 
 Currently OpenMM only supports the smirnoff typing engine from the
-``openforcefield`` toolkit. Currently available force fields are the following:
+``openff-toolkit``. Currently available force fields are the following:
 
 +----------------------------+------------+
 | Method                     | Basis      |
@@ -47,7 +47,7 @@ Currently OpenMM only supports the smirnoff typing engine from the
 | openff_unconstrained-1.0.0 | smirnoff   |
 +----------------------------+------------+
 
-Other forcefields may be available depending on your version of the ``openforcefield`` toolkit, see their `docs <https://open-forcefield-toolkit.readthedocs.io>`_ for more information.
+Other forcefields may be available depending on your version of the ``openff-toolkit``, see their `docs <https://open-forcefield-toolkit.readthedocs.io>`_ for more information.
 
 RDKit
 -----

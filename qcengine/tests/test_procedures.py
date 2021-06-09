@@ -19,8 +19,11 @@ def input_data():
 
 
 @using("psi4")
-@using("geometric")
-def test_geometric_psi4(input_data):
+@pytest.mark.parametrize(
+    "optimizer",
+    [pytest.param("geometric", marks=using("geometric")), pytest.param("optking", marks=using("optking"))],
+)
+def test_geometric_psi4(input_data, optimizer):
 
     input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
@@ -29,11 +32,11 @@ def test_geometric_psi4(input_data):
 
     input_data = OptimizationInput(**input_data)
 
-    ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
+    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True)
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
-    assert ret.provenance.creator.lower() == "geometric"
+    assert ret.provenance.creator.lower() == optimizer
     assert ret.trajectory[0].provenance.creator.lower() == "psi4"
 
     # Check keywords passing
@@ -206,6 +209,12 @@ def test_geometric_retries(failure_engine, input_data):
             [1.8897269787924604, 3.1516330703676063, 112.9999999990053],
             marks=using("openmm"),
         ),
+        pytest.param(
+            "qcore",
+            {"method": "GFN1"},
+            [1.8104763949897031, 2.9132449420655213, 107.13403040879244],
+            marks=using("qcore"),
+        ),
     ],
 )
 def test_geometric_generic(input_data, program, model, bench):
@@ -228,3 +237,23 @@ def test_geometric_generic(input_data, program, model, bench):
 
     assert "_secret_tags" in ret.trajectory[0].extras
     assert "data1" == ret.trajectory[0].extras["_secret_tags"]["mysecret_tag"]
+
+
+@using("nwchem")
+@pytest.mark.parametrize("linopt", [0, 1])
+def test_nwchem_relax(linopt):
+    # Make the input file
+    input_data = {
+        "input_specification": {
+            "model": {"method": "HF", "basis": "sto-3g"},
+            "keywords": {"set__driver:linopt": linopt},
+        },
+        "initial_molecule": qcng.get_molecule("hydrogen"),
+    }
+    input_data = OptimizationInput(**input_data)
+
+    # Run the relaxation
+    ret = qcng.compute_procedure(input_data, "nwchemdriver", raise_error=True)
+    assert 10 > len(ret.trajectory) > 1
+
+    assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737

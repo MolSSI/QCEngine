@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := all
-isort = isort -rc qcengine
+isort = isort --float-to-top qcengine
 black = black qcengine
 autoflake = autoflake -ir --remove-all-unused-imports --ignore-init-module-imports --remove-unused-variables --exclude="**/tests/**" qcengine
 

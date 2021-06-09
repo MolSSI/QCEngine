@@ -36,7 +36,7 @@ def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
 
 
 def test_no_args():
-    """ Test for qcengine with no arguments """
+    """Test for qcengine with no arguments"""
     try:
         run_qcengine_cli([])
     except subprocess.CalledProcessError as e:

@@ -6,14 +6,19 @@ from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 
-from .standard_suite_contracts import (
-    contractual_ccsd,
-    contractual_current,
+from .standard_suite_ref import answer_hash, std_suite
+
+from .standard_suite_contracts import (  # isort:skip
+    contractual_hf,
     contractual_mp2,
+    # contractual_mp2p5,
+    # contractual_mp3,
+    contractual_ccsd,
+    # contractual_ccsd_prt_pr,
+    contractual_current,
     query_has_qcvar,
     query_qcvar,
 )
-from .standard_suite_ref import answer_hash, std_suite
 
 pp = pprint.PrettyPrinter(width=120)
 
@@ -33,8 +38,16 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     # ? precedence on next two
     mp2_type = inp.get("corl_type", inp["keywords"].get("mp2_type", "df"))  # hard-code of read_options.cc MP2_TYPE
+    # mp_type = inp.get("corl_type", inp["keywords"].get("mp_type", "conv"))  # hard-code of read_options.cc MP_TYPE
     cc_type = inp.get("corl_type", inp["keywords"].get("cc_type", "conv"))  # hard-code of read_options.cc CC_TYPE
     corl_natural_values = {"mp2": mp2_type, "ccsd": cc_type}
+    corl_natural_values = {
+        "hf": "conv",  # dummy to assure df/cd/conv scf_type refs available
+        "mp2": mp2_type,
+        # "mp3": mp_type,
+        "ccsd": cc_type,
+        # "ccsd(t)": cc_type
+    }
     corl_type = corl_natural_values[method]
 
     natural_ref = {"conv": "pk", "df": "df", "cd": "cd"}
@@ -44,13 +57,23 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     atol = 1.0e-6
     chash = answer_hash(
-        system=subject.name, basis=basis, fcae=fcae, scf_type=scf_type, reference=reference, corl_type=corl_type,
+        system=subject.name,
+        basis=basis,
+        fcae=fcae,
+        scf_type=scf_type,
+        reference=reference,
+        corl_type=corl_type,
     )
 
     # check all calcs against conventional reference to looser tolerance
     atol_conv = 1.0e-4
     chash_conv = answer_hash(
-        system=subject.name, basis=basis, fcae=fcae, reference=reference, corl_type="conv", scf_type="pk",
+        system=subject.name,
+        basis=basis,
+        fcae=fcae,
+        reference=reference,
+        corl_type="conv",
+        scf_type="pk",
     )
     ref_block_conv = std_suite[chash_conv]
 
@@ -60,7 +83,10 @@ def runner_asserter(inp, subject, method, basis, tnm):
         **{
             "molecule": subject,
             "driver": driver,
-            "model": {"method": method, "basis": inp.get("basis", "(auto)"),},
+            "model": {
+                "method": method,
+                "basis": inp.get("basis", "(auto)"),
+            },
             "keywords": inp["keywords"],
         }
     )
@@ -73,15 +99,17 @@ def runner_asserter(inp, subject, method, basis, tnm):
         assert errmsg in str(e.value)
         return
 
-    wfn = qcng.compute(atin, qcprog, raise_error=True, return_dict=True)
+    wfn = qcng.compute(atin, qcprog, raise_error=True)
 
     print("WFN")
-    pp.pprint(wfn)
+    pp.pprint(wfn.dict())
 
     # <<<  Comparison Tests  >>>
 
-    assert wfn["success"] is True
-    assert wfn["provenance"]["creator"].lower() == qcprog
+    assert wfn.success is True
+    assert (
+        wfn.provenance.creator.lower() == qcprog
+    ), f"Creator ({wfn.provenance.creator.lower()}) not expected ({qcprog})"
 
     ref_block = std_suite[chash]
 
@@ -95,7 +123,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
         fcae,
     ]
     asserter_args = [
-        [wfn["extras"]["qcvars"], wfn["properties"]],
+        [wfn.extras["qcvars"], wfn.properties],
         ref_block,
         atol,
         ref_block_conv,
@@ -128,24 +156,48 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     # returns
     if driver == "energy":
-        compare_values(ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["return_result"], tnm + " wfn", atol=atol)
+        compare_values(ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.return_result, tnm + " wfn", atol=atol)
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["properties"]["return_energy"], tnm + " prop", atol=atol
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol
         )
 
     elif driver == "gradient":
-        assert compare_values(
-            ref_block[f"{method.upper()} TOTAL GRADIENT"], wfn["return_result"], tnm + " grad wfn", atol=atol
-        )
-        assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn["properties"]["return_energy"], tnm + " prop", atol=atol
-        )
-        assert compare_values(
+        tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL GRADIENT"],
-            wfn["properties"]["return_gradient"],
-            tnm + " grad prop",
+            wfn.return_result,
+            tnm + " grad wfn",
             atol=atol,
+            return_message=True,
+            quiet=True,
         )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL GRADIENT"], wfn.return_result, tnm + " grad wfn", atol=atol
+        ), errmsg
+        tf, errmsg = compare_values(
+            ref_block[f"{method.upper()} TOTAL ENERGY"],
+            wfn.properties.return_energy,
+            tnm + " prop",
+            atol=atol,
+            return_message=True,
+            quiet=True,
+        )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol
+        ), errmsg
+        # assert compare_values(
+        #     ref_block[f"{method.upper()} TOTAL GRADIENT"],
+        #     wfn["properties"]["return_gradient"],
+        #     tnm + " grad prop",
+        #     atol=atol,
+        # )
+
+    # generics
+    # yapf: disable
+    assert compare(ref_block["N BASIS FUNCTIONS"], wfn.properties.calcinfo_nbasis, tnm + " nbasis wfn"), f"nbasis {wfn.properties.calcinfo_nbasis} != {ref_block['N BASIS FUNCTIONS']}"
+    assert compare(ref_block["N MOLECULAR ORBITALS"], wfn.properties.calcinfo_nmo, tnm + " nmo wfn"), f"nmo {wfn.properties.calcinfo_nmo} != {ref_block['N MOLECULAR ORBITALS']}"
+    assert compare(ref_block["N ALPHA ELECTRONS"], wfn.properties.calcinfo_nalpha, tnm + " nalpha wfn"), f"nalpha {wfn.properties.calcinfo_nalpha} != {ref_block['N ALPHA ELECTRONS']}"
+    assert compare(ref_block["N BETA ELECTRONS"], wfn.properties.calcinfo_nbeta, tnm + " nbeta wfn"), f"nbeta {wfn.properties.calcinfo_nbeta} != {ref_block['N BETA ELECTRONS']}"
+    # yapf: enable
 
 
 def _asserter(asserter_args, contractual_args, contractual_fn):
@@ -164,7 +216,12 @@ def _asserter(asserter_args, contractual_args, contractual_fn):
                 )
                 assert compare_values(ref_block[rpv], query_qcvar(obj, pv), label, atol=atol), errmsg
                 tf, errmsg = compare_values(
-                    ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv, return_message=True, quiet=True,
+                    ref_block_conv[rpv],
+                    query_qcvar(obj, pv),
+                    label,
+                    atol=atol_conv,
+                    return_message=True,
+                    quiet=True,
                 )
                 assert compare_values(ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv), errmsg
 

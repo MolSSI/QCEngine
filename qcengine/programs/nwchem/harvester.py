@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from decimal import Decimal
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
@@ -239,6 +239,7 @@ def harvest_outfile_pass(outtext):
         # 5) RI-MP2
 
         # Process calculation through tce [dertype] command
+        tce_cumm_corl = 0.0
         for cc_name in [r"MBPT\(2\)", r"MBPT\(3\)", r"MBPT\(4\)"]:
             mobj = re.search(
                 # fmt: off
@@ -249,9 +250,13 @@ def harvest_outfile_pass(outtext):
                 re.MULTILINE,
             )
 
+            mobj3 = re.search(r"Wavefunction type : Restricted open-shell Hartree-Fock", outtext, re.MULTILINE)
+
             if mobj:
                 mbpt_plain = cc_name.replace("\\", "").replace("MBPT", "MP").replace("(", "").replace(")", "")
                 logger.debug(f"matched tce mbpt {mbpt_plain}", mobj.groups())
+                print(f"matched tce mbpt {mbpt_plain}", mobj.groups())
+                tce_cumm_corl += float(mobj.group(1))
 
                 if mbpt_plain == "MP2":
                     mobj3 = re.search(r"Wavefunction type : Restricted open-shell Hartree-Fock", outtext, re.MULTILINE)
@@ -264,6 +269,8 @@ def harvest_outfile_pass(outtext):
                         psivar[f"{mbpt_plain} CORRELATION ENERGY"] = mobj.group(1)
                 else:
                     psivar[f"{mbpt_plain} CORRECTION ENERGY"] = mobj.group(1)
+                    if not mobj3:
+                        psivar[f"{mbpt_plain} DOUBLES ENERGY"] = tce_cumm_corl
                 psivar[f"{mbpt_plain} TOTAL ENERGY"] = mobj.group(2)
             # TCE dipole- MBPT(n)
             mobj2 = re.search(
@@ -625,6 +632,8 @@ def harvest_outfile_pass(outtext):
             r"^\s+" + r"open shells     =" + r"\s+" + r"(\d+)" + r"\s*$", outtext, re.MULTILINE | re.IGNORECASE
         )
 
+        calcinfo = False
+
         if mobj:
             logger.debug("matched multiplicity")
             out_mult = int(mobj.group(1)) + 1
@@ -638,12 +647,100 @@ def harvest_outfile_pass(outtext):
             outtext,
             re.MULTILINE | re.IGNORECASE,
         )
-
         if mobj:
-            logger.debug("matched multiplicity via alpha and beta electrons")
+            logger.debug("matched multiplicity via alpha and beta electrons 0")
+            print("matched multiplicity via alpha and beta electrons 0")
             out_mult = int(mobj.group(1)) - int(mobj.group(2)) + 1  # nopen + 1
             psivar["N ALPHA ELECTRONS"] = mobj.group(1)
             psivar["N BETA ELECTRONS"] = mobj.group(2)
+
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"Basis functions"       + r"\s+=\s+" + r"(?P<nbf>\d+)" + r"\s*" +
+            r"^\s+" + r"Molecular orbitals"    + r"\s+=\s+" + r"(?P<nmo>\d+)" + r"\s*" +
+            r"^\s+" + r"Frozen core"           + r"\s+=\s+" + r"(?P<nfc>\d+)" + r"\s*" +
+            r"^\s+" + r"Frozen virtuals"       + f"\s+=\s+" + r"(?P<nfv>\d+)" + r"\s*" +
+            r"^\s+" + r"Active alpha occupied" + r"\s+=\s+" + r"(?P<nao>\d+)" + r"\s*" +
+            r"^\s+" + r"Active beta occupied"  + r"\s+=\s+" + r"(?P<nbo>\d+)" + r"\s*" +
+            r"^\s+" + r"Active alpha virtual"  + r"\s+=\s+" + r"(?P<nav>\d+)" + r"\s*" +
+            r"^\s+" + r"Active beta virtual"   + r"\s+=\s+" + r"(?P<nbv>\d+)" + r"\s*",
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        if mobj:
+            logger.debug("matched alpha and beta electrons 1")
+            print("matched alpha and beta electrons 1", mobj.groups())
+            calcinfo = True
+            psivar["N BASIS FUNCTIONS"] = mobj.group("nbf")
+            psivar["N MOLECULAR ORBITALS"] = mobj.group("nmo")
+            psivar["N ALPHA ELECTRONS"] = int(mobj.group("nao")) + int(mobj.group("nfc"))
+            psivar["N BETA ELECTRONS"] = int(mobj.group("nbo")) + int(mobj.group("nfc"))
+
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + "No. of electrons" + r"\s+:\s+" + r"(?P<ne>\d+)" + r"\s*" +
+            r"^\s+" + "Alpha electrons" + r"\s+:\s+" + r"(?P<nae>\d+)" + r"\s*" +
+            r"^\s+" + "Beta electrons" + r"\s+:\s+" + r"(?P<nbe>\d+)" + r"\s*" +
+            r"^\s+" + "No. of orbitals" + r"\s+:\s+" + r"(?P<no>\d+)" + r"\s*" +
+            r"^\s+" + "Alpha orbitals" + r"\s+:\s+" + r"(?P<namo>\d+)" + r"\s*" +
+            r"^\s+" + "Beta orbitals" + r"\s+:\s+" + r"(?P<nbmo>\d+)" + r"\s*" +
+            r"^\s+" + "Alpha frozen cores" + r"\s+:\s+" + r"(?P<nafc>\d+)" + r"\s*" +
+            r"^\s+" + "Beta frozen cores" + r"\s+:\s+" + r"(?P<nbfc>\d+)" + r"\s*" +
+            r"^\s+" + "Alpha frozen virtuals" + r"\s+:\s+" + r"(?P<nafv>\d+)" + r"\s*" +
+            r"^\s+" + "Beta frozen virtuals" + r"\s+:\s+" + r"(?P<nbfv>\d+)" + r"\s*" +
+            r"^\s+" + "Spin multiplicity" + r"\s+:\s+\w+" + r"\s*" +
+            r"^\s+" + "Number of AO functions" + r"\s+:\s+" + r"(?P<nbf>\d+)" + r"\s*",
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        if mobj and not calcinfo:
+            logger.debug("matched alpha and beta electrons 2")
+            print("matched alpha and beta electrons 2", mobj.groups())
+            calcinfo = True
+            psivar["N BASIS FUNCTIONS"] = mobj.group("nbf")
+            psivar["N MOLECULAR ORBITALS"] = (int(mobj.group("namo")) + int(mobj.group("nbmo"))) / 2
+            psivar["N ALPHA ELECTRONS"] = mobj.group("nae")
+            psivar["N BETA ELECTRONS"] = mobj.group("nbe")
+
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + "functions" + r"\s+=\s+" + r"(?P<nbf>\d+)" + r"\s*" +
+            r"^\s+" + "atoms" + r"\s+=\s+" + r"(?P<nat>\d+)" + r"\s*" +
+            r"^\s+" + "alpha electrons" + r"\s+=\s+" + r"(?P<nae>\d+)" + r"\s*" +
+            r"^\s+" + "beta  electrons" + r"\s+=\s+" + r"(?P<nbe>\d+)" + r"\s*",
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        if mobj and not calcinfo:
+            logger.debug("matched alpha and beta electrons 3")
+            print("matched alpha and beta electrons 3", mobj.groups())
+            calcinfo = True
+            psivar["N BASIS FUNCTIONS"] = mobj.group("nbf")
+            psivar["N MOLECULAR ORBITALS"] = mobj.group("nbf")
+            psivar["N ALPHA ELECTRONS"] = mobj.group("nae")
+            psivar["N BETA ELECTRONS"] = mobj.group("nbe")
+
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + "functions"     + r"\s+=\s+" + r"(?P<nbf>\d+)" + r"\s*" +
+            r"^\s+" + "atoms"         + r"\s+=\s+" + r"(?P<nat>\d+)" + r"\s*" +
+            r"^\s+" + "closed shells" + r"\s+=\s+" + r"(?P<ncl>\d+)" + r"\s*" +
+            r"^\s+" + "open shells"   + r"\s+=\s+" + r"(?P<nop>\d+)" + r"\s*",
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        if mobj and not calcinfo:
+            logger.debug("matched alpha and beta electrons 4")
+            print("matched alpha and beta electrons 4", mobj.groups())
+            calcinfo = True
+            psivar["N BASIS FUNCTIONS"] = mobj.group("nbf")
+            psivar["N MOLECULAR ORBITALS"] = mobj.group("nbf")  # BAD! TODO
+            psivar["N ALPHA ELECTRONS"] = int(mobj.group("ncl")) + int(mobj.group("nop"))
+            psivar["N BETA ELECTRONS"] = mobj.group("ncl")
 
         # Read multiplicity from General information (not scf module)
         mobj = re.search(
@@ -877,9 +974,10 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP2 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP2 TOTAL ENERGY"]
 
-    if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRELATION ENERGY" in psivar:
-        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"]
+    if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRECTION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 TOTAL ENERGY"] - psivar["HF TOTAL ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP3 TOTAL ENERGY"]
+
     if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
@@ -940,7 +1038,9 @@ def harvest_hessian(hess: str) -> np.ndarray:
     return hess_arr.T  # So that the array is listed in C-order, needed by some alignment routines
 
 
-def harvest(in_mol: Molecule, nwout: str, **outfiles) -> Tuple[PreservingDict, None, list, Molecule, str, str]:
+def harvest(
+    in_mol: Molecule, nwout: str, **outfiles
+) -> Tuple[PreservingDict, Optional[np.ndarray], list, Molecule, str, str]:
     """Parses all the pieces of output from NWChem: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 

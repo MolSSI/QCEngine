@@ -5,20 +5,25 @@ Imports the various compute backends
 from typing import Set
 
 from ..exceptions import InputError, ResourceError
+from .adcc import AdccHarness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
-from .entos import EntosHarness
+from .dftd4 import DFTD4Harness
 from .gamess import GAMESSHarness
+from .gcp import GCPHarness, MCTCGCPHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
+from .mrchem import MRChemHarness
 from .nwchem import NWChemHarness
 from .madness import MadnessHarness
 from .openmm import OpenMMHarness
 from .psi4 import Psi4Harness
 from .qchem import QChemHarness
+from .qcore import EntosHarness, QcoreHarness
 from .rdkit import RDKitHarness
 from .terachem import TeraChemHarness
+from .terachem_pbs import TeraChemPBSHarness
 from .torchani import TorchANIHarness
 from .turbomole import TurbomoleHarness
 from .xtb import XTBHarness
@@ -98,16 +103,20 @@ def list_available_programs() -> Set[str]:
 
 
 # Quantum
+register_program(AdccHarness())
 register_program(CFOURHarness())
-register_program(EntosHarness())
+register_program(EntosHarness())  # Duplicate of Qcore harness to transition the namespace, to be deprecated
 register_program(GAMESSHarness())
 register_program(MadnessHarness())
+register_program(MRChemHarness())
 register_program(MolproHarness())
 register_program(NWChemHarness())
 register_program(Psi4Harness())
 register_program(QChemHarness())
+register_program(QcoreHarness())
 register_program(TeraChemHarness())
 register_program(TurbomoleHarness())
+register_program(TeraChemPBSHarness())
 
 # Semi-empirical
 register_program(MopacHarness())
@@ -122,4 +131,7 @@ register_program(OpenMMHarness())
 
 # Analytical Corrections
 register_program(DFTD3Harness())
+register_program(DFTD4Harness())
+register_program(GCPHarness())
+register_program(MCTCGCPHarness())
 register_program(MP2DHarness())

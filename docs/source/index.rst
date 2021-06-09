@@ -36,7 +36,7 @@ These input specifications can be executed with the ``compute`` syntax along wit
 
 .. code:: python
 
-    >>> ret = qcng.compute(input, "psi4")
+    >>> ret = qcng.compute(model, "psi4")
 
 The results contain a complete record of the computation:
 
@@ -58,6 +58,7 @@ Currently available compute backends for single results are as follow:
 
 - Quantum Chemistry:
 
+  - `adcc <https://adc-connect.org>`_
   - `Entos <https://www.entos.info>`_
   - `Molpro <https://www.molpro.net>`_
   - `Psi4 <http://www.psicode.org>`_

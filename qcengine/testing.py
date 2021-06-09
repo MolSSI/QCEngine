@@ -64,6 +64,18 @@ def is_program_new_enough(program, version_feature_introduced):
     return parse_version(candidate_version) >= parse_version(version_feature_introduced)
 
 
+def is_mdi_new_enough(version_feature_introduced):
+    if which_import("mdi", return_bool=True):
+        import mdi
+
+        candidate_version = ".".join(
+            [str(mdi.MDI_MAJOR_VERSION), str(mdi.MDI_MINOR_VERSION), str(mdi.MDI_PATCH_VERSION)]
+        )
+        return parse_version(candidate_version) >= parse_version(version_feature_introduced)
+    else:
+        return False
+
+
 @pytest.fixture(scope="function")
 def failure_engine():
     unique_name = "testing_random_name"
@@ -140,30 +152,36 @@ def failure_engine():
 
 # Figure out what is imported
 _programs = {
+    "adcc": is_program_new_enough("adcc", "0.15.7"),
     "cfour": which("xcfour", return_bool=True),
     "dftd3": which("dftd3", return_bool=True),
     "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),
-    "entos": is_program_new_enough("entos", "0.7.1"),
+    "dftd4": which_import("dftd4", return_bool=True),
+    "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
+    "mctc-gcp": is_program_new_enough("mctc-gcp", "2.3.0"),
     "gcp": which("gcp", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
     "berny": which_import("berny", return_bool=True),
-    "mdi": which_import("mdi", return_bool=True),
+    "mdi": is_mdi_new_enough("1.2"),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
     "mp2d": which("mp2d", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),
     "madness": which("madness", return_bool=True),
+    "optking": which_import("optking", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
     "qcdb": which_import("qcdb", return_bool=True),
-    "qchem": is_program_new_enough("qchem", "5.2"),
+    "qchem": is_program_new_enough("qchem", "5.1"),
     "rdkit": which_import("rdkit", return_bool=True),
     "terachem": which("terachem", return_bool=True),
+    "terachem_pbs": is_program_new_enough("terachem_pbs", "0.7.2"),
     "torchani": is_program_new_enough("torchani", "0.9"),
     "turbomole": which("define", return_bool=True),
     "xtb": which_import("xtb", return_bool=True),
+    "mrchem": is_program_new_enough("mrchem", "1.0.0"),
 }
 _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 

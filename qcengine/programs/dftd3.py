@@ -20,8 +20,9 @@ from . import empirical_dispersion_resources
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -111,7 +112,7 @@ class DFTD3Harness(ProgramHarness):
             mtd = mtd[3:]
 
         if (input_model.driver.derivative_int() > 1) or (input_model.driver == "properties"):
-            raise InputError(f"""DFTD3 valid driver options are 'energy' and 'gradient', not {input_model.driver}""")
+            raise InputError(f"Driver {input_model.driver} not implemented for DFTD3.")
 
         # temp until actual options object
         input_model.extras["info"] = empirical_dispersion_resources.from_arrays(
@@ -130,19 +131,15 @@ class DFTD3Harness(ProgramHarness):
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
         # jobrec['molecule']['real'] = molrec['real']
 
-        # env = {
-        #    'HOME': os.environ.get('HOME'),
-        #    'PATH': os.environ.get('PATH'),
-        #    #'PATH': os.pathsep.join([os.path.abspath(x) for x in os.environ.get('PSIPATH', '').split(os.pathsep) if x != '']) + \
-        #    #        os.pathsep + os.environ.get('PATH'),
-        #    #'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH'),
-        # }
-
         command = ["dftd3", "dftd3_geometry.xyz"]
         if input_model.driver == "gradient":
             command.append("-grad")
         if input_model.extras["info"]["dashlevel"] == "atmgr":
             command.append("-abc")
+
+        # Append `-anal` for pairwise atomic analysis
+        if input_model.keywords.get("pair_resolved", False):
+            command.append("-anal")
 
         infiles = {
             ".dftd3par.local": dftd3_coeff_formatter(
@@ -169,6 +166,7 @@ class DFTD3Harness(ProgramHarness):
     #   set to run with some dummy values, the 2-body values are no good.
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
+        Grimme_h2kcal = 627.509541
         stdout = outfiles.pop("stdout")
 
         for fl, contents in outfiles.items():
@@ -180,7 +178,6 @@ class DFTD3Harness(ProgramHarness):
         real = np.array(input_model.molecule.real)
         full_nat = real.shape[0]
         real_nat = np.sum(real)
-
         for ln in stdout.splitlines():
             if re.match(" Edisp /kcal,au", ln):
                 ene = Decimal(ln.split()[3])
@@ -188,6 +185,21 @@ class DFTD3Harness(ProgramHarness):
                 raise ResourceError("Cannot process ATM results from DFTD3 prior to v3.2.1.")
             elif re.match(r""" E6\(ABC\) /kcal,au:""", ln):
                 atm = Decimal(ln.split()[-1])
+            elif re.match(" analysis of pair-wise terms", ln):
+                D3pairs = np.zeros((full_nat, full_nat))
+                # Iterate over block
+                start = stdout.splitlines().index(ln) + 2
+                for l in stdout.splitlines()[start:]:
+                    data = l.replace("-", " -").split()
+                    # print(data)
+                    if len(data) == 0:
+                        break
+                    atom1 = int(data[0]) - 1
+                    atom2 = int(data[1]) - 1
+                    Edisp = Decimal(data[-1])
+                    D3pairs[atom1, atom2] = Edisp / Decimal(Grimme_h2kcal)
+                    D3pairs[atom2, atom1] = D3pairs[atom1, atom2]
+
             elif re.match(" normal termination of dftd3", ln):
                 break
         else:
@@ -252,13 +264,9 @@ class DFTD3Harness(ProgramHarness):
 
         # LOGtext += qcel.datum.print_variables({info.label: info for info in calcinfo})
         calcinfo = {info.label: info.data for info in calcinfo}
-        # calcinfo = qcel.util.unnp(calcinfo, flat=True)
 
-        # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
-        calcinfo = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(calcinfo, flat=True).items()
-        }
+        calcinfo = {k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in calcinfo.items()}
 
         # jobrec['properties'] = {"return_energy": ene}
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
@@ -271,7 +279,9 @@ class DFTD3Harness(ProgramHarness):
 
         output_data = {
             "extras": input_model.extras,
-            "properties": {},
+            "properties": {
+                "return_energy": calcinfo[f"CURRENT ENERGY"],
+            },
             "provenance": Provenance(
                 creator="DFTD3", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
@@ -280,8 +290,10 @@ class DFTD3Harness(ProgramHarness):
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
-
+        if input_model.keywords.get("pair_resolved", False):
+            output_data["extras"]["qcvars"]["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
         output_data["success"] = True
+
         return AtomicResult(**{**input_model.dict(), **output_data})
 
 

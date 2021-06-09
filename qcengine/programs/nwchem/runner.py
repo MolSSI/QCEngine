@@ -9,16 +9,17 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-from qcelemental.models import AtomicInput, AtomicResult, Provenance
-from qcelemental.util import safe_version, unnp, which, which_import
+from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 
 from ...exceptions import InputError
 from ...util import create_mpi_invocation, execute
-from ..model import ProgramHarness
+from ..model import ErrorCorrectionProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from .errors import all_errors
 from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
@@ -27,7 +28,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
 
 
-class NWChemHarness(ProgramHarness):
+class NWChemHarness(ErrorCorrectionProgramHarness):
     """
 
     Notes
@@ -47,7 +48,7 @@ class NWChemHarness(ProgramHarness):
     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
+    class Config(ErrorCorrectionProgramHarness.Config):
         pass
 
     @staticmethod
@@ -112,7 +113,7 @@ class NWChemHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: AtomicInput, config: "TaskConfig") -> AtomicResult:
+    def _compute(self, input_model: AtomicInput, config: "TaskConfig") -> AtomicResult:
         """
         Runs NWChem in executable mode
         """
@@ -132,6 +133,9 @@ class NWChemHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
         else:
+            # Check if any of the errors are known
+            for error in all_errors:
+                error.detect_error(dexe)
             raise UnknownError(dexe["stdout"])
 
     def build_input(
@@ -162,6 +166,9 @@ class NWChemHarness(ProgramHarness):
         opts.update(mdcopts)
 
         # Handle basis set
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
             opts[f"basis__{el}"] = f"library {input_model.model.basis}"
@@ -231,7 +238,10 @@ task python
         stderr = outfiles.pop("stderr")
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
-        qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        try:
+            qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        except Exception as e:
+            raise UnknownError(stdout)
 
         if nwgrad is not None:
             qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
@@ -267,8 +277,9 @@ task python
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
+        # * formerly unnp(qcvars, flat=True).items()
         output_data["extras"]["qcvars"] = {
-            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in unnp(qcvars, flat=True).items()
+            k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
         return AtomicResult(**{**input_model.dict(), **output_data})

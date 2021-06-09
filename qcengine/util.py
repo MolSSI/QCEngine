@@ -32,12 +32,12 @@ __all__ = ["compute_wrapper", "model_wrapper", "handle_output_metadata", "create
 def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]:
     """Create the launch command for an MPI-parallel task
 
-     Parameters
-     ----------
-        executable: str
-            Path to executable
-        task_config: TaskConfig
-            Specification for number of nodes, cores per node, etc.
+    Parameters
+    ----------
+       executable: str
+           Path to executable
+       task_config: TaskConfig
+           Specification for number of nodes, cores per node, etc.
     """
 
     # Make the mpirun invocation
@@ -95,8 +95,7 @@ def capture_stdout():
 
 @contextmanager
 def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> Dict[str, Any]:
-    """Wraps compute for timing, output capturing, and raise protection
-    """
+    """Wraps compute for timing, output capturing, and raise protection"""
 
     metadata = {"stdout": None, "stderr": None, "success": True, "retries": 0}
 

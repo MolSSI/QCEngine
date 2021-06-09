@@ -38,10 +38,10 @@ def nh2():
         pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=using("cfour")),
         pytest.param("cfour", "aug-pvdz", {}, marks=using("cfour")),
         pytest.param(
-            "entos",
+            "qcore",
             "aug-cc-pVDZ",
             {"coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
-            marks=using("entos"),
+            marks=using("qcore"),
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=using("gamess")),
         pytest.param("molpro", "aug-cc-pvdz", {}, marks=using("molpro")),
@@ -50,6 +50,7 @@ def nh2():
         pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "direct"}, marks=using("psi4")),
         pytest.param("qchem", "aug-cc-pvdz", {}, marks=using("qchem")),
         pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=using("turbomole")),
+        pytest.param("terachem_pbs", "aug-cc-pvdz", {}, marks=using("terachem_pbs")),
     ],
 )
 def test_sp_hf_rhf(program, basis, keywords, h2o):
@@ -83,10 +84,10 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
         ),
         pytest.param("cfour", "aug-pvdz", {"reference": "uhf"}, marks=using("cfour")),
         pytest.param(
-            "entos",
+            "qcore",
             "aug-cc-pVDZ",
             {"ansatz": "u", "coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
-            marks=using("entos"),
+            marks=using("qcore"),
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=using("gamess")),
         pytest.param("molpro", "aug-cc-pvdz", {"reference": "unrestricted"}, marks=using("molpro")),

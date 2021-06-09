@@ -28,7 +28,7 @@ if __name__ == "__main__":
         cmdclass=versioneer.get_cmdclass(),
         packages=setuptools.find_packages(),
         setup_requires=[] + pytest_runner,
-        install_requires=["pyyaml", "py-cpuinfo", "psutil", "qcelemental>=0.12.0", "pydantic>=1.0.0"],
+        install_requires=["pyyaml", "py-cpuinfo", "psutil", "qcelemental>=0.19.0", "pydantic>=1.0.0"],
         entry_points={"console_scripts": ["qcengine=qcengine.cli:main"]},
         extras_require={
             "docs": [
@@ -48,6 +48,8 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
         ],
         zip_safe=False,
         long_description=long_description,

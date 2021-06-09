@@ -1,4 +1,5 @@
 # Available methods
+
 METHODS = {
     # Dummy for HF
     "hf": ["hf"],

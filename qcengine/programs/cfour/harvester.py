@@ -78,6 +78,30 @@ def harvest_outfile_pass(outtext):
         print("matched nre")
         psivar["NUCLEAR REPULSION ENERGY"] = mobj.group(1)
 
+    # Process calcinfo
+    mobj = re.search(
+        r"^\s*" + r"There are" + r"\s+" + r"(?P<nbf>\d+)" + r"\s+" + r"functions in the AO basis." + r"\s*$",
+        outtext,
+        re.MULTILINE,
+    )
+    if mobj:
+        print("matched nbf", mobj.groups())
+        psivar["N BASIS FUNCTIONS"] = mobj.group("nbf")
+        psivar["N MOLECULAR ORBITALS"] = mobj.group("nbf")  # TODO BAD
+
+    mobj = re.search(
+        # fmt: off
+        r"^\s*" + "Alpha population by irrep:" + r"(?P<aocc>[\d\s]+)" + r"\s*" +
+        r"^\s*" + "Beta population by irrep:" + r"(?P<bocc>[\d\s]+)" + r"\s*",
+        # fmt: on
+        outtext,
+        re.MULTILINE,
+    )
+    if mobj:
+        print("matched occ", mobj.groups())
+        psivar["N ALPHA ELECTRONS"] = sum([int(d) for d in mobj.group("aocc").split()])
+        psivar["N BETA ELECTRONS"] = sum([int(d) for d in mobj.group("bocc").split()])
+
     # Process SCF
     mobj = re.search(r"^\s+" + r"(?:E\(SCF\))" + r"\s+=\s+" + NUMBER + r"\s+a\.u\.\s*$", outtext, re.MULTILINE)
     if mobj:
@@ -208,6 +232,8 @@ def harvest_outfile_pass(outtext):
         psivar["MP3 TOTAL ENERGY"] = mobj.group(4)
         psivar["MP2.5 CORRELATION ENERGY"] = dmp2 + Decimal("0.500000000000") * dmp3
         psivar["MP2.5 TOTAL ENERGY"] = psivar["MP2.5 CORRELATION ENERGY"] + psivar["SCF TOTAL ENERGY"]
+        psivar["MP3 SINGLES ENERGY"] = Decimal("0.0")
+        psivar["MP3 DOUBLES ENERGY"] = dmp2 + dmp3
 
     mobj = re.search(
         # fmt: off
@@ -227,6 +253,8 @@ def harvest_outfile_pass(outtext):
         psivar["MP3 TOTAL ENERGY"] = mobj.group(8)
         psivar["MP2.5 CORRELATION ENERGY"] = dmp2 + Decimal("0.500000000000") * dmp3
         psivar["MP2.5 TOTAL ENERGY"] = psivar["MP2.5 CORRELATION ENERGY"] + psivar["SCF TOTAL ENERGY"]
+        psivar["MP3 SINGLES ENERGY"] = Decimal(mobj.group(1)) + Decimal(mobj.group(5))
+        psivar["MP3 DOUBLES ENERGY"] = Decimal(mobj.group(3)) + Decimal(mobj.group(7))
 
     # Process MP4
     mobj = re.search(
@@ -916,9 +944,7 @@ def harvest_GRD(grd):
 
 
 def harvest_DIPOL(dipol):
-    """Parses the contents *dipol* of the Cfour DIPOL file into a dipol vector.
-
-    """
+    """Parses the contents *dipol* of the Cfour DIPOL file into a dipol vector."""
     dipol = dipol.splitlines()
     lline = dipol[0].split()
     dip = [float(lline[0]), float(lline[1]), float(lline[2])]
