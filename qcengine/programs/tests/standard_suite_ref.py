@@ -220,6 +220,40 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.0019363896542312043,
+            "CCSDT CORRELATION ENERGY": -0.210768503167476,  # ncc
+            "CCSDT TOTAL GRADIENT": np.array(
+                [
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.003174888578646,
+                    0.000000000000000,
+                    0.000000000000000,
+                    -0.003174888578646,
+                ]
+            ).reshape((-1, 3)),
+            "[Q] CORRECTION ENERGY": -0.000380822242155,  # ncc
+            "(Q) CORRECTION ENERGY": -0.000414550980182,  # ncc
+            "CCSDT(Q) TOTAL GRADIENT": np.array(
+                [  # ncc
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.003539304813171,
+                    0.000000000000000,
+                    0.000000000000000,
+                    -0.00353930481317,
+                ]
+            ).reshape((-1, 3)),
+            "CCSDTQ CORRELATION ENERGY": -0.211162705496338,  # ncc
+            "CCSDTQ TOTAL GRADIENT": np.array(
+                [
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.003507320893113,
+                    0.000000000000000,
+                    0.000000000000000,
+                    -0.003507320893113,
+                ]
+            ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0005522939,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2104417743,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0484443079,  # occ
@@ -286,6 +320,36 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00523856,
+            "CCSDT CORRELATION ENERGY": -0.234880733453953,  # ncc
+            "CCSDT TOTAL GRADIENT": np.array(
+                [
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.010281901133138,
+                    0.000000000000000,
+                    0.006116030816197,
+                    -0.005140950566570,
+                    0.000000000000000,
+                    -0.006116030816197,
+                    -0.005140950566570,
+                ]
+            ).reshape((-1, 3)),
+            "[Q] CORRECTION ENERGY": -0.000291847368718,  # ncc
+            "(Q) CORRECTION ENERGY": -0.000507547985814,  # ncc
+            "CCSDT(Q) TOTAL GRADIENT": np.array(
+                [  # ncc
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.010822433278893,
+                    0.000000000000000,
+                    0.006408928209897,
+                    -0.005411216639448,
+                    0.000000000000000,
+                    -0.006408928209897,
+                    -0.005411216639448,
+                ]
+            ).reshape((-1, 3)),
+            "CCSDTQ CORRELATION ENERGY": -0.235338854850175,  # ncc
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011895155,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2330452995,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0503175223,  # occ
@@ -352,6 +416,36 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.007263596331,
+            "CCSDT CORRELATION ENERGY": -0.283033246143265,  # ncc
+            "CCSDT TOTAL GRADIENT": np.array(
+                [
+                    0.000000000000000,
+                    0.000000000000000,
+                    -0.000217363788816,
+                    0.000000000000000,
+                    -0.000742442561705,
+                    0.000108681894407,
+                    0.000000000000000,
+                    0.000742442561705,
+                    0.000108681894407,
+                ]
+            ).reshape((-1, 3)),
+            "[Q] CORRECTION ENERGY": -0.000163881984112,  # ncc
+            "(Q) CORRECTION ENERGY": -0.000383414612913,  # ncc
+            "CCSDT(Q) TOTAL GRADIENT": np.array(
+                [
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.000216022413761,
+                    0.000000000000000,
+                    -0.000511432746023,
+                    -0.000108011206892,
+                    0.000000000000000,
+                    0.000511432746023,
+                    -0.000108011206892,
+                ]
+            ).reshape((-1, 3)),
+            "CCSDTQ CORRELATION ENERGY": -0.283376955140291,  # ncc
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0013521561,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2800053174,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0582676514,  # occ
@@ -449,6 +543,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00062614,
+            "CCSDT CORRELATION ENERGY": -0.08311156413461,  # vcc
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0014842084,  # p4n
             "OLCCD CORRELATION ENERGY": -0.0847413506,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
@@ -514,6 +609,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00384378,
+            "CCSDT CORRELATION ENERGY": -0.17817199774450,  # vcc
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011118724,  # p4n
             "OLCCD CORRELATION ENERGY": -0.1781057943,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
@@ -579,6 +675,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00516659,
+            "CCSDT CORRELATION ENERGY": -0.21884856037681,  # vcc
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0012856903,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2180560836,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
@@ -641,6 +738,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.000713766189,
+            "CCSDT CORRELATION ENERGY": -0.08463562959121,  # vcc
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0000399018,  # p4n
             "OLCCD CORRELATION ENERGY": -0.0862654609,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
@@ -696,6 +794,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.003901085777,
+            "CCSDT CORRELATION ENERGY": -0.18258437583017,  # vcc
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033018315,  # p4n
             "OLCCD CORRELATION ENERGY": -0.1825194982,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
@@ -751,6 +850,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.005233938447,
+            "CCSDT CORRELATION ENERGY": -0.22345631762464,  # vcc
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033240178,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2226657917,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
@@ -808,6 +908,20 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.0019205007159748158,
+            "CCSDT CORRELATION ENERGY": -0.208825198347707,  # ncc
+            "CCSDT TOTAL GRADIENT": np.array(
+                [  # ecc
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.003519024898117,
+                    0.000000000000000,
+                    0.000000000000000,
+                    -0.003519024898117,
+                ]
+            ).reshape((-1, 3)),
+            "[Q] CORRECTION ENERGY": -0.000379506649993,  # ncc
+            "(Q) CORRECTION ENERGY": -0.000413051703749,  # ncc
+            "CCSDTQ CORRELATION ENERGY": -0.209218171097884,  # ncc
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
         },
     },
@@ -871,6 +985,23 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00521238,
+            "CCSDT CORRELATION ENERGY": -0.232619797476334,  # ncc
+            "CCSDT TOTAL GRADIENT": np.array(
+                [  # ecc
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.010883725577495,
+                    0.000000000000000,
+                    0.006489002186983,
+                    -0.005441862788749,
+                    0.000000000000000,
+                    -0.006489002186983,
+                    -0.005441862788749,
+                ]
+            ).reshape((-1, 3)),
+            "[Q] CORRECTION ENERGY": -0.000288788062660,  # ncc
+            "(Q) CORRECTION ENERGY": -0.000503838444143,  # ncc
+            "CCSDTQ CORRELATION ENERGY": -0.233074721244323,  # ncc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
         },
     },
@@ -934,6 +1065,23 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.007096579721,
+            "CCSDT CORRELATION ENERGY": -0.257494892048411,  # ncc
+            "CCSDT TOTAL GRADIENT": np.array(
+                [  # ecc
+                    0.000000000000000,
+                    0.000000000000000,
+                    0.000614598836608,
+                    0.000000000000000,
+                    -0.000362082670346,
+                    -0.000307299418304,
+                    0.000000000000000,
+                    0.000362082670346,
+                    -0.000307299418304,
+                ]
+            ).reshape((-1, 3)),
+            "[Q] CORRECTION ENERGY": -0.000151213601440,  # ncc
+            "(Q) CORRECTION ENERGY": -0.000368016662584,  # ncc
+            "CCSDTQ CORRELATION ENERGY": -0.257824320323573,  # ncc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
         },
     },
@@ -1029,6 +1177,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00060401,
+            "CCSDT CORRELATION ENERGY": -0.08208821205578,  # vcc
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
         },
     },
@@ -1091,6 +1240,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00381116,
+            "CCSDT CORRELATION ENERGY": -0.17591978591647,  # vcc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
         },
     },
@@ -1153,6 +1303,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00498265,
+            "CCSDT CORRELATION ENERGY": -0.19368177447948,  # vcc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
         },
     },
@@ -1212,6 +1363,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00068823,  # cfour only
+            "CCSDT CORRELATION ENERGY": -0.08361110233142,  # vcc
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
         },
     },
@@ -1264,6 +1416,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.003863167899,  # cfour only
+            "CCSDT CORRELATION ENERGY": -0.18030677104047,  # vcc (different orbs: -0.18031166502580)
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
         },
     },
@@ -1316,6 +1469,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00504351,  # cfour only
+            "CCSDT CORRELATION ENERGY": -0.19824510672649,  # vcc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
         },
     },
@@ -4501,6 +4655,24 @@ for calc in _std_suite:
             )
             calc["data"]["CCSD(T) TOTAL ENERGY"] = (
                 calc["data"]["CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
+
+        if "CCSDT CORRELATION ENERGY" in calc["data"]:
+            calc["data"]["CCSDT TOTAL ENERGY"] = (
+                calc["data"]["CCSDT CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
+
+        if "(Q) CORRECTION ENERGY" in calc["data"]:
+            calc["data"]["CCSDT(Q) CORRELATION ENERGY"] = (
+                calc["data"]["CCSDT CORRELATION ENERGY"] + calc["data"]["(Q) CORRECTION ENERGY"]
+            )
+            calc["data"]["CCSDT(Q) TOTAL ENERGY"] = (
+                calc["data"]["CCSDT(Q) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
+
+        if "CCSDTQ CORRELATION ENERGY" in calc["data"]:
+            calc["data"]["CCSDTQ TOTAL ENERGY"] = (
+                calc["data"]["CCSDTQ CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
             )
 
         if "OLCCD CORRELATION ENERGY" in calc["data"]:

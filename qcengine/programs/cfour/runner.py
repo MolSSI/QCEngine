@@ -80,14 +80,18 @@ class CFOURHarness(ProgramHarness):
     def build_input(
         self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
-        cfourrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
+        cfourrec = {
+            "infiles": {},
+            "scratch_directory": config.scratch_directory,
+            "scratch_messy": config.scratch_messy,
+        }
 
         opts = copy.deepcopy(input_model.keywords)
 
         # Handle memory
-        # for cfour, [GiB] --> [MB]
-        opts["memory_size"] = int(config.memory * (1024 ** 3) / 1e6)
-        opts["mem_unit"] = "mb"
+        # for cfour, [GiB] --> [QW]
+        opts["memory_size"] = int(config.memory * (1024 ** 3) / 8)
+        opts["mem_unit"] = "integerwords"
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="cfour", units="Bohr", return_data=True)
@@ -123,11 +127,13 @@ class CFOURHarness(ProgramHarness):
         self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
 
+        # llel works b/c util.environ_context sets OMP_NUM_THREADS = config.ncores
+
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
             ["GRD", "FCMFINAL", "DIPOL"],
-            scratch_messy=False,
+            scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
@@ -179,6 +185,8 @@ class CFOURHarness(ProgramHarness):
                 + "\nTRACEBACK:\n"
                 + "".join(traceback.format_exception(*sys.exc_info()))
             )
+
+        # TODO: "xalloc(): memory allocation failed!"
 
         if isinstance(retres, Decimal):
             retres = float(retres)

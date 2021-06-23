@@ -200,6 +200,9 @@ def harvest_outfile_pass(outtext):
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(4)
             qcvar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(5)
             qcvar["MP2 SAME-SPIN CORRELATION ENERGY"] = mobj.group(6)
+            mobj3 = re.search(r"\s+UHF-MP2 CALCULATION", outtext, re.MULTILINE)
+            if mobj3:
+                module = "uhfmp2"
 
         mobj = re.search(
             # fmt: off
@@ -219,6 +222,9 @@ def harvest_outfile_pass(outtext):
             print("matched mp2 rohf d", mobj.groups())
             qcvar["MP2 SINGLES ENERGY"] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
             qcvar["MP2 DOUBLES ENERGY"] = mobj.group(3)
+            mobj3 = re.search(r"\s+RMP2 (ROHF-MBPT2) CALCULATION", outtext, re.MULTILINE)
+            if mobj3:
+                module = "rohfmp2"
 
         mobj = re.search(r"^\s+" + "UHF-MP2 CALCULATION", outtext, re.MULTILINE)
         if mobj:
@@ -241,6 +247,59 @@ def harvest_outfile_pass(outtext):
             qcvar["HF TOTAL ENERGY"] = mobj.group(1)
             qcvar["MP2 CORRELATION ENERGY"] = mobj.group(2)
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
+
+        mobj = re.search(
+            # fmt: off
+            r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE\n'
+            r'^\s+' + r'E\(SCF\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(1\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(MP2\)=' + r'\s+' + NUMBER + r'\s*',
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched mp2 g llel")
+            print("matched mp2 g llel", mobj.groups())
+            qcvar["HF TOTAL ENERGY"] = mobj.group(1)
+            qcvar["MP2 SINGLES ENERGY"] = mobj.group(2)
+            qcvar["MP2 DOUBLES ENERGY"] = mobj.group(3)
+            qcvar["MP2 CORRELATION ENERGY"] = mobj.group(3)
+            qcvar["MP2 TOTAL ENERGY"] = mobj.group(4)
+            # mobj3 = re.search(r"\s+[RU]HF\s*SCF\s*CALCULATION", outtext, re.MULTILINE)
+            mobj3 = re.search(r"\s+DISTRIBUTED DATA UMP2 ENERGY", outtext, re.MULTILINE)
+            if mobj3:
+                module = "ddump2"
+
+        mobj = re.search(
+            # fmt: off
+            r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE\n'
+            r'^\s+' + r'E\(SCF\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(MP2\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'SPIN-COMPONENT-SCALED MP2 RESULTS ARE' + r'\s*' +
+            r'^\s+' + r'E\(2S\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2T\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2ST\)=' + r'\s+' + NUMBER + r'\s*',
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched mp2 rhf h llel")
+            print("matched mp2 h llel", mobj.groups())
+            qcvar["HF TOTAL ENERGY"] = mobj.group(1)
+            qcvar["MP2 SINGLES ENERGY"] = "0.0"
+            qcvar["MP2 DOUBLES ENERGY"] = mobj.group(2)
+            qcvar["MP2 CORRELATION ENERGY"] = mobj.group(2)
+            qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
+            qcvar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(4)
+            qcvar["MP2 SAME-SPIN CORRELATION ENERGY"] = mobj.group(5)
+            mobj3 = re.search(r"\s+DISTRIBUTED DATA MP2 ENERGY", outtext, re.MULTILINE)
+            if mobj3:
+                module = "ddrmp2"
+
 
         # Process CCSD
         mobj = re.search(
