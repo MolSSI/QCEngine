@@ -1010,6 +1010,10 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD(T) CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSD(T) TOTAL ENERGY"]
 
+    if "CCSDT TOTAL ENERGY" in psivar and "CCSDT CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSDT TOTAL ENERGY"]
+
     if ("EOM-%s TOTAL ENERGY" % (cc_name) in psivar) and ("%s EXCITATION ENERGY" % (cc_name) in psivar):
         psivar["CURRENT ENERGY"] = psivar["EOM-%s TOTAL ENERGY" % (cc_name)]
         psivar["CURRENT EXCITATION ENERGY"] = psivar["%s EXCITATION ENERGY" % (cc_name)]

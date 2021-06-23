@@ -78,14 +78,18 @@ class CFOURHarness(ProgramHarness):
     def build_input(
         self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
-        cfourrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
+        cfourrec = {
+            "infiles": {},
+            "scratch_directory": config.scratch_directory,
+            "scratch_messy": config.scratch_messy,
+        }
 
         opts = copy.deepcopy(input_model.keywords)
 
         # Handle memory
-        # for cfour, [GiB] --> [MB]
-        opts["memory_size"] = int(config.memory * (1024 ** 3) / 1e6)
-        opts["mem_unit"] = "mb"
+        # for cfour, [GiB] --> [QW]
+        opts["memory_size"] = int(config.memory * (1024 ** 3) / 8)
+        opts["mem_unit"] = "integerwords"
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="cfour", units="Bohr", return_data=True)
@@ -121,11 +125,13 @@ class CFOURHarness(ProgramHarness):
         self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
 
+        # llel works b/c util.environ_context sets OMP_NUM_THREADS = config.ncores
+
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
             ["GRD", "FCMFINAL", "DIPOL"],
-            scratch_messy=False,
+            scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
@@ -140,21 +146,23 @@ class CFOURHarness(ProgramHarness):
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         try:
             qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+
+            if c4grad is not None:
+                qcvars["CURRENT GRADIENT"] = c4grad
+                qcvars[f"{input_model.model.method.upper()[3:]} TOTAL GRADIENT"] = c4grad
+
+            if c4hess is not None:
+                qcvars[f"{input_model.model.method.upper()[3:]} TOTAL HESSIAN"] = c4hess
+                qcvars["CURRENT HESSIAN"] = c4hess
+
+            if input_model.driver.upper() == "PROPERTIES":
+                retres = qcvars[f"CURRENT ENERGY"]
+            else:
+                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         except Exception as e:
-            raise UnknownError(stdout)
+            raise UnknownError(stdout + stderr)
 
-        if c4grad is not None:
-            qcvars["CURRENT GRADIENT"] = c4grad
-            qcvars[f"{input_model.model.method.upper()[3:]} TOTAL GRADIENT"] = c4grad
-
-        if c4hess is not None:
-            qcvars[f"{input_model.model.method.upper()[3:]} TOTAL HESSIAN"] = c4hess
-            qcvars["CURRENT HESSIAN"] = c4hess
-
-        if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
-        else:
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        # TODO: "xalloc(): memory allocation failed!"
 
         if isinstance(retres, Decimal):
             retres = float(retres)

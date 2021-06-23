@@ -26,7 +26,10 @@ pp = pprint.PrettyPrinter(width=120)
 def runner_asserter(inp, subject, method, basis, tnm):
 
     qcprog = inp["call"]
-    qc_module = inp["qc_module"]
+    qc_module_in = inp["qc_module"]  # returns "<qcprog>"|"<qcprog>-<module>"  # input-specified routing
+    qc_module_xptd = (
+        (qcprog + "-" + inp["xptd"]["qc_module"]) if inp.get("xptd", {}).get("qc_module", None) else None
+    )  # expected routing
     driver = inp["driver"]
     reference = inp["reference"]
     fcae = inp["fcae"]
@@ -91,31 +94,40 @@ def runner_asserter(inp, subject, method, basis, tnm):
         }
     )
 
+    local_options = {}
+    # local_options = {"nnodes": 1, "ncores": 1}  # debug
+
     if "error" in inp:
         errtype, errmsg = inp["error"]
         with pytest.raises(errtype) as e:
-            qcng.compute(atin, qcprog, raise_error=True, return_dict=True)
+            qcng.compute(atin, qcprog, raise_error=True, return_dict=True, local_options=local_options)
 
         assert errmsg in str(e.value)
         return
 
-    wfn = qcng.compute(atin, qcprog, raise_error=True)
+    wfn = qcng.compute(atin, qcprog, raise_error=True, local_options=local_options)
 
     print("WFN")
     pp.pprint(wfn.dict())
 
+    qc_module_out = wfn.provenance.creator.lower()
+    if hasattr(wfn.provenance, "module"):
+        qc_module_out += "-" + wfn.provenance.module  # returns "<qcprog>-<module>"
+    # assert 0, f"{qc_module_xptd=} {qc_module_in=} {qc_module_out=}"  # debug
+
     # <<<  Comparison Tests  >>>
 
     assert wfn.success is True
-    assert (
-        wfn.provenance.creator.lower() == qcprog
-    ), f"Creator ({wfn.provenance.creator.lower()}) not expected ({qcprog})"
+    if qc_module_in != qcprog:
+        assert qc_module_out == qc_module_in, f"QC_MODULE used ({qc_module_out}) != requested ({qc_module_in})"
+    if qc_module_xptd:
+        assert qc_module_out == qc_module_xptd, f"QC_MODULE used ({qc_module_out}) != expected ({qc_module_xptd})"
 
     ref_block = std_suite[chash]
 
     # qcvars
     contractual_args = [
-        qc_module,
+        qc_module_out,
         driver,
         reference,
         method,

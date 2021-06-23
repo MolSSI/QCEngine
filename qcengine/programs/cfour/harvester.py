@@ -64,6 +64,7 @@ def harvest_outfile_pass(outtext):
     #          vcc/ecc
 
     NUMBER = r"(?x:" + regex.NUMBER + ")"
+    DECIMAL = r"(?x:" + regex.DECIMAL + ")"
 
     # Process version
     mobj = re.search(r"^\s*" + r"Version" + r"\s+" + r"(?P<version>[\w.]+)" + r"\s*$", outtext, re.MULTILINE)
@@ -372,15 +373,13 @@ def harvest_outfile_pass(outtext):
         module = {"has come": "vcc", "come": "ecc"}[mobj.group("ccprog")]
 
         mobj3 = re.search(r"SCF reference function:  RHF", outtext)
-        if mobj3:
+        if mobj3 and mobj.group("iterCC") not in ["CCSDT"]:
             psivar[f"{mobj.group('iterCC')} DOUBLES ENERGY"] = mobj.group(3)
 
     mobj = re.search(
         # fmt: off
         r'^\s+' + r'(?:\d+)' + r'\s+' + r'(?P<corl>' + NUMBER + r')\s+' +
-                  #NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*' +
-                  #NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER +  r'\s+' + NUMBER +  r'\s+' + NUMBER + r'\s*' +
-                  NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER +  r'\s+' + r'(' + NUMBER +  r'\s+' + NUMBER + r')?' + r'\s*' +
+                  NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER +  r'\s+' + r'(' + NUMBER +  r')?' + r'(' + r'\s+' + NUMBER + r')?' + r'\s*' +
         r'^\s*' +
         r'^\s*' + r'(?:\w+ iterations converged .*?)' +
         r'^\s*' +
@@ -393,9 +392,40 @@ def harvest_outfile_pass(outtext):
         print("matched ncc cc iter")
         # looks like ncc is rhf-only
         psivar["{} CORRELATION ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
-        psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
+        if mobj.group("iterCC") not in ["CCSDT"]:
+            psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
         psivar["{} TOTAL ENERGY".format(mobj.group("iterCC"))] = mobj.group("tot")
         module = "ncc"
+
+    mobj = re.search(
+        # fmt: off
+        r'^\s+' + r"Beginning iterative solution of (?P<iterCC>\w+) equations" + r"\s*" +
+        r'(?P<iterations>.*)' +
+        r'^\s*' + r"It\." + r"\s+" + "Correlation Energy" + r".*" +
+        r'^\s*(?:-+)\s*' +
+        r'^\s*' +
+        r'^\s*' + r'(?:\w+ iterations converged .*?)' +
+        r'^\s*' +
+        r'^\s*' + r'(?:Total \1 energy:)' + r'\s+' + r'(?P<tot>' + NUMBER + r')\s*$',
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:
+        mobj2 = re.findall(
+            # fmt: off
+            r"(\d+)" + r"\s+" + r"(?P<corl>" + DECIMAL + r")\s+" +
+                    DECIMAL + r"\s+" + DECIMAL + r"\s+" + DECIMAL + r"\s+" + DECIMAL + r"\s+" + r"(" + DECIMAL + r")?" + r"(" + r"\s+" + DECIMAL + r")?",
+            # fmt: on
+            mobj.group("iterations"),
+        )
+        if mobj2:
+            print("matched ncc cc iter mod5", mobj.groups())
+            psivar["{} CORRELATION ENERGY".format(mobj.group("iterCC"))] = mobj2[-1][2]
+            if mobj.group("iterCC") not in ["CCSDT"]:
+                psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
+            psivar["{} TOTAL ENERGY".format(mobj.group("iterCC"))] = mobj.group("tot")
+            module = "ncc"
 
     # Process CC(T)
     mobj = re.search(
@@ -525,6 +555,22 @@ def harvest_outfile_pass(outtext):
         psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
         psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        module = "ncc"
+
+    mobj = re.search(
+        # fmt: off
+        r'^\s*' + r'(?:CCSDT\[Q\] correlation energy:)\s+' + r'(?P<bkttcorr>' + NUMBER + ')' + r'\s*'
+        r'^\s*' + r'(?:CCSDT\(Q\) correlation energy:)\s+' + r'(?P<tcorr>' + NUMBER + ')' + r'\s*$',
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:
+        print("matched ccsdt(q) ncc")
+        psivar["(Q) CORRECTION ENERGY"] = mobj.group("tcorr")
+        psivar["[Q] CORRECTION ENERGY"] = mobj.group("bkttcorr")
+        psivar["CCSDT(Q) TOTAL ENERGY"] = psivar["(Q) CORRECTION ENERGY"] + psivar["CCSDT TOTAL ENERGY"]
+        psivar["CCSDT(Q) CORRELATION ENERGY"] = psivar["(Q) CORRECTION ENERGY"] + psivar["CCSDT CORRELATION ENERGY"]
         module = "ncc"
 
     # Process DBOC
@@ -767,6 +813,14 @@ def harvest_outfile_pass(outtext):
     if "CCSDT TOTAL ENERGY" in psivar and "CCSDT CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSDT TOTAL ENERGY"]
+
+    if "CCSDT(Q) TOTAL ENERGY" in psivar and "CCSDT(Q) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT(Q) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSDT(Q) TOTAL ENERGY"]
+
+    if "CCSDTQ TOTAL ENERGY" in psivar and "CCSDTQ CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDTQ CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSDTQ TOTAL ENERGY"]
 
     return psivar, psivar_coord, psivar_grad, version, module, error
 

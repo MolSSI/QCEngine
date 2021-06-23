@@ -146,13 +146,18 @@ class TaskConfig(pydantic.BaseModel):
 
     # Specifications
     ncores: int = pydantic.Field(None, description="Number cores per task on each node")
-    nnodes: int  # Number of nodes per task
-    memory: float  # Amount of memory in GiB per node
+    nnodes: int = pydantic.Field(None, description="Number of nodes per task")
+    memory: float = pydantic.Field(
+        None, description="Amount of memory in GiB (2^30 bytes; not GB = 10^9 bytes) per node."
+    )
     scratch_directory: Optional[str]  # What location to use as scratch
     retries: int  # Number of retries on random failures
     mpiexec_command: Optional[str]  # Command used to launch MPI tasks, see NodeDescriptor
     use_mpiexec: bool = False  # Whether it is necessary to use MPI to run an executable
     cores_per_rank: int = pydantic.Field(1, description="Number of cores per MPI rank")
+    scratch_messy: bool = pydantic.Field(
+        False, description="Leave scratch directory and contents on disk after completion."
+    )
 
     class Config:
         extra = "forbid"
@@ -247,9 +252,7 @@ def get_node_descriptor(hostname: Optional[str] = None) -> NodeDescriptor:
 
 
 def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Parses a dictionary looking for environmental variables
-    """
+    """Collects local environment variable values into ``data`` for any keys with RHS starting with ``$``."""
     ret = {}
     for k, var in data.items():
         if isinstance(var, str) and var.startswith("$"):
