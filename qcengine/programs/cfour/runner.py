@@ -2,6 +2,8 @@
 
 import copy
 import pprint
+import sys
+import traceback
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -146,7 +148,17 @@ class CFOURHarness(ProgramHarness):
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         try:
             qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        except Exception as e:
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
+        try:
             if c4grad is not None:
                 qcvars["CURRENT GRADIENT"] = c4grad
                 qcvars[f"{input_model.model.method.upper()[3:]} TOTAL GRADIENT"] = c4grad
@@ -159,8 +171,15 @@ class CFOURHarness(ProgramHarness):
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
-        except Exception as e:
-            raise UnknownError(stdout + stderr)
+        except KeyError as e:
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
         # TODO: "xalloc(): memory allocation failed!"
 

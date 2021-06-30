@@ -2,6 +2,8 @@
 
 import copy
 import pprint
+import sys
+import traceback
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -193,7 +195,7 @@ class GAMESSHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            [],
+            ["gamess.dat"],
             scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
         )
@@ -207,21 +209,39 @@ class GAMESSHarness(ProgramHarness):
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         try:
-            qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
+            qcvars, gamesshess, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
         except Exception as e:
-            raise UnknownError(stdout)
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
         try:
             if gamessgrad is not None:
                 qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = gamessgrad
                 qcvars["CURRENT GRADIENT"] = gamessgrad
 
+            if gamesshess is not None:
+                qcvars[f"{input_model.model.method.upper()[4:]} TOTAL HESSIAN"] = gamesshess
+                qcvars["CURRENT HESSIAN"] = gamesshess
+
             if input_model.driver.upper() == "PROPERTIES":
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
-        except KeyError:
-            raise UnknownError(stdout)
+        except KeyError as e:
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)

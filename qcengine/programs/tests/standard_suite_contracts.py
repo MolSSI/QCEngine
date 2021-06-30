@@ -89,6 +89,9 @@ def contractual_current(
     ]
     if driver == "gradient":
         contractual_qcvars.append((f"{method.upper()} TOTAL GRADIENT", "CURRENT GRADIENT"))
+    elif driver == "hessian":
+        # contractual_qcvars.append((f"{method.upper()} TOTAL GRADIENT", "CURRENT GRADIENT"))
+        contractual_qcvars.append((f"{method.upper()} TOTAL HESSIAN", "CURRENT HESSIAN"))
 
     for rpv, pv in contractual_qcvars:
         expected = True
@@ -112,6 +115,10 @@ def contractual_hf(
     ]
     if driver == "gradient" and method == "hf":
         contractual_qcvars.append(("HF TOTAL GRADIENT", "HF TOTAL GRADIENT"))
+        # contractual_qcvars.append(("HF TOTAL GRADIENT", "SCF TOTAL GRADIENT"))
+    elif driver == "hessian" and method == "hf":
+        # contractual_qcvars.append(("HF TOTAL GRADIENT", "HF TOTAL GRADIENT"))
+        contractual_qcvars.append(("HF TOTAL HESSIAN", "HF TOTAL HESSIAN"))
         # contractual_qcvars.append(("HF TOTAL GRADIENT", "SCF TOTAL GRADIENT"))
 
     for rpv, pv in contractual_qcvars:
@@ -163,15 +170,24 @@ def contractual_mp2(
     ]
     if driver == "gradient" and method == "mp2":
         contractual_qcvars.append("MP2 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "mp2":
+        # contractual_qcvars.append("MP2 TOTAL GRADIENT")
+        contractual_qcvars.append("MP2 TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True
         if (
             (
                 (
-                    (qc_module == "gamess" and reference in ["uhf", "rohf"] and method == "mp2")
-                    or (qc_module == "gamess" and reference == "rhf" and method == "mp2" and driver == "gradient")
-                    or (qc_module == "gamess" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
+                    (qc_module == "cfour" and reference == "rohf" and method == "mp2" and driver == "hessian")
+                    or (qc_module == "gamess" and reference in ["uhf", "rohf"] and method == "mp2")
+                    or (
+                        qc_module == "gamess"
+                        and reference == "rhf"
+                        and method == "mp2"
+                        and driver in ["gradient", "hessian"]
+                    )
+                    or (qc_module == "gamess" and reference in ["rhf"] and method in ["lccd", "ccd", "ccsd", "ccsd(t)"])
                     or (qc_module == "nwchem-tce" and method in ["mp2", "mp3"])
                     or (qc_module == "nwchem-cc" and reference in ["rhf"] and method in ["ccsd", "ccsd(t)"])
                     or (
@@ -210,7 +226,7 @@ def contractual_mp2(
             or (
                 (
                     (qc_module == "psi4-ccenergy" and reference == "rohf" and method == "ccsd")
-                    or (qc_module == "nwchem-tce" and method in ["ccsd", "ccsd(t)", "ccsdt"])
+                    or (qc_module == "nwchem-tce" and method in ["lccd", "lccsd", "ccd", "ccsd", "ccsd(t)", "ccsdt"])
                     or (qc_module == "gamess" and reference == "rohf" and method == "ccsd")
                     or (
                         qc_module.startswith("cfour")
@@ -256,6 +272,9 @@ def contractual_mp2p5(
     ]
     if driver == "gradient" and method == "mp2.5":
         contractual_qcvars.append("MP2.5 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "mp2.5":
+        # contractual_qcvars.append("MP2.5 TOTAL GRADIENT")
+        contractual_qcvars.append("MP2.5 TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True
@@ -306,6 +325,9 @@ def contractual_mp3(
     ]
     if driver == "gradient" and method == "mp3":
         contractual_qcvars.append("MP3 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "mp3":
+        # contractual_qcvars.append("MP3 TOTAL GRADIENT")
+        contractual_qcvars.append("MP3 TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True
@@ -377,12 +399,30 @@ def contractual_lccd(
     ]
     if driver == "gradient" and method == "lccd":
         contractual_qcvars.append("LCCD TOTAL GRADIENT")
+    elif driver == "hessian" and method == "lccd":
+        # contractual_qcvars.append("LCCD TOTAL GRADIENT")
+        contractual_qcvars.append("LCCD TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True
         if (
-            (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "lccd")
-        ) and pv in ["LCCD SAME-SPIN CORRELATION ENERGY", "LCCD OPPOSITE-SPIN CORRELATION ENERGY"]:
+            (
+                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "lccd")
+                or (qc_module == "cfour-ncc" and reference in ["rhf"] and method == "lccd")
+                or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method == "lccd")
+                or (qc_module == "gamess" and reference in ["rhf"] and method == "lccd")
+            )
+            and pv in ["LCCD SAME-SPIN CORRELATION ENERGY", "LCCD OPPOSITE-SPIN CORRELATION ENERGY"]
+        ) or (
+            (qc_module == "nwchem-tce" and reference in ["rohf"] and method in ["lccd"])
+            and pv
+            in [
+                "LCCD SAME-SPIN CORRELATION ENERGY",
+                "LCCD OPPOSITE-SPIN CORRELATION ENERGY",
+                "LCCD SINGLES ENERGY",
+                "LCCD DOUBLES ENERGY",
+            ]
+        ):
             expected = False
 
         yield (pv, pv, expected)
@@ -479,6 +519,9 @@ def contractual_ccsd(
     ]
     if driver == "gradient" and method == "ccsd":
         contractual_qcvars.append("CCSD TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsd":
+        # contractual_qcvars.append("CCSD TOTAL GRADIENT")
+        contractual_qcvars.append("CCSD TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True
@@ -590,6 +633,9 @@ def contractual_ccsd_prt_pr(
     ]
     if driver == "gradient" and method == "ccsd(t)":
         contractual_qcvars.append("CCSD(T) TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsd(t)":
+        # contractual_qcvars.append("CCSD(T) TOTAL GRADIENT")
+        contractual_qcvars.append("CCSD(T) TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         # print("WW", qc_module, driver, reference, method, corl_type, fcae, pv)
@@ -637,6 +683,9 @@ def contractual_ccsdt(
     ]
     if driver == "gradient" and method == "ccsdt":
         contractual_qcvars.append("CCSDT TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsdt":
+        # contractual_qcvars.append("CCSDT TOTAL GRADIENT")
+        contractual_qcvars.append("CCSDT TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True
@@ -682,6 +731,9 @@ def contractual_ccsdt_prq_pr(
     ]
     if driver == "gradient" and method == "ccsdt(q)":
         contractual_qcvars.append("CCSDT(Q) TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsdt(q)":
+        # contractual_qcvars.append("CCSDT(Q) TOTAL GRADIENT")
+        contractual_qcvars.append("CCSDT(Q) TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True
@@ -726,6 +778,9 @@ def contractual_ccsdtq(
     ]
     if driver == "gradient" and method == "ccsdtq":
         contractual_qcvars.append("CCSDTQ TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsdtq":
+        # contractual_qcvars.append("CCSDTQ TOTAL GRADIENT")
+        contractual_qcvars.append("CCSDTQ TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True
@@ -750,6 +805,9 @@ def contractual_olccd(
     ]
     if driver == "gradient" and method == "olccd":
         contractual_qcvars.append("OLCCD TOTAL GRADIENT")
+    elif driver == "hessian" and method == "olccd":
+        # contractual_qcvars.append("OLCCD TOTAL GRADIENT")
+        contractual_qcvars.append("OLCCD TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True

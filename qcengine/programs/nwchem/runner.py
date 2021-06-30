@@ -245,19 +245,39 @@ task python
         try:
             qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
         except Exception as e:
-            raise UnknownError(stdout)
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
-        if nwgrad is not None:
-            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
-            qcvars["CURRENT GRADIENT"] = nwgrad
-        if nwhess is not None:
-            qcvars["CURRENT HESSIAN"] = nwhess
+        try:
+            if nwgrad is not None:
+                qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
+                qcvars["CURRENT GRADIENT"] = nwgrad
 
-        # Normalize the output as a float or list of floats
-        if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
-        else:
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            if nwhess is not None:
+                qcvars[f"{input_model.model.method.upper()[4:]} TOTAL HESSIAN"] = nwhess
+                qcvars["CURRENT HESSIAN"] = nwhess
+
+            # Normalize the output as a float or list of floats
+            if input_model.driver.upper() == "PROPERTIES":
+                retres = qcvars[f"CURRENT ENERGY"]
+            else:
+                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        except KeyError as e:
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
+
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):

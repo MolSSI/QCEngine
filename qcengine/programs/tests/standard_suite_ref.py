@@ -32,7 +32,7 @@ symmetry c1  # TODO for nwchem, manage another way
                 O
                 H 1 R
                 H 1 R 2 A
-            
+
                 R=0.958
                 A=104.5
               """,
@@ -168,6 +168,131 @@ _grad_scf_nh2_adz_cd_rohf = np.array([0.0, 0.0, 0.007661397585, 0.0, 0.003876803
 # fmt: on
 
 
+# fmt: off
+_hess_scf_hf_dz_pk_rhf = np.array([
+    0.011420157, 0., 0., -0.011420157, 0., 0.,
+    0., 0.011420157, 0., 0., -0.011420157, 0.,
+    0., 0., 0.6371334086, 0., 0., -0.6371334086,
+    -0.011420157, 0., 0., 0.011420157, 0., 0.,
+    0., -0.011420157, 0., 0., 0.011420157, 0.,
+    0., 0., -0.6371334086, 0., 0., 0.6371334086]).reshape((6, 6))
+_hess_scf_bh3p_dz_pk_uhf = np.array([
+    0.0051661616, 0., 0., -0.0059617366, 0., 0., 0.0003977875, 0., 0., 0.0003977875, 0., 0.,
+    0., 0.005028448, 0., 0., -0.0057802433, 0., 0., 0.0003758976, 0.0004726863, 0., 0.0003758976, -0.0004726863,
+    0., 0., 0.2162990046, 0., 0., -0.2130428571, 0., 0.0001869025, -0.0016280737, 0., -0.0001869025, -0.0016280737,
+    -0.0059617366, 0., 0., 0.0063439881, 0., 0., -0.0001911257, 0., 0., -0.0001911257, 0., 0.,
+    0., -0.0057802433, 0., 0., 0.0062399336, 0., 0., -0.0002298451, 0.0001287182, 0., -0.0002298451, -0.0001287182,
+    0., 0., -0.2130428571, 0., 0., 0.213169144, 0., 0.000042202, -0.0000631434, 0., -0.000042202, -0.0000631434,
+    0.0003977875, 0., 0., -0.0001911257, 0., 0., -0.0035717661, 0., 0., 0.0033651042, 0., 0.,
+    0., 0.0003758976, 0.0001869025, 0., -0.0002298451, 0.000042202, 0., 0.4101678639, -0.0004152545, 0., -0.4103139164, 0.00018615,
+    0., 0.0004726863, -0.0016280737, 0., 0.0001287182, -0.0000631434, 0., -0.0004152545, -0.0000642125, 0., -0.00018615, 0.0017554296,
+    0.0003977875, 0., 0., -0.0001911257, 0., 0., 0.0033651042, 0., 0., -0.0035717661, 0., 0.,
+    0., 0.0003758976, -0.0001869025, 0., -0.0002298451, -0.000042202, 0., -0.4103139164, -0.00018615, 0., 0.4101678639, 0.0004152545,
+    0., -0.0004726863, -0.0016280737, 0., -0.0001287182, -0.0000631434, 0., 0.00018615, 0.0017554296, 0., 0.0004152545, -0.0000642125]).reshape((12, 12))
+_hess_scf_bh3p_dz_pk_rohf = np.array([
+    0.0065592076, 0., 0., -0.0074218605, 0., 0., 0.0004313264, 0., 0., 0.0004313264, 0., 0.,
+    0., 0.006418851, 0., 0., -0.0072356386, 0., 0., 0.0004083938, 0.0004886847, 0., 0.0004083938, -0.0004886847,
+    0., 0., 0.2263725717, 0., 0., -0.2227777355, 0., -0.0000454089, -0.0017974181, 0., 0.0000454089, -0.0017974181,
+    -0.0074218605, 0., 0., 0.0078274642, 0., 0., -0.0002028018, 0., 0., -0.0002028018, 0., 0.,
+    0., -0.0072356386, 0., 0., 0.007720208, 0., 0., -0.0002422847, 0.0001293422, 0., -0.0002422847, -0.0001293422,
+    0., 0., -0.2227777355, 0., 0., 0.2229077847, 0., -0.0000149119, -0.0000650246, 0., 0.0000149119, -0.0000650246,
+    0.0004313264, 0., 0., -0.0002028018, 0., 0., -0.003466217, 0., 0., 0.0032376924, 0., 0.,
+    0., 0.0004083938, -0.0000454089, 0., -0.0002422847, -0.0000149119, 0., 0.4104056572, -0.0002788531, 0., -0.4105717664, 0.0003391738,
+    0., 0.0004886847, -0.0017974181, 0., 0.0001293422, -0.0000650246, 0., -0.0002788531, 0.0002037173, 0., -0.0003391738, 0.0016587254,
+    0.0004313264, 0., 0., -0.0002028018, 0., 0., 0.0032376924, 0., 0., -0.003466217, 0., 0.,
+    0., 0.0004083938, 0.0000454089, 0., -0.0002422847, 0.0000149119, 0., -0.4105717664, -0.0003391738, 0., 0.4104056572, 0.0002788531,
+    0., -0.0004886847, -0.0017974181, 0., -0.0001293422, -0.0000650246, 0., 0.0003391738, 0.0016587254, 0., 0.0002788531, 0.0002037173]).reshape((12, 12))
+
+_hess_scf_hf_dz_df_rhf = np.zeros(36).reshape((6, 6))
+_hess_scf_bh3p_dz_df_uhf = np.zeros(144).reshape((12, 12))
+_hess_scf_bh3p_dz_df_rohf = np.zeros(144).reshape((12, 12))
+
+_hess_scf_hf_dz_cd_rhf = np.zeros(36).reshape((6, 6))
+_hess_scf_bh3p_dz_cd_uhf = np.zeros(144).reshape((12, 12))
+_hess_scf_bh3p_dz_cd_rohf = np.zeros(144).reshape((12, 12))
+
+
+_hess_scf_h2o_qz2p_pk_rhf = np.array([
+    0.0238430708, 0., 0., -0.0119215354, 0., 0., -0.0119215354, 0., 0.,
+    0., 0.7093110919, 0., 0., -0.3546555459, 0.2653730246, 0., -0.3546555459, -0.2653730246,
+    0., 0., 0.4985784094, 0., 0.2027912096, -0.2492892047, 0., -0.2027912096, -0.2492892047,
+    -0.0119215354, 0., 0., 0.0108311859, 0., 0., 0.0010903495, 0., 0.,
+    0., -0.3546555459, 0.2027912096, 0., 0.3886078743, -0.2340821171, 0., -0.0339523283, 0.0312909075,
+    0., 0.2653730246, -0.2492892047, 0., -0.2340821171, 0.2322518953, 0., -0.0312909075, 0.0170373094,
+    -0.0119215354, 0., 0., 0.0010903495, 0., 0., 0.0108311859, 0., 0.,
+    0., -0.3546555459, -0.2027912096, 0., -0.0339523283, -0.0312909075, 0., 0.3886078743, 0.2340821171,
+    0., -0.2653730246, -0.2492892047, 0., 0.0312909075, 0.0170373094, 0., 0.2340821171, 0.2322518953]).reshape((9, 9))
+_hess_scf_nh2_qz2p_pk_uhf=np.array([
+    -0.0013373967, 0., 0., 0.0006686983, 0., 0., 0.0006686983, 0., 0.,
+    0., 0.6034171677, 0., 0., -0.3017085838, 0.2320222491, 0., -0.3017085838, -0.2320222491,
+    0., 0., 0.4139303729, 0., 0.1753720372, -0.2069651864, 0., -0.1753720372, -0.2069651864,
+    0.0006686983, 0., 0., -0.000364922, 0., 0., -0.0003037763, 0., 0.,
+    0., -0.3017085838, 0.1753720372, 0., 0.3327449782, -0.2036971432, 0., -0.0310363944, 0.0283251059,
+    0., 0.2320222491, -0.2069651864, 0., -0.2036971432, 0.1924704871, 0., -0.0283251059, 0.0144946993,
+    0.0006686983, 0., 0., -0.0003037763, 0., 0., -0.000364922, 0., 0.,
+    0., -0.3017085838, -0.1753720372, 0., -0.0310363944, -0.0283251059, 0., 0.3327449782, 0.2036971432,
+    0., -0.2320222491, -0.2069651864, 0., 0.0283251059, 0.0144946993, 0., 0.2036971432, 0.1924704871]).reshape((9, 9))
+_hess_scf_nh2_qz2p_pk_rohf=np.array([
+    -0.0005896607, 0., 0., 0.0002948303, 0., 0., 0.0002948303, 0., 0.,
+    0., 0.6051456253, 0., 0., -0.3025728127, 0.2323985163, 0., -0.3025728127, -0.2323985163,
+    0., 0., 0.4152409466, 0., 0.1756925779, -0.2076204733, 0., -0.1756925779, -0.2076204733,
+    0.0002948303, 0., 0., 0.0000266223, 0., 0., -0.0003214527, 0., 0.,
+    0., -0.3025728127, 0.1756925779, 0., 0.3336853184, -0.2040455471, 0., -0.0311125058, 0.0283529691,
+    0., 0.2323985163, -0.2076204733, 0., -0.2040455471, 0.1931471008, 0., -0.0283529691, 0.0144733724,
+    0.0002948303, 0., 0., -0.0003214527, 0., 0., 0.0000266223, 0., 0.,
+    0., -0.3025728127, -0.1756925779, 0., -0.0311125058, -0.0283529691, 0., 0.3336853184, 0.2040455471,
+    0., -0.2323985163, -0.2076204733, 0., 0.0283529691, 0.0144733724, 0., 0.2040455471, 0.1931471008]).reshape((9, 9))
+
+_hess_scf_h2o_qz2p_df_rhf = np.zeros(81).reshape((9, 9))
+_hess_scf_nh2_qz2p_df_uhf = np.zeros(81).reshape((9, 9))
+_hess_scf_nh2_qz2p_df_rohf = np.zeros(81).reshape((9, 9))
+
+_hess_scf_h2o_qz2p_cd_rhf = np.zeros(81).reshape((9, 9))
+_hess_scf_nh2_qz2p_cd_uhf = np.zeros(81).reshape((9, 9))
+_hess_scf_nh2_qz2p_cd_rohf = np.zeros(81).reshape((9, 9))
+
+
+_hess_scf_h2o_adz_pk_rhf = np.array([
+    0.0193009116, 0., 0., -0.0096504557, 0., 0., -0.0096504557, 0., 0.,
+    0., 0.7259570062, 0., 0., -0.362978503, 0.2735758043, 0., -0.362978503, -0.2735758043,
+    0., 0., 0.507233142, 0., 0.2101340878, -0.253616571, 0., -0.2101340878, -0.253616571,
+    -0.0096504557, 0., 0., 0.0087580503, 0., 0., 0.0008924054, 0., 0.,
+    0., -0.362978503, 0.2101340878, 0., 0.3955011984, -0.2418549461, 0., -0.0325226952, 0.0317208583,
+    0., 0.2735758043, -0.253616571, 0., -0.2418549461, 0.236653618, 0., -0.0317208583, 0.016962953,
+    -0.0096504557, 0., 0., 0.0008924054, 0., 0., 0.0087580503, 0., 0.,
+    0., -0.362978503, -0.2101340878, 0., -0.0325226952, -0.0317208583, 0., 0.3955011984, 0.2418549461,
+    0., -0.2735758043, -0.253616571, 0., 0.0317208583, 0.016962953, 0., 0.2418549461, 0.236653618 ]).reshape((9, 9))
+_hess_scf_nh2_adz_pk_uhf = np.array([
+    -0.0073285241, 0., 0., 0.0036642621, 0., 0., 0.0036642621, 0., 0.,
+    0., 0.6248676289, 0., 0., -0.3124338145, 0.2425505849, 0., -0.3124338145, -0.2425505849,
+    0., 0., 0.4213971779, 0., 0.185122888, -0.210698589, 0., -0.185122888, -0.210698589,
+    0.0036642621, 0., 0., -0.0033269688, 0., 0., -0.0003372933, 0., 0.,
+    0., -0.3124338145, 0.185122888, 0., 0.3427670403, -0.2138367365, 0., -0.0303332259, 0.0287138485,
+    0., 0.2425505849, -0.210698589, 0., -0.2138367365, 0.1969122616, 0., -0.0287138485, 0.0137863273,
+    0.0036642621, 0., 0., -0.0003372933, 0., 0., -0.0033269688, 0., 0.,
+    0., -0.3124338145, -0.185122888, 0., -0.0303332259, -0.0287138485, 0., 0.3427670403, 0.2138367365,
+    0., -0.2425505849, -0.210698589, 0., 0.0287138485, 0.0137863273, 0., 0.2138367365, 0.1969122616]).reshape((9, 9))
+_hess_scf_nh2_adz_pk_rohf = np.array([
+    -0.006621982, 0., 0., 0.003310991, 0., 0., 0.003310991, 0., 0.,
+    0., 0.6266642672, 0., 0., -0.3133321336, 0.2429688151, 0., -0.3133321336, -0.2429688151,
+    0., 0., 0.4229135704, 0., 0.1853731231, -0.2114567853, 0., -0.1853731231, -0.2114567853,
+    0.003310991, 0., 0., -0.0029315977, 0., 0., -0.0003793933, 0., 0.,
+    0., -0.3133321336, 0.1853731231, 0., 0.3437839161, -0.2141709691, 0., -0.0304517825, 0.028797846,
+    0., 0.2429688151, -0.2114567853, 0., -0.2141709691, 0.1976705549, 0., -0.028797846, 0.0137862303,
+    0.003310991, 0., 0., -0.0003793933, 0., 0., -0.0029315977, 0., 0.,
+    0., -0.3133321336, -0.1853731231, 0., -0.0304517825, -0.028797846, 0., 0.3437839161, 0.2141709691,
+    0., -0.2429688151, -0.2114567853, 0., 0.028797846, 0.0137862303, 0., 0.2141709691, 0.1976705549]).reshape((9, 9))
+
+_hess_scf_h2o_adz_df_rhf = np.zeros(81).reshape((9, 9))
+_hess_scf_nh2_adz_df_uhf = np.zeros(81).reshape((9, 9))
+_hess_scf_nh2_adz_df_rohf = np.zeros(81).reshape((9, 9))
+
+_hess_scf_h2o_adz_cd_rhf = np.zeros(81).reshape((9, 9))
+_hess_scf_nh2_adz_cd_uhf = np.zeros(81).reshape((9, 9))
+_hess_scf_nh2_adz_cd_rohf = np.zeros(81).reshape((9, 9))
+# fmt: on
+
+
 _std_suite = [
     # <<<  CONV-AE-CONV  >>>
     {
@@ -182,6 +307,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_hf_dz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_hf_dz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_hf_dz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.203781911950,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05427697023782003,
@@ -272,6 +398,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_adz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_adz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_adz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.2218977246,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05669988343022163,
@@ -368,6 +495,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_qz2p_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_qz2p_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_qz2p_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.2701916672,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.06530131,
@@ -464,6 +592,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.05948928003552,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.001918693775,
@@ -562,6 +691,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.15485993330517828,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03520162545964887,
@@ -628,6 +758,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.195530391293,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04161633,
@@ -694,6 +825,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.060478115157,
             "MP2 SINGLES ENERGY": -0.000694049865,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.002004909679,
@@ -757,6 +889,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.15949744108346664,
             "MP2 SINGLES ENERGY": -0.0028296307982793997,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03541709278508698,
@@ -813,6 +946,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.2005395272,
             "MP2 SINGLES ENERGY": -0.00298375,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04178535,
@@ -870,6 +1004,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_hf_dz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_hf_dz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_hf_dz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.201627516796,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.0534895025483176,
@@ -937,6 +1072,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_adz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_adz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_adz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.2194081478,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.055833980855745646,
@@ -1017,6 +1153,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_qz2p_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_qz2p_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_qz2p_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.24515185206,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.06126410,
@@ -1097,6 +1234,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.058423513790,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.001767468898,
@@ -1193,6 +1331,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.15242755400188052,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03445360441348938,
@@ -1256,6 +1395,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.171184123093,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03822454,
@@ -1319,6 +1459,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.059407254257,
             "MP2 SINGLES ENERGY": -0.000688368657,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.001851937488,
@@ -1379,6 +1520,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.15702660833165538,
             "MP2 SINGLES ENERGY": -0.0028059971624814647,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03466304269235235,
@@ -1432,6 +1574,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.1761163066,
             "MP2 SINGLES ENERGY": -0.00294339,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03837483,
@@ -1486,6 +1629,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_hf_dz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_hf_dz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_hf_dz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.203778449,
             "MP2 SINGLES ENERGY": 0.0,
             "MP3 CORRELATION ENERGY": -0.20648138,  # dfocc
@@ -1510,6 +1654,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_adz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_adz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_adz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.22188844,
             "MP2 SINGLES ENERGY": 0.0,
             "MP3 CORRELATION ENERGY": -0.22643352,  # dfocc
@@ -1534,6 +1679,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_qz2p_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_qz2p_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_qz2p_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.27018509,
             "MP2 SINGLES ENERGY": 0.0,
             "MP3 CORRELATION ENERGY": -0.27294541,  # dfocc
@@ -1558,6 +1704,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.059477703268,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.001918940186,
@@ -1582,6 +1729,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.15485159,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03520588,
@@ -1606,6 +1754,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.19552518,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04162160,
@@ -1630,6 +1779,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.0604664810,
             "MP2 SINGLES ENERGY": -0.000694049858,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.002005152902,
@@ -1648,6 +1798,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.15948893,
             "MP2 SINGLES ENERGY": -0.00282963,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03542136,
@@ -1666,6 +1817,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.20053428,
             "MP2 SINGLES ENERGY": -0.00298375,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04179065,
@@ -1685,6 +1837,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_hf_dz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_hf_dz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_hf_dz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.20162439774,
             "MP2 SINGLES ENERGY": 0.0,
             "MP3 CORRELATION ENERGY": -0.20453779,  # dfocc
@@ -1709,6 +1862,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_adz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_adz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_adz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.21939933,
             "MP2 SINGLES ENERGY": 0.0,
             "MP3 CORRELATION ENERGY": -0.22415842,  # dfocc
@@ -1733,6 +1887,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_qz2p_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_qz2p_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_qz2p_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.24514540,
             "MP2 SINGLES ENERGY": 0.0,
             "MP3 CORRELATION ENERGY": -0.24747829,  # dfocc
@@ -1757,6 +1912,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.05841222894,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.0017676971,
@@ -1781,6 +1937,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.15241971,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03445776,
@@ -1805,6 +1962,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.17117906,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03822980,
@@ -1829,6 +1987,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.059395907176,
             "MP2 SINGLES ENERGY": -0.00068836865,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.001852162877,
@@ -1847,6 +2006,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.15701860,
             "MP2 SINGLES ENERGY": -0.00280600,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03466721,
@@ -1865,6 +2025,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.17611121,
             "MP2 SINGLES ENERGY": -0.00294339,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03838011,
@@ -1884,6 +2045,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_hf_dz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_hf_dz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_hf_dz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.20377997248921056,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05431321036920538,
@@ -1914,6 +2076,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_adz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_adz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_adz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.22188894,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05674808,
@@ -1939,6 +2102,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_qz2p_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_qz2p_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_qz2p_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.27018057,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.06530212,
@@ -1964,6 +2128,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.05945820694747983,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.0019203155958724552,
@@ -1988,6 +2153,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.15484736,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03523329,
@@ -2012,6 +2178,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.19551918,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04161696,
@@ -2036,6 +2203,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.0604460449537298,
             "MP2 SINGLES ENERGY": -0.0006940498589629459,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.0020066877639503184,
@@ -2055,6 +2223,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.15948289,
             "MP2 SINGLES ENERGY": -0.00282963,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03544835,
@@ -2074,6 +2243,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.20052829,
             "MP2 SINGLES ENERGY": -0.00298375,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04178599,
@@ -2094,6 +2264,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_hf_dz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_hf_dz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_hf_dz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.20162566806258586,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05352569481658172,
@@ -2122,6 +2293,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_adz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_adz_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_adz_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.21939942,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.05588210,
@@ -2147,6 +2319,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_h2o_qz2p_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_qz2p_pk_rhf,
+            "HF TOTAL HESSIAN": _hess_scf_h2o_qz2p_pk_rhf,
             "MP2 CORRELATION ENERGY": -0.24514425,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.06126481,
@@ -2172,6 +2345,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.058392397606538686,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.0017690135626491292,
@@ -2196,6 +2370,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.15241501,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03448519,
@@ -2220,6 +2395,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_uhf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_uhf,
             "MP2 CORRELATION ENERGY": -0.17117615,
             "MP2 SINGLES ENERGY": 0.0,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03822512,
@@ -2244,6 +2420,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.05937514348825628,
             "MP2 SINGLES ENERGY": -0.0006883686516107368,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.0018536363586657242,
@@ -2263,6 +2440,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.15701209,
             "MP2 SINGLES ENERGY": -0.00280600,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03469422,
@@ -2282,6 +2460,7 @@ _std_suite = [
         "data": {
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_rohf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_rohf,
+            "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_rohf,
             "MP2 CORRELATION ENERGY": -0.17610830,
             "MP2 SINGLES ENERGY": -0.00294339,
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03837541,

@@ -990,6 +990,14 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
 
+    if "LCCD TOTAL ENERGY" in psivar and "LCCD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["LCCD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["LCCD TOTAL ENERGY"]
+
+    if "LCCSD TOTAL ENERGY" in psivar and "LCCSD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["LCCSD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["LCCSD TOTAL ENERGY"]
+
     if "DFT TOTAL ENERGY" in psivar:
         psivar["CURRENT REFERENCE ENERGY"] = psivar["DFT TOTAL ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["DFT TOTAL ENERGY"]
@@ -1001,6 +1009,10 @@ def harvest_outfile_pass(outtext):
     if "%s TOTAL ENERGY" % (cc_name) in psivar and ("%s CORRELATION ENERGY" % (cc_name) in psivar):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["%s CORRELATION ENERGY" % (cc_name)]
         psivar["CURRENT ENERGY"] = psivar["%s TOTAL ENERGY" % (cc_name)]
+
+    if "CCD TOTAL ENERGY" in psivar and "CCD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCD TOTAL ENERGY"]
 
     if "CCSD TOTAL ENERGY" in psivar and "CCSD CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]
