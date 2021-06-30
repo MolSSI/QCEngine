@@ -260,6 +260,30 @@ def harvest_outfile_pass(outtext):
         psivar["MP3 DOUBLES ENERGY"] = Decimal(mobj.group(3)) + Decimal(mobj.group(7))
         module = "vcc"
 
+    mobj = re.search(
+        # fmt: off
+        r"^\s*" + r"(?:MP2 correlation energy:)\s+" + r"(?P<mp2corl>" + NUMBER + ")" + r"\s*" +
+        r"^\s*" + r"(?:MP3 correction:)\s+" +         r"(?P<mp3corr>" + NUMBER + ")" + r"\s*" +
+        r"^\s*" + r"(?:MP3 correlation energy:)\s+" + r"(?P<mp3corl>" + NUMBER + ")" + r"\s*" +
+        r"(?:.*?)" +
+        r"^\s*" + r"(?:Non-iterative calculation of MP3)" + r".*" +
+        r"(?:.*?)" +
+        r"^\s*" + r"(?:Total MP3 energy:)" + r"\s+" + r"(?P<mp3tot>" + NUMBER + ")" + r"\s*$",
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:
+        print("matched mp3 ncc", mobj.groupdict())
+        #psivar["MP2 CORRELATION ENERGY"] = mobj.group("mp2corl")
+        psivar["MP3 CORRELATION ENERGY"] = mobj.group("mp3corl")
+        psivar["MP3 CORRECTION ENERGY"] = mobj.group("mp3corr")
+        psivar["MP3 TOTAL ENERGY"] = mobj.group("mp3tot")
+        # looks like ncc is rhf-only
+        #psivar["MP2 DOUBLES ENERGY"] = mobj.group("mp2corl")
+        psivar["MP3 DOUBLES ENERGY"] = mobj.group("mp3corl")
+        module = "ncc"
+
     # Process MP4
     mobj = re.search(
         # fmt: off
@@ -360,7 +384,7 @@ def harvest_outfile_pass(outtext):
     # Process CC Iterations
     mobj = re.search(
         # fmt: off
-        r'^\s+' + r'(?P<fullCC>(?P<iterCC>CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
+        r'^\s+' + r'(?P<fullCC>(?P<iterCC>L?CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
         r'(?:.*?)' +
         r'^\s+' + r'(?:\d+)' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+DIIS\s*' +
         r'^\s*(?:-+)\s*' +
@@ -423,10 +447,10 @@ def harvest_outfile_pass(outtext):
             mobj.group("iterations"),
         )
         if mobj2:
-            print("matched ncc cc iter mod5", mobj.groups())
+            print("matched ncc cc iter mod5", mobj.groupdict(), mobj2[-1])
             psivar["{} CORRELATION ENERGY".format(mobj.group("iterCC"))] = mobj2[-1][2]
             if mobj.group("iterCC") not in ["CCSDT"]:
-                psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
+                psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj2[-1][2]
             psivar["{} TOTAL ENERGY".format(mobj.group("iterCC"))] = mobj.group("tot")
             module = "ncc"
 
@@ -655,6 +679,37 @@ def harvest_outfile_pass(outtext):
 
     mobj = re.search(
         # fmt: off
+        r'^\s+' + r'(?P<fullCC>(?P<iterCC>L?CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
+        r'(?:.*?)' +
+        r'^\s+' + r'Amplitude equations converged in' + r'\s*\d+\s*' + r'iterations.\s*' +
+        r'(?:.*?)' +
+         r'^\s+' + r'The AA contribution to the correlation energy is:\s+' + r"(?P<AA>" + NUMBER + r")" + r'\s+a.u.\s*' +
+        r'(^\s+' + r'The BB contribution to the correlation energy is:\s+' + r"(?P<BB>" + NUMBER + r")" + r'\s+a.u.\s*' + r")?" +
+         r'^\s+' + r'The AB contribution to the correlation energy is:\s+' + r"(?P<AB>" + NUMBER + r")" + r'\s+a.u.\s*' +
+        r'^\s+' + r'The total correlation energy is\s+' + r"(?P<corl>" + NUMBER + r")" + r'\s+a.u.\s*' +
+        r'(?:.*?)' +
+        r'^\s+' + r'(?:A miracle come to pass. )?' + r'The CC iterations have converged.' + r'\s*$',
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:  # PRINT=2 to get SCS components
+        print("matched scslccd", mobj.groupdict())
+        mobj3 = re.search(r"The reference state is a ROHF wave function.", outtext)
+        mobj4 = re.search(r"executable xvcc finished", outtext)
+        iterCC = mobj.group("iterCC")
+        if mobj4:  # vcc
+            if mobj.group("BB"):
+                aabb = Decimal(mobj.group("AA")) + Decimal(mobj.group("BB"))
+            else:
+                aabb = Decimal("2") * Decimal(mobj.group("AA"))
+            psivar[f"{iterCC} OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group("AB")
+            if not mobj3:
+                psivar[f"{iterCC} SAME-SPIN CORRELATION ENERGY"] = aabb
+        psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group("corl")
+
+    mobj = re.search(
+        # fmt: off
         r'^\s+' + r'(?P<fullCC>(?P<iterCC>CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
         r'(?:.*?)' +
         r'^\s+' + r'Amplitude equations converged in' + r'\s*\d+\s*' + r'iterations.\s*' +
@@ -792,6 +847,14 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
 
+    if "LCCD TOTAL ENERGY" in psivar and "LCCD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["LCCD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["LCCD TOTAL ENERGY"]
+
+    if "LCCSD TOTAL ENERGY" in psivar and "LCCSD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["LCCSD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["LCCSD TOTAL ENERGY"]
+
     #    if ('%s TOTAL ENERGY' % (mobj.group('fullCC')) in psivar) and \
     #       ('%s CORRELATION ENERGY' % (mobj.group('fullCC')) in psivar):
     #        psivar['CURRENT CORRELATION ENERGY'] = psivar['%s CORRELATION ENERGY' % (mobj.group('fullCC')]
@@ -800,6 +863,10 @@ def harvest_outfile_pass(outtext):
     if "CC2 TOTAL ENERGY" in psivar and "CC2 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CC2 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CC2 TOTAL ENERGY"]
+
+    if "CCD TOTAL ENERGY" in psivar and "CCD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCD TOTAL ENERGY"]
 
     if "CCSD TOTAL ENERGY" in psivar and "CCSD CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]

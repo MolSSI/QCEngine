@@ -195,7 +195,7 @@ class GAMESSHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            [],
+            ["gamess.dat"],
             scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
         )
