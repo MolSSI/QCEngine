@@ -3049,6 +3049,7 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03469422,
             "LCCD CORRELATION ENERGY": -0.1770018748,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3069,6 +3070,7 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03837541,
             "LCCD CORRELATION ENERGY": -0.1939912613,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     # <<<  CD-AE-CD  >>>
@@ -3100,6 +3102,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857381,
             "(T) CORRECTION ENERGY": -0.0019363109218456449,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     {
@@ -3140,6 +3143,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05017955,
             "(T) CORRECTION ENERGY": -0.00523867,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3180,6 +3184,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05801141,
             "(T) CORRECTION ENERGY": -0.00726395,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3253,6 +3258,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -3290,6 +3296,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.03413070,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3327,6 +3334,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.04013515,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3349,6 +3357,7 @@ _std_suite = [
                 [0.0, 0.0, 0.01359215, 0.0, 0.0, -0.01312116, 0.0, 0.01031541, -0.0002355, 0.0, -0.01031541, -0.0002355]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -3380,6 +3389,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3411,6 +3421,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     # <<<  CD-FC-CD  >>>
@@ -3442,6 +3453,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04787083,
             "(T) CORRECTION ENERGY": -0.0019204203743072874,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     {
@@ -3482,6 +3494,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04939986,
             "(T) CORRECTION ENERGY": -0.00521248,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3522,6 +3535,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05405638,
             "(T) CORRECTION ENERGY": -0.00709686,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3595,6 +3609,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -3632,6 +3647,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0334416820,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3669,6 +3685,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.03676422,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3704,6 +3721,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -3735,6 +3753,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3766,6 +3785,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     # <<<  CD-AE-DF  >>>
@@ -3799,6 +3819,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04845784,
             "(T) CORRECTION ENERGY": -0.00193844,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     {
@@ -3825,6 +3846,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05010092,
             "(T) CORRECTION ENERGY": -0.00524386,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3851,6 +3873,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05800702,
             "(T) CORRECTION ENERGY": -0.00726367,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3875,6 +3898,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0024017496,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -3899,6 +3923,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0340807883,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3923,6 +3948,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0401303480,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3942,6 +3968,7 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.0020066063,
             "LCCD CORRELATION ENERGY": -0.0834800819,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -3961,6 +3988,7 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03544828,
             "LCCD CORRELATION ENERGY": -0.1792705171,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -3980,6 +4008,7 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.04178566,
             "LCCD CORRELATION ENERGY": -0.2190993784,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     # <<<  CD-FC-DF  >>>
@@ -4011,6 +4040,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04775464,
             "(T) CORRECTION ENERGY": -0.00192252,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     {
@@ -4037,6 +4067,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04932106,
             "(T) CORRECTION ENERGY": -0.00521762,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4063,6 +4094,7 @@ _std_suite = [
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.05405189,
             "(T) CORRECTION ENERGY": -0.00709658,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4087,6 +4119,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0022546311,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -4111,6 +4144,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0333916888,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4135,6 +4169,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0367593319,  # dfocc
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4154,6 +4189,7 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.001853561678,
             "LCCD CORRELATION ENERGY": -0.0824761581,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -4173,6 +4209,7 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03469416,
             "LCCD CORRELATION ENERGY": -0.1770010376,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4192,6 +4229,7 @@ _std_suite = [
             "MP2 SAME-SPIN CORRELATION ENERGY": -0.03837509,
             "LCCD CORRELATION ENERGY": -0.1939904460,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     # <<<  DF-AE-DF  >>>
@@ -4241,6 +4279,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.0019380186429220421,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     {
@@ -4299,6 +4338,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00524345,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4347,6 +4387,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00726213,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4419,6 +4460,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -4462,6 +4504,7 @@ _std_suite = [
                 [0.0, 0.0, 0.030686886723, 0.0, 0.016619966665, -0.015343443362, 0.0, -0.016619966665, -0.015343443362]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4505,6 +4548,7 @@ _std_suite = [
                 [0.0, 0.0, 0.018122428755, 0.0, 0.007810952273, -0.009061214377, 0.0, -0.007810952273, -0.009061214377]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4541,6 +4585,7 @@ _std_suite = [
             "LCCD CORRELATION ENERGY": -0.0834776542,  # p4n
             "LCCD TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -4573,6 +4618,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCD CORRELATION ENERGY": -0.1792603912,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4605,6 +4651,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCD CORRELATION ENERGY": -0.2190866990,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     # <<<  DF-FC-DF  >>>
@@ -4654,6 +4701,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.001922093564526723,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     {
@@ -4712,6 +4760,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00521721,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4770,6 +4819,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00709505,
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4842,6 +4892,7 @@ _std_suite = [
                 ]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -4885,6 +4936,7 @@ _std_suite = [
                 [0.0, 0.0, 0.031455324295, 0.0, 0.017108389967, -0.015727662148, 0.0, -0.017108389967, -0.015727662148]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4928,6 +4980,7 @@ _std_suite = [
                 [0.0, 0.0, 0.019127907852, 0.0, 0.00829827557, -0.009563953926, 0.0, -0.00829827557, -0.009563953926]
             ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -4963,6 +5016,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCD CORRELATION ENERGY": -0.0824737155,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
     },
     {
@@ -4995,6 +5049,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCD CORRELATION ENERGY": -0.1769909051,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     {
@@ -5027,6 +5082,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCD CORRELATION ENERGY": -0.1939804718,  # p4n
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
     },
     # <<<  lopsided SCF/CORL algorithms  >>>
@@ -5052,6 +5108,7 @@ _std_suite = [
             "MP3 SINGLES ENERGY": 0.0,
             "MP3 SAME-SPIN CORRELATION ENERGY": -0.04918306,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     {
@@ -5076,6 +5133,7 @@ _std_suite = [
             "MP3 SINGLES ENERGY": 0.0,
             "MP3 SAME-SPIN CORRELATION ENERGY": -0.04918609,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     # {
@@ -5196,6 +5254,7 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857038,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     {
@@ -5231,6 +5290,7 @@ _std_suite = [
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD SAME-SPIN CORRELATION ENERGY": -0.04857333,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
+            # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
     #    {
@@ -5414,6 +5474,19 @@ for calc in _std_suite:
                         calc["data"]["LCCSD CORRELATION ENERGY"]
                         - calc["data"]["LCCSD SAME-SPIN CORRELATION ENERGY"]
                         - calc["data"]["LCCSD SINGLES ENERGY"]
+                    )
+
+        if "CCD CORRELATION ENERGY" in calc["data"]:
+            calc["data"]["CCD TOTAL ENERGY"] = calc["data"]["CCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            if "CCD SINGLES ENERGY" in calc["data"]:
+                calc["data"]["CCD DOUBLES ENERGY"] = (
+                    calc["data"]["CCD CORRELATION ENERGY"] - calc["data"]["CCD SINGLES ENERGY"]
+                )
+                if "CCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                    calc["data"]["CCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                        calc["data"]["CCD CORRELATION ENERGY"]
+                        - calc["data"]["CCD SAME-SPIN CORRELATION ENERGY"]
+                        - calc["data"]["CCD SINGLES ENERGY"]
                     )
 
         if "CCSD CORRELATION ENERGY" in calc["data"]:
