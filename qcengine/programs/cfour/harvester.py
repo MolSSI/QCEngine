@@ -275,12 +275,12 @@ def harvest_outfile_pass(outtext):
     )
     if mobj:
         print("matched mp3 ncc", mobj.groupdict())
-        #psivar["MP2 CORRELATION ENERGY"] = mobj.group("mp2corl")
+        # psivar["MP2 CORRELATION ENERGY"] = mobj.group("mp2corl")
         psivar["MP3 CORRELATION ENERGY"] = mobj.group("mp3corl")
         psivar["MP3 CORRECTION ENERGY"] = mobj.group("mp3corr")
         psivar["MP3 TOTAL ENERGY"] = mobj.group("mp3tot")
         # looks like ncc is rhf-only
-        #psivar["MP2 DOUBLES ENERGY"] = mobj.group("mp2corl")
+        # psivar["MP2 DOUBLES ENERGY"] = mobj.group("mp2corl")
         psivar["MP3 DOUBLES ENERGY"] = mobj.group("mp3corl")
         module = "ncc"
 
