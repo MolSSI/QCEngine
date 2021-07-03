@@ -515,25 +515,30 @@ def harvest_outfile_pass(outtext):
 
     mobj = re.search(
         # fmt: off
-        r'^\s+' + r'(?:HF-SCF energy)' + r'\s+' + NUMBER + r'\s*' +
+        r'^\s+' + r'(?:HF-SCF energy)' + r'\s+' + r"(?P<hf>" + NUMBER + r")" + r'\s*' +
         r'(?:.*?)' +
-        r'^\s+' + r'(?:CCSD energy)' + r'\s+' + NUMBER + r'\s*' +
+        r'^\s+' + r'(?:CCSD energy)' + r'\s+' + r"(?P<ccsd>" + NUMBER + r")" + r'\s*' +
         r'(?:.*?)' +
-        r'^\s+' + r'(?:E4T \+ E5ST)' + r'\s+' + NUMBER + r'\s*' +
+        r'^\s+' + r'(?:E4T  to CCSD\(T\))' + r'\s+' + r"(?P<e4t>" + NUMBER + r")" + r'\s*' +
+        r'(?:.*?)' +
+        r'^\s+' + r'(?:E4T \+ E5ST)' + r'\s+' + r"(?P<e4te5st>" + NUMBER + r")" + r'\s*' +
         r'(?:.*?)' +
         r'^\s*(?:-+)\s*' +
-        r'^\s+' + r'(?:CCSD\(T\) energy)' + r'\s+' + NUMBER + r'\s*$',
+        r'^\s+' + r'(?:CCSD\(T\) energy)' + r'\s+' + r"(?P<ccsd_t_>" + NUMBER + r")" + r'\s*$',
         # fmt: on
         outtext,
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
         print("matched ccsd(t) ecc v2")
-        psivar["SCF TOTAL ENERGY"] = mobj.group(1)
-        psivar["CCSD TOTAL ENERGY"] = mobj.group(2)
-        psivar["(T) CORRECTION ENERGY"] = mobj.group(3)
-        psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(4)) - Decimal(mobj.group(1))
-        psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(4)
+        psivar["SCF TOTAL ENERGY"] = mobj.group("hf")
+        psivar["CCSD TOTAL ENERGY"] = mobj.group("ccsd")
+        psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("e4t")
+        psivar["(T) CORRECTION ENERGY"] = mobj.group("e4te5st")
+        psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group("ccsd_t_")) - Decimal(mobj.group("hf"))
+        psivar["CCSD(T) TOTAL ENERGY"] = mobj.group("ccsd_t_")
+        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"] + psivar["T(CCSD) CORRECTION ENERGY"]
+        psivar["CCSD+T(CCSD) TOTAL ENERGY"] = psivar["CCSD TOTAL ENERGY"] + psivar["T(CCSD) CORRECTION ENERGY"]
         module = "ecc"
 
     mobj = re.search(
@@ -565,6 +570,7 @@ def harvest_outfile_pass(outtext):
         print("matched ccsd(t) ncc")
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
         psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
+        psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group("ttot")
         module = "ncc"
 
@@ -580,9 +586,29 @@ def harvest_outfile_pass(outtext):
         print("matched ccsd(t) ncc v2")
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
         psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
+        psivar["CCSD+T(CCSD) TOTAL ENERGY"] = psivar["[T] CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
+        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["[T] CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
         psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
         psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
         module = "ncc"
+
+    mobj = re.search(
+        # fmt: off
+           r"^\s*" + r"(?:E\(CCSD\))" + r"\s+=\s+" + r"(?P<ccsdtot>" + NUMBER + ")" + r"\s*" +
+           r"^\s*" + r"(?:E\(CCSD \+ T\(CCSD\)\))" + r"\s*=\s*" + r"(?P<ccsdtccsdtot>" + NUMBER + ")" + r"\s*$",
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:
+        print("matched ccsd+t(ccsd) vcc", mobj.groupdict())
+        psivar["CCSD TOTAL ENERGY"] = mobj.group("ccsdtot")
+        psivar["CCSD+T(CCSD) TOTAL ENERGY"] = mobj.group("ccsdtccsdtot")
+        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["CCSD+T(CCSD) TOTAL ENERGY"] - psivar["SCF TOTAL ENERGY"]
+        mobj3 = re.search(r"Reference function is (R|U)HF Hartree-Fock", outtext)
+        if mobj3:
+            psivar["CCSD SINGLES ENERGY"] = Decimal("0.0")
+        module = "vcc"
 
     mobj = re.search(
         # fmt: off
@@ -872,6 +898,10 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSD TOTAL ENERGY"]
 
+    if "CCSD+T(CCSD) TOTAL ENERGY" in psivar and "CCSD+T(CCSD) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSD+T(CCSD) TOTAL ENERGY"]
+
     if "CCSD(T) TOTAL ENERGY" in psivar and "CCSD(T) CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD(T) CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSD(T) TOTAL ENERGY"]
@@ -922,6 +952,11 @@ def harvest(p4Mol: Molecule, method: str, c4out, **largs):
         dipolDip = harvest_DIPOL(largs["DIPOL"])
     else:
         dipolDip = None
+
+    # Sometimes the hierarchical setting of CURRENT breaks down
+    if method.lower() in ["c4-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
+        outPsivar["CURRENT CORRELATION ENERGY"] = outPsivar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        outPsivar["CURRENT ENERGY"] = outPsivar["CCSD+T(CCSD) TOTAL ENERGY"]
 
     # Reconcile the coordinate information: several cases
     #   Case                            p4Mol   GRD      Check consistency           Apply orientation?     ReturnMol (1-19-2014)

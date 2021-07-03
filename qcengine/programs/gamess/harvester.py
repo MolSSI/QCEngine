@@ -35,6 +35,11 @@ def harvest(
         if np.count_nonzero(calc_hess) == 0:
             calc_hess = None
 
+    # Sometimes the hierarchical setting of CURRENT breaks down
+    if method.lower() in ["gms-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
+        qcvars["CURRENT CORRELATION ENERGY"] = qcvars["CCSD+T(CCSD) CORRELATION ENERGY"]
+        qcvars["CURRENT ENERGY"] = qcvars["CCSD+T(CCSD) TOTAL ENERGY"]
+
     if calc_mol:
         qcvars["NUCLEAR REPULSION ENERGY"] = str(round(calc_mol.nuclear_repulsion_energy(), 8))
         if in_mol:
@@ -404,6 +409,8 @@ def harvest_outfile_pass(outtext):
             qcvar["CCSD TOTAL ENERGY"] = mobj.group(4)
             qcvar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(8)) - Decimal(mobj.group(4))
             # qcvar['CCSD(T) CORRELATION ENERGY'] = Decimal(mobj.group(5)) - qcvar['SCF TOTAL ENERGY']
+            qcvar["CCSD+T(CCSD) CORRELATION ENERGY"] = mobj.group(7)
+            qcvar["CCSD+T(CCSD) TOTAL ENERGY"] = mobj.group(6)
             qcvar["CCSD(T) CORRELATION ENERGY"] = mobj.group(9)
             qcvar["CCSD(T) TOTAL ENERGY"] = mobj.group(8)
 
@@ -585,6 +592,10 @@ def harvest_outfile_pass(outtext):
     if "CR-CC(2,3) TOTAL ENERGY" in qcvar and "CR-CC(2,3) CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CR-CC(2,3) CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["CR-CC(2,3) TOTAL ENERGY"]
+
+    if "CCSD+T(CCSD) TOTAL ENERGY" in qcvar and "CCSD+T(CCSD) CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CCSD+T(CCSD) TOTAL ENERGY"]
 
     if "CCSD(T) TOTAL ENERGY" in qcvar and "CCSD(T) CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD(T) CORRELATION ENERGY"]
