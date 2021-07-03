@@ -209,7 +209,7 @@ class GAMESSHarness(ProgramHarness):
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         try:
-            qcvars, gamesshess, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
+            qcvars, gamesshess, gamessgrad, gamessmol = harvest(input_model.molecule, input_model.model.method, stdout, **outfiles)
         except Exception as e:
             raise UnknownError(
                 "STDOUT:\n"

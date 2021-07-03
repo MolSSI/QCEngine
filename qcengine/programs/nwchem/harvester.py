@@ -319,11 +319,15 @@ def harvest_outfile_pass(outtext):
             if mobj:
                 cc_plain = cc_name.replace("\\", "")
                 cc_corr = cc_plain.replace("CCSD", "")
+                print(f"matched tce cc {cc_plain}", mobj.groups())
                 logger.debug(f"matched tce cc {cc_plain}")
 
-                psivar[f"{cc_corr} CORRECTION ENERGY"] = mobj.group(1)
+                # psivar[f"{cc_corr} CORRECTION ENERGY"] = mobj.group(1)
                 psivar[f"{cc_plain} CORRELATION ENERGY"] = mobj.group(2)
                 psivar[f"{cc_plain} TOTAL ENERGY"] = mobj.group(3)
+                if cc_plain == "CCSD[T]":
+                    psivar[f"CCSD+T(CCSD) CORRELATION ENERGY"] = mobj.group(2)
+                    psivar[f"CCSD+T(CCSD) TOTAL ENERGY"] = mobj.group(3)
                 module = "tce"
 
             # TCE dipole with () or []
@@ -425,6 +429,22 @@ def harvest_outfile_pass(outtext):
 
         mobj = re.search(
             # fmt: off
+            r'^\s+' + r'T\(CCSD\) corr\. energy:' + r'\s+' + r"(?P<tccsdcorr>" + NUMBER + r")" + r'\s*' +
+            r'^\s+' + r'Total CCSD\+T\(CCSD\) energy:' + r'\s+' + r"(?P<tccsdtot>" + NUMBER + r")" + r'\s*$',
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.DOTALL,
+        )
+        if mobj:
+            print("matched ccsd+t(ccsd)", mobj.groupdict())
+            logger.debug("matched ccsd+t(ccsd)")
+            psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("tccsdcorr")
+            psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = Decimal(mobj.group("tccsdtot")) - psivar["HF TOTAL ENERGY"]
+            psivar["CCSD+T(CCSD) TOTAL ENERGY"] = mobj.group("tccsdtot")
+            module = "cc"
+
+        mobj = re.search(
+            # fmt: off
             r'^\s+' + r'--------------' + r'\s*' +
             r'^\s+' + r'CCSD\(T\) Energy' + r'\s*' +
             r'^\s+' + r'--------------' + r'\s*' + r'(?:.*?)' +
@@ -436,6 +456,7 @@ def harvest_outfile_pass(outtext):
         )
 
         if mobj:
+            print("matched ccsd(t)")
             logger.debug("matched ccsd(t)")
             psivar["(T) CORRECTION ENERGY"] = mobj.group(1)
             psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(2)) - psivar["HF TOTAL ENERGY"]
@@ -1018,6 +1039,10 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSD TOTAL ENERGY"]
 
+    if "CCSD+T(CCSD) TOTAL ENERGY" in psivar and "CCSD+T(CCSD) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSD+T(CCSD) TOTAL ENERGY"]
+
     if "CCSD(T) TOTAL ENERGY" in psivar and "CCSD(T) CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD(T) CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSD(T) TOTAL ENERGY"]
@@ -1063,7 +1088,7 @@ def harvest_hessian(hess: str) -> np.ndarray:
 
 
 def harvest(
-    in_mol: Molecule, nwout: str, **outfiles
+    in_mol: Molecule, method: str, nwout: str, **outfiles
 ) -> Tuple[PreservingDict, Optional[np.ndarray], list, Molecule, str, str]:
     """Parses all the pieces of output from NWChem: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
@@ -1094,6 +1119,11 @@ def harvest(
     out_hess = None
     if outfiles.get("nwchem.hess") is not None:
         out_hess = harvest_hessian(outfiles.get("nwchem.hess"))
+
+    # Sometimes the hierarchical setting of CURRENT breaks down
+    if method.lower() in ["nwc-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
+        out_psivar["CURRENT CORRELATION ENERGY"] = out_psivar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        out_psivar["CURRENT ENERGY"] = out_psivar["CCSD+T(CCSD) TOTAL ENERGY"]
 
     # Make sure the input and output molecules are the same
     if out_mol:

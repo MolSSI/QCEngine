@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def harvest(
-    p4Mol, gamessout: str, **outfiles
+    p4Mol, method: str, gamessout: str, **outfiles
 ) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]:
     """Parses all the pieces of output from gamess: the stdout in
     *gamessout* Scratch files are not yet considered at this moment.
@@ -34,6 +34,11 @@ def harvest(
         outHess = load_hessian(datasections["$HESS"], dtype="gamess")
         if np.count_nonzero(outHess) == 0:
             outHess = None
+
+    # Sometimes the hierarchical setting of CURRENT breaks down
+    if method.lower() in ["gms-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
+        outqcvar["CURRENT CORRELATION ENERGY"] = outqcvar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        outqcvar["CURRENT ENERGY"] = outqcvar["CCSD+T(CCSD) TOTAL ENERGY"]
 
     if outMol:
         outqcvar["NUCLEAR REPULSION ENERGY"] = outMol.nuclear_repulsion_energy()
@@ -400,6 +405,8 @@ def harvest_outfile_pass(outtext):
             qcvar["CCSD TOTAL ENERGY"] = mobj.group(4)
             qcvar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(8)) - Decimal(mobj.group(4))
             # qcvar['CCSD(T) CORRELATION ENERGY'] = Decimal(mobj.group(5)) - qcvar['SCF TOTAL ENERGY']
+            qcvar["CCSD+T(CCSD) CORRELATION ENERGY"] = mobj.group(7)
+            qcvar["CCSD+T(CCSD) TOTAL ENERGY"] = mobj.group(6)
             qcvar["CCSD(T) CORRELATION ENERGY"] = mobj.group(9)
             qcvar["CCSD(T) TOTAL ENERGY"] = mobj.group(8)
 
@@ -581,6 +588,10 @@ def harvest_outfile_pass(outtext):
     if "CR-CC(2,3) TOTAL ENERGY" in qcvar and "CR-CC(2,3) CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CR-CC(2,3) CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["CR-CC(2,3) TOTAL ENERGY"]
+
+    if "CCSD+T(CCSD) TOTAL ENERGY" in qcvar and "CCSD+T(CCSD) CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CCSD+T(CCSD) TOTAL ENERGY"]
 
     if "CCSD(T) TOTAL ENERGY" in qcvar and "CCSD(T) CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD(T) CORRELATION ENERGY"]

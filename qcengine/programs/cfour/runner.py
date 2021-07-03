@@ -147,7 +147,7 @@ class CFOURHarness(ProgramHarness):
 
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         try:
-            qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+            qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(input_model.molecule, input_model.model.method, stdout, **outfiles)
         except Exception as e:
             raise UnknownError(
                 "STDOUT:\n"
