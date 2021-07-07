@@ -10,6 +10,7 @@ from .util import PreservingDict
 
 logger = logging.getLogger(__name__)
 
+
 def _difference(args):
     minuend, subtrahend = args
     return minuend - subtrahend

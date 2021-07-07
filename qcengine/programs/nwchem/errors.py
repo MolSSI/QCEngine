@@ -1,5 +1,6 @@
 """Known errors for NWChem"""
 from typing import Any, Dict
+import logging
 
 from qcelemental.models import AtomicInput
 
@@ -7,11 +8,14 @@ from qcengine.exceptions import SimpleKnownErrorException
 from qcengine.programs.nwchem.germinate import xc_functionals
 
 
+logger = logging.getLogger(__name__)
+
+
 class GeomBinvrError(SimpleKnownErrorException):
     """GeomBinvr Error"""
 
     error_name = "geom_binvr"
-    description = "Error when generating redundant atomic coordinates. Fixed by turning this feature off (`noautoz`)"
+    description = "Error when generating redundant atomic coordinates. Often fixed by turning autoz off (`noautoz`)"
 
     @classmethod
     def _detect(cls, outputs: Dict[str, str]) -> bool:
@@ -25,7 +29,7 @@ class ConvergenceFailedError(SimpleKnownErrorException):
     """Failed to converge on electronic steps. This will increase the limit by 2x"""
 
     error_name = "convergence_failed"
-    description = "The computation failed to converge. We increased the number of steps by a factor of 2"
+    description = "The computation failed to converge."
 
     @classmethod
     def _detect(cls, outputs: Dict[str, str]) -> bool:
@@ -36,6 +40,8 @@ class ConvergenceFailedError(SimpleKnownErrorException):
     def create_keyword_update(self, input_data: AtomicInput) -> Dict[str, Any]:
         # Fit the correct keyword we are looking to update is different for different methods
         method = input_data.model.method
+        use_tce = input_data.keywords.get("qc_module", False)
+
         if method == "dft" or method.split()[0] in xc_functionals:
             if "dft__iterations" in input_data.keywords:
                 kwd = "dft__iterations"
@@ -46,6 +52,15 @@ class ConvergenceFailedError(SimpleKnownErrorException):
             else:
                 kwd = "dft__maxiter"
                 cur_iter = 20  # The NWChem default
+        elif method in ["scf", "hf", "mp2"]:
+            kwd = "scf__maxiter"
+            cur_iter = input_data.keywords.get(kwd, 8)
+        elif method.startswith("ccsd") and not use_tce:
+            kwd = "ccsd__maxiter"
+            cur_iter = input_data.keywords.get(kwd, 20)
+        elif method.startswith("ccsd") and use_tce:
+            kwd = "tce__maxiter"
+            cur_iter = input_data.keywords.get(kwd, 100)
         else:
             raise ValueError(f'Method "{method}" is not yet supported')
 

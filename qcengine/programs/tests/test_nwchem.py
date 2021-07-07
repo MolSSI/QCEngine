@@ -304,20 +304,29 @@ def test_autoz_error_correction():
 
 
 @pytest.mark.parametrize(
-    "method, keyword",
+    "method, keyword, init_iters, use_tce",
     [
-        ["b3lyp", "dft__maxiter"],
-        ["b3lyp", "dft__iterations"],
+        ["b3lyp", "dft__maxiter", 4, False],
+        ["b3lyp", "dft__iterations", 4, False],
+        ["hf", "scf__maxiter", 2, False],
+        ["mp2", "scf__maxiter", 2, False],
+        ["mp2", "scf__maxiter", 2, True],
+        ["ccsd", "tce__maxiter", 8, True],
+        ["ccsd", "ccsd__maxiter", 4, False],
     ],
 )
 @using("nwchem")
-def test_conv_threshold(nh2, method, keyword):
+def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
     result = qcng.compute(
         {
-            "molecule": nh2,
+            "molecule": h20v2,
             "model": {"method": method, "basis": "sto-3g"},
             "driver": "energy",
-            "keywords": {keyword: 4},
+            "keywords": {
+                keyword: init_iters,
+                "qc_module": use_tce,
+                "scf__uhf": True,  # UHF needed for SCF test
+            },
         },
         "nwchem",
         raise_error=True,
@@ -325,4 +334,4 @@ def test_conv_threshold(nh2, method, keyword):
 
     assert result.success
     assert "convergence_failed" in result.extras["observed_errors"]
-    assert result.extras["observed_errors"]["convergence_failed"]["keyword_updates"] == {keyword: 8}
+    assert result.extras["observed_errors"]["convergence_failed"]["keyword_updates"] == {keyword: init_iters * 2}
