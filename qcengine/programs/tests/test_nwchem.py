@@ -282,7 +282,7 @@ def test_autoz_error():
 
 
 @using("nwchem")
-def test_error_correction():
+def test_autoz_error_correction():
     """See if error correction for autoz works"""
 
     # Large molecule that leads to an AutoZ error
@@ -301,3 +301,28 @@ def test_error_correction():
     assert result.success
     assert "geom_binvr" in result.extras["observed_errors"]
     assert result.extras["observed_errors"]["geom_binvr"]["keyword_updates"] == {"geometry__noautoz": True}
+
+
+@pytest.mark.parametrize(
+    "method, keyword",
+    [
+        ["b3lyp", "dft__maxiter"],
+        ["b3lyp", "dft__iterations"],
+    ],
+)
+@using("nwchem")
+def test_conv_threshold(nh2, method, keyword):
+    result = qcng.compute(
+        {
+            "molecule": nh2,
+            "model": {"method": method, "basis": "sto-3g"},
+            "driver": "energy",
+            "keywords": {keyword: 4},
+        },
+        "nwchem",
+        raise_error=True,
+    )
+
+    assert result.success
+    assert "convergence_failed" in result.extras["observed_errors"]
+    assert result.extras["observed_errors"]["convergence_failed"]["keyword_updates"] == {keyword: 8}
