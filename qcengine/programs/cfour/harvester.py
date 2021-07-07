@@ -384,9 +384,9 @@ def harvest_outfile_pass(outtext):
     # Process CC Iterations
     mobj = re.search(
         # fmt: off
-        r'^\s+' + r'(?P<fullCC>(?P<iterCC>L?CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
+        r'^\s+' + r'(?P<fullCC>(?P<iterCC>L?CC(?:\w+(?:-(?:1|1b|2|3))?))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
         r'(?:.*?)' +
-        r'^\s+' + r'(?:\d+)' + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+DIIS\s*' +
+        r'^\s+' + r'(?:\d+)' + r'\s+' + r"(?P<corl>" + NUMBER + r")" + r'\s+' + r"(?P<tot>" + NUMBER + r")" + r'\s+DIIS\s*' +
         r'^\s*(?:-+)\s*' +
         r'^\s*(?:A miracle (?P<ccprog>has come|come) to pass. The CC iterations have converged.)\s*$',
         # fmt: on
@@ -394,23 +394,39 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched cc with full %s iterating %s" % (mobj.group("fullCC"), mobj.group("iterCC")))
-        psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(3)
-        psivar["%s TOTAL ENERGY" % (mobj.group("iterCC"))] = mobj.group(4)
+        print(
+            "matched cc with full %s iterating %s" % (mobj.group("fullCC"), mobj.group("iterCC")),
+            mobj.groupdict(),
+            mobj.groups(),
+        )
         module = {"has come": "vcc", "come": "ecc"}[mobj.group("ccprog")]
 
+        mobj4 = re.search(r"CALCLEVEL\s+ICLLVL\s+CCSDT-1b", outtext)
+        mtd = mobj.group("iterCC").upper()
+        if mtd == "CCSDT-1":
+            if mobj4 and module == "vcc":
+                mtd = "CCSDT-1B"
+            else:
+                mtd = "CCSDT-1A"
+        elif mtd == "CCSDT-1b":
+            mtd = "CCSDT-1B"
+        psivar[f"{mtd} CORRELATION ENERGY"] = mobj.group("corl")
+        psivar[f"{mtd} TOTAL ENERGY"] = mobj.group("tot")
+
         mobj3 = re.search(r"SCF reference function:  RHF", outtext)
-        if mobj3 and mobj.group("iterCC") not in ["CCSDT"]:
-            psivar[f"{mobj.group('iterCC')} DOUBLES ENERGY"] = mobj.group(3)
+        if mobj3 and mtd not in ["CCSDT-1A", "CCSDT-1B", "CCSDT-2", "CCSDT-3", "CCSDT"]:
+            psivar[f"{mtd} DOUBLES ENERGY"] = mobj.group("corl")
 
     mobj = re.search(
         # fmt: off
         r'^\s+' + r'(?:\d+)' + r'\s+' + r'(?P<corl>' + NUMBER + r')\s+' +
-                  NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER +  r'\s+' + r'(' + NUMBER +  r')?' + r'(' + r'\s+' + NUMBER + r')?' + r'\s*' +
+                  NUMBER + r'\s+' + NUMBER + r'\s+' + 
+                  NUMBER + r'\s+' + NUMBER +  r'\s+' + 
+                  r'(' + NUMBER +  r')?' + r'(' + r'\s+' + NUMBER + r')?' + r'\s*' +
         r'^\s*' +
-        r'^\s*' + r'(?:\w+ iterations converged .*?)' +
+        r'^\s*' + r'(?:\w+(?:-(1a|1b|2|3))? iterations converged .*?)' +
         r'^\s*' +
-        r'^\s*' + r'(?:Total (?P<iterCC>\w+) energy:)' + r'\s+' + r'(?P<tot>' + NUMBER + r')\s*$',
+        r'^\s*' + r'(?:Total (?P<iterCC>\w+(?:-(1a|1b|2|3))?) energy:)' + r'\s+' + r'(?P<tot>' + NUMBER + r')\s*$',
         # fmt: on
         outtext,
         re.MULTILINE | re.DOTALL,
@@ -418,20 +434,21 @@ def harvest_outfile_pass(outtext):
     if mobj:
         print("matched ncc cc iter")
         # looks like ncc is rhf-only
-        psivar["{} CORRELATION ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
-        if mobj.group("iterCC") not in ["CCSDT"]:
-            psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj.group("corl")
-        psivar["{} TOTAL ENERGY".format(mobj.group("iterCC"))] = mobj.group("tot")
+        mtd = mobj.group("iterCC").upper()
+        psivar[f"{mtd} CORRELATION ENERGY"] = mobj.group("corl")
+        if mtd not in ["CCSDT-1A", "CCSDT-1B", "CCSDT-2", "CCSDT-3", "CCSDT"]:
+            psivar[f"{mtd} DOUBLES ENERGY"] = mobj.group("corl")
+        psivar[f"{mtd} TOTAL ENERGY"] = mobj.group("tot")
         module = "ncc"
 
     mobj = re.search(
         # fmt: off
-        r'^\s+' + r"Beginning iterative solution of (?P<iterCC>\w+) equations" + r"\s*" +
+        r'^\s+' + r"Beginning iterative solution of (?P<iterCC>\w+(?:-\d)?) equations" + r"\s*" +
         r'(?P<iterations>.*)' +
         r'^\s*' + r"It\." + r"\s+" + "Correlation Energy" + r".*" +
         r'^\s*(?:-+)\s*' +
         r'^\s*' +
-        r'^\s*' + r'(?:\w+ iterations converged .*?)' +
+        r'^\s*' + r'(?:\w+(?:-\d)? iterations converged .*?)' +
         r'^\s*' +
         r'^\s*' + r'(?:Total \1 energy:)' + r'\s+' + r'(?P<tot>' + NUMBER + r')\s*$',
         # fmt: on
@@ -448,10 +465,11 @@ def harvest_outfile_pass(outtext):
         )
         if mobj2:
             print("matched ncc cc iter mod5", mobj.groupdict(), mobj2[-1])
-            psivar["{} CORRELATION ENERGY".format(mobj.group("iterCC"))] = mobj2[-1][2]
-            if mobj.group("iterCC") not in ["CCSDT"]:
-                psivar["{} DOUBLES ENERGY".format(mobj.group("iterCC"))] = mobj2[-1][2]
-            psivar["{} TOTAL ENERGY".format(mobj.group("iterCC"))] = mobj.group("tot")
+            mtd = mobj.group("iterCC").upper()
+            psivar[f"{mtd} CORRELATION ENERGY"] = mobj2[-1][2]
+            if mtd not in ["CCSDT-1A", "CCSDT-1B", "CCSDT-2", "CCSDT-3", "CCSDT"]:
+                psivar[f"{mtd} DOUBLES ENERGY"] = mobj2[-1][2]
+            psivar[f"{mtd} TOTAL ENERGY"] = mobj.group("tot")
             module = "ncc"
 
     # Process CC(T)
@@ -913,6 +931,22 @@ def harvest_outfile_pass(outtext):
     if "CCSDT TOTAL ENERGY" in psivar and "CCSDT CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSDT TOTAL ENERGY"]
+
+    if "CCSDT-1A TOTAL ENERGY" in psivar and "CCSDT-1A CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT-1A CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSDT-1A TOTAL ENERGY"]
+
+    if "CCSDT-1B TOTAL ENERGY" in psivar and "CCSDT-1B CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT-1B CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSDT-1B TOTAL ENERGY"]
+
+    if "CCSDT-2 TOTAL ENERGY" in psivar and "CCSDT-2 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT-2 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSDT-2 TOTAL ENERGY"]
+
+    if "CCSDT-3 TOTAL ENERGY" in psivar and "CCSDT-3 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT-3 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CCSDT-3 TOTAL ENERGY"]
 
     if "CCSDT(Q) TOTAL ENERGY" in psivar and "CCSDT(Q) CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT(Q) CORRELATION ENERGY"]

@@ -48,6 +48,37 @@ def query_has_qcvar(obj: Any, pv: str) -> bool:
     return bval
 
 
+_contractual_docstring = """
+    Parameters
+    ----------
+    qc_module
+        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
+    driver
+        {"energy", "gradient", "hessian"}
+        The derivative level that should be expected.
+    reference
+        {"rhf", "uhf", "rohf"}
+        The SCF reference since programs often output differently based on it.
+    method
+        The target AtomicInput.model.method since "free" methods may not always be
+        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
+    corl_type
+        {"conv", "df", "cd"}
+        The algorithm for the target method since programs often output differently
+        based on it.
+    fcae
+        {"ae", "fc"}
+        The all-electron vs. frozen-orbital aspect.
+
+    Returns
+    -------
+    (rpv, pv, expected)
+        Of all the QCVariables `pv` that should be available, returns tuple of
+        whether `expected` and what key `rpv` in the reference `pv` should match.
+
+"""
+
+
 def contractual_current(
     qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
 ) -> Tuple[str, str, bool]:
@@ -257,9 +288,10 @@ def contractual_mp2(
 def contractual_mp2p5(
     qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
 ) -> Tuple[str, str, bool]:
-    """Of the list of QCVariables an ideal MP2.5 should produce, returns whether or
+    f"""Of the list of QCVariables an ideal MP2.5 should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -361,32 +393,10 @@ def contractual_mp3(
 def contractual_lccd(
     qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
 ) -> Tuple[str, str, bool]:
-    """Of the list of QCVariables an ideal LCCD should produce, returns whether or
+    f"""Of the list of QCVariables an ideal LCCD should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
-    Parameters
-    ----------
-    qc_module : str
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver : {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference: {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method: str
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type: {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae: {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
-
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -606,35 +616,8 @@ def contractual_ccsd(
 def contractual_ccsdpt_prccsd_pr(
     qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
 ) -> Tuple[str, str, bool]:
-    """Of the list of QCVariables an ideal CCSD+T(CCSD) should produce, returns whether or
+    """Of the list of QCVariables an ideal CCSD+T(CCSD) (aka CCSD[T]) should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
-
-    Parameters
-    ----------
-    qc_module
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver
-        {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference
-        {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type
-        {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae
-        {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
 
     """
     contractual_qcvars = [
@@ -711,32 +694,10 @@ def contractual_ccsd_prt_pr(
 def contractual_ccsdt(
     qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
 ) -> Tuple[str, str, bool]:
-    """Of the list of QCVariables an ideal CCSDT should produce, returns whether or
+    f"""Of the list of QCVariables an ideal CCSDT should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
-    Parameters
-    ----------
-    qc_module : str
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver : {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference: {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method: str
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type: {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae: {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
-
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -748,6 +709,106 @@ def contractual_ccsdt(
     elif driver == "hessian" and method == "ccsdt":
         # contractual_qcvars.append("CCSDT TOTAL GRADIENT")
         contractual_qcvars.append("CCSDT TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+
+        yield (pv, pv, expected)
+
+
+def contractual_ccsdt1a(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal CCSDT-1A should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "CCSDT-1A CORRELATION ENERGY",
+        "CCSDT-1A TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "ccsdt-1a":
+        contractual_qcvars.append("CCSDT-1A TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsdt-1a":
+        # contractual_qcvars.append("CCSDT-1A TOTAL GRADIENT")
+        contractual_qcvars.append("CCSDT-1A TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+
+        yield (pv, pv, expected)
+
+
+def contractual_ccsdt1b(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal CCSDT-1B should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "CCSDT-1B CORRELATION ENERGY",
+        "CCSDT-1B TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "ccsdt-1b":
+        contractual_qcvars.append("CCSDT-1B TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsdt-1b":
+        # contractual_qcvars.append("CCSDT-1B TOTAL GRADIENT")
+        contractual_qcvars.append("CCSDT-1B TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+
+        yield (pv, pv, expected)
+
+
+def contractual_ccsdt2(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal CCSDT-2 should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "CCSDT-2 CORRELATION ENERGY",
+        "CCSDT-2 TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "ccsdt-2":
+        contractual_qcvars.append("CCSDT-2 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsdt-2":
+        # contractual_qcvars.append("CCSDT-2 TOTAL GRADIENT")
+        contractual_qcvars.append("CCSDT-2 TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+
+        yield (pv, pv, expected)
+
+
+def contractual_ccsdt3(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal CCSDT-3 should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "CCSDT-3 CORRELATION ENERGY",
+        "CCSDT-3 TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "ccsdt-3":
+        contractual_qcvars.append("CCSDT-3 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "ccsdt-3":
+        # contractual_qcvars.append("CCSDT-3 TOTAL GRADIENT")
+        contractual_qcvars.append("CCSDT-3 TOTAL HESSIAN")
 
     for pv in contractual_qcvars:
         expected = True

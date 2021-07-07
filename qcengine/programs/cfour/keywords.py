@@ -59,6 +59,10 @@ def format_keyword(keyword: str, val: Any) -> Tuple[str, str]:
     ]:
         text = str(val.lower())
 
+    # Transform the methods that *must* be mixed case
+    elif keyword in ["CFOUR_CALC_LEVEL", "CALC_LEVEL"] and val.upper() == "CCSDT-1B":
+        text = "CCSDT-1b"
+
     # No Transform
     else:
         text = str(val).upper()
