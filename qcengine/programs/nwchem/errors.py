@@ -64,7 +64,7 @@ class ConvergenceFailedError(SimpleKnownErrorException):
         else:
             raise ValueError(f'Method "{method}" is not yet supported')
 
-        return {kwd: cur_iter * 2}
+        return {kwd: cur_iter * 4}
 
 
 # List of all the known errors

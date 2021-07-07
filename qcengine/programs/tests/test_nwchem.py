@@ -334,4 +334,4 @@ def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
 
     assert result.success
     assert "convergence_failed" in result.extras["observed_errors"]
-    assert result.extras["observed_errors"]["convergence_failed"]["keyword_updates"] == {keyword: init_iters * 2}
+    assert result.extras["observed_errors"]["convergence_failed"]["keyword_updates"] == {keyword: init_iters * 4}
