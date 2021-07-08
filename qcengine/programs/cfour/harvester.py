@@ -587,7 +587,6 @@ def harvest_outfile_pass(outtext):
     if mobj:
         print("matched ccsd(t) ncc")
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
-        psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group("ttot")
         module = "ncc"
@@ -603,12 +602,83 @@ def harvest_outfile_pass(outtext):
     if mobj:
         print("matched ccsd(t) ncc v2")
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
-        psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
-        psivar["CCSD+T(CCSD) TOTAL ENERGY"] = psivar["[T] CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
-        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["[T] CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("bkttcorr")
+        psivar["CCSD+T(CCSD) TOTAL ENERGY"] = psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
+        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
         psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
         psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
         module = "ncc"
+
+    mobj = re.search(
+        # fmt: off
+        r"^\s*" + r"(?:Lambda-CCSD iterations converged .*)" +
+        r'(?:.*?)' +
+        r"^\s*" + r"(?:CCSD\[T\] correlation energy:)\s+" + r"(?P<bkttcorr>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD\(T\) correlation energy:)\s+" + r"(?P<tcorr>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD\[T\]_L correlation energy:)\s+" + r"(?P<abkttcorr>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD\(T\)_L correlation energy:)\s+" + r"(?P<atcorr>" + NUMBER + r")" + r"\s*" +
+        r'(?:.*?)' +
+        r"^\s*" + r"(?:Non-iterative calculation of CCSD\(T\)_L .*)" +
+        r'(?:.*?)' +
+        r"^\s*" + r"(?:Total CCSD\(T\)_L energy:)\s+" + r"(?P<accsdttot>" + NUMBER + r")" + r"\s*$",
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:
+        print("matched a-ccsd(t) ncc", mobj.groupdict())
+        psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
+        psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("bkttcorr")
+        psivar["A-(T) CORRECTION ENERGY"] = mobj.group("atcorr")
+        psivar["CCSD+T(CCSD) TOTAL ENERGY"] = psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
+        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
+        psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        psivar["A-CCSD(T) TOTAL ENERGY"] = mobj.group("accsdttot")
+        psivar["A-CCSD(T) CORRELATION ENERGY"] = psivar["A-(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        module = "ncc"
+
+    mobj = re.search(
+        # fmt: off
+        r"^\s*" + r"(?:A miracle come to pass. The CC iterations have converged.)" + r"\s*" +
+        r'(?:.*?)' +
+        r"^\s*" + r"(?:HF-SCF energy          )\s+" + r"(?P<hf>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:MP2 correlation energy )\s+" + r"(?P<mp2corl>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:MP2 energy             )\s+" + r"(?P<mp2>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD correlation energy)\s+" + r"(?P<ccsdcorl>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD energy            )\s+" + r"(?P<ccsd>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:Delta ET to CCSD\[T\]_L)\s+" + r"(?P<abkttcorr>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD\[T\]_L energy     )\s+" + r"(?P<accsdbktt>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:Delta ET to CCSD\(T\)_L)\s+" + r"(?P<atcorr>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD\(T\)_L energy     )\s+" + r"(?P<accsdt>" + NUMBER + r")" + r"\s*" +
+        r'(?:.*?)' +
+        r"^\s*" + r"(?:Non-iterative perturbative treatment of triple)" + r"\s*" +
+        r"^\s*" + r"(?:excitations using the CCSD\(T\)_L method:)" + r"\s*" +
+        r'(?:.*?)' +
+        r"^\s*" + r"(?:HF-SCF energy)\s+" + r"(?P<hf_again>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:MP2 correlation energy)\s+" + r"(?P<mp2corl_again>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:MP2 energy)\s+" + r"(?P<mp2_again>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD correlation energy)\s+" + r"(?P<lccsdcorl>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD energy)\s+" + r"(?P<lccsd>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:Delta ET to CCSD\(T\)_L)\s+" + r"(?P<atcorr_again>" + NUMBER + r")" + r"\s*" +
+        r"^\s*" + r"(?:CCSD\(T\)_L energy)\s+" + r"(?P<laccsdt>" + NUMBER + r")" + r"\s*$",
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:
+        print("matched a-ccsd(t) ecc", mobj.groupdict())
+        psivar["HF TOTAL ENERGY"] = mobj.group("hf")
+        psivar["MP2 CORRELATION ENERGY"] = mobj.group("mp2corl")
+        psivar["CCSD CORRELATION ENERGY"] = mobj.group("ccsdcorl")
+        psivar["A-(T) CORRECTION ENERGY"] = mobj.group("atcorr")
+        psivar["A-CCSD(T) TOTAL ENERGY"] = mobj.group("accsdt")
+        psivar["A-CCSD(T) CORRELATION ENERGY"] = psivar["A-(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+
+        mobj3 = re.search(r"SCF reference function:  (R|U)HF", outtext)
+        if mobj3:
+            psivar["CCSD SINGLES ENERGY"] = Decimal("0.0")
+        module = "ecc"
 
     mobj = re.search(
         # fmt: off
@@ -923,6 +993,10 @@ def harvest_outfile_pass(outtext):
     if "CCSD(T) TOTAL ENERGY" in psivar and "CCSD(T) CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD(T) CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSD(T) TOTAL ENERGY"]
+
+    if "A-CCSD(T) TOTAL ENERGY" in psivar and "A-CCSD(T) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["A-CCSD(T) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["A-CCSD(T) TOTAL ENERGY"]
 
     if "CC3 TOTAL ENERGY" in psivar and "CC3 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CC3 CORRELATION ENERGY"]

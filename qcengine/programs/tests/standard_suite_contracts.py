@@ -546,7 +546,7 @@ def contractual_ccsd(
                     or (
                         qc_module in ["cfour-ncc", "cfour-ecc"]
                         and reference in ["rhf"]
-                        and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)"]
+                        and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)", "a-ccsd(t)"]
                     )
                     or (
                         qc_module == "psi4-occ"
@@ -684,6 +684,34 @@ def contractual_ccsd_prt_pr(
 
     for pv in contractual_qcvars:
         # print("WW", qc_module, driver, reference, method, corl_type, fcae, pv)
+        expected = True
+        if False:
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_accsd_prt_pr(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal A-CCSD(T) (aka Lambda-CCSD(T), aka CCSD(aT) should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "A-(T) CORRECTION ENERGY",
+        "A-CCSD(T) CORRELATION ENERGY",
+        "A-CCSD(T) TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "a-ccsd(t)":
+        contractual_qcvars.append("A-CCSD(T) TOTAL GRADIENT")
+    elif driver == "hessian" and method == "a-ccsd(t)":
+        # contractual_qcvars.append("A-CCSD(T) TOTAL GRADIENT")
+        contractual_qcvars.append("A-CCSD(T) TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
         expected = True
         if False:
             expected = False
