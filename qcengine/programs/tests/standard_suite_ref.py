@@ -371,6 +371,10 @@ _std_suite = [
        [ 0.        ,  0.        , -0.6378403 ,  0.        ,  0.        , 0.6378403 ]]),
             "T(CCSD) CORRECTION ENERGY": -0.002058455537,  # vcc
             "(T) CORRECTION ENERGY": -0.0019363896542312043,
+            "A-(T) CORRECTION ENERGY": -0.001961066509136,  # ncc
+            "A-CCSD(T) TOTAL GRADIENT": np.array(  # ncc
+          [[ 0.000000000000000,   0.000000000000000,   0.003071874425935],
+           [ 0.000000000000000,   0.000000000000000,  -0.003071874425935]]),
             "CCSDT-1A CORRELATION ENERGY": -0.210768179766,  # ecc
             "CCSDT-1A TOTAL GRADIENT": np.array(  # mrcc
     [[ 0., 0.,  0.003162100349],
@@ -1145,6 +1149,7 @@ _std_suite = [
          0.00993118,  0.        ,  0.21762507,  0.18819594]]),
             "T(CCSD) CORRECTION ENERGY": -0.003990106867,  # vcc
             "(T) CORRECTION ENERGY": -0.00384378,
+            "A-(T) CORRECTION ENERGY": -0.00376395919,  # mrcc
 "CCSDT-1A CORRELATION ENERGY": -0.17782828147829832,  # mrcc
 "CCSDT-1A TOTAL GRADIENT": np.array(  # mrcc
 [[ 0.,          0.        ,  0.0311852 ],
@@ -2089,6 +2094,7 @@ _std_suite = [
          0.00989838,  0.        ,  0.21835496,  0.1883856 ]]),
             "T(CCSD) CORRECTION ENERGY": -0.003956941783,  # vcc
             "(T) CORRECTION ENERGY": -0.00381116,
+            "A-(T) CORRECTION ENERGY": -0.00373191576,  # mrcc
             "CCSDT-1A CORRELATION ENERGY": -0.1755715323437954,  # mrcc
             "CCSDT-1A TOTAL GRADIENT": np.array(  # mrcc
 [[ 0.,          0.        ,  0.03195915],
@@ -5728,6 +5734,14 @@ for calc in _std_suite:
             )
             calc["data"]["CCSD(T) TOTAL ENERGY"] = (
                 calc["data"]["CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
+
+        if "A-(T) CORRECTION ENERGY" in calc["data"]:
+            calc["data"]["A-CCSD(T) CORRELATION ENERGY"] = (
+                calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["A-(T) CORRECTION ENERGY"]
+            )
+            calc["data"]["A-CCSD(T) TOTAL ENERGY"] = (
+                calc["data"]["A-CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
             )
 
         if "CCSDT-1A CORRELATION ENERGY" in calc["data"]:
