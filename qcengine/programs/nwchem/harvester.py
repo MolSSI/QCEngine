@@ -270,7 +270,7 @@ def harvest_outfile_pass(outtext):
                         psivar[f"{mbpt_plain} CORRELATION ENERGY"] = mobj.group(1)
                 else:
                     psivar[f"{mbpt_plain} CORRECTION ENERGY"] = mobj.group(1)
-                    if not mobj3:
+                    if not mobj3 and mbpt_plain not in ["MP4"]:
                         psivar[f"{mbpt_plain} DOUBLES ENERGY"] = tce_cumm_corl
                 psivar[f"{mbpt_plain} TOTAL ENERGY"] = mobj.group(2)
                 module = "tce"
@@ -322,12 +322,13 @@ def harvest_outfile_pass(outtext):
                 print(f"matched tce cc {cc_plain}", mobj.groups())
                 logger.debug(f"matched tce cc {cc_plain}")
 
-                # psivar[f"{cc_corr} CORRECTION ENERGY"] = mobj.group(1)
-                psivar[f"{cc_plain} CORRELATION ENERGY"] = mobj.group(2)
-                psivar[f"{cc_plain} TOTAL ENERGY"] = mobj.group(3)
                 if cc_plain == "CCSD[T]":
                     psivar[f"CCSD+T(CCSD) CORRELATION ENERGY"] = mobj.group(2)
                     psivar[f"CCSD+T(CCSD) TOTAL ENERGY"] = mobj.group(3)
+                else:
+                    # psivar[f"{cc_corr} CORRECTION ENERGY"] = mobj.group(1)
+                    psivar[f"{cc_plain} CORRELATION ENERGY"] = mobj.group(2)
+                    psivar[f"{cc_plain} TOTAL ENERGY"] = mobj.group(3)
                 module = "tce"
 
             # TCE dipole with () or []
@@ -1007,8 +1008,8 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 TOTAL ENERGY"] - psivar["HF TOTAL ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP3 TOTAL ENERGY"]
 
-    if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRELATION ENERGY" in psivar:
-        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
+    if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRECTION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 TOTAL ENERGY"] - psivar["HF TOTAL ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
 
     if "LCCD TOTAL ENERGY" in psivar and "LCCD CORRELATION ENERGY" in psivar:

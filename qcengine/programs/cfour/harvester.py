@@ -283,6 +283,7 @@ def harvest_outfile_pass(outtext):
         psivar["MP3 DOUBLES ENERGY"] = mobj.group("mp3corl")
         module = "ncc"
 
+
     # Process MP4
     mobj = re.search(
         # fmt: off
@@ -323,6 +324,7 @@ def harvest_outfile_pass(outtext):
     )
     if mobj:
         print("matched mp4ro")
+        module = "vcc"
         dmp2 = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
         dmp3 = Decimal(mobj.group(5)) + Decimal(mobj.group(7))
         dmp4sdq = Decimal(mobj.group(9)) + Decimal(mobj.group(11))
@@ -352,10 +354,8 @@ def harvest_outfile_pass(outtext):
         psivar["MP4(SDQ) CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"] + dmp4sdq
         psivar["MP4(SDQ) TOTAL ENERGY"] = mobj.group(6)
         psivar["MP4(T) CORRECTION ENERGY"] = dmp4t
-        psivar["MP4(SDTQ) CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"] + dmp4sdq + dmp4t
-        psivar["MP4(SDTQ) TOTAL ENERGY"] = mobj.group(8)
-        psivar["MP4 CORRELATION ENERGY"] = psivar["MP4(SDTQ) CORRELATION ENERGY"]
-        psivar["MP4 TOTAL ENERGY"] = psivar["MP4(SDTQ) TOTAL ENERGY"]
+        psivar["MP4 CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"] + dmp4sdq + dmp4t
+        psivar["MP4 TOTAL ENERGY"] = mobj.group(8)
 
     mobj = re.search(
         # fmt: off
@@ -369,15 +369,53 @@ def harvest_outfile_pass(outtext):
     )
     if mobj:
         print("matched mp4tro")
+        module = "vcc"
         dmp4sdq = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
-        dmp4t = Decimal(mobj.group(5)) + Decimal(mobj.group(7))  # TODO: WT12 with T, not SDQ?
+        dmp4t = Decimal(mobj.group(5)) + Decimal(mobj.group(7))  # WT12 with T, not SDQ
         psivar["MP4(SDQ) CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"] + dmp4sdq
         psivar["MP4(SDQ) TOTAL ENERGY"] = mobj.group(4)
         psivar["MP4(T) CORRECTION ENERGY"] = dmp4t
-        psivar["MP4(SDTQ) CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"] + dmp4sdq + dmp4t
-        psivar["MP4(SDTQ) TOTAL ENERGY"] = mobj.group(8)
-        psivar["MP4 CORRELATION ENERGY"] = psivar["MP4(SDTQ) CORRELATION ENERGY"]
-        psivar["MP4 TOTAL ENERGY"] = psivar["MP4(SDTQ) TOTAL ENERGY"]
+        psivar["MP4 CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"] + dmp4sdq + dmp4t
+        psivar["MP4 TOTAL ENERGY"] = mobj.group(8)
+
+    mobj = re.search(
+        # fmt: off
+        r"^\s*" + r"(?:MP2 correlation energy:)\s+" + r"(?P<mp2corl>" + NUMBER + ")" + r"\s*" +
+        r"^\s*" + r"(?:MP3 correction:)\s+" +         r"(?P<mp3corr>" + NUMBER + ")" + r"\s*" +
+        r"^\s*" + r"(?:MP3 correlation energy:)\s+" + r"(?P<mp3corl>" + NUMBER + ")" + r"\s*" +
+        r"^\s*" + r"(?:SDQ-MP4 correction:)\s+" + r"(?P<mp4sdqcorr>" + NUMBER + ")" + r"\s*" +
+        r"^\s*" + r"(?:SDQ-MP4 correlation energy:)\s+" + r"(?P<mp4sdqcorl>" + NUMBER + ")" + r"\s*" +
+        r"(" +
+        r"^\s*" + r"(?:T-MP4 correction:)\s+" + r"(?P<mp4tcorr>" + NUMBER + ")" + r"\s*" +
+        r"^\s*" + r"(?:Total MP4 correction:)\s+" + r"(?P<mp4corr>" + NUMBER + ")" + r"\s*" +
+        r"^\s*" + r"(?:MP4 correlation energy:)\s+" + r"(?P<mp4sdtqcorl>" + NUMBER + ")" + r"\s*" +
+        r")?" +
+        r"(?:.*?)" +
+        r"^\s*" + r"(?:Non-iterative calculation of (MP4|SDQ-MP4))" + r".*" +
+        r"(?:.*?)" +
+        r"^\s*" + r"(?:Total (?P<mp4flavor>(MP4|SDQ-MP4)) energy:)" + r"\s+" + r"(?P<mp4flavortot>" + NUMBER + ")" + r"\s*$",
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:
+        print("matched mp4 ncc", mobj.groupdict())
+        # psivar["MP2 CORRELATION ENERGY"] = mobj.group("mp2corl")
+        module = "ncc"
+        mtd = {"MP4": "MP4", "SDQ-MP4": "MP4(SDQ)"}[mobj.group("mp4flavor")]
+        psivar["MP3 CORRELATION ENERGY"] = mobj.group("mp3corl")
+        psivar["MP3 CORRECTION ENERGY"] = mobj.group("mp3corr")
+        psivar["MP4(SDQ) CORRELATION ENERGY"] = mobj.group("mp4sdqcorl")
+        # looks like ncc is rhf-only
+        # psivar["MP2 DOUBLES ENERGY"] = mobj.group("mp2corl")
+        psivar["MP3 DOUBLES ENERGY"] = mobj.group("mp3corl")
+        if mtd == "MP4(SDQ)":
+            psivar["MP4(SDQ) TOTAL ENERGY"] = mobj.group("mp4flavortot")
+        elif mtd == "MP4":
+            psivar["MP4(T) CORRECTION ENERGY"] = mobj.group("mp4tcorr")
+            psivar["MP4 CORRECTION ENERGY"] = mobj.group("mp4corr")
+            psivar["MP4 TOTAL ENERGY"] = mobj.group("mp4flavortot")
+            psivar["MP4 CORRELATION ENERGY"] = mobj.group("mp4sdtqcorl")
 
     # Process CC Iterations
     mobj = re.search(
@@ -954,6 +992,10 @@ def harvest_outfile_pass(outtext):
     if "MP3 TOTAL ENERGY" in psivar and "MP3 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP3 TOTAL ENERGY"]
+
+    if "MP4(SDQ) TOTAL ENERGY" in psivar and "MP4(SDQ) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4(SDQ) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["MP4(SDQ) TOTAL ENERGY"]
 
     if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
