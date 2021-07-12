@@ -84,33 +84,7 @@ def contractual_current(
 ) -> Tuple[str, str, bool]:
     """Given the target method, returns the CURRENT QCVariables that should be produced.
 
-    Parameters
-    ----------
-    qc_module
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver
-        {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference
-        {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type
-        {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae
-        {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
-
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         ("HF TOTAL ENERGY", "SCF TOTAL ENERGY"),
@@ -138,6 +112,7 @@ def contractual_hf(
     """Of the list of QCVariables an ideal HF should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
+    {_contractual_docstring}
     """
 
     contractual_qcvars = [
@@ -162,33 +137,7 @@ def contractual_mp2(
     """Of the list of QCVariables an ideal MP2 should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
-    Parameters
-    ----------
-    qc_module
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver
-        {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference
-        {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type
-        {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae
-        {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
-
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -219,7 +168,7 @@ def contractual_mp2(
                         and driver in ["gradient", "hessian"]
                     )
                     or (qc_module == "gamess" and reference in ["rhf"] and method in ["lccd", "ccd", "ccsd", "ccsd+t(ccsd)", "ccsd(t)"])
-                    or (qc_module == "nwchem-tce" and method in ["mp2", "mp3"])
+                    or (qc_module == "nwchem-tce" and method in ["mp2", "mp3", "mp4"])
                     or (qc_module == "nwchem-cc" and reference in ["rhf"] and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)"])
                     or (
                         qc_module == "psi4-occ"
@@ -312,14 +261,14 @@ def contractual_mp2p5(
         expected = True
         if (
             (
-                (qc_module.startswith("cfour") and method == "mp3")
+                (qc_module.startswith("cfour") and method in ["mp3", "mp4(sdq)", "mp4"])
                 or (
                     qc_module == "psi4-occ"
                     and reference == "rhf"
                     and corl_type in ["df", "cd"]
                     and method in ["mp2.5", "mp3"]
                 )
-                or (qc_module.startswith("nwchem") and method == "mp3")
+                or (qc_module.startswith("nwchem") and method in ["mp3", "mp4"])
             )
             and pv in ["MP2.5 SAME-SPIN CORRELATION ENERGY", "MP2.5 OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (
@@ -345,6 +294,7 @@ def contractual_mp3(
     """Of the list of QCVariables an ideal MP3 should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -365,14 +315,14 @@ def contractual_mp3(
         expected = True
         if (
             (
-                (qc_module.startswith("cfour") and method == "mp3")
+                (qc_module.startswith("cfour") and method in ["mp3", "mp4(sdq)", "mp4"])
                 or (
                     qc_module == "psi4-occ"
                     and reference == "rhf"
                     and corl_type in ["df", "cd"]
                     and method in ["mp2.5", "mp3"]
                 )
-                or (qc_module.startswith("nwchem") and method == "mp3")
+                or (qc_module.startswith("nwchem") and method in ["mp3", "mp4"])
             )
             and pv in ["MP3 SAME-SPIN CORRELATION ENERGY", "MP3 OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (
@@ -441,32 +391,10 @@ def contractual_lccd(
 def contractual_lccsd(
     qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
 ) -> Tuple[str, str, bool]:
-    """Of the list of QCVariables an ideal LCCSD should produce, returns whether or
+    f"""Of the list of QCVariables an ideal LCCSD should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
-    Parameters
-    ----------
-    qc_module : str
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver : {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference: {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method: str
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type: {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae: {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
-
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -619,6 +547,7 @@ def contractual_ccsdpt_prccsd_pr(
     """Of the list of QCVariables an ideal CCSD+T(CCSD) (aka CCSD[T]) should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -646,29 +575,7 @@ def contractual_ccsd_prt_pr(
     """Of the list of QCVariables an ideal CCSD(T) should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
-    Parameters
-    ----------
-    qc_module : str
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver : {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference: {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method: str
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type: {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae: {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
-
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -850,29 +757,7 @@ def contractual_ccsdt_prq_pr(
     """Of the list of QCVariables an ideal CCSDT(Q) should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
-    Parameters
-    ----------
-    qc_module : str
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver : {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference: {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method: str
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type: {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae: {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
-
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -898,29 +783,7 @@ def contractual_ccsdtq(
     """Of the list of QCVariables an ideal CCSDTQ should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
-    Parameters
-    ----------
-    qc_module : str
-        The program or subprogram running the job (e.g., "cfour" or "cfour-ecc").
-    driver : {"energy", "gradient", "hessian"}
-        The derivative level that should be expected.
-    reference: {"rhf", "uhf", "rohf"}
-        The SCF reference since programs often output differently based on it.
-    method: str
-        The target AtomicInput.model.method since "free" methods may not always be
-        output (e.g., MP2 available when target is MP2 but not when target is CCSD).
-    corl_type: {"conv", "df", "cd"}
-        The algorithm for the target method since programs often output differently
-        based on it.
-    fcae: {"ae", "fc"}
-        The all-electron vs. frozen-orbital aspect.
-
-    Returns
-    -------
-    (rpv, pv, expected)
-        Of all the QCVariables `pv` that should be available, returns tuple of
-        whether `expected` and what key `rpv` in the reference `pv` should match.
-
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",
@@ -945,6 +808,7 @@ def contractual_olccd(
     """Of the list of QCVariables an ideal OLCCD should produce, returns whether or
     not each is expected, given the calculation circumstances (like QC program).
 
+    {_contractual_docstring}
     """
     contractual_qcvars = [
         "HF TOTAL ENERGY",

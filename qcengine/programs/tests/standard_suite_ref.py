@@ -325,6 +325,8 @@ _std_suite = [
             "MP3 SINGLES ENERGY": 0.0,
             "MP3 SAME-SPIN CORRELATION ENERGY": -0.04989037,  # fnocc
             "MP3 TOTAL GRADIENT": np.array([0.0, 0.0, -0.000917944631, 0.0, 0.0, 0.000917944631]).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.20864512,  # vcc
+            "MP4(T) CORRECTION ENERGY": -0.002048407683,  # vcc
             "LCCD CORRELATION ENERGY": -0.2099060277,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.048339903547,  # fnocc
@@ -502,6 +504,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.003997280108, 0.0, 0.00255475829, -0.001998640054, 0.0, -0.00255475829, -0.001998640054]
             ).reshape(-1, 3),
+            "MP4(SDQ) CORRELATION ENERGY": -0.229617624405,  # vcc
+            "MP4(T) CORRECTION ENERGY": -0.005637388222,  # vcc
             "LCCD CORRELATION ENERGY": -0.2318870702,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.049937236558,  # fnocc
@@ -676,6 +680,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, -0.007003320116, 0.0, -0.004485227443, 0.003501660058, 0.0, 0.004485227443, 0.003501660058]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.27601976,  # vcc
+            "MP4(T) CORRECTION ENERGY": -0.007944754373,  # vcc
             "LCCD CORRELATION ENERGY": -0.2786913134,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.057792990490,  # fnocc
@@ -881,6 +887,8 @@ _std_suite = [
                     -0.000113397085,
                 ]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.07927852,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.000248958942,  # vcc only
             "LCCD CORRELATION ENERGY": -0.0834347185,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0024003297,  # occ
@@ -1079,6 +1087,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.027091204409, 0.0, 0.014414444742, -0.013545602205, 0.0, -0.014414444742, -0.013545602205]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.17311842,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.003268429219,  # vcc only
             "LCCD CORRELATION ENERGY": -0.1770086091,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0341268118,  # occ
@@ -1209,6 +1219,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.014436297067, 0.0, 0.005622513341, -0.007218148534, 0.0, -0.005622513341, -0.007218148534]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.21275859,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.004646780601,  # vcc only
             "LCCD CORRELATION ENERGY": -0.2167878305,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0401306050,  # occ
@@ -1334,6 +1346,8 @@ _std_suite = [
                     [0.0, -0.012728956474, -0.000114109949],
                 ]
             ),
+            "MP4(SDQ) CORRELATION ENERGY": -0.08034256,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.000301596734,  # vcc only
             "LCCD CORRELATION ENERGY": -0.0834094914,  # p4n
             "LCCSD CORRELATION ENERGY": -0.0861427228,  # p4n
             "CCSD CORRELATION ENERGY": -0.08357160616,
@@ -1402,6 +1416,8 @@ _std_suite = [
                     [0.00000000000000, -0.01453084545981, -0.01365528117220],
                 ]
             ),
+            "MP4(SDQ) CORRELATION ENERGY": -0.17767316,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.003373917694,  # vcc only
             "LCCD CORRELATION ENERGY": -0.1791714105,  # p4n
             "LCCSD CORRELATION ENERGY": -0.1830545845,  # p4n
             "CCSD CORRELATION ENERGY": -0.178236032911,
@@ -1467,6 +1483,8 @@ _std_suite = [
                     [0.0, -0.005743113908, -0.007334618759],
                 ]
             ),
+            "MP4(SDQ) CORRELATION ENERGY": -0.21748938,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.004777946072,  # vcc only
             "LCCD CORRELATION ENERGY": -0.2191039411,  # p4n
             "LCCSD CORRELATION ENERGY": -0.2231241199,  # p4n
             "CCSD CORRELATION ENERGY": -0.217849506326,
@@ -1525,6 +1543,8 @@ _std_suite = [
             "MP3 SINGLES ENERGY": 0.0,
             "MP3 SAME-SPIN CORRELATION ENERGY": -0.04918710,  # fnocc
             "MP3 TOTAL GRADIENT": np.array([0.0, 0.0, -0.000579954803, 0.0, 0.0, 0.000579954803]).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.20670909,  # vcc
+            "MP4(T) CORRECTION ENERGY": -0.002027930587,  # vcc
             "LCCD CORRELATION ENERGY": -0.2079585027,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.047635656759,  # fnocc
@@ -1618,6 +1638,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.004593346123, 0.0, 0.002925016535, -0.002296673061, 0.0, -0.002925016535, -0.002296673061]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.22737281,  # vcc
+            "MP4(T) CORRECTION ENERGY": -0.005605447265,  # vcc
             "LCCD CORRELATION ENERGY": -0.2296135965,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.049154543318,  # fnocc
@@ -1735,6 +1757,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, -0.006163797026, 0.0, -0.004106253706, 0.003081898513, 0.0, 0.004106253706, 0.003081898513]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.25063260,  # vcc
+            "MP4(T) CORRECTION ENERGY": -0.007755518242,  # vcc
             "LCCD CORRELATION ENERGY": -0.2531942099,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.053842594884,  # fnocc
@@ -1897,6 +1921,8 @@ _std_suite = [
                     -0.000119881085,
                 ]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.07825006,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.000237348957,  # vcc only
             "LCCD CORRELATION ENERGY": -0.0824313452,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0022532590,  # occ
@@ -2043,6 +2069,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.027862081662, 0.0, 0.014906293724, -0.013931040831, 0.0, -0.014906293724, -0.013931040831]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.17088317,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.003237304648,  # vcc only
             "LCCD CORRELATION ENERGY": -0.1747537294,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0334378864,  # occ
@@ -2151,6 +2179,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(
                 [0.0, 0.0, 0.015431661276, 0.0, 0.006103353029, -0.007715830638, 0.0, -0.006103353029, -0.007715830638]
             ).reshape((-1, 3)),
+            "MP4(SDQ) CORRELATION ENERGY": -0.18773117,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.004470767049,  # vcc only
             "LCCD CORRELATION ENERGY": -0.1917024115,  # p4n
             "LCCD SINGLES ENERGY": 0.0,
             "LCCD SAME-SPIN CORRELATION ENERGY": -0.0367596656,  # occ
@@ -2254,6 +2284,8 @@ _std_suite = [
                     [0.0, -0.012725362696, -0.000120609126],
                 ]
             ),
+            "MP4(SDQ) CORRELATION ENERGY": -0.07930873,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.000289639941,  # vcc only
             "LCCD CORRELATION ENERGY": -0.0824056198,  # p4n
             "LCCSD CORRELATION ENERGY": -0.0851177481,  # p4n
             "CCSD CORRELATION ENERGY": -0.08256719,
@@ -2315,6 +2347,8 @@ _std_suite = [
             "MP3 TOTAL GRADIENT": np.array(  # vcc by fd psi
                 [[0.0, 0.0, 0.0280810549], [0.0, 0.0150218165, -0.0140405275], [0.0, -0.0150218165, -0.0140405275]]
             ),
+            "MP4(SDQ) CORRELATION ENERGY": -0.17541828,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.00334215131,  # vcc only
             "LCCD CORRELATION ENERGY": -0.1769020687,  # p4n
             "LCCSD CORRELATION ENERGY": -0.1807707740,  # p4n
             "CCSD CORRELATION ENERGY": -0.175988485854028,
@@ -2377,6 +2411,8 @@ _std_suite = [
                     [0.0, -0.006224027206, -0.007832241963],
                 ]
             ),
+            "MP4(SDQ) CORRELATION ENERGY": -0.19243169,  # vcc only
+            "MP4(T) CORRECTION ENERGY": -0.004597066465,  # vcc only
             "LCCD CORRELATION ENERGY": -0.1939920915,  # p4n
             "LCCSD CORRELATION ENERGY": -0.1979175937,  # p4n
             "CCSD CORRELATION ENERGY": -0.19282621471297376,
@@ -5661,6 +5697,16 @@ for calc in _std_suite:
             calc["data"]["MP2.5 TOTAL GRADIENT"] = 0.5 * (
                 calc["data"]["MP3 TOTAL GRADIENT"] + calc["data"]["MP2 TOTAL GRADIENT"]
             )
+
+        if "MP4(SDQ) CORRELATION ENERGY" in calc["data"]:
+            calc["data"]["MP4(SDQ) TOTAL ENERGY"] = (
+                calc["data"]["MP4(SDQ) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
+            if "MP4(T) CORRECTION ENERGY" in calc["data"]:
+                calc["data"]["MP4 CORRELATION ENERGY"] = (calc["data"]["MP4(SDQ) CORRELATION ENERGY"] + calc["data"]["MP4(T) CORRECTION ENERGY"])
+                calc["data"]["MP4 TOTAL ENERGY"] = (calc["data"]["MP4 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"])
+                if "MP3 CORRELATION ENERGY" in calc["data"]:
+                    calc["data"]["MP4 CORRECTION ENERGY"] = (calc["data"]["MP4 CORRELATION ENERGY"] - calc["data"]["MP3 CORRELATION ENERGY"])
 
         if "LCCD CORRELATION ENERGY" in calc["data"]:
             calc["data"]["LCCD TOTAL ENERGY"] = (
