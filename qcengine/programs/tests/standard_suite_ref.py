@@ -465,6 +465,18 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0005522939,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2104417743,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0484443079,  # occ
+            "PBE TOTAL ENERGY": -100.33517315116806,  # psi 99,590
+            "PBE TOTAL GRADIENT": np.array(  # psi 99,590
+         [[0., 0.,  0.020107103338],
+          [0., 0., -0.020107128125]]),
+            "B3LYP TOTAL ENERGY": -100.43544624005466,  # psi 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # psi 99,590
+[[-2.37578116e-16, -5.15211396e-17,  1.13731953e-02],
+       [-5.23661679e-14,  5.41065792e-15, -1.13730866e-02]]),
+            "B3LYP5 TOTAL ENERGY": -100.39768534808519,  # psi 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # psi 99,590
+[[-6.94208991e-16,  1.87550833e-16,  1.16101107e-02],
+       [ 3.49213371e-14,  3.53945060e-15, -1.16100020e-02]]),
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
@@ -641,6 +653,21 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011895155,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2330452995,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0503175223,  # occ
+            "PBE TOTAL ENERGY":  -76.35896461348528,  # psi 99,590
+            "PBE TOTAL GRADIENT": np.array(  # psi 99,590
+    [[-0. ,             0.            ,  0.018069712075],
+     [-0. ,             0.011568971307, -0.009035203776],
+     [ 0. ,            -0.011568971307, -0.009035203776]]),
+            "B3LYP TOTAL ENERGY": -76.4445487826922090,  # psi 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # psi 99,590
+[[-1.77493704e-30,  0.00000000e+00,  7.45592796e-03],
+       [-1.87490767e-19,  6.12391320e-03, -3.72819302e-03],
+       [ 1.87490767e-19, -6.12391320e-03, -3.72819302e-03]]),
+            "B3LYP5 TOTAL ENERGY": -76.40749597292017,  # psi 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # psi 99,590
+[[ 0.00000000e+00, -7.88860905e-31,  7.74045385e-03],
+       [-1.93603325e-19,  6.32356448e-03, -3.87045600e-03],
+       [ 1.93603325e-19, -6.32356448e-03, -3.87045600e-03]]),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -832,6 +859,21 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0013521561,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2800053174,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0582676514,  # occ
+            "PBE TOTAL ENERGY":  -76.38209089347507,  # psi 99,590
+            "PBE TOTAL GRADIENT": np.array(  # psi 99,590
+          [[              -0.000000000000,    -0.000000000000,     0.012770562551],
+           [              -0.000000000000,     0.008604125876,    -0.006385673964],
+           [               0.000000000000,    -0.008604125876,    -0.006385673964]]),
+            "B3LYP TOTAL ENERGY": -76.4684173811156711,  # psi 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # psi 99,590
+[[ 0.00000000e+00,  1.57772181e-30,  2.02268338e-03],
+       [-9.31840056e-20,  3.04362060e-03, -1.01162676e-03],
+       [ 9.31840056e-20, -3.04362060e-03, -1.01162676e-03]]),
+            "B3LYP5 TOTAL ENERGY": -76.43134091764595,  # psi 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # psi 99,590
+[[-7.88860905e-31,  7.88860905e-31,  2.30650526e-03],
+       [-9.91741439e-20,  3.23927336e-03, -1.15353738e-03],
+       [ 9.91741439e-20, -3.23927336e-03, -1.15353738e-03]]),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -1048,6 +1090,24 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0014842084,  # p4n
             "OLCCD CORRELATION ENERGY": -0.0847413506,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
+            "PBE TOTAL ENERGY":  -26.04681636799003,  # psi 99,590
+            "PBE TOTAL GRADIENT": np.array(  # psi 99,590
+          [[              -0.000000000000,    -0.000000000000,    -0.002915908298],
+           [               0.000000000000,     0.000000000000,    -0.000179663088],
+           [              -0.000000000000,     0.026137498638,     0.001547791345],
+           [               0.000000000000,    -0.026137498638,     0.001547791345]]),
+            "B3LYP TOTAL ENERGY": -26.1140057832643038,  # psi 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # psi 99,590
+[[ 1.97215226e-31,  0.00000000e+00,  3.32365409e-03],
+       [ 0.00000000e+00, -1.05926147e-32, -5.83320285e-03],
+       [-5.87137508e-19,  1.91773664e-02,  1.25496529e-03],
+       [ 5.87137508e-19, -1.91773664e-02,  1.25496529e-03]]),
+            "B3LYP5 TOTAL ENERGY": -26.0893142594464784,  # psi 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # psi 99,590
+[[ 0.00000000e+00,  9.86076132e-31,  3.05278616e-03],
+       [ 1.23259516e-32,  0.00000000e+00, -5.57401307e-03],
+       [-5.95843028e-19,  1.94617102e-02,  1.26080391e-03],
+       [ 5.95843028e-19, -1.94617102e-02,  1.26080391e-03]]),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
@@ -1180,6 +1240,21 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011118724,  # p4n
             "OLCCD CORRELATION ENERGY": -0.1781057943,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
+            "PBE TOTAL ENERGY":  -55.81473169701641,  # psi 99,590
+            "PBE TOTAL GRADIENT": np.array(  # psi 99,590
+          [[              -0.000000000000,     0.000000000000,     0.035829930902],
+           [              -0.000000000000,     0.019748673246,    -0.017915051582],
+           [               0.000000000000,    -0.019748673246,    -0.017915051582]]),
+            "B3LYP TOTAL ENERGY": -55.8900885216505259,  # psi 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # psi 99,590
+[[ 0.00000000e+00,  5.91645679e-31,  2.68092690e-02],
+       [-4.57342645e-19,  1.49379444e-02, -1.34046506e-02],
+       [ 4.57342645e-19, -1.49379444e-02, -1.34046506e-02]]),
+            "B3LYP5 TOTAL ENERGY": -55.8573454463695782,  # psi 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # psi 99,590
+[[ 0.00000000e+00,  1.97215226e-30,  2.70819655e-02],
+       [-4.63472198e-19,  1.51381508e-02, -1.35409990e-02],
+       [ 4.63472198e-19, -1.51381508e-02, -1.35409990e-02]]),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -1299,6 +1374,21 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0012856903,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2180560836,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
+            "PBE TOTAL ENERGY":  -55.83097248811423,  # psi 99,590
+            "PBE TOTAL GRADIENT": np.array(  # psi 99,590
+          [[               0.000000000000,     0.000000000000,     0.029614373344],
+           [              -0.000000000000,     0.015644026348,    -0.014807315411],
+           [               0.000000000000,    -0.015644026348,    -0.014807315411]]),
+            "B3LYP TOTAL ENERGY": -55.9072559501566744,  # psi 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # psi 99,590
+[[ 0.00000000e+00,  3.15544362e-30,  1.99929859e-02],
+       [-3.19390336e-19,  1.04320800e-02, -9.99655055e-03],
+       [ 3.19390336e-19, -1.04320800e-02, -9.99655055e-03]]),
+            "B3LYP5 TOTAL ENERGY": -55.8744982972056121,  # psi 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # psi 99,590
+[[-7.88860905e-31,  0.00000000e+00,  2.02715602e-02],
+       [-3.25473520e-19,  1.06307719e-02, -1.01358376e-02],
+       [ 3.25473520e-19, -1.06307719e-02, -1.01358376e-02]]),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -1374,6 +1464,24 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0000399018,  # p4n
             "OLCCD CORRELATION ENERGY": -0.0862654609,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
+            "PBE TOTAL ENERGY": -26.046275584237,  # nwc 99,590
+            "PBE TOTAL GRADIENT": np.array(  # nwc 99,590
+      [[ 7.84827311e-37, -2.13273843e-19, -1.92100000e-03],
+       [ 4.63705881e-37, -1.26010313e-19, -1.13500000e-03],
+       [-1.12670315e-35,  2.60500000e-02,  1.52800000e-03],
+       [ 1.00184983e-35, -2.60500000e-02,  1.52800000e-03]]),
+            "B3LYP TOTAL ENERGY": -26.113222717203,  # nwc 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # nwc 99,590
+[[-1.96104690e-36,  5.32907052e-19,  4.80000000e-03],
+       [ 2.94483876e-36, -8.00248756e-19, -7.20800000e-03],
+       [-8.25273903e-36,  1.89960000e-02,  1.20400000e-03],
+       [ 7.26894717e-36, -1.89960000e-02,  1.20400000e-03]]),
+            "B3LYP5 TOTAL ENERGY": -26.088528482841,  # nwc 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # nwc 99,590
+[[-1.85523208e-36,  5.04152275e-19,  4.54100000e-03],
+       [ 2.84351800e-36, -7.72715225e-19, -6.96000000e-03],
+       [-8.37121895e-36,  1.92800000e-02,  1.21000000e-03],
+       [ 7.38252447e-36, -1.92800000e-02,  1.21000000e-03]]),
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
@@ -1441,6 +1549,21 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033018315,  # p4n
             "OLCCD CORRELATION ENERGY": -0.1825194982,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
+            "PBE TOTAL ENERGY": -55.813318056978,  # nwc 99,590
+            "PBE TOTAL GRADIENT": np.array(  # nwc 99,590
+[[-2.94106602e-19,  2.94106602e-19,  3.56590000e-02],
+       [ 1.47049177e-19,  1.96000000e-02, -1.78290000e-02],
+       [ 1.47049177e-19, -1.96000000e-02, -1.78290000e-02]]),
+            "B3LYP TOTAL ENERGY": -55.888559899085,  # nwc 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # nwc 99,590
+[[-2.19134533e-19,  2.19134533e-19,  2.65690000e-02],
+       [ 1.09571390e-19,  1.47410000e-02, -1.32850000e-02],
+       [ 1.09571390e-19, -1.47410000e-02, -1.32850000e-02]]),
+            "B3LYP5 TOTAL ENERGY": -55.855798924171,  # nwc 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # nwc 99,590
+[[-2.21336683e-19,  2.21336683e-19,  2.68360000e-02],
+       [ 1.10668341e-19,  1.49380000e-02, -1.34180000e-02],
+       [ 1.10668341e-19, -1.49380000e-02, -1.34180000e-02]]),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -1508,6 +1631,21 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033240178,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2226657917,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
+            "PBE TOTAL ENERGY": -55.829414170216,  # nwc 99,590
+            "PBE TOTAL GRADIENT": np.array(  # nwc 99,590
+[[-2.43250961e-19,  2.43250961e-19,  2.94930000e-02],
+       [ 1.21621356e-19,  1.55340000e-02, -1.47460000e-02],
+       [ 1.21621356e-19, -1.55340000e-02, -1.47460000e-02]]),
+            "B3LYP TOTAL ENERGY": -55.905608800925,  # nwc 99,590
+            "B3LYP TOTAL GRADIENT": np.array(  # nwc 99,590
+[[-1.63082808e-19,  1.63082808e-19,  1.97730000e-02],
+       [ 8.15372799e-20,  1.02630000e-02, -9.88600000e-03],
+       [ 8.15372799e-20, -1.02630000e-02, -9.88600000e-03]]),
+            "B3LYP5 TOTAL ENERGY": -55.872832273661,  # nwc 99,590
+            "B3LYP5 TOTAL GRADIENT": np.array(  # nwc 99,590
+[[-1.65334444e-19,  1.65334444e-19,  2.00460000e-02],
+       [ 8.26672220e-20,  1.04580000e-02, -1.00230000e-02],
+       [ 8.26672220e-20, -1.04580000e-02, -1.00230000e-02]]),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },

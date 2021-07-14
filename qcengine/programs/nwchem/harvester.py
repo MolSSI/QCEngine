@@ -953,7 +953,7 @@ def harvest_outfile_pass(outtext):
 
     mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
-        psivar["N MOLECULAR ORBITALS"] = mobj.group(2)
+        psivar["N MOLECULAR ORBITALS"] = mobj.group(1)
         psivar["N BASIS FUNCTIONS"] = mobj.group(1)
 
     # Search for Center of charge

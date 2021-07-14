@@ -828,3 +828,29 @@ def contractual_olccd(
         expected = True
 
         yield (pv, pv, expected)
+
+
+def contractual_dft_current(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Given the target DFT method, returns the CURRENT QCVariables that should be produced.
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        (f"{method.upper()} TOTAL ENERGY", "DFT TOTAL ENERGY"),
+        (f"{method.upper()} TOTAL ENERGY", "CURRENT REFERENCE ENERGY"),
+        (f"{method.upper()} TOTAL ENERGY", "CURRENT ENERGY"),
+    ]
+    if driver == "gradient":
+        contractual_qcvars.append((f"{method.upper()} TOTAL GRADIENT", "CURRENT GRADIENT"))
+    elif driver == "hessian":
+        # contractual_qcvars.append((f"{method.upper()} TOTAL GRADIENT", "CURRENT GRADIENT"))
+        contractual_qcvars.append((f"{method.upper()} TOTAL HESSIAN", "CURRENT HESSIAN"))
+
+    for rpv, pv in contractual_qcvars:
+        expected = True
+        if method == "hf" and rpv == f"{method.upper()} CORRELATION ENERGY":
+            expected = False
+
+        yield (rpv, pv, expected)
