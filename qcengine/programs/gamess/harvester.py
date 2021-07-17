@@ -23,7 +23,7 @@ def harvest(
     """Parses all the pieces of output from gamess: the stdout in
     *gamessout* Scratch files are not yet considered at this moment.
     """
-    outqcvar, outMol, outGrad = harvest_output(gamessout)
+    outqcvar, outMol, outGrad, module = harvest_output(gamessout)
 
     datasections = {}
     if outfiles.get("gamess.dat"):
@@ -58,7 +58,7 @@ def harvest(
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
-    return outqcvar, outHess, outGrad, outMol
+    return outqcvar, outHess, outGrad, outMol, module
 
 
 def harvest_datfile(datfile: str) -> Dict[str, str]:
@@ -93,13 +93,13 @@ def harvest_output(outtext):
         re.MULTILINE,
     ):
 
-        qcvar, gamesscoord, gamessgrad = harvest_outfile_pass(outpass)
+        qcvar, gamesscoord, gamessgrad, module = harvest_outfile_pass(outpass)
         pass_qcvar.append(qcvar)
         pass_coord.append(gamesscoord)
         pass_grad.append(gamessgrad)
 
     retindx = -1 if pass_coord[-1] else -2
-    return pass_qcvar[retindx], pass_coord[retindx], pass_grad[retindx]
+    return pass_qcvar[retindx], pass_coord[retindx], pass_grad[retindx], module
 
 
 def harvest_outfile_pass(outtext):
@@ -109,6 +109,7 @@ def harvest_outfile_pass(outtext):
     qcvar = PreservingDict()
     qcvar_coord = None
     qcvar_grad = None
+    module = None
 
     NUMBER = r"(?x:" + regex.NUMBER + ")"
 
@@ -410,6 +411,32 @@ def harvest_outfile_pass(outtext):
             qcvar["CCSD(T) CORRELATION ENERGY"] = mobj.group(9)
             qcvar["CCSD(T) TOTAL ENERGY"] = mobj.group(8)
 
+        # Process CISD
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"PROPERTY VALUES FOR THE " + r"(RHF|ROHF)" + r"\s+" + r"SELF-CONSISTENT FIELD WAVEFUNCTION" + r"\s*" + 
+            r"(?:.*?)" +
+            r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s*" + r"(TOTAL ENERGY =)\s+" + r"(?P<hf>" + NUMBER + r")" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s+" + r"(?P<module>(FSOCI|GUGA))" + r"\s+" + r"CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1" + r"\s*" + 
+            r"(?:.*?)" +
+            r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s*" + r"(TOTAL ENERGY =)\s+" + r"(?P<ci>" + NUMBER + r")" + r"\s*$",
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.DOTALL,
+        )
+        if mobj:
+            logger.debug("matched cisd fsoci/guga", mobj.groupdict())
+            print("matched cisd fsoci/guga", mobj.groupdict())
+            module = mobj.group("module").lower()
+            qcvar["CISD CORRELATION ENERGY"] = Decimal(mobj.group("ci")) - Decimal(mobj.group("hf"))
+            qcvar["CISD TOTAL ENERGY"] = mobj.group("ci")
+            qcvar["CI TOTAL ENERGY"] = mobj.group("ci")
+
         # Process FCI
         mobj = re.search(
             # fmt: off
@@ -573,6 +600,10 @@ def harvest_outfile_pass(outtext):
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["MP2 CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["MP2 TOTAL ENERGY"]
 
+    if "CISD TOTAL ENERGY" in qcvar and "CISD CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CISD CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CISD TOTAL ENERGY"]
+
     if "LCCD TOTAL ENERGY" in qcvar and "LCCD CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["LCCD CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["LCCD TOTAL ENERGY"]
@@ -604,4 +635,4 @@ def harvest_outfile_pass(outtext):
     if "FCI TOTAL ENERGY" in qcvar:  # and 'FCI CORRELATION ENERGY' in qcvar:
         qcvar["CURRENT ENERGY"] = qcvar["FCI TOTAL ENERGY"]
 
-    return qcvar, qcvar_coord, qcvar_grad
+    return qcvar, qcvar_coord, qcvar_grad, module

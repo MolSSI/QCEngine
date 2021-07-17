@@ -209,7 +209,7 @@ class GAMESSHarness(ProgramHarness):
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         try:
-            qcvars, gamesshess, gamessgrad, gamessmol = harvest(input_model.molecule, input_model.model.method, stdout, **outfiles)
+            qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(input_model.molecule, input_model.model.method, stdout, **outfiles)
         except Exception as e:
             raise UnknownError(
                 "STDOUT:\n"
@@ -246,12 +246,16 @@ class GAMESSHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
+        provenance = Provenance(creator="GAMESS", version=self.get_version(), routine="rungms").dict()
+        if module is not None:
+            provenance["module"] = module
+
         output_data = {
             "schema_version": 1,
             "molecule": gamessmol,
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
-            "provenance": Provenance(creator="GAMESS", version=self.get_version(), routine="rungms"),
+            "provenance": provenance,
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,
