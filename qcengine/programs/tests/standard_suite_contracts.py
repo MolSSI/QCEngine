@@ -170,6 +170,7 @@ def contractual_mp2(
                     or (qc_module == "gamess" and reference in ["rhf"] and method in ["lccd", "ccd", "ccsd", "ccsd+t(ccsd)", "ccsd(t)"])
                     or (qc_module == "nwchem-tce" and method in ["mp2", "mp3", "mp4"])
                     or (qc_module == "nwchem-cc" and reference in ["rhf"] and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)"])
+                    or (qc_module == "nwchem-directmp2" and reference == "rhf" and method == "mp2")
                     or (
                         qc_module == "psi4-occ"
                         and reference == "rhf"
@@ -206,7 +207,7 @@ def contractual_mp2(
             or (
                 (
                     (qc_module == "psi4-ccenergy" and reference == "rohf" and method == "ccsd")
-                    or (qc_module == "nwchem-tce" and method in ["lccd", "lccsd", "ccd", "ccsd", "ccsd+t(ccsd)", "ccsd(t)", "ccsdt"])
+                    or (qc_module == "nwchem-tce" and method in ["qcisd", "lccd", "lccsd", "ccd", "ccsd", "ccsd+t(ccsd)", "ccsd(t)", "ccsdt"])
                     or (qc_module == "gamess" and reference == "rohf" and method == "ccsd")
                     or (
                         qc_module.startswith("cfour")
@@ -336,6 +337,144 @@ def contractual_mp3(
             ]
         ):
             expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_mp4_prsdq_pr(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal MP4(SDQ) should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "MP4(SDQ) CORRELATION ENERGY",
+        "MP4(SDQ) TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "mp4(sdq)":
+        contractual_qcvars.append("MP4(SDQ) TOTAL GRADIENT")
+    elif driver == "hessian" and method == "mp4(sdq)":
+        # contractual_qcvars.append("MP4(SDQ) TOTAL GRADIENT")
+        contractual_qcvars.append("MP4(SDQ) TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if (
+            (qc_module.startswith("nwchem") and method == "mp4")
+            and pv in ["MP4(SDQ) TOTAL ENERGY", "MP4(SDQ) CORRELATION ENERGY"]
+        ):
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_mp4(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal MP4 should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "MP4(T) CORRECTION ENERGY",
+        "MP4 CORRELATION ENERGY",
+        "MP4 CORRECTION ENERGY",
+        "MP4 TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "mp4":
+        contractual_qcvars.append("MP4 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "mp4":
+        # contractual_qcvars.append("MP4 TOTAL GRADIENT")
+        contractual_qcvars.append("MP4 TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if (
+                (qc_module.startswith("nwchem") and method == "mp4")
+            and pv in ["MP4(T) CORRECTION ENERGY"]
+        ):
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_cisd(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal CISD should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "CISD CORRELATION ENERGY",
+        "CISD TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "cisd":
+        contractual_qcvars.append("CISD TOTAL GRADIENT")
+    elif driver == "hessian" and method == "cisd":
+        # contractual_qcvars.append("CISD TOTAL GRADIENT")
+        contractual_qcvars.append("CISD TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+
+        yield (pv, pv, expected)
+
+
+def contractual_qcisd(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal QCISD should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "QCISD CORRELATION ENERGY",
+        "QCISD TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "qcisd":
+        contractual_qcvars.append("QCISD TOTAL GRADIENT")
+    elif driver == "hessian" and method == "qcisd":
+        # contractual_qcvars.append("QCISD TOTAL GRADIENT")
+        contractual_qcvars.append("QCISD TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+
+        yield (pv, pv, expected)
+
+
+def contractual_qcisd_prt_pr(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal QCISD(T) should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "QCISD(T) CORRECTION ENERGY",
+        "QCISD(T) CORRELATION ENERGY",
+        "QCISD(T) TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "qcisd(t)":
+        contractual_qcvars.append("QCISD(T) TOTAL GRADIENT")
+    elif driver == "hessian" and method == "qcisd(t)":
+        # contractual_qcvars.append("QCISD(T) TOTAL GRADIENT")
+        contractual_qcvars.append("QCISD(T) TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
 
         yield (pv, pv, expected)
 

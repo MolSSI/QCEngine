@@ -414,6 +414,32 @@ def harvest_outfile_pass(outtext):
             qcvar["CCSD(T) CORRELATION ENERGY"] = mobj.group(9)
             qcvar["CCSD(T) TOTAL ENERGY"] = mobj.group(8)
 
+        # Process CISD
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"PROPERTY VALUES FOR THE " + r"(RHF|ROHF)" + r"\s+" + r"SELF-CONSISTENT FIELD WAVEFUNCTION" + r"\s*" + 
+            r"(?:.*?)" +
+            r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s*" + r"(TOTAL ENERGY =)\s+" + r"(?P<hf>" + NUMBER + r")" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s+" + r"(?P<module>(FSOCI|GUGA))" + r"\s+" + r"CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1" + r"\s*" + 
+            r"(?:.*?)" +
+            r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s*" + r"(TOTAL ENERGY =)\s+" + r"(?P<ci>" + NUMBER + r")" + r"\s*$",
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.DOTALL,
+        )
+        if mobj:
+            logger.debug("matched cisd fsoci/guga", mobj.groupdict())
+            print("matched cisd fsoci/guga", mobj.groupdict())
+            module = mobj.group("module").lower()
+            qcvar["CISD CORRELATION ENERGY"] = Decimal(mobj.group("ci")) - Decimal(mobj.group("hf"))
+            qcvar["CISD TOTAL ENERGY"] = mobj.group("ci")
+            qcvar["CI TOTAL ENERGY"] = mobj.group("ci")
+
         # Process FCI
         mobj = re.search(
             # fmt: off
@@ -576,6 +602,10 @@ def harvest_outfile_pass(outtext):
     if "MP2 TOTAL ENERGY" in qcvar and "MP2 CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["MP2 CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["MP2 TOTAL ENERGY"]
+
+    if "CISD TOTAL ENERGY" in qcvar and "CISD CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CISD CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CISD TOTAL ENERGY"]
 
     if "LCCD TOTAL ENERGY" in qcvar and "LCCD CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["LCCD CORRELATION ENERGY"]

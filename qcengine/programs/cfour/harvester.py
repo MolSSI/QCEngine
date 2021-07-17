@@ -59,7 +59,6 @@ def harvest_outfile_pass(outtext):
 
     #    TODO: BCC
     #          CI
-    #          QCISD(T)
     #          other ROHF tests
     #          vcc/ecc
 
@@ -147,7 +146,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched mp2r")
+        print("matched mp2r", mobj.groups())
         psivar["MP2 SAME-SPIN CORRELATION ENERGY"] = 2 * Decimal(mobj.group(1))
         psivar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(2)
         psivar["MP2 CORRELATION ENERGY"] = 2 * Decimal(mobj.group(1)) + Decimal(mobj.group(2))
@@ -417,6 +416,46 @@ def harvest_outfile_pass(outtext):
             psivar["MP4 CORRECTION ENERGY"] = mobj.group("mp4corr")
             psivar["MP4 TOTAL ENERGY"] = mobj.group("mp4flavortot")
             psivar["MP4 CORRELATION ENERGY"] = mobj.group("mp4sdtqcorl")
+
+    # Process CI Iterations
+    mobj = re.search(
+        # fmt: off
+        r'^\s+' + r'(?P<fullCI>(?P<iterCI>Q?CI(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
+        r'(?:.*?)' +
+        r'^\s+' + r'(?:\d+)' + r'\s+' + r"(?P<corl>" + NUMBER + r")" + r'\s+' + r"(?P<tot>" + NUMBER + r")" + r'\s+DIIS\s*' +
+        r'^\s*(?:-+)\s*' +
+        # CI iterations for CISD, CC iterations for QCISD
+        r'^\s*(?:A miracle (?P<ccprog>has come|come) to pass. The (CI|CC) iterations have converged.)\s*$',
+        # fmt: on
+        outtext,
+        re.MULTILINE | re.DOTALL,
+    )
+    if mobj:
+        print(
+            "matched ci with full %s iterating %s" % (mobj.group("fullCI"), mobj.group("iterCI")),
+            mobj.groupdict(),
+            mobj.groups(),
+        )
+        module = {"has come": "vcc", "come": "ecc"}[mobj.group("ccprog")]
+
+        mtd = mobj.group("iterCI").upper()
+        psivar[f"{mtd} CORRELATION ENERGY"] = mobj.group("corl")
+        psivar[f"{mtd} TOTAL ENERGY"] = mobj.group("tot")
+
+        mobj2 = re.search(
+            # fmt: off
+            r"^\s+" + r"E\(QCISD\)\s+=\s+" + r"(?P<qcisd>" + NUMBER + r")" + r"\s*" +
+            r"^\s+" + r"E\(QCISD\(T\)\)\s+=\s+" + r"(?P<qcisdt>" + NUMBER + r")" + r"\s*$",
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.DOTALL,
+        )
+        if mobj2 and mobj.group("fullCI") == "QCISD(T)":
+            print("matched qcisd(t)", mobj2.groupdict())
+            psivar["QCISD(T) TOTAL ENERGY"] = mobj2.group("qcisdt")
+            psivar["QCISD(T) CORRECTION ENERGY"] = Decimal(mobj2.group("qcisdt")) - Decimal(mobj2.group("qcisd"))
+            psivar["QCISD(T) CORRELATION ENERGY"] = psivar["QCISD(T) TOTAL ENERGY"] - psivar["SCF TOTAL ENERGY"]
+
 
     # Process CC Iterations
     mobj = re.search(
@@ -1002,6 +1041,18 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
 
+    if "CISD TOTAL ENERGY" in psivar and "CISD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CISD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CISD TOTAL ENERGY"]
+
+    if "QCISD TOTAL ENERGY" in psivar and "QCISD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["QCISD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["QCISD TOTAL ENERGY"]
+
+    if "QCISD(T) TOTAL ENERGY" in psivar and "QCISD(T) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["QCISD(T) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["QCISD(T) TOTAL ENERGY"]
+
     if "LCCD TOTAL ENERGY" in psivar and "LCCD CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["LCCD CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["LCCD TOTAL ENERGY"]
@@ -1106,6 +1157,11 @@ def harvest(p4Mol: Molecule, method: str, c4out, **largs):
     if method.lower() in ["c4-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
         outPsivar["CURRENT CORRELATION ENERGY"] = outPsivar["CCSD+T(CCSD) CORRELATION ENERGY"]
         outPsivar["CURRENT ENERGY"] = outPsivar["CCSD+T(CCSD) TOTAL ENERGY"]
+
+    if fcmHess is not None and method.lower() in ["c4-hf", "hf"]:
+        # MP2 available in HF Hessian so need to counteract
+        outPsivar.pop("CURRENT CORRELATION ENERGY")
+        outPsivar["CURRENT ENERGY"] = outPsivar["HF TOTAL ENERGY"]
 
     # Reconcile the coordinate information: several cases
     #   Case                            p4Mol   GRD      Check consistency           Apply orientation?     ReturnMol (1-19-2014)

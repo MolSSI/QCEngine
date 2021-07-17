@@ -237,6 +237,24 @@ def harvest_outfile_pass(outtext):
 
         # 4) Direct MP2
 
+        mobj = re.search(
+            # fmt: off
+            r'^\s+' + r'SCF energy' + r'\s+' + r"(?P<hf>" + NUMBER + r")" + r'\s*' +
+            r'^\s+' + r'Correlation energy' + r'\s+' + r"(?P<mp2corl>" + NUMBER + r")" + r'\s*' +
+            r'^\s+' + r'Total MP2 energy' + r'\s+' + r"(?P<mp2>" + NUMBER + r")" + r'\s*$',
+            # fmt: on
+            outtext, re.MULTILINE)
+        mobj2 = re.search(r"Direct MP2", outtext)
+        if mobj and mobj2:
+            logger.debug("matched direct-mp2")
+            print("matched direct-mp2")
+            module = "directmp2"
+            psivar["HF TOTAL ENERGY"] = mobj.group("hf")
+            psivar["MP2 CORRELATION ENERGY"] = mobj.group("mp2corl")
+            psivar["MP2 TOTAL ENERGY"] = mobj.group("mp2")
+            # direct-mp2 is RHF only
+            psivar["MP2 DOUBLES ENERGY"] = mobj.group("mp2corl")
+
         # 5) RI-MP2
 
         # Process calculation through tce [dertype] command
@@ -354,6 +372,7 @@ def harvest_outfile_pass(outtext):
         # Process other TCE cases
         for cc_name in [
             r"CISD",
+            r"QCISD", 
             r"CISDT",
             r"CISDTQ",
             r"CCD",
@@ -1003,6 +1022,14 @@ def harvest_outfile_pass(outtext):
     if "MP4 TOTAL ENERGY" in psivar and "MP4 CORRECTION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP4 TOTAL ENERGY"] - psivar["HF TOTAL ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP4 TOTAL ENERGY"]
+
+    if "CISD TOTAL ENERGY" in psivar and "CISD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CISD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CISD TOTAL ENERGY"]
+
+    if "QCISD TOTAL ENERGY" in psivar and "QCISD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["QCISD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["QCISD TOTAL ENERGY"]
 
     if "LCCD TOTAL ENERGY" in psivar and "LCCD CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["LCCD CORRELATION ENERGY"]
