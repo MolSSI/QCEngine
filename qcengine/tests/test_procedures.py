@@ -3,9 +3,12 @@ Tests the DQM compute dispatch module
 """
 
 import pytest
-from qcelemental.models import OptimizationInput
+from qcelemental.models import DriverEnum, OptimizationInput
+from qcelemental.models.common_models import Model
+from qcelemental.models.procedures import QCInputSpecification
 
 import qcengine as qcng
+from qcengine.procedures.torsiondrive import OptimizationSpecification, TorsionDriveInput
 from qcengine.testing import failure_engine, using
 
 
@@ -257,3 +260,45 @@ def test_nwchem_relax(linopt):
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
+
+
+@using("rdkit")
+def test_torsiondrive_rdkit():
+
+    input_data = TorsionDriveInput(
+        keywords={"dihedrals": [(2, 0, 1, 5)], "grid_spacing": [180]},
+        input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="UFF", basis=None)),
+        initial_molecule=qcng.get_molecule("ethane"),
+        optimization_spec=OptimizationSpecification(
+            procedure="geomeTRIC",
+            keywords={
+                "coordsys": "dlc",
+                "maxiter": 300,
+                "program": "rdkit",
+            },
+        ),
+    )
+
+    ret = qcng.compute_procedure(input_data, "torsiondrive", raise_error=True)
+
+    assert ret.error is None
+    assert ret.success
+
+    expected_grid_ids = {"180", "0"}
+
+    assert {*ret.optimization_history} == expected_grid_ids
+
+    assert {*ret.final_energies} == expected_grid_ids
+    assert {*ret.final_molecules} == expected_grid_ids
+
+    assert (
+        pytest.approx(ret.final_molecules["180"].measure([2, 0, 1, 5]), abs=1.0e-2) == 180.0
+        or pytest.approx(ret.final_molecules["180"].measure([2, 0, 1, 5]), abs=1.0e-2) == -180.0
+    )
+    assert pytest.approx(ret.final_molecules["0"].measure([2, 0, 1, 5]), abs=1.0e-2) == 0.0
+
+    assert ret.provenance.creator.lower() == "torsiondrive"
+    assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
+    assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
+
+    assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"

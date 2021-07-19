@@ -1,4 +1,6 @@
+import io
 from collections import defaultdict
+from contextlib import redirect_stderr, redirect_stdout
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -92,7 +94,8 @@ class TorsionDriveProcedure(ProcedureHarness):
     def build_input_model(self, data: Union[Dict[str, Any], "TorsionDriveInput"]) -> "TorsionDriveInput":
         return self._build_model(data, TorsionDriveInput)
 
-    def compute(self, input_model: "TorsionDriveInput", config: "TaskConfig") -> "TorsionDriveResult":
+    def _compute(self, input_model: "TorsionDriveInput", config: "TaskConfig"):
+
         try:
             import torsiondrive
             from torsiondrive import td_api
@@ -123,7 +126,7 @@ class TorsionDriveProcedure(ProcedureHarness):
         # Spawn new optimizations at each grid points until convergence / an error.
         while True:
 
-            next_jobs = td_api.next_jobs_from_state(state, verbose=True)
+            next_jobs = td_api.next_jobs_from_state(state, verbose=False)
 
             if len(next_jobs) == 0:
                 break
@@ -187,10 +190,28 @@ class TorsionDriveProcedure(ProcedureHarness):
                 output_data["final_molecules"][grid_point] = final_molecule
 
             output_data["optimization_history"] = optimization_results
-            output_data = TorsionDriveResult(**output_data)
 
         else:
             output_data["error"] = error
+
+        return output_data
+
+    def compute(self, input_model: "TorsionDriveInput", config: "TaskConfig") -> "TorsionDriveResult":
+
+        # Capture the stdout and err here to avoid too much nesting in the _compute function
+        with io.StringIO() as stdout:
+            with io.StringIO() as stderr:
+
+                with redirect_stdout(stdout):
+                    with redirect_stderr(stderr):
+
+                        output_data = self._compute(input_model, config)
+
+                output_data["stdout"] = str(stdout.getvalue())
+                output_data["stderr"] = str(stderr.getvalue())
+
+        if "error" not in output_data:
+            output_data = TorsionDriveResult(**output_data)
 
         return output_data
 
