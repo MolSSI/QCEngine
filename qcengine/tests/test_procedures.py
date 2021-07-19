@@ -263,7 +263,8 @@ def test_nwchem_relax(linopt):
 
 
 @using("rdkit")
-def test_torsiondrive_rdkit():
+@using("torsiondrive")
+def test_torsiondrive_generic():
 
     input_data = TorsionDriveInput(
         keywords={"dihedrals": [(2, 0, 1, 5)], "grid_spacing": [180]},
