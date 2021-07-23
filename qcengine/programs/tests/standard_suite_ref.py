@@ -1352,6 +1352,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCSD CORRELATION ENERGY": -0.0848110820,  # p4n
             "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.0024351,  # vcc
             "CCD CORRELATION ENERGY": -0.08113776652663,  # vcc
             "CCD SINGLES ENERGY": 0.0,
             "CCD SAME-SPIN CORRELATION ENERGY": -0.00235010,  # vcc
@@ -1573,6 +1574,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCSD CORRELATION ENERGY": -0.1786081472,  # p4n
             "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.0344530,  # vcc
             "CCD CORRELATION ENERGY": -0.17274172367784,  # vcc
             "CCD SINGLES ENERGY": 0.0,
             "CCD SAME-SPIN CORRELATION ENERGY": -0.0337442,  # vcc
@@ -1736,6 +1738,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCSD CORRELATION ENERGY": -0.2185061347,  # p4n
             "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.0404661,  # vcc
             "CCD CORRELATION ENERGY": -0.2119966470870,  # vcc
             "CCD SINGLES ENERGY": 0.0,
             "CCD SAME-SPIN CORRELATION ENERGY": -0.0396775,  # vcc
@@ -3007,6 +3010,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCSD CORRELATION ENERGY": -0.0837903430,  # p4n
             "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.0022897,  # vcc
             "CCD CORRELATION ENERGY": -0.08014654379229,  # vcc
             "CCD SINGLES ENERGY": 0.0,
             "CCD SAME-SPIN CORRELATION ENERGY": -0.0022032,  # vcc
@@ -3158,6 +3162,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCSD CORRELATION ENERGY": -0.1763496376,  # p4n
             "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.0337624,  # vcc
             "CCD CORRELATION ENERGY": -0.17052107838019,  # vcc
             "CCD SINGLES ENERGY": 0.0,
             "CCD SAME-SPIN CORRELATION ENERGY": -0.033058,  # vcc
@@ -3284,6 +3289,7 @@ _std_suite = [
             ).reshape((-1, 3)),
             "LCCSD CORRELATION ENERGY": -0.1933416962,  # p4n
             "LCCSD SINGLES ENERGY": 0.0,
+            "LCCSD SAME-SPIN CORRELATION ENERGY": -0.0370625,  # vcc
             "CCD CORRELATION ENERGY": -0.18708520686363,  # vcc
             "CCD SINGLES ENERGY": 0.0,
             "CCD SAME-SPIN CORRELATION ENERGY": -0.0363299,  # vcc

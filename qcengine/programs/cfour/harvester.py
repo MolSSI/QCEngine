@@ -850,26 +850,27 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:  # PRINT=2 to get SCS components
-        print("matched scscc2")
+        print("matched scscc2", mobj.groups())
+        iterCC = mobj.group("iterCC")
         mobj3 = re.search(r"The reference state is a ROHF wave function.", outtext)
         mobj4 = re.search(r"executable xvcc finished", outtext)
         if mobj4:  # vcc
-            psivar["%s OPPOSITE-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(5)
+            if not (iterCC == "CCD" and mobj3):
+                # uncertain if ROHF CCD correct
+                psivar[f"{iterCC} OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(5)
             if not mobj3:
-                psivar[f'{mobj.group("iterCC")} SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) + Decimal(
-                    mobj.group(4)
-                )
+                psivar[f'{iterCC} SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
         else:  # ecc
-            psivar[f'{mobj.group("iterCC")} SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) + Decimal(
-                mobj.group(4)
-            )
+            psivar[f'{iterCC} SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
             if not mobj3:
-                psivar["%s OPPOSITE-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(5)
-        psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(6)
+                psivar[f"{iterCC} OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(5)
+        psivar[f"{iterCC} CORRELATION ENERGY"] = mobj.group(6)
 
     mobj = re.search(
         # fmt: off
-        r'^\s+' + r'(?P<fullCC>(?P<iterCC>L?CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
+        #r'^\s+' + r'(?P<fullCC>(?P<iterCC>L?CC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
+        # better one for LCC and one for CC, right?
+        r'^\s+' + r'(?P<fullCC>(?P<iterCC>LCC(?:\w+))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
         r'(?:.*?)' +
         r'^\s+' + r'Amplitude equations converged in' + r'\s*\d+\s*' + r'iterations.\s*' +
         r'(?:.*?)' +
