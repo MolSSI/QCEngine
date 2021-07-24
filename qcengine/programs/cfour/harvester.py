@@ -1010,15 +1010,19 @@ def harvest_outfile_pass(outtext):
 
     # Process error codes
     mobj = re.search(
-        r"^\s*" + r"--executable " + r"(\w+)" + r" finished with status" + r"\s+" + r"([1-9][0-9]*)",
+        r"^\s*" + r"--executable " + r"(?P<c4exe>\w+)" + r" finished with status" + r"\s+" + r"(?P<errcode>[1-9][0-9]*)",
         outtext,
         re.MULTILINE,
     )
     if mobj:
         print("matched error")
         # psivar['CFOUR ERROR CODE'] = mobj.group(2)
-        if int(mobj.group(2)) != 0:
-            error += "--executable {} finished with status {}".format(mobj.group(1), mobj.group(2))
+        c4exe = mobj.group("c4exe")
+        errcode = int(mobj.group("errcode"))
+        if errcode != 0:
+            error += f"--executable {c4exe} finished with status {errcode}"
+            if c4exe in ["xvcc", "xecc", "xncc"]:
+                module = c4exe[1:]
 
     # Process CURRENT energies (TODO: needs better way)
     if "SCF TOTAL ENERGY" in psivar:
