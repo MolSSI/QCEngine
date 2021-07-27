@@ -160,16 +160,28 @@ def contractual_mp2(
             (
                 (
                     (qc_module == "cfour" and reference == "rohf" and method == "mp2" and driver == "hessian")
-                    or (qc_module in ["gamess-serial", "gamess-ddi"] and reference in ["uhf", "rohf"] and method == "mp2")
+                    or (
+                        qc_module in ["gamess-serial", "gamess-ddi"]
+                        and reference in ["uhf", "rohf"]
+                        and method == "mp2"
+                    )
                     or (
                         qc_module in ["gamess-serial", "gamess-ims"]
                         and reference == "rhf"
                         and method == "mp2"
                         and driver in ["gradient", "hessian"]
                     )
-                    or (qc_module == "gamess" and reference in ["rhf"] and method in ["lccd", "ccd", "ccsd", "ccsd+t(ccsd)", "ccsd(t)"])
+                    or (
+                        qc_module == "gamess"
+                        and reference in ["rhf"]
+                        and method in ["lccd", "ccd", "ccsd", "ccsd+t(ccsd)", "ccsd(t)"]
+                    )
                     or (qc_module == "nwchem-tce" and method in ["mp2", "mp3", "mp4"])
-                    or (qc_module == "nwchem-cc" and reference in ["rhf"] and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)"])
+                    or (
+                        qc_module == "nwchem-cc"
+                        and reference in ["rhf"]
+                        and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)"]
+                    )
                     or (qc_module == "nwchem-directmp2" and reference == "rhf" and method == "mp2")
                     or (
                         qc_module == "psi4-occ"
@@ -207,7 +219,10 @@ def contractual_mp2(
             or (
                 (
                     (qc_module == "psi4-ccenergy" and reference == "rohf" and method == "ccsd")
-                    or (qc_module == "nwchem-tce" and method in ["qcisd", "lccd", "lccsd", "ccd", "ccsd", "ccsd+t(ccsd)", "ccsd(t)", "ccsdt"])
+                    or (
+                        qc_module == "nwchem-tce"
+                        and method in ["qcisd", "lccd", "lccsd", "ccd", "ccsd", "ccsd+t(ccsd)", "ccsd(t)", "ccsdt"]
+                    )
                     or (qc_module == "gamess" and reference == "rohf" and method == "ccsd")
                     or (
                         qc_module.startswith("cfour")
@@ -362,10 +377,10 @@ def contractual_mp4_prsdq_pr(
 
     for pv in contractual_qcvars:
         expected = True
-        if (
-            (qc_module.startswith("nwchem") and method == "mp4")
-            and pv in ["MP4(SDQ) TOTAL ENERGY", "MP4(SDQ) CORRELATION ENERGY"]
-        ):
+        if (qc_module.startswith("nwchem") and method == "mp4") and pv in [
+            "MP4(SDQ) TOTAL ENERGY",
+            "MP4(SDQ) CORRELATION ENERGY",
+        ]:
             expected = False
 
         yield (pv, pv, expected)
@@ -394,10 +409,7 @@ def contractual_mp4(
 
     for pv in contractual_qcvars:
         expected = True
-        if (
-                (qc_module.startswith("nwchem") and method == "mp4")
-            and pv in ["MP4(T) CORRECTION ENERGY"]
-        ):
+        if (qc_module.startswith("nwchem") and method == "mp4") and pv in ["MP4(T) CORRECTION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
@@ -553,12 +565,9 @@ def contractual_lccsd(
     for pv in contractual_qcvars:
         expected = True
         if (
-            (
-                (qc_module == "cfour-ncc" and reference in ["rhf"] and method == "lccsd")
-                or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method == "lccsd")
-            )
-            and pv in ["LCCSD SAME-SPIN CORRELATION ENERGY", "LCCSD OPPOSITE-SPIN CORRELATION ENERGY"]
-        ):
+            (qc_module == "cfour-ncc" and reference in ["rhf"] and method == "lccsd")
+            or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method == "lccsd")
+        ) and pv in ["LCCSD SAME-SPIN CORRELATION ENERGY", "LCCSD OPPOSITE-SPIN CORRELATION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
@@ -591,27 +600,24 @@ def contractual_ccd(
         expected = True
         if (
             (
-            (
                 (qc_module == "cfour-ecc" and reference in ["rhf"] and method == "ccd")
                 or (qc_module == "cfour-ncc" and reference in ["rhf"] and method == "ccd")
                 or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method == "ccd")
                 or (qc_module == "gamess" and reference in ["rhf"] and method == "ccd")
             )
             and pv in ["CCD SAME-SPIN CORRELATION ENERGY", "CCD OPPOSITE-SPIN CORRELATION ENERGY"]
-            )
-            or (
-                (
+        ) or (
+            (
                 (qc_module == "cfour-vcc" and reference in ["rohf"] and method in ["ccd"])
                 or (qc_module == "nwchem-tce" and reference in ["rohf"] and method in ["ccd"])
-                )
-                and pv
-                in [
-                    "CCD SAME-SPIN CORRELATION ENERGY",
-                    "CCD SINGLES ENERGY",
-                    "CCD DOUBLES ENERGY",
-                    "CCD OPPOSITE-SPIN CORRELATION ENERGY",
-                ]
             )
+            and pv
+            in [
+                "CCD SAME-SPIN CORRELATION ENERGY",
+                "CCD SINGLES ENERGY",
+                "CCD DOUBLES ENERGY",
+                "CCD OPPOSITE-SPIN CORRELATION ENERGY",
+            ]
         ):
             expected = False
 
@@ -647,7 +653,11 @@ def contractual_ccsd(
             (
                 (
                     (qc_module == "gamess" and reference == "rhf" and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)"])
-                    or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)"])
+                    or (
+                        qc_module == "nwchem-tce"
+                        and reference in ["rhf", "uhf"]
+                        and method in ["ccsd", "ccsd+t(ccsd)", "ccsd(t)"]
+                    )
                     or (
                         qc_module in ["cfour-ncc", "cfour-ecc"]
                         and reference in ["rhf"]
@@ -659,11 +669,7 @@ def contractual_ccsd(
                         and corl_type in ["df", "cd"]
                         and method in ["ccsd", "ccsd(t)"]
                     )
-                    or (
-                        qc_module in ["cfour-vcc"]
-                        and reference in ["rhf", "uhf"]
-                        and method in ["ccsd+t(ccsd)"]
-                    )
+                    or (qc_module in ["cfour-vcc"] and reference in ["rhf", "uhf"] and method in ["ccsd+t(ccsd)"])
                 )
                 and pv in ["CCSD SAME-SPIN CORRELATION ENERGY", "CCSD OPPOSITE-SPIN CORRELATION ENERGY"]
             )

@@ -58,9 +58,9 @@ def _get_molecule(program, method):
                 "nwchem": {"memory": "5 gb"},
                 "psi4": {},  # no contradictory memory keyword in psi
             },
-            id="dsl"
+            id="dsl",
         ),
-    ]
+    ],
 )
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
 def test_local_options_memory_gib(program, model, keywords, memory_trickery):

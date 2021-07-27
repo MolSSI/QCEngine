@@ -283,7 +283,6 @@ def harvest_outfile_pass(outtext):
         psivar["MP3 DOUBLES ENERGY"] = mobj.group("mp3corl")
         module = "ncc"
 
-
     # Process MP4
     mobj = re.search(
         # fmt: off
@@ -455,7 +454,6 @@ def harvest_outfile_pass(outtext):
             psivar["QCISD(T) TOTAL ENERGY"] = mobj2.group("qcisdt")
             psivar["QCISD(T) CORRECTION ENERGY"] = Decimal(mobj2.group("qcisdt")) - Decimal(mobj2.group("qcisd"))
             psivar["QCISD(T) CORRELATION ENERGY"] = psivar["QCISD(T) TOTAL ENERGY"] - psivar["SCF TOTAL ENERGY"]
-
 
     # Process CC Iterations
     mobj = re.search(
@@ -631,7 +629,9 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = mobj.group("e4te5st")
         psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group("ccsd_t_")) - Decimal(mobj.group("hf"))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group("ccsd_t_")
-        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"] + psivar["T(CCSD) CORRECTION ENERGY"]
+        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = (
+            psivar["CCSD CORRELATION ENERGY"] + psivar["T(CCSD) CORRECTION ENERGY"]
+        )
         psivar["CCSD+T(CCSD) TOTAL ENERGY"] = psivar["CCSD TOTAL ENERGY"] + psivar["T(CCSD) CORRECTION ENERGY"]
         module = "ecc"
 
@@ -680,7 +680,9 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
         psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD+T(CCSD) TOTAL ENERGY"] = psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
-        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = (
+            psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        )
         psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
         psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
         module = "ncc"
@@ -707,7 +709,9 @@ def harvest_outfile_pass(outtext):
         psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["A-(T) CORRECTION ENERGY"] = mobj.group("atcorr")
         psivar["CCSD+T(CCSD) TOTAL ENERGY"] = psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
-        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        psivar["CCSD+T(CCSD) CORRELATION ENERGY"] = (
+            psivar["T(CCSD) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
+        )
         psivar["CCSD(T) TOTAL ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD TOTAL ENERGY"]
         psivar["CCSD(T) CORRELATION ENERGY"] = psivar["(T) CORRECTION ENERGY"] + psivar["CCSD CORRELATION ENERGY"]
         psivar["A-CCSD(T) TOTAL ENERGY"] = mobj.group("accsdttot")
@@ -859,9 +863,9 @@ def harvest_outfile_pass(outtext):
                 # uncertain if ROHF CCD correct
                 psivar[f"{iterCC} OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(5)
             if not mobj3:
-                psivar[f'{iterCC} SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
+                psivar[f"{iterCC} SAME-SPIN CORRELATION ENERGY"] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
         else:  # ecc
-            psivar[f'{iterCC} SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
+            psivar[f"{iterCC} SAME-SPIN CORRELATION ENERGY"] = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
             if not mobj3:
                 psivar[f"{iterCC} OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(5)
         psivar[f"{iterCC} CORRELATION ENERGY"] = mobj.group(6)
@@ -1010,7 +1014,9 @@ def harvest_outfile_pass(outtext):
 
     # Process error codes
     mobj = re.search(
+        # fmt: off
         r"^\s*" + r"--executable " + r"(?P<c4exe>\w+)" + r" finished with status" + r"\s+" + r"(?P<errcode>[1-9][0-9]*)",
+        # fmt: on
         outtext,
         re.MULTILINE,
     )

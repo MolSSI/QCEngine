@@ -1,5 +1,5 @@
-import re
 import pprint
+import re
 
 import pytest
 from qcelemental.models import AtomicInput
@@ -59,11 +59,11 @@ def runner_asserter(inp, subject, method, basis, tnm):
     natural_values = {"pk": "pk", "direct": "pk", "df": "df", "mem_df": "df", "disk_df": "df", "cd": "cd"}
     scf_type = natural_values[scf_type]
 
-    is_dft = (method in ["pbe", "b3lyp", "b3lyp5"])
+    is_dft = method in ["pbe", "b3lyp", "b3lyp5"]
 
-    atol_e, rtol_e = 2.e-7, 1.e-16
-    atol_g, rtol_g = 5.e-7, 2.e-5
-    atol_h, rtol_h = 1.e-5, 2.e-5
+    atol_e, rtol_e = 2.0e-7, 1.0e-16
+    atol_g, rtol_g = 5.0e-7, 2.0e-5
+    atol_h, rtol_h = 1.0e-5, 2.0e-5
     chash = answer_hash(
         system=subject.name,
         basis=basis,
@@ -181,9 +181,15 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     # returns checks
     if driver == "energy":
-        compare_values(ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.return_result, tnm + " wfn", atol=atol_e, rtol=rtol_e)
+        compare_values(
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.return_result, tnm + " wfn", atol=atol_e, rtol=rtol_e
+        )
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol_e, rtol=rtol_e
+            ref_block[f"{method.upper()} TOTAL ENERGY"],
+            wfn.properties.return_energy,
+            tnm + " prop",
+            atol=atol_e,
+            rtol=rtol_e,
         )
 
     elif driver == "gradient":
@@ -197,7 +203,11 @@ def runner_asserter(inp, subject, method, basis, tnm):
             quiet=True,
         )
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL GRADIENT"], wfn.return_result, tnm + " grad wfn", atol=atol_g, rtol=rtol_g
+            ref_block[f"{method.upper()} TOTAL GRADIENT"],
+            wfn.return_result,
+            tnm + " grad wfn",
+            atol=atol_g,
+            rtol=rtol_g,
         ), errmsg
         tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL ENERGY"],
@@ -209,7 +219,11 @@ def runner_asserter(inp, subject, method, basis, tnm):
             quiet=True,
         )
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol_e, rtol=rtol_e
+            ref_block[f"{method.upper()} TOTAL ENERGY"],
+            wfn.properties.return_energy,
+            tnm + " prop",
+            atol=atol_e,
+            rtol=rtol_e,
         ), errmsg
         # assert compare_values(
         #     ref_block[f"{method.upper()} TOTAL GRADIENT"],
@@ -241,7 +255,11 @@ def runner_asserter(inp, subject, method, basis, tnm):
             quiet=True,
         )
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol_e, rtol=rtol_e
+            ref_block[f"{method.upper()} TOTAL ENERGY"],
+            wfn.properties.return_energy,
+            tnm + " prop",
+            atol=atol_e,
+            rtol=rtol_e,
         ), errmsg
 
     # generics
@@ -284,7 +302,9 @@ def _asserter(asserter_args, contractual_args, contractual_fn):
                     return_message=True,
                     quiet=True,
                 )
-                assert compare_values(ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv, rtol=rtol_conv), errmsg
+                assert compare_values(
+                    ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv, rtol=rtol_conv
+                ), errmsg
 
                 # Note that the double compare_values lines are to collect the errmsg in the first for assertion in the second.
                 #   If the errmsg isn't present in the assert, the string isn't accessible through `e.value`.
