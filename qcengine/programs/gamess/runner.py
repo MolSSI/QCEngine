@@ -121,6 +121,7 @@ class GAMESSHarness(ProgramHarness):
 
         for mem_frac_replicated in (1, 0.5, 0.1, 0.75):
             mwords, memddi = self._partition(mwords_total, mem_frac_replicated, config.ncores)
+            # DEBUG print(f"loop {mwords_total=} {mem_frac_replicated=} {config.ncores=} -> repl: {mwords=} dist: {memddi=} -> percore={memddi/config.ncores + mwords} tot={memddi + config.ncores * mwords}\n")
             trial_opts = copy.deepcopy(opts)
             trial_opts["contrl__exetyp"] = "check"
             trial_opts["system__parall"] = not (config.ncores == 1)
@@ -134,6 +135,8 @@ class GAMESSHarness(ProgramHarness):
             }
             success, dexe = self.execute(trial_gamessrec)
 
+            # TODO: switch to KnownError and better handle clobbering of user ncores
+            # when the "need serial exe" messages show up compared to mem messages isn't clear
             # this would be a lot cleaner if there was a unique or list of memory error strings
             if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
                 raise InputError(dexe["stdout"])
