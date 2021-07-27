@@ -245,7 +245,9 @@ task python
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
         try:
-            qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(input_model.molecule, input_model.model.method, stdout, **outfiles)
+            qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
+                input_model.molecule, input_model.model.method, stdout, **outfiles
+            )
         except Exception as e:
             raise UnknownError(
                 "STDOUT:\n"

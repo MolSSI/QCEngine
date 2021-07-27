@@ -200,7 +200,9 @@ class GAMESSHarness(ProgramHarness):
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         try:
-            qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(input_model.molecule, input_model.model.method, stdout, **outfiles)
+            qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(
+                input_model.molecule, input_model.model.method, stdout, **outfiles
+            )
         except Exception as e:
             raise UnknownError(
                 "STDOUT:\n"
@@ -263,26 +265,26 @@ class GAMESSHarness(ProgramHarness):
 
     @staticmethod
     def _partition(total: float, fraction_replicated: float, ncores: int) -> Tuple[int, int]:
-            """Compute memory keyword values from memory and core parameters.
+        """Compute memory keyword values from memory and core parameters.
 
-            Parameters
-            ----------
-            total
-                Total memory per node in mwords.
-            fraction_replicated
-                Portion on interval (0, 1] to be replicated memory, as opposed to distributed memory.
-            ncores
-                Number of cores needing replicated memory.
+        Parameters
+        ----------
+        total
+            Total memory per node in mwords.
+        fraction_replicated
+            Portion on interval (0, 1] to be replicated memory, as opposed to distributed memory.
+        ncores
+            Number of cores needing replicated memory.
 
-            Returns
-            -------
-            mwords, memddi
-                Return mwords and memddi values for ``total`` memory (already in mwords) partitioned so (0, 1]
-            ``fraction_replicated`` is replicated over ``ncores`` and remainder distributed.
+        Returns
+        -------
+        mwords, memddi
+            Return mwords and memddi values for ``total`` memory (already in mwords) partitioned so (0, 1]
+        ``fraction_replicated`` is replicated over ``ncores`` and remainder distributed.
 
-            """
-            replicated_summed = total * fraction_replicated
-            replicated_each = int(max(1, replicated_summed / ncores))
-            distributed = int(total - replicated_summed)
+        """
+        replicated_summed = total * fraction_replicated
+        replicated_each = int(max(1, replicated_summed / ncores))
+        distributed = int(total - replicated_summed)
 
-            return replicated_each, distributed
+        return replicated_each, distributed

@@ -244,7 +244,9 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'Correlation energy' + r'\s+' + r"(?P<mp2corl>" + NUMBER + r")" + r'\s*' +
             r'^\s+' + r'Total MP2 energy' + r'\s+' + r"(?P<mp2>" + NUMBER + r")" + r'\s*$',
             # fmt: on
-            outtext, re.MULTILINE)
+            outtext,
+            re.MULTILINE,
+        )
         mobj2 = re.search(r"Direct MP2", outtext)
         if mobj and mobj2:
             logger.debug("matched direct-mp2")
@@ -374,7 +376,7 @@ def harvest_outfile_pass(outtext):
         # Process other TCE cases
         for cc_name in [
             r"CISD",
-            r"QCISD", 
+            r"QCISD",
             r"CISDT",
             r"CISDTQ",
             r"CCD",
