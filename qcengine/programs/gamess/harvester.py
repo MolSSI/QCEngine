@@ -335,7 +335,6 @@ def harvest_outfile_pass(outtext):
             qcvar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(4)
             qcvar["MP2 SAME-SPIN CORRELATION ENERGY"] = mobj.group(5)
 
-
         # Process CCSD
         mobj = re.search(
             # fmt: off

@@ -169,6 +169,7 @@ def test_local_options_scratch(program, model, keywords):
         "dftd3": "Grimme",  # freebie
         "gamess": "IOWA STATE UNIVERSITY",  # freebie
         "gcp": "Grimme",  # freebie
+        "mctc-gcp": "Grimme",  # freebie
         "mp2d": "Beran",  # freebie
         "nwchem": "E. Apra",  # freebie
         "psi4": rf"Scratch directory: {scratch_directory}/tmp\w+_psi_scratch/",
@@ -180,6 +181,7 @@ def test_local_options_scratch(program, model, keywords):
         "dftd3": "*/dftd3_geometry.xyz",  # no outfiles
         "gamess": "*/gamess.dat",
         "gcp": "*/gcp_geometry.xyz",  # no outfiles
+        "mctc-gcp": "*/gcp_geometry.xyz",  # no outfiles
         "mp2d": "*/mp2d_geometry",  # no outfiles
         "nwchem": "*/nwchem.db",
         "psi4": "*/psi.*.35",
