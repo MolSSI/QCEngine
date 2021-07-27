@@ -5,7 +5,7 @@ Calls the RDKit package.
 from typing import TYPE_CHECKING, Dict
 
 from qcelemental.models import AtomicResult, Provenance
-from qcelemental.util import which_import
+from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError
 from ..units import ureg
