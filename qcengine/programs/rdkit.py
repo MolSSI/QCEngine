@@ -2,7 +2,7 @@
 Calls the RDKit package.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import which_import
@@ -27,6 +27,8 @@ class RDKitHarness(ProgramHarness):
         "node_parallel": False,
         "managed_memory": False,
     }
+
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramHarness.Config):
         pass
@@ -82,6 +84,18 @@ class RDKitHarness(ProgramHarness):
             raise_error=raise_error,
             raise_msg="Please install via `conda install rdkit -c conda-forge`.",
         )
+
+    def get_version(self) -> str:
+        """Return the currently used version of RDKit."""
+        self.found(raise_error=True)
+
+        which_prog = which_import("rdkit")
+        if which_prog not in self.version_cache:
+            import rdkit
+
+            self.version_cache[which_prog] = safe_version(rdkit.__version__)
+
+        return self.version_cache[which_prog]
 
     def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
