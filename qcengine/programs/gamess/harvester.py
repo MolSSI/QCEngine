@@ -171,6 +171,24 @@ def harvest_outfile_pass(outtext):
         # Process MP2
         mobj = re.search(
             # fmt: off
+            r"^\s+" + r"MP2 CONTROL INFORMATION" + r"\s*" +
+            r"^\s+" + r"-+" + r"\s*" +
+            r"^\s+" + r"NACORE" + r"\s+=\s+" + r"\d+" + r"\s+" + r"NBCORE" + r"\s+=\s+" + r"\d+" + r"\s*" +
+            r"^\s+" + r"LMOMP2" + r"\s+=\s+" + r"\w+" + r"\s+" + r"AOINTS" + r"\s+=\s+" + r"\w+" + r"\s*" +
+            r"^\s+" + r"METHOD" + r"\s+=\s+" + r"\d+" + r"\s+" + r"NWORD" + r"\s+=\s+" + r"\d+" + r"\s*" +
+            r"^\s+" + r"MP2PRP" + r"\s+=\s+" + r"\w+" + r"\s+" + r"OSPT" + r"\s+=\s+" + r"\w+"+ r"\s*" +
+            r"^\s+" + r"CUTOFF" + r"\s+=\s+" + NUMBER + r"\s+" + r"CPHFBS" + r"\s+=\s+" + r"\w+"+ r"\s*" +
+            r"^\s+" + r"CODE" + r"\s+=\s+" + r"(?P<code>\w+)"  + r"\s*$",
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            print("matched mp2 module", mobj.groups(), mobj.groupdict())
+            module = mobj.group("code").lower()
+
+        mobj = re.search(
+            # fmt: off
             r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE\n'
             r'^\s+' + r'E\(0\)' + r'=\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'E\(1\)' + r'=\s+' + NUMBER + r'\s*' +
@@ -230,9 +248,6 @@ def harvest_outfile_pass(outtext):
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(4)
             qcvar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(5)
             qcvar["MP2 SAME-SPIN CORRELATION ENERGY"] = mobj.group(6)
-            mobj3 = re.search(r"\s+UHF-MP2 CALCULATION", outtext, re.MULTILINE)
-            if mobj3:
-                module = "uhfmp2"
 
         mobj = re.search(
             # fmt: off
@@ -252,9 +267,6 @@ def harvest_outfile_pass(outtext):
             print("matched mp2 rohf d", mobj.groups())
             qcvar["MP2 SINGLES ENERGY"] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
             qcvar["MP2 DOUBLES ENERGY"] = mobj.group(3)
-            mobj3 = re.search(r"\s+RMP2 (ROHF-MBPT2) CALCULATION", outtext, re.MULTILINE)
-            if mobj3:
-                module = "rohfmp2"
 
         mobj = re.search(r"^\s+" + "UHF-MP2 CALCULATION", outtext, re.MULTILINE)
         if mobj:
@@ -297,10 +309,6 @@ def harvest_outfile_pass(outtext):
             qcvar["MP2 DOUBLES ENERGY"] = mobj.group(3)
             qcvar["MP2 CORRELATION ENERGY"] = mobj.group(3)
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(4)
-            # mobj3 = re.search(r"\s+[RU]HF\s*SCF\s*CALCULATION", outtext, re.MULTILINE)
-            mobj3 = re.search(r"\s+DISTRIBUTED DATA UMP2 ENERGY", outtext, re.MULTILINE)
-            if mobj3:
-                module = "ddump2"
 
         mobj = re.search(
             # fmt: off
@@ -326,9 +334,6 @@ def harvest_outfile_pass(outtext):
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
             qcvar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(4)
             qcvar["MP2 SAME-SPIN CORRELATION ENERGY"] = mobj.group(5)
-            mobj3 = re.search(r"\s+DISTRIBUTED DATA MP2 ENERGY", outtext, re.MULTILINE)
-            if mobj3:
-                module = "ddrmp2"
 
 
         # Process CCSD

@@ -1,3 +1,4 @@
+import re
 import pprint
 
 import pytest
@@ -58,7 +59,11 @@ def runner_asserter(inp, subject, method, basis, tnm):
     natural_values = {"pk": "pk", "direct": "pk", "df": "df", "mem_df": "df", "disk_df": "df", "cd": "cd"}
     scf_type = natural_values[scf_type]
 
-    atol = 1.0e-6
+    is_dft = (method in ["pbe", "b3lyp", "b3lyp5"])
+
+    atol_e, rtol_e = 2.e-7, 1.e-16
+    atol_g, rtol_g = 5.e-7, 2.e-5
+    atol_h, rtol_h = 1.e-5, 2.e-5
     chash = answer_hash(
         system=subject.name,
         basis=basis,
@@ -70,6 +75,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     # check all calcs against conventional reference to looser tolerance
     atol_conv = 1.0e-4
+    rtol_conv = 1.0e-3
     chash_conv = answer_hash(
         system=subject.name,
         basis=basis,
@@ -98,11 +104,12 @@ def runner_asserter(inp, subject, method, basis, tnm):
     # local_options = {"nnodes": 1, "ncores": 1}  # debug
 
     if "error" in inp:
-        errtype, errmsg = inp["error"]
+        errtype, errmatch, reason = inp["error"]
         with pytest.raises(errtype) as e:
             qcng.compute(atin, qcprog, raise_error=True, return_dict=True, local_options=local_options)
 
-        assert errmsg in str(e.value)
+        assert re.search(errmatch, str(e.value)), f"Not found: {errtype} '{errmatch}' in {e.value}"
+        # _recorder(qcprog, qc_module_in, driver, method, reference, fcae, scf_type, corl_type, "error", "nyi: " + reason)
         return
 
     wfn = qcng.compute(atin, qcprog, raise_error=True, local_options=local_options)
@@ -137,9 +144,11 @@ def runner_asserter(inp, subject, method, basis, tnm):
     asserter_args = [
         [wfn.extras["qcvars"], wfn.properties],
         ref_block,
-        atol,
+        [atol_e, atol_g, atol_h],
+        [rtol_e, rtol_g, rtol_h],
         ref_block_conv,
         atol_conv,
+        rtol_conv,
         tnm,
     ]
 
@@ -152,25 +161,29 @@ def runner_asserter(inp, subject, method, basis, tnm):
             _asserter(asserter_args, contractual_args, contractual_ccsd)
 
     if "wrong" in inp:
-        errmsg, reason = inp["wrong"]
+        errmatch, reason = inp["wrong"]
         with pytest.raises(AssertionError) as e:
             qcvar_assertions()
 
-        # print("WRONG", errmsg, reason, str(e.value), "ENDW")
-        assert errmsg in str(e.value)
+        assert errmatch in str(e.value), f"Not found: AssertionError '{errmatch}' for '{reason}' in {e.value}"
+        # _recorder(qcprog, qc_module_out, driver, method, reference, fcae, scf_type, corl_type, "wrong", reason + f" First wrong at `{errmatch}`.")
         pytest.xfail(reason)
 
+    # primary label checks
     qcvar_assertions()
 
-    # aliases
+    # aliases checks
     asserter_args[0].pop()  # checks not appropriate for properties
-    _asserter(asserter_args, contractual_args, contractual_current)
+    if is_dft:
+        _asserter(asserter_args, contractual_args, contractual_dft_current)
+    else:
+        _asserter(asserter_args, contractual_args, contractual_current)
 
-    # returns
+    # returns checks
     if driver == "energy":
-        compare_values(ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.return_result, tnm + " wfn", atol=atol)
+        compare_values(ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.return_result, tnm + " wfn", atol=atol_e, rtol=rtol_e)
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol_e, rtol=rtol_e
         )
 
     elif driver == "gradient":
@@ -178,30 +191,58 @@ def runner_asserter(inp, subject, method, basis, tnm):
             ref_block[f"{method.upper()} TOTAL GRADIENT"],
             wfn.return_result,
             tnm + " grad wfn",
-            atol=atol,
+            atol=atol_g,
+            rtol=rtol_g,
             return_message=True,
             quiet=True,
         )
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL GRADIENT"], wfn.return_result, tnm + " grad wfn", atol=atol
+            ref_block[f"{method.upper()} TOTAL GRADIENT"], wfn.return_result, tnm + " grad wfn", atol=atol_g, rtol=rtol_g
         ), errmsg
         tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL ENERGY"],
             wfn.properties.return_energy,
             tnm + " prop",
-            atol=atol,
+            atol=atol_e,
+            rtol=rtol_e,
             return_message=True,
             quiet=True,
         )
         assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol_e, rtol=rtol_e
         ), errmsg
         # assert compare_values(
         #     ref_block[f"{method.upper()} TOTAL GRADIENT"],
         #     wfn["properties"]["return_gradient"],
         #     tnm + " grad prop",
-        #     atol=atol,
+        #     atol=atol_g,
         # )
+
+    elif driver == "hessian":
+        tf, errmsg = compare_values(
+            ref_block[f"{method.upper()} TOTAL HESSIAN"],
+            wfn.return_result,
+            tnm + " hess wfn",
+            atol=atol_h,
+            rtol=rtol_h,
+            return_message=True,
+            quiet=True,
+        )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL HESSIAN"], wfn.return_result, tnm + " hess wfn", atol=atol_h, rtol=rtol_h
+        ), errmsg
+        tf, errmsg = compare_values(
+            ref_block[f"{method.upper()} TOTAL ENERGY"],
+            wfn.properties.return_energy,
+            tnm + " prop",
+            atol=atol_e,
+            rtol=rtol_e,
+            return_message=True,
+            quiet=True,
+        )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.properties.return_energy, tnm + " prop", atol=atol_e, rtol=rtol_e
+        ), errmsg
 
     # generics
     # yapf: disable
@@ -211,31 +252,39 @@ def runner_asserter(inp, subject, method, basis, tnm):
     assert compare(ref_block["N BETA ELECTRONS"], wfn.properties.calcinfo_nbeta, tnm + " nbeta wfn"), f"nbeta {wfn.properties.calcinfo_nbeta} != {ref_block['N BETA ELECTRONS']}"
     # yapf: enable
 
+    # record
+    # _recorder(qcprog, qc_module_out, driver, method, reference, fcae, scf_type, corl_type, "fd" if using_fd else "pass", "")
+
+    # assert 0
+
 
 def _asserter(asserter_args, contractual_args, contractual_fn):
     """For expectations in `contractual_fn`, check that the QCVars are present in P::e.globals and wfn and match expected ref_block."""
 
-    qcvar_stores, ref_block, atol, ref_block_conv, atol_conv, tnm = asserter_args
+    qcvar_stores, ref_block, atol_egh, rtol_egh, ref_block_conv, atol_conv, rtol_conv, tnm = asserter_args
 
     for obj in qcvar_stores:
         for rpv, pv, present in contractual_fn(*contractual_args):
             label = tnm + " " + pv
+            atol = atol_egh["EGH".index(rpv.split()[-1][0])]
+            rtol = rtol_egh["EGH".index(rpv.split()[-1][0])]
 
             if present:
                 # verify exact match to method (may be df) and near match to conventional (non-df) method
                 tf, errmsg = compare_values(
-                    ref_block[rpv], query_qcvar(obj, pv), label, atol=atol, return_message=True, quiet=True
+                    ref_block[rpv], query_qcvar(obj, pv), label, atol=atol, rtol=rtol, return_message=True, quiet=True
                 )
-                assert compare_values(ref_block[rpv], query_qcvar(obj, pv), label, atol=atol), errmsg
+                assert compare_values(ref_block[rpv], query_qcvar(obj, pv), label, atol=atol, rtol=rtol), errmsg
                 tf, errmsg = compare_values(
                     ref_block_conv[rpv],
                     query_qcvar(obj, pv),
                     label,
                     atol=atol_conv,
+                    rtol=rtol_conv,
                     return_message=True,
                     quiet=True,
                 )
-                assert compare_values(ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv), errmsg
+                assert compare_values(ref_block_conv[rpv], query_qcvar(obj, pv), label, atol=atol_conv, rtol=rtol_conv), errmsg
 
                 # Note that the double compare_values lines are to collect the errmsg in the first for assertion in the second.
                 #   If the errmsg isn't present in the assert, the string isn't accessible through `e.value`.
