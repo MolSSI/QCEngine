@@ -12,10 +12,28 @@ from .standard_suite_ref import answer_hash, std_suite
 from .standard_suite_contracts import (  # isort:skip
     contractual_hf,
     contractual_mp2,
-    # contractual_mp2p5,
-    # contractual_mp3,
+    contractual_mp2p5,
+    contractual_mp3,
+    contractual_mp4_prsdq_pr,
+    contractual_mp4,
+    contractual_cisd,
+    contractual_qcisd,
+    contractual_qcisd_prt_pr,
+    contractual_lccd,
+    contractual_lccsd,
+    contractual_ccd,
     contractual_ccsd,
-    # contractual_ccsd_prt_pr,
+    contractual_ccsdpt_prccsd_pr,
+    contractual_ccsd_prt_pr,
+    contractual_accsd_prt_pr,
+    contractual_ccsdt1a,
+    contractual_ccsdt1b,
+    contractual_ccsdt2,
+    contractual_ccsdt3,
+    contractual_ccsdt,
+    contractual_ccsdt_prq_pr,
+    contractual_ccsdtq,
+    contractual_dft_current,
     contractual_current,
     query_has_qcvar,
     query_qcvar,
@@ -40,17 +58,37 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     # <<<  Reference Values  >>>
 
-    # ? precedence on next two
+    # ? precedence on these types -- not really applicable to qcng
     mp2_type = inp.get("corl_type", inp["keywords"].get("mp2_type", "df"))  # hard-code of read_options.cc MP2_TYPE
-    # mp_type = inp.get("corl_type", inp["keywords"].get("mp_type", "conv"))  # hard-code of read_options.cc MP_TYPE
+    mp_type = inp.get("corl_type", inp["keywords"].get("mp_type", "conv"))  # hard-code of read_options.cc MP_TYPE
+    ci_type = inp.get("corl_type", inp["keywords"].get("ci_type", "conv"))  # hard-code of read_options.cc CI_TYPE
     cc_type = inp.get("corl_type", inp["keywords"].get("cc_type", "conv"))  # hard-code of read_options.cc CC_TYPE
-    corl_natural_values = {"mp2": mp2_type, "ccsd": cc_type}
     corl_natural_values = {
         "hf": "conv",  # dummy to assure df/cd/conv scf_type refs available
         "mp2": mp2_type,
-        # "mp3": mp_type,
+        "mp3": mp_type,
+        "mp4(sdq)": mp_type,
+        "mp4": mp_type,
+        "cisd": ci_type,
+        "qcisd": ci_type,
+        "qcisd(t)": ci_type,
+        "lccd": cc_type,
+        "lccsd": cc_type,
+        "ccd": cc_type,
         "ccsd": cc_type,
-        # "ccsd(t)": cc_type
+        "ccsd+t(ccsd)": cc_type,
+        "ccsd(t)": cc_type,
+        "a-ccsd(t)": cc_type,
+        "ccsdt-1a": cc_type,
+        "ccsdt-1b": cc_type,
+        "ccsdt-2": cc_type,
+        "ccsdt-3": cc_type,
+        "ccsdt": cc_type,
+        "ccsdt(q)": cc_type,
+        "ccsdtq": cc_type,
+        "pbe": "conv",
+        "b3lyp": "conv",
+        "b3lyp5": "conv",
     }
     corl_type = corl_natural_values[method]
 
@@ -64,6 +102,8 @@ def runner_asserter(inp, subject, method, basis, tnm):
     atol_e, rtol_e = 2.0e-7, 1.0e-16
     atol_g, rtol_g = 5.0e-7, 2.0e-5
     atol_h, rtol_h = 1.0e-5, 2.0e-5
+    if is_dft:
+        atol_g = 6.0e-6
     chash = answer_hash(
         system=subject.name,
         basis=basis,
@@ -154,11 +194,81 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     def qcvar_assertions():
         print("BLOCK", chash, contractual_args)
-        if method == "mp2":
+        if method == "hf":
+            _asserter(asserter_args, contractual_args, contractual_hf)
+        elif method == "mp2":
             _asserter(asserter_args, contractual_args, contractual_mp2)
+        elif method == "mp3":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_mp2p5)
+            _asserter(asserter_args, contractual_args, contractual_mp3)
+        elif method == "mp4(sdq)":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_mp2p5)
+            _asserter(asserter_args, contractual_args, contractual_mp3)
+            _asserter(asserter_args, contractual_args, contractual_mp4_prsdq_pr)
+        elif method == "mp4":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_mp2p5)
+            _asserter(asserter_args, contractual_args, contractual_mp3)
+            _asserter(asserter_args, contractual_args, contractual_mp4_prsdq_pr)
+            _asserter(asserter_args, contractual_args, contractual_mp4)
+        elif method == "cisd":
+            _asserter(asserter_args, contractual_args, contractual_cisd)
+        elif method == "qcisd":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_qcisd)
+        elif method == "qcisd(t)":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_qcisd)
+            _asserter(asserter_args, contractual_args, contractual_qcisd_prt_pr)
+        elif method == "lccd":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_lccd)
+        elif method == "lccsd":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_lccsd)
+        elif method == "ccd":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccd)
         elif method == "ccsd":
             _asserter(asserter_args, contractual_args, contractual_mp2)
             _asserter(asserter_args, contractual_args, contractual_ccsd)
+        elif method == "ccsd+t(ccsd)":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsd)
+            _asserter(asserter_args, contractual_args, contractual_ccsdpt_prccsd_pr)
+        elif method == "ccsd(t)":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsd)
+            _asserter(asserter_args, contractual_args, contractual_ccsd_prt_pr)
+        elif method == "a-ccsd(t)":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsd)
+            _asserter(asserter_args, contractual_args, contractual_accsd_prt_pr)
+        elif method == "ccsdt-1a":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsdt1a)
+        elif method == "ccsdt-1b":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsdt1b)
+        elif method == "ccsdt-2":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsdt2)
+        elif method == "ccsdt-3":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsdt3)
+        elif method == "ccsdt":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsdt)
+        elif method == "ccsdt(q)":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsdt)
+            _asserter(asserter_args, contractual_args, contractual_ccsdt_prq_pr)
+        elif method == "ccsdtq":
+            _asserter(asserter_args, contractual_args, contractual_mp2)
+            _asserter(asserter_args, contractual_args, contractual_ccsdtq)
+        # separations here for DFT appropriate when qcvars are labeled by functional
 
     if "wrong" in inp:
         errmatch, reason = inp["wrong"]
