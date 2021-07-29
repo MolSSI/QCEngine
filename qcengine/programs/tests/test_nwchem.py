@@ -282,7 +282,7 @@ def test_autoz_error():
 
 
 @using("nwchem")
-def test_error_correction():
+def test_autoz_error_correction():
     """See if error correction for autoz works"""
 
     # Large molecule that leads to an AutoZ error
@@ -301,3 +301,37 @@ def test_error_correction():
     assert result.success
     assert "geom_binvr" in result.extras["observed_errors"]
     assert result.extras["observed_errors"]["geom_binvr"]["keyword_updates"] == {"geometry__noautoz": True}
+
+
+@pytest.mark.parametrize(
+    "method, keyword, init_iters, use_tce",
+    [
+        ["b3lyp", "dft__maxiter", 4, False],
+        ["b3lyp", "dft__iterations", 4, False],
+        ["hf", "scf__maxiter", 2, False],
+        ["mp2", "scf__maxiter", 2, False],
+        ["mp2", "scf__maxiter", 2, True],
+        ["ccsd", "tce__maxiter", 8, True],
+        ["ccsd", "ccsd__maxiter", 4, False],
+    ],
+)
+@using("nwchem")
+def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
+    result = qcng.compute(
+        {
+            "molecule": h20v2,
+            "model": {"method": method, "basis": "sto-3g"},
+            "driver": "energy",
+            "keywords": {
+                keyword: init_iters,
+                "qc_module": use_tce,
+                "scf__uhf": True,  # UHF needed for SCF test
+            },
+        },
+        "nwchem",
+        raise_error=True,
+    )
+
+    assert result.success
+    assert "convergence_failed" in result.extras["observed_errors"]
+    assert result.extras["observed_errors"]["convergence_failed"]["keyword_updates"] == {keyword: init_iters * 4}

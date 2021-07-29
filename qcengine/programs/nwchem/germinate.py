@@ -3,7 +3,7 @@ from typing import Any, Dict, Tuple
 from qcengine.exceptions import InputError
 
 # List of XC functionals known to NWChem
-_xc_functionals = [
+xc_functionals = [
     "acm",
     "b3lyp",
     "beckehandh",
@@ -168,7 +168,7 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
             f"Do not specify TCE as a method. Instead specify the desired method " f'as a keyword and "qc_module=True".'
         )
 
-    elif method.split()[0] in _xc_functionals:
+    elif method.split()[0] in xc_functionals:
         opts["dft__xc"] = method
         if use_tce:
             mdccmd = f"task tce {runtyp}\n\n"

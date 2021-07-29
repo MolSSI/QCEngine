@@ -136,7 +136,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             # Check if any of the errors are known
             for error in all_errors:
                 error.detect_error(dexe)
-            raise UnknownError(dexe["stdout"])
+            raise UnknownError(f"STDOUT:\n{dexe['stdout']}\nSTDERR:\n{dexe['stderr']}")
 
     def build_input(
         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
@@ -238,10 +238,9 @@ task python
         stderr = outfiles.pop("stderr")
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
-        try:
-            qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
-        except Exception as e:
-            raise UnknownError(stdout)
+        # LW 7Jul21: I allow exceptions to be raised so that we can detect errors
+        #   in the parsing of output files
+        qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
         if nwgrad is not None:
             qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
