@@ -26,7 +26,7 @@ class GeomBinvrError(SimpleKnownErrorException):
 
 
 class ConvergenceFailedError(SimpleKnownErrorException):
-    """Failed to converge on electronic steps. This will increase the limit by 2x"""
+    """Failed to converge on electronic steps. This will increase the limit by 4x"""
 
     error_name = "convergence_failed"
     description = "The computation failed to converge."
