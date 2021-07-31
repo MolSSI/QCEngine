@@ -1,10 +1,18 @@
 from typing import Any, Dict
 
+from ...exceptions import InputError
+
 
 def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
     """Converts the QC method into GAMESS keywords."""
 
     method = method.lower()
+    if method.endswith("-makefp"):
+        method = method[:-7]
+        run_makefp = True
+    else:
+        run_makefp = False
+
     opts = {}
 
     runtyp = {
@@ -14,7 +22,13 @@ def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
         #'properties': 'prop',
     }[derint]
 
-    opts["contrl__runtyp"] = runtyp
+    if run_makefp and runtyp != "energy":
+        raise InputError(f"GAMESS MAKEFP must be run with energy, not {runtyp}")
+
+    if run_makefp:
+        opts["contrl__runtyp"] = "makefp"
+    else:
+        opts["contrl__runtyp"] = runtyp
 
     if method == "gamess":
         pass
@@ -34,5 +48,11 @@ def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
 
     elif method == "ccsd(t)":
         opts["contrl__cctyp"] = "ccsd(t)"
+
+    elif method == "efp":
+        opts["contrl__coord"] = "fragonly"
+
+    else:
+        raise InputError(f"Unrecognized method type '{method}'.")
 
     return opts
