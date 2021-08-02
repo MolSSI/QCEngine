@@ -1152,7 +1152,7 @@ def harvest(
         out_hess = harvest_hessian(outfiles.get("nwchem.hess"))
 
     # Sometimes the hierarchical setting of CURRENT breaks down
-    if method.lower() in ["nwc-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
+    if method == "ccsd+t(ccsd)":
         out_psivar["CURRENT CORRELATION ENERGY"] = out_psivar["CCSD+T(CCSD) CORRELATION ENERGY"]
         out_psivar["CURRENT ENERGY"] = out_psivar["CCSD+T(CCSD) TOTAL ENERGY"]
 
@@ -1167,15 +1167,25 @@ def harvest(
     else:
         raise ValueError("""No coordinate information extracted from NWChem output.""")
 
-    # If present, align the gradients and hessian with the original molecular coordinates
-    #  NWChem rotates the coordinates of the input molecule. `out_mol` contains the coordinates for the
-    #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
-    amol, data = out_mol.align(in_mol, atoms_map=True, verbose=0, mols_align=0.01)
-    mill = data["mill"]  # Retrieve tool with alignment routines
+    # Frame considerations
+    if in_mol.fix_com and in_mol.fix_orientation:
+        # Impose input frame if important as signalled by fix_*=T
+        # If present, align the gradients and hessian with the original molecular coordinates
+        #  NWChem rotates the coordinates of the input molecule. `out_mol` contains the coordinates for the
+        #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
+        return_mol, data = out_mol.align(in_mol, atoms_map=True, verbose=0, mols_align=0.01)
+        mill = data["mill"]
 
+    else:
+        return_mol = out_mol
+        mill = qcel.molutil.compute_scramble(len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False)  # identity AlignmentMill
+
+    return_grad = None
     if out_grad is not None:
-        out_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
-    if out_hess is not None:
-        out_hess = mill.align_hessian(np.array(out_hess))
+        return_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
 
-    return out_psivar, out_hess, out_grad, out_mol, version, module, error
+    return_hess = None
+    if out_hess is not None:
+        return_hess = mill.align_hessian(np.array(out_hess))
+
+    return out_psivar, return_hess, return_grad, return_mol, version, module, error

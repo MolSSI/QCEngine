@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 def harvest(
-    p4Mol, method: str, gamessout: str, **outfiles
+    in_mol: Molecule, method: str, gamessout: str, **outfiles
 ) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]:
     """Parses all the pieces of output from gamess: the stdout in
     *gamessout* Scratch files are not yet considered at this moment.
     """
-    outqcvar, outMol, outGrad, module = harvest_output(gamessout)
+    outqcvar, out_mol, outGrad, module = harvest_output(gamessout)
 
     datasections = {}
     if outfiles.get("gamess.dat"):
@@ -36,29 +36,39 @@ def harvest(
             outHess = None
 
     # Sometimes the hierarchical setting of CURRENT breaks down
-    if method.lower() in ["gms-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
+    if method == "ccsd+t(ccsd)":
         outqcvar["CURRENT CORRELATION ENERGY"] = outqcvar["CCSD+T(CCSD) CORRELATION ENERGY"]
         outqcvar["CURRENT ENERGY"] = outqcvar["CCSD+T(CCSD) TOTAL ENERGY"]
 
-    if outMol:
-        outqcvar["NUCLEAR REPULSION ENERGY"] = outMol.nuclear_repulsion_energy()
-        if p4Mol:
-            if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
+    if out_mol:
+        outqcvar["NUCLEAR REPULSION ENERGY"] = out_mol.nuclear_repulsion_energy()
+        if in_mol:
+            if abs(out_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
-                    """gamess outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
-                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                    f"""gamess outfile (NRE: {out_mol.nuclear_repulsion_energy()}) inconsistent with AtomicInput input (NRE: {in_mol.nuclear_repulsion_energy()})."""
                 )
 
-        amol, data = outMol.align(p4Mol, atoms_map=False, mols_align=True, verbose=0)
-        mill = data["mill"]
+        # Frame considerations
+        if in_mol.fix_com and in_mol.fix_orientation:
+            # Impose input frame if important as signalled by fix_*=T
+            return_mol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
+            mill = data["mill"]
+
+        else:
+            return_mol = out_mol
+            mill = qcel.molutil.compute_scramble(len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False)  # identity AlignmentMill
+
+        return_grad = None
         if outGrad is not None:
-            outGrad = mill.align_gradient(np.array(outGrad).reshape(-1, 3))
+            return_grad = mill.align_gradient(np.array(outGrad).reshape(-1, 3))
+
+        return_hess = None
         if outHess is not None:
-            outHess = mill.align_hessian(np.array(outHess))
+            return_hess = mill.align_hessian(np.array(outHess))
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
-    return outqcvar, outHess, outGrad, outMol, module
+    return outqcvar, return_hess, return_grad, return_mol, module
 
 
 def harvest_datfile(datfile: str) -> Dict[str, str]:
@@ -418,13 +428,13 @@ def harvest_outfile_pass(outtext):
         # Process CISD
         mobj = re.search(
             # fmt: off
-            r"^\s+" + r"PROPERTY VALUES FOR THE " + r"(RHF|ROHF)" + r"\s+" + r"SELF-CONSISTENT FIELD WAVEFUNCTION" + r"\s*" + 
+            r"^\s+" + r"PROPERTY VALUES FOR THE " + r"(RHF|ROHF)" + r"\s+" + r"SELF-CONSISTENT FIELD WAVEFUNCTION" + r"\s*" +
             r"(?:.*?)" +
             r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
             r"(?:.*?)" +
             r"^\s*" + r"(TOTAL ENERGY =)\s+" + r"(?P<hf>" + NUMBER + r")" + r"\s*" +
             r"(?:.*?)" +
-            r"^\s+" + r"(?P<module>(FSOCI|GUGA))" + r"\s+" + r"CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1" + r"\s*" + 
+            r"^\s+" + r"(?P<module>(FSOCI|GUGA))" + r"\s+" + r"CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1" + r"\s*" +
             r"(?:.*?)" +
             r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
             r"(?:.*?)" +

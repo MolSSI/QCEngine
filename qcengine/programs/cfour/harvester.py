@@ -494,8 +494,8 @@ def harvest_outfile_pass(outtext):
     mobj = re.search(
         # fmt: off
         r'^\s+' + r'(?:\d+)' + r'\s+' + r'(?P<corl>' + NUMBER + r')\s+' +
-                  NUMBER + r'\s+' + NUMBER + r'\s+' + 
-                  NUMBER + r'\s+' + NUMBER +  r'\s+' + 
+                  NUMBER + r'\s+' + NUMBER + r'\s+' +
+                  NUMBER + r'\s+' + NUMBER +  r'\s+' +
                   r'(' + NUMBER +  r')?' + r'(' + r'\s+' + NUMBER + r')?' + r'\s*' +
         r'^\s*' +
         r'^\s*' + r'(?:\w+(?:-(1a|1b|2|3))? iterations converged .*?)' +
@@ -1136,17 +1136,17 @@ def harvest_outfile_pass(outtext):
     return psivar, psivar_coord, psivar_grad, version, module, error
 
 
-def harvest(p4Mol, method: str, c4out, **largs):
+def harvest(in_mol: Molecule, method: str, c4out, **largs):
     """Parses all the pieces of output from Cfour: the stdout in
     *c4out* and the contents of various scratch files like GRD stored
     in their namesake keys in *largs*. Since all Cfour output uses
     its own orientation and atom ordering for the given molecule,
-    a qcdb.Molecule *p4Mol*, if supplied, is used to transform the
-    Cfour output back into consistency with *p4Mol*.
+    a qcdb.Molecule *in_mol*, if supplied, is used to transform the
+    Cfour output back into consistency with *in_mol*.
 
     """
     # Collect results from output file and subsidiary files
-    outPsivar, outMol, outGrad, version, module, error = harvest_output(c4out)
+    out_psivar, out_mol, outGrad, version, module, error = harvest_output(c4out)
 
     if largs.get("GRD"):
         grdMol, grdGrad = harvest_GRD(largs["GRD"])
@@ -1166,14 +1166,14 @@ def harvest(p4Mol, method: str, c4out, **largs):
         dipolDip = None
 
     # Sometimes the hierarchical setting of CURRENT breaks down
-    if method.lower() in ["c4-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
-        outPsivar["CURRENT CORRELATION ENERGY"] = outPsivar["CCSD+T(CCSD) CORRELATION ENERGY"]
-        outPsivar["CURRENT ENERGY"] = outPsivar["CCSD+T(CCSD) TOTAL ENERGY"]
+    if method == "ccsd+t(ccsd)":
+        out_psivar["CURRENT CORRELATION ENERGY"] = out_psivar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        out_psivar["CURRENT ENERGY"] = out_psivar["CCSD+T(CCSD) TOTAL ENERGY"]
 
-    if fcmHess is not None and method.lower() in ["c4-hf", "hf"]:
+    if fcmHess is not None and method == "hf":
         # MP2 available in HF Hessian so need to counteract
-        outPsivar.pop("CURRENT CORRELATION ENERGY")
-        outPsivar["CURRENT ENERGY"] = outPsivar["HF TOTAL ENERGY"]
+        out_psivar.pop("CURRENT CORRELATION ENERGY")
+        out_psivar["CURRENT ENERGY"] = out_psivar["HF TOTAL ENERGY"]
 
     # Reconcile the coordinate information: several cases
     #   Case                            p4Mol   GRD      Check consistency           Apply orientation?     ReturnMol (1-19-2014)
@@ -1181,96 +1181,104 @@ def harvest(p4Mol, method: str, c4out, **largs):
     #   opt with mol thru cfour {}      None    grdMol            outMol && grdMol   N.C.                   grdMol
     #   sp with mol thru molecule {}    p4Mol   None     p4Mol && outMol             p4Mol <-- outMol       p4Mol (same as input arg)
     #   opt with mol thru molecule {}   p4Mol   grdMol   p4Mol && outMol && grdMol   p4Mol <-- grdMol       p4Mol (same as input arg)
+    # Jul 2021: above describes longtime orientation strategy. Now, mol through cfour {} no longer allowed, and fix_* signal whether input (T) or cfour native (F) frames for returned data.
 
-    if outMol:
+    if out_mol:
         if grdMol:
-            if abs(outMol.nuclear_repulsion_energy() - grdMol.nuclear_repulsion_energy()) > 1.0e-3:
+            if abs(out_mol.nuclear_repulsion_energy() - grdMol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
                     """Cfour outfile (NRE: %f) inconsistent with Cfour GRD (NRE: %f)."""
-                    % (outMol.nuclear_repulsion_energy(), grdMol.nuclear_repulsion_energy())
+                    % (out_mol.nuclear_repulsion_energy(), grdMol.nuclear_repulsion_energy())
                 )
-        if p4Mol:
-            if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
+        if in_mol:
+            if abs(out_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
-                    """Cfour outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
-                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                    f"""Cfour outfile (NRE: {out_mol.nuclear_repulsion_energy()}) inconsistent with AtomicInput (NRE: {in_mol.nuclear_repulsion_energy()})."""
                 )
     else:
         raise ValueError("""No coordinate information extracted from Cfour output.""")
 
-    #    print '    <<<   [1] P4-MOL   >>>'
-    #    if p4Mol:
-    #        p4Mol.print_out_in_bohr()
-    #    print '    <<<   [2] C4-OUT-MOL   >>>'
-    #    if outMol:
-    #        outMol.print_out_in_bohr()
-    #    print '    <<<   [3] C4-GRD-MOL   >>>'
-    #    if grdMol:
-    #        grdMol.print_out_in_bohr()
+    # Set up array reorientation object(s)
+    if in_mol and out_mol and grdMol:
+        # Jul 2021: apparently GRD and FCMFINAL can have different atom orderings :-)
 
-    # Set up array reorientation object
-    if p4Mol and grdMol:
-        amol, data = grdMol.align(p4Mol, atoms_map=False, mols_align=True, verbose=0)
-        mill = data["mill"]
+        _, data = grdMol.align(out_mol, atoms_map=False, mols_align=True, verbose=0)
+        g2o_mill = data["mill"]
 
-        oriCoord = mill.align_coordinates(grdMol.geometry)  # (np_out=True))
-        oriGrad = mill.align_gradient(np.array(grdGrad))
+        oriCoord = g2o_mill.align_coordinates(grdMol.geometry)
+        oriGrad = g2o_mill.align_gradient(np.array(grdGrad))
+
         if dipolDip is None:
             oriDip = None
         else:
-            oriDip = mill.align_vector(np.array(dipolDip))
+            oriDip = g2o_mill.align_vector(dipolDip)
 
         if fcmHess is None:
             oriHess = None
         else:
-            oriHess = mill.align_hessian(np.array(fcmHess))
+            oriHess = fcmHess
 
-        # p4c4 = OrientMols(p4Mol, grdMol)
-        # oriCoord = p4c4.transform_coordinates2(grdMol)
-        # oriGrad = p4c4.transform_gradient(grdGrad)
-        # oriDip = None if dipolDip is None else p4c4.transform_vector(dipolDip)
+        # Frame considerations
+        if in_mol.fix_com and in_mol.fix_orientation:
+            # Impose input frame if important as signalled by fix_*=T
+            return_mol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
+            mill = data["mill"]
 
-    elif p4Mol and outMol:
+        else:
+            return_mol = out_mol
+            mill = qcel.molutil.compute_scramble(len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False)  # identity AlignmentMill
+
+#        _, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
+#        o2i_mill = data["mill"]
+#
+#        oriCoord = o2i_mill.align_coordinates(oriCoord)
+#        oriGrad = o2i_mill.align_gradient(oriGrad)
+#        if oriDip is not None:
+#            oriDip = o2i_mill.align_vector(oriDip)
+#        if oriHess is not None:
+#            oriHess = o2i_mill.align_hessian(oriHess)
+
+        oriCoord = mill.align_coordinates(oriCoord)
+        oriGrad = mill.align_gradient(oriGrad)
+        if oriDip is not None:
+            oriDip = mill.align_vector(oriDip)
+        if oriHess is not None:
+            oriHess = mill.align_hessian(oriHess)
+
+    elif in_mol and out_mol:
         # TODO watch out - haven't seen atom_map=False yet
-        amol, data = outMol.align(p4Mol, atoms_map=True, mols_align=True, verbose=0)
-        mill = data["mill"]
 
-        oriCoord = mill.align_coordinates(outMol.geometry)  # (np_out=True))
+        if in_mol.fix_com and in_mol.fix_orientation:
+            # Impose input frame if important as signalled by fix_*=T
+            return_mol, data = out_mol.align(in_mol, atoms_map=True, mols_align=True, verbose=0)
+            mill = data["mill"]
+
+        else:
+            return_mol = out_mol
+            mill = qcel.molutil.compute_scramble(len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False)  # identity AlignmentMill
+
+        oriCoord = mill.align_coordinates(out_mol.geometry)  # (np_out=True))
         oriGrad = None
         oriHess = None  # I don't think we ever get FCMFINAL w/o GRAD
         if dipolDip is None:
             oriDip = None
         else:
             oriDip = mill.align_vector(np.array(dipolDip))
-        # p4c4 = OrientMols(p4Mol, outMol)
-        # oriCoord = p4c4.transform_coordinates2(outMol)
+        # p4c4 = OrientMols(in_mol, out_mol)
+        # oriCoord = p4c4.transform_coordinates2(out_mol)
         # oriGrad = None
         # oriDip = None if dipolDip is None else p4c4.transform_vector(dipolDip)
 
-    elif outMol:
+    elif out_mol:
         oriGrad = None
         oriHess = None
         oriDip = None if dipolDip is None else dipolDip
 
-    #    print p4c4
-    #    print '    <<<   [4] C4-ORI-MOL   >>>'
-    #    if oriCoord is not None:
-    #        for item in oriCoord:
-    #            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
-    #
-    #    print '    <<<   [1] C4-GRD-GRAD   >>>'
-    #    if grdGrad is not None:
-    #        for item in grdGrad:
-    #            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
-    #    print '    <<<   [2] C4-ORI-GRAD   >>>'
-    #    if oriGrad is not None:
-    #        for item in oriGrad:
-    #            print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
-
-    retMol = None if p4Mol else grdMol
+    # not sure of purpose but it interferes now that return_mol overwrites atres.mol
+    #return_mol = None if in_mol else grdMol
 
     if oriDip is not None:
-        outPsivar["CURRENT DIPOLE"] = oriDip
+        out_psivar["CURRENT DIPOLE"] = oriDip
         oriDip *= qcel.constants.dipmom_au2debye
         # outPsivar["CURRENT DIPOLE X"] = oriDip[0]
         # outPsivar["CURRENT DIPOLE Y"] = oriDip[1]
@@ -1280,23 +1288,23 @@ def harvest(p4Mol, method: str, c4out, **largs):
         # outPsivar['CURRENT DIPOLE Z'] = str(oriDip[2] * psi_dipmom_au2debye)
 
     if oriGrad is not None:
-        retGrad = oriGrad
+        return_grad = oriGrad
     elif grdGrad is not None:
-        retGrad = grdGrad
+        return_grad = grdGrad
     else:
-        retGrad = None
+        return_grad = None
 
     if oriHess is not None:
-        retHess = oriHess
+        return_hess = oriHess
     else:
-        retHess = None
+        return_hess = None
 
     # if oriCoord is not None:
     #     retCoord = oriCoord
     # else:
     #     retCoord = None
 
-    return outPsivar, retHess, retGrad, retMol, version, module, error
+    return out_psivar, return_hess, return_grad, return_mol, version, module, error
 
 
 def harvest_GRD(grd):
@@ -1318,6 +1326,8 @@ def harvest_GRD(grd):
         molxyz += "%s %16s %16s %16s\n" % (el, mline[-3], mline[-2], mline[-1])
         lline = grd[at + 1 + Nat].split()
         grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
+    grad = np.array(grad).reshape((-1, 3))
+
     mol = Molecule(
         validate=False,
         **qcel.molparse.to_schema(
@@ -1332,7 +1342,7 @@ def harvest_DIPOL(dipol):
     """Parses the contents *dipol* of the Cfour DIPOL file into a dipol vector."""
     dipol = dipol.splitlines()
     lline = dipol[0].split()
-    dip = [float(lline[0]), float(lline[1]), float(lline[2])]
+    dip = np.array([float(lline[0]), float(lline[1]), float(lline[2])])
 
     # return None if empty else dip
     return dip

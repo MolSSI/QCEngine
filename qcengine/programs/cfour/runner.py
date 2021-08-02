@@ -145,10 +145,14 @@ class CFOURHarness(ProgramHarness):
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
+        method = input_model.model.method.lower()
+        method = method[3:] if method.startswith("c4-") else method
+
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         try:
+            # July 2021: c4mol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always atin orientation
             qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(
-                input_model.molecule, input_model.model.method, stdout, **outfiles
+                input_model.molecule, method, stdout, **outfiles
             )
         except Exception as e:
             raise UnknownError(
@@ -163,10 +167,10 @@ class CFOURHarness(ProgramHarness):
         try:
             if c4grad is not None:
                 qcvars["CURRENT GRADIENT"] = c4grad
-                qcvars[f"{input_model.model.method.upper()[3:]} TOTAL GRADIENT"] = c4grad
+                qcvars[f"{method.upper()} TOTAL GRADIENT"] = c4grad
 
             if c4hess is not None:
-                qcvars[f"{input_model.model.method.upper()[3:]} TOTAL HESSIAN"] = c4hess
+                qcvars[f"{method.upper()} TOTAL HESSIAN"] = c4hess
                 qcvars["CURRENT HESSIAN"] = c4hess
 
             if input_model.driver.upper() == "PROPERTIES":
@@ -199,6 +203,7 @@ class CFOURHarness(ProgramHarness):
 
         output_data = {
             "schema_version": 1,
+            "molecule": c4mol,  # overwrites with outfile Cartesians in case fix_*=F
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
             "provenance": provenance,
