@@ -473,11 +473,11 @@ def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 #        atol = 2.e-5
 
 
-def _processor(inp, dertype, basis, subjects, clsd_open_pmols, request, driver, method):
+def _processor(inp, dertype, basis, subjects, clsd_open_pmols, request, driver, method, *, scramble=None, fixed=""):
     method = method
     qcprog = inp["call"]
     tnm = request.node.name
-    subject = clsd_open_pmols[subjects[std_refs.index(inp["reference"])]]
+    subject = clsd_open_pmols[subjects[std_refs.index(inp["reference"])] + fixed]
 
     inpcopy = {k: v for k, v in inp.items() if k not in ["error", "wrong"]}
     if inp.get("error", False) and inp["error"].get(dertype, False):
@@ -500,4 +500,4 @@ def _processor(inp, dertype, basis, subjects, clsd_open_pmols, request, driver, 
         ]
     ).strip("-")
 
-    return inpcopy, subject, method, basis, tnm
+    return inpcopy, subject, method, basis, tnm, scramble, fixed

@@ -1,7 +1,10 @@
+import numpy as np
 import pprint
 import re
+from typing import Any, Dict
 
 import pytest
+from qcelemental.molutil import compute_scramble
 from qcelemental.models import AtomicInput
 from qcelemental.testing import compare, compare_values
 
@@ -42,7 +45,7 @@ from .standard_suite_contracts import (  # isort:skip
 pp = pprint.PrettyPrinter(width=120)
 
 
-def runner_asserter(inp, subject, method, basis, tnm):
+def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, fixed):
 
     qcprog = inp["call"]
     qc_module_in = inp["qc_module"]  # returns "<qcprog>"|"<qcprog>-<module>"  # input-specified routing
@@ -55,6 +58,21 @@ def runner_asserter(inp, subject, method, basis, tnm):
 
     if basis == "cfour-qz2p" and qcprog in ["gamess", "nwchem", "qchem"]:
         pytest.skip(f"basis {basis} not available in {qcprog} library")
+
+    # <<<  Molecule  >>>
+
+    # 1. ref mol: `ref_subject` nicely oriented mol taken from standard_suite_ref.py
+    min_nonzero_coords = np.count_nonzero(np.abs(ref_subject.geometry) > 1.e-10)
+
+    if scramble is None:
+        subject = ref_subject
+        ref2in_mill = compute_scramble(len(subject.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False)  # identity AlignmentMill
+
+    else:
+        subject, data = ref_subject.scramble(**scramble, do_test=False)
+        ref2in_mill = data["mill"]
+
+    # 2. input mol: `subject` now ready for `atin.molecule`. may have been scrambled away from nice ref orientation
 
     # <<<  Reference Values  >>>
 
@@ -112,6 +130,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
         reference=reference,
         corl_type=corl_type,
     )
+    ref_block = std_suite[chash]
 
     # check all calcs against conventional reference to looser tolerance
     atol_conv = 1.0e-4
@@ -162,6 +181,25 @@ def runner_asserter(inp, subject, method, basis, tnm):
         qc_module_out += "-" + wfn.provenance.module  # returns "<qcprog>-<module>"
     # assert 0, f"{qc_module_xptd=} {qc_module_in=} {qc_module_out=}"  # debug
 
+    # 3. output mol: `wfn.molecule` after calc. orientation for nonscalar quantities may be different from `subject` if fix_=False
+
+    _, data = ref_subject.align(wfn.molecule, atoms_map=False, mols_align=True, verbose=0)
+    ref2out_mill = data["mill"]
+
+    if subject.fix_com and subject.fix_orientation:
+        with np.printoptions(precision=3, suppress=True):
+            assert compare_values(subject.geometry, wfn.molecule.geometry, atol=5.e-8), f"coords: atres ({wfn.molecule.geometry}) != atin ({subject.geometry})"  # 10 too much
+
+        ref_block = _mill_qcvars(ref2in_mill, ref_block)
+        ref_block_conv = _mill_qcvars(ref2in_mill, ref_block_conv)
+
+    else:
+        with np.printoptions(precision=3, suppress=True):
+            assert compare(min_nonzero_coords, np.count_nonzero(np.abs(wfn.molecule.geometry) > 1.e-10), tnm + " !0 coords wfn"), f"ncoords {wfn.molecule.geometry} != {min_nonzero_coords}"
+
+        ref_block = _mill_qcvars(ref2out_mill, ref_block)
+        ref_block_conv = _mill_qcvars(ref2out_mill, ref_block_conv)
+
     # <<<  Comparison Tests  >>>
 
     assert wfn.success is True
@@ -169,8 +207,6 @@ def runner_asserter(inp, subject, method, basis, tnm):
         assert qc_module_out == qc_module_in, f"QC_MODULE used ({qc_module_out}) != requested ({qc_module_in})"
     if qc_module_xptd:
         assert qc_module_out == qc_module_xptd, f"QC_MODULE used ({qc_module_out}) != expected ({qc_module_xptd})"
-
-    ref_block = std_suite[chash]
 
     # qcvars
     contractual_args = [
@@ -195,8 +231,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
     def qcvar_assertions():
         print("BLOCK", chash, contractual_args)
         if method == "hf":
-            pass
-            # _asserter(asserter_args, contractual_args, contractual_hf)
+            _asserter(asserter_args, contractual_args, contractual_hf)
         elif method == "mp2":
             _asserter(asserter_args, contractual_args, contractual_mp2)
         elif method == "mp3":
@@ -320,6 +355,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
             atol=atol_g,
             rtol=rtol_g,
         ), errmsg
+
         tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL ENERGY"],
             wfn.properties.return_energy,
@@ -336,6 +372,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
             atol=atol_e,
             rtol=rtol_e,
         ), errmsg
+
         # assert compare_values(
         #     ref_block[f"{method.upper()} TOTAL GRADIENT"],
         #     wfn["properties"]["return_gradient"],
@@ -356,6 +393,7 @@ def runner_asserter(inp, subject, method, basis, tnm):
         assert compare_values(
             ref_block[f"{method.upper()} TOTAL HESSIAN"], wfn.return_result, tnm + " hess wfn", atol=atol_h, rtol=rtol_h
         ), errmsg
+
         tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL ENERGY"],
             wfn.properties.return_energy,
@@ -423,3 +461,18 @@ def _asserter(asserter_args, contractual_args, contractual_fn):
             else:
                 # verify and forgive known contract violations
                 assert compare(False, query_has_qcvar(obj, pv), label + " SKIP")
+
+
+def _mill_qcvars(mill: "AlignmentMill", qcvars: Dict[str, Any]) -> Dict[str, Any]:
+    """Apply translation, rotation, atom shuffle defined in ``mill`` to the nonscalar quantities in ``qcvars``."""
+
+    milled = {}
+    for k, v in qcvars.items():
+        if k.endswith("GRADIENT"):
+            milled[k] = mill.align_gradient(v)
+        elif k.endswith("HESSIAN"):
+            milled[k] = mill.align_hessian(v)
+        else:
+            milled[k] = v
+
+    return milled

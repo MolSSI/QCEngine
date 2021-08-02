@@ -138,6 +138,14 @@ class GAMESSHarness(ProgramHarness):
             # TODO: switch to KnownError and better handle clobbering of user ncores
             # when the "need serial exe" messages show up compared to mem messages isn't clear
             # this would be a lot cleaner if there was a unique or list of memory error strings
+            # if (
+            #    ("ERROR: ONLY CCTYP=CCSD OR CCTYP=CCSD(T) CAN RUN IN PARALLEL." in dexe["stdout"])
+            #    or ("ERROR: ROHF'S CCTYP MUST BE CCSD OR CR-CCL, WITH SERIAL EXECUTION" in dexe["stdout"])
+            #    or ("CI PROGRAM CITYP=FSOCI    DOES NOT RUN IN PARALLEL." in dexe["stdout"])
+            # ):
+            #    print("RESTETTITNG TO 1")
+            #    config.ncores = 1
+            #    break
             if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
                 raise InputError(dexe["stdout"])
             elif "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
@@ -206,6 +214,7 @@ class GAMESSHarness(ProgramHarness):
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         try:
+            # July 2021: gamessmol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always outfile orientation
             qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
@@ -251,7 +260,7 @@ class GAMESSHarness(ProgramHarness):
 
         output_data = {
             "schema_version": 1,
-            "molecule": gamessmol,
+            "molecule": gamessmol,  # overwrites with outfile Cartesians in case fix_*=F
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
             "provenance": provenance,

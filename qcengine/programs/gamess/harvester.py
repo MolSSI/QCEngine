@@ -36,7 +36,7 @@ def harvest(
             calc_hess = None
 
     # Sometimes the hierarchical setting of CURRENT breaks down
-    if method.lower() in ["gms-ccsd+t(ccsd)", "ccsd+t(ccsd)"]:
+    if method == "ccsd+t(ccsd)":
         qcvars["CURRENT CORRELATION ENERGY"] = qcvars["CCSD+T(CCSD) CORRELATION ENERGY"]
         qcvars["CURRENT ENERGY"] = qcvars["CCSD+T(CCSD) TOTAL ENERGY"]
 
@@ -48,9 +48,15 @@ def harvest(
                     f"""GAMESS outfile (NRE: {calc_mol.nuclear_repulsion_energy()}) inconsistent with AtomicInput.molecule (NRE: {in_mol.nuclear_repulsion_energy()})."""
                 )
 
-        return_mol = calc_mol
-        amol, data = calc_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
-        mill = data["mill"]
+        # Frame considerations
+        if in_mol.fix_com and in_mol.fix_orientation:
+            # Impose input frame if important as signalled by fix_*=T
+            return_mol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
+            mill = data["mill"]
+
+        else:
+            return_mol = out_mol
+            mill = qcel.molutil.compute_scramble(len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False)  # identity AlignmentMill
 
         return_grad = None
         if calc_grad is not None:
@@ -59,6 +65,7 @@ def harvest(
         return_hess = None
         if calc_hess is not None:
             return_hess = mill.align_hessian(np.array(calc_hess))
+
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
@@ -421,13 +428,13 @@ def harvest_outfile_pass(outtext):
         # Process CISD
         mobj = re.search(
             # fmt: off
-            r"^\s+" + r"PROPERTY VALUES FOR THE " + r"(RHF|ROHF)" + r"\s+" + r"SELF-CONSISTENT FIELD WAVEFUNCTION" + r"\s*" + 
+            r"^\s+" + r"PROPERTY VALUES FOR THE " + r"(RHF|ROHF)" + r"\s+" + r"SELF-CONSISTENT FIELD WAVEFUNCTION" + r"\s*" +
             r"(?:.*?)" +
             r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
             r"(?:.*?)" +
             r"^\s*" + r"(TOTAL ENERGY =)\s+" + r"(?P<hf>" + NUMBER + r")" + r"\s*" +
             r"(?:.*?)" +
-            r"^\s+" + r"(?P<module>(FSOCI|GUGA))" + r"\s+" + r"CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1" + r"\s*" + 
+            r"^\s+" + r"(?P<module>(FSOCI|GUGA))" + r"\s+" + r"CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1" + r"\s*" +
             r"(?:.*?)" +
             r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
             r"(?:.*?)" +
