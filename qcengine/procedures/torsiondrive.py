@@ -96,11 +96,9 @@ class TorsionDriveProcedure(ProcedureHarness):
 
     def _compute(self, input_model: "TorsionDriveInput", config: "TaskConfig"):
 
-        try:
-            import torsiondrive
-            from torsiondrive import td_api
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError("Could not find TorsionDrive in the Python path.")
+        self.found(raise_error=True)
+
+        import torsiondrive.td_api
 
         dihedrals = input_model.keywords["dihedrals"]
         grid_spacing = input_model.keywords["grid_spacing"]
@@ -110,7 +108,7 @@ class TorsionDriveProcedure(ProcedureHarness):
         energy_decrease_thresh = input_model.keywords.get("energy_decrease_thresh", None)
         energy_upper_limit = input_model.keywords.get("energy_upper_limit", None)
 
-        state = td_api.create_initial_state(
+        state = torsiondrive.td_api.create_initial_state(
             dihedrals=dihedrals,
             grid_spacing=grid_spacing,
             elements=input_model.initial_molecule.symbols,
@@ -126,13 +124,11 @@ class TorsionDriveProcedure(ProcedureHarness):
         # Spawn new optimizations at each grid points until convergence / an error.
         while True:
 
-            next_jobs = td_api.next_jobs_from_state(state, verbose=False)
+            next_jobs = torsiondrive.td_api.next_jobs_from_state(state, verbose=False)
 
             if len(next_jobs) == 0:
                 break
 
-            # TODO: Is it better to spawn multiple TDs at once each using one core
-            #       or one TD but give the optimization multiple cores?
             grid_point_results = {
                 grid_point: [self._spawn_optimization(grid_point, job, input_model, config) for job in jobs]
                 for grid_point, jobs in next_jobs.items()
@@ -168,7 +164,7 @@ class TorsionDriveProcedure(ProcedureHarness):
                 for grid_point, results in grid_point_results.items()
             }
 
-            td_api.update_state(state, {**task_results})
+            torsiondrive.td_api.update_state(state, {**task_results})
 
         output_data = input_model.dict()
         output_data["provenance"] = {
