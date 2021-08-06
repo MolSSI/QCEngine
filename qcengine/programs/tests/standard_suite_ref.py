@@ -32,7 +32,7 @@ symmetry c1  # TODO for nwchem, manage another way
                 O
                 H 1 R
                 H 1 R 2 A
-            
+
                 R=0.958
                 A=104.5
               """,

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Dict
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet, Provenance
-from qcelemental.util import which_import
+from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError
 from ..util import capture_stdout
@@ -36,6 +36,8 @@ class OpenMMHarness(ProgramHarness):
         "node_parallel": False,
         "managed_memory": True,
     }
+
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramHarness.Config):
         pass
@@ -114,6 +116,18 @@ class OpenMMHarness(ProgramHarness):
         )
 
         return rdkit_found and openff_found and openmm_found and openmmff_found
+
+    def get_version(self) -> str:
+        """Return the currently used version of OpenMM."""
+        self.found(raise_error=True)
+
+        which_prog = which_import(".openmm", package="simtk")
+        if which_prog not in self.version_cache:
+            from simtk import openmm
+
+            self.version_cache[which_prog] = safe_version(openmm.__version__)
+
+        return self.version_cache[which_prog]
 
     def _generate_openmm_system(
         self, molecule: "offtop.Molecule", method: str, keywords: Dict = None

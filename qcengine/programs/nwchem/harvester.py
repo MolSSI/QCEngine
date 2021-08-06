@@ -653,7 +653,7 @@ def harvest_outfile_pass(outtext):
             r"^\s+" + r"Basis functions"       + r"\s+=\s+" + r"(?P<nbf>\d+)" + r"\s*" +
             r"^\s+" + r"Molecular orbitals"    + r"\s+=\s+" + r"(?P<nmo>\d+)" + r"\s*" +
             r"^\s+" + r"Frozen core"           + r"\s+=\s+" + r"(?P<nfc>\d+)" + r"\s*" +
-            r"^\s+" + r"Frozen virtuals"       + f"\s+=\s+" + r"(?P<nfv>\d+)" + r"\s*" +
+            r"^\s+" + r"Frozen virtuals"       + r"\s+=\s+" + r"(?P<nfv>\d+)" + r"\s*" +
             r"^\s+" + r"Active alpha occupied" + r"\s+=\s+" + r"(?P<nao>\d+)" + r"\s*" +
             r"^\s+" + r"Active beta occupied"  + r"\s+=\s+" + r"(?P<nbo>\d+)" + r"\s*" +
             r"^\s+" + r"Active alpha virtual"  + r"\s+=\s+" + r"(?P<nav>\d+)" + r"\s*" +
@@ -912,7 +912,7 @@ def harvest_outfile_pass(outtext):
 
     mobj = re.search(r"AO basis - number of functions:\s+(\d+)\s+number of shells:\s+(\d+)", outtext, re.MULTILINE)
     if mobj:
-        psivar["N MOLECULAR ORBITALS"] = mobj.group(2)
+        psivar["N MOLECULAR ORBITALS"] = mobj.group(1)
         psivar["N BASIS FUNCTIONS"] = mobj.group(1)
 
     # Search for Center of charge

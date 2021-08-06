@@ -55,8 +55,8 @@ class TeraChemPBSHarness(ProgramHarness):
         if not tcpb_pkg_available:
             return False
 
-        from tcpb.tcpb import TCProtobufClient
         from tcpb.exceptions import ServerError
+        from tcpb.tcpb import TCProtobufClient
 
         try:
             with TCProtobufClient(

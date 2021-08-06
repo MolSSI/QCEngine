@@ -1,7 +1,7 @@
 from typing import Any, Dict, Union
 
 from qcelemental.models import OptimizationInput, OptimizationResult
-from qcelemental.util import which_import
+from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
 
@@ -9,6 +9,8 @@ from .model import ProcedureHarness
 class GeometricProcedure(ProcedureHarness):
 
     _defaults = {"name": "geomeTRIC", "procedure": "optimization"}
+
+    version_cache: Dict[str, str] = {}
 
     class Config(ProcedureHarness.Config):
         pass
@@ -20,6 +22,17 @@ class GeometricProcedure(ProcedureHarness):
             raise_error=raise_error,
             raise_msg="Please install via `conda install geometric -c conda-forge`.",
         )
+
+    def get_version(self) -> str:
+        self.found(raise_error=True)
+
+        which_prog = which_import("geometric")
+        if which_prog not in self.version_cache:
+            import geometric
+
+            self.version_cache[which_prog] = safe_version(geometric.__version__)
+
+        return self.version_cache[which_prog]
 
     def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
         return self._build_model(data, OptimizationInput)

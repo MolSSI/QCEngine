@@ -2,8 +2,10 @@
 
 import copy
 import pprint
+import sys
+import traceback
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
