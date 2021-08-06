@@ -14,7 +14,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental=0.19.0  # test minimum stated version.
+  - qcelemental=0.21.0  # test minimum constrained version. min stated version is 0.19.
   - pydantic=1.8.2  # test minimun stated version.
 
     # Testing
