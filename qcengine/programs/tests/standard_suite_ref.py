@@ -12,7 +12,6 @@ std_molecules = {
     "hf": """
                 H
                 F 1 0.917
-symmetry c1  # TODO for nwchem, manage another way
               """,
     # "bh3p": """
     #            1 2
@@ -63,7 +62,6 @@ symmetry c1  # TODO for nwchem, manage another way
     "hf-xyz": """
         H    0.          0.         -1.64558411
         F    0.          0.          0.08729475
-        symmetry c1
         units bohr
                """,
 }

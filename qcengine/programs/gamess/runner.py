@@ -218,6 +218,7 @@ class GAMESSHarness(ProgramHarness):
             qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
+
         except Exception as e:
             raise UnknownError(
                 "STDOUT:\n"
@@ -242,14 +243,20 @@ class GAMESSHarness(ProgramHarness):
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         except KeyError as e:
-            raise UnknownError(
-                "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+            if "EXETYP=CHECK" in stdout and "EXECUTION OF GAMESS TERMINATED NORMALLY" in stdout:
+                # check run that completed normally
+                # * on one hand, it's still an error return_result-wise
+                # * but on the other hand, often the reason for the job is to get gamessmol, so let it return success=T below
+                retres = 0.0
+            else:
+                raise UnknownError(
+                    "STDOUT:\n"
+                    + stdout
+                    + "\nSTDERR:\n"
+                    + stderr
+                    + "\nTRACEBACK:\n"
+                    + "".join(traceback.format_exception(*sys.exc_info()))
+                )
 
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)

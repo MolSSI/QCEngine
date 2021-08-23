@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import numpy as np
 from qcelemental.models import BasisSet
@@ -65,3 +65,18 @@ def reorder_row_and_column_ao_indices(
     new_matrix = reorder_column_ao_indices(col_reordered_matrix.transpose(), basis, to_new_ao_order)
 
     return new_matrix
+
+
+def mill_qcvars(mill: "AlignmentMill", qcvars: Dict[str, Any]) -> Dict[str, Any]:
+    """Apply translation, rotation, atom shuffle defined in ``mill`` to the nonscalar quantities in ``qcvars``."""
+
+    milled = {}
+    for k, v in qcvars.items():
+        if k.endswith("GRADIENT"):
+            milled[k] = mill.align_gradient(v)
+        elif k.endswith("HESSIAN"):
+            milled[k] = mill.align_hessian(v)
+        else:
+            milled[k] = v
+
+    return milled
