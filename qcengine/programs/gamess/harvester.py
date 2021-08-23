@@ -23,7 +23,7 @@ def harvest(
     """Parses all the pieces of output from gamess: the stdout in
     *gamessout* Scratch files are not yet considered at this moment.
     """
-    outqcvar, out_mol, outGrad, module = harvest_output(gamessout)
+    qcvars, calc_mol, calc_grad, module = harvest_output(gamessout)
 
     datasections = {}
     if outfiles.get("gamess.dat"):
@@ -37,30 +37,35 @@ def harvest(
 
     # Sometimes the hierarchical setting of CURRENT breaks down
     if method == "ccsd+t(ccsd)":
-        outqcvar["CURRENT CORRELATION ENERGY"] = outqcvar["CCSD+T(CCSD) CORRELATION ENERGY"]
-        outqcvar["CURRENT ENERGY"] = outqcvar["CCSD+T(CCSD) TOTAL ENERGY"]
+        qcvars["CURRENT CORRELATION ENERGY"] = qcvars["CCSD+T(CCSD) CORRELATION ENERGY"]
+        qcvars["CURRENT ENERGY"] = qcvars["CCSD+T(CCSD) TOTAL ENERGY"]
 
-    if out_mol:
-        outqcvar["NUCLEAR REPULSION ENERGY"] = out_mol.nuclear_repulsion_energy()
+    if calc_mol:
+        qcvars["NUCLEAR REPULSION ENERGY"] = str(round(calc_mol.nuclear_repulsion_energy(), 8))
         if in_mol:
-            if abs(out_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
+            if abs(calc_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
-                    f"""gamess outfile (NRE: {out_mol.nuclear_repulsion_energy()}) inconsistent with AtomicInput input (NRE: {in_mol.nuclear_repulsion_energy()})."""
+                    f"""GAMESS outfile (NRE: {calc_mol.nuclear_repulsion_energy()}) inconsistent with AtomicInput.molecule (NRE: {in_mol.nuclear_repulsion_energy()})."""
                 )
 
         # Frame considerations
+        # * `in_mol` built with deliberation and with all fields accessible.
+        # * `calc_mol` has the internally consistent geometry frame but otherwise dinky (geom & symbols & maybe chgmult).
         if in_mol.fix_com and in_mol.fix_orientation:
             # Impose input frame if important as signalled by fix_*=T
-            return_mol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
+            return_mol = in_mol
+            _, data = calc_mol.align(in_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
             mill = data["mill"]
 
         else:
-            return_mol = out_mol
-            mill = qcel.molutil.compute_scramble(len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False)  # identity AlignmentMill
+            return_mol, _ = in_mol.align(calc_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+            mill = qcel.molutil.compute_scramble(
+                len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
+            )  # identity AlignmentMill
 
         return_grad = None
-        if outGrad is not None:
-            return_grad = mill.align_gradient(np.array(outGrad).reshape(-1, 3))
+        if calc_grad is not None:
+            return_grad = mill.align_gradient(calc_grad)
 
         return_hess = None
         if outHess is not None:
@@ -68,7 +73,7 @@ def harvest(
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
-    return outqcvar, return_hess, return_grad, return_mol, module
+    return qcvars, return_hess, return_grad, return_mol, module
 
 
 def harvest_datfile(datfile: str) -> Dict[str, str]:
@@ -102,7 +107,6 @@ def harvest_output(outtext):
         outtext,
         re.MULTILINE,
     ):
-
         qcvar, gamesscoord, gamessgrad, module = harvest_outfile_pass(outpass)
         pass_qcvar.append(qcvar)
         pass_coord.append(gamesscoord)
@@ -509,7 +513,8 @@ def harvest_outfile_pass(outtext):
             # fmt: off
             r'^\s+' + r'ATOM      ATOMIC                      COORDINATES \(BOHR\)' + r'\s*' +
             r'^\s+' + r'CHARGE         X                   Y                   Z'+ r'\s*' +
-            r'((?:\s+([A-Z][a-z]*)+\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)'+r'\s*$',
+            r'((?:\s+([A-Za-z]\w*)\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
+            r"\s*$",
             # fmt: on
             outtext,
             re.MULTILINE | re.IGNORECASE,
@@ -534,7 +539,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'----------------------' + r'\s*'+
             r'\s+' + r'\n'+
             r'^\s+' + r'UNITS ARE HARTREE/BOHR    E\'X               E\'Y               E\'Z' + r'\s*' +
-            r'((?:\s+([1-9][0-9]*)+\s+([A-Z][a-x]*)+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
+            r'((?:\s+([1-9][0-9]*)+\s+([A-Za-z]\w*)+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
             r'\s*$',
             # fmt: off
                 outtext, re.MULTILINE
@@ -551,7 +556,7 @@ def harvest_outfile_pass(outtext):
                     logger.debug("printing gradient")
                     atoms.append(lline[1])
                     qcvar_grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
-            qcvar_grad = np.array(qcvar_grad)
+            qcvar_grad = np.array(qcvar_grad).reshape((-1, 3))
 
         # Process SCF blocks
         mobj = re.search(

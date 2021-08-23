@@ -247,20 +247,12 @@ task python
         method = method[4:] if method.startswith("nwc-") else method
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
-        try:
-            # July 2021: nwmol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always atin orientation
-            qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
-                input_model.molecule, method, stdout, **outfiles
-            )
-        except Exception as e:
-            raise UnknownError(
-                "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+        # July 2021: nwmol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always atin orientation
+        # LW 7Jul21: I allow exceptions to be raised so that we can detect errors
+        #   in the parsing of output files
+        qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
+            input_model.molecule, method, stdout, **outfiles
+        )
 
         try:
             if nwgrad is not None:

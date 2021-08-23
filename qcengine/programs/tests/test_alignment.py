@@ -1,10 +1,9 @@
 import numpy as np
 import pytest
 import qcelemental as qcel
+
 from qcengine.programs.tests.standard_suite_ref import std_molecules, std_refs
 from qcengine.testing import using
-
-import qcdb
 
 from .standard_suite_runner import runner_asserter
 from .test_standard_suite import _processor
@@ -26,14 +25,15 @@ def clsd_open_pmols():
     return {**frame_not_important, **frame_part_of_spec}
 
 
-#                                                                                          
-#  ,--.  ,--.,------.      ,---.  ,--.,--.                                          ,--.   
-#  |  '--'  ||  .---'     /  O  \ |  |`--' ,---. ,--,--, ,--,--,--. ,---. ,--,--, ,-'  '-. 
-#  |  .--.  ||  `--,     |  .-.  ||  |,--.| .-. ||      \|        || .-. :|      \'-.  .-' 
-#  |  |  |  ||  |`       |  | |  ||  ||  |' '-' '|  ||  ||  |  |  |\   --.|  ||  |  |  |   
-#  `--'  `--'`--'        `--' `--'`--'`--'.`-  / `--''--'`--`--`--' `----'`--''--'  `--'   
-#                                         `---'                                           
+#
+#  ,--.  ,--.,------.      ,---.  ,--.,--.                                          ,--.
+#  |  '--'  ||  .---'     /  O  \ |  |`--' ,---. ,--,--, ,--,--,--. ,---. ,--,--, ,-'  '-.
+#  |  .--.  ||  `--,     |  .-.  ||  |,--.| .-. ||      \|        || .-. :|      \'-.  .-'
+#  |  |  |  ||  |`       |  | |  ||  ||  |' '-' '|  ||  ||  |  |  |\   --.|  ||  |  |  |
+#  `--'  `--'`--'        `--' `--'`--'`--'.`-  / `--''--'`--`--`--' `----'`--''--'  `--'
+#                                         `---'
 #  <<<  HF Alignment
+
 
 @pytest.mark.parametrize(
     "scramble",
@@ -53,11 +53,11 @@ def clsd_open_pmols():
     ],
 )
 @pytest.mark.parametrize(
-    "fixed",
-    # * this parameter alters the input molecule by fix_com and fix_orientation to imitate user signalling frame matters or not.
+    "frame",
+    # * this parameter alters the input molecule by fix_com and fix_orientation to imitate user signaling frame matters or not.
     [
-        pytest.param("-fixed", id="fixed"),  # no_com/no_reorient ; fix_=True        ; atres.mol.geom = atin.mol.geom aka scrambled
-        pytest.param("", id="free"),         #                    ; fix_=False (def) ; atres.mol.geom = dsl internal orientation
+        pytest.param("fixed"),  # fix_=True (no_com/no_reorient); atres.mol.geom = atin.mol.geom aka scrambled
+        pytest.param("free"),  # fix_=False (def)               ; atres.mol.geom = dsl internal orientation
     ],
 )
 @pytest.mark.parametrize(
@@ -92,5 +92,7 @@ def clsd_open_pmols():
         # yapf: enable
     ],
 )
-def test_hf_alignment(inp, scramble, fixed, driver, basis, subjects, clsd_open_pmols, request):
-    runner_asserter(*_processor(inp, "", basis, subjects, clsd_open_pmols, request, driver, "hf", scramble=scramble, fixed=fixed))
+def test_hf_alignment(inp, scramble, frame, driver, basis, subjects, clsd_open_pmols, request):
+    runner_asserter(
+        *_processor(inp, "", basis, subjects, clsd_open_pmols, request, driver, "hf", scramble=scramble, frame=frame)
+    )

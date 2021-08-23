@@ -1,14 +1,15 @@
-import numpy as np
 import pprint
 import re
 from typing import Any, Dict
 
+import numpy as np
 import pytest
-from qcelemental.molutil import compute_scramble
 from qcelemental.models import AtomicInput
+from qcelemental.molutil import compute_scramble
 from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
+from qcengine.programs.util import mill_qcvars
 
 from .standard_suite_ref import answer_hash, std_suite
 
@@ -45,7 +46,7 @@ from .standard_suite_contracts import (  # isort:skip
 pp = pprint.PrettyPrinter(width=120)
 
 
-def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, fixed):
+def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
 
     qcprog = inp["call"]
     qc_module_in = inp["qc_module"]  # returns "<qcprog>"|"<qcprog>-<module>"  # input-specified routing
@@ -62,11 +63,13 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, fixed):
     # <<<  Molecule  >>>
 
     # 1. ref mol: `ref_subject` nicely oriented mol taken from standard_suite_ref.py
-    min_nonzero_coords = np.count_nonzero(np.abs(ref_subject.geometry) > 1.e-10)
+    min_nonzero_coords = np.count_nonzero(np.abs(ref_subject.geometry) > 1.0e-10)
 
     if scramble is None:
         subject = ref_subject
-        ref2in_mill = compute_scramble(len(subject.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False)  # identity AlignmentMill
+        ref2in_mill = compute_scramble(
+            len(subject.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
+        )  # identity AlignmentMill
 
     else:
         subject, data = ref_subject.scramble(**scramble, do_test=False)
@@ -188,17 +191,39 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, fixed):
 
     if subject.fix_com and subject.fix_orientation:
         with np.printoptions(precision=3, suppress=True):
-            assert compare_values(subject.geometry, wfn.molecule.geometry, atol=5.e-8), f"coords: atres ({wfn.molecule.geometry}) != atin ({subject.geometry})"  # 10 too much
+            assert compare_values(
+                subject.geometry, wfn.molecule.geometry, atol=5.0e-8
+            ), f"coords: atres ({wfn.molecule.geometry}) != atin ({subject.geometry})"  # 10 too much
+        assert (
+            ref_subject.fix_com
+            and ref_subject.fix_orientation
+            and subject.fix_com
+            and subject.fix_orientation
+            and wfn.molecule.fix_com
+            and wfn.molecule.fix_orientation
+        ), f"fixed, so all T: {ref_subject.fix_com} {ref_subject.fix_orientation} {subject.fix_com} {subject.fix_orientation} {wfn.molecule.fix_com} {wfn.molecule.fix_orientation}"
 
-        ref_block = _mill_qcvars(ref2in_mill, ref_block)
-        ref_block_conv = _mill_qcvars(ref2in_mill, ref_block_conv)
+        ref_block = mill_qcvars(ref2in_mill, ref_block)
+        ref_block_conv = mill_qcvars(ref2in_mill, ref_block_conv)
 
     else:
+        # this check assumes the qcprog will adjust an ugly Cartesian geometry into a pretty one (with more symmetry for computational efficiency).
+        # if qcprog doesn't have that behavior, it will need to be excused from this check.
         with np.printoptions(precision=3, suppress=True):
-            assert compare(min_nonzero_coords, np.count_nonzero(np.abs(wfn.molecule.geometry) > 1.e-10), tnm + " !0 coords wfn"), f"ncoords {wfn.molecule.geometry} != {min_nonzero_coords}"
+            assert compare(
+                min_nonzero_coords, np.count_nonzero(np.abs(wfn.molecule.geometry) > 1.0e-10), tnm + " !0 coords wfn"
+            ), f"count !0 coords {wfn.molecule.geometry} != {min_nonzero_coords}"
+        assert (
+            (not ref_subject.fix_com)
+            and (not ref_subject.fix_orientation)
+            and (not subject.fix_com)
+            and (not subject.fix_orientation)
+            and (not wfn.molecule.fix_com)
+            and (not wfn.molecule.fix_orientation)
+        ), f"free, so all F: {ref_subject.fix_com} {ref_subject.fix_orientation} {subject.fix_com} {subject.fix_orientation} {wfn.molecule.fix_com} {wfn.molecule.fix_orientation}"
 
-        ref_block = _mill_qcvars(ref2out_mill, ref_block)
-        ref_block_conv = _mill_qcvars(ref2out_mill, ref_block_conv)
+        ref_block = mill_qcvars(ref2out_mill, ref_block)
+        ref_block_conv = mill_qcvars(ref2out_mill, ref_block_conv)
 
     # <<<  Comparison Tests  >>>
 
@@ -461,18 +486,3 @@ def _asserter(asserter_args, contractual_args, contractual_fn):
             else:
                 # verify and forgive known contract violations
                 assert compare(False, query_has_qcvar(obj, pv), label + " SKIP")
-
-
-def _mill_qcvars(mill: "AlignmentMill", qcvars: Dict[str, Any]) -> Dict[str, Any]:
-    """Apply translation, rotation, atom shuffle defined in ``mill`` to the nonscalar quantities in ``qcvars``."""
-
-    milled = {}
-    for k, v in qcvars.items():
-        if k.endswith("GRADIENT"):
-            milled[k] = mill.align_gradient(v)
-        elif k.endswith("HESSIAN"):
-            milled[k] = mill.align_hessian(v)
-        else:
-            milled[k] = v
-
-    return milled
