@@ -1,5 +1,7 @@
 from typing import Any, Dict
 
+from qcengine.exceptions import InputError
+
 
 def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
     """Converts the QC method into GAMESS keywords."""
@@ -34,5 +36,8 @@ def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
 
     elif method == "ccsd(t)":
         opts["contrl__cctyp"] = "ccsd(t)"
+
+    else:
+        raise InputError(f"Method not recognized: {method}")
 
     return opts
