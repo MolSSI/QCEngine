@@ -394,6 +394,8 @@ qcvars_to_atomicproperties = {
     "HF QUADRUPOLE": "scf_quadrupole_moment",
     "HF TOTAL ENERGY": "scf_total_energy",
     "HF ITERATIONS": "scf_iterations",
+    "HF TOTAL GRADIENT": "scf_total_gradient",
+    "HF TOTAL HESSIAN": "scf_total_hessian",
     # MP2 keywords
     "MP2 SAME-SPIN CORRELATION ENERGY": "mp2_same_spin_correlation_energy",
     "MP2 OPPOSITE-SPIN CORRELATION ENERGY": "mp2_opposite_spin_correlation_energy",
@@ -419,6 +421,8 @@ qcvars_to_atomicproperties = {
     # scf_vv10_energy
     "DFT XC ENERGY": "scf_xc_energy",
     "DFT DISPERSION ENERGY": "scf_dispersion_correction_energy",
+    # multi-definition
+    "SCF TOTAL ENERGY": "scf_total_energy",
 }
 
 
