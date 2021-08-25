@@ -20,7 +20,7 @@ def harvest_output(outtext):
 
     # for outpass in re.split(r'--invoking executable xjoda', outtext, re.MULTILINE):
     for outpass in re.split(r"JODA beginning optimization cycle", outtext, re.MULTILINE):
-        psivar, c4coord, c4grad, version, error = harvest_outfile_pass(outpass)
+        psivar, c4coord, c4grad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(c4coord)
         pass_grad.append(c4grad)
@@ -42,7 +42,7 @@ def harvest_output(outtext):
     #    for item in pass_grad[retindx]:
     #        print('       %16.8f %16.8f %16.8f' % (item[0], item[1], item[2]))
 
-    return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
+    return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, module, error
 
 
 def harvest_outfile_pass(outtext):
@@ -54,6 +54,7 @@ def harvest_outfile_pass(outtext):
     psivar_coord = None
     psivar_grad = None
     version = ""
+    module = None
     error = ""
 
     #    TODO: BCC
@@ -234,6 +235,7 @@ def harvest_outfile_pass(outtext):
         psivar["MP2.5 TOTAL ENERGY"] = psivar["MP2.5 CORRELATION ENERGY"] + psivar["SCF TOTAL ENERGY"]
         psivar["MP3 SINGLES ENERGY"] = Decimal("0.0")
         psivar["MP3 DOUBLES ENERGY"] = dmp2 + dmp3
+        module = "vcc"
 
     mobj = re.search(
         # fmt: off
@@ -255,6 +257,7 @@ def harvest_outfile_pass(outtext):
         psivar["MP2.5 TOTAL ENERGY"] = psivar["MP2.5 CORRELATION ENERGY"] + psivar["SCF TOTAL ENERGY"]
         psivar["MP3 SINGLES ENERGY"] = Decimal(mobj.group(1)) + Decimal(mobj.group(5))
         psivar["MP3 DOUBLES ENERGY"] = Decimal(mobj.group(3)) + Decimal(mobj.group(7))
+        module = "vcc"
 
     # Process MP4
     mobj = re.search(
@@ -296,6 +299,7 @@ def harvest_outfile_pass(outtext):
     )
     if mobj:
         print("matched mp4ro")
+        module = "vcc"
         dmp2 = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
         dmp3 = Decimal(mobj.group(5)) + Decimal(mobj.group(7))
         dmp4sdq = Decimal(mobj.group(9)) + Decimal(mobj.group(11))
@@ -413,6 +417,7 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(2))
         psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(3)
+        module = "vcc"
 
     mobj = re.search(
         # fmt: off
@@ -428,6 +433,7 @@ def harvest_outfile_pass(outtext):
         psivar["CCSD TOTAL ENERGY"] = mobj.group(1)
         psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(2)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(2)
+        module = "vcc"
 
     mobj = re.search(
         # fmt: off
@@ -471,6 +477,7 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = mobj.group(3)
         psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(4)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(4)
+        module = "ecc"
 
     mobj = re.search(
         # fmt: off
@@ -502,6 +509,7 @@ def harvest_outfile_pass(outtext):
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
         psivar["[T] CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group("ttot")
+        module = "ncc"
 
     mobj = re.search(
         # fmt: off
@@ -530,6 +538,7 @@ def harvest_outfile_pass(outtext):
     if mobj:
         print("matched dboc ecc")
         psivar["CCSD DBOC ENERGY"] = mobj.group("dboc")
+        module = "ecc"
 
     # Process SCS-CC
     mobj = re.search(
@@ -758,20 +767,19 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDT CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSDT TOTAL ENERGY"]
 
-    return psivar, psivar_coord, psivar_grad, version, error
+    return psivar, psivar_coord, psivar_grad, version, module, error
 
 
-def harvest(p4Mol, c4out, **largs):
+def harvest(p4Mol: Molecule, method: str, c4out, **largs):
     """Parses all the pieces of output from Cfour: the stdout in
     *c4out* and the contents of various scratch files like GRD stored
     in their namesake keys in *largs*. Since all Cfour output uses
     its own orientation and atom ordering for the given molecule,
     a qcdb.Molecule *p4Mol*, if supplied, is used to transform the
     Cfour output back into consistency with *p4Mol*.
-
     """
     # Collect results from output file and subsidiary files
-    outPsivar, outMol, outGrad, version, error = harvest_output(c4out)
+    outPsivar, outMol, outGrad, version, module, error = harvest_output(c4out)
 
     if largs.get("GRD"):
         grdMol, grdGrad = harvest_GRD(largs["GRD"])
@@ -911,7 +919,7 @@ def harvest(p4Mol, c4out, **largs):
     # else:
     #     retCoord = None
 
-    return outPsivar, retHess, retGrad, retMol, version, error
+    return outPsivar, retHess, retGrad, retMol, version, module, error
 
 
 def harvest_GRD(grd):
@@ -933,6 +941,8 @@ def harvest_GRD(grd):
         molxyz += "%s %16s %16s %16s\n" % (el, mline[-3], mline[-2], mline[-1])
         lline = grd[at + 1 + Nat].split()
         grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
+    grad = np.array(grad).reshape((-1, 3))
+
     mol = Molecule(
         validate=False,
         **qcel.molparse.to_schema(

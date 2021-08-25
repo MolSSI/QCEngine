@@ -239,22 +239,40 @@ task python
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
+        method = input_model.model.method.lower()
+        method = method[4:] if method.startswith("nwc-") else method
+
         # Read the NWChem stdout file and, if needed, the hess or grad files
         # LW 7Jul21: I allow exceptions to be raised so that we can detect errors
         #   in the parsing of output files
-        qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
+            input_model.molecule, method, stdout, **outfiles
+        )
 
-        if nwgrad is not None:
-            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
-            qcvars["CURRENT GRADIENT"] = nwgrad
-        if nwhess is not None:
-            qcvars["CURRENT HESSIAN"] = nwhess
+        try:
+            if nwgrad is not None:
+                qcvars[f"{method.upper()} TOTAL GRADIENT"] = nwgrad
+                qcvars["CURRENT GRADIENT"] = nwgrad
 
-        # Normalize the output as a float or list of floats
-        if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
-        else:
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            if nwhess is not None:
+                qcvars[f"{method.upper()} TOTAL HESSIAN"] = nwhess
+                qcvars["CURRENT HESSIAN"] = nwhess
+
+            # Normalize the output as a float or list of floats
+            if input_model.driver.upper() == "PROPERTIES":
+                retres = qcvars[f"CURRENT ENERGY"]
+            else:
+                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        except KeyError as e:
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
+
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
@@ -264,12 +282,16 @@ task python
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
+        provenance = Provenance(creator="NWChem", version=self.get_version(), routine="nwchem").dict()
+        if module is not None:
+            provenance["module"] = module
+
         # Format them inout an output
         output_data = {
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
-            "provenance": Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
+            "provenance": provenance,
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,

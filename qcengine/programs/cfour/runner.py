@@ -139,24 +139,46 @@ class CFOURHarness(ProgramHarness):
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
+        method = input_model.model.method.lower()
+        method = method[3:] if method.startswith("c4-") else method
+
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         try:
-            qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+            qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(
+                input_model.molecule, method, stdout, **outfiles
+            )
         except Exception as e:
-            raise UnknownError(stdout)
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
-        if c4grad is not None:
-            qcvars["CURRENT GRADIENT"] = c4grad
-            qcvars[f"{input_model.model.method.upper()[3:]} TOTAL GRADIENT"] = c4grad
+        try:
+            if c4grad is not None:
+                qcvars["CURRENT GRADIENT"] = c4grad
+                qcvars[f"{method.upper()} TOTAL GRADIENT"] = c4grad
 
-        if c4hess is not None:
-            qcvars[f"{input_model.model.method.upper()[3:]} TOTAL HESSIAN"] = c4hess
-            qcvars["CURRENT HESSIAN"] = c4hess
+            if c4hess is not None:
+                qcvars[f"{method.upper()} TOTAL HESSIAN"] = c4hess
+                qcvars["CURRENT HESSIAN"] = c4hess
 
-        if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
-        else:
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            if input_model.driver.upper() == "PROPERTIES":
+                retres = qcvars[f"CURRENT ENERGY"]
+            else:
+                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        except KeyError as e:
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
         if isinstance(retres, Decimal):
             retres = float(retres)
@@ -166,11 +188,15 @@ class CFOURHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
+        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").dict()
+        if module is not None:
+            provenance["module"] = module
+
         output_data = {
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
-            "provenance": Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour"),
+            "provenance": provenance,
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,
