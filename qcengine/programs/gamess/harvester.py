@@ -655,4 +655,6 @@ def harvest_outfile_pass(outtext):
     if "FCI TOTAL ENERGY" in qcvar:  # and 'FCI CORRELATION ENERGY' in qcvar:
         qcvar["CURRENT ENERGY"] = qcvar["FCI TOTAL ENERGY"]
 
+    qcvar[f"N ATOMS"] = len(qcvar_coord.symbols)
+
     return qcvar, qcvar_coord, qcvar_grad, module

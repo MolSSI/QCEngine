@@ -100,7 +100,7 @@ def harvest_outfile_pass(outtext):
         if mobj:
             logger.debug("matched Dispersion")
             logger.debug(mobj.group(1))
-            psivar["DFT DISPERSION ENERGY"] = mobj.group(1)
+            psivar["DISPERSION CORRECTION ENERGY"] = mobj.group(1)
 
         # Process DFT (RDFT, RODFT,UDFT, SODFT [SODFT for nwchem versions before nwchem 6.8])
 
@@ -126,6 +126,17 @@ def harvest_outfile_pass(outtext):
             psivar["NUCLEAR REPULSION ENERGY"] = mobj.group(2)
 
         # MCSCF
+        mobj = re.search(
+            # fmt: off
+            r'^\s+' + r'Total MCSCF energy' + r'\s+=\s+' + NUMBER + r'\s*$',
+            # fmt: off
+            outtext,
+            re.MULTILINE | re.DOTALL,
+        )
+        if mobj:
+            logger.debug("matched mcscf 2")  # MCSCF energy calculation
+            psivar["MCSCF TOTAL ENERGY"] = mobj.group(1)
+
         mobj = re.findall(
             # fmt: off
             r'^\s+' + r'Total SCF energy' + r'\s+' + NUMBER + r'\s*' +
@@ -584,13 +595,14 @@ def harvest_outfile_pass(outtext):
         #       1) Spin allowed
         mobj = re.findall(
             # fmt: off
-            r'^\s+(?:Root)\s+(\d+)\s+(.*?)\s+' + NUMBER + r'\s(?:a\.u\.)\s+' + NUMBER + r'\s+(?:\w+)'
+            r'^\s+(?:Root)\s+(\d+)\s+(.*?)\s+' + NUMBER + r'\s+(?:a\.u\.)\s+' + NUMBER + r"\s+eV\s*" +
+            r"^\s+" + r"<S2>\s+=\s+" + NUMBER + r"\s*"
             #Root | symmetry | a.u. | eV
-            + r'\s+(?:.\w+.\s+.\s+\d+.\d+)' #s2 value
+            # unkn units for dip/quad
             + r'\s+(?:.*\n)\s+Transition Moments\s+X\s+'+ NUMBER + r'\s+Y\s+'+ NUMBER+ r'\s+Z\s+'+ NUMBER #dipole
             + r'\s+Transition Moments\s+XX\s+'+ NUMBER + r'\s+XY\s+'+ NUMBER+ r'\s+XZ\s+'+ NUMBER #quadrople
             + r'\s+Transition Moments\s+YY\s+'+ NUMBER + r'\s+YZ\s+'+ NUMBER+ r'\s+ZZ\s+'+ NUMBER #quadrople
-            + r'\s*$',
+            + r"\s+" + r"Dipole Oscillator Strength" + r"\s+" + NUMBER + r"\s*$",
             # fmt: on
             outtext,
             re.MULTILINE,
@@ -600,25 +612,31 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched TDDFT with transition moments")
             for mobj_list in mobj:
                 logger.debug(mobj_list)
+                iroot = mobj_list[0]
+                sym = mobj_list[1]
+
                 # in eV
-                psivar[f"TDDFT ROOT {mobj_list[0]} EXCITATION ENERGY - {mobj_list[1]} SYMMETRY"] = mobj_list[2]
-                psivar[f"TDDFT ROOT {mobj_list[0]} EXCITED STATE ENERGY - {mobj_list[1]} SYMMETRY"] = psivar[
+                psivar[f"TDDFT ROOT {iroot} EXCITATION ENERGY - {sym} SYMMETRY"] = mobj_list[2]
+                psivar[f"TDDFT ROOT {iroot} EXCITED STATE ENERGY - {sym} SYMMETRY"] = psivar[
                     "DFT TOTAL ENERGY"
                 ] + Decimal(mobj_list[2])
-                #### temporary psivars ####
-                # psivar['TDDFT ROOT %d %s %s EXCITATION ENERGY' %
-                #       (mobj_list[0], mobj_list[1], mobj_list[2])] = mobj_list[3]  # in a.u.
-                # psivar ['TDDFT ROOT %s %s %s EXCITED STATE ENERGY' %(mobj_list[0],mobj_list[1],mobj_list[2])] = \
-                #    psivar ['DFT TOTAL ENERGY'] + Decimal(mobj_list[3])
-                psivar["TDDFT ROOT %s DIPOLE X" % (mobj_list[0])] = mobj_list[5]
-                psivar["TDDFT ROOT %s DIPOLE Y" % (mobj_list[0])] = mobj_list[6]
-                psivar["TDDFT ROOT %s DIPOLE Z" % (mobj_list[0])] = mobj_list[7]
-                psivar["TDDFT ROOT %s QUADRUPOLE XX" % (mobj_list[0])] = mobj_list[8]
-                psivar["TDDFT ROOT %s QUADRUPOLE XY" % (mobj_list[0])] = mobj_list[9]
-                psivar["TDDFT ROOT %s QUADRUPOLE XZ" % (mobj_list[0])] = mobj_list[10]
-                psivar["TDDFT ROOT %s QUADRUPOLE YY" % (mobj_list[0])] = mobj_list[11]
-                psivar["TDDFT ROOT %s QUADRUPOLE YZ" % (mobj_list[0])] = mobj_list[12]
-                psivar["TDDFT ROOT %s QUADRUPOLE ZZ" % (mobj_list[0])] = mobj_list[13]
+                psivar[f"TDDFT ROOT 0 -> ROOT {iroot} DIPOLE"] = [
+                    float(mobj_list[5]),
+                    float(mobj_list[6]),
+                    float(mobj_list[7]),
+                ]
+                psivar[f"TDDFT ROOT 0 -> ROOT {iroot} QUADRUPOLE"] = [
+                    float(mobj_list[8]),
+                    float(mobj_list[9]),
+                    float(mobj_list[10]),
+                    float(mobj_list[9]),
+                    float(mobj_list[11]),
+                    float(mobj_list[12]),
+                    float(mobj_list[10]),
+                    float(mobj_list[12]),
+                    float(mobj_list[13]),
+                ]
+                psivar[f"TDDFT ROOT 0 -> ROOT {iroot} OSCILLATOR STRENGTH (LEN)"] = mobj_list[14]
 
         #       2) Spin forbidden
         mobj = re.findall(
@@ -1013,6 +1031,11 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT REFERENCE ENERGY"] = psivar["HF TOTAL ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["HF TOTAL ENERGY"]
 
+    if "MCSCF TOTAL ENERGY" in psivar:
+        psivar["CURRENT REFERENCE ENERGY"] = psivar["MCSCF TOTAL ENERGY"]
+        psivar["CURRENT CORRELATION ENERGY"] = 0.0
+        psivar["CURRENT ENERGY"] = psivar["MCSCF TOTAL ENERGY"]
+
     if "MP2 TOTAL ENERGY" in psivar and "MP2 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["MP2 CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["MP2 TOTAL ENERGY"]
@@ -1076,6 +1099,8 @@ def harvest_outfile_pass(outtext):
     if ("EOM-%s TOTAL ENERGY" % (cc_name) in psivar) and ("%s EXCITATION ENERGY" % (cc_name) in psivar):
         psivar["CURRENT ENERGY"] = psivar["EOM-%s TOTAL ENERGY" % (cc_name)]
         psivar["CURRENT EXCITATION ENERGY"] = psivar["%s EXCITATION ENERGY" % (cc_name)]
+
+    psivar[f"N ATOMS"] = len(psivar_coord.symbols)
 
     return psivar, psivar_coord, psivar_grad, version, module, error
 

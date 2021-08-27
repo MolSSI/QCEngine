@@ -1129,6 +1129,8 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSDTQ CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSDTQ TOTAL ENERGY"]
 
+    psivar[f"N ATOMS"] = len(psivar_coord.symbols)
+
     return psivar, psivar_coord, psivar_grad, version, module, error
 
 

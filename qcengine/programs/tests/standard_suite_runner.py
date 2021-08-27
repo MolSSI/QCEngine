@@ -352,16 +352,18 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
 
     # returns checks
     if driver == "energy":
-        compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.return_result, tnm + " wfn", atol=atol_e, rtol=rtol_e
-        )
-        assert compare_values(
+        tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL ENERGY"],
-            wfn.properties.return_energy,
-            tnm + " prop",
+            wfn.return_result,
+            tnm + " wfn",
             atol=atol_e,
             rtol=rtol_e,
+            return_message=True,
+            quiet=True,
         )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL ENERGY"], wfn.return_result, tnm + " wfn", atol=atol_e, rtol=rtol_e
+        ), errmsg
 
     elif driver == "gradient":
         tf, errmsg = compare_values(
@@ -381,30 +383,6 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
             rtol=rtol_g,
         ), errmsg
 
-        tf, errmsg = compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"],
-            wfn.properties.return_energy,
-            tnm + " prop",
-            atol=atol_e,
-            rtol=rtol_e,
-            return_message=True,
-            quiet=True,
-        )
-        assert compare_values(
-            ref_block[f"{method.upper()} TOTAL ENERGY"],
-            wfn.properties.return_energy,
-            tnm + " prop",
-            atol=atol_e,
-            rtol=rtol_e,
-        ), errmsg
-
-        # assert compare_values(
-        #     ref_block[f"{method.upper()} TOTAL GRADIENT"],
-        #     wfn["properties"]["return_gradient"],
-        #     tnm + " grad prop",
-        #     atol=atol_g,
-        # )
-
     elif driver == "hessian":
         tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL HESSIAN"],
@@ -419,6 +397,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
             ref_block[f"{method.upper()} TOTAL HESSIAN"], wfn.return_result, tnm + " hess wfn", atol=atol_h, rtol=rtol_h
         ), errmsg
 
+    if driver in ["energy", "gradient", "hessian"]:
         tf, errmsg = compare_values(
             ref_block[f"{method.upper()} TOTAL ENERGY"],
             wfn.properties.return_energy,
@@ -434,6 +413,42 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
             tnm + " prop",
             atol=atol_e,
             rtol=rtol_e,
+        ), errmsg
+
+    if driver in ["gradient"]:  # , "hessian"]:
+        tf, errmsg = compare_values(
+            ref_block[f"{method.upper()} TOTAL GRADIENT"],
+            wfn.properties.return_gradient,
+            tnm + " grad prop",
+            atol=atol_g,
+            rtol=rtol_g,
+            return_message=True,
+            quiet=True,
+        )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL GRADIENT"],
+            wfn.properties.return_gradient,
+            tnm + " grad prop",
+            atol=atol_g,
+            rtol=rtol_g,
+        ), errmsg
+
+    if driver == "hessian":
+        tf, errmsg = compare_values(
+            ref_block[f"{method.upper()} TOTAL HESSIAN"],
+            wfn.properties.return_hessian,
+            tnm + " hess prop",
+            atol=atol_h,
+            rtol=rtol_h,
+            return_message=True,
+            quiet=True,
+        )
+        assert compare_values(
+            ref_block[f"{method.upper()} TOTAL HESSIAN"],
+            wfn.properties.return_hessian,
+            tnm + " hess prop",
+            atol=atol_h,
+            rtol=rtol_h,
         ), errmsg
 
     # generics
