@@ -70,10 +70,10 @@ class GAMESSHarness(ProgramHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_data: AtomicInput, config: "TaskConfig") -> AtomicResult:
+    def compute(self, input_model: AtomicInput, config: "TaskConfig") -> AtomicResult:
         self.found(raise_error=True)
 
-        job_inputs = self.build_input(input_data, config)
+        job_inputs = self.build_input(input_model, config)
         success, dexe = self.execute(job_inputs)
 
         if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
@@ -82,7 +82,7 @@ class GAMESSHarness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
-            return self.parse_output(dexe["outfiles"], input_data)
+            return self.parse_output(dexe["outfiles"], input_model)
 
     def build_input(
         self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
@@ -150,30 +150,61 @@ class GAMESSHarness(ProgramHarness):
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
+        method = input_model.model.method.lower()
+        method = method[4:] if method.startswith("gms-") else method
+
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         try:
-            qcvars, gamessgrad, gamessmol = harvest(input_model.molecule, stdout, **outfiles)
+            qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(
+                input_model.molecule, method, stdout, **outfiles
+            )
+
         except Exception as e:
-            raise UnknownError(stdout)
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
-        if gamessgrad is not None:
-            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = gamessgrad
-            qcvars["CURRENT GRADIENT"] = gamessgrad
+        try:
+            if gamessgrad is not None:
+                qcvars[f"{method.upper()} TOTAL GRADIENT"] = gamessgrad
+                qcvars["CURRENT GRADIENT"] = gamessgrad
 
-        if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
-        else:
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            if gamesshess is not None:
+                qcvars[f"{method.upper()} TOTAL HESSIAN"] = gamesshess
+                qcvars["CURRENT HESSIAN"] = gamesshess
+
+            if input_model.driver.upper() == "PROPERTIES":
+                retres = qcvars[f"CURRENT ENERGY"]
+            else:
+                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        except KeyError as e:
+            raise UnknownError(
+                "STDOUT:\n"
+                + stdout
+                + "\nSTDERR:\n"
+                + stderr
+                + "\nTRACEBACK:\n"
+                + "".join(traceback.format_exception(*sys.exc_info()))
+            )
 
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
+
+        provenance = Provenance(creator="GAMESS", version=self.get_version(), routine="rungms").dict()
+        if module is not None:
+            provenance["module"] = module
 
         output_data = {
             "schema_version": 1,
             "molecule": gamessmol,
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
-            "provenance": Provenance(creator="GAMESS", version=self.get_version(), routine="rungms"),
+            "provenance": provenance,
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,

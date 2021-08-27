@@ -4,7 +4,7 @@ import logging
 import pprint
 import re
 from decimal import Decimal
-from typing import Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
@@ -17,29 +17,37 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
 
 
-def harvest(p4Mol, gamessout: str, **largs) -> Tuple[PreservingDict, Molecule, list]:
+def harvest(
+    in_mol: Molecule, method: str, gamessout: str, **outfiles
+) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]:
     """Parses all the pieces of output from gamess: the stdout in
     *gamessout* Scratch files are not yet considered at this moment.
     """
-    outqcvar, outMol, outGrad = harvest_output(gamessout)
+    qcvars, calc_mol, calc_grad, module = harvest_output(gamessout)
 
-    if outMol:
-        outqcvar["NUCLEAR REPULSION ENERGY"] = outMol.nuclear_repulsion_energy()
-        if p4Mol:
-            if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
+    if calc_mol:
+        qcvars["NUCLEAR REPULSION ENERGY"] = str(round(calc_mol.nuclear_repulsion_energy(), 8))
+        if in_mol:
+            if abs(calc_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
-                    """gamess outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
-                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                    f"""GAMESS outfile (NRE: {calc_mol.nuclear_repulsion_energy()}) inconsistent with AtomicInput.molecule (NRE: {in_mol.nuclear_repulsion_energy()})."""
                 )
 
-        amol, data = outMol.align(p4Mol, atoms_map=False, mols_align=True, verbose=0)
+        return_mol = calc_mol
+        amol, data = calc_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
         mill = data["mill"]
-        if outGrad is not None:
-            outGrad = mill.align_gradient(np.array(outGrad))
+
+        return_grad = None
+        if calc_grad is not None:
+            return_grad = mill.align_gradient(calc_grad)
+
+        return_hess = None
+        if outHess is not None:
+            return_hess = mill.align_hessian(np.array(outHess))
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
-    return outqcvar, outGrad, outMol
+    return qcvars, return_hess, return_grad, return_mol, module
 
 
 def harvest_output(outtext):
@@ -58,14 +66,13 @@ def harvest_output(outtext):
         outtext,
         re.MULTILINE,
     ):
-
-        qcvar, gamesscoord, gamessgrad = harvest_outfile_pass(outpass)
+        qcvar, gamesscoord, gamessgrad, module = harvest_outfile_pass(outpass)
         pass_qcvar.append(qcvar)
         pass_coord.append(gamesscoord)
         pass_grad.append(gamessgrad)
 
     retindx = -1 if pass_coord[-1] else -2
-    return pass_qcvar[retindx], pass_coord[retindx], pass_grad[retindx]
+    return pass_qcvar[retindx], pass_coord[retindx], pass_grad[retindx], module
 
 
 def harvest_outfile_pass(outtext):
@@ -75,6 +82,7 @@ def harvest_outfile_pass(outtext):
     qcvar = PreservingDict()
     qcvar_coord = None
     qcvar_grad = None
+    module = None
 
     NUMBER = r"(?x:" + regex.NUMBER + ")"
 
@@ -414,7 +422,7 @@ def harvest_outfile_pass(outtext):
                     logger.debug("printing gradient")
                     atoms.append(lline[1])
                     qcvar_grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
-            qcvar_grad = np.array(qcvar_grad)
+            qcvar_grad = np.array(qcvar_grad).reshape((-1, 3))
 
         # Process SCF blocks
         mobj = re.search(
@@ -496,4 +504,4 @@ def harvest_outfile_pass(outtext):
     if "FCI TOTAL ENERGY" in qcvar:  # and 'FCI CORRELATION ENERGY' in qcvar:
         qcvar["CURRENT ENERGY"] = qcvar["FCI TOTAL ENERGY"]
 
-    return qcvar, qcvar_coord, qcvar_grad
+    return qcvar, qcvar_coord, qcvar_grad, module

@@ -38,24 +38,24 @@ def compute(
     local_options: Optional[Dict[str, Any]] = None,
     return_dict: bool = False,
 ) -> "AtomicResult":
-    """Executes a single quantum chemistry program given a QC Schema input.
+    """Executes a single CMS program given a QCSchema input.
 
     The full specification can be found at:
         http://molssi-qc-schema.readthedocs.io/en/latest/index.html#
 
     Parameters
     ----------
-    input_data : Union[Dict[str, Any], 'AtomicInput']
+    input_data
         A QCSchema input specification in dictionary or model from QCElemental.models
-    program : str
-        The program to execute the input with.
-    raise_error : bool, optional
+    program
+        The CMS program with which to execute the input.
+    raise_error
         Determines if compute should raise an error or not.
     retries : int, optional
         The number of random tries to retry for.
-    local_options : Optional[Dict[str, Any]], optional
+    local_options
         A dictionary of local configuration options
-    return_dict : bool, optional
+    return_dict
         Returns a dict instead of qcelemental.models.AtomicResult
 
     Returns
