@@ -47,8 +47,6 @@ def harvest(
             return_grad = mill.align_gradient(calc_grad)
 
         return_hess = None
-        if outHess is not None:
-            return_hess = mill.align_hessian(np.array(outHess))
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
