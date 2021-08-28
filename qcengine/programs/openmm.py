@@ -307,6 +307,6 @@ class OpenMMHarness(ProgramHarness):
         ret_data["extras"] = input_model.extras
 
         # Move several pieces up a level
-        ret_data["provenance"] = Provenance(creator="openmm", version=openmm.__version__, nthreads=nthreads)
+        ret_data["provenance"] = Provenance(creator="openmm", version=str(openmm.version), nthreads=nthreads)
 
         return AtomicResult(**{**input_model.dict(), **ret_data})
