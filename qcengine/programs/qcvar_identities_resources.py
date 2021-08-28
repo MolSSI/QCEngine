@@ -1,12 +1,11 @@
+import logging
 from decimal import Decimal as Dm
 from typing import Any, Dict, List
-import logging
 
 import numpy as np
 from qcelemental.models import AtomicResultProperties
 
 from .util import PreservingDict
-
 
 logger = logging.getLogger(__name__)
 

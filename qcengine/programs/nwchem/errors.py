@@ -1,12 +1,11 @@
 """Known errors for NWChem"""
-from typing import Any, Dict
 import logging
+from typing import Any, Dict
 
 from qcelemental.models import AtomicInput
 
 from qcengine.exceptions import SimpleKnownErrorException
 from qcengine.programs.nwchem.germinate import xc_functionals
-
 
 logger = logging.getLogger(__name__)
 
