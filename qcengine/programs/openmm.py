@@ -125,7 +125,7 @@ class OpenMMHarness(ProgramHarness):
         if which_prog not in self.version_cache:
             from simtk import openmm
 
-            self.version_cache[which_prog] = safe_version(openmm.__version__)
+            self.version_cache[which_prog] = safe_version(openmm.version.short_version)
 
         return self.version_cache[which_prog]
 
@@ -307,6 +307,6 @@ class OpenMMHarness(ProgramHarness):
         ret_data["extras"] = input_model.extras
 
         # Move several pieces up a level
-        ret_data["provenance"] = Provenance(creator="openmm", version=openmm.__version__, nthreads=nthreads)
+        ret_data["provenance"] = Provenance(creator="openmm", version=openmm.version.short_version, nthreads=nthreads)
 
         return AtomicResult(**{**input_model.dict(), **ret_data})
