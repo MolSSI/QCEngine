@@ -1,79 +1,17 @@
 import io
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import numpy as np
-from pydantic import Field, validator
-from qcelemental.models import ComputeError, DriverEnum, FailedOperation, Molecule, ProtoModel, Provenance
-from qcelemental.models.procedures import (
-    OptimizationInput,
-    OptimizationProtocols,
-    OptimizationResult,
-    QCInputSpecification,
-)
+from qcelemental.models import FailedOperation, Molecule
+from qcelemental.models.procedures import OptimizationInput, OptimizationResult, TorsionDriveInput, TorsionDriveResult
 from qcelemental.util import which_import
 
-from ..extras import provenance_stamp
 from .model import ProcedureHarness
 
 if TYPE_CHECKING:
     from ..config import TaskConfig
-
-
-class OptimizationSpecification(ProtoModel):
-
-    procedure: str = Field(..., description="Optimization procedure to run the optimization with.")
-    keywords: Dict[str, Any] = Field({}, description="The optimization specific keywords to be used.")
-    protocols: OptimizationProtocols = Field(OptimizationProtocols(), description=str(OptimizationProtocols.__doc__))
-
-    @validator("procedure")
-    def _check_procedure(cls, v):
-        return v.lower()
-
-
-class TorsionDriveInput(ProtoModel):
-
-    keywords: Dict[str, Any] = Field({}, description="The torsion drive specific keywords to be used.")
-    extras: Dict[str, Any] = Field({}, description="Extra fields that are not part of the schema.")
-
-    input_specification: QCInputSpecification = Field(..., description=str(QCInputSpecification.__doc__))
-    initial_molecule: Molecule = Field(..., description="The starting molecule for the torsion drive.")
-
-    optimization_spec: OptimizationSpecification = Field(
-        ..., description="Settings to use for optimizations at each grid angle."
-    )
-
-    provenance: Provenance = Field(Provenance(**provenance_stamp(__name__)), description=str(Provenance.__doc__))
-
-    @validator("input_specification")
-    def _check_input_specification(cls, value):
-        assert value.driver == DriverEnum.gradient, "driver must be set to gradient"
-        return value
-
-
-class TorsionDriveResult(TorsionDriveInput):
-
-    final_energies: Dict[str, float] = Field(
-        ..., description="The final energy at each angle of the TorsionDrive scan."
-    )
-    final_molecules: Dict[str, Molecule] = Field(
-        ..., description="The final molecule at each angle of the TorsionDrive scan."
-    )
-
-    optimization_history: Dict[str, List[OptimizationResult]] = Field(
-        ...,
-        description="The map of each angle of the TorsionDrive scan to each optimization computations.",
-    )
-
-    stdout: Optional[str] = Field(None, description="The standard output of the program.")
-    stderr: Optional[str] = Field(None, description="The standard error of the program.")
-
-    success: bool = Field(
-        ..., description="The success of a given programs execution. If False, other fields may be blank."
-    )
-    error: Optional[ComputeError] = Field(None, description=str(ComputeError.__doc__))
-    provenance: Provenance = Field(..., description=str(Provenance.__doc__))
 
 
 class TorsionDriveProcedure(ProcedureHarness):
@@ -100,13 +38,13 @@ class TorsionDriveProcedure(ProcedureHarness):
 
         import torsiondrive.td_api
 
-        dihedrals = input_model.keywords["dihedrals"]
-        grid_spacing = input_model.keywords["grid_spacing"]
+        dihedrals = input_model.keywords.dihedrals
+        grid_spacing = input_model.keywords.grid_spacing
 
-        dihedral_ranges = input_model.keywords.get("dihedral_ranges", None)
+        dihedral_ranges = input_model.keywords.dihedral_ranges
 
-        energy_decrease_thresh = input_model.keywords.get("energy_decrease_thresh", None)
-        energy_upper_limit = input_model.keywords.get("energy_upper_limit", None)
+        energy_decrease_thresh = input_model.keywords.energy_decrease_thresh
+        energy_upper_limit = input_model.keywords.energy_upper_limit
 
         state = torsiondrive.td_api.create_initial_state(
             dihedrals=dihedrals,
@@ -207,6 +145,10 @@ class TorsionDriveProcedure(ProcedureHarness):
                 output_data["stderr"] = str(stderr.getvalue())
 
         if "error" not in output_data:
+
+            output_data.pop("schema_name", None)
+            output_data.pop("schema_version", None)
+
             output_data = TorsionDriveResult(**output_data)
 
         return output_data
@@ -243,7 +185,7 @@ class TorsionDriveProcedure(ProcedureHarness):
         input_molecule["geometry"] = np.array(job).reshape(len(input_molecule["symbols"]), 3)
         input_molecule = Molecule.from_data(input_molecule)
 
-        dihedrals = input_model.keywords["dihedrals"]
+        dihedrals = input_model.keywords.dihedrals
         angles = grid_point.split()
 
         keywords = {

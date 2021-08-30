@@ -5,10 +5,9 @@ Tests the DQM compute dispatch module
 import pytest
 from qcelemental.models import DriverEnum, OptimizationInput
 from qcelemental.models.common_models import Model
-from qcelemental.models.procedures import QCInputSpecification
+from qcelemental.models.procedures import OptimizationSpecification, QCInputSpecification, TDKeywords, TorsionDriveInput
 
 import qcengine as qcng
-from qcengine.procedures.torsiondrive import OptimizationSpecification, TorsionDriveInput
 from qcengine.testing import failure_engine, using
 
 
@@ -267,7 +266,7 @@ def test_nwchem_relax(linopt):
 def test_torsiondrive_generic():
 
     input_data = TorsionDriveInput(
-        keywords={"dihedrals": [(2, 0, 1, 5)], "grid_spacing": [180]},
+        keywords=TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
         input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="UFF", basis=None)),
         initial_molecule=qcng.get_molecule("ethane"),
         optimization_spec=OptimizationSpecification(
