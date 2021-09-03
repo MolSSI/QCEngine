@@ -139,7 +139,7 @@ class Psi4Harness(ProgramHarness):
         old_basis = input_model.model.basis
         input_model.model.__dict__["basis"] = old_basis or ""
 
-        with temporary_directory(parent=parent, suffix="_psi_scratch") as tmpdir:
+        with temporary_directory(parent=parent, suffix="_psi_scratch", messy=config.scratch_messy) as tmpdir:
 
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
             if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in caseless_keywords):
@@ -203,7 +203,7 @@ class Psi4Harness(ProgramHarness):
 
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()
                     psi4.core.set_num_threads(config.ncores, quiet=True)
-                    psi4.set_memory(f"{config.memory}GB", quiet=True)
+                    psi4.set_memory(f"{config.memory}GiB", quiet=True)
                     # psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
                     if pversion < parse_version("1.5rc1"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
@@ -224,10 +224,12 @@ class Psi4Harness(ProgramHarness):
                         "--nthread",
                         str(config.ncores),
                         "--memory",
-                        f"{config.memory}GB",
+                        f"{config.memory}GiB",
                         "--qcschema",
                         "data.msgpack",
                     ]
+                    if config.scratch_messy:
+                        run_cmd.append("--messy")
                     input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
                     success, output = execute(
                         run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir

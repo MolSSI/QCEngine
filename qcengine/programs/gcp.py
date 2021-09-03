@@ -104,7 +104,7 @@ class GCPHarness(ProgramHarness):
             inputs["command"],
             inputs["infiles"],
             inputs["outfiles"],
-            scratch_messy=False,
+            scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
             blocking_files=inputs["blocking_files"],
         )
@@ -185,6 +185,7 @@ class GCPHarness(ProgramHarness):
             "command": command,
             "infiles": infiles,
             "outfiles": ["gcp_gradient"],
+            "scratch_messy": config.scratch_messy,
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
             "blocking_files": [os.path.join(pathlib.Path.home(), ".gcppar." + socket.gethostname())],
