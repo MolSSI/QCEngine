@@ -24,9 +24,12 @@ Enhancements
 ++++++++++++
 - (:pr:`307`) NWChem - learns to automatically increase the number of iterations when SCF, CC, etc. fails to converge.
 - (:pr:`309`) ``qcengine info`` learned to print the location of found CMS programs, and geometric, OpenMM, and RDKit learned to return their versions.
+- (:pr:`311`) CFOUR, GAMESS, NWChem harnesses learned to notice which internal module performs a calc (e.g., tce/cc for NWChem) and to store it in ``AtomicResult.provenance.module``. Psi4 already does this.
+- (:pr:`312`) CFOUR, GAMESS, NWChem harnesses learned to run and harvest several new methods in the MP, CC, CI, DFT families.
 
 Bug Fixes
 +++++++++
+- (:pr:`313`, another more general) OpenMM - accommocate both old and new simtk/openmm import patterns.
 
 
 v0.19.0 / 2021-05-16

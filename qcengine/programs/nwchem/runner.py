@@ -249,6 +249,7 @@ task python
         method = method[4:] if method.startswith("nwc-") else method
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
+        # July 2021: nwmol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always atin orientation
         # LW 7Jul21: I allow exceptions to be raised so that we can detect errors
         #   in the parsing of output files
         qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
@@ -295,6 +296,7 @@ task python
         # Format them inout an output
         output_data = {
             "schema_version": 1,
+            "molecule": nwmol,  # overwrites with outfile Cartesians in case fix_*=F
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
             "provenance": provenance,
