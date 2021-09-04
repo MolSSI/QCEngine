@@ -1,0 +1,394 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/style.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/style.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Command Line Interface" href="cli.html" />
+    <link rel="prev" title="Single Compute" href="single_compute.html" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WJHQJQF');</script>
+<!-- End Google Tag Manager -->
+ 
+
+</head>
+
+<body class="wy-body-for-nav">
+
+  
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+
+<div style="width: 100%" class="qca-header">
+<nav class="navbar main-nav navbar-expand-lg p-0 qca-header">
+  <div class="container nav-width">
+    <div class="logo-width">
+    <a class="navbar-brand" href="https://docs.qcarchive.molssi.org"><img src="https://docs.qcarchive.molssi.org/en/latest/_static/images/QCAInfrastructure.png" alt="logo" width=200px></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="tf-ion-android-menu"></span>
+    </button>
+    </div>
+      <div class="collapse navbar-collapse" id=navbarNav>
+         <ul class="navbar-nav ml-auto">
+            <li class=nav-item>
+                <a class=nav-link href=https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM>
+                Community Slack
+                </a>
+            </li>
+            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org></a></li>
+            <li class="nav-item dropdown dropdown-slide">
+               <a class=nav-link href=# data-toggle=dropdown>GitHub
+               <span><i class=tf-ion-ios-arrow-down></i></span></a>
+               <div class=dropdown-menu>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCElemental>QCElemental</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCEngine>QCEngine</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCFractal</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCPortal</a>
+               </div>
+            </li>
+            <li class="nav-item dropdown dropdown-slide">
+               <a class=nav-link href=# data-toggle=dropdown>Documentation
+               <span><i class=tf-ion-ios-arrow-down></i></span></a>
+               <div class=dropdown-menu>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/>Examples</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable>QCElemental</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCEngine/en/stable>QCEngine</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCFractal/en/stable>QCFractal</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCPortal/en/stable>QCPortal</a>
+               </div>
+            </li>
+            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org/><u>MolSSI Database</u></a></li>
+         </ul>
+      </div>
+   </div>
+   </div>
+</nav>
+
+
+
+
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> QCEngine
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.g6235bd7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install QCEngine</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Interface</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="single_compute.html">Single Compute</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Environment Detection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#node-description">Node Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config">Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#global-environment">Global Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-files">Configuration Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cluster-configuration">Cluster Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Programs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="program_overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_semiempirical.html">Semiempirical Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_molecular_mechanics.html">Molecular Mechanics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">QCEngine API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QCEngine</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Environment Detection</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/environment.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="environment-detection">
+<h1>Environment Detection<a class="headerlink" href="#environment-detection" title="Permalink to this headline">¶</a></h1>
+<p>QCEngine can inspect the current compute environment to determine the resources available to it.</p>
+<div class="section" id="node-description">
+<h2>Node Description<a class="headerlink" href="#node-description" title="Permalink to this headline">¶</a></h2>
+<p>QCEngine can detect node descriptions to obtain general information about the current node.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get_node_descriptor</span><span class="p">()</span>
+<span class="go">&lt;NodeDescriptor hostname_pattern=&#39;*&#39; name=&#39;default&#39; scratch_directory=None</span>
+<span class="go">                memory=5.568 memory_safety_factor=10 ncores=4 jobs_per_node=2&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="config">
+<h2>Config<a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h2>
+<p>The configuration file operated based on the current node descriptor and can be overridden:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=None&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">local_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">:</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">})</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=&#39;/tmp&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/my_scratch&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">local_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">:</span> <span class="s2">&quot;$SCRATCH&quot;</span><span class="p">})</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=&#39;/my_scratch&#39;&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="global-environment">
+<h2>Global Environment<a class="headerlink" href="#global-environment" title="Permalink to this headline">¶</a></h2>
+<p>The global environment can also be inspected directly.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get_global</span><span class="p">()</span>
+<span class="go">{</span>
+<span class="go">    &#39;hostname&#39;: &#39;qcarchive.molssi.org&#39;,</span>
+<span class="go">    &#39;memory&#39;: 5.568,</span>
+<span class="go">    &#39;username&#39;: &#39;user&#39;,</span>
+<span class="go">    &#39;ncores&#39;: 4,</span>
+<span class="go">    &#39;cpuinfo&#39;: {</span>
+<span class="go">        &#39;python_version&#39;: &#39;3.6.7.final.0 (64 bit)&#39;,</span>
+<span class="go">        &#39;brand&#39;: &#39;Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz&#39;,</span>
+<span class="go">        &#39;hz_advertised&#39;: &#39;2.9000 GHz&#39;,</span>
+<span class="go">        ...</span>
+<span class="go">    },</span>
+<span class="go">    &#39;cpu_brand&#39;: &#39;Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz&#39;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuration-files">
+<h2>Configuration Files<a class="headerlink" href="#configuration-files" title="Permalink to this headline">¶</a></h2>
+<p>The computational environment defaults can be overridden by configuration files.</p>
+<p>Configuration files must be named <code class="docutils literal notranslate"><span class="pre">qcengine.yaml</span></code> and stored either in the directory
+from which you run QCEngine, a folder named <code class="docutils literal notranslate"><span class="pre">.qcarchive</span></code> in your home directory,
+or in a folder specified by the <code class="docutils literal notranslate"><span class="pre">DQM_CONFIG_PATH</span></code> environmental variable.
+Only one configuration file will be used if multiple are available.
+The <code class="docutils literal notranslate"><span class="pre">DQM_CONFIG_PATH</span></code> configuration file takes precedence over the current directory,
+which takes precedence over the <code class="docutils literal notranslate"><span class="pre">.qcarchive</span></code> folder.</p>
+<p>The configuration file is a YAML file that contains a dictionary of different node configurations.
+The keys in the YAML file are human-friendly names for the configurations.
+The values are dictionaries that define configurations for different nodes,
+following the <code class="docutils literal notranslate"><span class="pre">NodeDescription</span></code> schema:</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qcengine.config.NodeDescriptor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">qcengine.config.</span></span><span class="sig-name descname"><span class="pre">NodeDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hostname_pattern</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scratch_directory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/functions.html#float" title="(in Python v3.7)"><span class="pre">float</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory_safety_factor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/functions.html#int" title="(in Python v3.7)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncores</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/functions.html#int" title="(in Python v3.7)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobs_per_node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/functions.html#int" title="(in Python v3.7)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/functions.html#int" title="(in Python v3.7)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_batch_node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/functions.html#bool" title="(in Python v3.7)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpiexec_command</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qcengine/config.html#NodeDescriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.config.NodeDescriptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of an individual node</p>
+</dd></dl>
+
+<p>When running QCEngine, the proper configuration for a node is determined based on the hostname of the node
+and matching the <code class="docutils literal notranslate"><span class="pre">hostname_pattern</span></code> to each of the configurations defined in <code class="docutils literal notranslate"><span class="pre">qcengine.yaml</span></code>.</p>
+<p>An example <code class="docutils literal notranslate"><span class="pre">qcengine.yaml</span></code> file that sets the scratch directory for all nodes is as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">all</span><span class="p">:</span>
+  <span class="nt">hostname_pattern</span><span class="p">:</span> <span class="s">&quot;*&quot;</span>
+  <span class="nt">scratch_directory</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./scratch</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cluster-configuration">
+<h2>Cluster Configuration<a class="headerlink" href="#cluster-configuration" title="Permalink to this headline">¶</a></h2>
+<p>A node configuration file is required when using node-parallel tasks on a compute cluster.
+The configuration file must contain a description of the command used to launch MPI tasks and,
+in some cases, the designation that a certain node is a compute node.
+See the descriptions for <code class="docutils literal notranslate"><span class="pre">mpiexec_command</span></code> and <code class="docutils literal notranslate"><span class="pre">is_batch_node</span></code> in the <code class="docutils literal notranslate"><span class="pre">NodeDescriptor</span></code>
+documentation for further details.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="cli.html" class="btn btn-neutral float-right" title="Command Line Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="single_compute.html" class="btn btn-neutral float-left" title="Single Compute" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2021, The Molecular Sciences Software Institute.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

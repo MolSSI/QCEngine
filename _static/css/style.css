@@ -1,0 +1,191 @@
+/* Copyright (c) 2018 Dask Developers
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+Neither the name of Anaconda nor the names of any contributors may be used to
+endorse or promote products derived from this software without specific prior
+written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+@import url("theme.css");
+
+/* Custom fixes for tables and lists */
+
+.rst-content .section ul > li > p {
+    margin-bottom: 0px
+}
+
+.section th > p {
+    margin-bottom: 0px
+}
+
+/* General RST overloads*/
+.rst-content {
+  padding-top: 61px;
+}
+
+.rst-content p,h1,h2,h3,h4,h5 {
+  font-family: 'Garamond', 'Georgia', serif;
+  font-weight: normal;
+  color: black;
+}
+
+h2, .rst-content .toctree-wrapper p.caption {
+  font-family: 'Garamond', 'Georgia', serif;
+}
+
+.rst-content h1 {
+  font-size: 240%;
+}
+
+.rst-content h2 {
+  font-size: 180%;
+}
+
+.rst-content h3 {
+  font-size: 160%;
+}
+
+.section p, li {
+  color: black;
+}
+
+.wy-menu-vertical li ul li a,
+.wy-menu-vertical li.current a,
+.wy-menu-vertical a {
+  color: #F5FFFF;
+}
+
+.wy-menu-vertical li.toctree-l2.current>a:hover,
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3>a:hover,
+.wy-menu-vertical li.toctree-l3.current li.toctree-l4>a:hover,
+.wy-menu-vertical li.current a:hover {
+  background: #656162;
+  color: #F5FFFF;
+}
+
+.wy-menu-vertical a:hover {
+  background: #4C4849;
+}
+
+.wy-side-nav-search>a img.logo,
+.wy-side-nav-search .wy-dropdown>a img.logo {
+  width: 10rem
+}
+
+.wy-side-nav-search {
+  background-color: #231F20;
+}
+
+.wy-side-nav-search>div.version {
+  display: none;
+}
+
+.wy-menu-vertical header,
+.wy-menu-vertical p.caption {
+  color: #0080C7;
+}
+
+.wy-menu-vertical li.on a,
+.wy-menu-vertical li.current>a {
+  background: #4C4849;
+  border-top: none;
+  border-bottom: none;
+}
+
+
+.wy-menu-vertical ul,
+.wy-side-scroll {
+  background-color: #322E2F;
+}
+
+.wy-menu-vertical li.toctree-l2.current>a,
+.wy-menu-vertical li.toctree-l2.current li.toctree-l3>a,
+.wy-menu-vertical li.toctree-l3.current li.toctree-l4>a,
+.wy-menu-vertical li ul {
+  background-color: #4C4849;
+}
+
+/* Mobile */
+
+.wy-nav-top {
+  background: #322E2F;
+}
+
+.wy-nav-top a {
+  color: #F5FFFF;
+}
+
+.wy-nav-top i {
+  color: #F5FFFF;
+}
+
+.wy-breadcrumbs {
+  display: none;
+}
+
+
+
+/* File _rtd_overrides.css */
+.wy-nav-side {
+  padding-top: 61px;
+  padding-bottom: 0rem;
+}
+
+.wy-nav-content {
+}
+
+.logo-width {
+  width: 300px;
+}
+
+.content-width {
+  width: 768px;
+}
+.section {
+ padding: 0px
+}
+
+
+.qca-header {
+  position: fixed;
+  top: 0;
+  z-index: 300;
+  height: 61px;
+  line-height: 61px;
+  text-align: center;
+  display: flex;
+  border-bottom: 1.5px solid #e2e2e2;
+  background-color: white;
+}
+.nav-width {
+  width: 1100px;
+}
+
+@media (max-width: 768px) {
+  .qca-header {
+    display: none;
+  }
+
+/* File _qca_header.css */

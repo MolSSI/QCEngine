@@ -1,0 +1,7 @@
+NodeDescriptor
+==============
+
+.. currentmodule:: qcengine.config
+
+.. autoclass:: NodeDescriptor
+   :show-inheritance:

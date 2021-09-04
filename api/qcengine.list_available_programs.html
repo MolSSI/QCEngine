@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/small-apps.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/themefisher-font.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/small-apps.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/themefisher-font.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="register_program" href="qcengine.register_program.html" />
+    <link rel="prev" title="list_available_procedures" href="qcengine.list_available_procedures.html" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WJHQJQF');</script>
+<!-- End Google Tag Manager -->
+ 
+
+</head>
+
+<body class="wy-body-for-nav">
+
+  
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+
+<div style="width: 100%" class="qca-header">
+<nav class="navbar main-nav navbar-expand-lg p-0 qca-header">
+  <div class="container nav-width">
+    <div class="logo-width">
+    <a class="navbar-brand" href="https://docs.qcarchive.molssi.org"><img src="https://docs.qcarchive.molssi.org/en/latest/_static/images/QCAInfrastructure.png" alt="logo" width=200px></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="tf-ion-android-menu"></span>
+    </button>
+    </div>
+      <div class="collapse navbar-collapse" id=navbarNav>
+         <ul class="navbar-nav ml-auto">
+            <li class=nav-item>
+                <a class=nav-link href=https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM>
+                Community Slack
+                </a>
+            </li>
+            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org></a></li>
+            <li class="nav-item dropdown dropdown-slide">
+               <a class=nav-link href=# data-toggle=dropdown>GitHub
+               <span><i class=tf-ion-ios-arrow-down></i></span></a>
+               <div class=dropdown-menu>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCElemental>QCElemental</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCEngine>QCEngine</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCFractal</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCPortal</a>
+               </div>
+            </li>
+            <li class="nav-item dropdown dropdown-slide">
+               <a class=nav-link href=# data-toggle=dropdown>Documentation
+               <span><i class=tf-ion-ios-arrow-down></i></span></a>
+               <div class=dropdown-menu>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/>Examples</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable>QCElemental</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCEngine/en/stable>QCEngine</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCFractal/en/stable>QCFractal</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCPortal/en/stable>QCPortal</a>
+               </div>
+            </li>
+            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org/><u>MolSSI Database</u></a></li>
+         </ul>
+      </div>
+   </div>
+   </div>
+</nav>
+
+
+
+
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> QCEngine
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.g6235bd7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Install QCEngine</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../single_compute.html">Single Compute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../environment.html">Environment Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Programs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../program_overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programs_semiempirical.html">Semiempirical Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../programs_molecular_mechanics.html">Molecular Mechanics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">QCEngine API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-qcengine">qcengine Package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#functions">Functions</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qcengine.compute.html">compute</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.compute_procedure.html">compute_procedure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.get_config.html">get_config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.get_molecule.html">get_molecule</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.get_procedure.html">get_procedure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.get_program.html">get_program</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.list_all_procedures.html">list_all_procedures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.list_all_programs.html">list_all_programs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.list_available_procedures.html">list_available_procedures</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">list_available_programs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.register_program.html">register_program</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.unregister_program.html">unregister_program</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#classes">Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-qcengine.compute">qcengine.compute Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-qcengine.config">qcengine.config Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-qcengine.util">qcengine.util Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-qcengine.programs">qcengine.programs Package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QCEngine</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">QCEngine API</a> &raquo;</li>
+        
+      <li>list_available_programs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/qcengine.list_available_programs.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="list-available-programs">
+<h1>list_available_programs<a class="headerlink" href="#list-available-programs" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="qcengine.list_available_programs">
+<span class="sig-prename descclassname"><span class="pre">qcengine.</span></span><span class="sig-name descname"><span class="pre">list_available_programs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qcengine/programs/base.html#list_available_programs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.list_available_programs" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all programs that can be exectued (found) by QCEngine.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="qcengine.register_program.html" class="btn btn-neutral float-right" title="register_program" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qcengine.list_available_procedures.html" class="btn btn-neutral float-left" title="list_available_procedures" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2021, The Molecular Sciences Software Institute.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

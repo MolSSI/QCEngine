@@ -1,0 +1,51 @@
+MDIServer
+=========
+
+.. currentmodule:: qcengine
+
+.. autoclass:: MDIServer
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~MDIServer.recv_coords
+      ~MDIServer.recv_elements
+      ~MDIServer.recv_masses
+      ~MDIServer.recv_multiplicity
+      ~MDIServer.recv_total_charge
+      ~MDIServer.run_energy
+      ~MDIServer.send_coords
+      ~MDIServer.send_elements
+      ~MDIServer.send_energy
+      ~MDIServer.send_forces
+      ~MDIServer.send_masses
+      ~MDIServer.send_multiplicity
+      ~MDIServer.send_natoms
+      ~MDIServer.send_node
+      ~MDIServer.send_total_charge
+      ~MDIServer.start
+      ~MDIServer.stop
+      ~MDIServer.update_molecule
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: recv_coords
+   .. automethod:: recv_elements
+   .. automethod:: recv_masses
+   .. automethod:: recv_multiplicity
+   .. automethod:: recv_total_charge
+   .. automethod:: run_energy
+   .. automethod:: send_coords
+   .. automethod:: send_elements
+   .. automethod:: send_energy
+   .. automethod:: send_forces
+   .. automethod:: send_masses
+   .. automethod:: send_multiplicity
+   .. automethod:: send_natoms
+   .. automethod:: send_node
+   .. automethod:: send_total_charge
+   .. automethod:: start
+   .. automethod:: stop
+   .. automethod:: update_molecule

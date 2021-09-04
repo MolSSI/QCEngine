@@ -1,0 +1,6 @@
+compute_procedure
+=================
+
+.. currentmodule:: qcengine.compute
+
+.. autofunction:: compute_procedure

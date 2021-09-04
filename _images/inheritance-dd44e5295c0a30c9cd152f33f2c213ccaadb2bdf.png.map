@@ -1,0 +1,4 @@
+<map id="inheritance6d8ac8d9b4" name="inheritance6d8ac8d9b4">
+<area shape="rect" id="node3" href="environment.html#qcengine.config.NodeDescriptor" target="_top" title="Description of an individual node" alt="" coords="317,5,440,31"/>
+<area shape="rect" id="node2" title="Mixin to provide __str__, __repr__, and __pretty__ methods. See #884 for more details." alt="" coords="5,5,127,31"/>
+</map>

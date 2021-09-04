@@ -1,0 +1,7 @@
+ProgramHarness
+==============
+
+.. currentmodule:: qcengine.programs
+
+.. autoclass:: ProgramHarness
+   :show-inheritance:

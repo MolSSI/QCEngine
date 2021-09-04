@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/style.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/style.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Environment Detection" href="environment.html" />
+    <link rel="prev" title="Install QCEngine" href="install.html" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WJHQJQF');</script>
+<!-- End Google Tag Manager -->
+ 
+
+</head>
+
+<body class="wy-body-for-nav">
+
+  
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+
+<div style="width: 100%" class="qca-header">
+<nav class="navbar main-nav navbar-expand-lg p-0 qca-header">
+  <div class="container nav-width">
+    <div class="logo-width">
+    <a class="navbar-brand" href="https://docs.qcarchive.molssi.org"><img src="https://docs.qcarchive.molssi.org/en/latest/_static/images/QCAInfrastructure.png" alt="logo" width=200px></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="tf-ion-android-menu"></span>
+    </button>
+    </div>
+      <div class="collapse navbar-collapse" id=navbarNav>
+         <ul class="navbar-nav ml-auto">
+            <li class=nav-item>
+                <a class=nav-link href=https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM>
+                Community Slack
+                </a>
+            </li>
+            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org></a></li>
+            <li class="nav-item dropdown dropdown-slide">
+               <a class=nav-link href=# data-toggle=dropdown>GitHub
+               <span><i class=tf-ion-ios-arrow-down></i></span></a>
+               <div class=dropdown-menu>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCElemental>QCElemental</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCEngine>QCEngine</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCFractal</a>
+                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCPortal</a>
+               </div>
+            </li>
+            <li class="nav-item dropdown dropdown-slide">
+               <a class=nav-link href=# data-toggle=dropdown>Documentation
+               <span><i class=tf-ion-ios-arrow-down></i></span></a>
+               <div class=dropdown-menu>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/>Examples</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable>QCElemental</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCEngine/en/stable>QCEngine</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCFractal/en/stable>QCFractal</a>
+                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCPortal/en/stable>QCPortal</a>
+               </div>
+            </li>
+            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org/><u>MolSSI Database</u></a></li>
+         </ul>
+      </div>
+   </div>
+   </div>
+</nav>
+
+
+
+
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> QCEngine
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0+untagged.1.g6235bd7
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install QCEngine</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Interface</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Single Compute</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#input-description">Input Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computation">Computation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#results">Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-fields">Input Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#returned-fields">Returned Fields</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="environment.html">Environment Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Programs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="program_overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_semiempirical.html">Semiempirical Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_molecular_mechanics.html">Molecular Mechanics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">QCEngine API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QCEngine</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Single Compute</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/single_compute.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="single-compute">
+<h1>Single Compute<a class="headerlink" href="#single-compute" title="Permalink to this headline">¶</a></h1>
+<p>QCEngine’s primary purpose is to consume the MolSSI <a class="reference external" href="https://github.com/MolSSI/QC_JSON_Schema">QCSchema</a> and produce
+QCSchema results for a variety of quantum chemistry, semiempirical, and molecular mechanics programs. Single QCSchema representation
+comprises of a single <code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">gradient</span></code>, <code class="docutils literal notranslate"><span class="pre">hessian</span></code>, or <code class="docutils literal notranslate"><span class="pre">properties</span></code> evaluation.</p>
+<div class="section" id="input-description">
+<h2>Input Description<a class="headerlink" href="#input-description" title="Permalink to this headline">¶</a></h2>
+<p>An input description has the following fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">molecule</span></code> - A QCSchema compliant dictionary or Molecule model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">driver</span></code> - The <code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">gradient</span></code>, <code class="docutils literal notranslate"><span class="pre">hessian</span></code>, or <code class="docutils literal notranslate"><span class="pre">properties</span></code> option.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code> - A description of the evaluation model. For quantum chemistry this is typically <code class="docutils literal notranslate"><span class="pre">method</span></code> and <code class="docutils literal notranslate"><span class="pre">basis</span></code>. However,
+non-quantum chemistry models are often a simple <code class="docutils literal notranslate"><span class="pre">method</span></code> as in <code class="docutils literal notranslate"><span class="pre">method</span> <span class="pre">=</span> <span class="pre">'UFF'</span></code> for forcefield evaluation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">keywords</span></code> - a dictionary of keywords to pass to the underlying program. These are program-specific keywords.</p></li>
+</ul>
+<p>An example input is as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">qcengine</span> <span class="k">as</span> <span class="nn">qcng</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">qcelemental</span> <span class="k">as</span> <span class="nn">qcel</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">    O  0.0  0.000  -0.129</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">    H  0.0 -1.494  1.027</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">    H  0.0  1.494  1.027</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inp</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">AtomicInput</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">molecule</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;energy&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;SCF&quot;</span><span class="p">,</span> <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="s2">&quot;sto-3g&quot;</span><span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scf_type&quot;</span><span class="p">:</span> <span class="s2">&quot;df&quot;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="computation">
+<h2>Computation<a class="headerlink" href="#computation" title="Permalink to this headline">¶</a></h2>
+<p>A single computation can be evaluated with the <code class="docutils literal notranslate"><span class="pre">compute</span></code> function as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span> <span class="o">=</span> <span class="n">qcng</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="s2">&quot;psi4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default the job is given resources relating to the compute environment it is in; however, these variables can be overridden:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span> <span class="o">=</span> <span class="n">qcng</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="s2">&quot;psi4&quot;</span><span class="p">,</span> <span class="n">local_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;memory&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;ncores&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="results">
+<h2>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
+<p>The results contain a complete record of the computation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">return_result</span>
+<span class="go">-74.45994963230625</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">scf_dipole_moment</span>
+<span class="go">[0.0, 0.0, 0.6635967188869244]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">provenance</span><span class="o">.</span><span class="n">cpu</span>
+<span class="go">Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="input-fields">
+<h2>Input Fields<a class="headerlink" href="#input-fields" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qcelemental.models.AtomicInput">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">qcelemental.models.</span></span><span class="sig-name descname"><span class="pre">AtomicInput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*</span></em>, <em class="sig-param"><span class="pre">id:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">schema_name:</span> <span class="pre">qcelemental.models.results.ConstrainedStrValue</span> <span class="pre">=</span> <span class="pre">'qcschema_input'</span></em>, <em class="sig-param"><span class="pre">schema_version:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></em>, <em class="sig-param"><span class="pre">molecule:</span> <span class="pre">qcelemental.models.molecule.Molecule</span></em>, <em class="sig-param"><span class="pre">driver:</span> <span class="pre">qcelemental.models.common_models.DriverEnum</span></em>, <em class="sig-param"><span class="pre">model:</span> <span class="pre">qcelemental.models.common_models.Model</span></em>, <em class="sig-param"><span class="pre">keywords:</span> <span class="pre">Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]</span> <span class="pre">=</span> <span class="pre">{}</span></em>, <em class="sig-param"><span class="pre">protocols:</span> <span class="pre">qcelemental.models.results.AtomicResultProtocols</span> <span class="pre">=</span> <span class="pre">AtomicResultProtocols(wavefunction=&lt;WavefunctionProtocolEnum.none:</span> <span class="pre">'none'&gt;</span></em>, <em class="sig-param"><span class="pre">stdout=True</span></em>, <em class="sig-param"><span class="pre">error_correction=ErrorCorrectionProtocol(default_policy=True</span></em>, <em class="sig-param"><span class="pre">policies=None))</span></em>, <em class="sig-param"><span class="pre">extras:</span> <span class="pre">Dict[str</span></em>, <em class="sig-param"><span class="pre">Any]</span> <span class="pre">=</span> <span class="pre">{}</span></em>, <em class="sig-param"><span class="pre">provenance:</span> <span class="pre">qcelemental.models.common_models.Provenance</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qcelemental/models/results.html#AtomicInput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcelemental.models.AtomicInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>The MolSSI Quantum Chemistry Schema</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>str, Optional</em>) – The optional ID for the computation.</p></li>
+<li><p><strong>schema_name</strong> (<em>ConstrainedStrValue, Default: qcschema_input</em>) – The QCSchema specification this model conforms to. Explicitly fixed as qcschema_input.</p></li>
+<li><p><strong>schema_version</strong> (<em>int, Default: 1</em>) – The version number of <code class="docutils literal notranslate"><span class="pre">schema_name</span></code> to which this model conforms.</p></li>
+<li><p><strong>molecule</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Molecule</span></code>) – The molecule to use in the computation.</p></li>
+<li><p><strong>driver</strong> (<em>{energy,gradient,hessian,properties}</em>) – Allowed computation driver values.</p></li>
+<li><p><strong>model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code>) – The computational molecular sciences model to run.</p></li>
+<li><p><strong>keywords</strong> (<em>Dict[Any], Default: {}</em>) – The program-specific keywords to be used.</p></li>
+<li><p><strong>protocols</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResultProtocols</span></code>, Optional) – Protocols regarding the manipulation of computational result data.</p></li>
+<li><p><strong>extras</strong> (<em>Dict[Any], Default: {}</em>) – Additional information to bundle with the computation. Use for schema development and scratch space.</p></li>
+<li><p><strong>provenance</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Provenance</span></code>, Optional) – Provenance information.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="returned-fields">
+<h2>Returned Fields<a class="headerlink" href="#returned-fields" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qcelemental.models.AtomicResult">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">qcelemental.models.</span></span><span class="sig-name descname"><span class="pre">AtomicResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*,</span> <span class="pre">id:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">schema_name:</span> <span class="pre">qcelemental.models.results.ConstrainedStrValue</span> <span class="pre">=</span> <span class="pre">'qcschema_output',</span> <span class="pre">schema_version:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1,</span> <span class="pre">molecule:</span> <span class="pre">qcelemental.models.molecule.Molecule,</span> <span class="pre">driver:</span> <span class="pre">qcelemental.models.common_models.DriverEnum,</span> <span class="pre">model:</span> <span class="pre">qcelemental.models.common_models.Model,</span> <span class="pre">keywords:</span> <span class="pre">Dict[str,</span> <span class="pre">Any]</span> <span class="pre">=</span> <span class="pre">{},</span> <span class="pre">protocols:</span> <span class="pre">qcelemental.models.results.AtomicResultProtocols</span> <span class="pre">=</span> <span class="pre">AtomicResultProtocols(wavefunction=&lt;WavefunctionProtocolEnum.none:</span> <span class="pre">'none'&gt;,</span> <span class="pre">stdout=True,</span> <span class="pre">error_correction=ErrorCorrectionProtocol(default_policy=True,</span> <span class="pre">policies=None)),</span> <span class="pre">extras:</span> <span class="pre">Dict[str,</span> <span class="pre">Any]</span> <span class="pre">=</span> <span class="pre">{},</span> <span class="pre">provenance:</span> <span class="pre">qcelemental.models.common_models.Provenance,</span> <span class="pre">properties:</span> <span class="pre">qcelemental.models.results.AtomicResultProperties,</span> <span class="pre">wavefunction:</span> <span class="pre">qcelemental.models.results.WavefunctionProperties</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">return_result:</span> <span class="pre">Union[float,</span> <span class="pre">qcelemental.models.types.Array,</span> <span class="pre">Dict[str,</span> <span class="pre">Any]],</span> <span class="pre">stdout:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">stderr:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">success:</span> <span class="pre">bool,</span> <span class="pre">error:</span> <span class="pre">qcelemental.models.common_models.ComputeError</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qcelemental/models/results.html#AtomicResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcelemental.models.AtomicResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Results from a CMS program execution.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul>
+<li><p><strong>id</strong> (<em>str, Optional</em>) – The optional ID for the computation.</p></li>
+<li><p><strong>schema_name</strong> (<em>ConstrainedStrValue, Default: qcschema_output</em>) – The QCSchema specification this model conforms to. Explicitly fixed as qcschema_output.</p></li>
+<li><p><strong>schema_version</strong> (<em>int, Default: 1</em>) – The version number of <code class="docutils literal notranslate"><span class="pre">schema_name</span></code> to which this model conforms.</p></li>
+<li><p><strong>molecule</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Molecule</span></code>) – The molecule to use in the computation.</p></li>
+<li><p><strong>driver</strong> (<em>{energy,gradient,hessian,properties}</em>) – Allowed computation driver values.</p></li>
+<li><p><strong>model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code>) – The computational molecular sciences model to run.</p></li>
+<li><p><strong>keywords</strong> (<em>Dict[Any], Default: {}</em>) – The program-specific keywords to be used.</p></li>
+<li><p><strong>protocols</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResultProtocols</span></code>, Optional) – Protocols regarding the manipulation of computational result data.</p></li>
+<li><p><strong>extras</strong> (<em>Dict[Any], Default: {}</em>) – Additional information to bundle with the computation. Use for schema development and scratch space.</p></li>
+<li><p><strong>provenance</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Provenance</span></code>) – Provenance information.</p></li>
+<li><p><strong>properties</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResultProperties</span></code>) –</p>
+<p>Named properties of quantum chemistry computations following the MolSSI QCSchema.</p>
+<blockquote>
+<div><p>All arrays are stored flat but must be reshapable into the dimensions in attribute <code class="docutils literal notranslate"><span class="pre">shape</span></code>, with abbreviations as follows:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>nao: number of atomic orbitals = calcinfo_nbasis</p></li>
+<li><p>nmo: number of molecular orbitals</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p><strong>wavefunction</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">WavefunctionProperties</span></code>, Optional) – Wavefunction properties resulting from a computation. Matrix quantities are stored in column-major order. Presence and contents configurable by protocol.</p></li>
+<li><p><strong>return_result</strong> (<em>Union[float, Array, Dict[Any]]</em>) – The primary return specified by the <code class="docutils literal notranslate"><span class="pre">driver</span></code> field. Scalar if energy; array if gradient or hessian; dictionary with property keys if properties.</p></li>
+<li><p><strong>stdout</strong> (<em>str, Optional</em>) – The primary logging output of the program, whether natively standard output or a file. Presence vs. absence (or null-ness?) configurable by protocol.</p></li>
+<li><p><strong>stderr</strong> (<em>str, Optional</em>) – The standard error of the program execution.</p></li>
+<li><p><strong>success</strong> (<em>bool</em>) – The success of program execution. If False, other fields may be blank.</p></li>
+<li><p><strong>error</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputeError</span></code>, Optional) – Complete description of the error from an unsuccessful program execution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="environment.html" class="btn btn-neutral float-right" title="Environment Detection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="install.html" class="btn btn-neutral float-left" title="Install QCEngine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2018-2021, The Molecular Sciences Software Institute.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
