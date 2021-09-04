@@ -10,8 +10,7 @@ dependencies:
   - pint
 
     # qc
-  # - qcengine
-  # - qcelemental
+  - qcelemental
 
     # docs
   - python-graphviz
