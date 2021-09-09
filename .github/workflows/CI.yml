@@ -17,55 +17,55 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          #- conda-env: psi
-          #  python-version: 3.6
-          #  label: Psi4-release
-          #  runs-on: ubuntu-latest
+          - conda-env: psi
+            python-version: 3.6
+            label: Psi4-release
+            runs-on: ubuntu-latest
 
-          #- conda-env: psi-nightly
-          #  python-version: 3.9
-          #  label: Psi4-nightly
-          #  runs-on: ubuntu-latest
+          - conda-env: psi-nightly
+            python-version: 3.9
+            label: Psi4-nightly
+            runs-on: ubuntu-latest
 
-          #- conda-env: torchani
-          #  python-version: 3.6
-          #  label: ANI
-          #  runs-on: ubuntu-latest
+          - conda-env: torchani
+            python-version: 3.6
+            label: ANI
+            runs-on: ubuntu-latest
 
-          #- conda-env: openmm
-          #  python-version: 3.6
-          #  label: OpenMM
-          #  runs-on: ubuntu-latest
+          - conda-env: openmm
+            python-version: 3.6
+            label: OpenMM
+            runs-on: ubuntu-latest
 
           - conda-env: xtb
             python-version: 3.6
             label: xTB
             runs-on: ubuntu-latest
 
-          #- conda-env: qcore
-          #  python-version: 3.7
-          #  label: QCore
-          #  runs-on: ubuntu-latest
+          - conda-env: qcore
+            python-version: 3.7
+            label: QCore
+            runs-on: ubuntu-latest
 
-          #- conda-env: nwchem
-          #  python-version: 3.6
-          #  label: NWChem
-          #  runs-on: ubuntu-16.04
+          - conda-env: nwchem
+            python-version: 3.6
+            label: NWChem
+            runs-on: ubuntu-16.04
 
-          #- conda-env: mrchem
-          #  python-version: 3.6
-          #  label: MRChem
-          #  runs-on: ubuntu-latest
+          - conda-env: mrchem
+            python-version: 3.6
+            label: MRChem
+            runs-on: ubuntu-latest
 
-          #- conda-env: adcc
-          #  python-version: 3.8
-          #  label: ADCC
-          #  runs-on: ubuntu-latest
+          - conda-env: adcc
+            python-version: 3.8
+            label: ADCC
+            runs-on: ubuntu-latest
 
-          #- conda-env: opt-disp
-          #  python-version: 3.8
-          #  label: optimization-dispersion
-          #  runs-on: ubuntu-latest
+          - conda-env: opt-disp
+            python-version: 3.8
+            label: optimization-dispersion
+            runs-on: ubuntu-latest
 
           # - conda-env:
           #   python-version:
