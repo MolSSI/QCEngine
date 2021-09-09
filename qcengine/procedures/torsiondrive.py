@@ -112,20 +112,19 @@ class TorsionDriveProcedure(ProcedureHarness):
         }
         output_data["success"] = error is None
 
-        if error is None:
+        # even if we hit an error during the torsiondrive, we output what we can
+        output_data["final_energies"], output_data["final_molecules"] = {}, {}
 
-            output_data["final_energies"], output_data["final_molecules"] = {}, {}
+        for grid_point, results in optimization_results.items():
 
-            for grid_point, results in optimization_results.items():
+            final_energy, final_molecule = self._find_final_results(results)
 
-                final_energy, final_molecule = self._find_final_results(results)
+            output_data["final_energies"][grid_point] = final_energy
+            output_data["final_molecules"][grid_point] = final_molecule
 
-                output_data["final_energies"][grid_point] = final_energy
-                output_data["final_molecules"][grid_point] = final_molecule
+        output_data["optimization_history"] = optimization_results
 
-            output_data["optimization_history"] = optimization_results
-
-        else:
+        if error is not None:
             output_data["error"] = error
 
         return output_data
@@ -144,12 +143,11 @@ class TorsionDriveProcedure(ProcedureHarness):
                 output_data["stdout"] = str(stdout.getvalue())
                 output_data["stderr"] = str(stderr.getvalue())
 
-        if "error" not in output_data:
+        # these will get populated by the model below
+        output_data.pop("schema_name", None)
+        output_data.pop("schema_version", None)
 
-            output_data.pop("schema_name", None)
-            output_data.pop("schema_version", None)
-
-            output_data = TorsionDriveResult(**output_data)
+        output_data = TorsionDriveResult(**output_data)
 
         return output_data
 
