@@ -33,7 +33,7 @@ def harvest_output(outtext: str) -> Tuple[List[PreservingDict], List[Molecule], 
     pass_grad = []
     version = error = None
     for outpass in re.split(r"Step +\d", outtext, re.MULTILINE)[1:]:
-        psivar, nwcoord, nwgrad, version, error = harvest_outfile_pass(outpass)
+        psivar, nwcoord, nwgrad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
         pass_grad.append(nwgrad)
@@ -44,7 +44,7 @@ def harvest_output(outtext: str) -> Tuple[List[PreservingDict], List[Molecule], 
         pass_coord.pop()
         pass_grad.pop()
 
-    return pass_psivar, pass_coord, pass_grad, version, error
+    return pass_psivar, pass_coord, pass_grad, version, module, error
 
 
 def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List[AtomicResult]:
@@ -57,7 +57,7 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
         A list of the results at each step
     """
     # Parse the files
-    out_psivars, out_mols, out_grads, version, error = harvest_output(nwout)
+    out_psivars, out_mols, out_grads, version, module, error = harvest_output(nwout)
 
     # Make atomic results
     results = []
@@ -70,6 +70,10 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
+        provenance = Provenance(creator="NWChem", version=version, routine="nwchem_opt").dict()
+        if module is not None:
+            provenance["module"] = module
+
         # Format them inout an output
         output_data = {
             "schema_version": 1,
@@ -79,7 +83,7 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
             "model": input_model.input_specification.model,
             "keywords": input_model.input_specification.keywords,
             "properties": atprop,
-            "provenance": Provenance(creator="NWChem", version=version, routine="nwchem_opt"),
+            "provenance": provenance,
             "return_result": nwgrad,
             "success": True,
         }

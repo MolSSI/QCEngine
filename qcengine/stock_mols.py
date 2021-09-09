@@ -13,7 +13,7 @@ _test_mols = {
         "molecular_multiplicity": 1,
         "connectivity": [[0, 1, 1]],
     },
-    "lithium": {"symbols": ["Li"], "geometry": [0, 0, 0], "molecular_multiplicity": 2, "connectivity": []},
+    "lithium": {"symbols": ["Li"], "geometry": [0, 0, 0], "molecular_multiplicity": 2, "connectivity": None},
     "water": {
         "geometry": [
             0.0,

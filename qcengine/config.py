@@ -247,9 +247,7 @@ def get_node_descriptor(hostname: Optional[str] = None) -> NodeDescriptor:
 
 
 def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Parses a dictionary looking for environmental variables
-    """
+    """Collects local environment variable values into ``data`` for any keys with RHS starting with ``$``."""
     ret = {}
     for k, var in data.items():
         if isinstance(var, str) and var.startswith("$"):

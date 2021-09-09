@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal as Dm
 from typing import Any, Dict, List
 
@@ -5,6 +6,8 @@ import numpy as np
 from qcelemental.models import AtomicResultProperties
 
 from .util import PreservingDict
+
+logger = logging.getLogger(__name__)
 
 
 def _difference(args):
@@ -357,7 +360,7 @@ def build_out(rawvars: Dict[str, Any], verbose: int = 1) -> None:
                     data_rich_args.append(rawvars[pv])
                 else:
                     if verbose >= 2:
-                        print("""{}EMPTY, missing {}""".format(buildline, pv))
+                        logger.debug("""{}EMPTY, missing {}""".format(buildline, pv))
                     break
             else:
                 data_rich_args.append(pv)
@@ -367,7 +370,7 @@ def build_out(rawvars: Dict[str, Any], verbose: int = 1) -> None:
             # with data coming from file --> variable, looks more precise than it is. hack
             rawvars.__setitem__(pvar, result, 6)
             if verbose >= 1:
-                print("""{}SUCCESS""".format(buildline))
+                logger.debug("""{}SUCCESS""".format(buildline))
 
             if pvar == "CURRENT CORRELATION ENERGY" and abs(float(rawvars[pvar])) < 1.0e-16:
                 rawvars.pop(pvar)
