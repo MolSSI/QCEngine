@@ -200,7 +200,7 @@ def test_geometric_retries(failure_engine, input_data):
         pytest.param(
             "openmm",
             {"method": "openff-1.0.0", "basis": "smirnoff"},
-            [1.889726881670907, 3.10070288709234, 110.25177977849998],
+            [1.8344994291796748, 3.010099477501204, 110.25177977849998],
             marks=using("openmm"),
         ),
         pytest.param(
@@ -212,7 +212,7 @@ def test_geometric_retries(failure_engine, input_data):
         pytest.param(
             "openmm",
             {"method": "smirnoff99Frosst-1.1.0", "basis": "smirnoff"},
-            [1.8897269787924604, 3.1516330703676063, 112.9999999990053],
+            [1.814137087600702, 3.025566213038376, 112.9999999990053],
             marks=using("openmm"),
         ),
         pytest.param(
