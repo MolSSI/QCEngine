@@ -178,6 +178,7 @@ _programs = {
     "terachem": which("terachem", return_bool=True),
     "terachem_pbs": is_program_new_enough("terachem_pbs", "0.7.2"),
     "torchani": is_program_new_enough("torchani", "0.9"),
+    "torsiondrive": which_import("torsiondrive", return_bool=True),
     "turbomole": which("define", return_bool=True),
     "xtb": which_import("xtb", return_bool=True),
     "mrchem": is_program_new_enough("mrchem", "1.0.0"),

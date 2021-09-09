@@ -3,7 +3,9 @@ Tests the DQM compute dispatch module
 """
 
 import pytest
-from qcelemental.models import OptimizationInput
+from qcelemental.models import DriverEnum, OptimizationInput
+from qcelemental.models.common_models import Model
+from qcelemental.models.procedures import OptimizationSpecification, QCInputSpecification, TDKeywords, TorsionDriveInput
 
 import qcengine as qcng
 from qcengine.testing import failure_engine, using
@@ -198,7 +200,7 @@ def test_geometric_retries(failure_engine, input_data):
         pytest.param(
             "openmm",
             {"method": "openff-1.0.0", "basis": "smirnoff"},
-            [1.889726881670907, 3.10070288709234, 110.25177977849998],
+            [1.8344994291796748, 3.010099477501204, 110.25177977849998],
             marks=using("openmm"),
         ),
         pytest.param(
@@ -210,7 +212,7 @@ def test_geometric_retries(failure_engine, input_data):
         pytest.param(
             "openmm",
             {"method": "smirnoff99Frosst-1.1.0", "basis": "smirnoff"},
-            [1.8897269787924604, 3.1516330703676063, 112.9999999990053],
+            [1.814137087600702, 3.025566213038376, 112.9999999990053],
             marks=using("openmm"),
         ),
         pytest.param(
@@ -261,3 +263,46 @@ def test_nwchem_relax(linopt):
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
+
+
+@using("rdkit")
+@using("torsiondrive")
+def test_torsiondrive_generic():
+
+    input_data = TorsionDriveInput(
+        keywords=TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
+        input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="UFF", basis=None)),
+        initial_molecule=qcng.get_molecule("ethane"),
+        optimization_spec=OptimizationSpecification(
+            procedure="geomeTRIC",
+            keywords={
+                "coordsys": "dlc",
+                "maxiter": 300,
+                "program": "rdkit",
+            },
+        ),
+    )
+
+    ret = qcng.compute_procedure(input_data, "torsiondrive", raise_error=True)
+
+    assert ret.error is None
+    assert ret.success
+
+    expected_grid_ids = {"180", "0"}
+
+    assert {*ret.optimization_history} == expected_grid_ids
+
+    assert {*ret.final_energies} == expected_grid_ids
+    assert {*ret.final_molecules} == expected_grid_ids
+
+    assert (
+        pytest.approx(ret.final_molecules["180"].measure([2, 0, 1, 5]), abs=1.0e-2) == 180.0
+        or pytest.approx(ret.final_molecules["180"].measure([2, 0, 1, 5]), abs=1.0e-2) == -180.0
+    )
+    assert pytest.approx(ret.final_molecules["0"].measure([2, 0, 1, 5]), abs=1.0e-2) == 0.0
+
+    assert ret.provenance.creator.lower() == "torsiondrive"
+    assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
+    assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
+
+    assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
