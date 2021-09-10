@@ -151,6 +151,7 @@ class OpenMMHarness(ProgramHarness):
         Generate an OpenMM System object from the input molecule method and basis.
         """
         from openmmforcefields.generators import SystemGenerator
+
         try:
             from openmm import app, unit
         except ImportError:
