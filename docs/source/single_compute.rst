@@ -81,3 +81,13 @@ Returned Fields
 
 .. autoclass:: qcelemental.models.AtomicResult
 
+FAQ
+---
+
+#. Where is scratch so I can access the CMS code's files?
+
+   The QCArchive philosophy is that you shouldn't go looking in scratch for CMS-code-written files since the scratch directory is deleted automatically by QCEngine and even if preserved may be subject to autodeletion if run from a cluster. Instead, QCEngine brings back the primary input and output and any ancillary files from which it can harvest results. Whether these are returned to the user in ``AtomicResult`` can be controlled through protocols in the input like ``atomicinput.protocols.stdout = True`` and eventually (https://github.com/MolSSI/QCElemental/pull/275) ``atomicinput.protocols.native_files = "all"``.
+   
+   Nevertheless, you can, of course, access the scratch directory and CMS-code-written files. Pass an existing directory to the compute command (this directory will be parent) and tell it to not delete after the run: ``qcng.compute(..., local_options={"scratch_directory": "/existing/parent/dir", "scratch_messy": True})``.
+   
+#. sdfs
