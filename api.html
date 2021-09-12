@@ -17,9 +17,6 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/style.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
@@ -139,7 +136,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             
             
               <div class="version">
-                0+untagged.1.ga45d093
+                0+untagged.1.g17b5a7e
               </div>
             
           
@@ -258,6 +255,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_program_harness.html">Adding a New Program Harness</a></li>
 </ul>
 
             
@@ -338,10 +336,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.compute.html#qcengine.compute" title="qcengine.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(input_data, program[, raise_error, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.compute.html#qcengine.compute" title="qcengine.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(input_data, program[, raise_error, ...])</p></td>
 <td><p>Executes a single CMS program given a QCSchema input.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.compute_procedure.html#qcengine.compute_procedure" title="qcengine.compute_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_procedure</span></code></a>(input_data, procedure[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.compute_procedure.html#qcengine.compute_procedure" title="qcengine.compute_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_procedure</span></code></a>(input_data, procedure[, ...])</p></td>
 <td><p>Runs a procedure (a collection of the quantum chemistry executions)</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.get_config.html#qcengine.get_config" title="qcengine.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config</span></code></a>(*[, hostname, local_options])</p></td>
@@ -354,7 +352,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <td><p>Returns a procedures executor class</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.get_program.html#qcengine.get_program" title="qcengine.get_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_program</span></code></a>(name[, check])</p></td>
-<td><p>Returns a program’s executor class</p></td>
+<td><p>Returns a program's executor class</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.list_all_procedures.html#qcengine.list_all_procedures" title="qcengine.list_all_procedures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_procedures</span></code></a>()</p></td>
 <td><p>List all procedures registered by QCEngine.</p></td>
@@ -385,7 +383,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.MDIServer.html#qcengine.MDIServer" title="qcengine.MDIServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MDIServer</span></code></a>(mdi_options, program, molecule, …)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.MDIServer.html#qcengine.MDIServer" title="qcengine.MDIServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MDIServer</span></code></a>(mdi_options, program, molecule, ...)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -409,10 +407,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.compute.compute.html#qcengine.compute.compute" title="qcengine.compute.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(input_data, program[, raise_error, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.compute.compute.html#qcengine.compute.compute" title="qcengine.compute.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(input_data, program[, raise_error, ...])</p></td>
 <td><p>Executes a single CMS program given a QCSchema input.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.compute.compute_procedure.html#qcengine.compute.compute_procedure" title="qcengine.compute.compute_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_procedure</span></code></a>(input_data, procedure[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.compute.compute_procedure.html#qcengine.compute.compute_procedure" title="qcengine.compute.compute_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_procedure</span></code></a>(input_data, procedure[, ...])</p></td>
 <td><p>Runs a procedure (a collection of the quantum chemistry executions)</p></td>
 </tr>
 </tbody>
@@ -450,7 +448,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="environment.html#qcengine.config.NodeDescriptor" title="qcengine.config.NodeDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeDescriptor</span></code></a>(*, hostname_pattern, name, …)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="environment.html#qcengine.config.NodeDescriptor" title="qcengine.config.NodeDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeDescriptor</span></code></a>(*, hostname_pattern, name[, ...])</p></td>
 <td><p>Description of an individual node</p></td>
 </tr>
 </tbody>
@@ -486,7 +484,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.util.create_mpi_invocation.html#qcengine.util.create_mpi_invocation" title="qcengine.util.create_mpi_invocation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_mpi_invocation</span></code></a>(executable, task_config)</p></td>
 <td><p>Create the launch command for an MPI-parallel task</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.util.execute.html#qcengine.util.execute" title="qcengine.util.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command[, infiles, outfiles, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.util.execute.html#qcengine.util.execute" title="qcengine.util.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command[, infiles, outfiles, ...])</p></td>
 <td><p>Runs a process in the background until complete.</p></td>
 </tr>
 </tbody>
@@ -504,7 +502,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.get_program.html#qcengine.programs.get_program" title="qcengine.programs.get_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_program</span></code></a>(name[, check])</p></td>
-<td><p>Returns a program’s executor class</p></td>
+<td><p>Returns a program's executor class</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.programs.list_all_programs.html#qcengine.programs.list_all_programs" title="qcengine.programs.list_all_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_programs</span></code></a>()</p></td>
 <td><p>List all programs registered by QCEngine.</p></td>
@@ -529,7 +527,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" title="qcengine.programs.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProgramHarness</span></code></a>(*, name, scratch, …)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" title="qcengine.programs.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProgramHarness</span></code></a>(*, name, scratch, ...[, extras])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>

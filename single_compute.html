@@ -17,9 +17,6 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/style.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
@@ -139,7 +136,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             
             
               <div class="version">
-                0+untagged.1.ga45d093
+                0+untagged.1.g17b5a7e
               </div>
             
           
@@ -176,6 +173,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li class="toctree-l2"><a class="reference internal" href="#results">Results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#input-fields">Input Fields</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#returned-fields">Returned Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#faq">FAQ</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="environment.html">Environment Detection</a></li>
@@ -191,6 +189,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">QCEngine API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_program_harness.html">Adding a New Program Harness</a></li>
 </ul>
 
             
@@ -384,6 +383,16 @@ non-quantum chemistry models are often a simple <code class="docutils literal no
 </dl>
 </dd></dl>
 
+</div>
+<div class="section" id="faq">
+<h2>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p>Where is scratch so I can access the CMS code’s files?</p>
+<p>The QCArchive philosophy is that you shouldn’t go looking in scratch for CMS-code-written files since the scratch directory is deleted automatically by QCEngine and even if preserved may be subject to autodeletion if run from a cluster. Instead, QCEngine brings back the primary input and output and any ancillary files from which it can harvest results. Whether these are returned to the user in <code class="docutils literal notranslate"><span class="pre">AtomicResult</span></code> can be controlled through protocols in the input like <code class="docutils literal notranslate"><span class="pre">atomicinput.protocols.stdout</span> <span class="pre">=</span> <span class="pre">True</span></code> and eventually (<a class="reference external" href="https://github.com/MolSSI/QCElemental/pull/275">https://github.com/MolSSI/QCElemental/pull/275</a>) <code class="docutils literal notranslate"><span class="pre">atomicinput.protocols.native_files</span> <span class="pre">=</span> <span class="pre">&quot;all&quot;</span></code>.</p>
+<p>Nevertheless, you can, of course, access the scratch directory and CMS-code-written files. Pass an existing directory to the compute command (this directory will be parent) and tell it to not delete after the run: <code class="docutils literal notranslate"><span class="pre">qcng.compute(...,</span> <span class="pre">local_options={&quot;scratch_directory&quot;:</span> <span class="pre">&quot;/existing/parent/dir&quot;,</span> <span class="pre">&quot;scratch_messy&quot;:</span> <span class="pre">True})</span></code>.</p>
+</li>
+<li><p>sdfs</p></li>
+</ol>
 </div>
 </div>
 
