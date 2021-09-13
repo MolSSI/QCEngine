@@ -218,10 +218,13 @@ class GAMESSHarness(ProgramHarness):
             qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
+            # TODO:  "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
 
         except Exception as e:
             raise UnknownError(
-                "STDOUT:\n"
+                "INPUT:\n"
+                + outfiles["dsl_input"]
+                + "STDOUT:\n"
                 + stdout
                 + "\nSTDERR:\n"
                 + stderr

@@ -491,6 +491,31 @@ def contractual_qcisd_prt_pr(
         yield (pv, pv, expected)
 
 
+def contractual_fci(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal FCI should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "FCI CORRELATION ENERGY",
+        "FCI TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "fci":
+        contractual_qcvars.append("FCI TOTAL GRADIENT")
+    elif driver == "hessian" and method == "fci":
+        # contractual_qcvars.append("FCI TOTAL GRADIENT")
+        contractual_qcvars.append("FCI TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+
+        yield (pv, pv, expected)
+
+
 def contractual_lccd(
     qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
 ) -> Tuple[str, str, bool]:

@@ -21,6 +21,7 @@ from ...exceptions import InputError
 from ...util import create_mpi_invocation, execute
 from ..model import ErrorCorrectionProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ..util import error_stamp
 from .errors import all_errors
 from .germinate import muster_modelchem
 from .harvester import harvest
@@ -250,11 +251,12 @@ task python
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
         # July 2021: nwmol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always atin orientation
-        # LW 7Jul21: I allow exceptions to be raised so that we can detect errors
-        #   in the parsing of output files
-        qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
-            input_model.molecule, method, stdout, **outfiles
-        )
+        try:
+            qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
+                input_model.molecule, method, stdout, **outfiles
+            )
+        except Exception as e:
+            raise UnknownError(error_stamp(stdout=stdout, stderr=stderr))
 
         try:
             if nwgrad is not None:
@@ -271,14 +273,7 @@ task python
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         except KeyError as e:
-            raise UnknownError(
-                "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+            raise UnknownError(error_stamp(stdout=stdout, stderr=stderr))
 
         if isinstance(retres, Decimal):
             retres = float(retres)

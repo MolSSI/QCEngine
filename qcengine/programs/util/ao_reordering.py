@@ -1,3 +1,5 @@
+import sys
+import traceback
 from typing import Any, Dict, List
 
 import numpy as np
@@ -80,3 +82,11 @@ def mill_qcvars(mill: "AlignmentMill", qcvars: Dict[str, Any]) -> Dict[str, Any]
             milled[k] = v
 
     return milled
+
+
+def error_stamp(stdout: str = "", stderr: str = "", tb: str = None) -> str:
+    """Return all useful information in error string."""
+
+    if not tb:
+        tb = traceback.format_exception(*sys.exc_info())
+    return "STDOUT:\n" + stdout + "\nSTDERR:\n" + stderr + "\nTRACEBACK:\n" + "".join(tb)

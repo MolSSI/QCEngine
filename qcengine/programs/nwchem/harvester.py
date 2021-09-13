@@ -826,7 +826,7 @@ def harvest_outfile_pass(outtext):
             r'^\s' + r'Output coordinates in ' + r'(.*?)' + r'\s' + r'\(scale by' + r'.*' + r'\s' + r'to convert to a\.u\.\)' + r'\s+' + r'\n' +
             r'^\s+' + r'No\.\       Tag          Charge          X              Y              Z' + r'\s*' +
             r'^\s+' + r'---- ---------------- ---------- -------------- -------------- --------------' + r'\s*' +
-            r'((?:\s+([1-9][0-9]*)+\s+([A-Z][a-z]*)+\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' + r'\s*$',
+            r'((?:\s+([1-9][0-9]*)+\s+((bq)?[A-Z][a-z]*)(\d+)?\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' + r'\s*$',
             # fmt: on
             outtext,
             re.MULTILINE | re.IGNORECASE,
@@ -855,7 +855,15 @@ def harvest_outfile_pass(outtext):
                 molxyz = "%d au\n%d %d tag\n" % (len(mobj.group(2).splitlines()), out_charge, out_mult)
                 for line in mobj.group(2).splitlines():
                     lline = line.split()
-                    molxyz += "%s %16s %16s %16s\n" % (int(float(lline[-4])), lline[-3], lline[-2], lline[-1])
+                    chg_on_center = int(float(lline[-4]))
+                    if chg_on_center > 0:
+                        tag = f"{lline[-5]}"
+                    else:
+                        tag = lline[-5].strip()
+                        if tag.startswith("bq"):
+                            tag = tag[2:]
+                        tag = f"@{tag}"
+                    molxyz += "%s %16s %16s %16s\n" % (tag, lline[-3], lline[-2], lline[-1])
                     # Tag    ,    X,        Y,        Z
                 psivar_coord = Molecule(
                     validate=False,
@@ -871,7 +879,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'.*' + r'ENERGY GRADIENTS' + r'\s*' + r'\s+' + r'\n' +
             r'^\s+' + r'atom               coordinates                        gradient' + r'\s*' +
             r'^\s+' + r'x          y          z           x          y          z' + r'\s*' +
-            r'((?:\s+([1-9][0-9]*)+\s+([A-Z][a-x]*)+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' + r'\s*$',
+            r'((?:\s+([1-9][0-9]*)+\s+([A-Z][a-x]*)(\d+)?\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' + r'\s*$',
             # fmt: on
             outtext,
             re.MULTILINE,

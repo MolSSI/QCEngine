@@ -162,8 +162,8 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
         }
     )
 
-    # local_options = {}  # debug with default (parallel)
-    local_options = {"nnodes": 1, "ncores": 1}  # run serial by default
+    local_options = {}
+    local_options = {"nnodes": 1, "ncores": 2}  # debug. temp fix low for testing to avoid too many files open w/gamess
 
     if "error" in inp:
         errtype, errmatch, reason = inp["error"]
