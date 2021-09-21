@@ -155,7 +155,8 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         # Handle memory
         # * [GiB] --> [B]
         # * int() rounds down
-        memory_size = int(config.memory * (1024 ** 3))
+        # memory_size = int(config.memory * (1024 ** 3))  # [GiB] --> [B] works for v6.6 but not v7.0
+        memory_size = int(config.memory * (1024 ** 3) / 8)
         if config.use_mpiexec:  # It is the memory per MPI rank
             memory_size //= config.nnodes * config.ncores // config.cores_per_rank
         opts["memory"] = memory_size
