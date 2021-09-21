@@ -2,7 +2,7 @@ name: test
 channels:
   - conda-forge
 dependencies:
-  - nwchem
+  # - nwchem
 
     # Core
   - python
