@@ -48,9 +48,10 @@ jobs:
             runs-on: ubuntu-latest
 
           - conda-env: nwchem
-            python-version: 3.6
+            python-version: 3.9
             label: NWChem
-            runs-on: ubuntu-16.04
+            runs-on: ubuntu-latest
+            # runs-on: ubuntu-16.04  # compatible with docker nwc, but ubuntu env retired by GH Sept. 2021
 
           - conda-env: mrchem
             python-version: 3.6
@@ -88,10 +89,10 @@ jobs:
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
 
-    - name: Special Config - NWChem
-      if: "(matrix.cfg.label == 'NWChem')"
-      run: |
-        sudo apt-get -y install nwchem
+    # - name: Special Config - NWChem
+    #   if: "(matrix.cfg.label == 'NWChem')"
+    #   run: |
+    #     sudo apt-get -y install nwchem
 
     - name: Special Config - QCore
       if: "(matrix.cfg.label == 'QCore')"
