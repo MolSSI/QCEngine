@@ -826,7 +826,7 @@ def harvest_outfile_pass(outtext):
             r'^\s' + r'Output coordinates in ' + r'(.*?)' + r'\s' + r'\(scale by' + r'.*' + r'\s' + r'to convert to a\.u\.\)' + r'\s+' + r'\n' +
             r'^\s+' + r'No\.\       Tag          Charge          X              Y              Z' + r'\s*' +
             r'^\s+' + r'---- ---------------- ---------- -------------- -------------- --------------' + r'\s*' +
-            r'((?:\s+([1-9][0-9]*)+\s+((bq)?[A-Z][a-z]*)(\d+)?\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' + r'\s*$',
+            r'((?:\s+([1-9][0-9]*)+\s+(bq)?([A-Z]{1,3})((_\w+)|(\d+))?\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' + r'\s*$',
             # fmt: on
             outtext,
             re.MULTILINE | re.IGNORECASE,

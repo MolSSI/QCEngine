@@ -181,6 +181,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
             opts[f"basis__{el}"] = f"library {input_model.model.basis}"
+            opts[f"basis__bq{el}"] = f"library {el} {input_model.model.basis}"
 
         # Log the job settings
         logger.debug("JOB_OPTS")

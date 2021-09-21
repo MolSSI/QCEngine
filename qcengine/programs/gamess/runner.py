@@ -97,6 +97,9 @@ class GAMESSHarness(ProgramHarness):
         opts = copy.deepcopy(input_model.keywords)
 
         # Handle molecule
+        if not all(input_model.molecule.real):
+            raise InputError("GAMESS+QCEngine can't handle ghost atoms yet.")
+
         molcmd, moldata = input_model.molecule.to_string(dtype="gamess", units="Bohr", return_data=True)
         opts.update(moldata["keywords"])
 
