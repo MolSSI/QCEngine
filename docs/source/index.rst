@@ -198,3 +198,4 @@ Index
 
     api
     changelog
+    dev_program_harness
