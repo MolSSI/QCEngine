@@ -153,9 +153,10 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         opts = {k.lower(): v for k, v in opts.items()}
 
         # Handle memory
-        # * [GiB] --> [B]
+        # * [GiB] --> [QW]
         # * int() rounds down
-        # memory_size = int(config.memory * (1024 ** 3))  # [GiB] --> [B] works for v6.6 but not v7.0
+        # * was [GiB] --> [B] c. v6.6 but fails in v7.0 probably b/c https://github.com/nwchemgit/nwchem/commit/fca382eab477c3e85548457bfceb1fc9be31b47c#diff-7baaf4807cc9b853af14d9127f63db47d706e12f697a98560bc98bb647ef8326
+        #   * memory_size = int(config.memory * (1024 ** 3))
         memory_size = int(config.memory * (1024 ** 3) / 8)
         if config.use_mpiexec:  # It is the memory per MPI rank
             memory_size //= config.nnodes * config.ncores // config.cores_per_rank
