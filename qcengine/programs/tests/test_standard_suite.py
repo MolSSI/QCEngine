@@ -206,7 +206,7 @@ def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reques
         pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_conv": 12},                                                }, id="hf rohf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "rohf", "fcae": "ae", "keywords": {"contrl__scftyp": "rohf"},                                                           }, id="hf rohf ae: gamess",     marks=using("gamess")),
         pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"scf__rohf": True, "scf__thresh": 1.e-6},                                            }, id="hf rohf ae: nwchem",     marks=using("nwchem")),
-        pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_type": "pk"},                                              }, id="hf rohf ae: psi4",       marks=using("psi4_mp2qcsk")),
+        pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_type": "pk"},                                              }, id="hf rohf ae: psi4",       marks=using("psi4_derqcsk")),
         # yapf: enable
     ],
 )
