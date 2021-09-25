@@ -11,7 +11,7 @@ import qcelemental as qcel
 from qcelemental.models import Molecule
 from qcelemental.molparse import regex
 
-from ..util import PreservingDict
+from ..util import PreservingDict, load_hessian
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
@@ -24,6 +24,16 @@ def harvest(
     *gamessout* Scratch files are not yet considered at this moment.
     """
     qcvars, calc_mol, calc_grad, module = harvest_output(gamessout)
+
+    datasections = {}
+    if outfiles.get("gamess.dat"):
+        datasections = harvest_datfile(outfiles["gamess.dat"])
+
+    calc_hess = None
+    if "$HESS" in datasections:
+        calc_hess = load_hessian(datasections["$HESS"], dtype="gamess")
+        if np.count_nonzero(calc_hess) == 0:
+            calc_hess = None
 
     # Sometimes the hierarchical setting of CURRENT breaks down
     if method == "ccsd+t(ccsd)":
@@ -38,19 +48,48 @@ def harvest(
                     f"""GAMESS outfile (NRE: {calc_mol.nuclear_repulsion_energy()}) inconsistent with AtomicInput.molecule (NRE: {in_mol.nuclear_repulsion_energy()})."""
                 )
 
-        return_mol = calc_mol
-        amol, data = calc_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
-        mill = data["mill"]
+        # Frame considerations
+        # * `in_mol` built with deliberation and with all fields accessible.
+        # * `calc_mol` has the internally consistent geometry frame but otherwise dinky (geom & symbols & maybe chgmult).
+        if in_mol.fix_com and in_mol.fix_orientation:
+            # Impose input frame if important as signalled by fix_*=T
+            return_mol = in_mol
+            _, data = calc_mol.align(in_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+            mill = data["mill"]
+
+        else:
+            return_mol, _ = in_mol.align(calc_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+            mill = qcel.molutil.compute_scramble(
+                len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
+            )  # identity AlignmentMill
 
         return_grad = None
         if calc_grad is not None:
             return_grad = mill.align_gradient(calc_grad)
 
         return_hess = None
+        if calc_hess is not None:
+            return_hess = mill.align_hessian(np.array(calc_hess))
+
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
     return qcvars, return_hess, return_grad, return_mol, module
+
+
+def harvest_datfile(datfile: str) -> Dict[str, str]:
+    sections = datfile.split(r"$END")
+    goodies = {}
+
+    for i, sec in enumerate(sections):
+        lsec = sec.split("\n")
+        for iln, ln in enumerate(lsec):
+            if ln.strip():
+                key = ln.strip()
+                break
+        goodies[key] = "\n".join(lsec[iln + 1 :])
+
+    return goodies
 
 
 def harvest_output(outtext):
@@ -157,6 +196,7 @@ def harvest_outfile_pass(outtext):
             re.MULTILINE,
         )
         if mobj:
+            logger.debug("matched mp2 module")
             module = mobj.group("code").lower()
 
         mobj = re.search(

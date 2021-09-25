@@ -214,6 +214,7 @@ class GAMESSHarness(ProgramHarness):
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
         try:
+            # July 2021: gamessmol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always outfile orientation
             qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
@@ -266,7 +267,7 @@ class GAMESSHarness(ProgramHarness):
 
         output_data = {
             "schema_version": 1,
-            "molecule": gamessmol,
+            "molecule": gamessmol,  # overwrites with outfile Cartesians in case fix_*=F
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
             "provenance": provenance,

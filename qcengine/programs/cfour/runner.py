@@ -150,6 +150,7 @@ class CFOURHarness(ProgramHarness):
 
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         try:
+            # July 2021: c4mol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always atin orientation
             qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
@@ -162,6 +163,9 @@ class CFOURHarness(ProgramHarness):
                 + "\nTRACEBACK:\n"
                 + "".join(traceback.format_exception(*sys.exc_info()))
             )
+
+        if errorTMP != "":
+            raise UnknownError("STDOUT:\n" + stdout + "\nSTDERR:\n" + stderr)
 
         try:
             if c4grad is not None:
@@ -202,6 +206,7 @@ class CFOURHarness(ProgramHarness):
 
         output_data = {
             "schema_version": 1,
+            "molecule": c4mol,  # overwrites with outfile Cartesians in case fix_*=F
             "extras": {"outfiles": outfiles, **input_model.extras},
             "properties": atprop,
             "provenance": provenance,
