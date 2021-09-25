@@ -101,7 +101,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gb211867
+                0+untagged.1.g0c52306
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -301,16 +301,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h2>v0.20.0 / 2021-MM-DD<a class="headerlink" href="#v0-20-0-2021-mm-dd" title="Permalink to this headline"></a></h2>
 <section id="new-features">
 <h3>New Features<a class="headerlink" href="#new-features" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/305">GH#305</a>) TorsionDrive - new procedure to automate constrained optimizations along a geometry
+grid. Akin to the longstanding QCFractal TorsionDrive service. &#64;SimonBoothroyd</p></li>
+</ul>
 </section>
 <section id="enhancements">
 <h3>Enhancements<a class="headerlink" href="#enhancements" title="Permalink to this headline"></a></h3>
 <ul class="simple">
-<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/307">GH#307</a>) NWChem - learns to automatically increase the number of iterations when SCF, CC, etc. fails to converge.</p></li>
-<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/309">GH#309</a>) <code class="docutils literal notranslate"><span class="pre">qcengine</span> <span class="pre">info</span></code> learned to print the location of found CMS programs, and geometric, OpenMM, and RDKit learned to return their versions.</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/307">GH#307</a>) NWChem - learns to automatically increase the number of iterations when SCF, CC, etc.
+fails to converge. &#64;WardLT</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/309">GH#309</a>) <code class="docutils literal notranslate"><span class="pre">qcengine</span> <span class="pre">info</span></code> learned to print the location of found CMS programs, and geometric,
+OpenMM, and RDKit learned to return their versions. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/311">GH#311</a>) CFOUR, GAMESS, NWChem harnesses learned to notice which internal module performs a calc
+(e.g., tce/cc for NWChem) and to store it in <code class="docutils literal notranslate"><span class="pre">AtomicResult.provenance.module</span></code>. Psi4 already does
+this. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/312">GH#312</a>) CFOUR, GAMESS, NWChem harnesses learned to run and harvest several new methods in the
+MP, CC, CI, DFT families. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/316">GH#316</a>) Config - <code class="docutils literal notranslate"><span class="pre">TaskConfig</span></code> learned a new field <code class="docutils literal notranslate"><span class="pre">scratch_messy</span></code> to instruct a
+<code class="docutils literal notranslate"><span class="pre">qcng.compute()</span></code> run to not clean up the scratch directory at the end. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/316">GH#316</a>) GAMESS - harness learned to obey ncores and scratch_messy local_config options. When
+<code class="docutils literal notranslate"><span class="pre">ncores</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, the memory option is partitioned into replicated and non after exetyp=check trials. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/316">GH#316</a>) Psi4 - harness learned to obey scratch_messy and memory local_config options. Memory
+was previously off by a little (GB vs GiB). &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/316">GH#316</a>) CFOUR - harness learned to obey scratch_messy and memory local_config options. Memory
+was previously off by a little. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/316">GH#316</a>) NWChem - harness learned to obey scratch_messy and memory local_config options. Memory
+was previously very off for v7. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/317">GH#317</a>) CFOUR, GAMESS, NWChem – learned to return in AtomicInput or program native orientation
+depending on fix_com &amp; fix_orientation= T or F. Psi4 already did this. Previously these three
+always returned AtomicInput orientation. Note that when returning program native orientation, the
+molecule is overwritten, so AtomicResult is not a superset of AtomicInput. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/317">GH#317</a>) CFOUR, GAMESS, NWChem – learned to harvest gradients and Hessians. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/317">GH#317</a>) Docs - start “new harness” docs, so contributors have a coarse roadmap. &#64;loriab</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/318">GH#318</a>) Docs - documentation is now served from <a class="reference external" href="https://molssi.github.io/QCEngine/">https://molssi.github.io/QCEngine/</a> and built
+by <a class="reference external" href="https://github.com/MolSSI/QCEngine/blob/master/.github/workflows/CI.yml">https://github.com/MolSSI/QCEngine/blob/master/.github/workflows/CI.yml</a> .
+<a class="reference external" href="https://qcengine.readthedocs.io/en/latest/">https://qcengine.readthedocs.io/en/latest/</a> will soon be retired. &#64;loriab</p></li>
 </ul>
 </section>
 <section id="bug-fixes">
 <h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/313">GH#313</a>, <a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/319">GH#319</a>) OpenMM - accommocate both old and new simtk/openmm import patterns. &#64;dotsdl</p></li>
+</ul>
 </section>
 </section>
 <section id="v0-19-0-2021-05-16">
