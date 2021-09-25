@@ -48,9 +48,10 @@ jobs:
             runs-on: ubuntu-latest
 
           - conda-env: nwchem
-            python-version: 3.6
+            python-version: 3.8
             label: NWChem
-            runs-on: ubuntu-16.04
+            runs-on: ubuntu-20.04
+            # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
 
           - conda-env: mrchem
             python-version: 3.6
@@ -66,11 +67,6 @@ jobs:
             python-version: 3.8
             label: optimization-dispersion
             runs-on: ubuntu-latest
-
-          # - conda-env:
-          #   python-version:
-          #   label:
-          #   runs-on: ubuntu-latest
 
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }}" # • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
@@ -167,6 +163,7 @@ jobs:
 
     - name: GitHub Pages Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.1
+      if: github.event_name == 'push' && github.repository == 'MolSSI/QCEngine' && ( startsWith( github.ref, 'refs/tags/' ) || github.ref == 'refs/heads/master' )
       with:
         branch: gh-pages
         folder: docs/build/html

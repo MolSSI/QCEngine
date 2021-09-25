@@ -82,18 +82,19 @@ class GAMESSHarness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["dsl_input"] = job_inputs["infiles"]["gamess.inp"]
             return self.parse_output(dexe["outfiles"], input_model)
 
     def build_input(
         self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
-        gamessrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
+        gamessrec = {
+            "infiles": {},
+            "scratch_directory": config.scratch_directory,
+            "scratch_messy": config.scratch_messy,
+        }
 
         opts = copy.deepcopy(input_model.keywords)
-
-        # Handle memory
-        # for gamess, [GiB] --> [MW]
-        opts["system__mwords"] = int(config.memory * (1024 ** 3) / 8e6)
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="gamess", units="Bohr", return_data=True)
@@ -111,11 +112,65 @@ class GAMESSHarness(ProgramHarness):
         # * for gamess, usually insufficient b/c either ngauss or ispher needed
         opts["basis__gbasis"] = input_model.model.basis
 
+        # Handle memory
+        # * [GiB] --> [M QW]
+        # * docs on mwords: "This is given in units of 1,000,000 words (as opposed to 1024*1024 words)"
+        # * docs: "the memory required on each processor core for a run using p cores is therefore MEMDDI/p + MWORDS."
+        # * int() rounds down
+        mwords_total = int(config.memory * (1024 ** 3) / 8e6)
+
+        for mem_frac_replicated in (1, 0.5, 0.1, 0.75):
+            mwords, memddi = self._partition(mwords_total, mem_frac_replicated, config.ncores)
+            # DEBUG print(f"loop {mwords_total=} {mem_frac_replicated=} {config.ncores=} -> repl: {mwords=} dist: {memddi=} -> percore={memddi/config.ncores + mwords} tot={memddi + config.ncores * mwords}\n")
+            trial_opts = copy.deepcopy(opts)
+            trial_opts["contrl__exetyp"] = "check"
+            trial_opts["system__parall"] = not (config.ncores == 1)
+            trial_opts["system__mwords"] = mwords
+            trial_opts["system__memddi"] = memddi
+            trial_gamessrec = {
+                "infiles": {"trial_gamess.inp": format_keywords(trial_opts) + molcmd},
+                "command": [which("rungms"), "trial_gamess"],
+                "scratch_messy": False,
+                "scratch_directory": config.scratch_directory,
+            }
+            success, dexe = self.execute(trial_gamessrec)
+
+            # TODO: switch to KnownError and better handle clobbering of user ncores
+            # when the "need serial exe" messages show up compared to mem messages isn't clear
+            # this would be a lot cleaner if there was a unique or list of memory error strings
+            # if (
+            #    ("ERROR: ONLY CCTYP=CCSD OR CCTYP=CCSD(T) CAN RUN IN PARALLEL." in dexe["stdout"])
+            #    or ("ERROR: ROHF'S CCTYP MUST BE CCSD OR CR-CCL, WITH SERIAL EXECUTION" in dexe["stdout"])
+            #    or ("CI PROGRAM CITYP=FSOCI    DOES NOT RUN IN PARALLEL." in dexe["stdout"])
+            # ):
+            #    print("RESTETTITNG TO 1")
+            #    config.ncores = 1
+            #    break
+            if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
+                raise InputError(dexe["stdout"])
+            elif "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
+                pass
+            else:
+                opts["system__mwords"] = mwords
+                opts["system__memddi"] = memddi
+                break
+
+        # TODO: "semget errno=ENOSPC -- check system limit for sysv semaphores." `ipcs -l`, can fix if too many gamess tests run at once by config.ncores = 4
+
+        # ERROR: ROHF'S CCTYP MUST BE CCSD OR CR-CCL, WITH SERIAL EXECUTION
+        if opts.get("contrl__cctyp", "").lower() == "ccsd" and opts.get("contrl__scftyp", "").lower() == "rohf":
+            config.ncores = 1
+
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 
         gamessrec["infiles"]["gamess.inp"] = optcmd + molcmd
-        gamessrec["command"] = [which("rungms"), "gamess"]  # rungms JOB VERNO NCPUS >& JOB.log &
+        gamessrec["command"] = [
+            which("rungms"),
+            "gamess",
+            "00",
+            str(config.ncores),
+        ]  # rungms JOB VERNO NCPUS >& JOB.log &
 
         return gamessrec
 
@@ -140,7 +195,11 @@ class GAMESSHarness(ProgramHarness):
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
 
         success, dexe = execute(
-            inputs["command"], inputs["infiles"], [], scratch_messy=False, scratch_directory=inputs["scratch_directory"]
+            inputs["command"],
+            inputs["infiles"],
+            ["gamess.dat"],
+            scratch_messy=inputs["scratch_messy"],
+            scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
 
@@ -183,14 +242,20 @@ class GAMESSHarness(ProgramHarness):
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         except KeyError as e:
-            raise UnknownError(
-                "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+            if "EXETYP=CHECK" in stdout and "EXECUTION OF GAMESS TERMINATED NORMALLY" in stdout:
+                # check run that completed normally
+                # * on one hand, it's still an error return_result-wise
+                # * but on the other hand, often the reason for the job is to get gamessmol, so let it return success=T below
+                retres = 0.0
+            else:
+                raise UnknownError(
+                    "STDOUT:\n"
+                    + stdout
+                    + "\nSTDERR:\n"
+                    + stderr
+                    + "\nTRACEBACK:\n"
+                    + "".join(traceback.format_exception(*sys.exc_info()))
+                )
 
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
@@ -218,3 +283,29 @@ class GAMESSHarness(ProgramHarness):
         }
 
         return AtomicResult(**{**input_model.dict(), **output_data})
+
+    @staticmethod
+    def _partition(total: float, fraction_replicated: float, ncores: int) -> Tuple[int, int]:
+        """Compute memory keyword values from memory and core parameters.
+
+        Parameters
+        ----------
+        total
+            Total memory per node in mwords.
+        fraction_replicated
+            Portion on interval (0, 1] to be replicated memory, as opposed to distributed memory.
+        ncores
+            Number of cores needing replicated memory.
+
+        Returns
+        -------
+        mwords, memddi
+            Return mwords and memddi values for ``total`` memory (already in mwords) partitioned so (0, 1]
+        ``fraction_replicated`` is replicated over ``ncores`` and remainder distributed.
+
+        """
+        replicated_summed = total * fraction_replicated
+        replicated_each = int(max(1, replicated_summed / ncores))
+        distributed = int(total - replicated_summed)
+
+        return replicated_each, distributed

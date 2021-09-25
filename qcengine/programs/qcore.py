@@ -33,11 +33,11 @@ def qcore_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
 class QcoreHarness(ProgramHarness):
     _defaults: Dict[str, Any] = {
         "name": "Qcore",
-        "scratch": True,
+        "scratch": False,
         "thread_safe": False,
         "thread_parallel": True,
         "node_parallel": False,
-        "managed_memory": True,
+        "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
 
