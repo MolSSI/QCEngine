@@ -350,7 +350,6 @@ def harvest_outfile_pass(outtext):
             if mobj:
                 cc_plain = cc_name.replace("\\", "")
                 cc_corr = cc_plain.replace("CCSD", "")
-                print(f"matched tce cc {cc_plain}", mobj.groups())
                 logger.debug(f"matched tce cc {cc_plain}")
 
                 if cc_plain == "CCSD[T]":
@@ -492,7 +491,6 @@ def harvest_outfile_pass(outtext):
         )
 
         if mobj:
-            print("matched ccsd(t)")
             logger.debug("matched ccsd(t)")
             psivar["(T) CORRECTION ENERGY"] = mobj.group(1)
             psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(2)) - psivar["HF TOTAL ENERGY"]

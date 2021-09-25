@@ -1260,9 +1260,7 @@ def harvest(in_mol: Molecule, method: str, c4out, **largs):
             mill = data["mill"]
 
         else:
-            return_mol, _ = in_mol.align(
-                out_mol, atoms_map=False, mols_align=True, generic_ghosts=True, verbose=0
-            )
+            return_mol, _ = in_mol.align(out_mol, atoms_map=False, mols_align=True, generic_ghosts=True, verbose=0)
             mill = qcel.molutil.compute_scramble(
                 len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
             )  # identity AlignmentMill

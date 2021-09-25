@@ -241,8 +241,6 @@ class Psi4Harness(ProgramHarness):
 
                 if success:
                     if output_data.get("success", False) is False:
-                        # import pprint
-                        # pprint.pprint(output_data, width=200)
                         error_message, error_type = self._handle_errors(output_data)
                     else:
                         compute_success = True
