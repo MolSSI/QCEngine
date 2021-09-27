@@ -76,6 +76,8 @@ class DFTD3Harness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["input"] = job_inputs["infiles"][".dftd3par.local"]
+            dexe["outfiles"]["dftd3_geometry.xyz"] = job_inputs["infiles"]["dftd3_geometry.xyz"]
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
@@ -169,6 +171,7 @@ class DFTD3Harness(ProgramHarness):
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
         Grimme_h2kcal = 627.509541
         stdout = outfiles.pop("stdout")
+        stderr = outfiles.pop("stderr")
 
         for fl, contents in outfiles.items():
             if contents is not None:
@@ -280,6 +283,7 @@ class DFTD3Harness(ProgramHarness):
 
         output_data = {
             "extras": input_model.extras,
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": {
                 "return_energy": calcinfo[f"CURRENT ENERGY"],
             },
@@ -287,6 +291,7 @@ class DFTD3Harness(ProgramHarness):
                 creator="DFTD3", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
             "return_result": retres,
+            "stderr": stderr,
             "stdout": stdout,
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]

@@ -75,6 +75,7 @@ class CFOURHarness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["input"] = job_inputs["infiles"]["ZMAT"]
             return self.parse_output(dexe["outfiles"], input_model)
 
     def build_input(
@@ -224,7 +225,8 @@ class CFOURHarness(ProgramHarness):
         output_data = {
             "schema_version": 1,
             "molecule": c4mol,  # overwrites with outfile Cartesians in case fix_*=F
-            "extras": {"outfiles": outfiles, **input_model.extras},
+            "extras": {**input_model.extras},
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
             "provenance": provenance,
             "return_result": retres,
