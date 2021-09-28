@@ -104,7 +104,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched occ", mobj.groups())
+        print("matched occupied", mobj.groups())
         psivar["N ALPHA ELECTRONS"] = sum([int(d) for d in mobj.group("aocc").split()])
         psivar["N BETA ELECTRONS"] = sum([int(d) for d in mobj.group("bocc").split()])
 
@@ -954,7 +954,7 @@ def harvest_outfile_pass(outtext):
         # r'^\s+' + r'Z-matrix   Atomic            Coordinates (in bohr)' + r'\s*' +
         r'^\s+' + r'Symbol    Number           X              Y              Z' + r'\s*' +
         r'^\s+(?:-+)\s*' +
-        r'((?:\s+[A-Z]+\s+[0-9]+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
+        r'((?:\s+[A-Z]+\s+([0-9]+|\*\*\*)\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +  # allows ghosts
         r'^\s+(?:-+)\s*',
         # fmt: on
         outtext,
@@ -965,7 +965,11 @@ def harvest_outfile_pass(outtext):
         molxyz = "%d bohr\n\n" % len(mobj.group(1).splitlines())
         for line in mobj.group(1).splitlines():
             lline = line.split()
-            molxyz += "%s %16s %16s %16s\n" % (lline[0], lline[-3], lline[-2], lline[-1])
+            if lline[1] == "***":
+                tag = "@Xe"  # potentially dangerous bypass
+            else:
+                tag = lline[0]
+            molxyz += "%s %16s %16s %16s\n" % (tag, lline[-3], lline[-2], lline[-1])
         # Rather a dinky Molecule as no ghost, charge, or multiplicity
         psivar_coord = Molecule(
             validate=False,
@@ -1169,7 +1173,7 @@ def harvest(in_mol: Molecule, method: str, c4out, **largs):
         qcvars["CURRENT CORRELATION ENERGY"] = qcvars["CCSD+T(CCSD) CORRELATION ENERGY"]
         qcvars["CURRENT ENERGY"] = qcvars["CCSD+T(CCSD) TOTAL ENERGY"]
 
-    if fcmHess is not None and method == "hf":
+    if fcmHess is not None and method in ["hf", "scf"]:
         # MP2 available in HF Hessian so need to counteract
         qcvars.pop("CURRENT CORRELATION ENERGY")
         qcvars["CURRENT ENERGY"] = qcvars["HF TOTAL ENERGY"]
@@ -1252,11 +1256,11 @@ def harvest(in_mol: Molecule, method: str, c4out, **largs):
         if in_mol.fix_com and in_mol.fix_orientation:
             # Impose input frame if important as signalled by fix_*=T
             return_mol = in_mol
-            _, data = out_mol.align(in_mol, atoms_map=True, mols_align=True, verbose=0)
+            _, data = out_mol.align(in_mol, atoms_map=True, mols_align=True, generic_ghosts=True, verbose=0)
             mill = data["mill"]
 
         else:
-            return_mol, _ = in_mol.align(out_mol, atoms_map=False, mols_align=True, verbose=0)
+            return_mol, _ = in_mol.align(out_mol, atoms_map=False, mols_align=True, generic_ghosts=True, verbose=0)
             mill = qcel.molutil.compute_scramble(
                 len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
             )  # identity AlignmentMill

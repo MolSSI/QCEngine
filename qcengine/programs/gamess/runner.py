@@ -97,6 +97,9 @@ class GAMESSHarness(ProgramHarness):
         opts = copy.deepcopy(input_model.keywords)
 
         # Handle molecule
+        if not all(input_model.molecule.real):
+            raise InputError("GAMESS+QCEngine can't handle ghost atoms yet.")
+
         molcmd, moldata = input_model.molecule.to_string(dtype="gamess", units="Bohr", return_data=True)
         opts.update(moldata["keywords"])
 
@@ -218,10 +221,13 @@ class GAMESSHarness(ProgramHarness):
             qcvars, gamesshess, gamessgrad, gamessmol, module = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
+            # TODO:  "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
 
         except Exception as e:
             raise UnknownError(
-                "STDOUT:\n"
+                "INPUT:\n"
+                + outfiles["dsl_input"]
+                + "STDOUT:\n"
                 + stdout
                 + "\nSTDERR:\n"
                 + stderr

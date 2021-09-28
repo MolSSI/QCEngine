@@ -179,6 +179,26 @@ def harvest_outfile_pass(outtext):
             print("matched calcinfo 2", mobj.groups())
             qcvar["N MOLECULAR ORBITALS"] = mobj.group("nmo")
             qcvar["N BASIS FUNCTIONS"] = mobj.group("nmo")  # TODO BAD
+        else:
+            mobj2 = re.search(
+                # fmt: off
+                r"^\s+" + r"NUMBER OF CORE -A-  ORBITALS" + r"\s+=\s+" + r"(?P<core_nao>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF CORE -B-  ORBITALS" + r"\s+=\s+" + r"(?P<core_nbo>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF OCC. -A-  ORBITALS" + r"\s+=\s+" + r"(?P<occ_nao>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF OCC. -B-  ORBITALS" + r"\s+=\s+" + r"(?P<occ_nbo>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF MOLECULAR ORBITALS" + r"\s+=\s+" + r"(?P<nmo>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF   BASIS  FUNCTIONS" + r"\s+=\s+" + r"(?P<nbf>\d+)" + r"\s*",
+                # fmt: on
+                outtext,
+                re.MULTILINE,
+            )
+            if mobj2:
+                logger.debug("matched calcinfo 3")
+                print("matched calcinfo 3", mobj2.groups())
+                qcvar["N ALPHA ELECTRONS"] = mobj2.group("occ_nao")
+                qcvar["N BETA ELECTRONS"] = mobj2.group("occ_nbo")
+                qcvar["N MOLECULAR ORBITALS"] = mobj2.group("nmo")
+                qcvar["N BASIS FUNCTIONS"] = mobj2.group("nbf")
 
         # Process MP2
         mobj = re.search(
@@ -523,7 +543,12 @@ def harvest_outfile_pass(outtext):
             molxyz = "%d bohr\n\n" % len(mobj.group(1).splitlines())
             for line in mobj.group(1).splitlines():
                 lline = line.split()
-                molxyz += "%s %16s %16s %16s\n" % (int(float(lline[-4])), lline[-3], lline[-2], lline[-1])
+                chg_on_center = int(float(lline[-4]))
+                if chg_on_center > 0:
+                    tag = f"{lline[-5]}"
+                else:
+                    tag = f"@{lline[-5].strip()}"
+                molxyz += "%s %16s %16s %16s\n" % (tag, lline[-3], lline[-2], lline[-1])
             qcvar_coord = Molecule(
                 validate=False,
                 **qcel.molparse.to_schema(

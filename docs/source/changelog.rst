@@ -4,6 +4,9 @@ Changelog
 .. vX.Y.0 / 2021-MM-DD
 .. --------------------
 ..
+.. Breaking Changes
+.. ++++++++++++++++
+..
 .. New Features
 .. ++++++++++++
 ..

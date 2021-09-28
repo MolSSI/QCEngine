@@ -110,14 +110,30 @@ class CFOURHarness(ProgramHarness):
         # * why, yes, this is highly questionable
         #   * assuming relative file location between xcfour exe and GENBAS file
         #   * reading a multi MB file into the inputs dict
-        opts["basis"] = input_model.model.basis
+        if all(input_model.molecule.real):
+            opts["basis"] = input_model.model.basis
+            bascmd = ""
+        else:
+            # * note not getting per-basis casing like if it passed through format_keywords
+            opts["basis"] = "SPECIAL"
+            text = [
+                (
+                    f"""H:6-31G"""
+                    if (elem == "H" and input_model.model.basis.upper() == "6-31G*")
+                    else f"""{elem.upper()}:{input_model.model.basis.upper()}"""
+                )
+                for iat, elem in enumerate(input_model.molecule.symbols)
+            ]
+            text.append("")
+            text.append("")
+            bascmd = "\n".join(text)
 
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 
         xcfour = which("xcfour")
         genbas = Path(xcfour).parent.parent / "basis" / "GENBAS"
-        cfourrec["infiles"]["ZMAT"] = molcmd + optcmd
+        cfourrec["infiles"]["ZMAT"] = molcmd + optcmd + bascmd
         cfourrec["infiles"]["GENBAS"] = genbas.read_text()
         cfourrec["command"] = [xcfour]
 
@@ -132,7 +148,8 @@ class CFOURHarness(ProgramHarness):
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
-            ["GRD", "FCMFINAL", "DIPOL"],  # "DIPDER", "POLAR", "POLDER"],
+            ["GRD", "FCMFINAL", "DIPOL"],
+            # "DIPDER", "POLAR", "POLDER"],
             scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
         )

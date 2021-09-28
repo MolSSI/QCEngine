@@ -2,12 +2,17 @@ import collections
 from typing import Any, Dict, Tuple
 
 
-def format_keyword(keyword: str, val: Any, lop_off: bool = True) -> Tuple[str, str]:
+def format_keyword(keyword: str, val: Any, lop_off: bool = True, preserve_case: bool = False) -> Tuple[str, str]:
     """Function to reformat value `val` for `keyword` from python into nwchem-speak."""
+
+    if preserve_case:
+        key = keyword
+    else:
+        key = keyword.lower()
 
     # Transform string booleans into " "
     if val is True:
-        return keyword.lower(), ""
+        return key, ""
     elif val is False:
         return "", ""
 
@@ -28,9 +33,9 @@ def format_keyword(keyword: str, val: Any, lop_off: bool = True) -> Tuple[str, s
         text = str(val)
 
     if lop_off:
-        return keyword[7:].lower(), text
+        return key[7:], text
     else:
-        return keyword.lower(), text
+        return key, text
 
 
 def format_keywords(keywords: Dict[str, Any]) -> str:
@@ -53,7 +58,6 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
             g1, g2, key = nesting
             grouped_options[g1][g2][key] = val
         else:
-            print(nesting)
             raise ValueError("Nesting N!")
 
     grouped_lines = {}
@@ -70,7 +74,12 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
                 g2_level_lines = " ".join(g2_level_lines)
                 lines.append(g2_level_lines)
             else:
-                line = " ".join(format_keyword(key, val, lop_off=False))
+                preserve_case = False
+                try:
+                    preserve_case = val.startswith("library ")
+                except AttributeError:
+                    pass
+                line = " ".join(format_keyword(key, val, lop_off=False, preserve_case=preserve_case))
                 if group.lower() == "basis" and any(
                     [word in line for word in ["spherical", "cartesian", "print", "noprint", "rel"]]
                 ):
