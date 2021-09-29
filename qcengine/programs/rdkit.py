@@ -2,18 +2,19 @@
 Calls the RDKit package.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from qcelemental.models import AtomicResult, Provenance
-from qcelemental.util import which_import
+from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError
 from ..units import ureg
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from ..config import TaskConfig
     from qcelemental.models import AtomicInput
+
+    from ..config import TaskConfig
 
 
 class RDKitHarness(ProgramHarness):
@@ -26,6 +27,8 @@ class RDKitHarness(ProgramHarness):
         "node_parallel": False,
         "managed_memory": False,
     }
+
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramHarness.Config):
         pass
@@ -82,6 +85,18 @@ class RDKitHarness(ProgramHarness):
             raise_msg="Please install via `conda install rdkit -c conda-forge`.",
         )
 
+    def get_version(self) -> str:
+        """Return the currently used version of RDKit."""
+        self.found(raise_error=True)
+
+        which_prog = which_import("rdkit")
+        if which_prog not in self.version_cache:
+            import rdkit
+
+            self.version_cache[which_prog] = safe_version(rdkit.__version__)
+
+        return self.version_cache[which_prog]
+
     def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
         Runs RDKit in FF typing
@@ -121,7 +136,7 @@ class RDKitHarness(ProgramHarness):
             coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
             ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
         else:
-            raise InputError(f"RDKit can only compute energy and gradient driver methods. Found {input_data.driver}.")
+            raise InputError(f"Driver {input_model.driver} not implemented for RDKit.")
 
         ret_data["provenance"] = Provenance(
             creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField"

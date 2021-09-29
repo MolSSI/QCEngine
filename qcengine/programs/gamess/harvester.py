@@ -4,48 +4,98 @@ import logging
 import pprint
 import re
 from decimal import Decimal
-from typing import Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models import Molecule
 from qcelemental.molparse import regex
 
-from ..util import PreservingDict
+from ..util import PreservingDict, load_hessian
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
 
 
-def harvest(p4Mol, gamessout: str, **largs) -> Tuple[PreservingDict, Molecule, list]:
+def harvest(
+    in_mol: Molecule, method: str, gamessout: str, **outfiles
+) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]:
     """Parses all the pieces of output from gamess: the stdout in
     *gamessout* Scratch files are not yet considered at this moment.
     """
-    outqcvar, outMol, outGrad = harvest_output(gamessout)
+    qcvars, calc_mol, calc_grad, module = harvest_output(gamessout)
 
-    if outMol:
-        outqcvar["NUCLEAR REPULSION ENERGY"] = outMol.nuclear_repulsion_energy()
-        if p4Mol:
-            if abs(outMol.nuclear_repulsion_energy() - p4Mol.nuclear_repulsion_energy()) > 1.0e-3:
+    datasections = {}
+    if outfiles.get("gamess.dat"):
+        datasections = harvest_datfile(outfiles["gamess.dat"])
+
+    calc_hess = None
+    if "$HESS" in datasections:
+        calc_hess = load_hessian(datasections["$HESS"], dtype="gamess")
+        if np.count_nonzero(calc_hess) == 0:
+            calc_hess = None
+
+    # Sometimes the hierarchical setting of CURRENT breaks down
+    if method == "ccsd+t(ccsd)":
+        qcvars["CURRENT CORRELATION ENERGY"] = qcvars["CCSD+T(CCSD) CORRELATION ENERGY"]
+        qcvars["CURRENT ENERGY"] = qcvars["CCSD+T(CCSD) TOTAL ENERGY"]
+
+    if calc_mol:
+        qcvars["NUCLEAR REPULSION ENERGY"] = str(round(calc_mol.nuclear_repulsion_energy(), 8))
+        if in_mol:
+            if abs(calc_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
                 raise ValueError(
-                    """gamess outfile (NRE: %f) inconsistent with Psi4 input (NRE: %f)."""
-                    % (outMol.nuclear_repulsion_energy(), p4Mol.nuclear_repulsion_energy())
+                    f"""GAMESS outfile (NRE: {calc_mol.nuclear_repulsion_energy()}) inconsistent with AtomicInput.molecule (NRE: {in_mol.nuclear_repulsion_energy()})."""
                 )
 
-        amol, data = outMol.align(p4Mol, atoms_map=False, mols_align=True, verbose=0)
-        mill = data["mill"]
-        if outGrad is not None:
-            outGrad = mill.align_gradient(np.array(outGrad))
+        # Frame considerations
+        # * `in_mol` built with deliberation and with all fields accessible.
+        # * `calc_mol` has the internally consistent geometry frame but otherwise dinky (geom & symbols & maybe chgmult).
+        if in_mol.fix_com and in_mol.fix_orientation:
+            # Impose input frame if important as signalled by fix_*=T
+            return_mol = in_mol
+            _, data = calc_mol.align(in_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+            mill = data["mill"]
+
+        else:
+            return_mol, _ = in_mol.align(calc_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+            mill = qcel.molutil.compute_scramble(
+                len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
+            )  # identity AlignmentMill
+
+        return_grad = None
+        if calc_grad is not None:
+            return_grad = mill.align_gradient(calc_grad)
+
+        return_hess = None
+        if calc_hess is not None:
+            return_hess = mill.align_hessian(np.array(calc_hess))
+
     else:
         raise ValueError("""No coordinate information extracted from gamess output.""")
 
-    return outqcvar, outGrad, outMol
+    return qcvars, return_hess, return_grad, return_mol, module
+
+
+def harvest_datfile(datfile: str) -> Dict[str, str]:
+    sections = datfile.split(r"$END")
+    goodies = {}
+
+    for i, sec in enumerate(sections):
+        lsec = sec.split("\n")
+        for iln, ln in enumerate(lsec):
+            if ln.strip():
+                key = ln.strip()
+                break
+        goodies[key] = "\n".join(lsec[iln + 1 :])
+
+    return goodies
 
 
 def harvest_output(outtext):
     """Function to separate portions of a gamess output file *outtext*,
-        divided by "Step".
-        """
+    divided by "Step".
+    """
     pass_qcvar = []
     pass_coord = []
     pass_grad = []
@@ -58,14 +108,13 @@ def harvest_output(outtext):
         outtext,
         re.MULTILINE,
     ):
-
-        qcvar, gamesscoord, gamessgrad = harvest_outfile_pass(outpass)
+        qcvar, gamesscoord, gamessgrad, module = harvest_outfile_pass(outpass)
         pass_qcvar.append(qcvar)
         pass_coord.append(gamesscoord)
         pass_grad.append(gamessgrad)
 
     retindx = -1 if pass_coord[-1] else -2
-    return pass_qcvar[retindx], pass_coord[retindx], pass_grad[retindx]
+    return pass_qcvar[retindx], pass_coord[retindx], pass_grad[retindx], module
 
 
 def harvest_outfile_pass(outtext):
@@ -75,6 +124,7 @@ def harvest_outfile_pass(outtext):
     qcvar = PreservingDict()
     qcvar_coord = None
     qcvar_grad = None
+    module = None
 
     NUMBER = r"(?x:" + regex.NUMBER + ")"
 
@@ -101,7 +151,74 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched NRE")
             qcvar["NUCLEAR REPULSION ENERGY"] = mobj.group(1)
 
+        # Process calcinfo
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"NUMBER OF OCCUPIED ORBITALS \(ALPHA\)" + r"\s+=\s+" + r"(?P<nao>\d+)" + r"\s*" +
+            r"^\s+" + r"NUMBER OF OCCUPIED ORBITALS \(BETA \)" + r"\s+=\s+" + r"(?P<nbo>\d+)" + r"\s*" +
+            r"^\s+" + r"TOTAL NUMBER OF ATOMS" + r"\s+=\s+" + r"(?P<nat>\d+)" + r"\s*",
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched calcinfo")
+            print("matched calcinfo", mobj.groups())
+            qcvar["N ALPHA ELECTRONS"] = mobj.group("nao")
+            qcvar["N BETA ELECTRONS"] = mobj.group("nbo")
+
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"TOTAL NUMBER OF MOS IN VARIATION SPACE=" + r"\s+" + r"(?P<nmo>\d+)" + r"\s*$",
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched calcinfo 2")
+            print("matched calcinfo 2", mobj.groups())
+            qcvar["N MOLECULAR ORBITALS"] = mobj.group("nmo")
+            qcvar["N BASIS FUNCTIONS"] = mobj.group("nmo")  # TODO BAD
+        else:
+            mobj2 = re.search(
+                # fmt: off
+                r"^\s+" + r"NUMBER OF CORE -A-  ORBITALS" + r"\s+=\s+" + r"(?P<core_nao>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF CORE -B-  ORBITALS" + r"\s+=\s+" + r"(?P<core_nbo>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF OCC. -A-  ORBITALS" + r"\s+=\s+" + r"(?P<occ_nao>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF OCC. -B-  ORBITALS" + r"\s+=\s+" + r"(?P<occ_nbo>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF MOLECULAR ORBITALS" + r"\s+=\s+" + r"(?P<nmo>\d+)" + r"\s*" +
+                r"^\s+" + r"NUMBER OF   BASIS  FUNCTIONS" + r"\s+=\s+" + r"(?P<nbf>\d+)" + r"\s*",
+                # fmt: on
+                outtext,
+                re.MULTILINE,
+            )
+            if mobj2:
+                logger.debug("matched calcinfo 3")
+                print("matched calcinfo 3", mobj2.groups())
+                qcvar["N ALPHA ELECTRONS"] = mobj2.group("occ_nao")
+                qcvar["N BETA ELECTRONS"] = mobj2.group("occ_nbo")
+                qcvar["N MOLECULAR ORBITALS"] = mobj2.group("nmo")
+                qcvar["N BASIS FUNCTIONS"] = mobj2.group("nbf")
+
         # Process MP2
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"MP2 CONTROL INFORMATION" + r"\s*" +
+            r"^\s+" + r"-+" + r"\s*" +
+            r"^\s+" + r"NACORE" + r"\s+=\s+" + r"\d+" + r"\s+" + r"NBCORE" + r"\s+=\s+" + r"\d+" + r"\s*" +
+            r"^\s+" + r"LMOMP2" + r"\s+=\s+" + r"\w+" + r"\s+" + r"AOINTS" + r"\s+=\s+" + r"\w+" + r"\s*" +
+            r"^\s+" + r"METHOD" + r"\s+=\s+" + r"\d+" + r"\s+" + r"NWORD" + r"\s+=\s+" + r"\d+" + r"\s*" +
+            r"^\s+" + r"MP2PRP" + r"\s+=\s+" + r"\w+" + r"\s+" + r"OSPT" + r"\s+=\s+" + r"\w+"+ r"\s*" +
+            r"^\s+" + r"CUTOFF" + r"\s+=\s+" + NUMBER + r"\s+" + r"CPHFBS" + r"\s+=\s+" + r"\w+"+ r"\s*" +
+            r"^\s+" + r"CODE" + r"\s+=\s+" + r"(?P<code>\w+)"  + r"\s*$",
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched mp2 module")
+            module = mobj.group("code").lower()
+
         mobj = re.search(
             # fmt: off
             r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE\n'
@@ -114,10 +231,13 @@ def harvest_outfile_pass(outtext):
             re.MULTILINE,
         )
         if mobj:
-            logger.debug("matched mp2")
-            print("matched mp2 a")
+            logger.debug("matched mp2 a")
+            print("matched mp2 a", mobj.groups())
             qcvar["MP2 CORRELATION ENERGY"] = mobj.group(3)
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(4)
+            mobj3 = re.search(r"\s+[RU]HF\s*SCF\s*CALCULATION", outtext, re.MULTILINE)
+            if mobj3:
+                qcvar[f"MP2 DOUBLES ENERGY"] = mobj.group(3)
 
         mobj = re.search(
             # fmt: off
@@ -186,27 +306,87 @@ def harvest_outfile_pass(outtext):
             print("matched mp2 uhf e")
             qcvar["MP2 SINGLES ENERGY"] = "0.0"
 
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"E\(SCF\)" + r"\s*=\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"ZAPT E\(2\)" + r"\s*=\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"E\(MP2\)" + r"\s*=\s+" + NUMBER + r"\s*",
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched mp2 rohf f")
+            print("matched mp2 rohf f", mobj.groups())
+            qcvar["HF TOTAL ENERGY"] = mobj.group(1)
+            qcvar["MP2 CORRELATION ENERGY"] = mobj.group(2)
+            qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
+
+        mobj = re.search(
+            # fmt: off
+            r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE\n'
+            r'^\s+' + r'E\(SCF\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(1\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(MP2\)=' + r'\s+' + NUMBER + r'\s*',
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched mp2 g llel")
+            qcvar["HF TOTAL ENERGY"] = mobj.group(1)
+            qcvar["MP2 SINGLES ENERGY"] = mobj.group(2)
+            qcvar["MP2 DOUBLES ENERGY"] = mobj.group(3)
+            qcvar["MP2 CORRELATION ENERGY"] = mobj.group(3)
+            qcvar["MP2 TOTAL ENERGY"] = mobj.group(4)
+
+        mobj = re.search(
+            # fmt: off
+            r'^\s+' + r'RESULTS OF MOLLER-PLESSET 2ND ORDER CORRECTION ARE\n'
+            r'^\s+' + r'E\(SCF\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(MP2\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'SPIN-COMPONENT-SCALED MP2 RESULTS ARE' + r'\s*' +
+            r'^\s+' + r'E\(2S\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2T\)=' + r'\s+' + NUMBER + r'\s*' +
+            r'^\s+' + r'E\(2ST\)=' + r'\s+' + NUMBER + r'\s*',
+            # fmt: on
+            outtext,
+            re.MULTILINE,
+        )
+        if mobj:
+            logger.debug("matched mp2 rhf h llel")
+            qcvar["HF TOTAL ENERGY"] = mobj.group(1)
+            qcvar["MP2 SINGLES ENERGY"] = "0.0"
+            qcvar["MP2 DOUBLES ENERGY"] = mobj.group(2)
+            qcvar["MP2 CORRELATION ENERGY"] = mobj.group(2)
+            qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
+            qcvar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(4)
+            qcvar["MP2 SAME-SPIN CORRELATION ENERGY"] = mobj.group(5)
+
         # Process CCSD
         mobj = re.search(
             # fmt: off
             r'^\s+' + r'SUMMARY OF RESULTS' + r'\s+' + r'\n' +
             r'^\s+' + r'REFERENCE ENERGY:' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'MBPT\(2\) ENERGY:' + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*' +
-            r'^\s+' + r'CCSD    ENERGY:'   + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*$',
+            r'^\s+' + r"(?P<mtd>CCSD|LCCD|CCD)" + r"\s+" r'ENERGY:' + r'\s+' + NUMBER + r'\s*' + r'CORR.E=\s+' + r'\s+' + NUMBER + r'\s*$',
             # fmt: on
             outtext,
             re.MULTILINE,
         )
         if mobj:
-            logger.debug("matched rhf ccsd")
+            logger.debug("matched rhf ccsd/lccd/ccd")
+            mtd = mobj.group("mtd")
             qcvar["HF TOTAL ENERGY"] = mobj.group(1)
             qcvar["SCF TOTAL ENERGY"] = mobj.group(1)
             qcvar["MP2 CORRELATION ENERGY"] = mobj.group(3)
             qcvar["MP2 DOUBLES ENERGY"] = mobj.group(3)
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(2)
-            qcvar["CCSD DOUBLES ENERGY"] = mobj.group(5)
-            qcvar["CCSD CORRELATION ENERGY"] = mobj.group(5)
-            qcvar["CCSD TOTAL ENERGY"] = mobj.group(4)
+            qcvar[f"{mtd} DOUBLES ENERGY"] = mobj.group(6)
+            qcvar[f"{mtd} CORRELATION ENERGY"] = mobj.group(6)
+            qcvar[f"{mtd} TOTAL ENERGY"] = mobj.group(5)
 
         mobj = re.search(
             # fmt: off
@@ -263,8 +443,36 @@ def harvest_outfile_pass(outtext):
             qcvar["CCSD TOTAL ENERGY"] = mobj.group(4)
             qcvar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(8)) - Decimal(mobj.group(4))
             # qcvar['CCSD(T) CORRELATION ENERGY'] = Decimal(mobj.group(5)) - qcvar['SCF TOTAL ENERGY']
+            qcvar["CCSD+T(CCSD) CORRELATION ENERGY"] = mobj.group(7)
+            qcvar["CCSD+T(CCSD) TOTAL ENERGY"] = mobj.group(6)
             qcvar["CCSD(T) CORRELATION ENERGY"] = mobj.group(9)
             qcvar["CCSD(T) TOTAL ENERGY"] = mobj.group(8)
+
+        # Process CISD
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + r"PROPERTY VALUES FOR THE " + r"(RHF|ROHF)" + r"\s+" + r"SELF-CONSISTENT FIELD WAVEFUNCTION" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s*" + r"(TOTAL ENERGY =)\s+" + r"(?P<hf>" + NUMBER + r")" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s+" + r"(?P<module>(FSOCI|GUGA))" + r"\s+" + r"CI PROPERTIES...FOR THE WAVEFUNCTION OF STATE    1" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s+" + r"ENERGY COMPONENTS" + r"\s*" +
+            r"(?:.*?)" +
+            r"^\s*" + r"(TOTAL ENERGY =)\s+" + r"(?P<ci>" + NUMBER + r")" + r"\s*$",
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.DOTALL,
+        )
+        if mobj:
+            logger.debug("matched cisd fsoci/guga", mobj.groupdict())
+            print("matched cisd fsoci/guga", mobj.groupdict())
+            module = mobj.group("module").lower()
+            qcvar["CISD CORRELATION ENERGY"] = Decimal(mobj.group("ci")) - Decimal(mobj.group("hf"))
+            qcvar["CISD TOTAL ENERGY"] = mobj.group("ci")
+            qcvar["CI TOTAL ENERGY"] = mobj.group("ci")
 
         # Process FCI
         mobj = re.search(
@@ -324,7 +532,8 @@ def harvest_outfile_pass(outtext):
             # fmt: off
             r'^\s+' + r'ATOM      ATOMIC                      COORDINATES \(BOHR\)' + r'\s*' +
             r'^\s+' + r'CHARGE         X                   Y                   Z'+ r'\s*' +
-            r'((?:\s+([A-Z][a-z]*)+\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)'+r'\s*$',
+            r'((?:\s+([A-Za-z]\w*)\s+\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
+            r"\s*$",
             # fmt: on
             outtext,
             re.MULTILINE | re.IGNORECASE,
@@ -334,7 +543,12 @@ def harvest_outfile_pass(outtext):
             molxyz = "%d bohr\n\n" % len(mobj.group(1).splitlines())
             for line in mobj.group(1).splitlines():
                 lline = line.split()
-                molxyz += "%s %16s %16s %16s\n" % (int(float(lline[-4])), lline[-3], lline[-2], lline[-1])
+                chg_on_center = int(float(lline[-4]))
+                if chg_on_center > 0:
+                    tag = f"{lline[-5]}"
+                else:
+                    tag = f"@{lline[-5].strip()}"
+                molxyz += "%s %16s %16s %16s\n" % (tag, lline[-3], lline[-2], lline[-1])
             qcvar_coord = Molecule(
                 validate=False,
                 **qcel.molparse.to_schema(
@@ -349,7 +563,7 @@ def harvest_outfile_pass(outtext):
             r'^\s+' + r'----------------------' + r'\s*'+
             r'\s+' + r'\n'+
             r'^\s+' + r'UNITS ARE HARTREE/BOHR    E\'X               E\'Y               E\'Z' + r'\s*' +
-            r'((?:\s+([1-9][0-9]*)+\s+([A-Z][a-x]*)+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
+            r'((?:\s+([1-9][0-9]*)+\s+([A-Za-z]\w*)+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s+[-+]?\d+\.\d+\s*\n)+)' +
             r'\s*$',
             # fmt: off
                 outtext, re.MULTILINE
@@ -366,7 +580,7 @@ def harvest_outfile_pass(outtext):
                     logger.debug("printing gradient")
                     atoms.append(lline[1])
                     qcvar_grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])
-            qcvar_grad = np.array(qcvar_grad)
+            qcvar_grad = np.array(qcvar_grad).reshape((-1, 3))
 
         # Process SCF blocks
         mobj = re.search(
@@ -410,7 +624,7 @@ def harvest_outfile_pass(outtext):
                 r'\s*POINT\s+1\s+X\s+Y\s+Z\s+\(BOHR\)\s+CHARGE\s*\n'
                 r'.*\n'
                 r'\s*DX\s+DY\s+DZ\s+/D/\s+\(DEBYE\)\s*\n'
-                r'\s*' + NUMBER + '\s+' + NUMBER + '\s+' + NUMBER + '\s+' + NUMBER + r'\s*\n',
+                r'\s*' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s+' + NUMBER + r'\s*\n',
                 # fmt: on
                 prop_block
             )
@@ -429,6 +643,18 @@ def harvest_outfile_pass(outtext):
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["MP2 CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["MP2 TOTAL ENERGY"]
 
+    if "CISD TOTAL ENERGY" in qcvar and "CISD CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CISD CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CISD TOTAL ENERGY"]
+
+    if "LCCD TOTAL ENERGY" in qcvar and "LCCD CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["LCCD CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["LCCD TOTAL ENERGY"]
+
+    if "CCD TOTAL ENERGY" in qcvar and "CCD CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCD CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CCD TOTAL ENERGY"]
+
     if "CCSD TOTAL ENERGY" in qcvar and "CCSD CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["CCSD TOTAL ENERGY"]
@@ -436,6 +662,10 @@ def harvest_outfile_pass(outtext):
     if "CR-CC(2,3) TOTAL ENERGY" in qcvar and "CR-CC(2,3) CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CR-CC(2,3) CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["CR-CC(2,3) TOTAL ENERGY"]
+
+    if "CCSD+T(CCSD) TOTAL ENERGY" in qcvar and "CCSD+T(CCSD) CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD+T(CCSD) CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["CCSD+T(CCSD) TOTAL ENERGY"]
 
     if "CCSD(T) TOTAL ENERGY" in qcvar and "CCSD(T) CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CCSD(T) CORRELATION ENERGY"]
@@ -448,4 +678,6 @@ def harvest_outfile_pass(outtext):
     if "FCI TOTAL ENERGY" in qcvar:  # and 'FCI CORRELATION ENERGY' in qcvar:
         qcvar["CURRENT ENERGY"] = qcvar["FCI TOTAL ENERGY"]
 
-    return qcvar, qcvar_coord, qcvar_grad
+    qcvar[f"N ATOMS"] = len(qcvar_coord.symbols)
+
+    return qcvar, qcvar_coord, qcvar_grad, module

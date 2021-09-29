@@ -1,0 +1,19 @@
+name: test
+channels:
+  - conda-forge
+dependencies:
+  - mrchem=1=*openmpi*_1
+
+    # Core
+  - python
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental>=0.23
+  - pydantic 
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov

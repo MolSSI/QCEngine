@@ -1,13 +1,14 @@
 name: test
 channels:
   - conda-forge
-  - omnia
 dependencies:
-  - conda-forge::rdkit
-  - omnia::openmm
-  - omnia::openforcefield
-  - omnia::openforcefields
-  - omnia::openmmforcefields
+  - rdkit
+  - openmm
+  - openff-toolkit
+  - openff-forcefields
+  - openmmforcefields
+  - geometric
+  - torsiondrive
 
     # Core
   - python

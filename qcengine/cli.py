@@ -8,6 +8,7 @@ import os.path
 import sys
 from typing import Any, Dict
 
+from . import get_program  # run and run-procedure; info
 from . import (
     __version__,
     compute,
@@ -19,8 +20,6 @@ from . import (
     list_available_programs,
 )
 from .config import global_repr  # info
-
-from . import get_program  # run and run-procedure; info
 
 __all__ = ["main"]
 
@@ -85,10 +84,17 @@ def info_cli(args):
         avail_progs = list_available_programs()
         print("Available programs:")
         for prog_name in sorted(avail_progs):
-            version = get_program(prog_name).get_version()
+            program = get_program(prog_name)
+            version = program.get_version()
+            for loc, ver in program.version_cache.items():
+                if ver == version:
+                    which = loc
+                    break
+            else:
+                which = "???"
             if version is None:
                 version = "???"
-            print(f"{prog_name + ':':12} v{version}")
+            print(f"{prog_name + ':':12} v{version:20} {which}")
 
         print()
         print("Other supported programs:")

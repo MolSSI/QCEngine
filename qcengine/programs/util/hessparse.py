@@ -1,3 +1,6 @@
+import math
+import re
+
 import numpy as np
 from qcelemental.exceptions import ValidationError
 from qcelemental.util import filter_comments
@@ -10,7 +13,8 @@ def load_hessian(shess: str, dtype: str) -> np.ndarray:
     ----------
     shess
         Multiline string specification of Hessian in a recognized format.
-    dtype : {'fcmfinal', 'cfour'}
+    dtype
+        {"fcmfinal", "cfour", "gamess"}
         Hessian format name.
 
     Returns
@@ -29,6 +33,18 @@ def load_hessian(shess: str, dtype: str) -> np.ndarray:
         datastr = "\n".join(lhess[1:])
         nhess = np.fromstring(datastr, sep=" ")
         nhess = nhess.reshape(ndof, ndof)
+    elif dtype == "gamess":
+        if "ENERGY" in lhess[0]:
+            lhess.pop(0)
+        datastr = []
+        for ln in lhess:
+            numbers = re.findall(r"([-+]?\d+\.\d+[DdEe][-+]\d\d)", ln)
+            if numbers:
+                datastr.extend(numbers)
+
+        nhess = np.fromstring(" ".join(datastr), sep=" ")
+        ndof = int(math.sqrt(len(nhess)))
+        nhess = nhess.reshape((ndof, ndof))
     else:
         raise ValidationError("Unknown dtype: {}".format(dtype))
 

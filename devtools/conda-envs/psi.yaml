@@ -3,7 +3,7 @@ channels:
   - psi4
   - conda-forge
 dependencies:
-  - psi4=1.3
+  - psi4=1.4
   - dftd3
   - geometric
   - intel-openmp!=2019.5
@@ -14,8 +14,8 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.13.0
-  - pydantic>=1.0.0
+  - qcelemental=0.23.0  # test minimum constrained version. min stated version is 0.23.
+  - pydantic=1.8.2  # test minimun stated version.
 
     # Testing
   - pytest

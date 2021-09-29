@@ -1,8 +1,11 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2020-MM-DD
+.. vX.Y.0 / 2021-MM-DD
 .. --------------------
+..
+.. Breaking Changes
+.. ++++++++++++++++
 ..
 .. New Features
 .. ++++++++++++
@@ -14,16 +17,144 @@ Changelog
 .. +++++++++
 
 
+v0.20.0 / 2021-MM-DD
+--------------------
+
+New Features
+++++++++++++
+- (:pr:`305`) TorsionDrive - new procedure to automate constrained optimizations along a geometry
+  grid. Akin to the longstanding QCFractal TorsionDrive service. @SimonBoothroyd
+
+Enhancements
+++++++++++++
+- (:pr:`307`) NWChem - learns to automatically increase the number of iterations when SCF, CC, etc.
+  fails to converge. @WardLT
+- (:pr:`309`) ``qcengine info`` learned to print the location of found CMS programs, and geometric,
+  OpenMM, and RDKit learned to return their versions. @loriab
+- (:pr:`311`) CFOUR, GAMESS, NWChem harnesses learned to notice which internal module performs a calc
+  (e.g., tce/cc for NWChem) and to store it in ``AtomicResult.provenance.module``. Psi4 already does
+  this. @loriab
+- (:pr:`312`) CFOUR, GAMESS, NWChem harnesses learned to run and harvest several new methods in the
+  MP, CC, CI, DFT families. @loriab
+- (:pr:`316`) Config - ``TaskConfig`` learned a new field ``scratch_messy`` to instruct a
+  ``qcng.compute()`` run to not clean up the scratch directory at the end. @loriab
+- (:pr:`316`) GAMESS - harness learned to obey ncores and scratch_messy local_config options. When
+  ``ncores > 1``, the memory option is partitioned into replicated and non after exetyp=check trials. @loriab
+- (:pr:`316`) Psi4 - harness learned to obey scratch_messy and memory local_config options. Memory
+  was previously off by a little (GB vs GiB). @loriab
+- (:pr:`316`) CFOUR - harness learned to obey scratch_messy and memory local_config options. Memory
+  was previously off by a little. @loriab
+- (:pr:`316`) NWChem - harness learned to obey scratch_messy and memory local_config options. Memory
+  was previously very off for v7. @loriab
+- (:pr:`317`) CFOUR, GAMESS, NWChem -- learned to return in AtomicInput or program native orientation
+  depending on fix_com & fix_orientation= T or F. Psi4 already did this. Previously these three
+  always returned AtomicInput orientation. Note that when returning program native orientation, the
+  molecule is overwritten, so AtomicResult is not a superset of AtomicInput. @loriab
+- (:pr:`317`) CFOUR, GAMESS, NWChem -- learned to harvest gradients and Hessians. @loriab
+- (:pr:`317`) Docs - start "new harness" docs, so contributors have a coarse roadmap. @loriab
+- (:pr:`318`) Docs - documentation is now served from https://molssi.github.io/QCEngine/ and built
+  by https://github.com/MolSSI/QCEngine/blob/master/.github/workflows/CI.yml .
+  https://qcengine.readthedocs.io/en/latest/ will soon be retired. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`313`, :pr:`319`) OpenMM - accommocate both old and new simtk/openmm import patterns. @dotsdl
+
+
+v0.19.0 / 2021-05-16
+--------------------
+
+New Features
+++++++++++++
+- (:pr:`290`) MCTC-GCP - harness for new implementation of gCP, `mctc-gcp`, whose cmdline interface is drop-in replacement. @loriab
+- (:pr:`291`) DFTD4 - new harness for standalone DFT-D4 executable. @awvwgk
+- (:pr:`289`) TeraChem - new harness for TeraChem Protocol Buffer Server mode. @coltonbh
+
+Enhancements
+++++++++++++
+- (:pr:`288`) GAMESS, Cfour, NWChem - add calcinfo harvesting, HF and MP2 gradient harvesting. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`288`) Avert running model.basis = BasisSet schema even though they validate. @loriab
+- (:pr:`294`) NWChem - fixed bug where was retrieving only the first step in a geometry relaxation with line-search off. @WardLT
+- (:pr:`297`) MDI - Update interface for v1.2. @loriab
+
+
+v0.18.0 / 2021-02-16
+--------------------
+
+New Features
+++++++++++++
+- (:pr:`206`) OptKing - new procedure harness for OptKing optimizer. @AlexHeide
+- (:pr:`269`) MRChem - new multiresolution chemistry program harness. @robertodr
+- (:pr:`277`) ADCC - new program harness for ADC-connect. (Requires Psi4 for SCF.) @maxscheurer
+- (:pr:`278`) gCP - new program harness for geometric counterpoise. @hokru
+- (:pr:`280`) Add framework to register identifying known outfile errors, modify input schema, and rerun. @WardLT
+- (:pr:`281`) NWChem - new procedure harness to use NWChem's DRIVER geometry optimizer with NWChem's program harness gradients. @WardLT
+- (:pr:`282`) DFTD3 - added D3m and D3m(bj) parameters for SAPT0/HF. Allow pairwise analysis to be returned. @jeffschriber
+
+Enhancements
+++++++++++++
+- (:pr:`274`) Entos/Qcore - renamed harness and updated to new Python bindings. @dgasmith
+- (:pr:`283`) OpenMM - transition harness from `openforcefield` packages on omnia channel to `openff.toolkit` packages on conda-forge channel. @SimonBoothroyd
+- (:pr:`286`, :pr:`287`) CI - moves from Travis-CI to GHA for open-source testing. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`273`) TeraChem - fixed bug of missing method field. @stvogt
+
+
+v0.17.0 / 2020-10-02
+--------------------
+
+New Features
+++++++++++++
+- (:pr:`262`) Add project authors information. @loriab
+
+Enhancements
+++++++++++++
+- (:pr:`264`) Turbomole - add analytic and finite difference Hessians. @eljost
+- (:pr:`266`) Psi4- error messages from Psi4Harness no longer swallowed by `KeyError`. @dotsdl
+
+Bug Fixes
++++++++++
+- (:pr:`264`) Turbomole - fix output properties handling. @eljost
+- (:pr:`265`) xtb - ensure extra tags are preserved in XTB harness. @WardLT
+- (:pr:`270`) TorchANI - now lazily loads models as requested for compute. @dotsdl
+
+
+v0.16.0 / 2020-08-19
+--------------------
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`241`) NWChem - improved performance by turning on ``atoms_map=True``, which does seem to be true. @WardLT
+- (:pr:`257`) TorchANI - learned the ANI2x model and to work with v2. @farhadrgh
+- (:pr:`259`) Added MP2.5 & MP3 energies and HF, MP2.5, MP3, LCCD gradients reference data to stdsuite. @loriab
+- (:pr:`261`) Q-Chem - learned to return more informative Provenance, learned to work with v5.1. @loriab
+- (:pr:`263`) NWChem - learned how to turn off automatic Z-Matrix coordinates with ``geometry__noautoz = True``. @WardLT
+
+Bug Fixes
++++++++++
+- (:pr:`261`) Molpro - learned to error cleanly if version too old for XML parsing. @loriab
+- (:pr:`261`) Q-Chem - learned to extract version from output file instead of ``qchem -h`` since command isn't available
+  from a source install. @loriab
+
+
 v0.15.0 / 2020-06-26
 --------------------
 
 New Features
 ++++++++++++
-- (:pr:`232`) PyBerny - new geometry optimizer procedure harness.
+- (:pr:`232`) PyBerny - new geometry optimizer procedure harness. @jhrmnn
 - (:pr:`238`) Set up testing infrastructure, "stdsuite", where method reference values and expected results names (e.g.,
   total energy and correlation energy from MP2) are stored here in QCEngine but may be used from anywhere (presently,
   Psi4). Earlier MP2 and CCSD tests here converted to new scheme, removing ``test_standard_suite_mp2.py`` and ``ccsd``.
-- (:pr:`249`, :pr:`254`) XTB - new harness for xtb-python that natively speaks QCSchema.
+- (:pr:`249`, :pr:`254`) XTB - new harness for xtb-python that natively speaks QCSchema. @awvwgk
 
 Enhancements
 ++++++++++++
@@ -34,16 +165,16 @@ Enhancements
   Also updated to set appropriate ``qcel.models.AtomicProperties`` from collected QCVariables.
 - (:pr:`239`) OpenMM - OpenMM harness now looks for cmiles information in the
   molecule extras field when typing. Also we allow for the use of gaff
-  forcefields.
+  forcefields. @jthorton
 - (:pr:`243`) NWChem - more useful stdout error return.
-- (:pr:`244`) Added CCSD(T), LCCD, and LCCSD reference data to stdsuite.
+- (:pr:`244`) Added CCSD(T), LCCD, and LCCSD reference data to stdsuite. @loriab
 - (:pr:`246`) TorchANI - harness does not support v2 releases.
 - (:pr:`251`) DFTD3 - added D3(0) and D3(BJ) parameters for PBE0-DH functional.
 
 Bug Fixes
 +++++++++
-- (:pr:`244`) Psi4 - fixed bug in ``extras["psiapi"] == True`` mode where if calc failed, error not handled by QCEngine.
-- (:pr:`245`) Added missing import to sys for ``test_standard_suite.py``
+- (:pr:`244`) Psi4 - fixed bug in ``extras["psiapi"] == True`` mode where if calc failed, error not handled by QCEngine. @loriab
+- (:pr:`245`) Added missing import to sys for ``test_standard_suite.py``. @sjrl
 - (:pr:`248`) NWChem - fix HFexch specification bug.
 - Psi4 -- QCFractal INCOMPLETE state bug https://github.com/MolSSI/QCEngine/issues/250 fixed by https://github.com/psi4/psi4/pull/1933 .
 - (:pr:`253`) Make compatible with both py-cpuinfo 5 & 6, fixing issue 252.

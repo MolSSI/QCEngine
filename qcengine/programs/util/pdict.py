@@ -60,6 +60,7 @@ class PreservingDict(dict):
                 else:  # existing has more digits
                     places = Decimal(10) ** (candidate_exp + 1)
                     best_value = self[key]
+                # DEBUG print(f"{existing_exp=} {candidate_exp=} {places=} {self[key]=} {value=}")
                 # Validate values are the same
                 # places = max(places, Decimal('1E-11'))  # for computed psivars
                 places = max(places, Decimal("1E-{}".format(accept_places)))  # for computed psivars

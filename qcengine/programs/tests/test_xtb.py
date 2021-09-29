@@ -5,10 +5,8 @@ Most of the tests use mindless molecules for the diversity of element species
 to test as much different interactions as possible.
 """
 
-import pytest
-
 import numpy as np
-
+import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
@@ -43,13 +41,15 @@ def test_xtb_task_gfn1xtb_m01():
     )
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-01"), model={"method": "GFN1-xTB"}, driver="gradient",
+        molecule=qcng.get_molecule("mindless-01"),
+        model={"method": "GFN1-xTB"},
+        driver="gradient",
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result, thr) == return_result
+    assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
@@ -82,13 +82,16 @@ def test_xtb_task_gfn1xtb_m02():
         molecule=qcng.get_molecule("mindless-02"),
         model={"method": "GFN1-xTB"},
         driver="gradient",
-        keywords={"accuracy": 0.1, "electronic_temperature": 500.0,},
+        keywords={
+            "accuracy": 0.1,
+            "electronic_temperature": 500.0,
+        },
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result, thr) == return_result
+    assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
@@ -121,13 +124,15 @@ def test_xtb_task_gfn1xtb_m03():
         molecule=qcng.get_molecule("mindless-03"),
         model={"method": "GFN1-xTB"},
         driver="gradient",
-        keywords={"solvent": "chcl3",},
+        keywords={
+            "solvent": "chcl3",
+        },
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result, thr) == return_result
+    assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
@@ -160,14 +165,16 @@ def test_xtb_task_gfn1xtb_m04():
     }
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-04"), model={"method": "GFN1-xTB"}, driver="properties",
+        molecule=qcng.get_molecule("mindless-04"),
+        model={"method": "GFN1-xTB"},
+        driver="properties",
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result["dipole"], thr) == return_result["dipole"]
-    assert pytest.approx(atomic_result.return_result["mulliken_charges"], thr) == return_result["mulliken_charges"]
+    assert pytest.approx(atomic_result.return_result["dipole"], abs=thr) == return_result["dipole"]
+    assert pytest.approx(atomic_result.return_result["mulliken_charges"], abs=thr) == return_result["mulliken_charges"]
     assert "mayer_indices" in atomic_result.return_result
 
 
@@ -179,13 +186,15 @@ def test_xtb_task_gfn1xtb_m05():
     return_result = -29.038403257613453
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-05"), model={"method": "GFN1-xTB"}, driver="energy",
+        molecule=qcng.get_molecule("mindless-05"),
+        model={"method": "GFN1-xTB"},
+        driver="energy",
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result, thr) == return_result
+    assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
     assert "xtb" in atomic_result.extras
 
 
@@ -216,13 +225,15 @@ def test_xtb_task_gfn2xtb_m01():
     )
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-01"), model={"method": "GFN2-xTB"}, driver="gradient",
+        molecule=qcng.get_molecule("mindless-01"),
+        model={"method": "GFN2-xTB"},
+        driver="gradient",
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result, thr) == return_result
+    assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
@@ -255,13 +266,16 @@ def test_xtb_task_gfn2xtb_m02():
         molecule=qcng.get_molecule("mindless-02"),
         model={"method": "GFN2-xTB"},
         driver="gradient",
-        keywords={"accuracy": 0.1, "electronic_temperature": 500.0,},
+        keywords={
+            "accuracy": 0.1,
+            "electronic_temperature": 500.0,
+        },
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result, thr) == return_result
+    assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
@@ -294,13 +308,15 @@ def test_xtb_task_gfn2xtb_m03():
         molecule=qcng.get_molecule("mindless-03"),
         model={"method": "GFN2-xTB"},
         driver="gradient",
-        keywords={"solvent": "chcl3",},
+        keywords={
+            "solvent": "chcl3",
+        },
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result, thr) == return_result
+    assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
@@ -333,14 +349,16 @@ def test_xtb_task_gfn2xtb_m04():
     }
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-04"), model={"method": "GFN2-xTB"}, driver="properties",
+        molecule=qcng.get_molecule("mindless-04"),
+        model={"method": "GFN2-xTB"},
+        driver="properties",
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result["dipole"], thr) == return_result["dipole"]
-    assert pytest.approx(atomic_result.return_result["mulliken_charges"], thr) == return_result["mulliken_charges"]
+    assert pytest.approx(atomic_result.return_result["dipole"], abs=thr) == return_result["dipole"]
+    assert pytest.approx(atomic_result.return_result["mulliken_charges"], abs=thr) == return_result["mulliken_charges"]
     assert "mayer_indices" in atomic_result.return_result
 
 
@@ -352,13 +370,15 @@ def test_xtb_task_gfn2xtb_m05():
     return_result = -27.73598761779656
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-05"), model={"method": "GFN2-xTB"}, driver="energy",
+        molecule=qcng.get_molecule("mindless-05"),
+        model={"method": "GFN2-xTB"},
+        driver="energy",
     )
 
     atomic_result = qcng.compute(atomic_input, "xtb")
 
     assert atomic_result.success
-    assert pytest.approx(atomic_result.return_result, thr) == return_result
+    assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
     assert "xtb" in atomic_result.extras
 
 
@@ -366,7 +386,9 @@ def test_xtb_task_gfn2xtb_m05():
 def test_xtb_task_unknown_method():
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("water"), model={"method": "GFN-xTB"}, driver="energy",
+        molecule=qcng.get_molecule("water"),
+        model={"method": "GFN-xTB"},
+        driver="energy",
     )
     error = qcel.models.ComputeError(error_type="input_error", error_message="Invalid method GFN-xTB provided in model")
 
@@ -380,7 +402,9 @@ def test_xtb_task_unknown_method():
 def test_xtb_task_unsupported_driver():
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("water"), model={"method": "GFN2-xTB"}, driver="hessian",
+        molecule=qcng.get_molecule("water"),
+        model={"method": "GFN2-xTB"},
+        driver="hessian",
     )
     error = qcel.models.ComputeError(
         error_type="input_error", error_message="Calculation succeeded but invalid driver request provided"
