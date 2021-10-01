@@ -84,9 +84,9 @@ def mill_qcvars(mill: "AlignmentMill", qcvars: Dict[str, Any]) -> Dict[str, Any]
     return milled
 
 
-def error_stamp(stdout: str = "", stderr: str = "", tb: str = None) -> str:
+def error_stamp(stdin: str = "", stdout: str = "", stderr: str = "", tb: str = None) -> str:
     """Return all useful information in error string."""
 
     if not tb:
         tb = traceback.format_exception(*sys.exc_info())
-    return "STDOUT:\n" + stdout + "\nSTDERR:\n" + stderr + "\nTRACEBACK:\n" + "".join(tb)
+    return "INPUT:\n" + stdin + "STDOUT:\n" + stdout + "\nSTDERR:\n" + stderr + "\nTRACEBACK:\n" + "".join(tb)

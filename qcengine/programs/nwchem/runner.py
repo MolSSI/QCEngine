@@ -125,22 +125,23 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         job_inputs = self.build_input(input_model, config)
         success, dexe = self.execute(job_inputs)
 
+        stdin = job_inputs["infiles"]["nwchem.nw"]
         if "There is an error in the input file" in dexe["stdout"]:
-            raise InputError(dexe["stdout"])
+            raise InputError(error_stamp(stdin, dexe["stdout"], dexe["stderr"]))
         if "not compiled" in dexe["stdout"]:
             # recoverable with a different compilation with optional modules
-            raise InputError(dexe["stdout"])
+            raise InputError(error_stamp(stdin, dexe["stdout"], dexe["stderr"]))
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
-            dexe["outfiles"]["input"] = job_inputs["infiles"]["nwchem.nw"]
+            dexe["outfiles"]["input"] = stdin
             return self.parse_output(dexe["outfiles"], input_model)
         else:
             # Check if any of the errors are known
             for error in all_errors:
                 error.detect_error(dexe)
-            raise UnknownError(f"STDOUT:\n{dexe['stdout']}\nSTDERR:\n{dexe['stderr']}")
+            raise UnknownError(error_stamp(stdin, dexe["stdout"], dexe["stderr"]))
 
     def build_input(
         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
@@ -258,7 +259,7 @@ task python
                 input_model.molecule, method, stdout, **outfiles
             )
         except Exception as e:
-            raise UnknownError(error_stamp(stdout=stdout, stderr=stderr))
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         try:
             if nwgrad is not None:
@@ -275,7 +276,7 @@ task python
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         except KeyError as e:
-            raise UnknownError(error_stamp(stdout=stdout, stderr=stderr))
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         if isinstance(retres, Decimal):
             retres = float(retres)

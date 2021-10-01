@@ -16,6 +16,7 @@ from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ..util import error_stamp
 from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
@@ -173,17 +174,10 @@ class CFOURHarness(ProgramHarness):
                 input_model.molecule, method, stdout, **outfiles
             )
         except Exception as e:
-            raise UnknownError(
-                "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         if errorTMP != "":
-            raise UnknownError("STDOUT:\n" + stdout + "\nSTDERR:\n" + stderr)
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         try:
             if c4grad is not None:
@@ -199,14 +193,7 @@ class CFOURHarness(ProgramHarness):
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
         except KeyError as e:
-            raise UnknownError(
-                "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         # TODO: "xalloc(): memory allocation failed!"
 

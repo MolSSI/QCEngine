@@ -14,6 +14,7 @@ from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ..util import error_stamp
 from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
@@ -77,7 +78,7 @@ class GAMESSHarness(ProgramHarness):
         success, dexe = self.execute(job_inputs)
 
         if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
-            raise InputError(dexe["stdout"])
+            raise InputError(error_stamp(job_inputs["infiles"]["gamess.inp"], dexe["stdout"], dexe["stderr"]))
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
@@ -130,8 +131,9 @@ class GAMESSHarness(ProgramHarness):
             trial_opts["system__parall"] = not (config.ncores == 1)
             trial_opts["system__mwords"] = mwords
             trial_opts["system__memddi"] = memddi
+            trial_inp = format_keywords(trial_opts) + molcmd
             trial_gamessrec = {
-                "infiles": {"trial_gamess.inp": format_keywords(trial_opts) + molcmd},
+                "infiles": {"trial_gamess.inp": trial_inp},
                 "command": [which("rungms"), "trial_gamess"],
                 "scratch_messy": False,
                 "scratch_directory": config.scratch_directory,
@@ -150,7 +152,7 @@ class GAMESSHarness(ProgramHarness):
             #    config.ncores = 1
             #    break
             if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
-                raise InputError(dexe["stdout"])
+                raise InputError(error_stamp(trial_inp, dexe["stdout"], dexe["stderr"]))
             elif "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
                 pass
             else:
@@ -224,16 +226,7 @@ class GAMESSHarness(ProgramHarness):
             # TODO:  "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
 
         except Exception as e:
-            raise UnknownError(
-                "INPUT:\n"
-                + outfiles["dsl_input"]
-                + "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         try:
             if gamessgrad is not None:
@@ -255,14 +248,7 @@ class GAMESSHarness(ProgramHarness):
                 # * but on the other hand, often the reason for the job is to get gamessmol, so let it return success=T below
                 retres = 0.0
             else:
-                raise UnknownError(
-                    "STDOUT:\n"
-                    + stdout
-                    + "\nSTDERR:\n"
-                    + stderr
-                    + "\nTRACEBACK:\n"
-                    + "".join(traceback.format_exception(*sys.exc_info()))
-                )
+                raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)

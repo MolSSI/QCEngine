@@ -275,6 +275,10 @@ class Psi4Harness(ProgramHarness):
         # Move several pieces up a level
         output_data["provenance"]["memory"] = round(config.memory, 3)
         output_data["provenance"]["nthreads"] = config.ncores
+        if output_data.get("native_files", None) is None:
+            output_data["native_files"] = {
+                "input": json.dumps(json.loads(input_model.json()), indent=1),
+            }
 
         # Delete keys
         output_data.pop("return_output", None)
