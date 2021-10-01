@@ -2,8 +2,6 @@
 
 import copy
 import pprint
-import sys
-import traceback
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -173,7 +171,7 @@ class CFOURHarness(ProgramHarness):
             qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
-        except Exception as e:
+        except Exception:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         if errorTMP != "":
@@ -192,7 +190,7 @@ class CFOURHarness(ProgramHarness):
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
-        except KeyError as e:
+        except KeyError:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         # TODO: "xalloc(): memory allocation failed!"

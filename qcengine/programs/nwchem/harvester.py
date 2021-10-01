@@ -349,7 +349,7 @@ def harvest_outfile_pass(outtext):
             )
             if mobj:
                 cc_plain = cc_name.replace("\\", "")
-                cc_corr = cc_plain.replace("CCSD", "")
+                cc_plain.replace("CCSD", "")
                 print(f"matched tce cc {cc_plain}", mobj.groups())
                 logger.debug(f"matched tce cc {cc_plain}")
 
@@ -378,7 +378,7 @@ def harvest_outfile_pass(outtext):
 
             if mobj2:
                 cc_plain = cc_name.replace("\\", "")
-                cc_corr = cc_plain.replace("CCSD", "")
+                cc_plain.replace("CCSD", "")
                 logger.debug(f"matched tce {cc_plain} dipole moment")
 
                 # only pulling Debye

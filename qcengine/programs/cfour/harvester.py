@@ -1,5 +1,5 @@
-import re
 import logging
+import re
 from decimal import Decimal
 
 import numpy as np

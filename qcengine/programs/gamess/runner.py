@@ -2,8 +2,6 @@
 
 import copy
 import pprint
-import sys
-import traceback
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -225,7 +223,7 @@ class GAMESSHarness(ProgramHarness):
             )
             # TODO:  "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
 
-        except Exception as e:
+        except Exception:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         try:
@@ -241,7 +239,7 @@ class GAMESSHarness(ProgramHarness):
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
-        except KeyError as e:
+        except KeyError:
             if "EXETYP=CHECK" in stdout and "EXECUTION OF GAMESS TERMINATED NORMALLY" in stdout:
                 # check run that completed normally
                 # * on one hand, it's still an error return_result-wise

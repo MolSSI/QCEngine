@@ -5,8 +5,6 @@ import copy
 import logging
 import pprint
 import re
-import sys
-import traceback
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -258,7 +256,7 @@ task python
             qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
-        except Exception as e:
+        except Exception:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         try:
@@ -275,7 +273,7 @@ task python
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
-        except KeyError as e:
+        except KeyError:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         if isinstance(retres, Decimal):
