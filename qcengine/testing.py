@@ -172,7 +172,7 @@ _programs = {
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
-    "psi4_derqcsk": is_program_new_enough("psi4", "1.5a1.dev117"),  # psi4/psi4#2293
+    "psi4_derqcsk": is_program_new_enough("psi4", "1.5a1.dev117"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.1"),
     "rdkit": which_import("rdkit", return_bool=True),
