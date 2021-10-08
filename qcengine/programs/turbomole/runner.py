@@ -7,12 +7,13 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models import AtomicResult, Provenance, BasisSet
 from qcelemental.util import safe_version, which
 
-from ...util import execute, temporary_directory
+from ...exceptions import InputError
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ...util import execute, temporary_directory
 from .define import execute_define, prepare_stdin
 from .harvester import harvest
 from .methods import KEYWORDS, METHODS
@@ -81,6 +82,13 @@ class TurbomoleHarness(ProgramHarness):
     def build_input(
         self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
+
+        # The 'define' wrapper can only handle normal string basis set input. If
+        # a QCSchema basis set is given we break early, because this is not handled
+        # right now.
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+
         turbomolerec = {
             "infiles": {},
             "outfiles": {"control": "control"},

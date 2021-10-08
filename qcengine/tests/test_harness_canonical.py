@@ -46,7 +46,7 @@ _canonical_methods_qcsk_basis = [
     pytest.param("psi4", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("psi4_mp2qcsk")),
     ("qchem", {"method": "hf", "basis": qcsk_bs}, {}),
     ("qcore", {"method": "pbe", "basis": qcsk_bs}, {}),
-    # ("turbomole", {"method": "pbe", "basis": qcsk_bs}, {}),
+    ("turbomole", {"method": "pbe", "basis": qcsk_bs}, {}),
 ]
 
 
