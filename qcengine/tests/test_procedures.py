@@ -272,7 +272,7 @@ def test_torsiondrive_generic():
     input_data = TorsionDriveInput(
         keywords=TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
         input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="UFF", basis=None)),
-        initial_molecule=qcng.get_molecule("ethane"),
+        initial_molecule=[qcng.get_molecule("ethane")] * 2,
         optimization_spec=OptimizationSpecification(
             procedure="geomeTRIC",
             keywords={

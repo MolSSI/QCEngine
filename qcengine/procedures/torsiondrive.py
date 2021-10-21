@@ -49,8 +49,8 @@ class TorsionDriveProcedure(ProcedureHarness):
         state = torsiondrive.td_api.create_initial_state(
             dihedrals=dihedrals,
             grid_spacing=grid_spacing,
-            elements=input_model.initial_molecule.symbols,
-            init_coords=[input_model.initial_molecule.geometry.flatten().tolist()],
+            elements=input_model.initial_molecule[0].symbols,
+            init_coords=[molecule.geometry.flatten().tolist() for molecule in input_model.initial_molecule],
             dihedral_ranges=dihedral_ranges,
             energy_upper_limit=energy_upper_limit,
             energy_decrease_thresh=energy_decrease_thresh,
@@ -179,7 +179,7 @@ class TorsionDriveProcedure(ProcedureHarness):
 
         from qcengine import compute_procedure
 
-        input_molecule = input_model.initial_molecule.copy(deep=True).dict()
+        input_molecule = input_model.initial_molecule[0].copy(deep=True).dict()
         input_molecule["geometry"] = np.array(job).reshape(len(input_molecule["symbols"]), 3)
         input_molecule = Molecule.from_data(input_molecule)
 
