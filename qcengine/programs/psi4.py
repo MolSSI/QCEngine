@@ -150,7 +150,7 @@ class Psi4Harness(ProgramHarness):
 
                 # Setup the job
                 input_data = input_model.dict(encoding="json")
-                input_data["nthreads"] = config.ncores
+                input_data["nthreads"] = config.ncores 
                 input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
                 input_data["success"] = False
                 input_data["return_output"] = True
