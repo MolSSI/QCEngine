@@ -7,13 +7,13 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from qcelemental.models import AtomicResult, Provenance, BasisSet
+from qcelemental.models import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
 from ...exceptions import InputError
+from ...util import execute, temporary_directory
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
-from ...util import execute, temporary_directory
 from .define import execute_define, prepare_stdin
 from .harvester import harvest
 from .methods import KEYWORDS, METHODS

@@ -260,7 +260,11 @@ class Psi4Harness(ProgramHarness):
                     raise RandomError(error_message)
             elif ("SIGSEV" in error_message) or ("SIGSEGV" in error_message) or ("segmentation fault" in error_message):
                 raise RandomError(error_message)
-            elif ("TypeError: set_global_option" in error_message) or (error_type == "ValidationError"):
+            elif (
+                # Missing and Managed cover same category of error pre- and post-DDD
+                ("TypeError: set_global_option" in error_message)
+                or (error_type in ["ValidationError", "MissingMethodError", "ManagedMethodError"])
+            ):
                 raise InputError(error_message)
             elif "RHF reference is only for singlets" in error_message:
                 raise InputError(error_message)

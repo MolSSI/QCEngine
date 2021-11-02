@@ -72,7 +72,7 @@ def test_protocol_native(program, model, keywords, native):
         "mctc-gcp": ("gcp_geometry.xyz", rf"H\s+0.0+\s+0.0+\s+0.34"),
         "mp2d": ("mp2d_geometry", rf"H\s+0.0+\s+0.0+\s+0.34"),
         "nwchem": ("nwchem.grad", rf"0.0, 0.0, 0.03"),
-        "psi4": ("psi4.grad", rf"1.0+\s+0.0+\s+0.0+\s+0.03"),
+        "psi4": ("psi4.grad", rf"1.0+\s+(-?)0.0+\s+(-?)0.0+\s+0.03"),
     }
 
     #  <<  Test

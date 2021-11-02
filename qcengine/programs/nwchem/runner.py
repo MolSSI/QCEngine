@@ -197,7 +197,9 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         #  Note: The Hessian is already stored in high precision in a file named "*.hess"
         if input_model.driver == "gradient":
             # Get the name of the theory used for computing the gradients
-            theory = re.search(r"^task (\w+) ", mdccmd, re.MULTILINE).group(1)
+            theory = re.search(r"^task\s+(.+)\s+grad", mdccmd, re.MULTILINE).group(1)
+            if theory == "ccsd(t)":
+                theory = "ccsd"
             logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
 
             # Create a Python function to get the gradient from NWChem's checkpoint file (rtdb)
