@@ -140,11 +140,11 @@ class TorchANIHarness(ProgramHarness):
         elif input_data.driver == "gradient":
             derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
             ret_data["return_result"] = (
-                np.asarray(derivative * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
+                np.asarray(derivative.cpu() * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
             )
         elif input_data.driver == "hessian":
             hessian = torchani.utils.hessian(coordinates, energies=energy)
-            ret_data["return_result"] = np.asarray(hessian)
+            ret_data["return_result"] = np.asarray(hessian.cpu())
         else:
             raise InputError(
                 f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.driver}."
