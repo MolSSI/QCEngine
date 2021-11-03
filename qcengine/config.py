@@ -8,7 +8,6 @@ import logging
 import os
 import socket
 from typing import Any, Dict, Optional, Union
-from typing_extensions import Literal
 
 import pydantic
 
@@ -159,8 +158,7 @@ class TaskConfig(pydantic.BaseModel):
     scratch_messy: bool = pydantic.Field(
         False, description="Leave scratch directory and contents on disk after completion."
     )
-    device: Literal['cpu', 'cuda'] = 'cpu' # which device to perform calculation
-    
+        
     class Config:
         extra = "forbid"
 
