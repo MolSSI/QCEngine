@@ -100,7 +100,7 @@ class TorchANIHarness(ProgramHarness):
         import torch
         import torchani
 
-        device = torch.device(config.device)
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         # Failure flag
         ret_data = {"success": False}
