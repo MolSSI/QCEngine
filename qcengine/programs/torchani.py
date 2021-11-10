@@ -100,7 +100,7 @@ class TorchANIHarness(ProgramHarness):
         import torch
         import torchani
 
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # Failure flag
         ret_data = {"success": False}
@@ -127,7 +127,7 @@ class TorchANIHarness(ProgramHarness):
         geom_array = input_data.molecule.geometry.reshape(1, -1, 3) * ureg.conversion_factor("bohr", "angstrom")
         coordinates = torch.tensor(geom_array.tolist(), requires_grad=True, device=device)
         model.to(device)
-        
+
         _, energy_array = model((species, coordinates))
         energy = energy_array.mean()
         ensemble_std = energy_array.std()
