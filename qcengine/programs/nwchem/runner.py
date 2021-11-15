@@ -165,6 +165,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         # Shortcut: If the user allows restart and the restart directory is present
         allow_restart = opts.pop("allow_restarts", True)
+        scr_name = opts.pop("scratch_name", None)
 
         # Handle memory
         # * [GiB] --> [QW]
@@ -210,7 +211,8 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         if allow_restart:
             # use the input file as a source for a hash that is used to set the directory name
             input_hash = hashlib.sha256(nwchemrec["infiles"]["nwchem.nw"].encode()).hexdigest()[:12]
-            scr_name = "nwc_" + input_hash
+            if scr_name is None:
+                scr_name = "nwc_" + input_hash
             nwchemrec["scratch_name"] = scr_name
 
             # We call the "temporary_directory" to get the eventual name of the run directory
