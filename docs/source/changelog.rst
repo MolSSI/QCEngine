@@ -17,7 +17,20 @@ Changelog
 .. +++++++++
 
 
-v0.20.0 / 2021-MM-DD
+v0.20.1 / 2021-10-08
+--------------------
+
+Bug Fixes
++++++++++
+
+- (:pr:`322`) Psi4 - allowed more test cases with gradients and Hessians after a compatibility PR started
+  saving them.
+- (:pr:`323`) Turbomole - learned to store calcinfo_natom so that gradients and Hessians can be computed
+  after QCElemental started using that quantity for shape checking in 
+  [v0.22.0](https://github.com/MolSSI/QCElemental/blob/master/docs/source/changelog.rst#0220--2021-08-26)
+
+
+v0.20.0 / 2021-10-01
 --------------------
 
 New Features
@@ -55,6 +68,7 @@ Enhancements
 - (:pr:`318`) Docs - documentation is now served from https://molssi.github.io/QCEngine/ and built
   by https://github.com/MolSSI/QCEngine/blob/master/.github/workflows/CI.yml .
   https://qcengine.readthedocs.io/en/latest/ will soon be retired. @loriab
+- (:pr:`320`) CFOUR, NWChem -- learned to run with ghost atoms, tentatively. @loriab
 
 Bug Fixes
 +++++++++
