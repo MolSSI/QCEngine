@@ -30,10 +30,10 @@ logger = logging.getLogger(__name__)
 
 class MadnessHarness(ProgramHarness):
     """
-     Notes
-     -----
-     * To use the TCE, specify ``AtomicInput.model.method`` as usual, then also include ``qc_module = True`` in ``AtomicInput.keywords``.
-     """
+    Notes
+    -----
+    * To use the TCE, specify ``AtomicInput.model.method`` as usual, then also include ``qc_module = True`` in ``AtomicInput.keywords``.
+    """
 
     _defaults = {
         "name": "Madness",
@@ -65,7 +65,7 @@ class MadnessHarness(ProgramHarness):
              If raise_error is False and nwchem or networkx are missing, returns False.
              If raise_error is True and nwchem or networkx are missing, the error message for the first missing one is raised.
 
-       """
+        """
         qc = which(
             "moldft",
             return_bool=True,
@@ -116,8 +116,8 @@ class MadnessHarness(ProgramHarness):
 
     def compute(self, input_model: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
         """
-         Runs madness in executable mode
-         """
+        Runs madness in executable mode
+        """
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
@@ -177,7 +177,11 @@ class MadnessHarness(ProgramHarness):
     def execute(
         self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
-        success, dexe = execute(inputs["command"], inputs["infiles"], scratch_directory=inputs["scratch_directory"],)
+        success, dexe = execute(
+            inputs["command"],
+            inputs["infiles"],
+            scratch_directory=inputs["scratch_directory"],
+        )
         return success, dexe
 
     def parse_output(
