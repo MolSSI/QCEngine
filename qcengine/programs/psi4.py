@@ -260,7 +260,11 @@ class Psi4Harness(ProgramHarness):
                     raise RandomError(error_message)
             elif ("SIGSEV" in error_message) or ("SIGSEGV" in error_message) or ("segmentation fault" in error_message):
                 raise RandomError(error_message)
-            elif ("TypeError: set_global_option" in error_message) or (error_type == "ValidationError"):
+            elif (
+                # Missing and Managed cover same category of error pre- and post-DDD
+                ("TypeError: set_global_option" in error_message)
+                or (error_type in ["ValidationError", "MissingMethodError", "ManagedMethodError"])
+            ):
                 raise InputError(error_message)
             elif "RHF reference is only for singlets" in error_message:
                 raise InputError(error_message)
@@ -273,6 +277,10 @@ class Psi4Harness(ProgramHarness):
         # Move several pieces up a level
         output_data["provenance"]["memory"] = round(config.memory, 3)
         output_data["provenance"]["nthreads"] = config.ncores
+        if output_data.get("native_files", None) is None:
+            output_data["native_files"] = {
+                "input": json.dumps(json.loads(input_model.json()), indent=1),
+            }
 
         # Delete keys
         output_data.pop("return_output", None)

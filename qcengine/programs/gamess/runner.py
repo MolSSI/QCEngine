@@ -2,8 +2,6 @@
 
 import copy
 import pprint
-import sys
-import traceback
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -14,6 +12,7 @@ from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ..util import error_stamp
 from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
@@ -77,12 +76,12 @@ class GAMESSHarness(ProgramHarness):
         success, dexe = self.execute(job_inputs)
 
         if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
-            raise InputError(dexe["stdout"])
+            raise InputError(error_stamp(job_inputs["infiles"]["gamess.inp"], dexe["stdout"], dexe["stderr"]))
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
-            dexe["outfiles"]["dsl_input"] = job_inputs["infiles"]["gamess.inp"]
+            dexe["outfiles"]["input"] = job_inputs["infiles"]["gamess.inp"]
             return self.parse_output(dexe["outfiles"], input_model)
 
     def build_input(
@@ -130,8 +129,9 @@ class GAMESSHarness(ProgramHarness):
             trial_opts["system__parall"] = not (config.ncores == 1)
             trial_opts["system__mwords"] = mwords
             trial_opts["system__memddi"] = memddi
+            trial_inp = format_keywords(trial_opts) + molcmd
             trial_gamessrec = {
-                "infiles": {"trial_gamess.inp": format_keywords(trial_opts) + molcmd},
+                "infiles": {"trial_gamess.inp": trial_inp},
                 "command": [which("rungms"), "trial_gamess"],
                 "scratch_messy": False,
                 "scratch_directory": config.scratch_directory,
@@ -150,7 +150,7 @@ class GAMESSHarness(ProgramHarness):
             #    config.ncores = 1
             #    break
             if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
-                raise InputError(dexe["stdout"])
+                raise InputError(error_stamp(trial_inp, dexe["stdout"], dexe["stderr"]))
             elif "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
                 pass
             else:
@@ -223,17 +223,8 @@ class GAMESSHarness(ProgramHarness):
             )
             # TODO:  "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
 
-        except Exception as e:
-            raise UnknownError(
-                "INPUT:\n"
-                + outfiles["dsl_input"]
-                + "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+        except Exception:
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         try:
             if gamessgrad is not None:
@@ -248,21 +239,14 @@ class GAMESSHarness(ProgramHarness):
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
-        except KeyError as e:
+        except KeyError:
             if "EXETYP=CHECK" in stdout and "EXECUTION OF GAMESS TERMINATED NORMALLY" in stdout:
                 # check run that completed normally
                 # * on one hand, it's still an error return_result-wise
                 # * but on the other hand, often the reason for the job is to get gamessmol, so let it return success=T below
                 retres = 0.0
             else:
-                raise UnknownError(
-                    "STDOUT:\n"
-                    + stdout
-                    + "\nSTDERR:\n"
-                    + stderr
-                    + "\nTRACEBACK:\n"
-                    + "".join(traceback.format_exception(*sys.exc_info()))
-                )
+                raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
@@ -274,7 +258,8 @@ class GAMESSHarness(ProgramHarness):
         output_data = {
             "schema_version": 1,
             "molecule": gamessmol,  # overwrites with outfile Cartesians in case fix_*=F
-            "extras": {"outfiles": outfiles, **input_model.extras},
+            "extras": {**input_model.extras},
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
             "provenance": provenance,
             "return_result": retres,

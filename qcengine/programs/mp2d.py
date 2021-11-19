@@ -72,6 +72,8 @@ class MP2DHarness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["input"] = " ".join(job_inputs["command"])
+            dexe["outfiles"]["mp2d_geometry"] = job_inputs["infiles"]["mp2d_geometry"]
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
@@ -147,6 +149,7 @@ class MP2DHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
         stdout = outfiles.pop("stdout")
+        stderr = outfiles.pop("stderr")
 
         for fl, contents in outfiles.items():
             if contents is not None:
@@ -215,11 +218,13 @@ class MP2DHarness(ProgramHarness):
 
         output_data = {
             "extras": input_model.extras,
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": {},
             "provenance": Provenance(
                 creator="MP2D", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
             "return_result": retres,
+            "stderr": stderr,
             "stdout": stdout,
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
