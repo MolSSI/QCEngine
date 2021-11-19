@@ -58,7 +58,7 @@ def test_protocol_native(program, model, keywords, native):
         "dftd3": rf"1.000000     1.261000     1.703000",
         "gamess": rf"\$basis gbasis=n31 ngauss=6 \$end",
         "gcp": rf"level HF3C",
-        "mctc-gcp": rf"level HF3C",
+        "mctc-gcp": rf"level DFT/SV",
         "mp2d": rf"--TT_a1=0.944 --TT_a2=0.48",
         "nwchem": rf"H library 6-31G",
         "psi4": rf'"driver": "gradient",',
