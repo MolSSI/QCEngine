@@ -163,7 +163,6 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched calcinfo")
-            print("matched calcinfo", mobj.groups())
             qcvar["N ALPHA ELECTRONS"] = mobj.group("nao")
             qcvar["N BETA ELECTRONS"] = mobj.group("nbo")
 
@@ -176,7 +175,6 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched calcinfo 2")
-            print("matched calcinfo 2", mobj.groups())
             qcvar["N MOLECULAR ORBITALS"] = mobj.group("nmo")
             qcvar["N BASIS FUNCTIONS"] = mobj.group("nmo")  # TODO BAD
         else:
@@ -194,7 +192,6 @@ def harvest_outfile_pass(outtext):
             )
             if mobj2:
                 logger.debug("matched calcinfo 3")
-                print("matched calcinfo 3", mobj2.groups())
                 qcvar["N ALPHA ELECTRONS"] = mobj2.group("occ_nao")
                 qcvar["N BETA ELECTRONS"] = mobj2.group("occ_nbo")
                 qcvar["N MOLECULAR ORBITALS"] = mobj2.group("nmo")
@@ -232,7 +229,6 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched mp2 a")
-            print("matched mp2 a", mobj.groups())
             qcvar["MP2 CORRELATION ENERGY"] = mobj.group(3)
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(4)
             mobj3 = re.search(r"\s+[RU]HF\s*SCF\s*CALCULATION", outtext, re.MULTILINE)
@@ -252,7 +248,6 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched mp2 b")
-            print("matched mp2 b")
             qcvar["MP2 CORRELATION ENERGY"] = mobj.group(2)
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
 
@@ -273,7 +268,6 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched mp2 rhf c")
-            print("matched mp2 c", mobj.groups())
             qcvar["HF TOTAL ENERGY"] = mobj.group(1)
             qcvar["MP2 SINGLES ENERGY"] = mobj.group(2)
             qcvar["MP2 DOUBLES ENERGY"] = mobj.group(3)
@@ -296,14 +290,12 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched mp2 rohf d")
-            print("matched mp2 rohf d", mobj.groups())
             qcvar["MP2 SINGLES ENERGY"] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
             qcvar["MP2 DOUBLES ENERGY"] = mobj.group(3)
 
         mobj = re.search(r"^\s+" + "UHF-MP2 CALCULATION", outtext, re.MULTILINE)
         if mobj:
             logger.debug("matched mp2 uhf e")
-            print("matched mp2 uhf e")
             qcvar["MP2 SINGLES ENERGY"] = "0.0"
 
         mobj = re.search(
@@ -317,7 +309,6 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched mp2 rohf f")
-            print("matched mp2 rohf f", mobj.groups())
             qcvar["HF TOTAL ENERGY"] = mobj.group(1)
             qcvar["MP2 CORRELATION ENERGY"] = mobj.group(2)
             qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
@@ -468,7 +459,6 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched cisd fsoci/guga", mobj.groupdict())
-            print("matched cisd fsoci/guga", mobj.groupdict())
             module = mobj.group("module").lower()
             qcvar["CISD CORRELATION ENERGY"] = Decimal(mobj.group("ci")) - Decimal(mobj.group("hf"))
             qcvar["CISD TOTAL ENERGY"] = mobj.group("ci")
