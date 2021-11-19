@@ -31,6 +31,7 @@ Enhancements
 - (:pr:`321`) CFOUR, GAMESS, NWChem, Psi4, DFTD3, MP2D, gCP - learned to return certain native text
   files under control of the ``native_files`` protocol. GAMESS users are strongly advised to at
   least set ``protocols.native_files = "input"`` so that the job is reproducible. @loriab
+- (:pr:`325`) Torsiondrive - learned to use multiple molecules as input to torsiondrives. @jthorton
 - (:pr:`327`) TorchANI - learned to use GPUs if available. @kexul
 
 Bug Fixes
