@@ -163,10 +163,6 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         else:
             nwchemrec["command"] = [which("nwchem")]
 
-        # Shortcut: If the user allows restart and the restart directory is present
-        allow_restart = opts.pop("allow_restarts", True)
-        scr_name = opts.pop("scratch_name", None)
-
         # Handle memory
         # * [GiB] --> [QW]
         # * int() rounds down
@@ -208,9 +204,11 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
 
         # Now that we know the computation, check if we want a restart
-        if allow_restart:
+        #  TODO (wardlt): Store the restart information in the local_options configuration
+        if input_model.extras.get("allow_restarts", True):
             # use the input file as a source for a hash that is used to set the directory name
             input_hash = hashlib.sha256(nwchemrec["infiles"]["nwchem.nw"].encode()).hexdigest()[:12]
+            scr_name = input_model.extras.get("scratch_name")
             if scr_name is None:
                 scr_name = "nwc_" + input_hash
             nwchemrec["scratch_name"] = scr_name
