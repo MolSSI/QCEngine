@@ -17,14 +17,8 @@ Changelog
 .. +++++++++
 
 
-v0.21.0 / 2021-MM-DD
+v0.21.0 / 2021-11-19
 --------------------
-
-Breaking Changes
-++++++++++++++++
-
-New Features
-++++++++++++
 
 Enhancements
 ++++++++++++
@@ -33,9 +27,7 @@ Enhancements
   least set ``protocols.native_files = "input"`` so that the job is reproducible. @loriab
 - (:pr:`325`) Torsiondrive - learned to use multiple molecules as input to torsiondrives. @jthorton
 - (:pr:`327`) TorchANI - learned to use GPUs if available. @kexul
-
-Bug Fixes
-+++++++++
+- (:pr:`330`) NWChem - learned to restart from existing scratch if QCEngine is killed. @WardLT
 
 
 v0.20.1 / 2021-10-08
