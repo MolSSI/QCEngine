@@ -265,6 +265,28 @@ def test_nwchem_relax(linopt):
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
 
 
+@using("nwchem")
+def test_nwchem_restart(tmpdir):
+    # Make the input file
+    input_data = {
+        "input_specification": {
+            "model": {"method": "HF", "basis": "sto-3g"},
+            "keywords": {"driver__maxiter": 2, "set__driver:linopt": 0},
+        },
+        "initial_molecule": qcng.get_molecule("hydrogen"),
+    }
+    input_data = OptimizationInput(**input_data)
+
+    # Run an initial step, which should not converge
+    local_opts = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
+    ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=False)
+    assert not ret.success
+
+    # Run it again, which should converge
+    new_ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=True)
+    assert new_ret.success
+
+
 @using("rdkit")
 @using("torsiondrive")
 def test_torsiondrive_generic():
