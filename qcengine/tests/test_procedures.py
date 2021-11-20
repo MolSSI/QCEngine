@@ -272,6 +272,7 @@ def test_nwchem_restart(tmpdir):
         "input_specification": {
             "model": {"method": "HF", "basis": "sto-3g"},
             "keywords": {"driver__maxiter": 2, "set__driver:linopt": 0},
+            "extras": {"allow_restarts": True},
         },
         "initial_molecule": qcng.get_molecule("hydrogen"),
     }
