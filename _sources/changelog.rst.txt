@@ -27,7 +27,7 @@ Enhancements
   least set ``protocols.native_files = "input"`` so that the job is reproducible. @loriab
 - (:pr:`325`) Torsiondrive - learned to use multiple molecules as input to torsiondrives. @jthorton
 - (:pr:`327`) TorchANI - learned to use GPUs if available. @kexul
-- (:pr:`330`) NWChem - learned to restart from existing scratch if QCEngine is killed. @WardLT
+- (:pr:`330`, :pr:`332`) NWChem - learned to restart from existing scratch if QCEngine is killed. @WardLT
 
 
 v0.20.1 / 2021-10-08
