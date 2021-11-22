@@ -205,7 +205,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         # Now that we know the computation, check if we want a restart
         #  TODO (wardlt): Store the restart information in the local_options configuration
-        if input_model.extras.get("allow_restarts", True):
+        if input_model.extras.get("allow_restarts", False):
             # use the input file as a source for a hash that is used to set the directory name
             input_hash = hashlib.sha256(nwchemrec["infiles"]["nwchem.nw"].encode()).hexdigest()[:12]
             scr_name = input_model.extras.get("scratch_name")
