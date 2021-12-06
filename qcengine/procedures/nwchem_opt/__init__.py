@@ -39,6 +39,10 @@ class NWChemDriverProcedure(ProcedureHarness):
         if keywords.get("program", "nwchem").lower() != "nwchem":
             raise InputError("NWChemDriver procedure only works with NWChem")
 
+        # Add a flag to the atomic input that tells the NWChemHarness we are calling it from driver
+        #  This is needed for the NWCHarness to make some changes to the input file
+        input_data.input_specification.extras["is_driver"] = True
+
         # Make an atomic input
         atomic_input = AtomicInput(
             molecule=input_data.initial_molecule,
