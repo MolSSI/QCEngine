@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2021-MM-DD
+.. vX.Y.0 / 2022-MM-DD
 .. --------------------
 ..
 .. Breaking Changes
@@ -15,6 +15,15 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+
+
+v0.21.1 / 2022-MM-DD
+--------------------
+
+
+Bug Fixes
++++++++++
+- (:pr:`338`) Correctly export version to tarballs created by git-archive. @mbanck, @loriab
 
 
 v0.21.0 / 2021-11-22
