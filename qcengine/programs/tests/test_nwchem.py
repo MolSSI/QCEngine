@@ -325,8 +325,8 @@ def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
             "keywords": {
                 keyword: init_iters,
                 "qc_module": use_tce,
-                "scf__uhf": True,  # UHF needed for SCF test
-            },
+                "scf__uhf": True,
+            },  # UHF needed for SCF test
         },
         "nwchem",
         raise_error=True,

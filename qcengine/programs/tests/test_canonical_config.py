@@ -25,7 +25,7 @@ _canonical_methods = [
     # needs attn ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
     ("nwchem", {"method": "hf", "basis": "6-31G"}, {}),
     # needs attn ("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}),
-    ("psi4", {"method": "hf", "basis": "6-31G"}, {}),
+    ("psi4", {"method": "hf", "basis": "6-31G"}, {"gradient_write": True}),
     # needs attn ("qchem", {"method": "hf", "basis": "6-31G"}, {}),
     # needs attn ("qcore", {"method": "pbe", "basis": "6-31G"}, {}),
     # needs attn ("rdkit", {"method": "UFF"}, {}),

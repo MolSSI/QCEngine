@@ -1,5 +1,5 @@
-import re
 import logging
+import re
 from decimal import Decimal
 
 import numpy as np
@@ -71,7 +71,7 @@ def harvest_outfile_pass(outtext):
     # Process version
     mobj = re.search(r"^\s*" + r"Version" + r"\s+" + r"(?P<version>[\w.]+)" + r"\s*$", outtext, re.MULTILINE)
     if mobj:
-        print("matched version")
+        logger.debug("matched version")
         version = mobj.group("version")
 
     # Process NRE
@@ -81,7 +81,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.IGNORECASE,
     )
     if mobj:
-        print("matched nre")
+        logger.debug("matched nre")
         psivar["NUCLEAR REPULSION ENERGY"] = mobj.group(1)
 
     # Process calcinfo
@@ -91,7 +91,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched nbf", mobj.groups())
+        logger.debug("matched nbf", mobj.groups())
         psivar["N BASIS FUNCTIONS"] = mobj.group("nbf")
         psivar["N MOLECULAR ORBITALS"] = mobj.group("nbf")  # TODO BAD
 
@@ -104,19 +104,19 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched occupied", mobj.groups())
+        logger.debug("matched occupied", mobj.groups())
         psivar["N ALPHA ELECTRONS"] = sum([int(d) for d in mobj.group("aocc").split()])
         psivar["N BETA ELECTRONS"] = sum([int(d) for d in mobj.group("bocc").split()])
 
     # Process SCF
     mobj = re.search(r"^\s+" + r"(?:E\(SCF\))" + r"\s+=\s+" + NUMBER + r"\s+a\.u\.\s*$", outtext, re.MULTILINE)
     if mobj:
-        print("matched scf1")
+        logger.debug("matched scf1")
         psivar["SCF TOTAL ENERGY"] = mobj.group(1)
 
     mobj = re.search(r"^\s+" + r"(?:E\(SCF\)=)" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*$", outtext, re.MULTILINE)
     if mobj:
-        print("matched scf2")
+        logger.debug("matched scf2")
         psivar["SCF TOTAL ENERGY"] = mobj.group(1)
 
     if "SCF TOTAL ENERGY" not in psivar:
@@ -131,12 +131,12 @@ def harvest_outfile_pass(outtext):
             re.MULTILINE | re.DOTALL,
         )
         if mobj:
-            print("matched scf3")
+            logger.debug("matched scf3")
             psivar["SCF TOTAL ENERGY"] = mobj.group(1)
 
     mobj = re.search(r"^\s+" + r"(?:E\(ROHF\)=)" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*$", outtext, re.MULTILINE)
     if mobj:
-        print("matched scf4")
+        logger.debug("matched scf4")
         psivar["SCF TOTAL ENERGY"] = mobj.group(1)
 
     # Process MP2
@@ -169,7 +169,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched mp2u")
+        logger.debug("matched mp2u")
         psivar["MP2 SAME-SPIN CORRELATION ENERGY"] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
         psivar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(3)
         psivar["MP2 CORRELATION ENERGY"] = Decimal(mobj.group(1)) + Decimal(mobj.group(2)) + Decimal(mobj.group(3))
@@ -193,7 +193,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched mp2ro")
+        logger.debug("matched mp2ro")
         psivar["MP2 SAME-SPIN CORRELATION ENERGY"] = Decimal(mobj.group(2)) + Decimal(mobj.group(3))
         psivar["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = mobj.group(4)
         psivar["MP2 SINGLES ENERGY"] = mobj.group(5)
@@ -212,7 +212,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched mp2ro2")
+        logger.debug("matched mp2ro2")
         # psivar['MP2 SAME-SPIN CORRELATION ENERGY'] = Decimal(mobj.group(1)) + Decimal(mobj.group(2))
         # psivar['MP2 OPPOSITE-SPIN CORRELATION ENERGY'] = mobj.group(3)
         psivar["MP2 SINGLES ENERGY"] = mobj.group("sgl")
@@ -229,7 +229,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched mp3r")
+        logger.debug("matched mp3r")
         dmp2 = Decimal(mobj.group(1))
         dmp3 = Decimal(mobj.group(3))
         psivar["MP2 CORRELATION ENERGY"] = dmp2
@@ -253,7 +253,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched mp3ro")
+        logger.debug("matched mp3ro")
         dmp2 = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
         dmp3 = Decimal(mobj.group(5)) + Decimal(mobj.group(7))
         psivar["MP3 CORRELATION ENERGY"] = dmp2 + dmp3
@@ -301,7 +301,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched mp4r")
+        logger.debug("matched mp4r")
         dmp2 = Decimal(mobj.group(1))
         dmp3 = Decimal(mobj.group(3))
         dmp4sdq = Decimal(mobj.group(5)) + Decimal(mobj.group(7)) + Decimal(mobj.group(9))
@@ -327,7 +327,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched mp4ro")
+        logger.debug("matched mp4ro")
         module = "vcc"
         dmp2 = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
         dmp3 = Decimal(mobj.group(5)) + Decimal(mobj.group(7))
@@ -352,7 +352,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched mp4tr")
+        logger.debug("matched mp4tr")
         dmp4sdq = Decimal(mobj.group(1)) + Decimal(mobj.group(3)) + Decimal(mobj.group(5))
         dmp4t = Decimal(mobj.group(7))
         psivar["MP4(SDQ) CORRELATION ENERGY"] = psivar["MP3 CORRELATION ENERGY"] + dmp4sdq
@@ -372,7 +372,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched mp4tro")
+        logger.debug("matched mp4tro")
         module = "vcc"
         dmp4sdq = Decimal(mobj.group(1)) + Decimal(mobj.group(3))
         dmp4t = Decimal(mobj.group(5)) + Decimal(mobj.group(7))  # WT12 with T, not SDQ
@@ -503,7 +503,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched ncc cc iter")
+        logger.debug("matched ncc cc iter")
         # looks like ncc is rhf-only
         mtd = mobj.group("iterCC").upper()
         psivar[f"{mtd} CORRELATION ENERGY"] = mobj.group("corl")
@@ -535,7 +535,7 @@ def harvest_outfile_pass(outtext):
             mobj.group("iterations"),
         )
         if mobj2:
-            print("matched ncc cc iter mod5", mobj.groupdict(), mobj2[-1])
+            logger.debug("matched ncc cc iter mod5", mobj.groupdict(), mobj2[-1])
             mtd = mobj.group("iterCC").upper()
             psivar[f"{mtd} CORRELATION ENERGY"] = mobj2[-1][2]
             if mtd not in ["CCSDT-1A", "CCSDT-1B", "CCSDT-2", "CCSDT-3", "CCSDT"]:
@@ -556,7 +556,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched ccsd(t) vcc")
+        logger.debug("matched ccsd(t) vcc")
         psivar["SCF TOTAL ENERGY"] = mobj.group(1)
         psivar["CCSD TOTAL ENERGY"] = mobj.group(2)
         psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(2))
@@ -574,7 +574,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched ccsd(t) vcc v2")
+        logger.debug("matched ccsd(t) vcc v2")
         psivar["CCSD TOTAL ENERGY"] = mobj.group(1)
         psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(2)) - Decimal(mobj.group(1))
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(2)
@@ -594,7 +594,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched ccsd(t) ecc")
+        logger.debug("matched ccsd(t) ecc")
         psivar["SCF TOTAL ENERGY"] = mobj.group(1)
         psivar["CCSD TOTAL ENERGY"] = mobj.group(2)
         psivar["(T) CORRECTION ENERGY"] = mobj.group(3)
@@ -619,7 +619,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched ccsd(t) ecc v2")
+        logger.debug("matched ccsd(t) ecc v2")
         psivar["SCF TOTAL ENERGY"] = mobj.group("hf")
         psivar["CCSD TOTAL ENERGY"] = mobj.group("ccsd")
         psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("e4t")
@@ -642,7 +642,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched ccsd(t) lamb")
+        logger.debug("matched ccsd(t) lamb")
         psivar["CCSD TOTAL ENERGY"] = mobj.group(1)
         psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(2)) - Decimal(mobj.group(1))
         psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(2)) - psivar["SCF TOTAL ENERGY"]
@@ -658,7 +658,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched ccsd(t) ncc")
+        logger.debug("matched ccsd(t) ncc")
         psivar["(T) CORRECTION ENERGY"] = mobj.group("tcorr")
         psivar["T(CCSD) CORRECTION ENERGY"] = mobj.group("bkttcorr")
         psivar["CCSD(T) TOTAL ENERGY"] = mobj.group("ttot")
@@ -801,7 +801,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:
-        print("matched dboc ecc")
+        logger.debug("matched dboc ecc")
         psivar["CCSD DBOC ENERGY"] = mobj.group("dboc")
         module = "ecc"
 
@@ -819,7 +819,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:  # PRINT=2 to get SCS-CC components
-        print("matched scscc")
+        logger.debug("matched scscc")
         if float(mobj.group(4)) == 0.0:
             ss = 2 * Decimal(mobj.group(3))
         else:
@@ -917,7 +917,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE | re.DOTALL,
     )
     if mobj:  # PRINT=2 to get SCS components
-        print("matched scscc rhf", mobj.groups())
+        logger.debug("matched scscc rhf", mobj.groups())
         psivar["%s SAME-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = 2 * Decimal(mobj.group(3))
         psivar["%s OPPOSITE-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(4)
         psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(5)
@@ -938,7 +938,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched molgrad")
+        logger.debug("matched molgrad")
         atoms = []
         psivar_grad = []
         for line in mobj.group(1).splitlines():
@@ -961,7 +961,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched geom")
+        logger.debug("matched geom")
         molxyz = "%d bohr\n\n" % len(mobj.group(1).splitlines())
         for line in mobj.group(1).splitlines():
             lline = line.split()
@@ -984,7 +984,7 @@ def harvest_outfile_pass(outtext):
         r"^([A-Z]+)#1" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*$", outtext, re.MULTILINE
     )
     if mobj and mobj2:
-        print("matched atom2")  # unsavory for when atom never printed except for basis file
+        logger.debug("matched atom2")  # unsavory for when atom never printed except for basis file
         # Dinky Molecule
         molxyz = "1 bohr\n\n%s 0.0 0.0 0.0\n" % (mobj2.group(1))
         psivar_coord = Molecule(
@@ -1003,7 +1003,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched atom")
+        logger.debug("matched atom")
         # Dinky Molecule
         molxyz = "1 bohr\n\n%s 0.0 0.0 0.0\n" % (mobj.group(1))
         psivar_coord = Molecule(
@@ -1022,7 +1022,7 @@ def harvest_outfile_pass(outtext):
         re.MULTILINE,
     )
     if mobj:
-        print("matched error")
+        logger.debug("matched error")
         # psivar['CFOUR ERROR CODE'] = mobj.group(2)
         c4exe = mobj.group("c4exe")
         errcode = int(mobj.group("errcode"))

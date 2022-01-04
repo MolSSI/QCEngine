@@ -2,8 +2,6 @@
 
 import copy
 import pprint
-import sys
-import traceback
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -16,6 +14,7 @@ from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ..util import error_stamp
 from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
@@ -75,6 +74,7 @@ class CFOURHarness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["input"] = job_inputs["infiles"]["ZMAT"]
             return self.parse_output(dexe["outfiles"], input_model)
 
     def build_input(
@@ -171,18 +171,11 @@ class CFOURHarness(ProgramHarness):
             qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(
                 input_model.molecule, method, stdout, **outfiles
             )
-        except Exception as e:
-            raise UnknownError(
-                "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+        except Exception:
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         if errorTMP != "":
-            raise UnknownError("STDOUT:\n" + stdout + "\nSTDERR:\n" + stderr)
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         try:
             if c4grad is not None:
@@ -197,15 +190,8 @@ class CFOURHarness(ProgramHarness):
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
                 retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
-        except KeyError as e:
-            raise UnknownError(
-                "STDOUT:\n"
-                + stdout
-                + "\nSTDERR:\n"
-                + stderr
-                + "\nTRACEBACK:\n"
-                + "".join(traceback.format_exception(*sys.exc_info()))
-            )
+        except KeyError:
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
         # TODO: "xalloc(): memory allocation failed!"
 
@@ -224,7 +210,8 @@ class CFOURHarness(ProgramHarness):
         output_data = {
             "schema_version": 1,
             "molecule": c4mol,  # overwrites with outfile Cartesians in case fix_*=F
-            "extras": {"outfiles": outfiles, **input_model.extras},
+            "extras": {**input_model.extras},
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
             "provenance": provenance,
             "return_result": retres,

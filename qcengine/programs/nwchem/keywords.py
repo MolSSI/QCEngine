@@ -18,7 +18,7 @@ def format_keyword(keyword: str, val: Any, lop_off: bool = True, preserve_case: 
 
     # complete hack
     if keyword.upper() == "MEMORY":
-        return keyword.lower(), f"{val} double"
+        return key, f"{val} double"
 
     elif isinstance(val, list):
         text = " ".join([str(v) for v in val])
