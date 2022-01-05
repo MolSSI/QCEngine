@@ -36,7 +36,7 @@ class MadnessHarness(ProgramHarness):
     """
 
     _defaults = {
-        "name": "Madness",
+        "name": "madness",
         "scratch": True,
         "thread_safe": True,
         "thread_parallel": True,
@@ -67,7 +67,7 @@ class MadnessHarness(ProgramHarness):
 
         """
         qc = which(
-            "moldft",
+            "madness",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via https://github.com/m-a-d-n-e-s-s/madness",
@@ -89,6 +89,7 @@ class MadnessHarness(ProgramHarness):
 
         # Run MADNESS
         which_prog = which("madness")
+
         if config.use_mpiexec:
             command = create_mpi_invocation(which_prog, config)
         else:
@@ -99,7 +100,7 @@ class MadnessHarness(ProgramHarness):
             success, output = execute(
                 command,
                 {
-                    "v.moldft": "dft\nxc hf\nend\n\ngeometry\n He    0.00000000      0.00000000     0.00000000    \n end\n"
+                    "v.moldft": "dft\nxc lda\nend\ngeometry\nO  0.0    0.0 0.0\nH  1.4375 0.0 1.15\nH - 1.4375 0.0 1.15\nend\n"
                 },
                 scratch_directory=config.scratch_directory,
             )
@@ -137,10 +138,11 @@ class MadnessHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+            self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
-        madnessrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
+        madnessrec = {"infiles": {}, "scratch_directory": config.scratch_directory,
+                      "scratch_messy": config.scratch_messy}
 
         opts = copy.deepcopy(input_model.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
@@ -170,22 +172,24 @@ class MadnessHarness(ProgramHarness):
         madnessrec["infiles"]["input"] = optcmd + molcmd
         ## Determine the command
         # Determine the command
-        madnessrec["command"] = [which("moldft")]
+        madnessrec["command"] = [which("madness")]
         # print(madnessrec["infiles"]["input"])
         return madnessrec
 
     def execute(
-        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+            self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
+            scratch_exist_ok=True,
+            scratch_name=inputs.get("scratch_name", None),
             scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
 
     def parse_output(
-        self, outfiles: Dict[str, str], input_model: "AtomicInput"
+            self, outfiles: Dict[str, str], input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
         # Get the stdout from the calculation (required)
