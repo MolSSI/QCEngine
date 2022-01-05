@@ -17,10 +17,10 @@ from ..util import PreservingDict
 logger = logging.getLogger(__name__)
 
 
-def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, str]:
+def harvest_moldft_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, str]:
     """Function to read an entire MADNESS output file.
 
-    Reads all of the different "line search" segments of a file and returns
+    Read all of the different "line search" segments of a file and returns
     values from the last segment for which a geometry was written.
 
     Args:
@@ -39,22 +39,15 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
     pass_grad = []
     # Write now we split at Converge
     counter = 1
-    for outpass in re.split(r"Converged!", outtext, re.MULTILINE):
-        # for outpass in re.split(r"Iteration" + r"\s*" + r"[0 - 256]", outtext, re.MULTILINE):
 
-        counter = counter + 1
-        psivar, madcoord, madgrad, version, error = harvest_outfile_pass(outpass)
-        pass_psivar.append(psivar)  ## all the variables extracted
-        pass_coord.append(madcoord)
-        pass_grad.append(madgrad)
+    splits = re.split(r"Converged!", outtext, re.MULTILINE)[-2]
+    final_outpass = re.split(r"Iteration", splits, re.MULTILINE)[-1]
+    psivar, madcoord, madgrad, version, error = harvest_outfile_moldft_pass(final_outpass)
 
-    # Determine which segment contained the last geometry
-    retindx = -1  # if pass_coord[-1] else -2
-
-    return pass_psivar[retindx], pass_coord[retindx], pass_grad[retindx], version, error
+    return psivar, madcoord, madgrad, version, error
 
 
-def harvest_outfile_pass(outtext):
+def harvest_outfile_moldft_pass(outtext):
     """Function to read Madness output file *outtext* and parse important
     quantum chemical information from it in
 
@@ -70,7 +63,7 @@ def harvest_outfile_pass(outtext):
 
     # Process version
     mobj = re.search(
-        r'^\s+' + r'MADNESS' + r'\s+' + r'(\d+.\d\d+.\d)' +r'\s'+ r'multiresolution suite'+r'\s*$',
+        r'^\s+' + r'MADNESS' + r'\s+' + r'(\d+.\d\d+.\d)' + r'\s' + r'multiresolution suite' + r'\s*$',
         outtext, re.MULTILINE)
     # fmt: on
     if mobj:
@@ -180,7 +173,7 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
 
 
 def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, None, None, Molecule, str, str]:
-    """Parses all the pieces of output from NWChem: the stdout in
+    """Parses all the pieces of output from Madness: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 
     Args:
@@ -197,10 +190,10 @@ def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, 
     """
 
     # Parse the Madness output
-    out_psivar, out_mol, out_grad, version, error = harvest_output(madout)
+    out_psivar, out_mol, out_grad, version, error = harvest_moldft_output(madout)
 
     # If available, read higher-accuracy gradients
-    #  These were output using a Python Task in NWChem to read them out of the database
+    #  These were output using a Python Task in Madness to read them out of the database
     if outfiles.get("mad.grad") is not None:
         logger.debug("Reading higher-accuracy gradients")
         out_grad = json.loads(outfiles.get("mad.grad"))
