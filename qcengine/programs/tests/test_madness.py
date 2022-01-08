@@ -41,3 +41,41 @@ def test_mad_hf(program, basis, keywords, h2o):
 
     atol = 1.0e-5
     assert compare_values(scf_tot, res["return_result"], atol=atol)
+
+
+@using("madness")
+@pytest.mark.parametrize(
+    "program,basis,keywords",
+    [
+        pytest.param(
+            "madness",
+            None,
+            {
+                "dft__k": 7,
+                "dft__aobasis": "sto-3g",
+                "dft__econv": 1.0000e-05,
+                "response__firstorder": True,
+                "response__dipole": True,
+                "response__maxsub": 10,
+                "response__maxiter": 10,
+                "response__omega": 0.0,
+            },
+        ),
+    ],
+)
+@using("madness")
+def test_mad_hf_response(program, basis, keywords, h2o):
+    resi = {"molecule": h2o, "driver": "properties", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
+
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    # print(res["stdout"])
+
+    assert res["driver"] == "properties"
+    assert "provenance" in res
+    assert res["success"] is True
+
+    # k=7
+    scf_tot = -76.06720262
+
+    atol = 1.0e-5
+    assert compare_values(scf_tot, res["return_result"], atol=atol)
