@@ -7,6 +7,7 @@ import logging
 import pprint
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
+from pathlib import Path
 
 import numpy as np
 import qcelemental as qcel
@@ -122,28 +123,32 @@ class MadnessHarness(ProgramHarness):
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
+        print(job_inputs)
         success, dexe = self.execute(job_inputs)
-
         if "There is an error in the input file" in dexe["stdout"]:
             raise InputError(dexe["stdout"])
         if "not compiled" in dexe["stdout"]:
             # recoverable with a different compilation with optional modules
             raise InputError(dexe["stdout"])
-
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             return self.parse_output(dexe["outfiles"], input_model)
         else:
+            print(dexe["stdout"])
+
             raise UnknownError(dexe["stderr"])
 
     def build_input(
             self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
-        madnessrec = {"infiles": {}, "scratch_directory": config.scratch_directory,
-                      "scratch_messy": config.scratch_messy}
+        madnessrec = {
+            "infiles": {},
+            "scratch_directory": config.scratch_directory,
+            "scratch_messy": config.scratch_messy}
 
+        ## These are the madness keywords
         opts = copy.deepcopy(input_model.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
 
@@ -155,7 +160,9 @@ class MadnessHarness(ProgramHarness):
         opts.update(molData)
 
         ## Handle Calc Type (ROBERT)
-        mdccmd, mdcopts = muster_modelchem(input_model.model.method)
+        ## now returns respnse options as well
+        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver)
+
         opts.update(mdcopts)
 
         ## Handle the basis set (ROBERT) the question is what value of k
@@ -166,26 +173,58 @@ class MadnessHarness(ProgramHarness):
 
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
+        madnessrec["commands"] = {}
+        if mdccmd == "response":
+            dft_cmds = optcmd.split(mdccmd)
+            dft_cmds[1] = "response\n" + dft_cmds[1]
 
+            madnessrec["infiles"]["moldft"] = {}
+            madnessrec["infiles"]["moldft"]["input"] = dft_cmds[0] + molcmd
+            madnessrec["infiles"]["molresponse"] = {}
+            madnessrec["infiles"]["molresponse"]["input"] = dft_cmds[1]
+            madnessrec["commands"]["moldft"] = [which("moldft")]
+            madnessrec["commands"]["molresponse"] = [which("molresponse")]
+        else:
+            dft_cmds = optcmd
+            madnessrec["infiles"]["moldft"] = {}
+            madnessrec["infiles"]["moldft"]["input"] = dft_cmds + molcmd
+            madnessrec["commands"]["moldft"] = [which("moldft")]
+
+        print(dft_cmds)
         # optcmd="dft\n xc hf \nend\n"
-
-        madnessrec["infiles"]["input"] = optcmd + molcmd
-        ## Determine the command
-        # Determine the command
-        madnessrec["command"] = [which("madness")]
         # print(madnessrec["infiles"]["input"])
         return madnessrec
 
     def execute(
             self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
-        success, dexe = execute(
-            inputs["command"],
-            inputs["infiles"],
-            scratch_exist_ok=True,
-            scratch_name=inputs.get("scratch_name", None),
-            scratch_directory=inputs["scratch_directory"],
-        )
+        num_commands = len(inputs["commands"])
+        print(num_commands)
+        if num_commands == 2:
+            success, dexe = execute(
+                inputs["commands"]["moldft"],
+                inputs["infiles"]["moldft"],
+                scratch_name=inputs.get("scratch_name", None),
+                scratch_directory=inputs["scratch_directory"],
+                scratch_messy=True
+            )
+            success, dexe_response= execute(
+                inputs["commands"]["molresponse"],
+                inputs["infiles"]["molresponse"],
+                scratch_messy=False,
+                scratch_name=Path(dexe['scratch_directory']).name,
+                scratch_exist_ok=True
+            )
+        else:
+            print(inputs["commands"]["moldft"])
+            success, dexe = execute(
+                inputs["commands"]["moldft"],
+                inputs["infiles"]["moldft"],
+                scratch_exist_ok=True,
+                scratch_name=inputs.get("scratch_name", None),
+                scratch_directory=inputs["scratch_directory"],
+                scratch_messy=False,
+            )
         return success, dexe
 
     def parse_output(
@@ -194,7 +233,6 @@ class MadnessHarness(ProgramHarness):
 
         # Get the stdout from the calculation (required)
         stdout = outfiles.pop("stdout")
-
         # Read the MADNESj stdout file and, if needed, the hess or grad files
         qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
 
@@ -203,7 +241,6 @@ class MadnessHarness(ProgramHarness):
 
         if madhess is not None:
             qcvars["CURRENT HESSIAN"] = madhess
-
         # Normalize the output as a float or list of floats
         if input_model.driver.upper() == "PROPERTIES":
             retres = qcvars[f"CURRENT ENERGY"]
@@ -218,7 +255,6 @@ class MadnessHarness(ProgramHarness):
 
         # Get the formatted properties
         qcprops = extract_formatted_properties(qcvars)
-
         # Format them inout an output
         output_data = {
             "schema_name": "qcschema_output",
