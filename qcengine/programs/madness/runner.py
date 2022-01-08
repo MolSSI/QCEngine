@@ -140,13 +140,14 @@ class MadnessHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-            self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
         madnessrec = {
             "infiles": {},
             "scratch_directory": config.scratch_directory,
-            "scratch_messy": config.scratch_messy}
+            "scratch_messy": config.scratch_messy,
+        }
 
         ## These are the madness keywords
         opts = copy.deepcopy(input_model.keywords)
@@ -196,7 +197,7 @@ class MadnessHarness(ProgramHarness):
         return madnessrec
 
     def execute(
-            self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
         num_commands = len(inputs["commands"])
         print(num_commands)
@@ -204,16 +205,17 @@ class MadnessHarness(ProgramHarness):
             success, dexe = execute(
                 inputs["commands"]["moldft"],
                 inputs["infiles"]["moldft"],
+                scratch_exist_ok=True,
                 scratch_name=inputs.get("scratch_name", None),
                 scratch_directory=inputs["scratch_directory"],
-                scratch_messy=True
+                scratch_messy=True,
             )
-            success, dexe_response= execute(
+            success, dexe_response = execute(
                 inputs["commands"]["molresponse"],
                 inputs["infiles"]["molresponse"],
                 scratch_messy=False,
-                scratch_name=Path(dexe['scratch_directory']).name,
-                scratch_exist_ok=True
+                scratch_name=Path(dexe["scratch_directory"]).name,
+                scratch_exist_ok=True,
             )
         else:
             print(inputs["commands"]["moldft"])
@@ -228,7 +230,7 @@ class MadnessHarness(ProgramHarness):
         return success, dexe
 
     def parse_output(
-            self, outfiles: Dict[str, str], input_model: "AtomicInput"
+        self, outfiles: Dict[str, str], input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
         # Get the stdout from the calculation (required)
