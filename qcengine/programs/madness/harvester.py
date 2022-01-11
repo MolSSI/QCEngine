@@ -193,7 +193,7 @@ def harvest(in_mol: Molecule, **outfiles) -> Tuple[PreservingDict, None, None, M
     out_psivar, out_mol, out_grad, version, error = harvest_moldft_output(outfiles["moldft"]["stdout"])
     print(outfiles)
     if "molresponse" in outfiles.keys():
-        response_psi_var= harvest_response_file(outfiles["molresponse"]["stdout"])
+        response_psi_var = harvest_response_file(outfiles["molresponse"]["stdout"])
         out_psivar.update(response_psi_var)
 
     # If available, read higher-accuracy gradients
@@ -281,11 +281,7 @@ def harvest_response_file(outtext):
 
     var = r"Orbital Energies: \[\*\]"
     VAR = "ORBITAL ENERGIES"
-    mobj = re.search(
-        r"^\s*" + var + r"\s*" + NUMSPACEORB + r"$",
-        outtext,
-        re.MULTILINE,
-    )
+    mobj = re.search(r"^\s*" + var + r"\s*" + NUMSPACEORB + r"$", outtext, re.MULTILINE,)
     # print(mobj)
 
     if mobj:
@@ -317,11 +313,7 @@ def grab_tensor(var, VAR, row, col, psivar, data):
         total += line
     #    print(line)
 
-    mobj = re.search(
-        total,
-        data,
-        re.MULTILINE,
-    )
+    mobj = re.search(total, data, re.MULTILINE,)
     # print(mobj)
     if mobj:
         oe_list = []

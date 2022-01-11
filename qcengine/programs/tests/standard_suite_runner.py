@@ -126,12 +126,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
     if is_dft:
         atol_g = 6.0e-6
     chash = answer_hash(
-        system=subject.name,
-        basis=basis,
-        fcae=fcae,
-        scf_type=scf_type,
-        reference=reference,
-        corl_type=corl_type,
+        system=subject.name, basis=basis, fcae=fcae, scf_type=scf_type, reference=reference, corl_type=corl_type,
     )
     ref_block = std_suite[chash]
 
@@ -139,12 +134,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
     atol_conv = 1.0e-4
     rtol_conv = 1.0e-3
     chash_conv = answer_hash(
-        system=subject.name,
-        basis=basis,
-        fcae=fcae,
-        reference=reference,
-        corl_type="conv",
-        scf_type="pk",
+        system=subject.name, basis=basis, fcae=fcae, reference=reference, corl_type="conv", scf_type="pk",
     )
     ref_block_conv = std_suite[chash_conv]
 
@@ -154,10 +144,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
         **{
             "molecule": subject,
             "driver": driver,
-            "model": {
-                "method": method,
-                "basis": inp.get("basis", "(auto)"),
-            },
+            "model": {"method": method, "basis": inp.get("basis", "(auto)"),},
             "keywords": inp["keywords"],
         }
     )

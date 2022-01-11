@@ -322,11 +322,7 @@ def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
             "molecule": h20v2,
             "model": {"method": method, "basis": "sto-3g"},
             "driver": "energy",
-            "keywords": {
-                keyword: init_iters,
-                "qc_module": use_tce,
-                "scf__uhf": True,
-            },  # UHF needed for SCF test
+            "keywords": {keyword: init_iters, "qc_module": use_tce, "scf__uhf": True,},  # UHF needed for SCF test
         },
         "nwchem",
         raise_error=True,

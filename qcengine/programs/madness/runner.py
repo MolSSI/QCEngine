@@ -147,7 +147,7 @@ class MadnessHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-            self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
         madnessrec = {
@@ -204,7 +204,7 @@ class MadnessHarness(ProgramHarness):
         return madnessrec
 
     def execute(
-            self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
         num_commands = len(inputs["commands"])
         oexe = {}
@@ -243,7 +243,7 @@ class MadnessHarness(ProgramHarness):
             return success, oexe
 
     def parse_output(
-            self, outfiles: Dict[str, str], input_model: "AtomicInput"
+        self, outfiles: Dict[str, str], input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
         # Get the stdout from the calculation (required)

@@ -90,10 +90,7 @@ _xc_functionals = [
 
 
 # def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict[str, Any]]:
-def muster_modelchem(
-    method: str,
-    derint: int,
-) -> Tuple[str, Dict[str, Any]]:
+def muster_modelchem(method: str, derint: int,) -> Tuple[str, Dict[str, Any]]:
     """Converts the QC method into MADNESS keywords
 
     Args:
@@ -127,7 +124,7 @@ def muster_modelchem(
         if method.split()[0] in _xc_functionals:
             opts["dft__xc"] = method
             opts["response__xc"] = method
-            opts["response__archive"]="restartdata"
+            opts["response__archive"] = "restartdata"
         else:
             raise InputError(f"Method not recognized: {method}")
         mdccmd = f"response"  ## we will split the options with the word response later

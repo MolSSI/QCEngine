@@ -284,9 +284,7 @@ class DFTD3Harness(ProgramHarness):
         output_data = {
             "extras": input_model.extras,
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
-            "properties": {
-                "return_energy": calcinfo[f"CURRENT ENERGY"],
-            },
+            "properties": {"return_energy": calcinfo[f"CURRENT ENERGY"],},
             "provenance": Provenance(
                 creator="DFTD3", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),

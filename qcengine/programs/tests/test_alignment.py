@@ -62,11 +62,7 @@ def clsd_open_pmols():
 )
 @pytest.mark.parametrize(
     "driver",
-    [
-        pytest.param("energy", id="ene0"),
-        pytest.param("gradient", id="grd1"),
-        pytest.param("hessian", id="hes2"),
-    ],
+    [pytest.param("energy", id="ene0"), pytest.param("gradient", id="grd1"), pytest.param("hessian", id="hes2"),],
 )
 @pytest.mark.parametrize(
     "basis, subjects",

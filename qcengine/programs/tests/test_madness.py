@@ -21,9 +21,7 @@ def h2o():
 @using("madness")
 @pytest.mark.parametrize(
     "program,basis,keywords",
-    [
-        pytest.param("madness", None, {"dft__k": 7, "dft__aobasis": "sto-3g", "dft__econv": 1.0000e-05}),
-    ],
+    [pytest.param("madness", None, {"dft__k": 7, "dft__aobasis": "sto-3g", "dft__econv": 1.0000e-05}),],
 )
 @using("madness")
 def test_mad_hf(program, basis, keywords, h2o):

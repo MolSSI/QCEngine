@@ -25,14 +25,7 @@ def test_energy(h2o):
         "world_unit": "bohr",
     }
 
-    inp = qcel.models.AtomicInput(
-        molecule=h2o,
-        driver="energy",
-        model={
-            "method": "BLYP",
-        },
-        keywords=mr_kws,
-    )
+    inp = qcel.models.AtomicInput(molecule=h2o, driver="energy", model={"method": "BLYP",}, keywords=mr_kws,)
 
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
 
@@ -59,14 +52,7 @@ def test_dipole(h2o):
         "world_unit": "bohr",
     }
 
-    inp = qcel.models.AtomicInput(
-        molecule=h2o,
-        driver="properties",
-        model={
-            "method": "BLYP",
-        },
-        keywords=mr_kws,
-    )
+    inp = qcel.models.AtomicInput(molecule=h2o, driver="properties", model={"method": "BLYP",}, keywords=mr_kws,)
 
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
 

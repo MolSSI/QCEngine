@@ -209,12 +209,7 @@ def contractual_mp2(
             )
             or (
                 ((qc_module == "psi4-occ" and reference == "rohf" and method in ["olccd"]))
-                and pv
-                in [
-                    "MP2 CORRELATION ENERGY",
-                    "MP2 TOTAL ENERGY",
-                    "MP2 SINGLES ENERGY",
-                ]
+                and pv in ["MP2 CORRELATION ENERGY", "MP2 TOTAL ENERGY", "MP2 SINGLES ENERGY",]
             )
             or (
                 (
@@ -700,21 +695,11 @@ def contractual_ccsd(
             )
             or (
                 (qc_module == "cfour-vcc" and reference in ["rohf"] and method in ["ccsd", "ccsd(t)"])
-                and pv
-                in [
-                    "CCSD SAME-SPIN CORRELATION ENERGY",
-                    "CCSD SINGLES ENERGY",
-                    "CCSD DOUBLES ENERGY",
-                ]
+                and pv in ["CCSD SAME-SPIN CORRELATION ENERGY", "CCSD SINGLES ENERGY", "CCSD DOUBLES ENERGY",]
             )
             or (
                 (qc_module == "cfour-ecc" and reference in ["rohf"] and method in ["ccsd", "ccsd(t)"])
-                and pv
-                in [
-                    "CCSD OPPOSITE-SPIN CORRELATION ENERGY",
-                    "CCSD SINGLES ENERGY",
-                    "CCSD DOUBLES ENERGY",
-                ]
+                and pv in ["CCSD OPPOSITE-SPIN CORRELATION ENERGY", "CCSD SINGLES ENERGY", "CCSD DOUBLES ENERGY",]
             )
             or (
                 (

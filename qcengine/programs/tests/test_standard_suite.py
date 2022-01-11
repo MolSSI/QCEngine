@@ -123,10 +123,7 @@ def _trans_key(qc, bas, key):
 
 
 @pytest.mark.parametrize(
-    "dertype",
-    [
-        pytest.param(0, id="ene0"),
-    ],
+    "dertype", [pytest.param(0, id="ene0"),],
 )
 @pytest.mark.parametrize(
     "basis, subjects",
@@ -276,11 +273,7 @@ def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 
 
 @pytest.mark.parametrize(
-    "dertype",
-    [
-        0,
-    ],
-    ids=["ene0"],
+    "dertype", [0,], ids=["ene0"],
 )
 @pytest.mark.parametrize(
     "basis, subjects",
@@ -353,11 +346,7 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 
 
 @pytest.mark.parametrize(
-    "dertype",
-    [
-        0,
-    ],
-    ids=["ene0"],
+    "dertype", [0,], ids=["ene0"],
 )
 @pytest.mark.parametrize(
     "basis, subjects",

@@ -1728,11 +1728,7 @@ def test_dftd3__run_dftd3__2body(inp, subjects, request):
 
     program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
-    atin = AtomicInput(
-        molecule=mol,
-        driver="gradient",
-        **inp["qcsk"],
-    )
+    atin = AtomicInput(molecule=mol, driver="gradient", **inp["qcsk"],)
     jrec = qcng.compute(atin, program, raise_error=True)
     jrec = jrec.dict()
     pprint.pprint(jrec)
@@ -1793,11 +1789,7 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
 
     program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
-    atin = AtomicInput(
-        molecule=mol,
-        driver="gradient",
-        **inp["qcsk"],
-    )
+    atin = AtomicInput(molecule=mol, driver="gradient", **inp["qcsk"],)
     jrec = qcng.compute(atin, program, raise_error=True)
     jrec = jrec.dict()
 
@@ -1896,14 +1888,7 @@ def test_sapt_pairwise(inp, subjects, request):
 
     program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
-    atin = AtomicInput(
-        molecule=mol,
-        driver="energy",
-        model={"method": inp["lbl"]},
-        keywords={
-            "pair_resolved": True,
-        },
-    )
+    atin = AtomicInput(molecule=mol, driver="energy", model={"method": inp["lbl"]}, keywords={"pair_resolved": True,},)
     jrec = qcng.compute(atin, program, raise_error=True)
     jrec = jrec.dict()
 
@@ -1917,11 +1902,7 @@ def test_sapt_pairwise(inp, subjects, request):
 
 
 @pytest.mark.parametrize(
-    "program",
-    [
-        pytest.param("gcp", marks=using("gcp")),
-        pytest.param("mctc-gcp", marks=using("mctc-gcp")),
-    ],
+    "program", [pytest.param("gcp", marks=using("gcp")), pytest.param("mctc-gcp", marks=using("mctc-gcp")),],
 )
 @pytest.mark.parametrize(
     "subjects",
