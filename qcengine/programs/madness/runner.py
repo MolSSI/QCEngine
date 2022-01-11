@@ -123,24 +123,31 @@ class MadnessHarness(ProgramHarness):
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
-        print(job_inputs)
         success, dexe = self.execute(job_inputs)
-        if "There is an error in the input file" in dexe["stdout"]:
-            raise InputError(dexe["stdout"])
-        if "not compiled" in dexe["stdout"]:
+        if "There is an error in the input file" in dexe["moldft"]["stdout"]:
+            raise InputError(dexe["moldft"]["stdout"])
+        if "not compiled" in dexe["moldft"]["stdout"]:
             # recoverable with a different compilation with optional modules
-            raise InputError(dexe["stdout"])
+            raise InputError(dexe["moldft"]["stdout"])
         if success:
-            dexe["outfiles"]["stdout"] = dexe["stdout"]
-            dexe["outfiles"]["stderr"] = dexe["stderr"]
-            return self.parse_output(dexe["outfiles"], input_model)
+            num_commands = len(dexe)
+            print(num_commands)
+            if num_commands == 2:
+                dexe["moldft"]["outfiles"]["stdout"] = dexe["moldft"]["stdout"]
+                dexe["moldft"]["outfiles"]["stderr"] = dexe["moldft"]["stderr"]
+                dexe["molresponse"]["outfiles"]["stdout"] = dexe["molresponse"]["stdout"]
+                dexe["molresponse"]["outfiles"]["stderr"] = dexe["molresponse"]["stderr"]
+            else:
+                dexe["moldft"]["outfiles"]["stdout"] = dexe["moldft"]["stdout"]
+                dexe["moldft"]["outfiles"]["stderr"] = dexe["moldft"]["stderr"]
+            return self.parse_output(dexe, input_model)
         else:
             print(dexe["stdout"])
 
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+            self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
         madnessrec = {
@@ -182,7 +189,7 @@ class MadnessHarness(ProgramHarness):
             madnessrec["infiles"]["moldft"] = {}
             madnessrec["infiles"]["moldft"]["input"] = dft_cmds[0] + molcmd
             madnessrec["infiles"]["molresponse"] = {}
-            madnessrec["infiles"]["molresponse"]["input"] = dft_cmds[1]
+            madnessrec["infiles"]["molresponse"]["rinput"] = dft_cmds[1]
             madnessrec["commands"]["moldft"] = [which("moldft")]
             madnessrec["commands"]["molresponse"] = [which("molresponse")]
         else:
@@ -197,10 +204,10 @@ class MadnessHarness(ProgramHarness):
         return madnessrec
 
     def execute(
-        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+            self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
         num_commands = len(inputs["commands"])
-        print(num_commands)
+        oexe = {}
         if num_commands == 2:
             success, dexe = execute(
                 inputs["commands"]["moldft"],
@@ -210,13 +217,18 @@ class MadnessHarness(ProgramHarness):
                 scratch_directory=inputs["scratch_directory"],
                 scratch_messy=True,
             )
+            oexe["moldft"] = dexe
             success, dexe_response = execute(
                 inputs["commands"]["molresponse"],
                 inputs["infiles"]["molresponse"],
-                scratch_messy=False,
+                scratch_messy=True,
                 scratch_name=Path(dexe["scratch_directory"]).name,
                 scratch_exist_ok=True,
             )
+            oexe["molresponse"] = dexe_response
+            print(dexe)
+            print(dexe_response)
+            return success, oexe
         else:
             print(inputs["commands"]["moldft"])
             success, dexe = execute(
@@ -225,18 +237,26 @@ class MadnessHarness(ProgramHarness):
                 scratch_exist_ok=True,
                 scratch_name=inputs.get("scratch_name", None),
                 scratch_directory=inputs["scratch_directory"],
-                scratch_messy=False,
+                scratch_messy=True,
             )
-        return success, dexe
+            oexe["moldft"] = dexe
+            return success, oexe
 
     def parse_output(
-        self, outfiles: Dict[str, str], input_model: "AtomicInput"
+            self, outfiles: Dict[str, str], input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
         # Get the stdout from the calculation (required)
-        stdout = outfiles.pop("stdout")
+        stdout = outfiles["moldft"]["stdout"]
+        if "molresponse" in outfiles.keys():
+            stdout += outfiles["molresponse"]["stdout"]
+
         # Read the MADNESj stdout file and, if needed, the hess or grad files
-        qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
+        qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, **outfiles)
+        ## pop the files because I think I need to
+        outfiles.pop("moldft")
+        if "molresponse" in outfiles.keys():
+            outfiles.pop("molresponse")
 
         if madgrad is not None:
             qcvars["CURRENT GRADIENT"] = madgrad

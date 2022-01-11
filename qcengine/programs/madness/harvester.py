@@ -172,7 +172,7 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     return AtomicResultProperties(**output)
 
 
-def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, None, None, Molecule, str, str]:
+def harvest(in_mol: Molecule, **outfiles) -> Tuple[PreservingDict, None, None, Molecule, str, str]:
     """Parses all the pieces of output from Madness: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 
@@ -190,7 +190,11 @@ def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, 
     """
 
     # Parse the Madness output
-    out_psivar, out_mol, out_grad, version, error = harvest_moldft_output(madout)
+    out_psivar, out_mol, out_grad, version, error = harvest_moldft_output(outfiles["moldft"]["stdout"])
+    print(outfiles)
+    if "molresponse" in outfiles.keys():
+        response_psi_var= harvest_response_file(outfiles["molresponse"]["stdout"])
+        out_psivar.update(response_psi_var)
 
     # If available, read higher-accuracy gradients
     #  These were output using a Python Task in Madness to read them out of the database
@@ -227,3 +231,103 @@ def harvest(in_mol: Molecule, madout: str, **outfiles) -> Tuple[PreservingDict, 
     #    out_hess = mill.align_hessian(np.array(out_hess))
 
     return out_psivar, out_hess, out_grad, out_mol, version, error
+
+
+def harvest_response_file(outtext):
+    psivar = PreservingDict()
+    psivar_coord = None
+    psivar_grad = None
+    version = ""
+    error = ""  # TODO (wardlt): The error string is never used.
+    pass_psivar = []
+    pass_coord = []
+    pass_grad = []
+    # Write now we split at Converge
+    counter = 1
+
+    splits = re.split(r"Converged!", outtext, re.MULTILINE)
+    print(splits)
+    splits = splits[-1]
+    data = re.split(r"Iteration", splits, re.MULTILINE)[-1]
+    print(data)
+
+    NUMBER = r"(?x:" + regex.NUMBER + ")"  # NUMBER
+    NUMSPACE = NUMBER + r"\s*"  # NUMBER + SPACE
+
+    OPTIONS = [
+        r"Number of Response States:",
+        r"Number of Ground States:",
+        r"k =",
+    ]
+    PSIVAR = ["NUM STATES", "NUM ORBITALS", "K"]
+    optDict = dict(zip(OPTIONS, PSIVAR))
+
+    for var, VAR in optDict.items():
+        mobj = re.search(r"^\s*" + var + r"\s*" + NUMBER + r"\s*$", outtext, re.MULTILINE)
+        # print(mobj)
+        if mobj:
+            psivar[VAR] = mobj.group(1)
+    # Grab the Orbital Energies  There are NUM ORBITALS
+    num_states = int(psivar["NUM STATES"])
+    num_orbitals = int(psivar["NUM ORBITALS"])
+
+    print(num_states)
+    print(num_orbitals)
+    # print(NUMSPACE)
+    NUMSPACEORB = str()
+    for i in range(num_orbitals):
+        NUMSPACEORB += NUMSPACE
+    # print(NUMSPACEORB)
+
+    var = r"Orbital Energies: \[\*\]"
+    VAR = "ORBITAL ENERGIES"
+    mobj = re.search(
+        r"^\s*" + var + r"\s*" + NUMSPACEORB + r"$",
+        outtext,
+        re.MULTILINE,
+    )
+    # print(mobj)
+
+    if mobj:
+        oe_list = []
+        for i in range(num_orbitals):
+            oe_list.append(mobj.group(i + 1))
+
+        psivar[VAR] = np.array(oe_list, dtype=float)
+
+    psivar = grab_tensor(r"Ground state overlap:", "OVERLAP", num_orbitals, num_orbitals, psivar, outtext)
+    psivar = grab_tensor(r"Ground state hamiltonian:", "HAMILTONIAN", num_orbitals, num_orbitals, psivar, outtext)
+    psivar = grab_tensor(r"Polarizability Final", "POLARIZABILITY", num_states, num_states, psivar, data)
+    return psivar
+
+
+def grab_tensor(var, VAR, row, col, psivar, data):
+    first_line = r"^\s*" + var + r"\s+"
+    NUMBER = r"(?x:" + regex.NUMBER + ")"  # NUMBER
+    NUMSPACE = NUMBER + r"\s*"  # NUMBER + SPACE
+    # print(first_line)
+
+    CAPTURE_LINE = str()
+    for j in range(col):
+        CAPTURE_LINE += NUMSPACE
+    total = first_line
+    for i in range(row):
+        front = r"^\[" + str(i) + r",\*\]\s*"
+        line = front + CAPTURE_LINE
+        total += line
+    #    print(line)
+
+    mobj = re.search(
+        total,
+        data,
+        re.MULTILINE,
+    )
+    # print(mobj)
+    if mobj:
+        oe_list = []
+        for i in range(row):
+            for j in range(col):
+                oe_list.append(mobj.group(i + 1))
+        tensor = np.array(oe_list)
+        psivar[VAR] = tensor.reshape((row, col))
+    return psivar
