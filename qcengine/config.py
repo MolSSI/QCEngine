@@ -53,12 +53,16 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
             _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand_raw"]
         except KeyError:
             # Remove this if py-cpuinfo is pinned to >=6.0.0
-            _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand"]
+            try:
+                _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand"]
+            except KeyError:
+                pass
+
 
     if key is None:
         return _global_values.copy()
     else:
-        return _global_values[key]
+        return _global_values.get(key)
 
 
 class NodeDescriptor(pydantic.BaseModel):
