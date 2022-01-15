@@ -58,7 +58,6 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
             except KeyError:
                 pass
 
-
     if key is None:
         return _global_values.copy()
     else:
