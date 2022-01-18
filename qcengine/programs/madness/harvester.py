@@ -133,6 +133,9 @@ def harvest_hessian(hess: str) -> np.ndarray:
 #     return hess_arr.T  # So that the array is listed in C-order, needed by some alignment routines
 
 
+
+# gets calc info from psivars preservingDict
+# before 
 def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultProperties:
     """Get named properties out of the general variables extracted out of the result file
 
@@ -145,6 +148,7 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
 
     # Initialize the output
     output = dict()
+    print("extract_formatted_properties",output)
 
     # Extract the Calc Info
     output.update(
@@ -158,12 +162,12 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     )
 
     # Get the "canonical" properties
-    output["return_energy"] = psivars["CURRENT ENERGY"]
-    output["nuclear_repulsion_energy"] = psivars["NUCLEAR REPULSION ENERGY"]
+    #output["return_energy"] = psivars["CURRENT ENERGY"]
+    #output["nuclear_repulsion_energy"] = psivars["NUCLEAR REPULSION ENERGY"]
 
     # Get the SCF properties
-    output["scf_total_energy"] = psivars.get("TOTAL SCF ENERGY", None)
-    output["scf_xc_energy"] = psivars.get("EXCHANGE-CORRELATION", None)
+    #output["scf_total_energy"] = psivars.get("TOTAL SCF ENERGY", None)
+    #output["scf_xc_energy"] = psivars.get("EXCHANGE-CORRELATION", None)
     # TODO AdrianH right madness to output these variables
     # output["scf_one_electron_energy"] = psivars.get("ONE-ELECTRON ENERGY", None)
     # output["scf_two_electron_energy"] = psivars.get("TWO-ELECTRON ENERGY", None)
@@ -172,7 +176,7 @@ def extract_formatted_properties(psivars: PreservingDict) -> AtomicResultPropert
     return AtomicResultProperties(**output)
 
 
-def harvest(in_mol: Molecule, **outfiles) -> Tuple[PreservingDict, None, None, Molecule, str, str]:
+def harvest(in_mol: Molecule, outfiles) -> Tuple[PreservingDict, None, None, Molecule, str, str]:
     """Parses all the pieces of output from Madness: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 
@@ -188,10 +192,33 @@ def harvest(in_mol: Molecule, **outfiles) -> Tuple[PreservingDict, None, None, M
         - (str): Version string
         - (str): Error message, if any
     """
-
+    print("harvest ",outfiles)
     # Parse the Madness output
-    out_psivar, out_mol, out_grad, version, error = harvest_moldft_output(outfiles["moldft"]["stdout"])
-    print(outfiles)
+    # This is a weird unpacking but i'm sure i'll find a more elegant way to do this later
+    moldft_info=outfiles.get("moldft")
+    moldft_outfiles=moldft_info.get("outfiles")
+    # At this point scf prints a list of json outputs where each list refers to the scf at givin protocol
+    ## Here I load the scf_info and calc_info as json
+    scf_info=json.loads(moldft_outfiles.get("scf_info.json"))
+    calc_info=json.loads(moldft_outfiles.get("calc_info.json"))
+
+    
+    # Write harvest scf_info and harvest calc_info 
+    out_calc_vars=harvest_calc_info(calc_info)
+    print("harvesting calc info",out_calc_vars)
+    out_scf_vars=harvest_scf_info(scf_info)
+    
+
+    out_psivar=PreservingDict()
+    out_psivar.update(out_calc_vars)
+    out_psivar.update(out_scf_vars)
+    
+
+    print("harvest scf_info json",scf_info)
+    print("harvest calc_info json",calc_info)
+    # no need for this when we now have json files with all of the scf and calc info
+    ## currently only use this for verson 
+    Idontneed_vars, out_mol, out_grad, version, error = harvest_moldft_output(outfiles["moldft"]["stdout"])
     if "molresponse" in outfiles.keys():
         response_psi_var = harvest_response_file(outfiles["molresponse"]["stdout"])
         out_psivar.update(response_psi_var)
@@ -203,6 +230,8 @@ def harvest(in_mol: Molecule, **outfiles) -> Tuple[PreservingDict, None, None, M
         out_grad = json.loads(outfiles.get("mad.grad"))
 
     # If available, read the hessian
+    # TODO read in the geometry outputs from a geometry optimization
+    #out_mol = None
     out_hess = None
     if outfiles.get("mad.hess") is not None:
         out_hess = harvest_hessian(outfiles.get("mad.hess"))
@@ -229,9 +258,67 @@ def harvest(in_mol: Molecule, **outfiles) -> Tuple[PreservingDict, None, None, M
     #    out_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
     # if out_hess is not None:
     #    out_hess = mill.align_hessian(np.array(out_hess))
+    # TODO create a madness json that outputs basic info like the version and github hash?
+
+    
 
     return out_psivar, out_hess, out_grad, out_mol, version, error
 
+#collect the scf_info json
+# first iterate through single numbers
+# Then iteration throught tensor values
+# this format should work for response values in the future
+def harvest_scf_info(scf_info):
+    psivar = PreservingDict()
+
+    # We only need to last set in the list
+    scf_info=scf_info[-1][0]
+    print("harvest scf info",scf_info)
+
+    scf_number_vars=['scf_one_electron_energy',
+    'scf_two_electron_energy',
+    'nuclear_repulsion_energy',
+    'scf_vv10_energy',
+    'scf_xc_energy',
+    'scf_dispersion_correction_energy',
+    'scf_total_energy',
+    'scf_iterations']
+
+    for var in scf_number_vars: 
+        if scf_info.get(var) is not None:
+            psivar[var.upper()]=scf_info.get(var)
+
+    scf_tensor_vars=[
+    'scf_dipole_moment'
+    ]
+
+    for var in scf_tensor_vars: 
+        if scf_info.get(var) is not None:
+            psivar[var.upper()]=tensor_to_numpy(scf_info.get(var))
+
+
+    return psivar
+
+def harvest_calc_info(calc_info):
+    psivar = PreservingDict()
+    qcvars=['calcinfo_nbasis',
+    'calcinfo_nmo',
+    'calcinfo_nalpha',
+    'calcinfo_nbeta',
+    'calcinfo_natom',
+    'return_energy']
+
+    for var in qcvars: 
+        if calc_info.get(var) is not None:
+            psivar[var.upper()]=calc_info.get(var)
+
+    return psivar
+
+def tensor_to_numpy(j):
+    array = np.empty(j["size"])
+    array[:] = j["vals"]
+    print(tuple(j['dims']))
+    return np.reshape(array,tuple(j["dims"]))
 
 def harvest_response_file(outtext):
     psivar = PreservingDict()
@@ -296,6 +383,7 @@ def harvest_response_file(outtext):
     psivar = grab_tensor(r"Polarizability Final", "POLARIZABILITY", num_states, num_states, psivar, data)
     return psivar
 
+# Translate a madness tensor defined within json output to a numpy array
 
 def grab_tensor(var, VAR, row, col, psivar, data):
     first_line = r"^\s*" + var + r"\s+"

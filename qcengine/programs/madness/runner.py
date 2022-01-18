@@ -62,7 +62,7 @@ class MadnessHarness(ProgramHarness):
          Returns
          -------
          bool
-             If both nwchem and its harness dependency networkx are found, returns True.
+             If both m-a-d-n-e-s-s and its harness dependency networkx are found, returns True.
              If raise_error is False and nwchem or networkx are missing, returns False.
              If raise_error is True and nwchem or networkx are missing, the error message for the first missing one is raised.
 
@@ -140,6 +140,9 @@ class MadnessHarness(ProgramHarness):
             else:
                 dexe["moldft"]["outfiles"]["stdout"] = dexe["moldft"]["stdout"]
                 dexe["moldft"]["outfiles"]["stderr"] = dexe["moldft"]["stderr"]
+                print(dexe["moldft"]["outfiles"]["scf_info.json"])
+                print(dexe["moldft"]["outfiles"]["calc_info.json"])
+            print("Write before self.parse",dexe)
             return self.parse_output(dexe, input_model)
         else:
             print(dexe["stdout"])
@@ -212,6 +215,7 @@ class MadnessHarness(ProgramHarness):
             success, dexe = execute(
                 inputs["commands"]["moldft"],
                 inputs["infiles"]["moldft"],
+                ["calc_info.json","scf_info.json"],
                 scratch_exist_ok=True,
                 scratch_name=inputs.get("scratch_name", None),
                 scratch_directory=inputs["scratch_directory"],
@@ -234,6 +238,7 @@ class MadnessHarness(ProgramHarness):
             success, dexe = execute(
                 inputs["commands"]["moldft"],
                 inputs["infiles"]["moldft"],
+                ["calc_info.json","scf_info.json"],
                 scratch_exist_ok=True,
                 scratch_name=inputs.get("scratch_name", None),
                 scratch_directory=inputs["scratch_directory"],
@@ -243,16 +248,18 @@ class MadnessHarness(ProgramHarness):
             return success, oexe
 
     def parse_output(
-        self, outfiles: Dict[str, str], input_model: "AtomicInput"
+        self, outfiles , input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
         # Get the stdout from the calculation (required)
         stdout = outfiles["moldft"]["stdout"]
         if "molresponse" in outfiles.keys():
             stdout += outfiles["molresponse"]["stdout"]
+        print("within parse_output scf_info.json",outfiles["moldft"]["outfiles"]["scf_info.json"])
+        print("within parse output calc_info",outfiles["moldft"]["outfiles"]["calc_info.json"])
 
         # Read the MADNESj stdout file and, if needed, the hess or grad files
-        qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, **outfiles)
+        qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, outfiles)
         ## pop the files because I think I need to
         outfiles.pop("moldft")
         if "molresponse" in outfiles.keys():
@@ -267,8 +274,7 @@ class MadnessHarness(ProgramHarness):
         if input_model.driver.upper() == "PROPERTIES":
             retres = qcvars[f"CURRENT ENERGY"]
         else:
-            print(qcvars)
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            retres = qcvars["RETURN_ENERGY"]
 
         if isinstance(retres, Decimal):
             retres = float(retres)
