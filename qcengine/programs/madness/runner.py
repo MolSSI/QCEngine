@@ -131,7 +131,6 @@ class MadnessHarness(ProgramHarness):
             raise InputError(dexe["moldft"]["stdout"])
         if success:
             num_commands = len(dexe)
-            print(num_commands)
             if num_commands == 2:
                 dexe["moldft"]["outfiles"]["stdout"] = dexe["moldft"]["stdout"]
                 dexe["moldft"]["outfiles"]["stderr"] = dexe["moldft"]["stderr"]
@@ -140,9 +139,6 @@ class MadnessHarness(ProgramHarness):
             else:
                 dexe["moldft"]["outfiles"]["stdout"] = dexe["moldft"]["stdout"]
                 dexe["moldft"]["outfiles"]["stderr"] = dexe["moldft"]["stderr"]
-                print(dexe["moldft"]["outfiles"]["scf_info.json"])
-                print(dexe["moldft"]["outfiles"]["calc_info.json"])
-            print("Write before self.parse",dexe)
             return self.parse_output(dexe, input_model)
         else:
             print(dexe["stdout"])
@@ -150,7 +146,7 @@ class MadnessHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+            self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
         madnessrec = {
@@ -162,9 +158,12 @@ class MadnessHarness(ProgramHarness):
         ## These are the madness keywords
         opts = copy.deepcopy(input_model.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
+        print(opts)
 
         # Handle Molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="madness", units="bohr", return_data=True)
+        print(moldata)
+        print(molcmd)
         molData = {}
         for k, v in moldata["keywords"].items():
             molData["dft__" + k] = v
@@ -173,9 +172,7 @@ class MadnessHarness(ProgramHarness):
         ## Handle Calc Type (ROBERT)
         ## now returns respnse options as well
         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver)
-
         opts.update(mdcopts)
-
         ## Handle the basis set (ROBERT) the question is what value of k
 
         # Log the job settings (LORI)  Not sure if i need this
@@ -184,6 +181,20 @@ class MadnessHarness(ProgramHarness):
 
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
+        # I need to split to geometry keywords and add it to the end of the geometry command in molcommand
+        # if the geometry keyword exits
+        if optcmd.find("geometry") != -1:
+            geo_index = optcmd.find("geometry")  # find first occurrence of geometry
+            end_index = optcmd[geo_index:].find("end")  # find first occurrence of end after geometry
+            geometry_input = optcmd[geo_index + 8:end_index + geo_index]  # grab everything in between geometry and end
+
+            optcmd = optcmd[0:geo_index] + optcmd[geo_index + end_index + 4:]  # optcmd becomes everything else
+            molcmd=molcmd.replace("end", geometry_input.strip() + "\nend")  # replace end with the added geometry input
+            print("optcmd\n",optcmd)
+            print("molcmd\n",molcmd)
+
+        print(optcmd.find("geometry"))
+        print(optcmd)
         madnessrec["commands"] = {}
         if mdccmd == "response":
             dft_cmds = optcmd.split(mdccmd)
@@ -201,13 +212,13 @@ class MadnessHarness(ProgramHarness):
             madnessrec["infiles"]["moldft"]["input"] = dft_cmds + molcmd
             madnessrec["commands"]["moldft"] = [which("moldft")]
 
-        print(dft_cmds)
+        print(madnessrec)
         # optcmd="dft\n xc hf \nend\n"
         # print(madnessrec["infiles"]["input"])
         return madnessrec
 
     def execute(
-        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+            self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
         num_commands = len(inputs["commands"])
         oexe = {}
@@ -215,7 +226,7 @@ class MadnessHarness(ProgramHarness):
             success, dexe = execute(
                 inputs["commands"]["moldft"],
                 inputs["infiles"]["moldft"],
-                ["calc_info.json","scf_info.json"],
+                ["calc_info.json", "scf_info.json"],
                 scratch_exist_ok=True,
                 scratch_name=inputs.get("scratch_name", None),
                 scratch_directory=inputs["scratch_directory"],
@@ -238,7 +249,7 @@ class MadnessHarness(ProgramHarness):
             success, dexe = execute(
                 inputs["commands"]["moldft"],
                 inputs["infiles"]["moldft"],
-                ["calc_info.json","scf_info.json"],
+                ["calc_info.json", "scf_info.json"],
                 scratch_exist_ok=True,
                 scratch_name=inputs.get("scratch_name", None),
                 scratch_directory=inputs["scratch_directory"],
@@ -248,15 +259,15 @@ class MadnessHarness(ProgramHarness):
             return success, oexe
 
     def parse_output(
-        self, outfiles , input_model: "AtomicInput"
+            self, outfiles, input_model: "AtomicInput"
     ) -> "AtomicResult":  # lgtm: [py/similar-function]
 
         # Get the stdout from the calculation (required)
         stdout = outfiles["moldft"]["stdout"]
         if "molresponse" in outfiles.keys():
             stdout += outfiles["molresponse"]["stdout"]
-        print("within parse_output scf_info.json",outfiles["moldft"]["outfiles"]["scf_info.json"])
-        print("within parse output calc_info",outfiles["moldft"]["outfiles"]["calc_info.json"])
+        print("within parse_output scf_info.json", outfiles["moldft"]["outfiles"]["scf_info.json"])
+        print("within parse output calc_info", outfiles["moldft"]["outfiles"]["calc_info.json"])
 
         # Read the MADNESj stdout file and, if needed, the hess or grad files
         qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, outfiles)
@@ -272,7 +283,7 @@ class MadnessHarness(ProgramHarness):
             qcvars["CURRENT HESSIAN"] = madhess
         # Normalize the output as a float or list of floats
         if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
+            retres = qcvars[f"RETURN_ENERGY"]
         else:
             retres = qcvars["RETURN_ENERGY"]
 
