@@ -98,7 +98,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g43b0713
+                0+untagged.1.gbc1a161
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -211,7 +211,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="n">_global_values</span><span class="p">[</span><span class="s2">&quot;cpu_brand&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_global_values</span><span class="p">[</span><span class="s2">&quot;cpuinfo&quot;</span><span class="p">][</span><span class="s2">&quot;brand_raw&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="c1"># Remove this if py-cpuinfo is pinned to &gt;=6.0.0</span>
-            <span class="n">_global_values</span><span class="p">[</span><span class="s2">&quot;cpu_brand&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_global_values</span><span class="p">[</span><span class="s2">&quot;cpuinfo&quot;</span><span class="p">][</span><span class="s2">&quot;brand&quot;</span><span class="p">]</span>
+            <span class="n">_global_values</span><span class="p">[</span><span class="s2">&quot;cpu_brand&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_global_values</span><span class="p">[</span><span class="s2">&quot;cpuinfo&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;brand&quot;</span><span class="p">,</span> <span class="s2">&quot;(unknown)&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_global_values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
