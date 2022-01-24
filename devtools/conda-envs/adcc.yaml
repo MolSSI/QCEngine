@@ -3,6 +3,7 @@ channels:
   - adcc
   - psi4/label/dev
   - conda-forge
+  - defaults
 dependencies:
   - adcc>=0.15.7
   - psi4

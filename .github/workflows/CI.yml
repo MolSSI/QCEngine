@@ -77,12 +77,12 @@ jobs:
         fetch-depth: 0
 
     - name: Create Environment
-      uses: conda-incubator/setup-miniconda@v2
+      uses: mamba-org/provision-with-micromamba@v11
       with:
-        activate-environment: test
+        environment-name: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
-        python-version: ${{ matrix.cfg.python-version }}
-        auto-activate-base: false
+        extra-specs: |
+          python=${{ matrix.cfg.python-version }}
 
     - name: Special Config - NWChem
       if: "(matrix.cfg.label == 'NWChem')"

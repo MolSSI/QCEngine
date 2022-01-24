@@ -2,6 +2,7 @@ name: test
 channels:
   - psi4
   - conda-forge
+  - defaults
 dependencies:
   - psi4=1.4
   - dftd3
