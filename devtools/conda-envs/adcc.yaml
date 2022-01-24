@@ -2,8 +2,9 @@ name: test
 channels:
   - adcc
   - psi4/label/dev
-  - conda-forge
   - defaults
+  - conda-forge
+  - psi4/label/dev
 dependencies:
   - adcc>=0.15.7
   - psi4
