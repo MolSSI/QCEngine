@@ -2,10 +2,11 @@ name: test
 channels:
   - psi4/label/dev
   - conda-forge
+  - defaults
 dependencies:
-  - psi4
+  - psi4=1.5*
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
-  - intel-openmp!=2019.5
+  #- intel-openmp!=2019.5
   - rdkit
 
     # Mixed Tests
