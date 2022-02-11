@@ -30,7 +30,9 @@ def h2o():
 @using("madness")
 @pytest.mark.parametrize(
     "program,basis,keywords",
-    [pytest.param("madness", None, {"dft__k": 7, "dft__aobasis": "sto-3g", "dft__econv": 1.0000e-05}), ],
+    [
+        pytest.param("madness", None, {"dft__k": 7, "dft__aobasis": "sto-3g", "dft__econv": 1.0000e-05}),
+    ],
 )
 @using("madness")
 def test_mad_hf(program, basis, keywords, h2o):
@@ -93,7 +95,9 @@ def test_mad_hf_response(program, basis, keywords, h2o):
 @using("madness")
 @pytest.mark.parametrize(
     "program,basis,keywords",
-    [pytest.param("madness", None, {}), ],
+    [
+        pytest.param("madness", None, {}),
+    ],
 )
 @using("madness")
 def test_mad_hf_be(program, basis, keywords, Be):
@@ -112,6 +116,7 @@ def test_mad_hf_be(program, basis, keywords, Be):
     atol = 1.0e-5
     assert compare_values(scf_tot, res["return_result"], atol=atol)
 
+
 @using("madness")
 @pytest.mark.parametrize(
     "program,basis,keywords",
@@ -127,7 +132,6 @@ def test_mad_hf_be(program, basis, keywords, Be):
         ),
     ],
 )
-
 @using("madness")
 def test_mad_geometry_optimization(program, basis, keywords, h2o):
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
@@ -144,4 +148,3 @@ def test_mad_geometry_optimization(program, basis, keywords, h2o):
 
     atol = 1.0e-5
     assert compare_values(scf_tot, res["return_result"], atol=atol)
-

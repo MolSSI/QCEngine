@@ -91,7 +91,10 @@ _xc_functionals = [
 
 
 # def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict[str, Any]]:
-def muster_modelchem(method: str, derint: int,) -> Tuple[str, Dict[str, Any]]:
+def muster_modelchem(
+    method: str,
+    derint: int,
+) -> Tuple[str, Dict[str, Any]]:
     """Converts the QC method into MADNESS keywords
     Options include energy calculation with moldft
     Geometry optimiazation with moldft

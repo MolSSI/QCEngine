@@ -18,7 +18,11 @@ from qcengine.testing import using
 )
 def test_qcore_methods(method, energy, gradient_norm):
 
-    atomic_input = qcel.models.AtomicInput(molecule=qcng.get_molecule("water"), model=method, driver="gradient",)
+    atomic_input = qcel.models.AtomicInput(
+        molecule=qcng.get_molecule("water"),
+        model=method,
+        driver="gradient",
+    )
 
     atomic_result = qcng.compute(atomic_input, "qcore")
 

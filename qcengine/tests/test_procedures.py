@@ -297,7 +297,12 @@ def test_torsiondrive_generic():
         input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="UFF", basis=None)),
         initial_molecule=[qcng.get_molecule("ethane")] * 2,
         optimization_spec=OptimizationSpecification(
-            procedure="geomeTRIC", keywords={"coordsys": "dlc", "maxiter": 300, "program": "rdkit",},
+            procedure="geomeTRIC",
+            keywords={
+                "coordsys": "dlc",
+                "maxiter": 300,
+                "program": "rdkit",
+            },
         ),
     )
 

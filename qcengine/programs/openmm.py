@@ -100,7 +100,11 @@ class OpenMMHarness(ProgramHarness):
         )
 
         # for openmm, try new import, then old import if not found
-        openmm_found = which_import("openmm", return_bool=True, raise_error=False,)
+        openmm_found = which_import(
+            "openmm",
+            return_bool=True,
+            raise_error=False,
+        )
         if not openmm_found:
             openmm_found = which_import(
                 ".openmm",

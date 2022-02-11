@@ -21,7 +21,9 @@ def test_dftd4_task_b97m_m01():
     return_result = -0.025024986301735823
 
     atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-01"), model={"method": "b97m"}, driver="energy",
+        molecule=qcng.get_molecule("mindless-01"),
+        model={"method": "b97m"},
+        driver="energy",
     )
 
     atomic_result = qcng.compute(atomic_input, "dftd4")
@@ -60,7 +62,13 @@ def test_dftd4_task_tpss_m02():
     atomic_input = qcel.models.AtomicInput(
         molecule=qcng.get_molecule("mindless-02"),
         model={"method": ""},
-        keywords={"params_tweaks": {"s8": 1.76596355, "a1": 0.42822303, "a2": 4.54257102,},},
+        keywords={
+            "params_tweaks": {
+                "s8": 1.76596355,
+                "a1": 0.42822303,
+                "a2": 4.54257102,
+            },
+        },
         driver="gradient",
     )
 
@@ -148,7 +156,10 @@ def test_dftd4_task_cold_fusion():
         model={"method": "pbe"},
         driver="energy",
     )
-    error = qcel.models.ComputeError(error_type="input error", error_message="Too close interatomic distances found",)
+    error = qcel.models.ComputeError(
+        error_type="input error",
+        error_message="Too close interatomic distances found",
+    )
 
     atomic_result = qcng.compute(atomic_input, "dftd4")
 

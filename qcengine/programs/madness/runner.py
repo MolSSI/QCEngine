@@ -146,7 +146,7 @@ class MadnessHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-            self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
         madnessrec = {
@@ -186,12 +186,16 @@ class MadnessHarness(ProgramHarness):
         if optcmd.find("geometry") != -1:
             geo_index = optcmd.find("geometry")  # find first occurrence of geometry
             end_index = optcmd[geo_index:].find("end")  # find first occurrence of end after geometry
-            geometry_input = optcmd[geo_index + 8:end_index + geo_index]  # grab everything in between geometry and end
+            geometry_input = optcmd[
+                geo_index + 8 : end_index + geo_index
+            ]  # grab everything in between geometry and end
 
-            optcmd = optcmd[0:geo_index] + optcmd[geo_index + end_index + 4:]  # optcmd becomes everything else
-            molcmd=molcmd.replace("end", geometry_input.strip() + "\nend")  # replace end with the added geometry input
-            print("optcmd\n",optcmd)
-            print("molcmd\n",molcmd)
+            optcmd = optcmd[0:geo_index] + optcmd[geo_index + end_index + 4 :]  # optcmd becomes everything else
+            molcmd = molcmd.replace(
+                "end", geometry_input.strip() + "\nend"
+            )  # replace end with the added geometry input
+            print("optcmd\n", optcmd)
+            print("molcmd\n", molcmd)
 
         print(optcmd.find("geometry"))
         print(optcmd)
@@ -218,7 +222,7 @@ class MadnessHarness(ProgramHarness):
         return madnessrec
 
     def execute(
-            self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
         num_commands = len(inputs["commands"])
         oexe = {}
@@ -259,9 +263,7 @@ class MadnessHarness(ProgramHarness):
             oexe["moldft"] = dexe
             return success, oexe
 
-    def parse_output(
-            self, outfiles, input_model: "AtomicInput"
-    ) -> "AtomicResult":  # lgtm: [py/similar-function]
+    def parse_output(self, outfiles, input_model: "AtomicInput") -> "AtomicResult":  # lgtm: [py/similar-function]
 
         # Get the stdout from the calculation (required)
         stdout = outfiles["moldft"]["stdout"]

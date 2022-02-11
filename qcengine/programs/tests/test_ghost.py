@@ -81,7 +81,16 @@ bimol_ref["eneyne"]["mp2"] = dict(
             marks=using("gamess"),
         ),
         pytest.param("nwchem", "6-31g*", {"scf__thresh": 1.0e-8}, id="nwchem", marks=using("nwchem")),
-        pytest.param("psi4", "6-31g*", {"scf_type": "pk", "mp2_type": "conv",}, id="psi4", marks=using("psi4"),),
+        pytest.param(
+            "psi4",
+            "6-31g*",
+            {
+                "scf_type": "pk",
+                "mp2_type": "conv",
+            },
+            id="psi4",
+            marks=using("psi4"),
+        ),
     ],
 )
 def test_tricky_ghost(qcprog, subject, basis, keywords):
@@ -142,11 +151,26 @@ def test_tricky_ghost(qcprog, subject, basis, keywords):
     "qcprog, basis, keywords",
     [
         pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, id="cfour", marks=using("cfour")),
-        pytest.param("gamess", "accd", {"mp2__nacore": 0, "contrl__ispher": 1}, id="gamess", marks=using("gamess"),),
+        pytest.param(
+            "gamess",
+            "accd",
+            {"mp2__nacore": 0, "contrl__ispher": 1},
+            id="gamess",
+            marks=using("gamess"),
+        ),
         pytest.param(
             "nwchem", "aug-cc-pvdz", {"scf__nr": 1.0, "scf__thresh": 1.0e-8}, id="nwchem", marks=using("nwchem")
         ),
-        pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "pk", "mp2_type": "conv",}, id="psi4", marks=using("psi4"),),
+        pytest.param(
+            "psi4",
+            "aug-cc-pvdz",
+            {
+                "scf_type": "pk",
+                "mp2_type": "conv",
+            },
+            id="psi4",
+            marks=using("psi4"),
+        ),
     ],
 )
 def test_atom_labels(qcprog, basis, keywords):

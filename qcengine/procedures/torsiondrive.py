@@ -190,7 +190,11 @@ class TorsionDriveProcedure(ProcedureHarness):
             **input_model.optimization_spec.keywords,
             "constraints": {
                 "set": [
-                    {"type": "dihedral", "indices": dihedral, "value": int(angle),}
+                    {
+                        "type": "dihedral",
+                        "indices": dihedral,
+                        "value": int(angle),
+                    }
                     for dihedral, angle in zip(dihedrals, angles)
                 ]
             },
@@ -209,7 +213,9 @@ class TorsionDriveProcedure(ProcedureHarness):
         )
 
     @staticmethod
-    def _find_final_results(optimization_results: List[OptimizationResult],) -> Tuple[float, Molecule]:
+    def _find_final_results(
+        optimization_results: List[OptimizationResult],
+    ) -> Tuple[float, Molecule]:
         """Returns the energy and final molecule of the lowest energy optimization
         in a set."""
 

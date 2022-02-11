@@ -42,8 +42,7 @@ def harvest_moldft_output(outtext: str) -> Tuple[PreservingDict, Molecule, list,
 
     splits = re.split(r"Converged!", outtext, re.MULTILINE)[-2]
     final_outpass = re.split(r"Iteration", splits, re.MULTILINE)[-1]
-    psivar, madcoord, madgrad, version, error = harvest_outfile_moldft_pass(
-        final_outpass)
+    psivar, madcoord, madgrad, version, error = harvest_outfile_moldft_pass(final_outpass)
 
     return psivar, madcoord, madgrad, version, error
 
@@ -84,15 +83,13 @@ def harvest_outfile_moldft_pass(outtext):
     # 2)Calculation converged
     else:
         OPTIONS = [r"exchange-correlation", r"nuclear-repulsion", r"total"]
-        PSIVAR = ["EXCHANGE-CORRELATION",
-                  "NUCLEAR REPULSION ENERGY", "TOTAL SCF ENERGY"]
+        PSIVAR = ["EXCHANGE-CORRELATION", "NUCLEAR REPULSION ENERGY", "TOTAL SCF ENERGY"]
         # OPTIONS=[r'kinetic',r'nonlocal psp',r'nuclear attraction',r'coulomb',r'PCM',r'exchange-correlation',r'nuclear-repulsion',r'total']
         # PSIVAR=['KINETIC ENERGY','NONLOCAL PSP','NUCLEAR ATTRACTION ENERGY','COULOMB','PCM','EXCHANGE-CORRELATION','NUCLEAR REPULSION ENERGY','TOTAL SCF ENERGY']
         optDict = dict(zip(OPTIONS, PSIVAR))
 
         for var, VAR in optDict.items():
-            mobj = re.search(r"^\s+" + var + r"\s*" + NUMBER +
-                             r"s*$", outtext, re.MULTILINE)
+            mobj = re.search(r"^\s+" + var + r"\s*" + NUMBER + r"s*$", outtext, re.MULTILINE)
             if mobj:
                 logger.debug("matched SCF")  # not sure what this means
                 psivar[VAR] = mobj.group(1)
@@ -220,14 +217,11 @@ def harvest(in_mol: Molecule, outfiles) -> Tuple[PreservingDict, None, None, Mol
         # At this point scf prints a list of json outputs where each list refers to the scf at given protocol
         # Here I load the scf_info and calc_info as json
         response_info = json.loads(molresponse_outfiles.get("respones.json"))
-        response_params, response_data_dict = read_molrespone_json(
-            response_info)
+        response_params, response_data_dict = read_molrespone_json(response_info)
 
-    Idontneed_vars, out_mol, out_grad, version, error = harvest_moldft_output(
-        outfiles["moldft"]["stdout"])
+    Idontneed_vars, out_mol, out_grad, version, error = harvest_moldft_output(outfiles["moldft"]["stdout"])
     if "molresponse" in outfiles.keys():
-        response_psi_var = harvest_response_file(
-            outfiles["molresponse"]["stdout"])
+        response_psi_var = harvest_response_file(outfiles["molresponse"]["stdout"])
         out_psivar.update(response_psi_var)
     # If available, read higher-accuracy gradients
     #  These were output using a Python Task in Madness to read them out of the database
@@ -279,22 +273,22 @@ def harvest_scf_info(scf_info):
     scf_info = scf_info[-1][0]
     print("harvest scf info", scf_info)
 
-    scf_number_vars = ['scf_one_electron_energy',
-                       'scf_two_electron_energy',
-                       'nuclear_repulsion_energy',
-                       'scf_vv10_energy',
-                       'scf_xc_energy',
-                       'scf_dispersion_correction_energy',
-                       'scf_total_energy',
-                       'scf_iterations']
+    scf_number_vars = [
+        "scf_one_electron_energy",
+        "scf_two_electron_energy",
+        "nuclear_repulsion_energy",
+        "scf_vv10_energy",
+        "scf_xc_energy",
+        "scf_dispersion_correction_energy",
+        "scf_total_energy",
+        "scf_iterations",
+    ]
 
     for var in scf_number_vars:
         if scf_info.get(var) is not None:
             psivar[var.upper()] = scf_info.get(var)
 
-    scf_tensor_vars = [
-        'scf_dipole_moment'
-    ]
+    scf_tensor_vars = ["scf_dipole_moment"]
 
     for var in scf_tensor_vars:
         if scf_info.get(var) is not None:
@@ -305,12 +299,7 @@ def harvest_scf_info(scf_info):
 
 def harvest_calc_info(calc_info):
     psivar = PreservingDict()
-    qcvars = ['calcinfo_nbasis',
-              'calcinfo_nmo',
-              'calcinfo_nalpha',
-              'calcinfo_nbeta',
-              'calcinfo_natom',
-              'return_energy']
+    qcvars = ["calcinfo_nbasis", "calcinfo_nmo", "calcinfo_nalpha", "calcinfo_nbeta", "calcinfo_natom", "return_energy"]
 
     for var in qcvars:
         if calc_info.get(var) is not None:
@@ -322,7 +311,7 @@ def harvest_calc_info(calc_info):
 def tensor_to_numpy(j):
     array = np.empty(j["size"])
     array[:] = j["vals"]
-    print(tuple(j['dims']))
+    print(tuple(j["dims"]))
     return np.reshape(array, tuple(j["dims"]))
 
 
@@ -367,8 +356,8 @@ def read_excited_proto_iter_data(my_iter_data, num_states, num_orbitals):
 # input response_info json and returns a dict of response paramters
 # and a list of dicts of numpy arrays holding response data
 def read_molrespone_json(response_info):
-    protocol_data = response_info['protocol_data']
-    response_parameters = response_info['response_parameters']
+    protocol_data = response_info["protocol_data"]
+    response_parameters = response_info["response_parameters"]
     n_states = response_parameters["states"]
     n_orbitals = response_parameters["num_orbitals"]
     num_protos = len(protocol_data)
@@ -378,11 +367,9 @@ def read_molrespone_json(response_info):
         protos.append(protocol_data[p]["proto"])
         iter_data = protocol_data[p]["iter_data"]
         if response_parameters["excited_state"]:
-            proto_data.append(read_excited_proto_iter_data(
-                iter_data, n_states, n_orbitals))
+            proto_data.append(read_excited_proto_iter_data(iter_data, n_states, n_orbitals))
         else:
-            proto_data.append(read_frequency_proto_iter_data(
-                iter_data, n_states, n_orbitals))
+            proto_data.append(read_frequency_proto_iter_data(iter_data, n_states, n_orbitals))
     return response_parameters, proto_data
 
 
@@ -416,8 +403,7 @@ def harvest_response_file(outtext):
     optDict = dict(zip(OPTIONS, PSIVAR))
 
     for var, VAR in optDict.items():
-        mobj = re.search(r"^\s*" + var + r"\s*" + NUMBER +
-                         r"\s*$", outtext, re.MULTILINE)
+        mobj = re.search(r"^\s*" + var + r"\s*" + NUMBER + r"\s*$", outtext, re.MULTILINE)
         # print(mobj)
         if mobj:
             psivar[VAR] = mobj.group(1)
@@ -435,8 +421,11 @@ def harvest_response_file(outtext):
 
     var = r"Orbital Energies: \[\*\]"
     VAR = "ORBITAL ENERGIES"
-    mobj = re.search(r"^\s*" + var + r"\s*" + NUMSPACEORB +
-                     r"$", outtext, re.MULTILINE, )
+    mobj = re.search(
+        r"^\s*" + var + r"\s*" + NUMSPACEORB + r"$",
+        outtext,
+        re.MULTILINE,
+    )
     # print(mobj)
 
     if mobj:
@@ -446,16 +435,14 @@ def harvest_response_file(outtext):
 
         psivar[VAR] = np.array(oe_list, dtype=float)
 
-    psivar = grab_tensor(r"Ground state overlap:", "OVERLAP",
-                         num_orbitals, num_orbitals, psivar, outtext)
-    psivar = grab_tensor(r"Ground state hamiltonian:", "HAMILTONIAN",
-                         num_orbitals, num_orbitals, psivar, outtext)
-    psivar = grab_tensor(r"Polarizability Final",
-                         "POLARIZABILITY", num_states, num_states, psivar, data)
+    psivar = grab_tensor(r"Ground state overlap:", "OVERLAP", num_orbitals, num_orbitals, psivar, outtext)
+    psivar = grab_tensor(r"Ground state hamiltonian:", "HAMILTONIAN", num_orbitals, num_orbitals, psivar, outtext)
+    psivar = grab_tensor(r"Polarizability Final", "POLARIZABILITY", num_states, num_states, psivar, data)
     return psivar
 
 
 # Translate a madness tensor defined within json output to a numpy array
+
 
 def grab_tensor(var, VAR, row, col, psivar, data):
     first_line = r"^\s*" + var + r"\s+"
@@ -473,7 +460,11 @@ def grab_tensor(var, VAR, row, col, psivar, data):
         total += line
     #    print(line)
 
-    mobj = re.search(total, data, re.MULTILINE, )
+    mobj = re.search(
+        total,
+        data,
+        re.MULTILINE,
+    )
     # print(mobj)
     if mobj:
         oe_list = []
