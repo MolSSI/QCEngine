@@ -236,6 +236,7 @@ class MadnessHarness(ProgramHarness):
             success, dexe_response = execute(
                 inputs["commands"]["molresponse"],
                 inputs["infiles"]["molresponse"],
+                ["response.json"],
                 scratch_messy=True,
                 scratch_name=Path(dexe["scratch_directory"]).name,
                 scratch_exist_ok=True,
