@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2021-MM-DD
+.. vX.Y.0 / 2022-MM-DD
 .. --------------------
 ..
 .. Breaking Changes
@@ -15,6 +15,16 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+
+
+v0.21.1 / 2022-01-06
+--------------------
+
+
+Bug Fixes
++++++++++
+- (:pr:`338`) Correctly export version to tarballs created by git-archive. @mbanck, @loriab
+- (:pr:`339`) QCEngine now tolerant of `cpuinfo` failure to populate `brand_raw`, `brand`. @dotsdl, @loriab, @WardLT
 
 
 v0.21.0 / 2021-11-22

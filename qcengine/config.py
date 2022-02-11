@@ -53,7 +53,7 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
             _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand_raw"]
         except KeyError:
             # Remove this if py-cpuinfo is pinned to >=6.0.0
-            _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand"]
+            _global_values["cpu_brand"] = _global_values["cpuinfo"].get("brand", "(unknown)")
 
     if key is None:
         return _global_values.copy()
