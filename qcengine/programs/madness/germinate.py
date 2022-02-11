@@ -92,14 +92,16 @@ _xc_functionals = [
 # def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict[str, Any]]:
 def muster_modelchem(method: str, derint: int,) -> Tuple[str, Dict[str, Any]]:
     """Converts the QC method into MADNESS keywords
+    Options include energy calculation with moldft
+    Geometry optimiazation with moldft
+    propreties calculation with molresponse...runs moldft then molresponse
 
     Args:
        method (str): Name of the QC method to use
        derint (str): Index of the run type
-       use_tce (bool): Whether to use the Tensor Contraction Engine
     Returns:
-       (str): Task command for NWChem
-       (dict): Any options for NWChem
+       (str): Task command for MADNESS
+       (dict): Any options for MADNESS
     """
 
     # Standardize the method name
