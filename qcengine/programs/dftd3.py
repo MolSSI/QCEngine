@@ -76,6 +76,8 @@ class DFTD3Harness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["input"] = job_inputs["infiles"][".dftd3par.local"]
+            dexe["outfiles"]["dftd3_geometry.xyz"] = job_inputs["infiles"]["dftd3_geometry.xyz"]
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
@@ -95,7 +97,7 @@ class DFTD3Harness(ProgramHarness):
             inputs["command"],
             inputs["infiles"],
             inputs["outfiles"],
-            scratch_messy=False,
+            scratch_messy=inputs["scratch_messy"],
             # env=inputs["env"],
             scratch_directory=inputs["scratch_directory"],
             blocking_files=inputs["blocking_files"],
@@ -152,6 +154,7 @@ class DFTD3Harness(ProgramHarness):
             "command": command,
             "infiles": infiles,
             "outfiles": ["dftd3_gradient", "dftd3_abc_gradient"],
+            "scratch_messy": config.scratch_messy,
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
             "blocking_files": [os.path.join(pathlib.Path.home(), ".dftd3par." + socket.gethostname())],
@@ -168,6 +171,7 @@ class DFTD3Harness(ProgramHarness):
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
         Grimme_h2kcal = 627.509541
         stdout = outfiles.pop("stdout")
+        stderr = outfiles.pop("stderr")
 
         for fl, contents in outfiles.items():
             if contents is not None:
@@ -279,13 +283,13 @@ class DFTD3Harness(ProgramHarness):
 
         output_data = {
             "extras": input_model.extras,
-            "properties": {
-                "return_energy": calcinfo[f"CURRENT ENERGY"],
-            },
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
+            "properties": {"return_energy": calcinfo[f"CURRENT ENERGY"],},
             "provenance": Provenance(
                 creator="DFTD3", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
             "return_result": retres,
+            "stderr": stderr,
             "stdout": stdout,
         }
         output_data["extras"]["local_keywords"] = input_model.extras["info"]

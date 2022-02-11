@@ -139,7 +139,7 @@ class Psi4Harness(ProgramHarness):
         old_basis = input_model.model.basis
         input_model.model.__dict__["basis"] = old_basis or ""
 
-        with temporary_directory(parent=parent, suffix="_psi_scratch") as tmpdir:
+        with temporary_directory(parent=parent, suffix="_psi_scratch", messy=config.scratch_messy) as tmpdir:
 
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
             if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in caseless_keywords):
@@ -203,9 +203,9 @@ class Psi4Harness(ProgramHarness):
 
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()
                     psi4.core.set_num_threads(config.ncores, quiet=True)
-                    psi4.set_memory(f"{config.memory}GB", quiet=True)
+                    psi4.set_memory(f"{config.memory}GiB", quiet=True)
                     # psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
-                    if pversion < parse_version("1.4"):  # adjust to where DDD merged
+                    if pversion < parse_version("1.5rc1"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
                         output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
@@ -224,10 +224,12 @@ class Psi4Harness(ProgramHarness):
                         "--nthread",
                         str(config.ncores),
                         "--memory",
-                        f"{config.memory}GB",
+                        f"{config.memory}GiB",
                         "--qcschema",
                         "data.msgpack",
                     ]
+                    if config.scratch_messy:
+                        run_cmd.append("--messy")
                     input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
                     success, output = execute(
                         run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
@@ -258,7 +260,11 @@ class Psi4Harness(ProgramHarness):
                     raise RandomError(error_message)
             elif ("SIGSEV" in error_message) or ("SIGSEGV" in error_message) or ("segmentation fault" in error_message):
                 raise RandomError(error_message)
-            elif ("TypeError: set_global_option" in error_message) or (error_type == "ValidationError"):
+            elif (
+                # Missing and Managed cover same category of error pre- and post-DDD
+                ("TypeError: set_global_option" in error_message)
+                or (error_type in ["ValidationError", "MissingMethodError", "ManagedMethodError"])
+            ):
                 raise InputError(error_message)
             elif "RHF reference is only for singlets" in error_message:
                 raise InputError(error_message)
@@ -271,6 +277,10 @@ class Psi4Harness(ProgramHarness):
         # Move several pieces up a level
         output_data["provenance"]["memory"] = round(config.memory, 3)
         output_data["provenance"]["nthreads"] = config.ncores
+        if output_data.get("native_files", None) is None:
+            output_data["native_files"] = {
+                "input": json.dumps(json.loads(input_model.json()), indent=1),
+            }
 
         # Delete keys
         output_data.pop("return_output", None)

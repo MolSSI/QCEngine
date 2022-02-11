@@ -5,6 +5,7 @@ import copy
 import logging
 import pprint
 import re
+import hashlib
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
@@ -16,9 +17,10 @@ from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
 
 from ...exceptions import InputError
-from ...util import create_mpi_invocation, execute
+from ...util import create_mpi_invocation, execute, temporary_directory
 from ..model import ErrorCorrectionProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ..util import error_stamp
 from .errors import all_errors
 from .germinate import muster_modelchem
 from .harvester import harvest
@@ -122,34 +124,51 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         job_inputs = self.build_input(input_model, config)
         success, dexe = self.execute(job_inputs)
 
+        stdin = job_inputs["infiles"]["nwchem.nw"]
         if "There is an error in the input file" in dexe["stdout"]:
-            raise InputError(dexe["stdout"])
+            raise InputError(error_stamp(stdin, dexe["stdout"], dexe["stderr"]))
         if "not compiled" in dexe["stdout"]:
             # recoverable with a different compilation with optional modules
-            raise InputError(dexe["stdout"])
+            raise InputError(error_stamp(stdin, dexe["stdout"], dexe["stderr"]))
 
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["input"] = stdin
             return self.parse_output(dexe["outfiles"], input_model)
         else:
             # Check if any of the errors are known
             for error in all_errors:
                 error.detect_error(dexe)
-            raise UnknownError(dexe["stdout"])
+            raise UnknownError(error_stamp(stdin, dexe["stdout"], dexe["stderr"]))
 
     def build_input(
         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
-        nwchemrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
+        # Define the controller for th e
+        nwchemrec = {
+            "infiles": {},
+            "scratch_directory": config.scratch_directory,
+            "scratch_messy": config.scratch_messy,
+        }
 
+        # Prepare to write out the options
         opts = copy.deepcopy(input_model.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
 
+        # Determine the command to use to launch the code
+        if config.use_mpiexec:
+            nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
+            logger.info(f"Launching with mpiexec: {' '.join(nwchemrec['command'])}")
+        else:
+            nwchemrec["command"] = [which("nwchem")]
+
         # Handle memory
-        # for nwchem, [GiB] --> [B]
-        # someday, replace with this: opts['memory'] = str(int(config.memory * (1024**3) / 1e6)) + ' mb'
-        memory_size = int(config.memory * (1024 ** 3))
+        # * [GiB] --> [QW]
+        # * int() rounds down
+        # * was [GiB] --> [B] c. v6.6 but fails in v7.0 probably b/c https://github.com/nwchemgit/nwchem/commit/fca382eab477c3e85548457bfceb1fc9be31b47c#diff-7baaf4807cc9b853af14d9127f63db47d706e12f697a98560bc98bb647ef8326
+        #   * memory_size = int(config.memory * (1024 ** 3))
+        memory_size = int(config.memory * (1024 ** 3) / 8)
         if config.use_mpiexec:  # It is the memory per MPI rank
             memory_size //= config.nnodes * config.ncores // config.cores_per_rank
         opts["memory"] = memory_size
@@ -172,6 +191,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
             opts[f"basis__{el}"] = f"library {input_model.model.basis}"
+            opts[f"basis__bq{el}"] = f"library {el} {input_model.model.basis}"
 
         # Log the job settings
         logger.debug("JOB_OPTS")
@@ -183,11 +203,38 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         # Combine the molecule description, options and method command together
         nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + molcmd + optcmd + mdccmd
 
+        # Now that we know the computation, check if we want a restart
+        #  TODO (wardlt): Store the restart information in the local_options configuration
+        if input_model.extras.get("allow_restarts", False):
+            # use the input file as a source for a hash that is used to set the directory name
+            input_hash = hashlib.sha256(nwchemrec["infiles"]["nwchem.nw"].encode()).hexdigest()[:12]
+            scr_name = input_model.extras.get("scratch_name")
+            if scr_name is None:
+                scr_name = "nwc_" + input_hash
+            nwchemrec["scratch_name"] = scr_name
+
+            # We call the "temporary_directory" to get the eventual name of the run directory
+            #  and then see if nwchem.db exists to determine whether
+            with temporary_directory(
+                parent=config.scratch_directory, child=scr_name, exist_ok=True, messy=True
+            ) as tmpdir:
+                restart = tmpdir.joinpath("nwchem.db").is_file()
+
+            # If computation is a restart, remove the input geometry
+            #  It is not needed for restarts and restarts geometry optimization
+            #   if you are using the NWChem Driver module
+
+            if restart:
+                logger.info(f"Restarting from {tmpdir}")
+                nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + optcmd + mdccmd
+
         # For gradient methods, add a Python command to save the gradients in higher precision
         #  Note: The Hessian is already stored in high precision in a file named "*.hess"
         if input_model.driver == "gradient":
             # Get the name of the theory used for computing the gradients
-            theory = re.search(r"^task (\w+) ", mdccmd, re.MULTILINE).group(1)
+            theory = re.search(r"^task\s+(.+)\s+grad", mdccmd, re.MULTILINE).group(1)
+            if theory == "ccsd(t)":
+                theory = "ccsd"
             logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
 
             # Create a Python function to get the gradient from NWChem's checkpoint file (rtdb)
@@ -206,13 +253,6 @@ task python
             """
             nwchemrec["infiles"]["nwchem.nw"] += pycmd
 
-        # Determine the command
-        if config.use_mpiexec:
-            nwchemrec["command"] = create_mpi_invocation(which("nwchem"), config)
-            logger.info(f"Launching with mpiexec: {' '.join(nwchemrec['command'])}")
-        else:
-            nwchemrec["command"] = [which("nwchem")]
-
         return nwchemrec
 
     def execute(
@@ -223,8 +263,9 @@ task python
             inputs["command"],
             inputs["infiles"],
             ["nwchem.hess", "nwchem.grad"],
-            scratch_messy=False,
+            scratch_messy=inputs["scratch_messy"],
             scratch_exist_ok=True,
+            scratch_name=inputs.get("scratch_name", None),
             scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
@@ -237,23 +278,35 @@ task python
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
+        method = input_model.model.method.lower()
+        method = method[4:] if method.startswith("nwc-") else method
+
         # Read the NWChem stdout file and, if needed, the hess or grad files
+        # July 2021: nwmol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always atin orientation
         try:
-            qcvars, nwhess, nwgrad, nwmol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
-        except Exception as e:
-            raise UnknownError(stdout)
+            qcvars, nwhess, nwgrad, nwmol, version, module, errorTMP = harvest(
+                input_model.molecule, method, stdout, **outfiles
+            )
+        except Exception:
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
-        if nwgrad is not None:
-            qcvars[f"{input_model.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
-            qcvars["CURRENT GRADIENT"] = nwgrad
-        if nwhess is not None:
-            qcvars["CURRENT HESSIAN"] = nwhess
+        try:
+            if nwgrad is not None:
+                qcvars[f"{method.upper()} TOTAL GRADIENT"] = nwgrad
+                qcvars["CURRENT GRADIENT"] = nwgrad
 
-        # Normalize the output as a float or list of floats
-        if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
-        else:
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            if nwhess is not None:
+                qcvars[f"{method.upper()} TOTAL HESSIAN"] = nwhess
+                qcvars["CURRENT HESSIAN"] = nwhess
+
+            # Normalize the output as a float or list of floats
+            if input_model.driver.upper() == "PROPERTIES":
+                retres = qcvars[f"CURRENT ENERGY"]
+            else:
+                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        except KeyError:
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
+
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
@@ -263,12 +316,18 @@ task python
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
+        provenance = Provenance(creator="NWChem", version=self.get_version(), routine="nwchem").dict()
+        if module is not None:
+            provenance["module"] = module
+
         # Format them inout an output
         output_data = {
             "schema_version": 1,
-            "extras": {"outfiles": outfiles, **input_model.extras},
+            "molecule": nwmol,  # overwrites with outfile Cartesians in case fix_*=F
+            "extras": {**input_model.extras},
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
-            "provenance": Provenance(creator="NWChem", version=self.get_version(), routine="nwchem"),
+            "provenance": provenance,
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,

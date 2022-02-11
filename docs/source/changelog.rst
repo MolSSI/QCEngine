@@ -4,6 +4,9 @@ Changelog
 .. vX.Y.0 / 2021-MM-DD
 .. --------------------
 ..
+.. Breaking Changes
+.. ++++++++++++++++
+..
 .. New Features
 .. ++++++++++++
 ..
@@ -14,7 +17,79 @@ Changelog
 .. +++++++++
 
 
-v0.19.0 / 2021-05-DD
+v0.21.0 / 2021-11-22
+--------------------
+
+Enhancements
+++++++++++++
+- (:pr:`321`) CFOUR, GAMESS, NWChem, Psi4, DFTD3, MP2D, gCP - learned to return certain native text
+  files under control of the ``native_files`` protocol. GAMESS users are strongly advised to at
+  least set ``protocols.native_files = "input"`` so that the job is reproducible. @loriab
+- (:pr:`325`) Torsiondrive - learned to use multiple molecules as input to torsiondrives. @jthorton
+- (:pr:`327`) TorchANI - learned to use GPUs if available. @kexul
+- (:pr:`330`, :pr:`332`) NWChem - learned to restart from existing scratch if QCEngine is killed. @WardLT
+
+
+v0.20.1 / 2021-10-08
+--------------------
+
+Bug Fixes
++++++++++
+
+- (:pr:`322`) Psi4 - allowed more test cases with gradients and Hessians after a compatibility PR started
+  saving them. @loriab
+- (:pr:`323`) Turbomole - learned to store calcinfo_natom so that gradients and Hessians can be computed
+  after QCElemental started using that quantity for shape checking in 
+  [v0.22.0](https://github.com/MolSSI/QCElemental/blob/master/docs/source/changelog.rst#0220--2021-08-26)
+  @eljost
+
+
+v0.20.0 / 2021-10-01
+--------------------
+
+New Features
+++++++++++++
+- (:pr:`305`) TorsionDrive - new procedure to automate constrained optimizations along a geometry
+  grid. Akin to the longstanding QCFractal TorsionDrive service. @SimonBoothroyd
+
+Enhancements
+++++++++++++
+- (:pr:`307`) NWChem - learns to automatically increase the number of iterations when SCF, CC, etc.
+  fails to converge. @WardLT
+- (:pr:`309`) ``qcengine info`` learned to print the location of found CMS programs, and geometric,
+  OpenMM, and RDKit learned to return their versions. @loriab
+- (:pr:`311`) CFOUR, GAMESS, NWChem harnesses learned to notice which internal module performs a calc
+  (e.g., tce/cc for NWChem) and to store it in ``AtomicResult.provenance.module``. Psi4 already does
+  this. @loriab
+- (:pr:`312`) CFOUR, GAMESS, NWChem harnesses learned to run and harvest several new methods in the
+  MP, CC, CI, DFT families. @loriab
+- (:pr:`316`) Config - ``TaskConfig`` learned a new field ``scratch_messy`` to instruct a
+  ``qcng.compute()`` run to not clean up the scratch directory at the end. @loriab
+- (:pr:`316`) GAMESS - harness learned to obey ncores and scratch_messy local_config options. When
+  ``ncores > 1``, the memory option is partitioned into replicated and non after exetyp=check trials. @loriab
+- (:pr:`316`) Psi4 - harness learned to obey scratch_messy and memory local_config options. Memory
+  was previously off by a little (GB vs GiB). @loriab
+- (:pr:`316`) CFOUR - harness learned to obey scratch_messy and memory local_config options. Memory
+  was previously off by a little. @loriab
+- (:pr:`316`) NWChem - harness learned to obey scratch_messy and memory local_config options. Memory
+  was previously very off for v7. @loriab
+- (:pr:`315`) CFOUR, GAMESS, NWChem -- learned to return in AtomicInput or program native orientation
+  depending on fix_com & fix_orientation= T or F. Psi4 already did this. Previously these three
+  always returned AtomicInput orientation. Note that when returning program native orientation, the
+  molecule is overwritten, so AtomicResult is not a superset of AtomicInput. @loriab
+- (:pr:`315`) CFOUR, GAMESS, NWChem -- learned to harvest gradients and Hessians. @loriab
+- (:pr:`317`) Docs - start "new harness" docs, so contributors have a coarse roadmap. @loriab
+- (:pr:`318`) Docs - documentation is now served from https://molssi.github.io/QCEngine/ and built
+  by https://github.com/MolSSI/QCEngine/blob/master/.github/workflows/CI.yml .
+  https://qcengine.readthedocs.io/en/latest/ will soon be retired. @loriab
+- (:pr:`320`) CFOUR, NWChem -- learned to run with ghost atoms, tentatively. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`313`, :pr:`319`) OpenMM - accommocate both old and new simtk/openmm import patterns. @dotsdl
+
+
+v0.19.0 / 2021-05-16
 --------------------
 
 New Features

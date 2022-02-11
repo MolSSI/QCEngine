@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Dict
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet, Provenance
-from qcelemental.util import which_import
+from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError
 from ..util import capture_stdout
@@ -36,6 +36,8 @@ class OpenMMHarness(ProgramHarness):
         "node_parallel": False,
         "managed_memory": True,
     }
+
+    version_cache: Dict[str, str] = {}
 
     class Config(ProgramHarness.Config):
         pass
@@ -94,26 +96,49 @@ class OpenMMHarness(ProgramHarness):
             "openff.toolkit",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install openff-toolkit`.",
+            raise_msg="Please install via `conda install -c conda-forge openff-toolkit`",
         )
 
-        openmm_found = which_import(
-            ".openmm",
-            return_bool=True,
-            raise_error=raise_error,
-            package="simtk",
-            raise_msg="Please install via `conda install openmm -c omnia`.",
-        )
+        # for openmm, try new import, then old import if not found
+        openmm_found = which_import("openmm", return_bool=True, raise_error=False,)
+        if not openmm_found:
+            openmm_found = which_import(
+                ".openmm",
+                return_bool=True,
+                raise_error=raise_error,
+                package="simtk",
+                raise_msg="Please install via `conda install -c conda-forge openmm`",
+            )
 
         openmmff_found = which_import(
             ".generators",
             return_bool=True,
             raise_error=raise_error,
             package="openmmforcefields",
-            raise_msg="Please install via `conda install openmmforcefields -c conda-forge`",
+            raise_msg="Please install via `conda install -c conda-forge openmmforcefields`",
         )
 
         return rdkit_found and openff_found and openmm_found and openmmff_found
+
+    def get_version(self) -> str:
+        """Return the currently used version of OpenMM."""
+        self.found(raise_error=True)
+
+        # we have to do some gymnastics for OpenMM pre-7.6 import support
+        # we know it exists due to succesful `found` above
+        which_prog = which_import("openmm")
+        if which_prog is None:
+            which_prog = which_import(".openmm", package="simtk")
+
+        if which_prog not in self.version_cache:
+            try:
+                import openmm
+            except ImportError:
+                from simtk import openmm
+
+            self.version_cache[which_prog] = safe_version(openmm.version.short_version)
+
+        return self.version_cache[which_prog]
 
     def _generate_openmm_system(
         self, molecule: "offtop.Molecule", method: str, keywords: Dict = None
@@ -122,8 +147,12 @@ class OpenMMHarness(ProgramHarness):
         Generate an OpenMM System object from the input molecule method and basis.
         """
         from openmmforcefields.generators import SystemGenerator
-        from simtk import unit
-        from simtk.openmm import app
+
+        try:
+            from openmm import app, unit
+        except ImportError:
+            from simtk import unit
+            from simtk.openmm import app
 
         # create a hash based on the input options
         hashstring = molecule.to_smiles(isomeric=True, explicit_hydrogens=True, mapped=True) + method
@@ -190,7 +219,11 @@ class OpenMMHarness(ProgramHarness):
         """
         self.found(raise_error=True)
 
-        from simtk import openmm, unit
+        try:
+            import openmm
+            from openmm import unit
+        except ImportError:
+            from simtk import openmm, unit
 
         with capture_stdout():
             from openff.toolkit import topology as offtop
@@ -265,7 +298,7 @@ class OpenMMHarness(ProgramHarness):
         # Compute the energy of the configuration
         state = context.getState(getEnergy=True)
 
-        # Get the potential as a simtk.unit.Quantity, put into units of hartree
+        # Get the potential as a unit.Quantity, put into units of hartree
         q = state.getPotentialEnergy() / unit.hartree / unit.AVOGADRO_CONSTANT_NA
 
         ret_data["properties"] = {"return_energy": q}
@@ -278,7 +311,7 @@ class OpenMMHarness(ProgramHarness):
             # Compute the forces
             state = context.getState(getForces=True)
 
-            # Get the gradient as a simtk.unit.Quantity with shape (n_atoms, 3)
+            # Get the gradient as a unit.Quantity with shape (n_atoms, 3)
             gradient = state.getForces(asNumpy=True)
 
             # Convert to hartree/bohr and reformat as 1D array
@@ -293,6 +326,6 @@ class OpenMMHarness(ProgramHarness):
         ret_data["extras"] = input_model.extras
 
         # Move several pieces up a level
-        ret_data["provenance"] = Provenance(creator="openmm", version=openmm.__version__, nthreads=nthreads)
+        ret_data["provenance"] = Provenance(creator="openmm", version=openmm.version.short_version, nthreads=nthreads)
 
         return AtomicResult(**{**input_model.dict(), **ret_data})

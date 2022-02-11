@@ -14,6 +14,7 @@ from ...exceptions import InputError, UnknownError
 from ...util import execute
 from ..model import ProgramHarness
 from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ..util import error_stamp
 from .germinate import muster_modelchem
 from .harvester import harvest
 from .keywords import format_keywords
@@ -73,19 +74,24 @@ class CFOURHarness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["input"] = job_inputs["infiles"]["ZMAT"]
             return self.parse_output(dexe["outfiles"], input_model)
 
     def build_input(
         self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
-        cfourrec = {"infiles": {}, "scratch_directory": config.scratch_directory}
+        cfourrec = {
+            "infiles": {},
+            "scratch_directory": config.scratch_directory,
+            "scratch_messy": config.scratch_messy,
+        }
 
         opts = copy.deepcopy(input_model.keywords)
 
         # Handle memory
-        # for cfour, [GiB] --> [MB]
-        opts["memory_size"] = int(config.memory * (1024 ** 3) / 1e6)
-        opts["mem_unit"] = "mb"
+        # for cfour, [GiB] --> [QW]
+        opts["memory_size"] = int(config.memory * (1024 ** 3) / 8)
+        opts["mem_unit"] = "integerwords"
 
         # Handle molecule
         molcmd, moldata = input_model.molecule.to_string(dtype="cfour", units="Bohr", return_data=True)
@@ -104,14 +110,30 @@ class CFOURHarness(ProgramHarness):
         # * why, yes, this is highly questionable
         #   * assuming relative file location between xcfour exe and GENBAS file
         #   * reading a multi MB file into the inputs dict
-        opts["basis"] = input_model.model.basis
+        if all(input_model.molecule.real):
+            opts["basis"] = input_model.model.basis
+            bascmd = ""
+        else:
+            # * note not getting per-basis casing like if it passed through format_keywords
+            opts["basis"] = "SPECIAL"
+            text = [
+                (
+                    f"""H:6-31G"""
+                    if (elem == "H" and input_model.model.basis.upper() == "6-31G*")
+                    else f"""{elem.upper()}:{input_model.model.basis.upper()}"""
+                )
+                for iat, elem in enumerate(input_model.molecule.symbols)
+            ]
+            text.append("")
+            text.append("")
+            bascmd = "\n".join(text)
 
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 
         xcfour = which("xcfour")
         genbas = Path(xcfour).parent.parent / "basis" / "GENBAS"
-        cfourrec["infiles"]["ZMAT"] = molcmd + optcmd
+        cfourrec["infiles"]["ZMAT"] = molcmd + optcmd + bascmd
         cfourrec["infiles"]["GENBAS"] = genbas.read_text()
         cfourrec["command"] = [xcfour]
 
@@ -121,11 +143,14 @@ class CFOURHarness(ProgramHarness):
         self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
 
+        # llel works b/c util.environ_context sets OMP_NUM_THREADS = config.ncores
+
         success, dexe = execute(
             inputs["command"],
             inputs["infiles"],
             ["GRD", "FCMFINAL", "DIPOL"],
-            scratch_messy=False,
+            # "DIPDER", "POLAR", "POLDER"],
+            scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
         )
         return success, dexe
@@ -137,24 +162,38 @@ class CFOURHarness(ProgramHarness):
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
+        method = input_model.model.method.lower()
+        method = method[3:] if method.startswith("c4-") else method
+
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
         try:
-            qcvars, c4hess, c4grad, c4mol, version, errorTMP = harvest(input_model.molecule, stdout, **outfiles)
-        except Exception as e:
-            raise UnknownError(stdout)
+            # July 2021: c4mol & vector returns now atin/outfile orientation depending on fix_com,orientation=T/F. previously always atin orientation
+            qcvars, c4hess, c4grad, c4mol, version, module, errorTMP = harvest(
+                input_model.molecule, method, stdout, **outfiles
+            )
+        except Exception:
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
-        if c4grad is not None:
-            qcvars["CURRENT GRADIENT"] = c4grad
-            qcvars[f"{input_model.model.method.upper()[3:]} TOTAL GRADIENT"] = c4grad
+        if errorTMP != "":
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
-        if c4hess is not None:
-            qcvars[f"{input_model.model.method.upper()[3:]} TOTAL HESSIAN"] = c4hess
-            qcvars["CURRENT HESSIAN"] = c4hess
+        try:
+            if c4grad is not None:
+                qcvars["CURRENT GRADIENT"] = c4grad
+                qcvars[f"{method.upper()} TOTAL GRADIENT"] = c4grad
 
-        if input_model.driver.upper() == "PROPERTIES":
-            retres = qcvars[f"CURRENT ENERGY"]
-        else:
-            retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+            if c4hess is not None:
+                qcvars[f"{method.upper()} TOTAL HESSIAN"] = c4hess
+                qcvars["CURRENT HESSIAN"] = c4hess
+
+            if input_model.driver.upper() == "PROPERTIES":
+                retres = qcvars[f"CURRENT ENERGY"]
+            else:
+                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        except KeyError:
+            raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
+
+        # TODO: "xalloc(): memory allocation failed!"
 
         if isinstance(retres, Decimal):
             retres = float(retres)
@@ -164,11 +203,17 @@ class CFOURHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
+        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").dict()
+        if module is not None:
+            provenance["module"] = module
+
         output_data = {
             "schema_version": 1,
-            "extras": {"outfiles": outfiles, **input_model.extras},
+            "molecule": c4mol,  # overwrites with outfile Cartesians in case fix_*=F
+            "extras": {**input_model.extras},
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
-            "provenance": Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour"),
+            "provenance": provenance,
             "return_result": retres,
             "stderr": stderr,
             "stdout": stdout,

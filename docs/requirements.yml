@@ -4,7 +4,7 @@ channels:
     - conda-forge
 dependencies:
     - python=3
-    - sphinx
+    - sphinx <4
     - sphinx_rtd_theme
     - sphinx-automodapi
     - graphviz

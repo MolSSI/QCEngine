@@ -19,10 +19,7 @@ class BernyProcedure(ProcedureHarness):
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(
-            "berny",
-            return_bool=True,
-            raise_error=raise_error,
-            raise_msg="Please install via `pip install pyberny`.",
+            "berny", return_bool=True, raise_error=raise_error, raise_msg="Please install via `pip install pyberny`.",
         )
 
     def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":

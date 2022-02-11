@@ -16,10 +16,6 @@ mol = qcel.models.Molecule.from_data(
 """
 )
 
-inp = qcel.models.AtomicInput(
-    molecule=mol,
-    driver="energy",
-    model={"method": "pbe0", "basis": "6-31g"},
-)
+inp = qcel.models.AtomicInput(molecule=mol, driver="energy", model={"method": "pbe0", "basis": "6-31g"},)
 ret = prog.compute(inp)
 print(ret)

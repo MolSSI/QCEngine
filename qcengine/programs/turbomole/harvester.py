@@ -129,6 +129,7 @@ def harvest(input_model, stdout, **outfiles):
     gradient = None
     if "gradient" in outfiles:
         gradient = parse_gradient(outfiles["gradient"])
+        qcvars["N ATOMS"] = gradient.size // 3
 
     hessian = None
     if "nprhessian" in outfiles:
@@ -136,5 +137,7 @@ def harvest(input_model, stdout, **outfiles):
     if "hessian" in outfiles:
         size = input_model.geometry.size
         hessian = parse_hessian(outfiles["hessian"], size)
+    if hessian:
+        qcvars["N ATOMS"] = hessian.shape[0] // 3
 
     return qcvars, gradient, hessian

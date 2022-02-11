@@ -85,6 +85,8 @@ class GCPHarness(ProgramHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
+            dexe["outfiles"]["input"] = " ".join(job_inputs["command"])  # stretch to call this input
+            dexe["outfiles"]["gcp_geometry.xyz"] = job_inputs["infiles"]["gcp_geometry.xyz"]
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
@@ -104,7 +106,7 @@ class GCPHarness(ProgramHarness):
             inputs["command"],
             inputs["infiles"],
             inputs["outfiles"],
-            scratch_messy=False,
+            scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
             blocking_files=inputs["blocking_files"],
         )
@@ -185,6 +187,7 @@ class GCPHarness(ProgramHarness):
             "command": command,
             "infiles": infiles,
             "outfiles": ["gcp_gradient"],
+            "scratch_messy": config.scratch_messy,
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
             "blocking_files": [os.path.join(pathlib.Path.home(), ".gcppar." + socket.gethostname())],
@@ -192,6 +195,7 @@ class GCPHarness(ProgramHarness):
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
         stdout = outfiles.pop("stdout")
+        stderr = outfiles.pop("stderr")
 
         # parse energy output (could go further and break into E6, E8, E10 and Cn coeff)
         real = np.array(input_model.molecule.real)
@@ -252,11 +256,13 @@ class GCPHarness(ProgramHarness):
 
         output_data = {
             "extras": input_model.extras,
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": {},
             "provenance": Provenance(
                 creator="GCP", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
             "return_result": retres,
+            "stderr": stderr,
             "stdout": stdout,
         }
 

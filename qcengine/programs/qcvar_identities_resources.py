@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal as Dm
 from typing import Any, Dict, List
 
@@ -5,6 +6,8 @@ import numpy as np
 from qcelemental.models import AtomicResultProperties
 
 from .util import PreservingDict
+
+logger = logging.getLogger(__name__)
 
 
 def _difference(args):
@@ -357,7 +360,7 @@ def build_out(rawvars: Dict[str, Any], verbose: int = 1) -> None:
                     data_rich_args.append(rawvars[pv])
                 else:
                     if verbose >= 2:
-                        print("""{}EMPTY, missing {}""".format(buildline, pv))
+                        logger.debug("""{}EMPTY, missing {}""".format(buildline, pv))
                     break
             else:
                 data_rich_args.append(pv)
@@ -367,7 +370,7 @@ def build_out(rawvars: Dict[str, Any], verbose: int = 1) -> None:
             # with data coming from file --> variable, looks more precise than it is. hack
             rawvars.__setitem__(pvar, result, 6)
             if verbose >= 1:
-                print("""{}SUCCESS""".format(buildline))
+                logger.debug("""{}SUCCESS""".format(buildline))
 
             if pvar == "CURRENT CORRELATION ENERGY" and abs(float(rawvars[pvar])) < 1.0e-16:
                 rawvars.pop(pvar)
@@ -385,11 +388,15 @@ qcvars_to_atomicproperties = {
     "ONE-ELECTRON ENERGY": "scf_one_electron_energy",
     "TWO-ELECTRON ENERGY": "scf_two_electron_energy",
     "CURRENT ENERGY": "return_energy",
+    "CURRENT GRADIENT": "return_gradient",
+    "CURRENT HESSIAN": "return_hessian",
     # HF keywords
     "HF DIPOLE": "scf_dipole_moment",
     "HF QUADRUPOLE": "scf_quadrupole_moment",
     "HF TOTAL ENERGY": "scf_total_energy",
     "HF ITERATIONS": "scf_iterations",
+    "HF TOTAL GRADIENT": "scf_total_gradient",
+    "HF TOTAL HESSIAN": "scf_total_hessian",
     # MP2 keywords
     "MP2 SAME-SPIN CORRELATION ENERGY": "mp2_same_spin_correlation_energy",
     "MP2 OPPOSITE-SPIN CORRELATION ENERGY": "mp2_opposite_spin_correlation_energy",
@@ -415,6 +422,8 @@ qcvars_to_atomicproperties = {
     # scf_vv10_energy
     "DFT XC ENERGY": "scf_xc_energy",
     "DFT DISPERSION ENERGY": "scf_dispersion_correction_energy",
+    # multi-definition
+    "SCF TOTAL ENERGY": "scf_total_energy",
 }
 
 
