@@ -1,4 +1,3 @@
-import itertools as it
 from math import sqrt
 import re
 from decimal import Decimal
