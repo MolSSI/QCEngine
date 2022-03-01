@@ -92,7 +92,7 @@ def parse_hessian(hessian):
 
     hess_items = [item for item in split if is_float(item)]
     coord_num = int(sqrt(len(hess_items)))
-    assert coord_num ** 2 == len(hess_items)
+    assert coord_num**2 == len(hess_items)
     hessian = np.array(hess_items, dtype=float).reshape(-1, coord_num)
 
     return hessian
@@ -118,7 +118,7 @@ def harvest(input_model, stdout, **outfiles):
     if hessian_text is None:
         hessian_text = outfiles.get("hessian", None)
 
-    if hessian_text is not None: 
+    if hessian_text is not None:
         hessian = parse_hessian(hessian_text)
         qcvars["N ATOMS"] = hessian.shape[0] // 3
     else:
