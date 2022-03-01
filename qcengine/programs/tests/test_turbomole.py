@@ -202,4 +202,4 @@ def test_turbomole_parse_hessian(h2o_nprhessian):
     hessian = parse_hessian(h2o_nprhessian)
     assert hessian.shape == (9, 9)
     eigvals, _ = np.linalg.eigh(hessian)
-    assert eigvals[-1] == pytest.approx(1.12157030e+00)
+    assert eigvals[-1] == pytest.approx(1.12157030e00)
