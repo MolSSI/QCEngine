@@ -210,7 +210,7 @@ class TurbomoleHarness(ProgramHarness):
         if input_model.driver.derivative_int() == 2:
             freq_command = "NumForce -level cc2" if ricc2_calculation else "aoforce"
             # NumForce seems to ignore the nprhessian command and will always
-            # write to hessian
+            # write to unprojected and projected Hessian to "hessian".
             hessian_outfile = "hessian" if ricc2_calculation else "nprhessian"
             commands.append(freq_command)
             # Add some keywords to the control file
