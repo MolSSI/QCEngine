@@ -19,7 +19,7 @@ from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 from pydantic import BaseModel, ValidationError
-from qcelemental.models import FailedOperation
+from qcelemental.models import AtomicResult, FailedOperation, OptimizationResult
 
 from qcengine.config import TaskConfig
 
@@ -142,17 +142,23 @@ def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> D
 
 
 def handle_output_metadata(
-    output_data: Union[Dict[str, Any], BaseModel],
+    output_data: Union[Dict[str, Any], "AtomicResult", "OptimizationResult", "FailedOperation"],
     metadata: Dict[str, Any],
     raise_error: bool = False,
     return_dict: bool = True,
-) -> Union[Dict[str, Any], BaseModel]:
+) -> Union[Dict[str, Any], "AtomicResult", "OptimizationResult", "FailedOperation"]:
     """
     Fuses general metadata and output together.
 
+    Parameters:
+        output_data: The original output object to be fused with metadata
+        metadata: Metadata produced by the compute_wrapper context manager
+        raise_error: Raise an exception if errors exist (True) or return FailedOperation (False)
+        return_dict: Return dictionary or object representation of data
+
     Returns
     -------
-    result : dict or pydantic.models.AtomicResult
+    result : AtomicResult, OptimizationResult, FailedOperation, or dict representation of any one.
         Output type depends on return_dict or a dict if an error was generated in model construction
     """
 
