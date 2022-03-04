@@ -67,10 +67,7 @@ class TorsionDriveProcedure(ProcedureHarness):
             if len(next_jobs) == 0:
                 break
 
-            grid_point_results = {
-                grid_point: [self._spawn_optimization(grid_point, job, input_model, config) for job in jobs]
-                for grid_point, jobs in next_jobs.items()
-            }
+            grid_point_results = self._spawn_optimizations(next_jobs=next_jobs, input_model=input_model, config=config)
 
             for grid_point, results in grid_point_results.items():
 
@@ -223,3 +220,13 @@ class TorsionDriveProcedure(ProcedureHarness):
         lowest_energy_idx = final_energies.argmin()
 
         return float(final_energies[lowest_energy_idx]), optimization_results[lowest_energy_idx].final_molecule
+
+    def _spawn_optimizations(
+        self, next_jobs: Dict[str, List[float]], input_model: "TorsionDriveInput", config: "TaskConfig"
+    ) -> Dict[str, List[Union[FailedOperation, OptimizationResult]]]:
+
+        grid_point_results = {
+            grid_point: [self._spawn_optimization(grid_point, job, input_model, config) for job in jobs]
+            for grid_point, jobs in next_jobs.items()
+        }
+        return grid_point_results
