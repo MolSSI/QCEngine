@@ -16,10 +16,16 @@ Changelog
 .. Bug Fixes
 .. +++++++++
 
+v0.23.0 / 2022-03-10
+--------------------
+
+Enhancements
+++++++++++++
+- (:pr:`351`) Torsiondrive procedure refactored to make it easier for users to implement a parallel version via subclassing and overwriting the `_spawn_optimizations` method. @jthorton
+
 
 v0.22.0 / 2022-01-25
 --------------------
-
 
 Bug Fixes
 +++++++++
