@@ -90,7 +90,7 @@ class CFOURHarness(ProgramHarness):
 
         # Handle memory
         # for cfour, [GiB] --> [QW]
-        opts["memory_size"] = int(config.memory * (1024 ** 3) / 8)
+        opts["memory_size"] = int(config.memory * (1024**3) / 8)
         opts["mem_unit"] = "integerwords"
 
         # Handle molecule
