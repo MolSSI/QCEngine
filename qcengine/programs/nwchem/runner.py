@@ -2,10 +2,10 @@
 Calls the NWChem executable.
 """
 import copy
+import hashlib
 import logging
 import pprint
 import re
-import hashlib
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 
