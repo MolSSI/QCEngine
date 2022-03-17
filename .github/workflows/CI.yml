@@ -18,12 +18,12 @@ jobs:
       matrix:
         cfg:
           - conda-env: psi
-            python-version: 3.6
+            python-version: 3.7
             label: Psi4-release
             runs-on: ubuntu-latest
 
           - conda-env: psi-nightly
-            python-version: 3.9
+            python-version: "3.10"
             label: Psi4-nightly
             runs-on: ubuntu-latest
 

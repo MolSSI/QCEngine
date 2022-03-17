@@ -25,4 +25,4 @@ dependencies:
   - codecov
 
   - pip:
-     - git+git://github.com/MolSSI/qcarchive-sphinx-theme#egg=qcarchive_sphinx_theme
+     - git+https://github.com/MolSSI/qcarchive-sphinx-theme#egg=qcarchive_sphinx_theme
