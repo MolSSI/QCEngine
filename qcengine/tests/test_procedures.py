@@ -48,7 +48,8 @@ def test_geometric_psi4(input_data, optimizer):
     # Check keywords passing
     for single in ret.trajectory:
         assert "scf_properties" in single.keywords
-        assert "WIBERG_LOWDIN_INDICES" in single.extras["qcvars"]
+        assert ("WIBERG_LOWDIN_INDICES" in single.extras["qcvars"] or
+                "WIBERG LOWDIN INDICES" in single.extras["qcvars"])
 
 
 @using("psi4")
