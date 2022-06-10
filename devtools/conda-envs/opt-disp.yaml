@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - psi4
+  - pcmsolver=*=py38h92d4acf_3
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
   #- intel-openmp!=2019.5
   - rdkit

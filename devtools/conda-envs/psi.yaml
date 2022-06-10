@@ -4,6 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - psi4=1.5
+  - libint2=*=hc9558a2_9
   - dftd3
   - geometric
   - intel-openmp!=2019.5
