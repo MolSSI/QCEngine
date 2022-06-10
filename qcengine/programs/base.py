@@ -5,6 +5,7 @@ Imports the various compute backends
 from typing import Set
 
 from ..exceptions import InputError, ResourceError
+from .model import ProgramHarness
 from .adcc import AdccHarness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
@@ -32,7 +33,7 @@ __all__ = ["register_program", "get_program", "list_all_programs", "list_availab
 programs = {}
 
 
-def register_program(entry_point: "ProgramHarness") -> None:
+def register_program(entry_point: ProgramHarness) -> None:
     """
     Register a new ProgramHarness with QCEngine.
     """
@@ -54,7 +55,7 @@ def unregister_program(name: str) -> None:
         raise KeyError(f"Program {name} is not registered with QCEngine")
 
 
-def get_program(name: str, check: bool = True) -> "ProgramHarness":
+def get_program(name: str, check: bool = True) -> ProgramHarness:
     """
     Returns a program's executor class
 

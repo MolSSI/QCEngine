@@ -10,13 +10,14 @@ from .geometric import GeometricProcedure
 from .nwchem_opt import NWChemDriverProcedure
 from .optking import OptKingProcedure
 from .torsiondrive import TorsionDriveProcedure
+from .model import ProcedureHarness
 
 __all__ = ["register_procedure", "get_procedure", "list_all_procedures", "list_available_procedures"]
 
 procedures = {}
 
 
-def register_procedure(entry_point: "ProcedureHarness") -> None:
+def register_procedure(entry_point: ProcedureHarness) -> None:
     """
     Register a new ProcedureHarness with QCEngine
     """
@@ -28,7 +29,7 @@ def register_procedure(entry_point: "ProcedureHarness") -> None:
     procedures[name.lower()] = entry_point
 
 
-def get_procedure(name: str) -> "ProcedureHarness":
+def get_procedure(name: str) -> ProcedureHarness:
     """
     Returns a procedures executor class
     """

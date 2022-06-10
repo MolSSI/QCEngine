@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from qcelemental.models import AtomicInput, AtomicResult
 
 from qcengine.exceptions import KnownErrorException
+from qcengine.config import TaskConfig
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class ProgramHarness(BaseModel, abc.ABC):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> "AtomicResult":
+    def compute(self, input_data: AtomicInput, config: TaskConfig) -> AtomicResult:
         pass
 
     @staticmethod
@@ -63,7 +64,7 @@ class ProgramHarness(BaseModel, abc.ABC):
     ## Computers
 
     def build_input(
-        self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
@@ -99,10 +100,10 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
     ``ErrorCorrectionProgramHarness`` and used to determine if/how to re-run the computation.
     """
 
-    def _compute(self, input_data: AtomicInput, config: "TaskConfig") -> AtomicResult:
+    def _compute(self, input_data: AtomicInput, config: TaskConfig) -> AtomicResult:
         raise NotImplementedError()
 
-    def compute(self, input_data: AtomicInput, config: "TaskConfig") -> AtomicResult:
+    def compute(self, input_data: AtomicInput, config: TaskConfig) -> AtomicResult:
         # Get the error correction configuration
         error_policy = input_data.protocols.error_correction
 
