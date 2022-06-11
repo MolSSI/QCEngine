@@ -1,6 +1,0 @@
-compute
-=======
-
-.. currentmodule:: qcengine.compute
-
-.. autofunction:: compute

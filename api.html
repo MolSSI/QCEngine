@@ -4,16 +4,11 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-
+  <title>QCEngine API &mdash; QCEngine 0+untagged.1.g7b3e843 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/small-apps.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/themefisher-font.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/style.css" type="text/css" />
+      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -44,56 +39,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-
-
-<div style="width: 100%" class="qca-header">
-<nav class="navbar main-nav navbar-expand-lg p-0 qca-header">
-  <div class="container nav-width">
-    <div class="logo-width">
-    <a class="navbar-brand" href="https://docs.qcarchive.molssi.org"><img src="https://docs.qcarchive.molssi.org/en/latest/_static/images/QCAInfrastructure.png" alt="logo" width=200px></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
-      aria-expanded="false" aria-label="Toggle navigation">
-      <span class="tf-ion-android-menu"></span>
-    </button>
-    </div>
-      <div class="collapse navbar-collapse" id=navbarNav>
-         <ul class="navbar-nav ml-auto">
-            <li class=nav-item>
-                <a class=nav-link href=https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM>
-                Community Slack
-                </a>
-            </li>
-            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org></a></li>
-            <li class="nav-item dropdown dropdown-slide">
-               <a class=nav-link href=# data-toggle=dropdown>GitHub
-               <span><i class=tf-ion-ios-arrow-down></i></span></a>
-               <div class=dropdown-menu>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCElemental>QCElemental</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCEngine>QCEngine</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCFractal</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCPortal</a>
-               </div>
-            </li>
-            <li class="nav-item dropdown dropdown-slide">
-               <a class=nav-link href=# data-toggle=dropdown>Documentation
-               <span><i class=tf-ion-ios-arrow-down></i></span></a>
-               <div class=dropdown-menu>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/>Examples</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable>QCElemental</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCEngine/en/stable>QCEngine</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCFractal/en/stable>QCFractal</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCPortal/en/stable>QCPortal</a>
-               </div>
-            </li>
-            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org/><u>MolSSI Database</u></a></li>
-         </ul>
-      </div>
-   </div>
-   </div>
-</nav>
-
-
-
+ 
 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
@@ -102,7 +48,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g1f8e26d
+                0+untagged.1.g7b3e843
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -154,30 +100,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li class="toctree-l3"><a class="reference internal" href="#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-qcengine.compute">qcengine.compute Module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Functions</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="api/qcengine.compute.compute.html">compute</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/qcengine.compute.compute_procedure.html">compute_procedure</a></li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-qcengine.config">qcengine.config Module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.config.get_config.html">get_config</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.config.get_provenance_augments.html">get_provenance_augments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.config.global_repr.html">global_repr</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Classes</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html">NodeDescriptor</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">Class Inheritance Diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Class Inheritance Diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-qcengine.util">qcengine.util Module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id5">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.util.compute_wrapper.html">compute_wrapper</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.util.model_wrapper.html">model_wrapper</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.util.handle_output_metadata.html">handle_output_metadata</a></li>
@@ -188,7 +126,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-qcengine.programs">qcengine.programs Package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id6">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.get_program.html">get_program</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.list_all_programs.html">list_all_programs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.list_available_programs.html">list_available_programs</a></li>
@@ -196,11 +134,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.unregister_program.html">unregister_program</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Classes</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.ProgramHarness.html">ProgramHarness</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id8">Class Inheritance Diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Class Inheritance Diagram</a></li>
 </ul>
 </li>
 </ul>
@@ -306,32 +244,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <area shape="rect" id="node1" href="api/qcengine.MDIServer.html#qcengine.MDIServer" target="_top" title="MDIServer" alt="" coords="5,5,96,31"/>
 </map></section>
 </section>
-<section id="module-qcengine.compute">
-<span id="qcengine-compute-module"></span><h2>qcengine.compute Module<a class="headerlink" href="#module-qcengine.compute" title="Permalink to this heading"></a></h2>
-<p>Integrates the computes together</p>
-<section id="id1">
-<h3>Functions<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.compute.compute.html#qcengine.compute.compute" title="qcengine.compute.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(input_data, program[, raise_error, ...])</p></td>
-<td><p>Executes a single CMS program given a QCSchema input.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.compute.compute_procedure.html#qcengine.compute.compute_procedure" title="qcengine.compute.compute_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_procedure</span></code></a>(input_data, procedure[, ...])</p></td>
-<td><p>Runs a procedure (a collection of the quantum chemistry executions)</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-</section>
 <section id="module-qcengine.config">
 <span id="qcengine-config-module"></span><h2>qcengine.config Module<a class="headerlink" href="#module-qcengine.config" title="Permalink to this heading"></a></h2>
 <p>Creates globals for the qcengine module</p>
-<section id="id2">
-<h3>Functions<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<section id="id1">
+<h3>Functions<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -342,7 +259,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <td><p>Returns the configuration key for qcengine.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.config.get_provenance_augments.html#qcengine.config.get_provenance_augments" title="qcengine.config.get_provenance_augments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_provenance_augments</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">rtype</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
+</dd>
+</dl>
+</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.config.global_repr.html#qcengine.config.global_repr" title="qcengine.config.global_repr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">global_repr</span></code></a>()</p></td>
 <td><p>A representation of the current global configuration.</p></td>
@@ -350,32 +272,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </tbody>
 </table>
 </section>
-<section id="id3">
-<h3>Classes<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<section id="id2">
+<h3>Classes<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="environment.html#qcengine.config.NodeDescriptor" title="qcengine.config.NodeDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeDescriptor</span></code></a>(*, hostname_pattern, name[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor" title="qcengine.config.NodeDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeDescriptor</span></code></a></p></td>
 <td><p>Description of an individual node</p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="id4">
-<h3>Class Inheritance Diagram<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
-<div class="graphviz"><img src="_images/inheritance-dd44e5295c0a30c9cd152f33f2c213ccaadb2bdf.png" alt="Inheritance diagram of qcengine.config.NodeDescriptor" usemap="#inheritance6d8ac8d9b4" class="inheritance graphviz" /></div>
+<section id="id3">
+<h3>Class Inheritance Diagram<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<div class="graphviz"><img src="_images/inheritance-c72d11f91e00b97018aea4f61e7125b725684508.png" alt="Inheritance diagram of qcengine.config.NodeDescriptor" usemap="#inheritance6d8ac8d9b4" class="inheritance graphviz" /></div>
 <map id="inheritance6d8ac8d9b4" name="inheritance6d8ac8d9b4">
-<area shape="rect" id="node3" href="environment.html#qcengine.config.NodeDescriptor" target="_top" title="Description of an individual node" alt="" coords="317,5,440,31"/>
+<area shape="rect" id="node3" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor" target="_top" title="Description of an individual node" alt="" coords="317,5,440,31"/>
 </map></section>
 </section>
 <section id="module-qcengine.util">
 <span id="qcengine-util-module"></span><h2>qcengine.util Module<a class="headerlink" href="#module-qcengine.util" title="Permalink to this heading"></a></h2>
 <p>Several import utilities</p>
-<section id="id5">
-<h3>Functions<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<section id="id4">
+<h3>Functions<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -403,8 +325,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 <section id="module-qcengine.programs">
 <span id="qcengine-programs-package"></span><h2>qcengine.programs Package<a class="headerlink" href="#module-qcengine.programs" title="Permalink to this heading"></a></h2>
-<section id="id6">
-<h3>Functions<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<section id="id5">
+<h3>Functions<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -429,22 +351,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </tbody>
 </table>
 </section>
-<section id="id7">
-<h3>Classes<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<section id="id6">
+<h3>Classes<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" title="qcengine.programs.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProgramHarness</span></code></a>(*, name, scratch, ...[, extras])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" title="qcengine.programs.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProgramHarness</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="id8">
-<h3>Class Inheritance Diagram<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<section id="id7">
+<h3>Class Inheritance Diagram<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
 <div class="graphviz"><img src="_images/inheritance-73f22ae93c9fefc236fdafee2d96c1966f59ad9b.png" alt="Inheritance diagram of qcengine.programs.model.ProgramHarness" usemap="#inheritance27cf6b60bd" class="inheritance graphviz" /></div>
 <map id="inheritance27cf6b60bd" name="inheritance27cf6b60bd">
 <area shape="rect" id="node4" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" target="_top" title="ProgramHarness" alt="" coords="317,31,448,56"/>

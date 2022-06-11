@@ -3,25 +3,4 @@ ProgramHarness
 
 .. currentmodule:: qcengine.programs
 
-.. autoclass:: ProgramHarness
-   :show-inheritance:
-
-   .. rubric:: Methods Summary
-
-   .. autosummary::
-
-      ~ProgramHarness.build_input
-      ~ProgramHarness.compute
-      ~ProgramHarness.execute
-      ~ProgramHarness.found
-      ~ProgramHarness.get_version
-      ~ProgramHarness.parse_output
-
-   .. rubric:: Methods Documentation
-
-   .. automethod:: build_input
-   .. automethod:: compute
-   .. automethod:: execute
-   .. automethod:: found
-   .. automethod:: get_version
-   .. automethod:: parse_output
+.. autopydantic_model:: ProgramHarness

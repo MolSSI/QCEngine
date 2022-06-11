@@ -70,7 +70,8 @@ The keys in the YAML file are human-friendly names for the configurations.
 The values are dictionaries that define configurations for different nodes,
 following the ``NodeDescription`` schema:
 
-.. autoclass:: qcengine.config.NodeDescriptor
+.. autopydantic_model:: qcengine.config.NodeDescriptor
+   :noindex:
 
 When running QCEngine, the proper configuration for a node is determined based on the hostname of the node
 and matching the ``hostname_pattern`` to each of the configurations defined in ``qcengine.yaml``.

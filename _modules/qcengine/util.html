@@ -3,16 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-
+  <title>qcengine.util &mdash; QCEngine 0+untagged.1.g7b3e843 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/small-apps.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/themefisher-font.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/style.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -41,56 +36,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-
-
-<div style="width: 100%" class="qca-header">
-<nav class="navbar main-nav navbar-expand-lg p-0 qca-header">
-  <div class="container nav-width">
-    <div class="logo-width">
-    <a class="navbar-brand" href="https://docs.qcarchive.molssi.org"><img src="https://docs.qcarchive.molssi.org/en/latest/_static/images/QCAInfrastructure.png" alt="logo" width=200px></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
-      aria-expanded="false" aria-label="Toggle navigation">
-      <span class="tf-ion-android-menu"></span>
-    </button>
-    </div>
-      <div class="collapse navbar-collapse" id=navbarNav>
-         <ul class="navbar-nav ml-auto">
-            <li class=nav-item>
-                <a class=nav-link href=https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM>
-                Community Slack
-                </a>
-            </li>
-            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org></a></li>
-            <li class="nav-item dropdown dropdown-slide">
-               <a class=nav-link href=# data-toggle=dropdown>GitHub
-               <span><i class=tf-ion-ios-arrow-down></i></span></a>
-               <div class=dropdown-menu>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCElemental>QCElemental</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCEngine>QCEngine</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCFractal</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCPortal</a>
-               </div>
-            </li>
-            <li class="nav-item dropdown dropdown-slide">
-               <a class=nav-link href=# data-toggle=dropdown>Documentation
-               <span><i class=tf-ion-ios-arrow-down></i></span></a>
-               <div class=dropdown-menu>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/>Examples</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable>QCElemental</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCEngine/en/stable>QCEngine</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCFractal/en/stable>QCFractal</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCPortal/en/stable>QCPortal</a>
-               </div>
-            </li>
-            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org/><u>MolSSI Database</u></a></li>
-         </ul>
-      </div>
-   </div>
-   </div>
-</nav>
-
-
-
+ 
 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
@@ -99,7 +45,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g1f8e26d
+                0+untagged.1.g7b3e843
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -177,7 +123,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ValidationError</span>
 <span class="kn">from</span> <span class="nn">qcelemental.models</span> <span class="kn">import</span> <span class="n">FailedOperation</span>
 
 <span class="kn">from</span> <span class="nn">qcengine.config</span> <span class="kn">import</span> <span class="n">TaskConfig</span>
@@ -213,7 +159,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="k">return</span> <span class="n">command</span></div>
 
 
-<div class="viewcode-block" id="model_wrapper"><a class="viewcode-back" href="../../api/qcengine.util.model_wrapper.html#qcengine.util.model_wrapper">[docs]</a><span class="k">def</span> <span class="nf">model_wrapper</span><span class="p">(</span><span class="n">input_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="s2">&quot;BaseModel&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseModel&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="model_wrapper"><a class="viewcode-back" href="../../api/qcengine.util.model_wrapper.html#qcengine.util.model_wrapper">[docs]</a><span class="k">def</span> <span class="nf">model_wrapper</span><span class="p">(</span><span class="n">input_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">BaseModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseModel</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrap input data in the given model, or return a controlled error</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -301,11 +247,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <div class="viewcode-block" id="handle_output_metadata"><a class="viewcode-back" href="../../api/qcengine.util.handle_output_metadata.html#qcengine.util.handle_output_metadata">[docs]</a><span class="k">def</span> <span class="nf">handle_output_metadata</span><span class="p">(</span>
-    <span class="n">output_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">&quot;BaseModel&quot;</span><span class="p">],</span>
+    <span class="n">output_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">BaseModel</span><span class="p">],</span>
     <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">return_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">&quot;BaseModel&quot;</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">BaseModel</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fuses general metadata and output together.</span>
 

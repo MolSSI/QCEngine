@@ -4,16 +4,11 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-
+  <title>get_config &mdash; QCEngine 0+untagged.1.g7b3e843 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/small-apps.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/themefisher-font.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/style.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/autodoc_pydantic.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -27,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="get_provenance_augments" href="qcengine.config.get_provenance_augments.html" />
-    <link rel="prev" title="compute_procedure" href="qcengine.compute.compute_procedure.html" />
+    <link rel="prev" title="MDIServer" href="qcengine.MDIServer.html" />
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -44,56 +39,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-
-
-<div style="width: 100%" class="qca-header">
-<nav class="navbar main-nav navbar-expand-lg p-0 qca-header">
-  <div class="container nav-width">
-    <div class="logo-width">
-    <a class="navbar-brand" href="https://docs.qcarchive.molssi.org"><img src="https://docs.qcarchive.molssi.org/en/latest/_static/images/QCAInfrastructure.png" alt="logo" width=200px></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
-      aria-expanded="false" aria-label="Toggle navigation">
-      <span class="tf-ion-android-menu"></span>
-    </button>
-    </div>
-      <div class="collapse navbar-collapse" id=navbarNav>
-         <ul class="navbar-nav ml-auto">
-            <li class=nav-item>
-                <a class=nav-link href=https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM>
-                Community Slack
-                </a>
-            </li>
-            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org></a></li>
-            <li class="nav-item dropdown dropdown-slide">
-               <a class=nav-link href=# data-toggle=dropdown>GitHub
-               <span><i class=tf-ion-ios-arrow-down></i></span></a>
-               <div class=dropdown-menu>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCElemental>QCElemental</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCEngine>QCEngine</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCFractal</a>
-                  <a class=dropdown-item href=https://github.com/MolSSI/QCFractal>QCPortal</a>
-               </div>
-            </li>
-            <li class="nav-item dropdown dropdown-slide">
-               <a class=nav-link href=# data-toggle=dropdown>Documentation
-               <span><i class=tf-ion-ios-arrow-down></i></span></a>
-               <div class=dropdown-menu>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/>Examples</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable>QCElemental</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCEngine/en/stable>QCEngine</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCFractal/en/stable>QCFractal</a>
-                  <a class=dropdown-item href=https://docs.qcarchive.molssi.org/projects/QCPortal/en/stable>QCPortal</a>
-               </div>
-            </li>
-            <li class=nav-item><a class=nav-link href=https://qcarchive.molssi.org/><u>MolSSI Database</u></a></li>
-         </ul>
-      </div>
-   </div>
-   </div>
-</nav>
-
-
-
+ 
 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
@@ -102,7 +48,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g1f8e26d
+                0+untagged.1.g7b3e843
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -132,16 +78,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">QCEngine API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-qcengine">qcengine Package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-qcengine.compute">qcengine.compute Module</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#module-qcengine.config">qcengine.config Module</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="../api.html#id2">Functions</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../api.html#id1">Functions</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">get_config</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.config.get_provenance_augments.html">get_provenance_augments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.config.global_repr.html">global_repr</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../api.html#id3">Classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../api.html#id4">Class Inheritance Diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id2">Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../api.html#id3">Class Inheritance Diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-qcengine.util">qcengine.util Module</a></li>
@@ -181,8 +126,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <h1>get_config<a class="headerlink" href="#get-config" title="Permalink to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="qcengine.config.get_config">
-<span class="sig-prename descclassname"><span class="pre">qcengine.config.</span></span><span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hostname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/typing.html#typing.Optional" title="(in Python v3.7)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.7/library/typing.html#typing.Optional" title="(in Python v3.7)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.7/library/typing.html#typing.Dict" title="(in Python v3.7)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.7/library/stdtypes.html#str" title="(in Python v3.7)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.7/library/typing.html#typing.Any" title="(in Python v3.7)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TaskConfig</span></span></span><a class="reference internal" href="../_modules/qcengine/config.html#get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.config.get_config" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qcengine.config.</span></span><span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hostname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/config.html#get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.config.get_config" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the configuration key for qcengine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskConfig</span></code></p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>hostname</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>local_options</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -191,7 +147,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qcengine.compute.compute_procedure.html" class="btn btn-neutral float-left" title="compute_procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qcengine.MDIServer.html" class="btn btn-neutral float-left" title="MDIServer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qcengine.config.get_provenance_augments.html" class="btn btn-neutral float-right" title="get_provenance_augments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

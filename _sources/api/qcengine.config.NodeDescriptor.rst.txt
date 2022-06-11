@@ -3,5 +3,4 @@ NodeDescriptor
 
 .. currentmodule:: qcengine.config
 
-.. autoclass:: NodeDescriptor
-   :show-inheritance:
+.. autopydantic_model:: NodeDescriptor
