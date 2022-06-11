@@ -21,6 +21,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -101,7 +102,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gc171e80
+                0+untagged.1.g1f8e26d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -165,7 +166,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            <div itemprop="articleBody">
              
   <section id="molecular-mechanics">
-<h1>Molecular Mechanics<a class="headerlink" href="#molecular-mechanics" title="Permalink to this headline"></a></h1>
+<h1>Molecular Mechanics<a class="headerlink" href="#molecular-mechanics" title="Permalink to this heading"></a></h1>
 <p>For Molecular Mechanics (MM) engines to fit the AtomicInput/Result schema
 the following convention is used:</p>
 <ul class="simple">
@@ -174,7 +175,7 @@ the following convention is used:</p>
 </ul>
 <p>For all MM computations the input Molecule object must have connectivity and this will not be automatically assigned for you.</p>
 <section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h2>
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">symbols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">geometry</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
@@ -193,7 +194,7 @@ the following convention is used:</p>
 </div>
 </section>
 <section id="openmm">
-<h2>OpenMM<a class="headerlink" href="#openmm" title="Permalink to this headline"></a></h2>
+<h2>OpenMM<a class="headerlink" href="#openmm" title="Permalink to this heading"></a></h2>
 <p>Currently OpenMM only supports the smirnoff typing engine from the
 <code class="docutils literal notranslate"><span class="pre">openff-toolkit</span></code>. Currently available force fields are the following:</p>
 <table class="docutils align-default">
@@ -221,7 +222,7 @@ the following convention is used:</p>
 <p>Other forcefields may be available depending on your version of the <code class="docutils literal notranslate"><span class="pre">openff-toolkit</span></code>, see their <a class="reference external" href="https://open-forcefield-toolkit.readthedocs.io">docs</a> for more information.</p>
 </section>
 <section id="rdkit">
-<h2>RDKit<a class="headerlink" href="#rdkit" title="Permalink to this headline"></a></h2>
+<h2>RDKit<a class="headerlink" href="#rdkit" title="Permalink to this heading"></a></h2>
 <p>RDKit force fields currently do not require a typing engine and the basis is omitted in all computations. Currently available force fields are the following:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -247,7 +248,7 @@ the following convention is used:</p>
 </table>
 </section>
 <section id="xtb">
-<h2>xtb<a class="headerlink" href="#xtb" title="Permalink to this headline"></a></h2>
+<h2>xtb<a class="headerlink" href="#xtb" title="Permalink to this heading"></a></h2>
 <p>Experimental access to force fields are available with the <code class="docutils literal notranslate"><span class="pre">xtb</span></code> engine.
 Note that the <code class="docutils literal notranslate"><span class="pre">xtb</span></code> engine will not require nor use a topology information provided in the input schema.</p>
 <table class="docutils align-default">

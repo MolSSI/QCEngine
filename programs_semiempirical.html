@@ -21,6 +21,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -101,7 +102,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gc171e80
+                0+untagged.1.g1f8e26d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -164,7 +165,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            <div itemprop="articleBody">
              
   <section id="semiempirical-quantum-mechanics">
-<h1>Semiempirical Quantum Mechanics<a class="headerlink" href="#semiempirical-quantum-mechanics" title="Permalink to this headline"></a></h1>
+<h1>Semiempirical Quantum Mechanics<a class="headerlink" href="#semiempirical-quantum-mechanics" title="Permalink to this heading"></a></h1>
 <p>For semiempirical quantum mechanics (SQM) engines to fit the AtomicInput/Result schema the following convention is used:</p>
 <ul class="simple">
 <li><p>Method: The unique method name (PM7 or GFN2-xTB) including the parametrisation information is provided, no basis is needed</p></li>
@@ -176,7 +177,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 To be sure remove ghost atoms from input to semiempirical engines beforehand.</p>
 </div>
 <section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h2>
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
 <p>For example, running a calculation with the GFN2-xTB method using the <code class="docutils literal notranslate"><span class="pre">xtb</span></code> engine would work like any other QM engine with</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">qcelemental</span> <span class="k">as</span> <span class="nn">qcel</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span>
@@ -202,7 +203,7 @@ To be sure remove ghost atoms from input to semiempirical engines beforehand.</p
 </div>
 </section>
 <section id="mopac">
-<h2>MOPAC<a class="headerlink" href="#mopac" title="Permalink to this headline"></a></h2>
+<h2>MOPAC<a class="headerlink" href="#mopac" title="Permalink to this heading"></a></h2>
 <p>The following semiempirical Hamiltonians are supported with the MOPAC engine.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -261,7 +262,7 @@ To be sure remove ghost atoms from input to semiempirical engines beforehand.</p
 </table>
 </section>
 <section id="xtb">
-<h2>xtb<a class="headerlink" href="#xtb" title="Permalink to this headline"></a></h2>
+<h2>xtb<a class="headerlink" href="#xtb" title="Permalink to this heading"></a></h2>
 <p>The following extended tight binding Hamiltonians are available with the <code class="docutils literal notranslate"><span class="pre">xtb</span></code> engine.</p>
 <table class="docutils align-default">
 <colgroup>

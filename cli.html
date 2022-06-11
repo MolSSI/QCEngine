@@ -21,6 +21,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -101,7 +102,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gc171e80
+                0+untagged.1.g1f8e26d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -179,7 +180,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            <div itemprop="articleBody">
              
   <section id="command-line-interface">
-<h1>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline"></a></h1>
+<h1>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this heading"></a></h1>
 <p>QCEngine provides a command line interface with three commands:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">qcengine</span> <span class="pre">info</span></code> displays information about the environment detected by QCEngine.</p></li>
@@ -187,19 +188,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><p><code class="docutils literal notranslate"><span class="pre">qcengine</span> <span class="pre">run-procedure</span></code> runs a procedure.</p></li>
 </ul>
 <section id="info-command">
-<h2>Info Command<a class="headerlink" href="#info-command" title="Permalink to this headline"></a></h2>
+<h2>Info Command<a class="headerlink" href="#info-command" title="Permalink to this heading"></a></h2>
 <section id="command-invocation">
-<h3>Command Invocation<a class="headerlink" href="#command-invocation" title="Permalink to this headline"></a></h3>
+<h3>Command Invocation<a class="headerlink" href="#command-invocation" title="Permalink to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>qcengine info &lt;options&gt;
 </pre></div>
 </div>
 </section>
 <section id="command-description">
-<h3>Command Description<a class="headerlink" href="#command-description" title="Permalink to this headline"></a></h3>
+<h3>Command Description<a class="headerlink" href="#command-description" title="Permalink to this heading"></a></h3>
 <p>This command prints information about the QCEngine environment.</p>
 </section>
 <section id="arguments">
-<h3>Arguments<a class="headerlink" href="#arguments" title="Permalink to this headline"></a></h3>
+<h3>Arguments<a class="headerlink" href="#arguments" title="Permalink to this heading"></a></h3>
 <dl>
 <dt><code class="docutils literal notranslate"><span class="pre">category</span></code></dt><dd><p>The information categories to show. Choices include:</p>
 <ul class="simple">
@@ -215,19 +216,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 </section>
 <section id="run-command">
-<h2>Run Command<a class="headerlink" href="#run-command" title="Permalink to this headline"></a></h2>
+<h2>Run Command<a class="headerlink" href="#run-command" title="Permalink to this heading"></a></h2>
 <section id="id1">
-<h3>Command Invocation<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<h3>Command Invocation<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>qcengine run &lt;program&gt; &lt;data&gt;
 </pre></div>
 </div>
 </section>
 <section id="id2">
-<h3>Command Description<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<h3>Command Description<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>This command runs a program on a given task and outputs the result as a JSON blob.</p>
 </section>
 <section id="id3">
-<h3>Arguments<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<h3>Arguments<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">program</span></code></dt><dd><p>The program to run.</p>
 </dd>
@@ -242,19 +243,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 </section>
 <section id="run-procedure-command">
-<h2>Run-Procedure Command<a class="headerlink" href="#run-procedure-command" title="Permalink to this headline"></a></h2>
+<h2>Run-Procedure Command<a class="headerlink" href="#run-procedure-command" title="Permalink to this heading"></a></h2>
 <section id="id4">
-<h3>Command Invocation<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
+<h3>Command Invocation<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>qcengine run-procedure &lt;program&gt; &lt;data&gt;
 </pre></div>
 </div>
 </section>
 <section id="id5">
-<h3>Command Description<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<h3>Command Description<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
 <p>This command runs a procedure on a given task and outputs the result as a JSON blob.</p>
 </section>
 <section id="id6">
-<h3>Arguments<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<h3>Arguments<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">procedure</span></code></dt><dd><p>The procedure to run.</p>
 </dd>
