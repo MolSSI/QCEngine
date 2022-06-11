@@ -14,15 +14,16 @@ dependencies:
 
     # docs
   - python-graphviz
-  - sphinx >=3.5
+  - sphinx
   - sphinx-autodoc-typehints
   - sphinx-automodapi
   - sphinx_rtd_theme
+  - autodoc-pydantic
 
     # testing
   - pytest>=4.0.0
   - pytest-cov
   - codecov
 
-  - pip:
-     - git+https://github.com/MolSSI/qcarchive-sphinx-theme#egg=qcarchive_sphinx_theme
+  #- pip:
+  #   - git+https://github.com/MolSSI/qcarchive-sphinx-theme#egg=qcarchive_sphinx_theme

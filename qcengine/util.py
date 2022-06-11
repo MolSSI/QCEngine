@@ -18,7 +18,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 from qcelemental.models import FailedOperation
 
 from qcengine.config import TaskConfig
@@ -54,7 +54,7 @@ def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]
     return command
 
 
-def model_wrapper(input_data: Dict[str, Any], model: "BaseModel") -> "BaseModel":
+def model_wrapper(input_data: Dict[str, Any], model: BaseModel) -> BaseModel:
     """
     Wrap input data in the given model, or return a controlled error
     """
@@ -142,11 +142,11 @@ def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> D
 
 
 def handle_output_metadata(
-    output_data: Union[Dict[str, Any], "BaseModel"],
+    output_data: Union[Dict[str, Any], BaseModel],
     metadata: Dict[str, Any],
     raise_error: bool = False,
     return_dict: bool = True,
-) -> Union[Dict[str, Any], "BaseModel"]:
+) -> Union[Dict[str, Any], BaseModel]:
     """
     Fuses general metadata and output together.
 
