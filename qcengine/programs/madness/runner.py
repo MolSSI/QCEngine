@@ -68,7 +68,7 @@ class MadnessHarness(ProgramHarness):
 
         """
         qc = which(
-            "madness",
+            "moldft",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via https://github.com/m-a-d-n-e-s-s/madness",
@@ -89,7 +89,7 @@ class MadnessHarness(ProgramHarness):
         config = get_config()
 
         # Run MADNESS
-        which_prog = which("madness")
+        which_prog = which("moldft")
 
         if config.use_mpiexec:
             command = create_mpi_invocation(which_prog, config)
@@ -101,7 +101,7 @@ class MadnessHarness(ProgramHarness):
             success, output = execute(
                 command,
                 {
-                    "v.moldft": "dft\nxc lda\nend\ngeometry\nO  0.0    0.0 0.0\nH  1.4375 0.0 1.15\nH - 1.4375 0.0 1.15\nend\n"
+                    "v.moldft": "dft\nxc lda\nend\ngeometry\nBe  0.0    0.0 0.0\n\nend\n"
                 },
                 scratch_directory=config.scratch_directory,
             )
