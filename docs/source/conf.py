@@ -46,23 +46,32 @@ release = qcengine.__version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.doctest",
-    "sphinx.ext.todo",
-    "sphinx.ext.coverage",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.extlinks",
-    "sphinx_automodapi.automodapi",
-    "sphinx_automodapi.automodsumm",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.doctest',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.extlinks',
+    'sphinx.ext.graphviz',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
+    'sphinx_automodapi.automodapi',
+    'sphinx_automodapi.automodsumm',
+    'sphinx_automodapi.smart_resolver',
+    "sphinx_autodoc_typehints",
+    "sphinxcontrib.autodoc_pydantic",
 ]
 
-napoleon_google_docstring = False
-napoleon_use_param = False
-napoleon_use_ivar = True
+autosummary_generate = True
+automodapi_toctreedirnm = 'api'
+autodoc_typehints = "description"
+napoleon_use_param = True
+napoleon_use_rtype = True
+autodoc_pydantic_model_hide_paramlist = True
+autodoc_pydantic_model_show_config_summary = False
+autodoc_pydantic_field_swap_name_and_alias = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
