@@ -596,7 +596,9 @@ def disk_files(
         for fl, content in infiles.items():
             omode = "wb" if fl in as_binary else "w"
             filename = lwd / fl
-            with open(filename, omode) as fp:
+            if filename.parent != lwd:
+                filename.parent.mkdir(parents=True, exist_ok=True)
+            with filename.open(omode) as fp:
                 fp.write(content)
                 LOGGER.info(f"... Writing ({omode}): {filename}")
 
