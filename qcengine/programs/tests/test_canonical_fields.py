@@ -78,7 +78,7 @@ def test_protocol_native(program, model, keywords, native):
     #  <<  Test
 
     if native == "none":
-        assert ret.native_files is None
+        assert ret.native_files == {}
     elif native == "input":
         assert list(ret.native_files.keys()) == ["input"]
 
