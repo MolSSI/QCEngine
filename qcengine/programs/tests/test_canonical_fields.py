@@ -2,6 +2,7 @@ import pprint
 import re
 
 import pytest
+import qcelemental as qcel
 from qcelemental.models import AtomicInput
 
 import qcengine as qcng
@@ -78,7 +79,10 @@ def test_protocol_native(program, model, keywords, native):
     #  <<  Test
 
     if native == "none":
-        assert ret.native_files == {}
+        if qcel.__version__ >= "v0.25":
+            assert ret.native_files == {}
+        else:
+            assert ret.native_files is None
     elif native == "input":
         assert list(ret.native_files.keys()) == ["input"]
 
