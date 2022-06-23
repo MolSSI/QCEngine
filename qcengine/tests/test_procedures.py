@@ -49,6 +49,7 @@ def test_geometric_psi4(input_data, optimizer):
     for single in ret.trajectory:
         assert "scf_properties" in single.keywords
         assert "WIBERG_LOWDIN_INDICES" in single.extras["qcvars"] or "WIBERG LOWDIN INDICES" in single.extras["qcvars"]
+        # TODO: old WIBERG qcvar used underscore; new one uses space. covering bases here but remove someday
 
 
 @using("psi4")
