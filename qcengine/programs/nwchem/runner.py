@@ -179,7 +179,9 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         if opts.pop("geometry__noautoz", False):
             molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 noautoz", molcmd)
-        if val := opts.pop("geometry__autosym", False):
+        # someday when minimum >=py38 `if val := opts.pop("geometry__autosym", False):`
+        if opts.get("geometry__autosym", False):
+            val = opts.pop("geometry__autosym")
             molcmd = re.sub(r"geometry ([^\n]*)", rf"geometry \1 autosym {val}", molcmd)
 
         # Handle calc type and quantum chemical method
