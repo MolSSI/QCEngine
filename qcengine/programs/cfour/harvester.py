@@ -1224,11 +1224,11 @@ def harvest(in_mol: Molecule, method: str, c4out, **largs):
         if in_mol.fix_com and in_mol.fix_orientation:
             # Impose input frame if important as signalled by fix_*=T
             return_mol = in_mol
-            _, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
+            _, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, generic_ghosts=True, verbose=0)
             mill = data["mill"]
 
         else:
-            return_mol, _ = in_mol.align(out_mol, atoms_map=False, mols_align=True, verbose=0)
+            return_mol, _ = in_mol.align(out_mol, atoms_map=False, mols_align=True, generic_ghosts=True, verbose=0)
             mill = qcel.molutil.compute_scramble(
                 len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
             )  # identity AlignmentMill
@@ -1330,7 +1330,9 @@ def harvest_GRD(grd):
     grad = []
     for at in range(Nat):
         mline = grd[at + 1].split()
-        el = "GH" if int(float(mline[0])) == 0 else qcel.periodictable.to_E(int(float(mline[0])))
+
+        # "@Xe" is potentially dangerous bypass for ghosts
+        el = "@Xe" if int(float(mline[0])) == 0 else qcel.periodictable.to_E(int(float(mline[0])))
         molxyz += "%s %16s %16s %16s\n" % (el, mline[-3], mline[-2], mline[-1])
         lline = grd[at + 1 + Nat].split()
         grad.append([float(lline[-3]), float(lline[-2]), float(lline[-1])])

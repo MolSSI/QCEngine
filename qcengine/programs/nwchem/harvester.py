@@ -1202,6 +1202,8 @@ def harvest(
         # If present, align the gradients and hessian with the original molecular coordinates
         #  NWChem rotates the coordinates of the input molecule. `calc_mol` contains the coordinates for the
         #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
+        # Beware the loose symmetrizer that can noticably change the input geometry.
+        #  `geometry__autosym = 1d-4` tightens.
         return_mol = in_mol
         _, data = calc_mol.align(in_mol, atoms_map=True, verbose=0, mols_align=0.01)
         mill = data["mill"]

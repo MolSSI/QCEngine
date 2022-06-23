@@ -179,6 +179,8 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         if opts.pop("geometry__noautoz", False):
             molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 noautoz", molcmd)
+        if val := opts.pop("geometry__autosym", False):
+            molcmd = re.sub(r"geometry ([^\n]*)", rf"geometry \1 autosym {val}", molcmd)
 
         # Handle calc type and quantum chemical method
         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))

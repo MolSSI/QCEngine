@@ -2,6 +2,7 @@ import pprint
 import re
 
 import pytest
+import numpy as np
 import qcelemental as qcel
 from qcelemental.testing import compare, compare_values
 
@@ -16,22 +17,30 @@ def hene():
  0 1
  He 0 0 0
  @Ne 2.5 0 0
+ nocom
+ noreorient
 """
     return qcel.models.Molecule.from_data(smol)
 
 
+@pytest.mark.parametrize("driver", ["energy", "gradient"])
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [
         pytest.param("cfour", "aug-pvdz", {}, marks=using("cfour")),
         pytest.param("gamess", "ccd", {"contrl__ispher": 1}, marks=using("gamess")),
-        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=using("nwchem")),
-        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=using("nwchem")),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__thresh": 1.0e-6}, marks=using("nwchem")),
+        pytest.param(
+            "nwchem",
+            "aug-cc-pvdz",
+            {"basis__spherical": True, "scf__thresh": 1.0e-6, "qc_module": "tce"},
+            marks=using("nwchem"),
+        ),
         pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "direct"}, marks=using("psi4")),
     ],
 )
-def test_simple_ghost(program, basis, keywords, hene):
-    resi = {"molecule": hene, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
+def test_simple_ghost(driver, program, basis, keywords, hene):
+    resi = {"molecule": hene, "driver": driver, "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     if program == "gamess":
         with pytest.raises(qcng.exceptions.InputError) as e:
@@ -40,7 +49,7 @@ def test_simple_ghost(program, basis, keywords, hene):
 
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
 
-    assert res["driver"] == "energy"
+    assert res["driver"] == driver
     assert "provenance" in res
     assert res["success"] is True
 
@@ -50,7 +59,21 @@ def test_simple_ghost(program, basis, keywords, hene):
     assert compare_values(0.0, res["properties"]["nuclear_repulsion_energy"], atol=atol, label="nre")
     assert compare(32, res["properties"]["calcinfo_nbasis"], label="nbas")
     assert compare(32, res["properties"]["calcinfo_nmo"], label="nmo")
-    assert compare_values(-2.8557143339397539, res["return_result"], atol=atol, label="ene")
+
+    ene = -2.8557143339397539
+    grad = np.array(
+        [
+            0.000004317771,
+            0.000000000000,
+            0.000000000000,
+            -0.000004317771,
+            0.000000000000,
+            0.000000000000,
+        ]
+    )
+    retres = {"energy": ene, "gradient": grad}[driver]
+    assert compare_values(ene, res["properties"]["return_energy"], atol=atol, label="ene")
+    assert compare_values(retres, res["return_result"], atol=atol, label="return")
 
 
 bimol_ref = {}
@@ -66,8 +89,58 @@ bimol_ref["eneyne"]["nmo"] = dict(zip(dmm, [72, 38, 34, 72, 72]))
 bimol_ref["eneyne"]["mp2"] = dict(
     zip(dmm, [-155.3738614073, -78.2942587466, -77.0760547257, -78.2957592762, -77.0762583352])
 )
+# fmt: off
+bimol_ref["eneyne"]["mp2_gradient"] = dict(zip(dmm, [
+    np.array([
+              0.000000000000,    -0.000593266109,    -0.000461056876,
+             -0.000000000000,     0.000593266109,    -0.000461056876,
+             -0.001061612039,     0.001517372852,     0.000162497702,
+              0.001061612039,     0.001517372852,     0.000162497702,
+              0.001061612039,    -0.001517372852,     0.000162497702,
+             -0.001061612039,    -0.001517372852,     0.000162497702,
+              0.000000000000,     0.000000000000,    -0.017632146748,
+              0.000000000000,     0.000000000000,     0.018013978833,
+             -0.000000000000,     0.000000000000,     0.001709075893,
+              0.000000000000,     0.000000000000,    -0.001818785037]).reshape(-1, 3),
+    np.array([
+              0.000000000000,    -0.002441448034,     0.000180001772,
+             -0.000000000000,     0.002441448034,     0.000180001772,
+             -0.000901391196,     0.001441168636,    -0.000090000886,
+              0.000901391196,     0.001441168636,    -0.000090000886,
+              0.000901391196,    -0.001441168636,    -0.000090000886,
+             -0.000901391196,    -0.001441168636,    -0.000090000886]).reshape(-1, 3),
+    np.array([
+              0.000000000000,     0.000000000000,    -0.016477969697,
+              0.000000000000,     0.000000000000,     0.018475631244,
+              0.000000000000,     0.000000000000,    -0.000114435361,
+              0.000000000000,     0.000000000000,    -0.001883226187]).reshape(-1, 3),
+    np.array([
+              0.000000000000,    -0.001485687659,    -0.000311350386,
+             -0.000000000000,     0.001485687659,    -0.000311350386,
+             -0.000964480529,     0.001442449761,    -0.000001369355,
+              0.000964480529,     0.001442449761,    -0.000001369355,
+              0.000964480529,    -0.001442449761,    -0.000001369355,
+             -0.000964480529,    -0.001442449761,    -0.000001369355,
+             -0.000000000000,     0.000000000000,     0.000120621150,
+             -0.000000000000,     0.000000000000,     0.000279898955,
+              0.000000000000,     0.000000000000,     0.000207604252,
+             -0.000000000000,     0.000000000000,     0.000020053834]).reshape(-1, 3),
+    np.array([
+              0.000000000000,    -0.000012504382,    -0.000103233192,
+             -0.000000000000,     0.000012504382,    -0.000103233192,
+             -0.000000589727,    -0.000001580375,    -0.000009047576,
+              0.000000589727,    -0.000001580375,    -0.000009047576,
+              0.000000589727,     0.000001580375,    -0.000009047576,
+             -0.000000589727,     0.000001580375,    -0.000009047576,
+              0.000000000000,     0.000000000000,    -0.016334419378,
+             -0.000000000000,     0.000000000000,     0.018457229773,
+             -0.000000000000,     0.000000000000,     0.000025489498,
+              0.000000000000,     0.000000000000,    -0.001905643204]).reshape(-1, 3),
+]))
+# fmt: on
 
 
+@pytest.mark.parametrize("driver", ["energy", "gradient"])
 @pytest.mark.parametrize("subject", dmm)
 @pytest.mark.parametrize(
     "qcprog, basis, keywords",
@@ -93,15 +166,26 @@ bimol_ref["eneyne"]["mp2"] = dict(
         ),
     ],
 )
-def test_tricky_ghost(qcprog, subject, basis, keywords):
-    kmol = qcel.models.Molecule(**eneyne_ne_qcschemamols()["eneyne"][subject])
+def test_tricky_ghost(driver, qcprog, subject, basis, keywords):
+    dmol = eneyne_ne_qcschemamols()["eneyne"][subject]
+    # Freeze the input orientation so that output arrays are aligned to input
+    #   and all programs match gradient.
+    dmol["fix_com"] = True
+    dmol["fix_orientation"] = True
+    if qcprog == "nwchem" and subject in ["mA", "mB"]:
+        # NWChem symmetry detection uses a loose tolerance (0.01) that catches
+        #   the monomers and symmetrizes them, belying the atoms_map=True arg
+        #   to the in_mol vs. calc_mol aligner. Gradients don't change much
+        #   w/symm geometry but enough that the symmetrizer must be defeated.
+        keywords["geometry__autosym"] = "1d-4"
+    kmol = qcel.models.Molecule(**dmol)
     ref = bimol_ref["eneyne"]
 
     assert len(kmol.symbols) == ref["natom"][subject]
     assert sum([int(at) for at in kmol.real]) == ref["nreal"][subject]
 
     atin = qcel.models.AtomicInput(
-        **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": "energy", "keywords": keywords}
+        **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords}
     )
 
     if qcprog == "gamess" and subject in ["mAgB", "gAmB"]:
@@ -122,8 +206,12 @@ def test_tricky_ghost(qcprog, subject, basis, keywords):
         ref["nmo"][subject], atres.properties.calcinfo_nmo, label="nmo"
     ), f'nmo: {atres.properties.calcinfo_nmo} != {ref["nmo"][subject]}'
     assert compare_values(
-        ref["mp2"][subject], atres.return_result, atol=3.0e-6, label="ene"
-    ), f'ene: {atres.return_result} != {ref["mp2"][subject]}'
+        ref["mp2"][subject], atres.properties.return_energy, atol=3.0e-6, label="ene"
+    ), f'ene: {atres.properties.return_energy} != {ref["mp2"][subject]}'
+    retres = {"energy": ref["mp2"][subject], "gradient": ref["mp2_gradient"][subject]}[driver]
+    assert compare_values(
+        retres, atres.return_result, atol=3.0e-6, label="return"
+    ), f"return: {atres.return_result} != {retres}"
 
     pgline = {
         "cfour": r"Computational point group: (?P<pg>\w+)",
