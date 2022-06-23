@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcelemental.models.results &mdash; QCEngine 0+untagged.1.g7b3e843 documentation</title>
+  <title>qcelemental.models.results &mdash; QCEngine 0+untagged.1.gd738623 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -45,7 +45,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g7b3e843
+                0+untagged.1.gd738623
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -122,12 +122,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">AtomicResultProperties</span><span class="p">(</span><span class="n">ProtoModel</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Named properties of quantum chemistry computations following the MolSSI QCSchema.</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Named properties of quantum chemistry computations following the MolSSI QCSchema.</span>
 
 <span class="sd">    All arrays are stored flat but must be reshapable into the dimensions in attribute ``shape``, with abbreviations as follows:</span>
 
-<span class="sd">      * nao: number of atomic orbitals = calcinfo_nbasis</span>
-<span class="sd">      * nmo: number of molecular orbitals</span>
+<span class="sd">    * nao: number of atomic orbitals = :attr:`~qcelemental.models.AtomicResultProperties.calcinfo_nbasis`</span>
+<span class="sd">    * nmo: number of molecular orbitals = :attr:`~qcelemental.models.AtomicResultProperties.calcinfo_nmo`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Calcinfo</span>
@@ -141,16 +142,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">nuclear_repulsion_energy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The nuclear repulsion energy.&quot;</span><span class="p">)</span>
     <span class="n">return_energy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The energy of the requested method, identical to ``return_result`` for ``driver=energy`` computations.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The energy of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`\ =\ :attr:`~qcelemental.models.DriverEnum.energy` computations.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">return_gradient</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Array</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The gradient of the requested method, identical to ``return_result`` for ``driver=gradient`` computations.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The gradient of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`\ =\ :attr:`~qcelemental.models.DriverEnum.gradient` computations.&quot;</span><span class="p">,</span>
         <span class="n">units</span><span class="o">=</span><span class="s2">&quot;E_h/a0&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">return_hessian</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Array</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The Hessian of the requested method, identical to ``return_result`` for ``driver=hessian`` computations.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The Hessian of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`\ =\ :attr:`~qcelemental.models.DriverEnum.hessian` computations.&quot;</span><span class="p">,</span>
         <span class="n">units</span><span class="o">=</span><span class="s2">&quot;E_h/a0^2&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -672,15 +673,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="sa">f</span><span class="s2">&quot;The QCSchema specification this model conforms to. Explicitly fixed as </span><span class="si">{</span><span class="n">qcschema_input_default</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">),</span>
     <span class="p">)</span>
-    <span class="n">schema_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The version number of ``schema_name`` to which this model conforms.&quot;</span><span class="p">)</span>
+    <span class="n">schema_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The version number of :attr:`~qcelemental.models.AtomicInput.schema_name` to which this model conforms.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="n">molecule</span><span class="p">:</span> <span class="n">Molecule</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The molecule to use in the computation.&quot;</span><span class="p">)</span>
     <span class="n">driver</span><span class="p">:</span> <span class="n">DriverEnum</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">DriverEnum</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
-    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Model</span><span class="o">.</span><span class="n">__base_doc__</span><span class="p">))</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Model</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
     <span class="n">keywords</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">({},</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The program-specific keywords to be used.&quot;</span><span class="p">)</span>
-    <span class="n">protocols</span><span class="p">:</span> <span class="n">AtomicResultProtocols</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">AtomicResultProtocols</span><span class="p">(),</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">AtomicResultProtocols</span><span class="o">.</span><span class="n">__base_doc__</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">protocols</span><span class="p">:</span> <span class="n">AtomicResultProtocols</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">AtomicResultProtocols</span><span class="p">(),</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">AtomicResultProtocols</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
 
     <span class="n">extras</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="p">{},</span>
@@ -688,7 +690,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="p">)</span>
 
     <span class="n">provenance</span><span class="p">:</span> <span class="n">Provenance</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">provenance_stamp</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">),</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Provenance</span><span class="o">.</span><span class="n">__base_doc__</span><span class="p">)</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">provenance_stamp</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">),</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Provenance</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="k">class</span> <span class="nc">Config</span><span class="p">(</span><span class="n">ProtoModel</span><span class="o">.</span><span class="n">Config</span><span class="p">):</span>
@@ -712,12 +714,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="sa">f</span><span class="s2">&quot;The QCSchema specification this model conforms to. Explicitly fixed as </span><span class="si">{</span><span class="n">qcschema_output_default</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">),</span>
     <span class="p">)</span>
-    <span class="n">properties</span><span class="p">:</span> <span class="n">AtomicResultProperties</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">AtomicResultProperties</span><span class="o">.</span><span class="n">__base_doc__</span><span class="p">))</span>
-    <span class="n">wavefunction</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WavefunctionProperties</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">WavefunctionProperties</span><span class="o">.</span><span class="n">__base_doc__</span><span class="p">))</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="n">AtomicResultProperties</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">AtomicResultProperties</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
+    <span class="n">wavefunction</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WavefunctionProperties</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">WavefunctionProperties</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
 
     <span class="n">return_result</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Array</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="o">...</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The primary return specified by the ``driver`` field. Scalar if energy; array if gradient or hessian; dictionary with property keys if properties.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The primary return specified by the :attr:`~qcelemental.models.AtomicInput.driver` field. Scalar if energy; array if gradient or hessian; dictionary with property keys if properties.&quot;</span><span class="p">,</span>
     <span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="n">stdout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
@@ -725,11 +727,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The primary logging output of the program, whether natively standard output or a file. Presence vs. absence (or null-ness?) configurable by protocol.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">stderr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The standard error of the program execution.&quot;</span><span class="p">)</span>
-    <span class="n">native_files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;DSL files.&quot;</span><span class="p">)</span>
+    <span class="n">native_files</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">({},</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;DSL files.&quot;</span><span class="p">)</span>
 
     <span class="n">success</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The success of program execution. If False, other fields may be blank.&quot;</span><span class="p">)</span>
-    <span class="n">error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComputeError</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ComputeError</span><span class="o">.</span><span class="n">__base_doc__</span><span class="p">))</span>
-    <span class="n">provenance</span><span class="p">:</span> <span class="n">Provenance</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Provenance</span><span class="o">.</span><span class="n">__base_doc__</span><span class="p">))</span>
+    <span class="n">error</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComputeError</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ComputeError</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
+    <span class="n">provenance</span><span class="p">:</span> <span class="n">Provenance</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Provenance</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
 
     <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;schema_name&quot;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_input_to_output</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
@@ -747,7 +749,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hessian&quot;</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="n">nsq</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">size</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">nsq</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">size</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
             <span class="n">v</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">nsq</span><span class="p">,</span> <span class="n">nsq</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">v</span>
@@ -843,7 +845,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="k">if</span> <span class="n">ancp</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span>
         <span class="k">elif</span> <span class="n">ancp</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="p">{}</span>
         <span class="k">elif</span> <span class="n">ancp</span> <span class="o">==</span> <span class="s2">&quot;input&quot;</span><span class="p">:</span>
             <span class="n">return_keep</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -860,40 +862,68 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">ResultProperties</span><span class="p">(</span><span class="n">AtomicResultProperties</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;QC Result Properties Schema.</span>
+
+<span class="sd">    .. deprecated:: 0.12</span>
+<span class="sd">       Use :py:func:`qcelemental.models.AtomicResultProperties` instead.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
         <span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;ResultProperties has been renamed to AtomicResultProperties and will be removed in v0.13.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ResultProperties has been renamed to AtomicResultProperties and will be removed as soon as v0.13.0&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">ResultProtocols</span><span class="p">(</span><span class="n">AtomicResultProtocols</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;QC Result Protocols Schema.</span>
+
+<span class="sd">    .. deprecated:: 0.12</span>
+<span class="sd">       Use :py:func:`qcelemental.models.AtomicResultProtocols` instead.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
         <span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;ResultProtocols has been renamed to AtomicResultProtocols and will be removed in v0.13.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ResultProtocols has been renamed to AtomicResultProtocols and will be removed as soon as v0.13.0&quot;</span><span class="p">,</span>
             <span class="ne">DeprecationWarning</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">ResultInput</span><span class="p">(</span><span class="n">AtomicInput</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;QC Input Schema.</span>
+
+<span class="sd">    .. deprecated:: 0.12</span>
+<span class="sd">       Use :py:func:`qcelemental.models.AtomicInput` instead.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
-        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;ResultInput has been renamed to AtomicInput and will be removed in v0.13.0&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;ResultInput has been renamed to AtomicInput and will be removed as soon as v0.13.0&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Result</span><span class="p">(</span><span class="n">AtomicResult</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;QC Result Schema.</span>
+
+<span class="sd">    .. deprecated:: 0.12</span>
+<span class="sd">       Use :py:func:`qcelemental.models.AtomicResult` instead.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
-        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Result has been renamed to AtomicResult and will be removed in v0.13.0&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Result has been renamed to AtomicResult and will be removed as soon as v0.13.0&quot;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 
