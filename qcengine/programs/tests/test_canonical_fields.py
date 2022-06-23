@@ -79,10 +79,10 @@ def test_protocol_native(program, model, keywords, native):
     #  <<  Test
 
     if native == "none":
-        if qcel.__version__ >= "v0.25":
-            assert ret.native_files == {}
-        else:
+        if qcel.util.parse_version(qcel.__version__) < qcel.util.parse_version("0.25.0"):
             assert ret.native_files is None
+        else:
+            assert ret.native_files == {}
     elif native == "input":
         assert list(ret.native_files.keys()) == ["input"]
 
