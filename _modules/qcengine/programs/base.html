@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.programs.base &mdash; QCEngine 0+untagged.1.g7343f1e documentation</title>
+  <title>qcengine.programs.base &mdash; QCEngine 0+untagged.1.g113d1e8 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -45,7 +45,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g7343f1e
+                0+untagged.1.g113d1e8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -128,6 +128,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">from</span> <span class="nn">.qcore</span> <span class="kn">import</span> <span class="n">EntosHarness</span><span class="p">,</span> <span class="n">QcoreHarness</span>
 <span class="kn">from</span> <span class="nn">.rdkit</span> <span class="kn">import</span> <span class="n">RDKitHarness</span>
 <span class="kn">from</span> <span class="nn">.terachem</span> <span class="kn">import</span> <span class="n">TeraChemHarness</span>
+<span class="kn">from</span> <span class="nn">.terachem_frontend</span> <span class="kn">import</span> <span class="n">TeraChemFrontEndHarness</span>
 <span class="kn">from</span> <span class="nn">.terachem_pbs</span> <span class="kn">import</span> <span class="n">TeraChemPBSHarness</span>
 <span class="kn">from</span> <span class="nn">.torchani</span> <span class="kn">import</span> <span class="n">TorchANIHarness</span>
 <span class="kn">from</span> <span class="nn">.turbomole</span> <span class="kn">import</span> <span class="n">TurbomoleHarness</span>
@@ -220,6 +221,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="n">register_program</span><span class="p">(</span><span class="n">QcoreHarness</span><span class="p">())</span>
 <span class="n">register_program</span><span class="p">(</span><span class="n">TeraChemHarness</span><span class="p">())</span>
 <span class="n">register_program</span><span class="p">(</span><span class="n">TurbomoleHarness</span><span class="p">())</span>
+<span class="n">register_program</span><span class="p">(</span><span class="n">TeraChemFrontEndHarness</span><span class="p">())</span>
 <span class="n">register_program</span><span class="p">(</span><span class="n">TeraChemPBSHarness</span><span class="p">())</span>
 
 <span class="c1"># Semi-empirical</span>
