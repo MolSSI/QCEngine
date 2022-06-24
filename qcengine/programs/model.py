@@ -1,9 +1,9 @@
 import abc
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
-from qcelemental.models import AtomicInput, AtomicResult
+from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
 
 from qcengine.exceptions import KnownErrorException
 from qcengine.config import TaskConfig
@@ -30,7 +30,18 @@ class ProgramHarness(BaseModel, abc.ABC):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def compute(self, input_data: AtomicInput, config: TaskConfig) -> AtomicResult:
+    def compute(self, input_data: AtomicInput, config: TaskConfig) -> Union[AtomicResult, FailedOperation]:
+        """Top-level compute method to be implemented for every ProgramHarness
+
+        Note:
+            This method behave in any of the following ways:
+                1. Return AtomicResult upon successful completion of a calculation
+                2. Return FailedOperation object if an operation was unsuccessful or raised an exception. This is most
+                    likely to occur if the underlying QC package has a QCSchema API that catches exceptions and
+                    returns them as FailedOperation objects to end users.
+                3. Raise an exception if a computation failed. The raised exception will be handled by the
+                    qcng.compute() method and either raised or packaged as a FailedOperation object.
+        """
         pass
 
     @staticmethod

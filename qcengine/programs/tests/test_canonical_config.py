@@ -93,7 +93,7 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, req
 
     config = qcng.config.get_config(
         hostname="something",
-        local_options={
+        task_config={
             "ncores": 1,
             "nnodes": 1,
             "memory": 1.555,
@@ -158,7 +158,7 @@ def test_local_options_scratch(program, model, keywords):
 
     config = qcng.config.get_config(
         hostname="something",
-        local_options={
+        task_config={
             "scratch_directory": scratch_directory,
             "scratch_messy": True,
         },
@@ -235,7 +235,7 @@ def test_local_options_ncores(program, model, keywords, ncores):
 
     config = qcng.config.get_config(
         hostname="something",
-        local_options={
+        task_config={
             "ncores": ncores,
             "nnodes": 1,
         },

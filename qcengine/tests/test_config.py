@@ -140,26 +140,26 @@ def test_config_default(opt_state_basic):
 
 
 def test_config_local_ncores(opt_state_basic):
-    config = qcng.config.get_config(hostname="something", local_options={"ncores": 10, "retries": 3})
+    config = qcng.config.get_config(hostname="something", task_config={"ncores": 10, "retries": 3})
     assert config.ncores == 10
     assert config.memory == 4
     assert config.retries == 3
 
 
 def test_config_local_njobs(opt_state_basic):
-    config = qcng.config.get_config(hostname="something", local_options={"jobs_per_node": 5})
+    config = qcng.config.get_config(hostname="something", task_config={"jobs_per_node": 5})
     assert config.ncores == 1
     assert pytest.approx(config.memory) == 0.8
 
 
 def test_config_local_njob_ncore(opt_state_basic):
-    config = qcng.config.get_config(hostname="something", local_options={"jobs_per_node": 3, "ncores": 1})
+    config = qcng.config.get_config(hostname="something", task_config={"jobs_per_node": 3, "ncores": 1})
     assert config.ncores == 1
     assert pytest.approx(config.memory, 0.1) == 1.33
 
 
 def test_config_local_njob_ncore_plus_memory(opt_state_basic):
-    config = qcng.config.get_config(hostname="something", local_options={"jobs_per_node": 3, "ncores": 1, "memory": 6})
+    config = qcng.config.get_config(hostname="something", task_config={"jobs_per_node": 3, "ncores": 1, "memory": 6})
     assert config.ncores == 1
     assert pytest.approx(config.memory, 0.1) == 6
 
@@ -167,7 +167,7 @@ def test_config_local_njob_ncore_plus_memory(opt_state_basic):
 def test_config_local_nnodes(opt_state_basic):
     # Give a warning that mentions that mpirun is needed if you define a multi-node task
     with pytest.raises(ValueError) as exc:
-        qcng.config.get_config(hostname="something", local_options={"nnodes": 10})
+        qcng.config.get_config(hostname="something", task_config={"nnodes": 10})
     assert "https://qcengine.readthedocs.io/en/stable/environment.html" in str(exc.value)
 
     # Test with an MPI run command
@@ -175,7 +175,7 @@ def test_config_local_nnodes(opt_state_basic):
         "nnodes": 4,
         "mpiexec_command": "mpirun -n {total_ranks} -N {ranks_per_node} --cpus-per-slot {cores_per_rank}",
     }
-    config = qcng.config.get_config(hostname="something", local_options=local_options)
+    config = qcng.config.get_config(hostname="something", task_config=local_options)
     assert config.use_mpiexec
     assert config.mpiexec_command.startswith("mpirun")
     assert create_mpi_invocation("hello_world", config) == [
@@ -191,7 +191,7 @@ def test_config_local_nnodes(opt_state_basic):
 
     # Change the number of cores per rank
     local_options["cores_per_rank"] = 2
-    config = qcng.config.get_config(hostname="something", local_options=local_options)
+    config = qcng.config.get_config(hostname="something", task_config=local_options)
     assert config.use_mpiexec
     assert config.mpiexec_command.startswith("mpirun")
     assert create_mpi_invocation("hello_world", config) == [
@@ -208,7 +208,7 @@ def test_config_local_nnodes(opt_state_basic):
 
 def test_config_validation(opt_state_basic):
     with pytest.raises(pydantic.ValidationError):
-        config = qcng.config.get_config(hostname="something", local_options={"bad": 10})
+        config = qcng.config.get_config(hostname="something", task_config={"bad": 10})
 
 
 def test_global_repr():
@@ -222,7 +222,7 @@ def test_batch_node(opt_state_basic):
     assert config.ncores == 24
     assert config.nnodes == 1
 
-    config = qcng.config.get_config(hostname="bn1", local_options={"nnodes": 2})
+    config = qcng.config.get_config(hostname="bn1", task_config={"nnodes": 2})
     assert config.use_mpiexec
     assert config.ncores == 24
     assert config.nnodes == 2

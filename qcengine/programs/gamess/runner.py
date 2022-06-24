@@ -119,7 +119,7 @@ class GAMESSHarness(ProgramHarness):
         # * docs on mwords: "This is given in units of 1,000,000 words (as opposed to 1024*1024 words)"
         # * docs: "the memory required on each processor core for a run using p cores is therefore MEMDDI/p + MWORDS."
         # * int() rounds down
-        mwords_total = int(config.memory * (1024**3) / 8e6)
+        mwords_total = int(config.memory * (1024 ** 3) / 8e6)
 
         for mem_frac_replicated in (1, 0.5, 0.1, 0.75):
             mwords, memddi = self._partition(mwords_total, mem_frac_replicated, config.ncores)

@@ -24,11 +24,11 @@ The configuration file operated based on the current node descriptor and can be 
     >>> qcng.get_config()
     <JobConfig ncores=2 memory=2.506 scratch_directory=None>
 
-    >>> qcng.get_config(local_options={"scratch_directory": "/tmp"})
+    >>> qcng.get_config(task_config={"scratch_directory": "/tmp"})
     <JobConfig ncores=2 memory=2.506 scratch_directory='/tmp'>
 
     >>> os.environ["SCRATCH"] = "/my_scratch"
-    >>> qcng.get_config(local_options={"scratch_directory": "$SCRATCH"})
+    >>> qcng.get_config(task_config={"scratch_directory": "$SCRATCH"})
     <JobConfig ncores=2 memory=2.506 scratch_directory='/my_scratch'>
 
 Global Environment

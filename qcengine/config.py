@@ -34,7 +34,7 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
     if _global_values is None:
         _global_values = {}
         _global_values["hostname"] = socket.gethostname()
-        _global_values["memory"] = round(psutil.virtual_memory().available / (1024**3), 3)
+        _global_values["memory"] = round(psutil.virtual_memory().available / (1024 ** 3), 3)
         _global_values["username"] = getpass.getuser()
 
         # Work through VMs and logical cores.
@@ -267,28 +267,28 @@ def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     return ret
 
 
-def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] = None) -> TaskConfig:
+def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = None) -> TaskConfig:
     """
     Returns the configuration key for qcengine.
     """
 
-    if local_options is None:
-        local_options = {}
+    if task_config is None:
+        task_config = {}
 
-    local_options = parse_environment(local_options)
+    task_config = parse_environment(task_config)
     config = {}
 
     # Node data
     node = get_node_descriptor(hostname)
     ncores = node.ncores or get_global("ncores")
-    config["scratch_directory"] = local_options.pop("scratch_directory", node.scratch_directory)
-    config["retries"] = local_options.pop("retries", node.retries)
+    config["scratch_directory"] = task_config.pop("scratch_directory", node.scratch_directory)
+    config["retries"] = task_config.pop("retries", node.retries)
 
     # Jobs per node
-    jobs_per_node = local_options.pop("jobs_per_node", None) or node.jobs_per_node
+    jobs_per_node = task_config.pop("jobs_per_node", None) or node.jobs_per_node
 
     # Handle memory
-    memory = local_options.pop("memory", None)
+    memory = task_config.pop("memory", None)
     if memory is None:
         memory = node.memory or get_global("memory")
         memory_coeff = 1 - node.memory_safety_factor / 100
@@ -297,21 +297,21 @@ def get_config(*, hostname: Optional[str] = None, local_options: Dict[str, Any] 
     config["memory"] = memory
 
     # Get the number of cores available to each task
-    ncores = local_options.pop("ncores", int(ncores / jobs_per_node))
+    ncores = task_config.pop("ncores", int(ncores / jobs_per_node))
     if ncores < 1:
         raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
     config["ncores"] = ncores
-    config["nnodes"] = local_options.pop("nnodes", 1)
+    config["nnodes"] = task_config.pop("nnodes", 1)
 
     # Add in the MPI launch command template
     config["mpiexec_command"] = node.mpiexec_command
     config["use_mpiexec"] = node.is_batch_node or config["nnodes"] > 1
-    config["cores_per_rank"] = local_options.get("cores_per_rank", 1)
+    config["cores_per_rank"] = task_config.get("cores_per_rank", 1)
 
     # Override any settings
-    if local_options is not None:
-        config.update(local_options)
+    if task_config is not None:
+        config.update(task_config)
 
     # Make sure mpirun command is defined if needed
     if config["use_mpiexec"] and config["mpiexec_command"] is None:

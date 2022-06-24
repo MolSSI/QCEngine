@@ -100,9 +100,7 @@ class MadnessHarness(ProgramHarness):
         if which_prog not in self.version_cache:
             success, output = execute(
                 command,
-                {
-                    "v.moldft": "dft\nxc lda\nend\ngeometry\nBe  0.0    0.0 0.0\n\nend\n"
-                },
+                {"v.moldft": "dft\nxc lda\nend\ngeometry\nBe  0.0    0.0 0.0\n\nend\n"},
                 scratch_directory=config.scratch_directory,
             )
 

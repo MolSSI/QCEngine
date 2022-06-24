@@ -1,9 +1,10 @@
 """
 Integrates the computes together
 """
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
-from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
+from qcelemental.models import AtomicInput, AtomicResult, FailedOperation, OptimizationResult
 
 from .config import get_config
 from .exceptions import InputError, RandomError
@@ -35,9 +36,10 @@ def compute(
     input_data: Union[Dict[str, Any], "AtomicInput"],
     program: str,
     raise_error: bool = False,
+    task_config: Optional[Dict[str, Any]] = None,
     local_options: Optional[Dict[str, Any]] = None,
     return_dict: bool = False,
-) -> "AtomicResult":
+) -> Union["AtomicResult", "FailedOperation", Dict[str, Any]]:
     """Executes a single CMS program given a QCSchema input.
 
     The full specification can be found at:
@@ -53,15 +55,18 @@ def compute(
         Determines if compute should raise an error or not.
     retries : int, optional
         The number of random tries to retry for.
+    task_config
+        A dictionary of local configuration options corresponding to a TaskConfig object.
     local_options
-        A dictionary of local configuration options
+        Deprecated parameter, renamed to ``task_config``
     return_dict
         Returns a dict instead of qcelemental.models.AtomicResult
 
     Returns
     -------
     result
-        A computed AtomicResult object.
+        AtomicResult, FailedOperation, or Dict representation of either object type
+        A QCSchema representation of the requested output, type depends on return_dict key.
     """
 
     output_data = input_data.copy()  # lgtm [py/multiple-definition]
@@ -73,14 +78,23 @@ def compute(
         # Build the model and validate
         input_data = model_wrapper(input_data, AtomicInput)
 
-        # Build out local options
-        if local_options is None:
-            local_options = {}
+        # Build out task_config
+        if task_config is None:
+            task_config = {}
+
+        if local_options:
+            warnings.warn(
+                "Using the `local_options` keyword argument is deprecated in favor of using `task_config`, "
+                "in version 0.30.0 it will stop working.",
+                category=FutureWarning,
+                stacklevel=2,
+            )
+            task_config = {**local_options, **task_config}
 
         input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
 
-        local_options = {**local_options, **input_engine_options}
-        config = get_config(local_options=local_options)
+        task_config = {**task_config, **input_engine_options}
+        config = get_config(task_config=task_config)
 
         # Set environment parameters and execute
         with environ_context(config=config):
@@ -106,9 +120,10 @@ def compute_procedure(
     input_data: Union[Dict[str, Any], "BaseModel"],
     procedure: str,
     raise_error: bool = False,
+    task_config: Optional[Dict[str, str]] = None,
     local_options: Optional[Dict[str, str]] = None,
     return_dict: bool = False,
-) -> "BaseModel":
+) -> Union["OptimizationResult", "FailedOperation", Dict[str, Any]]:
     """Runs a procedure (a collection of the quantum chemistry executions)
 
     Parameters
@@ -119,8 +134,10 @@ def compute_procedure(
         The name of the procedure to run
     raise_error : bool, option
         Determines if compute should raise an error or not.
-    local_options : dict, optional
-        A dictionary of local configuration options
+    task_config
+        A dictionary of local configuration options corresponding to a TaskConfig object.
+    local_options
+        Deprecated parameter, renamed to ``task_config``
     return_dict : bool, optional, default True
         Returns a dict instead of qcelemental.models.AtomicInput
 
@@ -129,6 +146,18 @@ def compute_procedure(
     dict, OptimizationResult, FailedOperation
         A QC Schema representation of the requested output, type depends on return_dict key.
     """
+    # Build out task_config
+    if task_config is None:
+        task_config = {}
+
+    if local_options:
+        warnings.warn(
+            "Using the `local_options` keyword argument is depreciated in favor of using `task_config`, "
+            "in version 0.30.0 it will stop working.",
+            category=FutureWarning,
+            stacklevel=2,
+        )
+        task_config = {**local_options, **task_config}
 
     output_data = input_data.copy()  # lgtm [py/multiple-definition]
     with compute_wrapper(capture_output=False, raise_error=raise_error) as metadata:
@@ -136,7 +165,7 @@ def compute_procedure(
         # Grab the executor and build the input model
         executor = get_procedure(procedure)
 
-        config = get_config(local_options=local_options)
+        config = get_config(task_config=task_config)
         input_data = executor.build_input_model(input_data)
 
         # Create a base output data in case of errors
