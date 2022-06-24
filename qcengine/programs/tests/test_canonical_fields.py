@@ -39,7 +39,7 @@ def test_protocol_native(program, model, keywords, native):
     }
     config = qcng.config.get_config(
         hostname="something",
-        local_options={
+        task_config={
             "ncores": 1,
             "nnodes": 1,
         },
