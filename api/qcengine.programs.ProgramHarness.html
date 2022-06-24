@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ProgramHarness &mdash; QCEngine 0+untagged.1.gdafd974 documentation</title>
+  <title>ProgramHarness &mdash; QCEngine 0+untagged.1.g7343f1e documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -48,7 +48,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gdafd974
+                0+untagged.1.g7343f1e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -238,9 +238,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <dl class="py method">
 <dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.compute">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.compute" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Top-level compute method to be implemented for every ProgramHarness</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>This method behave in any of the following ways:</dt><dd><ol class="arabic simple">
+<li><p>Return AtomicResult upon successful completion of a calculation</p></li>
+<li><dl class="simple">
+<dt>Return FailedOperation object if an operation was unsuccessful or raised an exception. This is most</dt><dd><p>likely to occur if the underlying QC package has a QCSchema API that catches exceptions and
+returns them as FailedOperation objects to end users.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Raise an exception if a computation failed. The raised exception will be handled by the</dt><dd><p>qcng.compute() method and either raised or packaged as a FailedOperation object.</p>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+</dl>
+</div>
+<dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.AtomicResult.html#qcelemental.models.AtomicResult" title="(in QCElemental vv0.24.0+6.g2956421.dirty)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResult</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.AtomicResult.html#qcelemental.models.AtomicResult" title="(in QCElemental vv0.24.0+6.g2956421.dirty)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResult</span></code></a>, <a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.FailedOperation.html#qcelemental.models.FailedOperation" title="(in QCElemental vv0.24.0+6.g2956421.dirty)"><code class="xref py py-class docutils literal notranslate"><span class="pre">FailedOperation</span></code></a>]</p>
 </dd>
 <dt class="field-even">Parameters</dt>
 <dd class="field-even"><ul class="simple">

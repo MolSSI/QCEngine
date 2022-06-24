@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.config &mdash; QCEngine 0+untagged.1.gdafd974 documentation</title>
+  <title>qcengine.config &mdash; QCEngine 0+untagged.1.g7343f1e documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -45,7 +45,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gdafd974
+                0+untagged.1.g7343f1e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -372,28 +372,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="k">return</span> <span class="n">ret</span>
 
 
-<div class="viewcode-block" id="get_config"><a class="viewcode-back" href="../../api/qcengine.get_config.html#qcengine.config.get_config">[docs]</a><span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">local_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TaskConfig</span><span class="p">:</span>
+<div class="viewcode-block" id="get_config"><a class="viewcode-back" href="../../api/qcengine.get_config.html#qcengine.config.get_config">[docs]</a><span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">task_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TaskConfig</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the configuration key for qcengine.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">local_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">local_options</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">task_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">task_config</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="n">local_options</span> <span class="o">=</span> <span class="n">parse_environment</span><span class="p">(</span><span class="n">local_options</span><span class="p">)</span>
+    <span class="n">task_config</span> <span class="o">=</span> <span class="n">parse_environment</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
     <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Node data</span>
     <span class="n">node</span> <span class="o">=</span> <span class="n">get_node_descriptor</span><span class="p">(</span><span class="n">hostname</span><span class="p">)</span>
     <span class="n">ncores</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">ncores</span> <span class="ow">or</span> <span class="n">get_global</span><span class="p">(</span><span class="s2">&quot;ncores&quot;</span><span class="p">)</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">scratch_directory</span><span class="p">)</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;retries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;retries&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">retries</span><span class="p">)</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">scratch_directory</span><span class="p">)</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;retries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;retries&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">retries</span><span class="p">)</span>
 
     <span class="c1"># Jobs per node</span>
-    <span class="n">jobs_per_node</span> <span class="o">=</span> <span class="n">local_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;jobs_per_node&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">jobs_per_node</span>
+    <span class="n">jobs_per_node</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;jobs_per_node&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">jobs_per_node</span>
 
     <span class="c1"># Handle memory</span>
-    <span class="n">memory</span> <span class="o">=</span> <span class="n">local_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">memory</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">memory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">memory</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">memory</span> <span class="ow">or</span> <span class="n">get_global</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">)</span>
         <span class="n">memory_coeff</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">node</span><span class="o">.</span><span class="n">memory_safety_factor</span> <span class="o">/</span> <span class="mi">100</span>
@@ -402,21 +402,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;memory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">memory</span>
 
     <span class="c1"># Get the number of cores available to each task</span>
-    <span class="n">ncores</span> <span class="o">=</span> <span class="n">local_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ncores&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncores</span> <span class="o">/</span> <span class="n">jobs_per_node</span><span class="p">))</span>
+    <span class="n">ncores</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ncores&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncores</span> <span class="o">/</span> <span class="n">jobs_per_node</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">ncores</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Number of jobs per node exceeds the number of available cores.&quot;</span><span class="p">)</span>
 
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;ncores&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ncores</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;nnodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;nnodes&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;nnodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;nnodes&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Add in the MPI launch command template</span>
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;mpiexec_command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">mpiexec_command</span>
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;use_mpiexec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">is_batch_node</span> <span class="ow">or</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;nnodes&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;cores_per_rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cores_per_rank&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;cores_per_rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cores_per_rank&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Override any settings</span>
-    <span class="k">if</span> <span class="n">local_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">local_options</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">task_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
 
     <span class="c1"># Make sure mpirun command is defined if needed</span>
     <span class="k">if</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;use_mpiexec&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;mpiexec_command&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

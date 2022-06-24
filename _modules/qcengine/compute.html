@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.compute &mdash; QCEngine 0+untagged.1.gdafd974 documentation</title>
+  <title>qcengine.compute &mdash; QCEngine 0+untagged.1.g7343f1e documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -45,7 +45,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gdafd974
+                0+untagged.1.g7343f1e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -106,9 +106,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Integrates the computes together</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">qcelemental.models</span> <span class="kn">import</span> <span class="n">AtomicInput</span><span class="p">,</span> <span class="n">AtomicResult</span><span class="p">,</span> <span class="n">FailedOperation</span>
+<span class="kn">from</span> <span class="nn">qcelemental.models</span> <span class="kn">import</span> <span class="n">AtomicInput</span><span class="p">,</span> <span class="n">AtomicResult</span><span class="p">,</span> <span class="n">FailedOperation</span><span class="p">,</span> <span class="n">OptimizationResult</span>
 
 <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">get_config</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">InputError</span><span class="p">,</span> <span class="n">RandomError</span>
@@ -140,9 +141,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">input_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">&quot;AtomicInput&quot;</span><span class="p">],</span>
     <span class="n">program</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">task_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">local_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AtomicResult&quot;</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;AtomicResult&quot;</span><span class="p">,</span> <span class="s2">&quot;FailedOperation&quot;</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;Executes a single CMS program given a QCSchema input.</span>
 
 <span class="sd">    The full specification can be found at:</span>
@@ -158,15 +160,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">        Determines if compute should raise an error or not.</span>
 <span class="sd">    retries : int, optional</span>
 <span class="sd">        The number of random tries to retry for.</span>
+<span class="sd">    task_config</span>
+<span class="sd">        A dictionary of local configuration options corresponding to a TaskConfig object.</span>
 <span class="sd">    local_options</span>
-<span class="sd">        A dictionary of local configuration options</span>
+<span class="sd">        Deprecated parameter, renamed to ``task_config``</span>
 <span class="sd">    return_dict</span>
 <span class="sd">        Returns a dict instead of qcelemental.models.AtomicResult</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    result</span>
-<span class="sd">        A computed AtomicResult object.</span>
+<span class="sd">        AtomicResult, FailedOperation, or Dict representation of either object type</span>
+<span class="sd">        A QCSchema representation of the requested output, type depends on return_dict key.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">output_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># lgtm [py/multiple-definition]</span>
@@ -178,14 +183,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="c1"># Build the model and validate</span>
         <span class="n">input_data</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">AtomicInput</span><span class="p">)</span>
 
-        <span class="c1"># Build out local options</span>
-        <span class="k">if</span> <span class="n">local_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">local_options</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Build out task_config</span>
+        <span class="k">if</span> <span class="n">task_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task_config</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">local_options</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Using the `local_options` keyword argument is deprecated in favor of using `task_config`, &quot;</span>
+                <span class="s2">&quot;in version 0.30.0 it will stop working.&quot;</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">task_config</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">local_options</span><span class="p">,</span> <span class="o">**</span><span class="n">task_config</span><span class="p">}</span>
 
         <span class="n">input_engine_options</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;_qcengine_local_config&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
-        <span class="n">local_options</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">local_options</span><span class="p">,</span> <span class="o">**</span><span class="n">input_engine_options</span><span class="p">}</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="n">local_options</span><span class="o">=</span><span class="n">local_options</span><span class="p">)</span>
+        <span class="n">task_config</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">task_config</span><span class="p">,</span> <span class="o">**</span><span class="n">input_engine_options</span><span class="p">}</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="n">task_config</span><span class="p">)</span>
 
         <span class="c1"># Set environment parameters and execute</span>
         <span class="k">with</span> <span class="n">environ_context</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">):</span>
@@ -211,9 +225,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">input_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">&quot;BaseModel&quot;</span><span class="p">],</span>
     <span class="n">procedure</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">task_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">local_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseModel&quot;</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;OptimizationResult&quot;</span><span class="p">,</span> <span class="s2">&quot;FailedOperation&quot;</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;Runs a procedure (a collection of the quantum chemistry executions)</span>
 
 <span class="sd">    Parameters</span>
@@ -224,8 +239,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">        The name of the procedure to run</span>
 <span class="sd">    raise_error : bool, option</span>
 <span class="sd">        Determines if compute should raise an error or not.</span>
-<span class="sd">    local_options : dict, optional</span>
-<span class="sd">        A dictionary of local configuration options</span>
+<span class="sd">    task_config</span>
+<span class="sd">        A dictionary of local configuration options corresponding to a TaskConfig object.</span>
+<span class="sd">    local_options</span>
+<span class="sd">        Deprecated parameter, renamed to ``task_config``</span>
 <span class="sd">    return_dict : bool, optional, default True</span>
 <span class="sd">        Returns a dict instead of qcelemental.models.AtomicInput</span>
 
@@ -234,6 +251,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">    dict, OptimizationResult, FailedOperation</span>
 <span class="sd">        A QC Schema representation of the requested output, type depends on return_dict key.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Build out task_config</span>
+    <span class="k">if</span> <span class="n">task_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">task_config</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">local_options</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Using the `local_options` keyword argument is depreciated in favor of using `task_config`, &quot;</span>
+            <span class="s2">&quot;in version 0.30.0 it will stop working.&quot;</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">task_config</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">local_options</span><span class="p">,</span> <span class="o">**</span><span class="n">task_config</span><span class="p">}</span>
 
     <span class="n">output_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># lgtm [py/multiple-definition]</span>
     <span class="k">with</span> <span class="n">compute_wrapper</span><span class="p">(</span><span class="n">capture_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="n">raise_error</span><span class="p">)</span> <span class="k">as</span> <span class="n">metadata</span><span class="p">:</span>
@@ -241,7 +270,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="c1"># Grab the executor and build the input model</span>
         <span class="n">executor</span> <span class="o">=</span> <span class="n">get_procedure</span><span class="p">(</span><span class="n">procedure</span><span class="p">)</span>
 
-        <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="n">local_options</span><span class="o">=</span><span class="n">local_options</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="n">task_config</span><span class="p">)</span>
         <span class="n">input_data</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">build_input_model</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
 
         <span class="c1"># Create a base output data in case of errors</span>

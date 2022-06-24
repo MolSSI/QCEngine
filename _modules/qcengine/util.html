@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.util &mdash; QCEngine 0+untagged.1.gdafd974 documentation</title>
+  <title>qcengine.util &mdash; QCEngine 0+untagged.1.g7343f1e documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -45,7 +45,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gdafd974
+                0+untagged.1.g7343f1e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -124,7 +124,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ValidationError</span>
-<span class="kn">from</span> <span class="nn">qcelemental.models</span> <span class="kn">import</span> <span class="n">FailedOperation</span>
+<span class="kn">from</span> <span class="nn">qcelemental.models</span> <span class="kn">import</span> <span class="n">AtomicResult</span><span class="p">,</span> <span class="n">FailedOperation</span><span class="p">,</span> <span class="n">OptimizationResult</span>
 
 <span class="kn">from</span> <span class="nn">qcengine.config</span> <span class="kn">import</span> <span class="n">TaskConfig</span>
 
@@ -247,17 +247,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <div class="viewcode-block" id="handle_output_metadata"><a class="viewcode-back" href="../../api/qcengine.util.handle_output_metadata.html#qcengine.util.handle_output_metadata">[docs]</a><span class="k">def</span> <span class="nf">handle_output_metadata</span><span class="p">(</span>
-    <span class="n">output_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">BaseModel</span><span class="p">],</span>
+    <span class="n">output_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">&quot;AtomicResult&quot;</span><span class="p">,</span> <span class="s2">&quot;OptimizationResult&quot;</span><span class="p">,</span> <span class="s2">&quot;FailedOperation&quot;</span><span class="p">],</span>
     <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">return_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">BaseModel</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">&quot;AtomicResult&quot;</span><span class="p">,</span> <span class="s2">&quot;OptimizationResult&quot;</span><span class="p">,</span> <span class="s2">&quot;FailedOperation&quot;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fuses general metadata and output together.</span>
 
+<span class="sd">    Parameters:</span>
+<span class="sd">        output_data: The original output object to be fused with metadata</span>
+<span class="sd">        metadata: Metadata produced by the compute_wrapper context manager</span>
+<span class="sd">        raise_error: Raise an exception if errors exist (True) or return FailedOperation (False)</span>
+<span class="sd">        return_dict: Return dictionary or object representation of data</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    result : dict or pydantic.models.AtomicResult</span>
+<span class="sd">    result : AtomicResult, OptimizationResult, FailedOperation, or dict representation of any one.</span>
 <span class="sd">        Output type depends on return_dict or a dict if an error was generated in model construction</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
