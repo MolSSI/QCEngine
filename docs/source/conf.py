@@ -46,26 +46,26 @@ release = qcengine.__version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.doctest',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.extlinks',
-    'sphinx.ext.graphviz',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.napoleon',
-    'sphinx_automodapi.automodapi',
-    'sphinx_automodapi.automodsumm',
-    'sphinx_automodapi.smart_resolver',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.doctest",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.napoleon",
+    "sphinx_automodapi.automodapi",
+    "sphinx_automodapi.automodsumm",
+    "sphinx_automodapi.smart_resolver",
     "sphinx_autodoc_typehints",
     "sphinxcontrib.autodoc_pydantic",
 ]
 
 autosummary_generate = True
-automodapi_toctreedirnm = 'api'
+automodapi_toctreedirnm = "api"
 autodoc_typehints = "description"
 napoleon_use_param = True
 napoleon_use_rtype = True
