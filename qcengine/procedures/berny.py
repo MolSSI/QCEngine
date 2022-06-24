@@ -1,11 +1,12 @@
 import logging
+from qcengine.exceptions import UnknownError
 import sys
 import traceback
 from io import StringIO
 from typing import Any, Dict, Union
 
 import numpy as np
-from qcelemental.models import OptimizationInput, OptimizationResult
+from qcelemental.models import OptimizationInput, OptimizationResult, FailedOperation
 from qcelemental.util import which_import
 
 import qcengine
@@ -28,7 +29,9 @@ class BernyProcedure(ProcedureHarness):
     def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
         return self._build_model(data, OptimizationInput)
 
-    def compute(self, input_data: "OptimizationInput", config: "TaskConfig") -> "OptimizationResult":
+    def compute(
+        self, input_data: "OptimizationInput", config: "TaskConfig"
+    ) -> Union["OptimizationResult", "FailedOperation"]:
         try:
             import berny
         except ModuleNotFoundError:
@@ -65,23 +68,28 @@ class BernyProcedure(ProcedureHarness):
             for geom_berny in opt:
                 geom_qcng["geometry"] = np.stack(geom_berny.coords * berny.angstrom)
                 ret = qcengine.compute(comput, program)
-                trajectory.append(ret.dict())
-                opt.send((ret.properties.return_energy, ret.return_result))
+                if ret.success:
+                    trajectory.append(ret.dict())
+                    opt.send((ret.properties.return_energy, ret.return_result))
+                else:
+                    # qcengine.compute returned FailedOperation
+                    raise UnknownError("Gradient computation failed")
+
+        except UnknownError:
+            error = ret.error.dict()  # ComputeError
         except Exception:
-            output_data["success"] = False
-            output_data["error"] = {"error_type": "unknown", "error_message": f"Berny error:\n{traceback.format_exc()}"}
+            error = {"error_type": "unknown", "error_message": f"Berny error:\n{traceback.format_exc()}"}
         else:
             output_data["success"] = True
-        output_data.update(
-            {
-                "schema_name": "qcschema_optimization_output",
-                "final_molecule": trajectory[-1]["molecule"],
-                "energies": [r["properties"]["return_energy"] for r in trajectory],
-                "trajectory": trajectory,
-                "provenance": {"creator": "Berny", "routine": "berny.Berny", "version": berny_version},
-                "stdout": log_stream.getvalue(),  # collect logged messages
-            }
-        )
-        if output_data["success"]:
-            output_data = OptimizationResult(**output_data)
-        return output_data
+            output_data.update(
+                {
+                    "schema_name": "qcschema_optimization_output",
+                    "final_molecule": trajectory[-1]["molecule"],
+                    "energies": [r["properties"]["return_energy"] for r in trajectory],
+                    "trajectory": trajectory,
+                    "provenance": {"creator": "Berny", "routine": "berny.Berny", "version": berny_version},
+                    "stdout": log_stream.getvalue(),  # collect logged messages
+                }
+            )
+            return OptimizationResult(**output_data)
+        return FailedOperation(input_data=input_data, error=error)
