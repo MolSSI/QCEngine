@@ -339,6 +339,8 @@ def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
 
 @using("nwchem")
 def test_restart(nh2, tmpdir):
+    # Create a molecule that takes 5-8 steps for NWChem to relax it,
+    #  but only run the relaxation for 4 steps
     resi = {
         "molecule": nh2,
         "driver": "gradient",
@@ -359,7 +361,7 @@ def test_restart(nh2, tmpdir):
     assert not result.success
     assert "computation failed to converge" in str(result.error)
 
-    # Run again: It should converge
+    # Run again: It should converge only if we start from the last geometry
     result = qcng.compute(
         resi,
         "nwchem",
