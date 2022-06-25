@@ -25,7 +25,8 @@ Breaking Changes
 
 New Features
 ++++++++++++
-- UNMERGED (:pr:`353`) TeraChem - added the ``TeraChemFrontEndHarness`` to handle file I/O in extension to the protocol buffer ``TeraChemPBSHarness`` interface.
+- UNMERGED (:pr:`343`) DFT-D3 - added the ``SDFTD3Harness`` to handle DFT-D3 via a Python API. This has native QCSchema support and programmatic access to the parameter database. @awvwgk
+- (:pr:`353`) TeraChem - added the ``TeraChemFrontEndHarness`` to handle file I/O in extension to the protocol buffer ``TeraChemPBSHarness`` interface.
 
 Enhancements
 ++++++++++++
@@ -40,11 +41,11 @@ Enhancements
 Bug Fixes
 +++++++++
 - (:pr:`301`, :pr:`367`) PyBerny - learned how to fail informatively when something goes wrong instead of assuming all is well and failing misleadingly while processing success. @coltonbh
-- UNMERGED (:pr:`333`) NWChem - learned to skip writing the original ``atomicinput.molecule`` geometry to the input file only when both (1) the job is known to be part of a restart and (2) the job originates from the NWChem "driver" (that is, the optimizer). Previously, the geometry writing was skipped under (1) circumstances, so single-point e/g/h didn't have a geometry to work from. @WardLT
+- (:pr:`333`) NWChem - learned to skip writing the original ``atomicinput.molecule`` geometry to the input file only when both (1) the job is known to be part of a restart and (2) the job originates from the NWChem "driver" (that is, the optimizer). Previously, the geometry writing was skipped under (1) circumstances, so single-point e/g/h didn't have a geometry to work from. @WardLT
 - UNMERGED (:pr:`349`) Turbomole - learned to correctly parse Hessian files when molecule contains more than 33 atoms. @eljost
 
 - (:pr:`354`, :pr:`356`, :pr:`361`, :pr:`366`) CI updates and fixes. @coltonbh, @loriab
-
+- UNMERGED (:pr:`368`)
 
 v0.23.0 / 2022-03-10
 --------------------
