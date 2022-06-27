@@ -99,8 +99,10 @@ class MadnessHarness(ProgramHarness):
 
         if which_prog not in self.version_cache:
             success, output = execute(
-                command,
-                {"v.moldft": "dft\nxc lda\nend\ngeometry\nBe  0.0    0.0 0.0\n\nend\n"},
+                    command,
+                {
+                    "v.moldft": "dft\nxc lda\nend\ngeometry\nH  0.0 0.0 0.0\nH  0.7 0.0 0.0\nend\n"
+                }, 
                 scratch_directory=config.scratch_directory,
             )
 
@@ -305,7 +307,6 @@ class MadnessHarness(ProgramHarness):
             "return_result": retres,
             "stdout": stdout,
         }
-
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
         output_data["extras"]["qcvars"] = {
