@@ -301,7 +301,7 @@ class MadnessHarness(ProgramHarness):
             "schema_name": "qcschema_output",
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
-            "native_files": {"input": native_dict["input"]},
+            #TODO (figure out what this does and how to use it)  "native_files": {"input": native_dict["input"]},
             "properties": qcprops,
             "provenance": Provenance(creator="MADNESS", version=self.get_version(), routine="madness"),
             "return_result": retres,
