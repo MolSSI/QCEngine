@@ -203,13 +203,13 @@ def harvest(in_mol: Molecule, outfiles) -> Tuple[PreservingDict, None, None, Mol
     moldft_outfiles = moldft_info.get("outfiles")
     # At this point scf prints a list of json outputs where each list refers to the scf at givin protocol
     # Here I load the scf_info and calc_info as json
-    scf_info = json.loads(moldft_outfiles.get("scf_info.json"))
+    #scf_info = json.loads(moldft_outfiles.get("scf_info.json"))
     calc_info = json.loads(moldft_outfiles.get("calc_info.json"))
     # Write harvest scf_info and harvest calc_info
     out_calc_vars = harvest_calc_info(calc_info)
-    out_scf_vars = harvest_scf_info(scf_info)
+    #out_scf_vars = harvest_scf_info(scf_info)
     out_psivar.update(out_calc_vars)
-    out_psivar.update(out_scf_vars)
+    #out_psivar.update(out_scf_vars)
 
     if "molresponse" in outfiles.keys():
         molresponse_info = outfiles.get("moldft")
