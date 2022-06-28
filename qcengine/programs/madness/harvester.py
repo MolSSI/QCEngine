@@ -216,7 +216,7 @@ def harvest(in_mol: Molecule, outfiles) -> Tuple[PreservingDict, None, None, Mol
         molresponse_outfiles = molresponse_info.get("outfiles")
         # At this point scf prints a list of json outputs where each list refers to the scf at given protocol
         # Here I load the scf_info and calc_info as json
-        response_info = json.loads(molresponse_outfiles.get("respones.json"))
+        response_info = json.loads(molresponse_outfiles.get("response_base.json"))
         response_params, response_data_dict = read_molrespone_json(response_info)
 
     Idontneed_vars, out_mol, out_grad, version, error = harvest_moldft_output(outfiles["moldft"]["stdout"])

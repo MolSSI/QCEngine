@@ -99,10 +99,10 @@ class MadnessHarness(ProgramHarness):
 
         if which_prog not in self.version_cache:
             success, output = execute(
-                    command,
+                command,
                 {
                     "v.moldft": "dft\nxc lda\nend\ngeometry\nH  0.0 0.0 0.0\nH  0.7 0.0 0.0\nend\n"
-                }, 
+                },
                 scratch_directory=config.scratch_directory,
             )
 
@@ -146,7 +146,7 @@ class MadnessHarness(ProgramHarness):
             raise UnknownError(dexe["stderr"])
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+            self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
         madnessrec = {
@@ -187,10 +187,10 @@ class MadnessHarness(ProgramHarness):
             geo_index = optcmd.find("geometry")  # find first occurrence of geometry
             end_index = optcmd[geo_index:].find("end")  # find first occurrence of end after geometry
             geometry_input = optcmd[
-                geo_index + 8 : end_index + geo_index
-            ]  # grab everything in between geometry and end
+                             geo_index + 8: end_index + geo_index
+                             ]  # grab everything in between geometry and end
 
-            optcmd = optcmd[0:geo_index] + optcmd[geo_index + end_index + 4 :]  # optcmd becomes everything else
+            optcmd = optcmd[0:geo_index] + optcmd[geo_index + end_index + 4:]  # optcmd becomes everything else
             molcmd = molcmd.replace(
                 "end", geometry_input.strip() + "\nend"
             )  # replace end with the added geometry input
@@ -222,7 +222,7 @@ class MadnessHarness(ProgramHarness):
         return madnessrec
 
     def execute(
-        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+            self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
         num_commands = len(inputs["commands"])
         oexe = {}
@@ -269,8 +269,9 @@ class MadnessHarness(ProgramHarness):
         stdout = outfiles["moldft"]["stdout"]
         if "molresponse" in outfiles.keys():
             stdout += outfiles["molresponse"]["stdout"]
-        print("within parse_output scf_info.json", outfiles["moldft"]["outfiles"]["scf_info.json"])
         print("within parse output calc_info", outfiles["moldft"]["outfiles"]["calc_info.json"])
+        native_dict = {}
+        native_dict["calc_info"] = outfiles["moldft"]["outfiles"]["calc_info.json"]
 
         # Read the MADNESj stdout file and, if needed, the hess or grad files
         qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, outfiles)
@@ -302,11 +303,13 @@ class MadnessHarness(ProgramHarness):
             "schema_name": "qcschema_output",
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
+            "native_files": {k: v for k, v in native_dict.items() if v is not None},
             "properties": qcprops,
             "provenance": Provenance(creator="MADNESS", version=self.get_version(), routine="madness"),
             "return_result": retres,
             "stdout": stdout,
         }
+        print(output_data)
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
         output_data["extras"]["qcvars"] = {
