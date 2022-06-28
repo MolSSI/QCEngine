@@ -123,27 +123,27 @@ class MadnessHarness(ProgramHarness):
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
-        success, dexe = self.execute(job_inputs)
-        if "There is an error in the input file" in dexe["moldft"]["stdout"]:
-            raise InputError(dexe["moldft"]["stdout"])
-        if "not compiled" in dexe["moldft"]["stdout"]:
+        success, output = self.execute(job_inputs, extra_outfiles=['calc_info.json'])
+        if "There is an error in the input file" in output["moldft"]["stdout"]:
+            raise InputError(output["moldft"]["stdout"])
+        if "not compiled" in output["moldft"]["stdout"]:
             # recoverable with a different compilation with optional modules
-            raise InputError(dexe["moldft"]["stdout"])
+            raise InputError(output["moldft"]["stdout"])
         if success:
-            num_commands = len(dexe)
+            num_commands = len(output)
             if num_commands == 2:
-                dexe["moldft"]["outfiles"]["stdout"] = dexe["moldft"]["stdout"]
-                dexe["moldft"]["outfiles"]["stderr"] = dexe["moldft"]["stderr"]
-                dexe["molresponse"]["outfiles"]["stdout"] = dexe["molresponse"]["stdout"]
-                dexe["molresponse"]["outfiles"]["stderr"] = dexe["molresponse"]["stderr"]
+                output["moldft"]["outfiles"]["stdout"] = output["moldft"]["stdout"]
+                output["moldft"]["outfiles"]["stderr"] = output["moldft"]["stderr"]
+                output["molresponse"]["outfiles"]["stdout"] = output["molresponse"]["stdout"]
+                output["molresponse"]["outfiles"]["stderr"] = output["molresponse"]["stderr"]
             else:
-                dexe["moldft"]["outfiles"]["stdout"] = dexe["moldft"]["stdout"]
-                dexe["moldft"]["outfiles"]["stderr"] = dexe["moldft"]["stderr"]
-            return self.parse_output(dexe, input_model)
+                output["moldft"]["outfiles"]["stdout"] = output["moldft"]["stdout"]
+                output["moldft"]["outfiles"]["stderr"] = output["moldft"]["stderr"]
+            return self.parse_output(output, input_model)
         else:
-            print(dexe["stdout"])
+            print(output["stdout"])
 
-            raise UnknownError(dexe["stderr"])
+            raise UnknownError(output["stderr"])
 
     def build_input(
             self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
@@ -270,8 +270,6 @@ class MadnessHarness(ProgramHarness):
         if "molresponse" in outfiles.keys():
             stdout += outfiles["molresponse"]["stdout"]
         print("within parse output calc_info", outfiles["moldft"]["outfiles"]["calc_info.json"])
-        native_dict = {}
-        native_dict["calc_info"] = outfiles["moldft"]["outfiles"]["calc_info.json"]
 
         # Read the MADNESj stdout file and, if needed, the hess or grad files
         qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, outfiles)
@@ -303,18 +301,21 @@ class MadnessHarness(ProgramHarness):
             "schema_name": "qcschema_output",
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
-            "native_files": {k: v for k, v in native_dict.items() if v is not None},
+            "native_files": {"input": native_dict["input"]},
             "properties": qcprops,
             "provenance": Provenance(creator="MADNESS", version=self.get_version(), routine="madness"),
             "return_result": retres,
             "stdout": stdout,
         }
-        print(output_data)
+        print(output_data['native_files']['input'])
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
         output_data["extras"]["qcvars"] = {
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
         }
+
+        calc_info_json = outfiles["moldft"]["outfiles"]["calc_info.json"]
+        output_data["extras"]["outfiles"] = {"calc_info.json": calc_info_json}
 
         output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})
