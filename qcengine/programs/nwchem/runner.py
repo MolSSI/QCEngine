@@ -220,13 +220,14 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             ) as tmpdir:
                 restart = tmpdir.joinpath("nwchem.db").is_file()
 
-            # If computation is a restart, remove the input geometry
-            #  It is not needed for restarts and restarts geometry optimization
-            #   if you are using the NWChem Driver module
-
+            # If computation is a restart and you are calling from the NWChem Driver module, remove the input geometry
+            #  This will ensure the computation will pick up from the last geometry
             if restart:
                 logger.info(f"Restarting from {tmpdir}")
-                nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + optcmd + mdccmd
+                if input_model.extras.get("is_driver", False):
+                    nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + optcmd + mdccmd
+            else:
+                logger.warning(f"Existing files found in {tmpdir}. Your computation will restart")
 
         # For gradient methods, add a Python command to save the gradients in higher precision
         #  Note: The Hessian is already stored in high precision in a file named "*.hess"

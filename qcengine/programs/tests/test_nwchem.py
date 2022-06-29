@@ -335,3 +335,37 @@ def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
     assert result.success
     assert "convergence_failed" in result.extras["observed_errors"]
     assert result.extras["observed_errors"]["convergence_failed"]["keyword_updates"] == {keyword: init_iters * 4}
+
+
+@using("nwchem")
+def test_restart(nh2, tmpdir):
+    # Create a molecule that takes 5-8 steps for NWChem to relax it,
+    #  but only run the relaxation for 4 steps
+    resi = {
+        "molecule": nh2,
+        "driver": "gradient",
+        "model": {"method": "b3lyp", "basis": "3-21g"},
+        "keywords": {"dft__convergence__gradient": "1e-6", "dft__iterations": 4},
+        "protocols": {"error_correction": {"default_policy": False}},
+        "extras": {"allow_restarts": True},
+    }
+
+    # Run once: It should fail to converge
+    local_options = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
+    result = qcng.compute(
+        resi,
+        "nwchem",
+        local_options=local_options,
+        raise_error=False,
+    )
+    assert not result.success
+    assert "computation failed to converge" in str(result.error)
+
+    # Run again: It should converge only if we start from the last geometry
+    result = qcng.compute(
+        resi,
+        "nwchem",
+        local_options=local_options,
+        raise_error=False,
+    )
+    assert result.success
