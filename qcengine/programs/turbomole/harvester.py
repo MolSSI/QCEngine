@@ -113,9 +113,7 @@ def harvest(input_model, stdout, **outfiles):
         qcvars["N ATOMS"] = gradient.size // 3
 
     # Prefer unprojected 'nprhessian' over projected 'hessian'.
-    hessian_text = outfiles.get("nprhessian", None)
-    if hessian_text is None:
-        hessian_text = outfiles.get("hessian", None)
+    hessian_text = outfiles.get("nprhessian", outfiles.get("hessian", None))
 
     if hessian_text is not None:
         hessian = parse_hessian(hessian_text)
