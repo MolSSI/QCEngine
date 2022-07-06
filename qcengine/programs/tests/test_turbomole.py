@@ -4,6 +4,7 @@ import qcelemental
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
+from qcengine.programs.turbomole.harvester import parse_hessian
 from qcengine.testing import using
 
 
@@ -170,3 +171,35 @@ def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp)
     assert res.success is True
     assert res.properties.return_energy
     assert_hessian(H, ref_eigvals, size)
+
+
+@pytest.fixture
+def h2o_nprhessian():
+    return """$nprhessian
+     1  1   0.6142699252  -0.0000000000   0.0000000000  -0.3071349626  -0.2479448514
+     1  2  -0.0000000000  -0.3071349626   0.2479448514  -0.0000000000
+     2  1  -0.0000000000   0.4365036678   0.0000000000  -0.1885017686  -0.2182518339
+     2  2  -0.0000000000   0.1885017686  -0.2182518339   0.0000000000
+     3  1   0.0000000000   0.0000000000  -0.0000524175  -0.0000000000  -0.0000000000
+     3  2   0.0000262088  -0.0000000000   0.0000000000   0.0000262088
+     4  1  -0.3071349626  -0.1885017686  -0.0000000000   0.3389423895   0.2182233100
+     4  2   0.0000000000  -0.0318074269  -0.0297215414  -0.0000000000
+     5  1  -0.2479448514  -0.2182518339  -0.0000000000   0.2182233100   0.2092172237
+     5  2   0.0000000000   0.0297215414   0.0090346102   0.0000000000
+     6  1  -0.0000000000  -0.0000000000   0.0000262088   0.0000000000   0.0000000000
+     6  2  -0.0000125560  -0.0000000000   0.0000000000  -0.0000136528
+     7  1  -0.3071349626   0.1885017686  -0.0000000000  -0.0318074269   0.0297215414
+     7  2  -0.0000000000   0.3389423895  -0.2182233100   0.0000000000
+     8  1   0.2479448514  -0.2182518339   0.0000000000  -0.0297215414   0.0090346102
+     8  2   0.0000000000  -0.2182233100   0.2092172237  -0.0000000000
+     9  1  -0.0000000000   0.0000000000   0.0000262088  -0.0000000000   0.0000000000
+     9  2  -0.0000136528   0.0000000000  -0.0000000000  -0.0000125560
+    $end"""
+
+
+def test_turbomole_parse_hessian(h2o_nprhessian):
+    """Test parsing of unproject Turbomole Hessian for water."""
+    hessian = parse_hessian(h2o_nprhessian)
+    assert hessian.shape == (9, 9)
+    eigvals, _ = np.linalg.eigh(hessian)
+    assert eigvals[-1] == pytest.approx(1.12157030e00)

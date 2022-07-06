@@ -1,4 +1,4 @@
-import itertools as it
+from math import sqrt
 import re
 from decimal import Decimal
 
@@ -12,9 +12,6 @@ def parse_decimal(regex, text, method="search"):
     matches = getattr(with_float, method)(text)
 
     if method == "search":
-        # groups = matches.groups()
-        # if len(groups) == 1:
-        # groups = ("", groups[0])
         matches = [matches.groups()]
     return [(method, Decimal(energy)) for method, energy in matches]
 
@@ -83,35 +80,19 @@ def parse_gradient(gradient):
     return grad
 
 
-def parse_nprhessian(nprhessian):
-    lines = [l.strip() for l in nprhessian.strip().split("\n")]
-    assert lines[0] == "$nprhessian"
-    assert lines[-1] == "$end"
+def parse_hessian(hessian):
+    first_hessian = hessian.strip().split("$")[1]
+    split = first_hessian.split()
+    hess_type = split.pop(0)
+    assert hess_type in ("nprhessian", "hessian")
 
-    hess_lines = [line.split()[2:] for line in lines[1:-1]]
-    atom_num = int(lines[-2].split()[0])
-    hessian = np.array(list(it.chain(*hess_lines)), dtype=float)
-    hessian = hessian.reshape(atom_num, atom_num)
+    def is_float(str_):
+        return "." in str_
 
-    return hessian
-
-
-def parse_hessian(hessian, size):
-    lines = [l.strip() for l in hessian.strip().split("\n")]
-    assert lines[0] == "$hessian"
-    assert lines[-1] == "$end"
-
-    hess_lines = list()
-    for line in lines[1:-1]:
-        line = line.strip()
-        if line == "$hessian (projected)":
-            break
-        hess_lines.append(line.split()[2:])
-    else:
-        raise Exception("'$hessian (projected)' line was not encountered!")
-
-    hessian = np.array(list(it.chain(*hess_lines)), dtype=float)
-    hessian = hessian.reshape(size, size)
+    hess_items = [item for item in split if is_float(item)]
+    coord_num = int(sqrt(len(hess_items)))
+    assert coord_num**2 == len(hess_items)
+    hessian = np.array(hess_items, dtype=float).reshape(-1, coord_num)
 
     return hessian
 
@@ -131,13 +112,13 @@ def harvest(input_model, stdout, **outfiles):
         gradient = parse_gradient(outfiles["gradient"])
         qcvars["N ATOMS"] = gradient.size // 3
 
-    hessian = None
-    if "nprhessian" in outfiles:
-        hessian = parse_nprhessian(outfiles["nprhessian"])
-    if "hessian" in outfiles:
-        size = input_model.geometry.size
-        hessian = parse_hessian(outfiles["hessian"], size)
-    if hessian:
+    # Prefer unprojected 'nprhessian' over projected 'hessian'.
+    hessian_text = outfiles.get("nprhessian", outfiles.get("hessian", None))
+
+    if hessian_text is not None:
+        hessian = parse_hessian(hessian_text)
         qcvars["N ATOMS"] = hessian.shape[0] // 3
+    else:
+        hessian = None
 
     return qcvars, gradient, hessian
