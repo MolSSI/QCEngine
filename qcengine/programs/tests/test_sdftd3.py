@@ -47,7 +47,8 @@ def test_dftd3_task_b97m_m01():
 )
 def test_dftd3_task_pbe_m02(inp):
 
-    thr = 1.0e-8
+    # return to 1.0e-8 after https://github.com/MolSSI/QCEngine/issues/370
+    thr = 1.0e-7
 
     return_result = inp["return_result"]
 
