@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.util &mdash; QCEngine 0+untagged.1.g4b46d7a documentation</title>
+  <title>qcengine.util &mdash; QCEngine 0+untagged.1.gf726364 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -45,7 +45,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g4b46d7a
+                0+untagged.1.gf726364
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -707,7 +707,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="k">for</span> <span class="n">fl</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">infiles</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">omode</span> <span class="o">=</span> <span class="s2">&quot;wb&quot;</span> <span class="k">if</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">as_binary</span> <span class="k">else</span> <span class="s2">&quot;w&quot;</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="n">lwd</span> <span class="o">/</span> <span class="n">fl</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">omode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">lwd</span><span class="p">:</span>
+                <span class="n">filename</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">filename</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">omode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
                 <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
                 <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;... Writing (</span><span class="si">{</span><span class="n">omode</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
