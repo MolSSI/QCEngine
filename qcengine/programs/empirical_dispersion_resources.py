@@ -662,6 +662,21 @@ dashcoeff = {
             "hf": {"params": {"s6": 1.000, "s8": 0.713190, "a1": 0.079541, "a2": 3.627854}},  # JBS 01/2021
         },
     },
+    "d3op": {
+        "formal": "D3(op)",
+        "alias": [],
+        "description": "    D3 dispersion correction with optimized power damping function. Based on rational damping function and additional zero-damping like power function.",
+        "citation": "    S. Grimme, S. Ehrlich, and L. Goerigk., Comput. Chem., 32:1456–1465, 2011. doi:10.1002/jcc.21759.\n"
+        + "    Jonathon Witte, Narbe Mardirossian, Jeffrey B Neaton, and Martin Head-Gordon., J. Chem. Theory Comput., 13(5):2043–2052, 2017. doi:10.1021/acs.jctc.7b00176.\n",
+        "bibtex": "Grimme:2011:1456",
+        "default": collections.OrderedDict(
+            [("a1", 1.0), ("a2", 1.0), ("alp", 14.0), ("s6", 1.0), ("s8", 1.0), ("s9", 1.0), ("bet", 0.0)]
+        ),
+        "definitions": {
+            # will be loaded later
+            # From https://github.com/awvwgk/simple-dftd3/blob/main/assets/parameters.toml
+        },
+    },
     "nl": {
         "formal": "NL",
         "alias": [],
@@ -821,6 +836,8 @@ def _get_d4bj_definitions() -> dict:
     We let DFTD4 take care of finding and loading the parameter file,
     but to get all parameters, we implement the logic to read those
     parameters ourselves again.
+
+    This method is upstreamed in dftd4 >3.3.0 and could be replaced in the future.
     """
 
     try:
@@ -880,6 +897,59 @@ def _get_d4bj_definitions() -> dict:
 
 dashcoeff["d4bjeeqatm"]["definitions"].update(_get_d4bj_definitions())
 
+try:
+
+    def _get_d3_definitions(dashlevel: str) -> dict:
+        """
+        Lucky for us dftd3 provides access to all damping parameters directly.
+
+        However, we are not happy with the structure of the dict and
+        therefore do some restructuring. The below solution tries to bend
+        the data returned by dftd3 into the right shape to make qcng happy.
+        """
+
+        from dftd3.parameters import get_all_damping_params
+
+        # The names here are the subset allowed by qcng with the names used in dftd3
+        allowed = {
+            "bj": ["a1", "a2", "s6", "s8"],
+            "zero": ["rs6", "rs8", "alp", "s6", "s8"],
+            "mbj": ["a1", "a2", "s6", "s8"],
+            "mzero": ["rs6", "rs8", "alp", "s6", "s8", "bet"],
+            "op": ["a1", "a2", "s6", "s8", "bet"],
+        }
+        # mapping from dftd3 to qcng names, also, we have to reverse it later again
+        rename = {
+            "rs6": "sr6",
+            "rs8": "sr8",
+            "alp": "alpha6",
+            "bet": "beta",
+        }
+
+        # FIXME: dict comprehension at its finest
+        #
+        # 1. insert an additional level each method
+        # 2. filter parameter names accepted by qcng
+        # 3. map from dftd3 to qcng names
+        # 4. return the whole mess
+        return {
+            key: {
+                "params": {
+                    rename.get(param, param): value for param, value in params.items() if param in allowed[dashlevel]
+                }
+            }
+            for key, params in get_all_damping_params([dashlevel]).items()
+        }
+
+    dashcoeff["d3bj"]["definitions"].update(_get_d3_definitions("bj"))
+    dashcoeff["d3zero"]["definitions"].update(_get_d3_definitions("zero"))
+    dashcoeff["d3mbj"]["definitions"].update(_get_d3_definitions("mbj"))
+    dashcoeff["d3mzero"]["definitions"].update(_get_d3_definitions("mzero"))
+    dashcoeff["d3op"]["definitions"].update(_get_d3_definitions("op"))
+
+except ModuleNotFoundError:
+    pass
+
 
 def get_dispersion_aliases():
     """Returns dict where keys are all (lowercased) strings that are
@@ -933,7 +1003,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     dict
         Metadata defining dispersion calculation.
 
-        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'chg', 'das2009', 'das2010', 'nl', "d4bjeeqatm"}
+        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'd3op', 'chg', 'das2009', 'das2010', 'nl', "d4bjeeqatm"}
             Name (de-aliased, de-formalized, lowercase) of dispersion
             correction -- atom data, dispersion model, damping functional
             form -- to be applied. Resolved from `name_hint` and/or
