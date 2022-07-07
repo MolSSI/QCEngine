@@ -4,6 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - py-qcore
+  - mopac
 
     # Core
   - python
