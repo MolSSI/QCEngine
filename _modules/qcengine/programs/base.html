@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.programs.base &mdash; QCEngine 0+untagged.1.gf726364 documentation</title>
+  <title>qcengine.programs.base &mdash; QCEngine 0+untagged.1.g4348720 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -45,7 +45,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gf726364
+                0+untagged.1.g4348720
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -114,7 +114,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">from</span> <span class="nn">.adcc</span> <span class="kn">import</span> <span class="n">AdccHarness</span>
 <span class="kn">from</span> <span class="nn">.cfour</span> <span class="kn">import</span> <span class="n">CFOURHarness</span>
 <span class="kn">from</span> <span class="nn">.dftd3</span> <span class="kn">import</span> <span class="n">DFTD3Harness</span>
-<span class="kn">from</span> <span class="nn">.dftd4</span> <span class="kn">import</span> <span class="n">DFTD4Harness</span>
+<span class="kn">from</span> <span class="nn">.dftd_ng</span> <span class="kn">import</span> <span class="n">DFTD4Harness</span><span class="p">,</span> <span class="n">SDFTD3Harness</span>
 <span class="kn">from</span> <span class="nn">.gamess</span> <span class="kn">import</span> <span class="n">GAMESSHarness</span>
 <span class="kn">from</span> <span class="nn">.gcp</span> <span class="kn">import</span> <span class="n">GCPHarness</span><span class="p">,</span> <span class="n">MCTCGCPHarness</span>
 <span class="kn">from</span> <span class="nn">.molpro</span> <span class="kn">import</span> <span class="n">MolproHarness</span>
@@ -238,6 +238,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="c1"># Analytical Corrections</span>
 <span class="n">register_program</span><span class="p">(</span><span class="n">DFTD3Harness</span><span class="p">())</span>
 <span class="n">register_program</span><span class="p">(</span><span class="n">DFTD4Harness</span><span class="p">())</span>
+<span class="n">register_program</span><span class="p">(</span><span class="n">SDFTD3Harness</span><span class="p">())</span>
 <span class="n">register_program</span><span class="p">(</span><span class="n">GCPHarness</span><span class="p">())</span>
 <span class="n">register_program</span><span class="p">(</span><span class="n">MCTCGCPHarness</span><span class="p">())</span>
 <span class="n">register_program</span><span class="p">(</span><span class="n">MP2DHarness</span><span class="p">())</span>
