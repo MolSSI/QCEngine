@@ -3,7 +3,7 @@ QCEngine
 [![Travis build](https://img.shields.io/travis/MolSSI/QCEngine/master.svg?logo=linux&logoColor=white)](https://travis-ci.org/MolSSI/QCEngine)
 [![codecov](https://img.shields.io/codecov/c/github/MolSSI/QCEngine.svg?logo=Codecov&logoColor=white)](https://codecov.io/gh/MolSSI/QCEngine)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MolSSI/QCEngine.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MolSSI/QCEngine/context:python)
-[![Documentation Status](https://readthedocs.org/projects/qcengine/badge/?version=latest)](https://qcengine.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://img.shields.io/github/workflow/status/MolSSI/QCEngine/CI/master?label=docs&logo=readthedocs&logoColor=white)](http://docs.qcarchive.molssi.org/projects/qcengine/en/latest/)
 [![Conda (channel only)](https://img.shields.io/conda/vn/conda-forge/qcengine?color=blue&logo=anaconda&logoColor=white)](https://anaconda.org/conda-forge/qcengine)
 [![Chat on Slack](https://img.shields.io/badge/chat-on_slack-808493.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM)
 
