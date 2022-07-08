@@ -212,7 +212,7 @@ def test_geometric_retries(failure_engine, input_data):
         pytest.param(
             "mopac",
             {"method": "PM6"},
-            [1.7927843431811934, 2.893333237502448, 107.60441967992045],
+            [1.793052302291527, 2.893333237502448, 107.57254391453196],
             marks=using("mopac"),
         ),
         pytest.param(

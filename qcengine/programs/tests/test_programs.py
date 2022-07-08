@@ -188,13 +188,13 @@ def test_mopac_task():
     }
 
     ret = qcng.compute(input_data, "mopac", raise_error=True)
-    assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
+    assert ret.extras.keys() >= {"heat_of_formation", "dip_vec"}
     energy = pytest.approx(-0.08474117913025125, rel=1.0e-5)
 
     # Check gradient
     ret = qcng.compute(input_data, "mopac", raise_error=True)
-    assert ret.extras.keys() >= {"heat_of_formation", "energy_electronic", "dip_vec"}
-    assert np.linalg.norm(ret.return_result) == pytest.approx(0.03543560156912385, rel=1.0e-4)
+    assert ret.extras.keys() >= {"heat_of_formation", "dip_vec"}
+    assert np.linalg.norm(ret.return_result) == pytest.approx(0.03543560156912385, rel=3.0e-4)
     assert ret.properties.return_energy == energy
 
     # Check energy
