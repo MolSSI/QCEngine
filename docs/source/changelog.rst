@@ -22,12 +22,12 @@ v0.24.0 / 2022-07-08
 
 Upcoming Breaking Changes
 +++++++++++++++++++++++++
-- (:pr:`372`) QCSchema - changes are planned to schema layout and QCEngine API that will be outlined in an issue. These are not expected to involve detailed changes to the harnesses, and update helper functions will be provided. In preparation, QCEngine is pinned to a maximum compatible QCElemental v0.25.0 (current release). Projects using QCSchema through QCElemental are advised to pin to maximum v0.25.0 qcel and v0.24.0 to avert trouble, since this is our first experience with schema increments.
+- (:pr:`372`) QCSchema - changes are planned to schema layout and QCEngine API that will be outlined in an issue. These are not expected to involve detailed changes to the harnesses, and update helper functions will be provided. In preparation, QCEngine is pinned to a maximum compatible QCElemental v0.25.0 (current release). Projects using QCSchema through QCElemental are advised to pin to maximum v0.25.0 qcel and v0.24.0 to avert trouble, since this is our first experience with schema increments. @loriab
 
 New Features
 ++++++++++++
 - (:pr:`343`) DFT-D3 - added the ``SDFTD3Harness`` to handle DFT-D3 via a Python API. This has native QCSchema support and programmatic access to the parameter database. @awvwgk
-- (:pr:`353`) TeraChem - added the ``TeraChemFrontEndHarness`` to handle file I/O in extension to the protocol buffer ``TeraChemPBSHarness`` interface.
+- (:pr:`353`) TeraChem - added the ``TeraChemFrontEndHarness`` to handle file I/O in extension to the protocol buffer ``TeraChemPBSHarness`` interface. @coltonbh
 
 Enhancements
 ++++++++++++
@@ -38,7 +38,7 @@ Enhancements
 - (:pr:`363`) Allow directory structure in ``execute(..., infiles)`` argument, not just flat-level files. @loriab
 - (:pr:`364`) CFOUR - learned to harvest gradients when ghost atoms involved. Any CFOUR job with ghost atoms involves a hack that may go amiss when Xenon atoms in target molecule. @loriab
 - (:pr:`364`) NWChem - learned to handle keyword ``geometry__autosym`` to tighten or loosen automatic symmetry detection. @loriab
-- (:pr:`372`) testing - 2022 OpenMopac now actively tested in GHA. Note fields and output slightly different since 2019 harness.
+- (:pr:`372`) testing - 2022 OpenMopac now actively tested in GHA. Note fields and output slightly different since 2019 harness. @awvwgk, @loriab
 
 Bug Fixes
 +++++++++
