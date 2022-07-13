@@ -3,6 +3,7 @@ Calls the Madness moldft executable.
 """
 # import re
 import copy
+import json
 import logging
 import pprint
 from decimal import Decimal
@@ -100,9 +101,7 @@ class MadnessHarness(ProgramHarness):
         if which_prog not in self.version_cache:
             success, output = execute(
                 command,
-                {
-                    "v.moldft": "dft\nxc lda\nend\ngeometry\nH  0.0 0.0 0.0\nH  0.7 0.0 0.0\nend\n"
-                },
+                {"v.moldft": "dft\nxc lda\nend\ngeometry\nH  0.0 0.0 0.0\nH  0.7 0.0 0.0\nend\n"},
                 scratch_directory=config.scratch_directory,
             )
 
@@ -110,7 +109,7 @@ class MadnessHarness(ProgramHarness):
                 for line in output["stdout"].splitlines():
                     if "multiresolution suite" in line:
                         version = line.strip().split()[1]
-                self.version_cache[which_prog] = safe_version(version)
+                        self.version_cache[which_prog] = safe_version(version)
             else:
                 raise UnknownError(output["stderr"])
 
@@ -123,7 +122,7 @@ class MadnessHarness(ProgramHarness):
         self.found(raise_error=True)
 
         job_inputs = self.build_input(input_model, config)
-        success, output = self.execute(job_inputs, extra_outfiles=['calc_info.json'])
+        success, output = self.execute(job_inputs, extra_outfiles=["calc_info.json"])
         if "There is an error in the input file" in output["moldft"]["stdout"]:
             raise InputError(output["moldft"]["stdout"])
         if "not compiled" in output["moldft"]["stdout"]:
@@ -146,7 +145,7 @@ class MadnessHarness(ProgramHarness):
             raise UnknownError(output["stderr"])
 
     def build_input(
-            self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         #
         madnessrec = {
@@ -187,18 +186,18 @@ class MadnessHarness(ProgramHarness):
             geo_index = optcmd.find("geometry")  # find first occurrence of geometry
             end_index = optcmd[geo_index:].find("end")  # find first occurrence of end after geometry
             geometry_input = optcmd[
-                             geo_index + 8: end_index + geo_index
-                             ]  # grab everything in between geometry and end
+                geo_index + 8 : end_index + geo_index
+            ]  # grab everything in between geometry and end
 
-            optcmd = optcmd[0:geo_index] + optcmd[geo_index + end_index + 4:]  # optcmd becomes everything else
+            optcmd = optcmd[0:geo_index] + optcmd[geo_index + end_index + 4 :]  # optcmd becomes everything else
             molcmd = molcmd.replace(
                 "end", geometry_input.strip() + "\nend"
             )  # replace end with the added geometry input
-            print("optcmd\n", optcmd)
-            print("molcmd\n", molcmd)
+            # print("optcmd\n", optcmd)
+            # print("molcmd\n", molcmd)
 
-        print(optcmd.find("geometry"))
-        print(optcmd)
+        # print(optcmd.find("geometry"))
+        # print(optcmd)
         madnessrec["commands"] = {}
         if mdccmd == "response":
             dft_cmds = optcmd.split(mdccmd)
@@ -216,13 +215,13 @@ class MadnessHarness(ProgramHarness):
             madnessrec["infiles"]["moldft"]["input"] = dft_cmds + molcmd
             madnessrec["commands"]["moldft"] = [which("moldft")]
 
-        print(madnessrec)
+        # print(madnessrec)
         # optcmd="dft\n xc hf \nend\n"
         # print(madnessrec["infiles"]["input"])
         return madnessrec
 
     def execute(
-            self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
     ) -> Tuple[bool, Dict]:
         num_commands = len(inputs["commands"])
         oexe = {}
@@ -246,11 +245,11 @@ class MadnessHarness(ProgramHarness):
                 scratch_exist_ok=True,
             )
             oexe["molresponse"] = dexe_response
-            print(dexe)
-            print(dexe_response)
+            # print(dexe)
+            # print(dexe_response)
             return success, oexe
         else:
-            print(inputs["commands"]["moldft"])
+            # print(inputs["commands"]["moldft"])
             success, dexe = execute(
                 inputs["commands"]["moldft"],
                 inputs["infiles"]["moldft"],
@@ -269,11 +268,11 @@ class MadnessHarness(ProgramHarness):
         stdout = outfiles["moldft"]["stdout"]
         if "molresponse" in outfiles.keys():
             stdout += outfiles["molresponse"]["stdout"]
-        print("within parse output calc_info", outfiles["moldft"]["outfiles"]["calc_info.json"])
+        # print("within parse output calc_info", outfiles["moldft"]["outfiles"]["calc_info.json"])
 
         # Read the MADNESj stdout file and, if needed, the hess or grad files
         qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, outfiles)
-        ## pop the files because I think I need to
+        calc_info_json = outfiles["moldft"]["outfiles"]["calc_info.json"]
         outfiles.pop("moldft")
         if "molresponse" in outfiles.keys():
             outfiles.pop("molresponse")
@@ -301,21 +300,18 @@ class MadnessHarness(ProgramHarness):
             "schema_name": "qcschema_output",
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
-            #TODO (figure out what this does and how to use it)  "native_files": {"input": native_dict["input"]},
+            # TODO (figure out what this does and how to use it)  "native_files": {"input": native_dict["input"]},
             "properties": qcprops,
             "provenance": Provenance(creator="MADNESS", version=self.get_version(), routine="madness"),
             "return_result": retres,
             "stdout": stdout,
         }
-        print(output_data['native_files']['input'])
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision
         output_data["extras"]["qcvars"] = {
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
         }
-
-        calc_info_json = outfiles["moldft"]["outfiles"]["calc_info.json"]
-        output_data["extras"]["outfiles"] = {"calc_info.json": calc_info_json}
+        output_data["extras"]["outfiles"] = {"calc_info.json": json.loads(calc_info_json)}
 
         output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})
