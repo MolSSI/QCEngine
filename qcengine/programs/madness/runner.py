@@ -131,13 +131,17 @@ class MadnessHarness(ProgramHarness):
         if success:
             num_commands = len(output)
             if num_commands == 2:
+                stdin = job_inputs["infiles"]["moldft"]["input"]
                 output["moldft"]["outfiles"]["stdout"] = output["moldft"]["stdout"]
                 output["moldft"]["outfiles"]["stderr"] = output["moldft"]["stderr"]
                 output["molresponse"]["outfiles"]["stdout"] = output["molresponse"]["stdout"]
                 output["molresponse"]["outfiles"]["stderr"] = output["molresponse"]["stderr"]
+
             else:
+                stdin = job_inputs["infiles"]["moldft"]["input"]
                 output["moldft"]["outfiles"]["stdout"] = output["moldft"]["stdout"]
                 output["moldft"]["outfiles"]["stderr"] = output["moldft"]["stderr"]
+                output["moldft"]["outfiles"]["input"] = stdin
             return self.parse_output(output, input_model)
         else:
             print(output["stdout"])
@@ -239,7 +243,7 @@ class MadnessHarness(ProgramHarness):
             success, dexe_response = execute(
                 inputs["commands"]["molresponse"],
                 inputs["infiles"]["molresponse"],
-                ["response.json"],
+                ["response_base.json"],
                 scratch_messy=True,
                 scratch_name=Path(dexe["scratch_directory"]).name,
                 scratch_exist_ok=True,
@@ -264,18 +268,27 @@ class MadnessHarness(ProgramHarness):
 
     def parse_output(self, outfiles, input_model: "AtomicInput") -> "AtomicResult":  # lgtm: [py/similar-function]
 
-        # Get the stdout from the calculation (required)
-        stdout = outfiles["moldft"]["stdout"]
-        if "molresponse" in outfiles.keys():
-            stdout += outfiles["molresponse"]["stdout"]
-        # print("within parse output calc_info", outfiles["moldft"]["outfiles"]["calc_info.json"])
-
-        # Read the MADNESj stdout file and, if needed, the hess or grad files
         qcvars, madhess, madgrad, madmol, version, errorTMP = harvest(input_model.molecule, outfiles)
-        calc_info_json = outfiles["moldft"]["outfiles"]["calc_info.json"]
-        outfiles.pop("moldft")
+
+        moldft_out = outfiles.pop("moldft")
+
+        print(moldft_out["outfiles"].keys())
+
+        m_stdout = moldft_out.pop("stdout")
+        m_stderr = moldft_out.pop("stderr")
+        print("after pop", moldft_out["outfiles"].keys())
+
+        response_out = None
+        r_stdout = None
+        r_stderr = None
         if "molresponse" in outfiles.keys():
-            outfiles.pop("molresponse")
+            response_out = outfiles.pop("molresponse")
+            r_stdout = response_out.pop("stdout")
+            r_stderr = response_out.pop("stderr")
+
+        stdout = m_stdout
+        if r_stdout is not None:
+            stdout.update(r_stdout)
 
         if madgrad is not None:
             qcvars["CURRENT GRADIENT"] = madgrad
@@ -296,11 +309,16 @@ class MadnessHarness(ProgramHarness):
         # Get the formatted properties
         qcprops = extract_formatted_properties(qcvars)
         # Format them inout an output
+        m_native_files = {k: v for k, v in moldft_out["outfiles"].items() if v is not None}
+        native_files = {
+            "input": m_native_files["input"],
+            "calc_info": m_native_files["calc_info.json"],
+        }
         output_data = {
             "schema_name": "qcschema_output",
             "schema_version": 1,
             "extras": {"outfiles": outfiles, **input_model.extras},
-            # TODO (figure out what this does and how to use it)  "native_files": {"input": native_dict["input"]},
+            "native_files": native_files,
             "properties": qcprops,
             "provenance": Provenance(creator="MADNESS", version=self.get_version(), routine="madness"),
             "return_result": retres,
@@ -311,7 +329,10 @@ class MadnessHarness(ProgramHarness):
         output_data["extras"]["qcvars"] = {
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcel.util.unnp(qcvars, flat=True).items()
         }
-        output_data["extras"]["outfiles"] = {"calc_info.json": json.loads(calc_info_json)}
+        output_data["extras"]["outfiles"] = {
+            "input": native_files["input"],
+            "calc_info": json.loads(native_files["calc_info"]),
+        }
 
         output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})
