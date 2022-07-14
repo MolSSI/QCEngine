@@ -49,6 +49,7 @@ def test_geometric_psi4(input_data, optimizer):
     for single in ret.trajectory:
         assert "scf_properties" in single.keywords
         assert "WIBERG_LOWDIN_INDICES" in single.extras["qcvars"] or "WIBERG LOWDIN INDICES" in single.extras["qcvars"]
+        # TODO: old WIBERG qcvar used underscore; new one uses space. covering bases here but remove someday
 
 
 @using("psi4")
@@ -211,7 +212,7 @@ def test_geometric_retries(failure_engine, input_data):
         pytest.param(
             "mopac",
             {"method": "PM6"},
-            [1.7927843431811934, 2.893333237502448, 107.60441967992045],
+            [1.793052302291527, 2.893333237502448, 107.57254391453196],
             marks=using("mopac"),
         ),
         pytest.param(

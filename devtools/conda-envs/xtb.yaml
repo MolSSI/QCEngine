@@ -15,6 +15,7 @@ dependencies:
 
     # Extras
   - gcp-correction
+  - dftd3-python >=0.5.1
 
     # Testing
   - pytest

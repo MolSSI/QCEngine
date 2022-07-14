@@ -42,7 +42,10 @@ class MopacHarness(ProgramHarness):
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         return which(
-            "mopac", return_bool=True, raise_error=raise_error, raise_msg="Please install via http://openmopac.net."
+            "mopac",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install -c conda-forge mopac`",
         )
 
     def get_version(self) -> str:

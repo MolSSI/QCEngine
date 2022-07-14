@@ -3,23 +3,28 @@ from typing import Any, Dict
 from qcengine.exceptions import InputError
 
 
-def muster_modelchem(method: str, derint: int) -> Dict[str, Any]:
+def muster_modelchem(method: str, driver: "DriverEnum") -> Dict[str, Any]:
     """Converts the QC method into CFOUR keywords."""
 
     method = method.lower()
     opts = {}
 
-    if derint == 0:
-        if method == "cfour":
-            pass  # permit clean operation of sandwich mode
-        else:
-            opts["deriv_level"] = "zero"
+    if driver == "properties":
+        pass
+    else:
+        derint = driver.derivative_int()
 
-    elif derint == 1:
-        opts["deriv_level"] = "first"
+        if derint == 0:
+            if method == "cfour":
+                pass  # permit clean operation of sandwich mode
+            else:
+                opts["deriv_level"] = "zero"
 
-    elif derint == 2:
-        opts["vibration"] = "exact"
+        elif derint == 1:
+            opts["deriv_level"] = "first"
+
+        elif derint == 2:
+            opts["vibration"] = "exact"
 
     if method == "cfour":
         pass
