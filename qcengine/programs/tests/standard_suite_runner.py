@@ -12,36 +12,7 @@ import qcengine as qcng
 from qcengine.programs.util import mill_qcvars
 
 from .standard_suite_ref import answer_hash, std_suite
-
-from .standard_suite_contracts import (  # isort:skip
-    contractual_hf,
-    contractual_mp2,
-    contractual_mp2p5,
-    contractual_mp3,
-    contractual_mp4_prsdq_pr,
-    contractual_mp4,
-    contractual_cisd,
-    contractual_qcisd,
-    contractual_qcisd_prt_pr,
-    contractual_lccd,
-    contractual_lccsd,
-    contractual_ccd,
-    contractual_ccsd,
-    contractual_ccsdpt_prccsd_pr,
-    contractual_ccsd_prt_pr,
-    contractual_accsd_prt_pr,
-    contractual_ccsdt1a,
-    contractual_ccsdt1b,
-    contractual_ccsdt2,
-    contractual_ccsdt3,
-    contractual_ccsdt,
-    contractual_ccsdt_prq_pr,
-    contractual_ccsdtq,
-    contractual_dft_current,
-    contractual_current,
-    query_has_qcvar,
-    query_qcvar,
-)
+from .standard_suite_contracts import *
 
 pp = pprint.PrettyPrinter(width=120)
 

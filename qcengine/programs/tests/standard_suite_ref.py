@@ -659,6 +659,15 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0005522939,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2104417743,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0484443079,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [ 0.,             0.,             0.00339205449,
+                         0.,             0.,            -0.00339205449]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": 0.000511277,  # qchem
+            "OCCD CORRELATION ENERGY": -0.208649453,  # qchem
+            "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
+                [    0.00000000,    0.00000000, 0.00184797, 0, 0, -0.00184797]
+            ).reshape((-1, 3)),
             "PBE TOTAL ENERGY": -100.33517315116806,  # psi 99,590
             "PBE TOTAL GRADIENT": np.array([[0.0, 0.0, 0.020107103338], [0.0, 0.0, -0.020107128125]]),  # psi 99,590
             "B3LYP TOTAL ENERGY": -100.43544624005466,  # psi 99,590
@@ -1463,6 +1472,16 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011895155,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2330452995,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0503175223,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [ 0.,              0.,              0.009755099696,
+                        -0.,              0.005854889163, -0.004877549848,
+                         0.,             -0.005854889163, -0.004877549848]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": 0.001123344,  # qchem
+            "OCCD CORRELATION ENERGY": -0.229118050,  # qchem
+            "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
+                [ 0., 0., 0.00727331, 0., 0.00447444, -0.00363665, 0., -0.00447444, -0.00363665]
+            ).reshape((-1, 3)),
             "PBE TOTAL ENERGY": -76.35896461348528,  # psi 99,590
             "PBE TOTAL GRADIENT": np.array(  # psi 99,590
                 [
@@ -2451,6 +2470,16 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0013521561,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2800053174,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0582676514,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [ 0.,              0.,             -0.001040099489,
+                         0.,             -0.001127979233,  0.000520049745,
+                        -0.,              0.001127979233,  0.000520049745]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": 0.001279242,  # qchem
+            "OCCD CORRELATION ENERGY": -0.275418269,  # qchem
+            "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
+                [0, 0, -0.00363692, 0, -0.00246929, 0.00181846, 0, 0.00246929, 0.00181846]
+            ).reshape((-1, 3)),
             "PBE TOTAL ENERGY": -76.38209089347507,  # psi 99,590
             "PBE TOTAL GRADIENT": np.array(  # psi 99,590
                 [
@@ -3285,6 +3314,7 @@ _std_suite = [
                     ],
                 ]
             ),
+            "A-(T) CORRECTION ENERGY": -0.000609324,  # mrcc
             "CCSDT-1A CORRELATION ENERGY": -0.082798380297,  # ecc
             "CCSDT-1B CORRELATION ENERGY": -0.082796300732,  # ecc
             "CCSDT-2 CORRELATION ENERGY": -0.082795702684,  # ecc
@@ -3293,6 +3323,14 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0014842084,  # p4n
             "OLCCD CORRELATION ENERGY": -0.0847413506,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [ 0.,              0.,              0.002952428656,
+                         0.,              0.,             -0.002937832654,
+                        -0.,              0.015746258127, -0.000007298001,
+                         0.,             -0.015746258127, -0.000007298001]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": 0.001165795,  # qchem
+            "OCCD CORRELATION ENERGY": -0.082188930,  # qchem
             "PBE TOTAL ENERGY": -26.04681636799003,  # psi 99,590
             "PBE TOTAL GRADIENT": np.array(  # psi 99,590
                 [
@@ -3534,6 +3572,13 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011118724,  # p4n
             "OLCCD CORRELATION ENERGY": -0.1781057943,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [ 0.,              0.,              0.031877236853,
+                        -0.,              0.017265501329, -0.015938618427,
+                         0.,             -0.017265501329, -0.015938618427]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": 0.000987794,  # qchem
+            "OCCD CORRELATION ENERGY": -0.173720242,  # qchem
             "PBE TOTAL ENERGY": -55.81473169701641,  # psi 99,590
             "PBE TOTAL GRADIENT": np.array(  # psi 99,590
                 [
@@ -3754,6 +3799,7 @@ _std_suite = [
                     ],
                 ]
             ),
+            "A-(T) CORRECTION ENERGY": -0.0050643207,  # mrcc
             "CCSDT-1A CORRELATION ENERGY": -0.218598725534,  # ecc
             "CCSDT-1B CORRELATION ENERGY": -0.218597572977,  # ecc
             "CCSDT-2 CORRELATION ENERGY": -0.218253889761,  # ecc
@@ -3762,6 +3808,13 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0012856903,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2180560836,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [-0.,              0.,              0.019472272298,
+                        -0.,              0.008522161738, -0.009736136149,
+                         0.,             -0.008522161738, -0.009736136149]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": 0.001155093,  # qchem
+            "OCCD CORRELATION ENERGY": -0.213139955,  # qchem
             "PBE TOTAL ENERGY": -55.83097248811423,  # psi 99,590
             "PBE TOTAL GRADIENT": np.array(  # psi 99,590
                 [
@@ -4045,6 +4098,14 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0000399018,  # p4n
             "OLCCD CORRELATION ENERGY": -0.0862654609,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [-0.,              0.,              0.002952428137,
+                         0.,              0.,             -0.002937832352,
+                        -0.,              0.015746258328, -0.000007297893,
+                         0.,             -0.015746258328, -0.000007297893]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": -0.000358562,  # qchem
+            "OCCD CORRELATION ENERGY": -0.083713042,  # qchem
             "PBE TOTAL ENERGY": -26.046275584237,  # nwc 99,590
             "PBE TOTAL GRADIENT": np.array(  # nwc 99,590
                 [
@@ -4163,6 +4224,13 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033018315,  # p4n
             "OLCCD CORRELATION ENERGY": -0.1825194982,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [-0.,              0.,              0.031877236593,
+                        -0.,              0.017265501452, -0.015938618296,
+                         0.,             -0.017265501452, -0.015938618296]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": -0.003426081,  # qchem
+            "OCCD CORRELATION ENERGY": -0.178133946,  # qchem
             "PBE TOTAL ENERGY": -55.813318056978,  # nwc 99,590
             "PBE TOTAL GRADIENT": np.array(  # nwc 99,590
                 [
@@ -4278,6 +4346,13 @@ _std_suite = [
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033240178,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2226657917,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
+            "OLCCD TOTAL GRADIENT": np.array(  # occ
+                       [ 0.,              0.,              0.019472272302,
+                        -0.,              0.008522161726, -0.009736136151,
+                         0.,             -0.008522161726, -0.009736136151]
+            ).reshape((-1, 3)),
+            "OCCD REFERENCE CORRECTION ENERGY": -0.00345534,  # qchem
+            "OCCD CORRELATION ENERGY": -0.217749658,  # qchem
             "PBE TOTAL ENERGY": -55.829414170216,  # nwc 99,590
             "PBE TOTAL GRADIENT": np.array(  # nwc 99,590
                 [
@@ -4464,6 +4539,11 @@ _std_suite = [
             "[Q] CORRECTION ENERGY": -0.000379506649993,  # ncc
             "(Q) CORRECTION ENERGY": -0.000413051703749,  # ncc
             "CCSDTQ CORRELATION ENERGY": -0.209218171097884,  # ncc
+            "OCCD REFERENCE CORRECTION ENERGY": 0.000510311,  # qchem
+            "OCCD CORRELATION ENERGY": -0.206722125,  # qchem
+            "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
+                [0, 0, 0.00227059, 0, 0, -0.00227059]
+            ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
@@ -4957,6 +5037,11 @@ _std_suite = [
             "[Q] CORRECTION ENERGY": -0.000288788062660,  # ncc
             "(Q) CORRECTION ENERGY": -0.000503838444143,  # ncc
             "CCSDTQ CORRELATION ENERGY": -0.233074721244323,  # ncc
+            "OCCD REFERENCE CORRECTION ENERGY": 0.001125755,  # qchem
+            "OCCD CORRELATION ENERGY": -0.226880992,  # qchem
+            "OCCD TOTAL GRADIENT": np.array(  # dfocc, rearranged
+                [ 0, 0, 0.00797428, 0, 0.00488548, -0.00398714, 0, -0.00488548, -0.00398714]
+            ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -5686,6 +5771,11 @@ _std_suite = [
             "[Q] CORRECTION ENERGY": -0.000151213601440,  # ncc
             "(Q) CORRECTION ENERGY": -0.000368016662584,  # ncc
             "CCSDTQ CORRELATION ENERGY": -0.257824320323573,  # ncc
+            "OCCD REFERENCE CORRECTION ENERGY": 0.001225751,  # qchem
+            "OCCD CORRELATION ENERGY": -0.250044802,  # qchem
+            "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
+                [0, 0, -0.00269153 , 0, -0.00204152, 0.00134576, 0,  0.00204152, 0.00134576]
+            ).reshape((-1, 3)),
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -6325,11 +6415,14 @@ _std_suite = [
                     ],
                 ]
             ),
+            "A-(T) CORRECTION ENERGY": -0.000587873,  # mrcc
             "CCSDT-1A CORRELATION ENERGY": -0.081774257938,  # ecc
             "CCSDT-1B CORRELATION ENERGY": -0.081772270576,  # ecc
             "CCSDT-2 CORRELATION ENERGY": -0.081772292290,  # ecc
             "CCSDT-3 CORRELATION ENERGY": -0.08177701734273,  # vcc
             "CCSDT CORRELATION ENERGY": -0.08208821205578,  # vcc
+            "OCCD REFERENCE CORRECTION ENERGY": 0.001154566,  # qchem
+            "OCCD CORRELATION ENERGY": -0.081188108,  # qchem
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
@@ -6558,6 +6651,8 @@ _std_suite = [
                 [[0.0, 0.0, 0.03180282], [0.0, 0.01723825, -0.01590141], [0.0, -0.01723825, -0.01590141]]
             ),
             "CCSDT CORRELATION ENERGY": -0.17591978591647,  # vcc
+            "OCCD REFERENCE CORRECTION ENERGY": 0.000986681,  # qchem
+            "OCCD CORRELATION ENERGY": -0.171498252,  # qchem
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -6741,11 +6836,14 @@ _std_suite = [
                     ],
                 ]
             ),
+            "A-(T) CORRECTION ENERGY": -0.004882427,  # mrcc
             "CCSDT-1A CORRELATION ENERGY": -0.193424330972,  # ecc
             "CCSDT-1B CORRELATION ENERGY": -0.193423371134,  # ecc
             "CCSDT-2 CORRELATION ENERGY": -0.193087540038,  # vcc
             "CCSDT-3 CORRELATION ENERGY": -0.19310599643349,  # vcc
             "CCSDT CORRELATION ENERGY": -0.19368177447948,  # vcc
+            "OCCD REFERENCE CORRECTION ENERGY": 0.001089195,  # qchem
+            "OCCD CORRELATION ENERGY": -0.188164420,  # qchem
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -6993,6 +7091,8 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00068823,  # cfour only
             "CCSDT CORRELATION ENERGY": -0.08361110233142,  # vcc
+            "OCCD REFERENCE CORRECTION ENERGY": -0.000362931,  # qchem
+            "OCCD CORRELATION ENERGY": -0.082712571,  # qchem
             # "XXX TOTAL GRADIENT": np.zeros(12).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(144).reshape((12, 12)),
         },
@@ -7069,6 +7169,8 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.003863167899,  # cfour only
             "CCSDT CORRELATION ENERGY": -0.18030677104047,  # vcc (different orbs: -0.18031166502580)
+            "OCCD REFERENCE CORRECTION ENERGY": -0.003402152,  # qchem
+            "OCCD CORRELATION ENERGY": -0.175891240,  # qchem
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -7149,6 +7251,8 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00504351,  # cfour only
             "CCSDT CORRELATION ENERGY": -0.19824510672649,  # vcc
+            "OCCD REFERENCE CORRECTION ENERGY": -0.003478949,  # qchem
+            "OCCD CORRELATION ENERGY": -0.192732814,  # qchem
             # "XXX TOTAL GRADIENT": np.zeros(9).reshape((-1, 3)),
             # "XXX TOTAL HESSIAN": np.zeros(81).reshape((9, 9)),
         },
@@ -10072,6 +10176,7 @@ _std_suite = [
         },
     },
     # <<<  lopsided SCF/CORL algorithms  >>>
+    # <<<  lopsided DF-FC-CONV  >>>
     {
         "meta": {
             "system": "hf",
@@ -10098,6 +10203,7 @@ _std_suite = [
             # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
+    # <<<  lopsided CD-FC-CONV  >>>
     {
         "meta": {
             "system": "hf",
@@ -10208,6 +10314,7 @@ _std_suite = [
     #            "MP2 SAME-SPIN CORRELATION ENERGY": -1.3,
     #        },
     #    },
+    # <<<  lopsided DF-AE-CONV  >>>
     {
         "meta": {
             "system": "hf",
@@ -10245,6 +10352,7 @@ _std_suite = [
             # "XXX TOTAL HESSIAN": np.zeros(36).reshape((6, 6)),
         },
     },
+    # <<<  lopsided CD-AE-CONV  >>>
     {
         "meta": {
             "system": "hf",
@@ -10364,7 +10472,8 @@ _std_suite = [
 ]
 
 
-for calc in _std_suite:
+def compute_derived_qcvars(std_suite_list):
+  for calc in std_suite_list:
     if calc["data"]:
         if "MP2 CORRELATION ENERGY" in calc["data"]:
             calc["data"]["MP2 TOTAL ENERGY"] = calc["data"]["MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
@@ -10600,6 +10709,17 @@ for calc in _std_suite:
                 - calc["data"]["OLCCD SAME-SPIN CORRELATION ENERGY"]
             )
 
+        if "OCCD CORRELATION ENERGY" in calc["data"]:
+            calc["data"]["OCCD TOTAL ENERGY"] = (
+                calc["data"]["OCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            )
+            if "OCCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["OCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                    calc["data"]["OCCD CORRELATION ENERGY"]
+                    - calc["data"]["OCCD REFERENCE CORRECTION ENERGY"]
+                    - calc["data"]["OCCD SAME-SPIN CORRELATION ENERGY"]
+                )
+
     calc["data"].update(_std_generics[f"{calc['meta']['system']}_{calc['meta']['basis']}_{calc['meta']['fcae']}"])
 
 
@@ -10614,4 +10734,5 @@ def answer_hash(**kwargs):
     return "_".join([system, basis, scf_type, reference, fcae, corl_type])
 
 
+compute_derived_qcvars(_std_suite)
 std_suite = {answer_hash(**calc["meta"]): calc["data"] for calc in _std_suite}
