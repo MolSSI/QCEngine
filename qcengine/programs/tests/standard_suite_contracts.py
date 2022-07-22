@@ -29,6 +29,8 @@ __all__ = [
     "contractual_ccsdtq",
     "contractual_olccd",
     "contractual_occd",
+    "contractual_occd_prt_pr",
+    "contractual_aoccd_prt_pr",
     "contractual_dft_current",
     "query_qcvar",
     "query_has_qcvar",
@@ -221,7 +223,7 @@ def contractual_mp2(
                         qc_module == "psi4-occ"
                         and reference == "rhf"
                         and corl_type in ["df", "cd"]
-                        and method in ["mp2", "mp2.5", "mp3", "lccd", "ccsd", "ccsd(t)", "a-ccsd(t)", "olccd", "occd"]
+                        and method in ["mp2", "mp2.5", "mp3", "lccd", "ccsd", "ccsd(t)", "a-ccsd(t)", "olccd", "occd", "occd(t)", "a-occd(t)"]
                     )
                 )
                 and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
@@ -1105,10 +1107,66 @@ def contractual_occd(
         expected = True
         if (
             (
-                (qc_module == "psi4-occ" and reference in ["rhf", "uhf", "rohf"] and corl_type in ["df", "cd"] and method == "occd")
+                (qc_module == "psi4-occ" and reference in ["rhf", "uhf", "rohf"] and corl_type in ["df", "cd"] and method in ["occd", "occd(t)", "a-occd(t)"])
             )
             and pv in ["OCCD SAME-SPIN CORRELATION ENERGY", "OCCD OPPOSITE-SPIN CORRELATION ENERGY"]
         ):
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_occd_prt_pr(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal OCCD(T) should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "O(T) CORRECTION ENERGY",
+        "OCCD(T) CORRELATION ENERGY",
+        "OCCD(T) TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "occd(t)":
+        contractual_qcvars.append("OCCD(T) TOTAL GRADIENT")
+    elif driver == "hessian" and method == "occd(t)":
+        # contractual_qcvars.append("OCCD(T) TOTAL GRADIENT")
+        contractual_qcvars.append("OCCD(T) TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if False:
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_aoccd_prt_pr(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal A-OCCD(T) (aka Lambda-OCCD(T), aka OCCD(aT) should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "A-O(T) CORRECTION ENERGY",
+        "A-OCCD(T) CORRELATION ENERGY",
+        "A-OCCD(T) TOTAL ENERGY",
+    ]
+    if driver == "gradient" and method == "a-occd(t)":
+        contractual_qcvars.append("A-OCCD(T) TOTAL GRADIENT")
+    elif driver == "hessian" and method == "a-occd(t)":
+        # contractual_qcvars.append("A-OCCD(T) TOTAL GRADIENT")
+        contractual_qcvars.append("A-OCCD(T) TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if False:
             expected = False
 
         yield (pv, pv, expected)
