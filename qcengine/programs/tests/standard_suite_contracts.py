@@ -13,6 +13,7 @@ __all__ = [
     "contractual_qcisd",
     "contractual_qcisd_prt_pr",
     "contractual_fci",
+    "contractual_remp",
     "contractual_lccd",
     "contractual_lccsd",
     "contractual_ccd",
@@ -27,6 +28,10 @@ __all__ = [
     "contractual_ccsdt3",
     "contractual_ccsdt_prq_pr",
     "contractual_ccsdtq",
+    "contractual_omp2",
+    "contractual_omp2p5",
+    "contractual_omp3",
+    "contractual_oremp",
     "contractual_olccd",
     "contractual_occd",
     "contractual_occd_prt_pr",
@@ -223,7 +228,8 @@ def contractual_mp2(
                         qc_module == "psi4-occ"
                         and reference == "rhf"
                         and corl_type in ["df", "cd"]
-                        and method in ["mp2", "mp2.5", "mp3", "lccd", "ccsd", "ccsd(t)", "a-ccsd(t)", "olccd", "occd", "occd(t)", "a-occd(t)"]
+                        and method in [ "mp2",  "mp2.5",  "mp3",  "remp",  "lccd", "ccsd", "ccsd(t)", "a-ccsd(t)",
+                                       "omp2", "omp2.5", "omp3", "oremp", "olccd", "occd", "occd(t)", "a-occd(t)"]
                     )
                 )
                 and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
@@ -244,7 +250,7 @@ def contractual_mp2(
                 ]
             )
             or (
-                ((qc_module == "psi4-occ" and reference == "rohf" and method in ["olccd"]))
+                ((qc_module == "psi4-occ" and reference == "rohf" and corl_type == "conv" and method in ["omp2", "omp2.5", "omp3", "oremp", "olccd"]))
                 and pv
                 in [
                     "MP2 CORRELATION ENERGY",
@@ -318,13 +324,15 @@ def contractual_mp2p5(
                     qc_module == "psi4-occ"
                     and reference == "rhf"
                     and corl_type in ["df", "cd"]
-                    and method in ["mp2.5", "mp3"]
+                    and method in ["mp2.5", "mp3", "omp2.5"]
                 )
                 or (qc_module.startswith("nwchem") and method in ["mp3", "mp4"])
             )
             and pv in ["MP2.5 SAME-SPIN CORRELATION ENERGY", "MP2.5 OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (
-            (qc_module == "psi4-detci" and method in ["mp3"])
+            ((qc_module == "psi4-detci" and method in ["mp3"])
+            or (qc_module == "psi4-occ" and reference == "rohf" and corl_type in ["conv", "df", "cd"] and method in ["omp2.5", "omp3"]))
+                # Note SS/OS might be obtainable but no reference to verify
             and pv
             in [
                 "MP2.5 CORRELATION ENERGY",
@@ -372,7 +380,7 @@ def contractual_mp3(
                     qc_module == "psi4-occ"
                     and reference == "rhf"
                     and corl_type in ["df", "cd"]
-                    and method in ["mp2.5", "mp3"]
+                    and method in ["mp2.5", "mp3", "omp2.5", "omp3"]
                 )
                 or (qc_module.startswith("nwchem") and method in ["mp3", "mp4"])
             )
@@ -385,6 +393,18 @@ def contractual_mp3(
                 "MP3 OPPOSITE-SPIN CORRELATION ENERGY",
                 "MP3 SINGLES ENERGY",
                 "MP3 DOUBLES ENERGY",
+            ]
+        ) or (
+            ((qc_module == "psi4-occ" and reference == "rohf" and corl_type in ["conv", "df", "cd"] and method in ["omp2.5", "omp3"]))
+            # Note SS/OS might be obtainable but no reference to verify
+            and pv
+            in [
+                "MP3 CORRELATION ENERGY",
+                "MP3 TOTAL ENERGY",
+                "MP3 SAME-SPIN CORRELATION ENERGY",
+                "MP3 SINGLES ENERGY",
+                "MP3 DOUBLES ENERGY",
+                "MP3 OPPOSITE-SPIN CORRELATION ENERGY",
             ]
         ):
             expected = False
@@ -548,6 +568,53 @@ def contractual_fci(
 
     for pv in contractual_qcvars:
         expected = True
+
+        yield (pv, pv, expected)
+
+
+def contractual_remp(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    f"""Of the list of QCVariables an ideal REMP should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "REMP CORRELATION ENERGY",
+        "REMP TOTAL ENERGY",
+        "REMP SAME-SPIN CORRELATION ENERGY",
+        "REMP SINGLES ENERGY",
+        "REMP DOUBLES ENERGY",
+        "REMP OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "remp":
+        contractual_qcvars.append("REMP TOTAL GRADIENT")
+    elif driver == "hessian" and method == "remp":
+        # contractual_qcvars.append("REMP TOTAL GRADIENT")
+        contractual_qcvars.append("REMP TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if (
+            (
+                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "remp")
+            )
+            and pv in ["REMP SAME-SPIN CORRELATION ENERGY", "REMP OPPOSITE-SPIN CORRELATION ENERGY"]
+        ) or (
+            (qc_module == "psi4-occ" and reference in ["rhf", "uhf", "rohf"] and corl_type in ["conv", "df", "cd"] and method == "oremp")
+            and pv
+            in [
+                "REMP CORRELATION ENERGY",
+                "REMP TOTAL ENERGY",
+                "REMP SAME-SPIN CORRELATION ENERGY",
+                "REMP SINGLES ENERGY",
+                "REMP DOUBLES ENERGY",
+                "REMP OPPOSITE-SPIN CORRELATION ENERGY",
+            ]
+        ):
+            expected = False
 
         yield (pv, pv, expected)
 
@@ -1042,6 +1109,147 @@ def contractual_ccsdtq(
 
     for pv in contractual_qcvars:
         expected = True
+
+        yield (pv, pv, expected)
+
+
+def contractual_omp2(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal OMP2 should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "OMP2 CORRELATION ENERGY",
+        "OMP2 TOTAL ENERGY",
+        "OMP2 REFERENCE CORRECTION ENERGY",
+        "OMP2 SAME-SPIN CORRELATION ENERGY",
+        "OMP2 OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "omp2":
+        contractual_qcvars.append("OMP2 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "omp2":
+        # contractual_qcvars.append("OMP2 TOTAL GRADIENT")
+        contractual_qcvars.append("OMP2 TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if (
+            (
+                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp2")
+            )
+            and pv in ["OMP2 SAME-SPIN CORRELATION ENERGY", "OMP2 OPPOSITE-SPIN CORRELATION ENERGY"]
+        ):
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_omp2p5(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal OMP2.5 should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "OMP2.5 CORRELATION ENERGY",
+        "OMP2.5 TOTAL ENERGY",
+        "OMP2.5 REFERENCE CORRECTION ENERGY",
+        "OMP2.5 SAME-SPIN CORRELATION ENERGY",
+        "OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "omp2.5":
+        contractual_qcvars.append("OMP2.5 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "omp2.5":
+        # contractual_qcvars.append("OMP2.5 TOTAL GRADIENT")
+        contractual_qcvars.append("OMP2.5 TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if (
+            (
+                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp2.5")
+            )
+            and pv in ["OMP2.5 SAME-SPIN CORRELATION ENERGY", "OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"]
+        ):
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_omp3(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal OMP3 should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "OMP3 CORRELATION ENERGY",
+        "OMP3 TOTAL ENERGY",
+        "OMP3 REFERENCE CORRECTION ENERGY",
+        "OMP3 SAME-SPIN CORRELATION ENERGY",
+        "OMP3 OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "omp3":
+        contractual_qcvars.append("OMP3 TOTAL GRADIENT")
+    elif driver == "hessian" and method == "omp3":
+        # contractual_qcvars.append("OMP3 TOTAL GRADIENT")
+        contractual_qcvars.append("OMP3 TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if (
+            (
+                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp3")
+            )
+            and pv in ["OMP3 SAME-SPIN CORRELATION ENERGY", "OMP3 OPPOSITE-SPIN CORRELATION ENERGY"]
+        ):
+            expected = False
+
+        yield (pv, pv, expected)
+
+
+def contractual_oremp(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str
+) -> Tuple[str, str, bool]:
+    """Of the list of QCVariables an ideal OREMP should produce, returns whether or
+    not each is expected, given the calculation circumstances (like QC program).
+
+    {_contractual_docstring}
+    """
+    contractual_qcvars = [
+        "HF TOTAL ENERGY",
+        "OREMP CORRELATION ENERGY",
+        "OREMP TOTAL ENERGY",
+        "OREMP REFERENCE CORRECTION ENERGY",
+        "OREMP SAME-SPIN CORRELATION ENERGY",
+        "OREMP OPPOSITE-SPIN CORRELATION ENERGY",
+    ]
+    if driver == "gradient" and method == "oremp":
+        contractual_qcvars.append("OREMP TOTAL GRADIENT")
+    elif driver == "hessian" and method == "oremp":
+        # contractual_qcvars.append("OREMP TOTAL GRADIENT")
+        contractual_qcvars.append("OREMP TOTAL HESSIAN")
+
+    for pv in contractual_qcvars:
+        expected = True
+        if (
+            (
+                # usual for oo (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "oremp")
+                (qc_module == "psi4-occ" and reference in ["rhf", "uhf", "rohf"] and corl_type in ["df", "cd"] and method == "oremp")
+            )
+            and pv in ["OREMP SAME-SPIN CORRELATION ENERGY", "OREMP OPPOSITE-SPIN CORRELATION ENERGY"]
+        ):
+            expected = False
 
         yield (pv, pv, expected)
 
