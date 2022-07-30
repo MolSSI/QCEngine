@@ -683,41 +683,36 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.204465719970,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.054616313597,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-             [ 0., 0.,  0.004107528173,
-               0., 0., -0.004107528173]
+                [0.0, 0.0, 0.004107528173, 0.0, 0.0, -0.004107528173]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.000571728736,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.205686837008,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.052301161413,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,     0.002017001118,
-                0.,   0.000000000000,    -0.002017001118]
+                [0.0, 0.000000000000, 0.002017001118, 0.0, 0.000000000000, -0.002017001118]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000467222482,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.206935131375,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.050007707662,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0., 0., -0.000007413433,
-                    0., 0.,  0.000007413433]
+                [0.0, 0.0, -0.000007413433, 0.0, 0.0, 0.000007413433]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.000553304064,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.208942935871,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.049683397802,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.002830089047,
-                0.,  0.000000000000,    -0.002830089047]
+                [0.0, 0.000000000000, 0.002830089047, 0.0, 0.000000000000, -0.002830089047]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0005522939,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2104417743,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0484443079,  # occ
-            "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [ 0.,             0.,             0.00339205449,
-                         0.,             0.,            -0.00339205449]
-            ).reshape((-1, 3)),
+            "OLCCD TOTAL GRADIENT": np.array([0.0, 0.0, 0.00339205449, 0.0, 0.0, -0.00339205449]).reshape(  # occ
+                (-1, 3)
+            ),
             "OCCD REFERENCE CORRECTION ENERGY": 0.000511277,  # qchem
             "OCCD CORRELATION ENERGY": -0.208649453,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-                [    0.00000000,    0.00000000, 0.00184797, 0, 0, -0.00184797]
+                [0.00000000, 0.00000000, 0.00184797, 0, 0, -0.00184797]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -1529,46 +1524,66 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.224125328536,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.058141813805,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-                [ 0.,  0.,  0.012093662469,
-                  0.,  0.006798848063,   -0.006046831235,
-                  0., -0.006798848063,   -0.006046831235]
+                [0.0, 0.0, 0.012093662469, 0.0, 0.006798848063, -0.006046831235, 0.0, -0.006798848063, -0.006046831235]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001534835679,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.225651726817,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.055105451161,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,     0.008280964210,
-                0.,   0.004780030747,    -0.004140482105,
-                0.,  -0.004780030747,    -0.004140482105]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.008280964210,
+                    0.0,
+                    0.004780030747,
+                    -0.004140482105,
+                    0.0,
+                    -0.004780030747,
+                    -0.004140482105,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000953570304,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.227372086899,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.052239106558,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.004803850255,
-                    0.,  0.002953922342,    -0.002401925128,
-                    0., -0.002953922342,    -0.002401925128]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.004803850255,
+                    0.0,
+                    0.002953922342,
+                    -0.002401925128,
+                    0.0,
+                    -0.002953922342,
+                    -0.002401925128,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.00128167136578,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.23069139385821,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.05189818473696,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-               [    0., -0.000000000000,     0.009103029917,
-                    0.,  0.005405690204,    -0.004551514958,
-                    0., -0.005405690204,    -0.004551514958]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.009103029917,
+                    0.0,
+                    0.005405690204,
+                    -0.004551514958,
+                    0.0,
+                    -0.005405690204,
+                    -0.004551514958,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011895155,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2330452995,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0503175223,  # occ
             "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [ 0.,              0.,              0.009755099696,
-                        -0.,              0.005854889163, -0.004877549848,
-                         0.,             -0.005854889163, -0.004877549848]
+                [0.0, 0.0, 0.009755099696, -0.0, 0.005854889163, -0.004877549848, 0.0, -0.005854889163, -0.004877549848]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.001123344,  # qchem
             "OCCD CORRELATION ENERGY": -0.229118050,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-                [ 0., 0., 0.00727331, 0., 0.00447444, -0.00363665, 0., -0.00447444, -0.00363665]
+                [0.0, 0.0, 0.00727331, 0.0, 0.00447444, -0.00363665, 0.0, -0.00447444, -0.00363665]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -2564,41 +2579,71 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.272599646070,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.066843168345,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.001853244534,
-                0.,  0.000249902550,    -0.000926622267,
-                0., -0.000249902550,    -0.000926622267]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.001853244534,
+                    0.0,
+                    0.000249902550,
+                    -0.000926622267,
+                    0.0,
+                    -0.000249902550,
+                    -0.000926622267,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001691543451,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.273211228305,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.063331759367,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,    -0.002291101232,
-                0.,  -0.001990147396,     0.001145550616,
-                0.,   0.001990147396,     0.001145550616]
+                [
+                    0.0,
+                    0.000000000000,
+                    -0.002291101232,
+                    0.0,
+                    -0.001990147396,
+                    0.001145550616,
+                    0.0,
+                    0.001990147396,
+                    0.001145550616,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001090059672,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.274015056808,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.059986220382,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,    -0.006148152213,
-                    0., -0.004066707268,     0.003074076107,
-                    0.,  0.004066707268,     0.003074076107]
+                [
+                    0.0,
+                    0.000000000000,
+                    -0.006148152213,
+                    0.0,
+                    -0.004066707268,
+                    0.003074076107,
+                    0.0,
+                    0.004066707268,
+                    0.003074076107,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001444328268,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.277848169449,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.059932090515,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,    -0.001616411571,
-                0., -0.001508635375,     0.000808205786,
-                0.,  0.001508635375,     0.000808205786]
+                [
+                    0.0,
+                    0.000000000000,
+                    -0.001616411571,
+                    0.0,
+                    -0.001508635375,
+                    0.000808205786,
+                    0.0,
+                    0.001508635375,
+                    0.000808205786,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0013521561,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2800053174,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0582676514,  # occ
             "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [ 0.,              0.,             -0.001040099489,
-                         0.,             -0.001127979233,  0.000520049745,
-                        -0.,              0.001127979233,  0.000520049745]
+                [0.0, 0.0, -0.001040099489, 0.0, -0.001127979233, 0.000520049745, -0.0, 0.001127979233, 0.000520049745]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.001279242,  # qchem
             "OCCD CORRELATION ENERGY": -0.275418269,  # qchem
@@ -3454,51 +3499,101 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.059864579866,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.001971155898,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.012017558262,
-                    0.,  0.000000000000,    -0.011623172725,
-                    0.,  0.010549443964,    -0.000197192768,
-                    0., -0.010549443964,    -0.000197192768]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.012017558262,
+                    0.0,
+                    0.000000000000,
+                    -0.011623172725,
+                    0.0,
+                    0.010549443964,
+                    -0.000197192768,
+                    0.0,
+                    -0.010549443964,
+                    -0.000197192768,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.000564671059,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.067680196985,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.002198682496,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,     0.010260851431,
-                0.,   0.000000000000,    -0.009981279417,
-                0.,   0.011818192519,    -0.000139786007,
-                0.,  -0.011818192519,    -0.000139786007]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.010260851431,
+                    0.0,
+                    0.000000000000,
+                    -0.009981279417,
+                    0.0,
+                    0.011818192519,
+                    -0.000139786007,
+                    0.0,
+                    -0.011818192519,
+                    -0.000139786007,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000777674538,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.075531256945,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.002426022161,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.008456348171,
-                    0.,  0.000000000000,    -0.008291902042,
-                    0.,  0.013097750811,    -0.000082223065,
-                    0., -0.013097750811,    -0.000082223065]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.008456348171,
+                    0.0,
+                    0.000000000000,
+                    -0.008291902042,
+                    0.0,
+                    0.013097750811,
+                    -0.000082223065,
+                    0.0,
+                    -0.013097750811,
+                    -0.000082223065,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001061018532,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.078996001732,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.002398210306,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.005898073051,
-                0.,  0.000000000000,    -0.005790147152,
-                0.,  0.014384641403,    -0.000053962950,
-                0., -0.014384641403,    -0.000053962950]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.005898073051,
+                    0.0,
+                    0.000000000000,
+                    -0.005790147152,
+                    0.0,
+                    0.014384641403,
+                    -0.000053962950,
+                    0.0,
+                    -0.014384641403,
+                    -0.000053962950,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0014842084,  # p4n
             "OLCCD CORRELATION ENERGY": -0.0847413506,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
             "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [ 0.,              0.,              0.002952428656,
-                         0.,              0.,             -0.002937832654,
-                        -0.,              0.015746258127, -0.000007298001,
-                         0.,             -0.015746258127, -0.000007298001]
+                [
+                    0.0,
+                    0.0,
+                    0.002952428656,
+                    0.0,
+                    0.0,
+                    -0.002937832654,
+                    -0.0,
+                    0.015746258127,
+                    -0.000007298001,
+                    0.0,
+                    -0.015746258127,
+                    -0.000007298001,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.001165795,  # qchem
             "OCCD CORRELATION ENERGY": -0.082188930,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-              [0, 0, 0.00520110, 0, 0, -0.00505850, 0., 0.01487527, -0.00007130, 0., -0.01487527, -0.00007130]
+                [0, 0, 0.00520110, 0, 0, -0.00505850, 0.0, 0.01487527, -0.00007130, 0.0, -0.01487527, -0.00007130]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -3747,46 +3842,76 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.156193539287,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.035974458829,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.026928654402,
-                0.,  0.014250914503,    -0.013464327201,
-                0., -0.014250914503,    -0.013464327201]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.026928654402,
+                    0.0,
+                    0.014250914503,
+                    -0.013464327201,
+                    0.0,
+                    -0.014250914503,
+                    -0.013464327201,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001173901427,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.164044987798,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.035847752938,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,     0.027494393497,
-                0.,   0.014585953475,    -0.013747196748,
-                0.,  -0.014585953475,    -0.013747196748]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.027494393497,
+                    0.0,
+                    0.014585953475,
+                    -0.013747196748,
+                    0.0,
+                    -0.014585953475,
+                    -0.013747196748,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001024209316,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.171933638522,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.035747352644,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.028120207496,
-                    0.,  0.014956911575,    -0.014060103748,
-                    0., -0.014956911575,    -0.014060103748]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.028120207496,
+                    0.0,
+                    0.014956911575,
+                    -0.014060103748,
+                    0.0,
+                    -0.014956911575,
+                    -0.014060103748,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.00111233720168,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.17359939909712,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.03496212583967,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.030225286483,
-                    0.,  0.016238459426,    -0.015112643242,
-                    0., -0.016238459426,    -0.015112643242]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.030225286483,
+                    0.0,
+                    0.016238459426,
+                    -0.015112643242,
+                    0.0,
+                    -0.016238459426,
+                    -0.015112643242,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0011118724,  # p4n
             "OLCCD CORRELATION ENERGY": -0.1781057943,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
             "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [ 0.,              0.,              0.031877236853,
-                        -0.,              0.017265501329, -0.015938618427,
-                         0.,             -0.017265501329, -0.015938618427]
+                [0.0, 0.0, 0.031877236853, -0.0, 0.017265501329, -0.015938618427, 0.0, -0.017265501329, -0.015938618427]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.000987794,  # qchem
             "OCCD CORRELATION ENERGY": -0.173720242,  # qchem
-            "OCCD TOTAL GRADIENT":  np.array(  # qchem, rearranged
-                [0., 0., 0.02915872, 0., 0.01575094, -0.01457936, 0., -0.01575094, -0.01457936]
+            "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
+                [0.0, 0.0, 0.02915872, 0.0, 0.01575094, -0.01457936, 0.0, -0.01575094, -0.01457936]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -4023,46 +4148,86 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.197071770029,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.042459313035,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.015314078302,
-                    0.,  0.006156840975,    -0.007657039151,
-                    0., -0.006156840975,    -0.007657039151]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.015314078302,
+                    0.0,
+                    0.006156840975,
+                    -0.007657039151,
+                    0.0,
+                    -0.006156840975,
+                    -0.007657039151,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001350812375,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.204522615491,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.042086148458,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,     0.015411835251,
-                0.,   0.006162364663,    -0.007705917626,
-                0.,  -0.006162364663,    -0.007705917626]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.015411835251,
+                    0.0,
+                    0.006162364663,
+                    -0.007705917626,
+                    0.0,
+                    -0.006162364663,
+                    -0.007705917626,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001177767799,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.212015174087,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.041743491888,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.015569868835,
-                    0.,  0.006203313670,    -0.007784934417,
-                    0., -0.006203313670,    -0.007784934417]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.015569868835,
+                    0.0,
+                    0.006203313670,
+                    -0.007784934417,
+                    0.0,
+                    -0.006203313670,
+                    -0.007784934417,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001287772670,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.213723933328,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.041063372010,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.017901979677,
-                0.,  0.007592988824,    -0.008950989839,
-                0., -0.007592988824,    -0.008950989839]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.017901979677,
+                    0.0,
+                    0.007592988824,
+                    -0.008950989839,
+                    0.0,
+                    -0.007592988824,
+                    -0.008950989839,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.0012856903,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2180560836,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
             "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [-0.,              0.,              0.019472272298,
-                        -0.,              0.008522161738, -0.009736136149,
-                         0.,             -0.008522161738, -0.009736136149]
+                [
+                    -0.0,
+                    0.0,
+                    0.019472272298,
+                    -0.0,
+                    0.008522161738,
+                    -0.009736136149,
+                    0.0,
+                    -0.008522161738,
+                    -0.009736136149,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.001155093,  # qchem
             "OCCD CORRELATION ENERGY": -0.213139955,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-                [0, 0, 0.01669862, 0,  0.00707632 , -0.00834931, 0, -0.00707632, -0.00834931],
+                [0, 0, 0.01669862, 0, 0.00707632, -0.00834931, 0, -0.00707632, -0.00834931],
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -4350,54 +4515,114 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.061388690115,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.001971155774,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.012017560624,
-                    0.,  0.000000000000,    -0.011623175532,
-                    0.,  0.010549441086,    -0.000197192546,
-                    0., -0.010549441086,    -0.000197192546]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.012017560624,
+                    0.0,
+                    0.000000000000,
+                    -0.011623175532,
+                    0.0,
+                    0.010549441086,
+                    -0.000197192546,
+                    0.0,
+                    -0.010549441086,
+                    -0.000197192546,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.000959439798,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.069204306750,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.002198682531,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,     0.010260857036,
-                0.,   0.000000000000,    -0.009981284641,
-                0.,   0.011818192175,    -0.000139786197,
-                0.,  -0.011818192175,    -0.000139786197]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.010260857036,
+                    0.0,
+                    0.000000000000,
+                    -0.009981284641,
+                    0.0,
+                    0.011818192175,
+                    -0.000139786197,
+                    0.0,
+                    -0.011818192175,
+                    -0.000139786197,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.000746435584,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.077055367311,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.002426022153,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.008456347254,
-                    0.,  0.000000000000,    -0.008291901023,
-                    0.,  0.013097750617,    -0.000082223115,
-                    0., -0.013097750617,    -0.000082223115]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.008456347254,
+                    0.0,
+                    0.000000000000,
+                    -0.008291901023,
+                    0.0,
+                    0.013097750617,
+                    -0.000082223115,
+                    0.0,
+                    -0.013097750617,
+                    -0.000082223115,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.000463092111,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.080520111623,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.002398210414,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.005898074368,
-                0.,  0.000000000000,    -0.005790150595,
-                0.,  0.014384643442,    -0.000053961887,
-                0., -0.014384643442,    -0.000053961887]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.005898074368,
+                    0.0,
+                    0.000000000000,
+                    -0.005790150595,
+                    0.0,
+                    0.014384643442,
+                    -0.000053961887,
+                    0.0,
+                    -0.014384643442,
+                    -0.000053961887,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0000399018,  # p4n
             "OLCCD CORRELATION ENERGY": -0.0862654609,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0024486744,  # occ
             "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [-0.,              0.,              0.002952428137,
-                         0.,              0.,             -0.002937832352,
-                        -0.,              0.015746258328, -0.000007297893,
-                         0.,             -0.015746258328, -0.000007297893]
+                [
+                    -0.0,
+                    0.0,
+                    0.002952428137,
+                    0.0,
+                    0.0,
+                    -0.002937832352,
+                    -0.0,
+                    0.015746258328,
+                    -0.000007297893,
+                    0.0,
+                    -0.015746258328,
+                    -0.000007297893,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.000358562,  # qchem
             "OCCD CORRELATION ENERGY": -0.083713042,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem 3-pt findif
-              [ 0.,  0.,    5.200665059079133e-03,
-                0.,  0.,   -5.057359056039087e-03,
-                0.,  1.487654179061328e-02,  -7.165259590676168e-05,
-                0., -1.487654176147304e-02,  -7.165259308673899e-05]
+                [
+                    0.0,
+                    0.0,
+                    5.200665059079133e-03,
+                    0.0,
+                    0.0,
+                    -5.057359056039087e-03,
+                    0.0,
+                    1.487654179061328e-02,
+                    -7.165259590676168e-05,
+                    0.0,
+                    -1.487654176147304e-02,
+                    -7.165259308673899e-05,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -4520,48 +4745,96 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.160607243189,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.035974454782,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.026928663612,
-                0.,  0.014250907985,    -0.013464331806,
-                0., -0.014250907985,    -0.013464331806]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.026928663612,
+                    0.0,
+                    0.014250907985,
+                    -0.013464331806,
+                    0.0,
+                    -0.014250907985,
+                    -0.013464331806,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.003239801580,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.168458692138,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.035847753329,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,     0.027494386758,
-                0.,   0.014585950370,    -0.013747193379,
-                0.,  -0.014585950370,    -0.013747193379]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.027494386758,
+                    0.0,
+                    0.014585950370,
+                    -0.013747193379,
+                    0.0,
+                    -0.014585950370,
+                    -0.013747193379,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.003389494582,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.176347342433,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.035747352645,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.028120207297,
-                0.,  0.014956911348,    -0.014060103648,
-                0., -0.014956911348,    -0.014060103648]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.028120207297,
+                    0.0,
+                    0.014956911348,
+                    -0.014060103648,
+                    0.0,
+                    -0.014956911348,
+                    -0.014060103648,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.003301366872,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.178013102573,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.034962125667,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.030225286965,
-                0.,  0.016238460656,    -0.015112643483,
-                0., -0.016238460656,    -0.015112643483]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.030225286965,
+                    0.0,
+                    0.016238460656,
+                    -0.015112643483,
+                    0.0,
+                    -0.016238460656,
+                    -0.015112643483,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033018315,  # p4n
             "OLCCD CORRELATION ENERGY": -0.1825194982,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0344689234,  # occ
             "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [-0.,              0.,              0.031877236593,
-                        -0.,              0.017265501452, -0.015938618296,
-                         0.,             -0.017265501452, -0.015938618296]
+                [
+                    -0.0,
+                    0.0,
+                    0.031877236593,
+                    -0.0,
+                    0.017265501452,
+                    -0.015938618296,
+                    0.0,
+                    -0.017265501452,
+                    -0.015938618296,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.003426081,  # qchem
             "OCCD CORRELATION ENERGY": -0.178133946,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem 3-pt findif
-              [ 0.,    2.629008122312371e-10,   2.915992176610871e-02,
-                0.,    1.575113356366842e-02,  -1.457995768916476e-02,
-                0.,   -1.575113354590485e-02,  -1.457995755771435e-02]
+                [
+                    0.0,
+                    2.629008122312371e-10,
+                    2.915992176610871e-02,
+                    0.0,
+                    1.575113356366842e-02,
+                    -1.457995768916476e-02,
+                    0.0,
+                    -1.575113354590485e-02,
+                    -1.457995755771435e-02,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -4681,48 +4954,86 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.201681478150,  # occ, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.042459312118,  # occ, tight
             "OMP2 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.015314087546,
-                    0.,  0.006156841239,    -0.007657043773,
-                    0., -0.006156841239,    -0.007657043773]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.015314087546,
+                    0.0,
+                    0.006156841239,
+                    -0.007657043773,
+                    0.0,
+                    -0.006156841239,
+                    -0.007657043773,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.003258895747,  # occ, tight
             "OMP2.5 CORRELATION ENERGY": -0.209132323529,  # occ, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.042086148395,  # occ, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,   0.000000000000,     0.015411833442,
-                0.,   0.006162364110,    -0.007705916721,
-                0.,  -0.006162364110,    -0.007705916721]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.015411833442,
+                    0.0,
+                    0.006162364110,
+                    -0.007705916721,
+                    0.0,
+                    -0.006162364110,
+                    -0.007705916721,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.003431940343,  # occ, tight
             "OMP3 CORRELATION ENERGY": -0.216624882230,  # occ, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.041743491868,  # occ, tight
             "OMP3 TOTAL GRADIENT": np.array(  # occ, tight
-                [   0.,  0.000000000000,     0.015569867435,
-                    0.,  0.006203313291,    -0.007784933717,
-                    0., -0.006203313291,    -0.007784933717]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.015569867435,
+                    0.0,
+                    0.006203313291,
+                    -0.007784933717,
+                    0.0,
+                    -0.006203313291,
+                    -0.007784933717,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.003321935448,  # occ, tight
             "OREMP2 CORRELATION ENERGY": -0.218333639848,  # occ, tight
             "OREMP2 SAME-SPIN CORRELATION ENERGY": -0.041063372384,  # occ, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # occ, tight
-              [ 0.,  0.000000000000,     0.017901994172,
-                0.,  0.007592995571,    -0.008950997086,
-                0., -0.007592995571,    -0.008950997086]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.017901994172,
+                    0.0,
+                    0.007592995571,
+                    -0.008950997086,
+                    0.0,
+                    -0.007592995571,
+                    -0.008950997086,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.0033240178,  # p4n
             "OLCCD CORRELATION ENERGY": -0.2226657917,  # p4n
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.0405122800,  # occ
             "OLCCD TOTAL GRADIENT": np.array(  # occ
-                       [ 0.,              0.,              0.019472272302,
-                        -0.,              0.008522161726, -0.009736136151,
-                         0.,             -0.008522161726, -0.009736136151]
+                [0.0, 0.0, 0.019472272302, -0.0, 0.008522161726, -0.009736136151, 0.0, -0.008522161726, -0.009736136151]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.00345534,  # qchem
             "OCCD CORRELATION ENERGY": -0.217749658,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem 3-pt findif
-              [ 0.,   2.948752353404416e-10,   1.669883480914791e-02,
-                0.,   7.076450128096212e-03,  -8.349414756025908e-03,
-                0.,  -7.076449627163584e-03,  -8.349414585495651e-03]
+                [
+                    0.0,
+                    2.948752353404416e-10,
+                    1.669883480914791e-02,
+                    0.0,
+                    7.076450128096212e-03,
+                    -8.349414756025908e-03,
+                    0.0,
+                    -7.076449627163584e-03,
+                    -8.349414585495651e-03,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -4932,9 +5243,9 @@ _std_suite = [
             "OLCCD TOTAL GRADIENT": _knownmissing,
             "OCCD REFERENCE CORRECTION ENERGY": 0.000510311,  # qchem
             "OCCD CORRELATION ENERGY": -0.206722125,  # qchem
-            "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-                [0, 0, 0.00227059, 0, 0, -0.00227059]
-            ).reshape((-1, 3)),
+            "OCCD TOTAL GRADIENT": np.array([0, 0, 0.00227059, 0, 0, -0.00227059]).reshape(  # qchem, rearranged
+                (-1, 3)
+            ),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
             # "XXX TOTAL GRADIENT": np.zeros(6).reshape((-1, 3)),
@@ -5451,7 +5762,7 @@ _std_suite = [
             "OCCD REFERENCE CORRECTION ENERGY": 0.001125755,  # qchem
             "OCCD CORRELATION ENERGY": -0.226880992,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-                [ 0, 0, 0.00797428, 0, 0.00488548, -0.00398714, 0, -0.00488548, -0.00398714]
+                [0, 0, 0.00797428, 0, 0.00488548, -0.00398714, 0, -0.00488548, -0.00398714]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -6205,7 +6516,7 @@ _std_suite = [
             "OCCD REFERENCE CORRECTION ENERGY": 0.001225751,  # qchem
             "OCCD CORRELATION ENERGY": -0.250044802,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-                [0, 0, -0.00269153 , 0, -0.00204152, 0.00134576, 0,  0.00204152, 0.00134576]
+                [0, 0, -0.00269153, 0, -0.00204152, 0.00134576, 0, 0.00204152, 0.00134576]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -6880,7 +7191,7 @@ _std_suite = [
             "OCCD REFERENCE CORRECTION ENERGY": 0.001154566,  # qchem
             "OCCD CORRELATION ENERGY": -0.081188108,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-                [0, 0, 0.00494989, 0, 0,  -0.00479521, 0, 0.01487079, -0.00007734, 0, -0.01487079, -0.00007734]
+                [0, 0, 0.00494989, 0, 0, -0.00479521, 0, 0.01487079, -0.00007734, 0, -0.01487079, -0.00007734]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -7357,7 +7668,7 @@ _std_suite = [
             "OCCD REFERENCE CORRECTION ENERGY": 0.001089195,  # qchem
             "OCCD CORRELATION ENERGY": -0.188164420,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem, rearranged
-                [0, 0, 0.01780351, 0,  0.00760260, -0.00890176 , 0, -0.00760260, -0.00890176]
+                [0, 0, 0.01780351, 0, 0.00760260, -0.00890176, 0, -0.00760260, -0.00890176]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -7631,10 +7942,20 @@ _std_suite = [
             "OCCD REFERENCE CORRECTION ENERGY": -0.000362931,  # qchem
             "OCCD CORRELATION ENERGY": -0.082712571,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem 3-pt findif
-              [  0.,    8.460068018933954e-12,   4.950754755080671e-03,
-                 0.,   -1.880015115318656e-12,  -4.795829218979597e-03,
-                 0.,    1.487359483495976e-02,  -7.746235397720769e-05,
-                 0.,   -1.487359480111949e-02,  -7.746237653738908e-05]
+                [
+                    0.0,
+                    8.460068018933954e-12,
+                    4.950754755080671e-03,
+                    0.0,
+                    -1.880015115318656e-12,
+                    -4.795829218979597e-03,
+                    0.0,
+                    1.487359483495976e-02,
+                    -7.746235397720769e-05,
+                    0.0,
+                    -1.487359480111949e-02,
+                    -7.746237653738908e-05,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -7737,9 +8058,17 @@ _std_suite = [
             "OCCD REFERENCE CORRECTION ENERGY": -0.003402152,  # qchem
             "OCCD CORRELATION ENERGY": -0.175891240,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem 3-pt findif
-             [ 0.,   -2.131628207280301e-11,   2.994042840143152e-02,
-               0.,    1.624512323772365e-02,  -1.497021096596995e-02,
-               0.,   -1.624512344378104e-02,  -1.497021098018081e-02]
+                [
+                    0.0,
+                    -2.131628207280301e-11,
+                    2.994042840143152e-02,
+                    0.0,
+                    1.624512323772365e-02,
+                    -1.497021096596995e-02,
+                    0.0,
+                    -1.624512344378104e-02,
+                    -1.497021098018081e-02,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -7846,9 +8175,17 @@ _std_suite = [
             "OCCD REFERENCE CORRECTION ENERGY": -0.003478949,  # qchem
             "OCCD CORRELATION ENERGY": -0.192732814,  # qchem
             "OCCD TOTAL GRADIENT": np.array(  # qchem 3-pt findif
-              [  0.,   1.705302565824240e-10,   1.774538645804569e-02,
-                 0.,   7.588575865469238e-03,  -8.872690465011601e-03,
-                 0.,  -7.588575776651396e-03,  -8.872690337113909e-03]
+                [
+                    0.0,
+                    1.705302565824240e-10,
+                    1.774538645804569e-02,
+                    0.0,
+                    7.588575865469238e-03,
+                    -8.872690465011601e-03,
+                    0.0,
+                    -7.588575776651396e-03,
+                    -8.872690337113909e-03,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": _knownmissing,
             "A-O(T) CORRECTION ENERGY": _knownmissing,
@@ -8828,7 +9165,7 @@ _std_suite = [
             "MP3 SINGLES ENERGY": 0.0,
             "MP3 TOTAL GRADIENT": np.array(
                 # dfocc findif-5
-                [ 0., 0., -0.000926981449, 0., 0., 0.000926981449]
+                [0.0, 0.0, -0.000926981449, 0.0, 0.0, 0.000926981449]
             ).reshape((-1, 3)),
             "REMP2 CORRELATION ENERGY": -0.208401248910,  # dfocc, tight
             "REMP2 SINGLES ENERGY": 0.0,
@@ -8836,7 +9173,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD TOTAL GRADIENT": np.array(
                 # dfocc findif-5
-                [ 0., 0., 0.002193849073, 0., 0., -0.002193849073]
+                [0.0, 0.0, 0.002193849073, 0.0, 0.0, -0.002193849073]
             ).reshape((-1, 3)),
             "CCSD CORRELATION ENERGY": -0.20873986003026,  # dfocc, tight
             "CCSD SINGLES ENERGY": 0.0,
@@ -9367,7 +9704,7 @@ _std_suite = [
             "MP3 SINGLES ENERGY": 0.0,
             "MP3 TOTAL GRADIENT": np.array(
                 # dfocc findif-5 fc cd+cd
-                [ 0., 0., -0.000588974421, 0., 0., 0.000588974421]
+                [0.0, 0.0, -0.000588974421, 0.0, 0.0, 0.000588974421]
             ).reshape((-1, 3)),
             "REMP2 CORRELATION ENERGY": -0.206423120122,  # dfocc, tight
             "REMP2 SINGLES ENERGY": 0.0,
@@ -9375,7 +9712,7 @@ _std_suite = [
             "LCCD SINGLES ENERGY": 0.0000000000,
             "LCCD TOTAL GRADIENT": np.array(
                 # dfocc findif-5 fc cd+cd
-                [ 0., 0., 0.002525704147, 0., 0., -0.002525704147]
+                [0.0, 0.0, 0.002525704147, 0.0, 0.0, -0.002525704147]
             ).reshape((-1, 3)),
             "CCSD CORRELATION ENERGY": -0.20681170792808,  # dfocc, tight
             "CCSD SINGLES ENERGY": 0.0,
@@ -10419,45 +10756,38 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00193801686266,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,              0.,              0.003068357914,
-                        -0.,             -0.,             -0.003068357914]
+                [0.0, 0.0, 0.003068357914, -0.0, -0.0, -0.003068357914]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00196274645521,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.000705416559,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.204449284608,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.004079891926,
-                    0., -0.000000000000,    -0.004079891926]
+                [0.0, 0.000000000000, 0.004079891926, 0.0, -0.000000000000, -0.004079891926]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.000572277516,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.205719687105,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.001995568826,
-                    0., -0.000000000000,    -0.001995568826]
+                [0.0, 0.000000000000, 0.001995568826, 0.0, -0.000000000000, -0.001995568826]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000467850505,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.207017324163,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,    -0.000022521780,
-                    0., -0.000000000000,     0.000022521780]
+                [0.0, 0.000000000000, -0.000022521780, 0.0, -0.000000000000, 0.000022521780]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.000553781427,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.209041900252,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0.,  0.000000000000,     0.002809444261,
-                    0., -0.000000000000,    -0.002809444261]
+                [0.0, 0.000000000000, 0.002809444261, 0.0, -0.000000000000, -0.002809444261]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.000552755815,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.210569944656,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-              [  0.000000000000,     0.000000000000,     0.003371636637,
-                -0.000000000000,    -0.000000000000,    -0.003371636637]
+                [0.000000000000, 0.000000000000, 0.003371636637, -0.000000000000, -0.000000000000, -0.003371636637]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00051171478318,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.20877455867384,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0., 0.,    0.001829701353,
-                0., 0.,   -0.001829701353]
+                [0.0, 0.0, 0.001829701353, 0.0, 0.0, -0.001829701353]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.002064008068,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.002043954736,  # dfocc, tight
@@ -10524,52 +10854,98 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00524345048605,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,              0.,              0.010200006450,
-                        -0.,              0.00604923838,  -0.005100003223,
-                        -0.,             -0.00604923838,  -0.005100003226]
+                [0.0, 0.0, 0.010200006450, -0.0, 0.00604923838, -0.005100003223, -0.0, -0.00604923838, -0.005100003226]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00524100328791,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.002353213091,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.224108722336,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.012090520150,
-                    0.,  0.006792038487,    -0.006045260075,
-                    0., -0.006792038487,    -0.006045260075]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.012090520150,
+                    0.0,
+                    0.006792038487,
+                    -0.006045260075,
+                    0.0,
+                    -0.006792038487,
+                    -0.006045260075,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001535554696,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.225687426127,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.008284981234,
-                    0.,  0.004775627693,    -0.004142490617,
-                    0., -0.004775627693,    -0.004142490617]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.008284981234,
+                    0.0,
+                    0.004775627693,
+                    -0.004142490617,
+                    0.0,
+                    -0.004775627693,
+                    -0.004142490617,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000954089054,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.227460339651,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.004815233651,
-                    0.,  0.002952173310,    -0.002407616826,
-                    0., -0.002952173310,    -0.002407616826]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.004815233651,
+                    0.0,
+                    0.002952173310,
+                    -0.002407616826,
+                    0.0,
+                    -0.002952173310,
+                    -0.002407616826,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001281722402,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.23079090375495,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0.,  0.000000000000,     0.009108870642,
-                0.,  0.005403366342,    -0.004554435321,
-                0., -0.005403366342,    -0.004554435321]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.009108870642,
+                    0.0,
+                    0.005403366342,
+                    -0.004554435321,
+                    0.0,
+                    -0.005403366342,
+                    -0.004554435321,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001189314489,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.233173062606,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [        0.000000000000,    -0.000000000000,     0.009761700492,
-                        -0.000000000000,     0.005853403252,    -0.004880850246,
-                        -0.000000000000,    -0.005853403251,    -0.004880850246]
+                [
+                    0.000000000000,
+                    -0.000000000000,
+                    0.009761700492,
+                    -0.000000000000,
+                    0.005853403252,
+                    -0.004880850246,
+                    -0.000000000000,
+                    -0.005853403251,
+                    -0.004880850246,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.0011241002379,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.22924045334096,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-             [  0., -0.000000000000,     0.007259063497,
-               -0.,  0.004473960460,    -0.003629531749,
-               -0., -0.004473960460,    -0.003629531749]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.007259063497,
+                    -0.0,
+                    0.004473960460,
+                    -0.003629531749,
+                    -0.0,
+                    -0.004473960460,
+                    -0.003629531749,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.005578769043,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.005480838164,  # dfocc, tight
@@ -10626,52 +11002,98 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00726212675888,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,              0.,             -0.000217412659,
-                        -0.,             -0.000742939442,  0.000108706327,
-                         0.,              0.000742939441,  0.000108706333]
+                [0.0, 0.0, -0.000217412659, -0.0, -0.000742939442, 0.000108706327, 0.0, 0.000742939441, 0.000108706333]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00718000875661,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.002514012770,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.272569214076,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.001818176662,
-                    0.,  0.000241592175,    -0.000909088331,
-                    0., -0.000241592175,    -0.000909088331]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.001818176662,
+                    0.0,
+                    0.000241592175,
+                    -0.000909088331,
+                    0.0,
+                    -0.000241592175,
+                    -0.000909088331,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001691695489,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.273184743555,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,    -0.002325903973,
-                    0., -0.001998665869,     0.001162951987,
-                    0.,  0.001998665869,     0.001162951987]
+                [
+                    0.0,
+                    -0.000000000000,
+                    -0.002325903973,
+                    0.0,
+                    -0.001998665869,
+                    0.001162951987,
+                    0.0,
+                    0.001998665869,
+                    0.001162951987,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001090223846,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.273992490969,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,    -0.006182600264,
-                    0., -0.004075383127,     0.003091300132,
-                    0.,  0.004075383127,     0.003091300132]
+                [
+                    0.0,
+                    0.000000000000,
+                    -0.006182600264,
+                    0.0,
+                    -0.004075383127,
+                    0.003091300132,
+                    0.0,
+                    0.004075383127,
+                    0.003091300132,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001444459285,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.277823416296,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,    -0.001651592566,
-                    0., -0.001517469318,     0.000825796283,
-                    0.,  0.001517469318,     0.000825796283]
+                [
+                    0.0,
+                    -0.000000000000,
+                    -0.001651592566,
+                    0.0,
+                    -0.001517469318,
+                    0.000825796283,
+                    0.0,
+                    0.001517469318,
+                    0.000825796283,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001352291360,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.279981325469,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-             [  0.000000000000,    -0.000000000000,    -0.001075340549,
-               -0.000000000000,    -0.001136934323,     0.000537670274,
-                0.000000000000,     0.001136934323,     0.000537670274]
+                [
+                    0.000000000000,
+                    -0.000000000000,
+                    -0.001075340549,
+                    -0.000000000000,
+                    -0.001136934323,
+                    0.000537670274,
+                    0.000000000000,
+                    0.001136934323,
+                    0.000537670274,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00127938819983,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.27539517277894,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-             [  0.,  0.000000000000,    -0.003670656144,
-               -0., -0.002477953103,     0.001835328072,
-                0.,  0.002477953103,     0.001835328072]
+                [
+                    0.0,
+                    0.000000000000,
+                    -0.003670656144,
+                    -0.0,
+                    -0.002477953103,
+                    0.001835328072,
+                    0.0,
+                    0.002477953103,
+                    0.001835328072,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.007571167323,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.007455996809,  # dfocc, tight
@@ -10755,70 +11177,150 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.08223900985527,  # dfocc, tight
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,              0.,              0.005201169988,
-                         0.,             -0.,             -0.005060084065,
-                        -0.,              0.014882201275, -0.000070542962,
-                         0.,             -0.014882201275, -0.000070542961]
+                [
+                    -0.0,
+                    0.0,
+                    0.005201169988,
+                    0.0,
+                    -0.0,
+                    -0.005060084065,
+                    -0.0,
+                    0.014882201275,
+                    -0.000070542962,
+                    0.0,
+                    -0.014882201275,
+                    -0.000070542961,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00062655599464,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,              0.,              0.004689654727,
-                         0.,             -0.,             -0.004631718438,
-                        -0.,              0.014962374742, -0.000028968145,
-                         0.,             -0.014962374742, -0.000028968144]
+                [
+                    -0.0,
+                    0.0,
+                    0.004689654727,
+                    0.0,
+                    -0.0,
+                    -0.004631718438,
+                    -0.0,
+                    0.014962374742,
+                    -0.000028968145,
+                    0.0,
+                    -0.014962374742,
+                    -0.000028968144,
+                ]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00060971952519,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.000396459592,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.059832149673,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.001972801620,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.012031476427,
-                    0., -0.000000000000,    -0.011634888026,
-                    0.,  0.010540730273,    -0.000198294201,
-                    0., -0.010540730274,    -0.000198294201]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.012031476427,
+                    0.0,
+                    -0.000000000000,
+                    -0.011634888026,
+                    0.0,
+                    0.010540730273,
+                    -0.000198294201,
+                    0.0,
+                    -0.010540730274,
+                    -0.000198294201,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.000566397552,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.067689046439,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.002200309774,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.010263706524,
-                    0., -0.000000000000,    -0.009982176653,
-                    0.,  0.011813660618,    -0.000140764936,
-                    0., -0.011813660618,    -0.000140764936]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.010263706524,
+                    0.0,
+                    -0.000000000000,
+                    -0.009982176653,
+                    0.0,
+                    0.011813660618,
+                    -0.000140764936,
+                    0.0,
+                    -0.011813660618,
+                    -0.000140764936,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000780187024,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.075581499723,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.002427625806,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.008448066470,
-                    0., -0.000000000000,    -0.008281866938,
-                    0.,  0.013097326629,    -0.000083099766,
-                    0., -0.013097326629,    -0.000083099766]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.008448066470,
+                    0.0,
+                    -0.000000000000,
+                    -0.008281866938,
+                    0.0,
+                    0.013097326629,
+                    -0.000083099766,
+                    0.0,
+                    -0.013097326629,
+                    -0.000083099766,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001063189693,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.079048591655,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0.,  0.000000000000,     0.005890513253,
-                    0., -0.000000000000,    -0.005780178036,
-                    0.,  0.014386023476,    -0.000055167609,
-                    0., -0.014386023476,    -0.000055167609]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.005890513253,
+                    0.0,
+                    -0.000000000000,
+                    -0.005780178036,
+                    0.0,
+                    0.014386023476,
+                    -0.000055167609,
+                    0.0,
+                    -0.014386023476,
+                    -0.000055167609,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001486131044,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.084811453110,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.002450103204,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [      -0.000000000000,     0.000000000000,     0.002942322545,
-                        0.000000000000,    -0.000000000000,    -0.002924986204,
-                       -0.000000000000,     0.015750409537,    -0.000008668171,
-                        0.000000000000,    -0.015750409537,    -0.000008668171]
+                [
+                    -0.000000000000,
+                    0.000000000000,
+                    0.002942322545,
+                    0.000000000000,
+                    -0.000000000000,
+                    -0.002924986204,
+                    -0.000000000000,
+                    0.015750409537,
+                    -0.000008668171,
+                    0.000000000000,
+                    -0.015750409537,
+                    -0.000008668171,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00116757931849,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.08225497590846,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,  0.,                0.005192742269,
-                         0., -0.,               -0.005046526613,
-                        -0.,  0.014877327584,   -0.000073107828,
-                         0., -0.014877327584,   -0.000073107828]
+                [
+                    -0.0,
+                    0.0,
+                    0.005192742269,
+                    0.0,
+                    -0.0,
+                    -0.005046526613,
+                    -0.0,
+                    0.014877327584,
+                    -0.000073107828,
+                    0.0,
+                    -0.014877327584,
+                    -0.000073107828,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.000628655467,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.000606118093,  # dfocc, tight
@@ -10873,62 +11375,116 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.17395818499234,  # dfocc, tight
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [-0.,             0.,              0.029266386707,
-                 0.,              0.015807793582, -0.014633193357,
-                -0.,             -0.015807793582, -0.014633193351]
+                [
+                    -0.0,
+                    0.0,
+                    0.029266386707,
+                    0.0,
+                    0.015807793582,
+                    -0.014633193357,
+                    -0.0,
+                    -0.015807793582,
+                    -0.014633193351,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00384810072338,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,              0.,              0.031148775451,
-                         0.,              0.016805034066, -0.015574387726,
-                        -0.,             -0.016805034066, -0.015574387725]
+                [
+                    -0.0,
+                    0.0,
+                    0.031148775451,
+                    0.0,
+                    0.016805034066,
+                    -0.015574387726,
+                    -0.0,
+                    -0.016805034066,
+                    -0.015574387725,
+                ]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00376812221828,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.001367832301,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.156173452626,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.036004901480,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.026914388853,
-                    0.,  0.014240311996,    -0.013457194426,
-                    0., -0.014240311996,    -0.013457194426]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.026914388853,
+                    0.0,
+                    0.014240311996,
+                    -0.013457194426,
+                    0.0,
+                    -0.014240311996,
+                    -0.013457194426,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001174470264,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.164063461670,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.035847923992,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.027483211370,
-                    0.,  0.014576999156,    -0.013741605685,
-                    0., -0.014576999156,    -0.013741605685]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.027483211370,
+                    0.0,
+                    0.014576999156,
+                    -0.013741605685,
+                    0.0,
+                    -0.014576999156,
+                    -0.013741605685,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001024687110,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.171990731878,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.035717311998,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.028112148199,
-                    0.,  0.014949633980,    -0.014056074099,
-                    0., -0.014949633980,    -0.014056074099]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.028112148199,
+                    0.0,
+                    0.014949633980,
+                    -0.014056074099,
+                    0.0,
+                    -0.014949633980,
+                    -0.014056074099,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.0011125246764,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.17366812020990,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight)
-              [ 0., -0.000000000000,     0.030213597936,
-                0.,  0.016231443797,    -0.015106798968,
-                0., -0.016231443797,    -0.015106798968]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.030213597936,
+                    0.0,
+                    0.016231443797,
+                    -0.015106798968,
+                    0.0,
+                    -0.016231443797,
+                    -0.015106798968,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001111851483,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.178196933112,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.034422402711,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [  -0.000000000000,    -0.000000000000,     0.031864432517,
-                0.000000000000,     0.017258987132,    -0.015932216258,
-               -0.000000000000,    -0.017258987132,    -0.015932216258]
+                [
+                    -0.000000000000,
+                    -0.000000000000,
+                    0.031864432517,
+                    0.000000000000,
+                    0.017258987132,
+                    -0.015932216258,
+                    -0.000000000000,
+                    -0.017258987132,
+                    -0.015932216258,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00098766230788,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.17380639841079,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,             -0.,              0.029147626743,
-                         0.,              0.01574493194,  -0.014573813372,
-                        -0.,             -0.01574493194,  -0.014573813372]
+                [-0.0, -0.0, 0.029147626743, 0.0, 0.01574493194, -0.014573813372, -0.0, -0.01574493194, -0.014573813372]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.003993549226,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.003893263740,  # dfocc, tight
@@ -10983,62 +11539,106 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.21328159274710,  # dfocc, tight
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [ 0.,             -0.,              0.016818391166,
-                -0.,              0.0071380193,   -0.008409195584,
-                 0.,             -0.0071380193,   -0.008409195582]
+                [0.0, -0.0, 0.016818391166, -0.0, 0.0071380193, -0.008409195584, 0.0, -0.0071380193, -0.008409195582]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00516563729772,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,             -0.,              0.019018581448,
-                        -0.,              0.008236968052, -0.009509290726,
-                         0.,             -0.008236968052, -0.009509290722]
+                [
+                    0.0,
+                    -0.0,
+                    0.019018581448,
+                    -0.0,
+                    0.008236968052,
+                    -0.009509290726,
+                    0.0,
+                    -0.008236968052,
+                    -0.009509290722,
+                ]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00506341197521,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.001570633341,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.197048695120,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.042457672915,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.015291382216,
-                    0.,  0.006145115573,    -0.007645691108,
-                    0., -0.006145115573,    -0.007645691108]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.015291382216,
+                    0.0,
+                    0.006145115573,
+                    -0.007645691108,
+                    0.0,
+                    -0.006145115573,
+                    -0.007645691108,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001350847967,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.204503012944,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.042084276114,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.015388626332,
-                    0.,  0.006150433332,    -0.007694313166,
-                    0., -0.006150433332,    -0.007694313166]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.015388626332,
+                    0.0,
+                    0.006150433332,
+                    -0.007694313166,
+                    0.0,
+                    -0.006150433332,
+                    -0.007694313166,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001177820960,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.211999043568,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.041741379825,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.015546142750,
-                    0.,  0.006191167357,    -0.007773071375,
-                    0., -0.006191167357,    -0.007773071375]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.015546142750,
+                    0.0,
+                    0.006191167357,
+                    -0.007773071375,
+                    0.0,
+                    -0.006191167357,
+                    -0.007773071375,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001287786460,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.213706080780,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,     0.017877890596,
-                    0.,  0.007580722221,    -0.008938945298,
-                    0., -0.007580722221,    -0.008938945298]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.017877890596,
+                    0.0,
+                    0.007580722221,
+                    -0.008938945298,
+                    0.0,
+                    -0.007580722221,
+                    -0.008938945298,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001285702841,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.218038927594,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.040510034508,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [        0.000000000000,    -0.000000000000,     0.019448090911,
-                        -0.000000000000,     0.008509858260,    -0.009724045456,
-                         0.000000000000,    -0.008509858260,    -0.009724045456]
+                [
+                    0.000000000000,
+                    -0.000000000000,
+                    0.019448090911,
+                    -0.000000000000,
+                    0.008509858260,
+                    -0.009724045456,
+                    0.000000000000,
+                    -0.008509858260,
+                    -0.009724045456,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00115506325268,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.21312358096054,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-             [  0.,  0.,                0.016675154934,
-               -0.,  0.007064234315,   -0.008337577467,
-                0., -0.007064234315,   -0.008337577467]
+                [0.0, 0.0, 0.016675154934, -0.0, 0.007064234315, -0.008337577467, 0.0, -0.007064234315, -0.008337577467]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.005337854371,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.005214252989,  # dfocc, tight
@@ -11084,53 +11684,113 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.061356186762,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.001972801188,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.012031487574,
-                    0., -0.000000000000,    -0.011634881724,
-                    0.,  0.010540719393,    -0.000198302925,
-                    0., -0.010540719393,    -0.000198302925]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.012031487574,
+                    0.0,
+                    -0.000000000000,
+                    -0.011634881724,
+                    0.0,
+                    0.010540719393,
+                    -0.000198302925,
+                    0.0,
+                    -0.010540719393,
+                    -0.000198302925,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.000957639989,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.069213083529,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.002200309067,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.010263733632,
-                    0., -0.000000000000,    -0.009982179290,
-                    0.,  0.011813639779,    -0.000140777171,
-                    0., -0.011813639779,    -0.000140777171]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.010263733632,
+                    0.0,
+                    -0.000000000000,
+                    -0.009982179290,
+                    0.0,
+                    0.011813639779,
+                    -0.000140777171,
+                    0.0,
+                    -0.011813639779,
+                    -0.000140777171,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.000743849641,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.077105536812,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.002427625679,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.008448077204,
-                    0., -0.000000000000,    -0.008281875978,
-                    0.,  0.013097326563,    -0.000083100613,
-                    0., -0.013097326563,    -0.000083100613]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.008448077204,
+                    0.0,
+                    -0.000000000000,
+                    -0.008281875978,
+                    0.0,
+                    0.013097326563,
+                    -0.000083100613,
+                    0.0,
+                    -0.013097326563,
+                    -0.000083100613,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.000460845361,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.080572628744,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0.,  0.000000000000,     0.005890487280,
-                    0., -0.000000000000,    -0.005780144920,
-                    0.,  0.014386015714,    -0.000055171180,
-                    0., -0.014386015714,    -0.000055171180]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.005890487280,
+                    0.0,
+                    -0.000000000000,
+                    -0.005780144920,
+                    0.0,
+                    0.014386015714,
+                    -0.000055171180,
+                    0.0,
+                    -0.014386015714,
+                    -0.000055171180,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.000037911160,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.086335490199,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.002450103939,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [       -0.000000000000,     0.000000000000,     0.002942353924,
-                         0.000000000000,    -0.000000000000,    -0.002925017923,
-                        -0.000000000000,     0.015750403382,    -0.000008668000,
-                         0.000000000000,    -0.015750403382,    -0.000008668000]
+                [
+                    -0.000000000000,
+                    0.000000000000,
+                    0.002942353924,
+                    0.000000000000,
+                    -0.000000000000,
+                    -0.002925017923,
+                    -0.000000000000,
+                    0.015750403382,
+                    -0.000008668000,
+                    0.000000000000,
+                    -0.015750403382,
+                    -0.000008668000,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.00035645775738,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.08377901300913,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [ -0.,  0.000000000000,     0.005192742183,
-               0., -0.000000000000,    -0.005046526527,
-              -0.,  0.014877327583,    -0.000073107828,
-               0., -0.014877327583,    -0.000073107828]
+                [
+                    -0.0,
+                    0.000000000000,
+                    0.005192742183,
+                    0.0,
+                    -0.000000000000,
+                    -0.005046526527,
+                    -0.0,
+                    0.014877327583,
+                    -0.000073107828,
+                    0.0,
+                    -0.014877327583,
+                    -0.000073107828,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.000628655467,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.000606118094,  # dfocc, tight
@@ -11172,47 +11832,95 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.160587412835,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.036004901152,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.026914381459,
-                    0.,  0.014240313354,    -0.013457190729,
-                    0., -0.014240313354,    -0.013457190729]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.026914381459,
+                    0.0,
+                    0.014240313354,
+                    -0.013457190729,
+                    0.0,
+                    -0.014240313354,
+                    -0.013457190729,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.003239492526,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.168477421879,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.035847923306,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.027483206969,
-                    0.,  0.014577000408,    -0.013741603485,
-                    0., -0.014577000408,    -0.013741603485]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.027483206969,
+                    0.0,
+                    0.014577000408,
+                    -0.013741603485,
+                    0.0,
+                    -0.014577000408,
+                    -0.013741603485,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.003389275946,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.176404692086,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.035717311411,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.028112143061,
-                    0.,  0.014949636932,    -0.014056071530,
-                    0., -0.014949636932,    -0.014056071530]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.028112143061,
+                    0.0,
+                    0.014949636932,
+                    -0.014056071530,
+                    0.0,
+                    -0.014949636932,
+                    -0.014056071530,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.003301435451,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.178082080418,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,     0.030213608364,
-                    0.,  0.016231443474,    -0.015106804182,
-                    0., -0.016231443474,    -0.015106804182]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.030213608364,
+                    0.0,
+                    0.016231443474,
+                    -0.015106804182,
+                    0.0,
+                    -0.016231443474,
+                    -0.015106804182,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.003302111181,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.182610893321,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.034422399491,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [       -0.000000000000,    -0.000000000000,     0.031864462561,
-                         0.000000000000,     0.017259000991,    -0.015932231281,
-                        -0.000000000000,    -0.017259000990,    -0.015932231281]
+                [
+                    -0.000000000000,
+                    -0.000000000000,
+                    0.031864462561,
+                    0.000000000000,
+                    0.017259000991,
+                    -0.015932231281,
+                    -0.000000000000,
+                    -0.017259000990,
+                    -0.015932231281,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.00342629789193,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.17822035862112,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-             [-0., -0.000000000000,     0.029147627070,
-               0.,  0.015744932006,    -0.014573813535,
-              -0., -0.015744932006,    -0.014573813535]
+                [
+                    -0.0,
+                    -0.000000000000,
+                    0.029147627070,
+                    0.0,
+                    0.015744932006,
+                    -0.014573813535,
+                    -0.0,
+                    -0.015744932006,
+                    -0.014573813535,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.003993549230,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.003893263743,  # dfocc, tight
@@ -11254,47 +11962,95 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.201658737065,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.042457672983,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.015291380391,
-                    0.,  0.006145126895,    -0.007645690196,
-                    0., -0.006145126895,    -0.007645690196]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.015291380391,
+                    0.0,
+                    0.006145126895,
+                    -0.007645690196,
+                    0.0,
+                    -0.006145126895,
+                    -0.007645690196,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.003259197444,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.209113054889,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.042084275918,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.015388624199,
-                    0.,  0.006150440601,    -0.007694312099,
-                    0., -0.006150440601,    -0.007694312099]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.015388624199,
+                    0.0,
+                    0.006150440601,
+                    -0.007694312099,
+                    0.0,
+                    -0.006150440601,
+                    -0.007694312099,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.003432224601,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.216609085513,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.041741379888,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.015546139127,
-                    0.,  0.006191172928,    -0.007773069564,
-                    0., -0.006191172928,    -0.007773069564]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.015546139127,
+                    0.0,
+                    0.006191172928,
+                    -0.007773069564,
+                    0.0,
+                    -0.006191172928,
+                    -0.007773069564,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.003322256873,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.218316122726,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,     0.017877876813,
-                    0.,  0.007580722265,    -0.008938938407,
-                    0., -0.007580722265,    -0.008938938407]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.017877876813,
+                    0.0,
+                    0.007580722265,
+                    -0.008938938407,
+                    0.0,
+                    -0.007580722265,
+                    -0.008938938407,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.003324348494,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.222648969545,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.040510044397,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [        0.000000000000,    -0.000000000000,     0.019447884570,
-                        -0.000000000000,     0.008509802850,    -0.009723942285,
-                         0.000000000000,    -0.008509802849,    -0.009723942285]
+                [
+                    0.000000000000,
+                    -0.000000000000,
+                    0.019447884570,
+                    -0.000000000000,
+                    0.008509802850,
+                    -0.009723942285,
+                    0.000000000000,
+                    -0.008509802849,
+                    -0.009723942285,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.00345497869314,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.21773362291808,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [  0., -0.000000000000,     0.016675155033,
-              -0.,  0.007064234369,    -0.008337577516,
-               0., -0.007064234369,    -0.008337577516]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.016675155033,
+                    -0.0,
+                    0.007064234369,
+                    -0.008337577516,
+                    0.0,
+                    -0.007064234369,
+                    -0.008337577516,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.005337854373,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.005214252991,  # dfocc, tight
@@ -11352,45 +12108,38 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00192209183545,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,              0.,              0.003412477814,
-                        -0.,             -0.,             -0.003412477814]
+                [0.0, 0.0, 0.003412477814, -0.0, -0.0, -0.003412477814]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00194585245550,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.000703072086,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.202322737562,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.004462211239,
-                    0., -0.000000000000,    -0.004462211239]
+                [0.0, 0.000000000000, 0.004462211239, 0.0, -0.000000000000, -0.004462211239]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.000572012280,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.203736894925,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0.,  0.000000000000,     0.002400349139,
-                    0., -0.000000000000,    -0.002400349139]
+                [0.0, 0.000000000000, 0.002400349139, 0.0, -0.000000000000, -0.002400349139]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000469635507,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.205198445453,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.000413292087,
-                    0., -0.000000000000,    -0.000413292087]
+                [0.0, 0.000000000000, 0.000413292087, 0.0, -0.000000000000, -0.000413292087]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.000554531047,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.207169559461,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0.,  0.000000000000,     0.003224769580,
-                0., -0.000000000000,    -0.003224769580]
+                [0.0, 0.000000000000, 0.003224769580, 0.0, -0.000000000000, -0.003224769580]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.000553992712,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.208748872411,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-              [    0.000000000000,     0.000000000000,     0.003792898685,
-                  -0.000000000000,    -0.000000000000,    -0.003792898685]
+                [0.000000000000, 0.000000000000, 0.003792898685, -0.000000000000, -0.000000000000, -0.003792898685]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00051222526754,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.20695630522582,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-             [  0.,  0.,   0.002245645626,
-               -0., -0.,  -0.002245645626]
+                [0.0, 0.0, 0.002245645626, -0.0, -0.0, -0.002245645626]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.002045023614,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.002024842553,  # dfocc, tight
@@ -11457,52 +12206,108 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00521721307613,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,              0.,              0.010801208563,
-                        -0.,              0.006421774051, -0.005400604280,
-                        -0.,             -0.006421774051, -0.005400604283]
+                [
+                    0.0,
+                    0.0,
+                    0.010801208563,
+                    -0.0,
+                    0.006421774051,
+                    -0.005400604280,
+                    -0.0,
+                    -0.006421774051,
+                    -0.005400604283,
+                ]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00521446434812,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.002352666762,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.221650942141,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.012771605048,
-                    0.,  0.007190306206,    -0.006385802524,
-                    0., -0.007190306205,    -0.006385802524]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.012771605048,
+                    0.0,
+                    0.007190306206,
+                    -0.006385802524,
+                    0.0,
+                    -0.007190306205,
+                    -0.006385802524,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001538577646,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.223375325491,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,     0.008996184043,
-                    0.,  0.005183828520,    -0.004498092021,
-                    0., -0.005183828519,    -0.004498092021]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.008996184043,
+                    0.0,
+                    0.005183828520,
+                    -0.004498092021,
+                    0.0,
+                    -0.005183828519,
+                    -0.004498092021,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000960712694,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.225313300040,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.005564092786,
-                    0.,  0.003375822885,    -0.002782046393,
-                    0., -0.003375822885,    -0.002782046393]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.005564092786,
+                    0.0,
+                    0.003375822885,
+                    -0.002782046393,
+                    0.0,
+                    -0.003375822885,
+                    -0.002782046393,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001285806012,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.228593144538,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-             [ 0.0,  0.000000000000,     0.009830485254,
-               0.0,  0.005814222254,    -0.004915242627,
-               0.0, -0.005814222254,    -0.004915242627]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.009830485254,
+                    0.0,
+                    0.005814222254,
+                    -0.004915242627,
+                    0.0,
+                    -0.005814222254,
+                    -0.004915242627,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001194079264,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.231028592985,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-       [        0.000000000000,     0.000000000000,     0.010488609074,
-               -0.000000000000,     0.006266448803,    -0.005244304537,
-               -0.000000000000,    -0.006266448803,    -0.005244304537]
+                [
+                    0.000000000000,
+                    0.000000000000,
+                    0.010488609074,
+                    -0.000000000000,
+                    0.006266448803,
+                    -0.005244304537,
+                    -0.000000000000,
+                    -0.006266448803,
+                    -0.005244304537,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00112736114914,  # dfocc, tight
-            "OCCD CORRELATION ENERGY":  -0.22711013815896,  # dfocc, tight
+            "OCCD CORRELATION ENERGY": -0.22711013815896,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [  0., -0.000000000000,     0.007977310114,
-              -0.,  0.004884098446,    -0.003988655057,
-              -0., -0.004884098446,    -0.003988655057]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.007977310114,
+                    -0.0,
+                    0.004884098446,
+                    -0.003988655057,
+                    -0.0,
+                    -0.004884098446,
+                    -0.003988655057,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.005548457534,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.005450541943,  # dfocc, tight
@@ -11569,52 +12374,98 @@ _std_suite = [
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00709505459495,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,              0.,              0.000617506530,
-                        -0.,             -0.000361314051, -0.000308753267,
-                         0.,              0.000361314051, -0.000308753262]
+                [0.0, 0.0, 0.000617506530, -0.0, -0.000361314051, -0.000308753267, 0.0, 0.000361314051, -0.000308753262]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00701650721029,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.002436225037,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.247501148905,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.002625578291,
-                    0.,  0.000602919468,    -0.001312789146,
-                    0., -0.000602919468,    -0.001312789146]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.002625578291,
+                    0.0,
+                    0.000602919468,
+                    -0.001312789146,
+                    0.0,
+                    -0.000602919468,
+                    -0.001312789146,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001628506731,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.247890696918,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,    -0.001471303306,
-                    0., -0.001622363348,     0.000735651653,
-                    0.,  0.001622363348,     0.000735651653]
+                [
+                    0.0,
+                    -0.000000000000,
+                    -0.001471303306,
+                    0.0,
+                    -0.001622363348,
+                    0.000735651653,
+                    0.0,
+                    0.001622363348,
+                    0.000735651653,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001042188755,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.248510869843,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,    -0.005274771244,
-                    0., -0.003679381392,     0.002637385622,
-                    0.,  0.003679381392,     0.002637385622]
+                [
+                    0.0,
+                    -0.000000000000,
+                    -0.005274771244,
+                    0.0,
+                    -0.003679381392,
+                    0.002637385622,
+                    0.0,
+                    0.003679381392,
+                    0.002637385622,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001387432536,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.252366737687,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0.,  0.000000000000,    -0.000767533552,
-                0., -0.001128632785,     0.000383766776,
-                0.,  0.001128632785,     0.000383766776]
+                [
+                    0.0,
+                    0.000000000000,
+                    -0.000767533552,
+                    0.0,
+                    -0.001128632785,
+                    0.000383766776,
+                    0.0,
+                    0.001128632785,
+                    0.000383766776,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001298398813,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.254465606264,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [        0.000000000000,    -0.000000000000,    -0.000178270779,
-                        -0.000000000000,    -0.000741462346,     0.000089135390,
-                         0.000000000000,     0.000741462346,     0.000089135390]
+                [
+                    0.000000000000,
+                    -0.000000000000,
+                    -0.000178270779,
+                    -0.000000000000,
+                    -0.000741462346,
+                    0.000089135390,
+                    0.000000000000,
+                    0.000741462346,
+                    0.000089135390,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00122701106154,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.25004962087804,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [  0., -0.000000000000,    -0.002738846535,
-              -0., -0.002056141369,     0.001369423268,
-               0.,  0.002056141369,     0.001369423268]
+                [
+                    0.0,
+                    -0.000000000000,
+                    -0.002738846535,
+                    -0.0,
+                    -0.002056141369,
+                    0.001369423268,
+                    0.0,
+                    0.002056141369,
+                    0.001369423268,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.007400543965,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.007287376322,  # dfocc, tight
@@ -11698,70 +12549,150 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.08123709133288,  # dfocc, tight
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,              0.,              0.004955877488,
-                         0.,             -0.,             -0.004802960939,
-                        -0.,              0.014879065297, -0.000076458275,
-                         0.,             -0.014879065297, -0.000076458275]
+                [
+                    -0.0,
+                    0.0,
+                    0.004955877488,
+                    0.0,
+                    -0.0,
+                    -0.004802960939,
+                    -0.0,
+                    0.014879065297,
+                    -0.000076458275,
+                    0.0,
+                    -0.014879065297,
+                    -0.000076458275,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00060440612636,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,              0.,              0.004453849339,
-                         0.,             -0.,             -0.004383447765,
-                        -0.,              0.014958703713, -0.000035200787,
-                         0.,             -0.014958703713, -0.000035200787]
+                [
+                    -0.0,
+                    0.0,
+                    0.004453849339,
+                    0.0,
+                    -0.0,
+                    -0.004383447765,
+                    -0.0,
+                    0.014958703713,
+                    -0.000035200787,
+                    0.0,
+                    -0.014958703713,
+                    -0.000035200787,
+                ]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00058824527447,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.000394385396,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.058935159355,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.001823537679,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.011816043382,
-                    0., -0.000000000000,    -0.011405170159,
-                    0.,  0.010534044966,    -0.000205436611,
-                    0., -0.010534044966,    -0.000205436611]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.011816043382,
+                    0.0,
+                    -0.000000000000,
+                    -0.011405170159,
+                    0.0,
+                    0.010534044966,
+                    -0.000205436611,
+                    0.0,
+                    -0.010534044966,
+                    -0.000205436611,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.000566186305,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.066806131554,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.002050540370,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0.,  0.000000000000,     0.010039510728,
-                    0., -0.000000000000,    -0.009744203205,
-                    0.,  0.011807411335,    -0.000147653762,
-                    0., -0.011807411335,    -0.000147653762]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.010039510728,
+                    0.0,
+                    -0.000000000000,
+                    -0.009744203205,
+                    0.0,
+                    0.011807411335,
+                    -0.000147653762,
+                    0.0,
+                    -0.011807411335,
+                    -0.000147653762,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.000783155015,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.074716931449,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.002277314389,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.008212538414,
-                    0., -0.000000000000,    -0.008033077982,
-                    0.,  0.013091494156,    -0.000089730216,
-                    0., -0.013091494156,    -0.000089730216]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.008212538414,
+                    0.0,
+                    -0.000000000000,
+                    -0.008033077982,
+                    0.0,
+                    0.013091494156,
+                    -0.000089730216,
+                    0.0,
+                    -0.013091494156,
+                    -0.000089730216,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001067566021,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.078201861999,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0.,  0.000000000000,     0.005652301943,
-                0., -0.000000000000,    -0.005529627660,
-                0.,  0.014380946092,    -0.000061337141,
-                0., -0.014380946092,    -0.000061337141]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.005652301943,
+                    0.0,
+                    -0.000000000000,
+                    -0.005529627660,
+                    0.0,
+                    0.014380946092,
+                    -0.000061337141,
+                    0.0,
+                    -0.014380946092,
+                    -0.000061337141,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001494223667,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.083986395282,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.002308873939,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [       -0.000000000000,     0.000000000000,     0.002693251383,
-                         0.000000000000,    -0.000000000000,    -0.002664270590,
-                        -0.000000000000,     0.015745905068,    -0.000014490396,
-                         0.000000000000,    -0.015745905068,    -0.000014490396]
+                [
+                    -0.000000000000,
+                    0.000000000000,
+                    0.002693251383,
+                    0.000000000000,
+                    -0.000000000000,
+                    -0.002664270590,
+                    -0.000000000000,
+                    0.015745905068,
+                    -0.000014490396,
+                    0.000000000000,
+                    -0.015745905068,
+                    -0.000014490396,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00117513618887,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.08143642271488,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [ -0.,  0.000000000000,     0.004941329452,
-               0., -0.000000000000,    -0.004783766728,
-              -0.,  0.014873123435,    -0.000078781362,
-               0., -0.014873123435,    -0.000078781362]
+                [
+                    -0.0,
+                    0.000000000000,
+                    0.004941329452,
+                    0.0,
+                    -0.000000000000,
+                    -0.004783766728,
+                    -0.0,
+                    0.014873123435,
+                    -0.000078781362,
+                    0.0,
+                    -0.014873123435,
+                    -0.000078781362,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.000609013952,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.000587107823,  # dfocc, tight
@@ -11816,62 +12747,126 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.17173557387375,  # dfocc, tight
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,              0.,              0.030043575132,
-                         0.,              0.016300990267, -0.015021787567,
-                        -0.,             -0.016300990267, -0.015021787565]
+                [
+                    -0.0,
+                    0.0,
+                    0.030043575132,
+                    0.0,
+                    0.016300990267,
+                    -0.015021787567,
+                    -0.0,
+                    -0.016300990267,
+                    -0.015021787565,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00381543842966,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [-0.,              0.,              0.031923074308,
-                         0.,              0.017296807836, -0.015961537154,
-                        -0.,             -0.017296807836, -0.015961537154]
+                [
+                    -0.0,
+                    0.0,
+                    0.031923074308,
+                    0.0,
+                    0.017296807836,
+                    -0.015961537154,
+                    -0.0,
+                    -0.017296807836,
+                    -0.015961537154,
+                ]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00373604126252,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.001361296352,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.153806958505,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.035220509485,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.027773187697,
-                    0.,  0.014760469702,    -0.013886593849,
-                    0., -0.014760469702,    -0.013886593849]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.027773187697,
+                    0.0,
+                    0.014760469702,
+                    -0.013886593849,
+                    0.0,
+                    -0.014760469702,
+                    -0.013886593849,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001172388039,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.161802412521,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.035084385482,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,     0.028357272969,
-                    0.,  0.015100442421,    -0.014178636485,
-                    0., -0.015100442421,    -0.014178636485]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.028357272969,
+                    0.0,
+                    0.015100442421,
+                    -0.014178636485,
+                    0.0,
+                    -0.015100442421,
+                    -0.014178636485,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001026896343,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.169839459643,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.034978089725,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.029002023504,
-                    0.,  0.015477270320,    -0.014501011752,
-                    0., -0.015477270319,    -0.014501011752]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.029002023504,
+                    0.0,
+                    0.015477270320,
+                    -0.014501011752,
+                    0.0,
+                    -0.015477270319,
+                    -0.014501011752,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001113332083,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.171513122196,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0., -0.000000000000,     0.031096217899,
-                0.,  0.016756071833,    -0.015548108949,
-                0., -0.016756071832,    -0.015548108949]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.031096217899,
+                    0.0,
+                    0.016756071833,
+                    -0.015548108949,
+                    0.0,
+                    -0.016756071832,
+                    -0.015548108949,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001113749802,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.176088417240,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.033693410677,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [       -0.000000000000,    -0.000000000000,     0.032749728621,
-                         0.000000000000,     0.017783947932,    -0.016374864311,
-                        -0.000000000000,    -0.017783947932,    -0.016374864310]
+                [
+                    -0.000000000000,
+                    -0.000000000000,
+                    0.032749728621,
+                    0.000000000000,
+                    0.017783947932,
+                    -0.016374864311,
+                    -0.000000000000,
+                    -0.017783947932,
+                    -0.016374864310,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.00098853594635,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.17171797869288,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [ -0., -0.000000000000,     0.030027361324,
-               0.,  0.016268352543,    -0.015013680662,
-              -0., -0.016268352543,    -0.015013680662]
+                [
+                    -0.0,
+                    -0.000000000000,
+                    0.030027361324,
+                    0.0,
+                    0.016268352543,
+                    -0.015013680662,
+                    -0.0,
+                    -0.016268352543,
+                    -0.015013680662,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.003958389693,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.003858590576,  # dfocc, tight
@@ -11926,62 +12921,126 @@ _std_suite = [
             "CCSD CORRELATION ENERGY": -0.18830636267506,  # dfocc, tight
             "CCSD SINGLES ENERGY": 0.0,
             "CCSD TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,             -0.,              0.017859476803,
-                        -0.,              0.007647663282, -0.008929738402,
-                         0.,             -0.007647663282, -0.008929738401]
+                [
+                    0.0,
+                    -0.0,
+                    0.017859476803,
+                    -0.0,
+                    0.007647663282,
+                    -0.008929738402,
+                    0.0,
+                    -0.007647663282,
+                    -0.008929738401,
+                ]
             ).reshape((-1, 3)),
             "(T) CORRECTION ENERGY": -0.00498171470106,  # dfocc, tight
             "CCSD(T) TOTAL GRADIENT": np.array(  # dfocc, tight
-                       [ 0.,             -0.,              0.020007178737,
-                        -0.,              0.008716203188, -0.010003589371,
-                         0.,             -0.008716203188, -0.010003589367]
+                [
+                    0.0,
+                    -0.0,
+                    0.020007178737,
+                    -0.0,
+                    0.008716203188,
+                    -0.010003589371,
+                    0.0,
+                    -0.008716203188,
+                    -0.010003589367,
+                ]
             ).reshape((-1, 3)),
             "A-(T) CORRECTION ENERGY": -0.00488153123480,  # dfocc, tight
             "OMP2 REFERENCE CORRECTION ENERGY": 0.001480332224,  # dfocc, tight
             "OMP2 CORRELATION ENERGY": -0.172665177005,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.039018138633,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.016299386418,
-                    0.,  0.006629699700,    -0.008149693209,
-                    0., -0.006629699700,    -0.008149693209]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.016299386418,
+                    0.0,
+                    0.006629699700,
+                    -0.008149693209,
+                    0.0,
+                    -0.006629699700,
+                    -0.008149693209,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": 0.001272971815,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.179766145094,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.038623138099,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,     0.016424137432,
-                    0.,  0.006638678143,    -0.008212068716,
-                    0., -0.006638678143,    -0.008212068716]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.016424137432,
+                    0.0,
+                    0.006638678143,
+                    -0.008212068716,
+                    0.0,
+                    -0.006638678143,
+                    -0.008212068716,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": 0.001112851260,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.186923452541,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.038268824767,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.016608938328,
-                    0.,  0.006684117862,    -0.008304469164,
-                    0., -0.006684117862,    -0.008304469164]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.016608938328,
+                    0.0,
+                    0.006684117862,
+                    -0.008304469164,
+                    0.0,
+                    -0.006684117862,
+                    -0.008304469164,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": 0.001217776401,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.188735219689,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0.,  0.000000000000,     0.018940660731,
-                0.,  0.008076822926,    -0.009470330365,
-                0., -0.008076822926,    -0.009470330365]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.018940660731,
+                    0.0,
+                    0.008076822926,
+                    -0.009470330365,
+                    0.0,
+                    -0.008076822926,
+                    -0.009470330365,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": 0.001218640112,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.192974799277,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.037040961442,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [        0.000000000000,     0.000000000000,     0.020520978467,
-                        -0.000000000000,     0.009009472752,    -0.010260489234,
-                         0.000000000000,    -0.009009472752,    -0.010260489234]
+                [
+                    0.000000000000,
+                    0.000000000000,
+                    0.020520978467,
+                    -0.000000000000,
+                    0.009009472752,
+                    -0.010260489234,
+                    0.000000000000,
+                    -0.009009472752,
+                    -0.010260489234,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": 0.0010910673835,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.18822673037030,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [  0.,  0.000000000000,     0.017781686076,
-              -0.,  0.007590501254,    -0.008890843038,
-               0., -0.007590501254,    -0.008890843038]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.017781686076,
+                    -0.0,
+                    0.007590501254,
+                    -0.008890843038,
+                    0.0,
+                    -0.007590501254,
+                    -0.008890843038,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.005145029771,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.005024912480,  # dfocc, tight
@@ -12026,53 +13085,113 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.060459196444,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.001823537706,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.011816050823,
-                    0., -0.000000000000,    -0.011405176978,
-                    0.,  0.010534044979,    -0.000205436923,
-                    0., -0.010534044979,    -0.000205436923]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.011816050823,
+                    0.0,
+                    -0.000000000000,
+                    -0.011405176978,
+                    0.0,
+                    0.010534044979,
+                    -0.000205436923,
+                    0.0,
+                    -0.010534044979,
+                    -0.000205436923,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.000957847537,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.068330168643,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.002050540345,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0.,  0.000000000000,     0.010039462838,
-                    0., -0.000000000000,    -0.009744167884,
-                    0.,  0.011807418804,    -0.000147647477,
-                    0., -0.011807418804,    -0.000147647477]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.010039462838,
+                    0.0,
+                    -0.000000000000,
+                    -0.009744167884,
+                    0.0,
+                    0.011807418804,
+                    -0.000147647477,
+                    0.0,
+                    -0.011807418804,
+                    -0.000147647477,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.000740878651,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.076240968538,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.002277314395,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.008212498711,
-                    0., -0.000000000000,    -0.008033043130,
-                    0.,  0.013091495437,    -0.000089727790,
-                    0., -0.013091495437,    -0.000089727790]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.008212498711,
+                    0.0,
+                    -0.000000000000,
+                    -0.008033043130,
+                    0.0,
+                    0.013091495437,
+                    -0.000089727790,
+                    0.0,
+                    -0.013091495437,
+                    -0.000089727790,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.000456469124,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.079725899088,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0.,  0.000000000000,     0.005652293263,
-                0., -0.000000000000,    -0.005529605660,
-                0.,  0.014380930007,    -0.000061343802,
-                0., -0.014380930007,    -0.000061343802]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.005652293263,
+                    0.0,
+                    -0.000000000000,
+                    -0.005529605660,
+                    0.0,
+                    0.014380930007,
+                    -0.000061343802,
+                    0.0,
+                    -0.014380930007,
+                    -0.000061343802,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.000029817721,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.085510432371,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.002308874960,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [       -0.000000000000,     0.000000000000,     0.002693270150,
-                         0.000000000000,    -0.000000000000,    -0.002664286871,
-                        -0.000000000000,     0.015745889183,    -0.000014491640,
-                         0.000000000000,    -0.015745889183,    -0.000014491640]
+                [
+                    -0.000000000000,
+                    0.000000000000,
+                    0.002693270150,
+                    0.000000000000,
+                    -0.000000000000,
+                    -0.002664286871,
+                    -0.000000000000,
+                    0.015745889183,
+                    -0.000014491640,
+                    0.000000000000,
+                    -0.015745889183,
+                    -0.000014491640,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.00034890091894,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.08296045969717,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [ -0.,  0.000000000000,     0.004941329268,
-               0., -0.000000000000,    -0.004783766592,
-              -0.,  0.014873123401,    -0.000078781338,
-               0., -0.014873123401,    -0.000078781338]
+                [
+                    -0.0,
+                    0.000000000000,
+                    0.004941329268,
+                    0.0,
+                    -0.000000000000,
+                    -0.004783766592,
+                    -0.0,
+                    0.014873123401,
+                    -0.000078781338,
+                    0.0,
+                    -0.014873123401,
+                    -0.000078781338,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.000609013944,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.000587107816,  # dfocc, tight
@@ -12114,47 +13233,95 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.158220918714,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.035220509402,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.027773186774,
-                    0.,  0.014760475104,    -0.013886593387,
-                    0., -0.014760475103,    -0.013886593387]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.027773186774,
+                    0.0,
+                    0.014760475104,
+                    -0.013886593387,
+                    0.0,
+                    -0.014760475103,
+                    -0.013886593387,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.003241577707,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.166216372729,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.035084385218,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,     0.028357346855,
-                    0.,  0.015100453507,    -0.014178673427,
-                    0., -0.015100453507,    -0.014178673427]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.028357346855,
+                    0.0,
+                    0.015100453507,
+                    -0.014178673427,
+                    0.0,
+                    -0.015100453507,
+                    -0.014178673427,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.003387066455,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.174253419851,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.034978090484,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.029002032180,
-                    0.,  0.015477263061,    -0.014501016090,
-                    0., -0.015477263061,    -0.014501016090]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.029002032180,
+                    0.0,
+                    0.015477263061,
+                    -0.014501016090,
+                    0.0,
+                    -0.015477263061,
+                    -0.014501016090,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.003300628093,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.175927082404,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0., -0.000000000000,     0.031096218276,
-                0.,  0.016756071943,    -0.015548109138,
-                0., -0.016756071943,    -0.015548109138]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.031096218276,
+                    0.0,
+                    0.016756071943,
+                    -0.015548109138,
+                    0.0,
+                    -0.016756071943,
+                    -0.015548109138,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.003300211378,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.180502377447,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.033693402688,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [       -0.000000000000,    -0.000000000000,     0.032749671199,
-                         0.000000000000,     0.017783936393,    -0.016374835600,
-                        -0.000000000000,    -0.017783936393,    -0.016374835600]
+                [
+                    -0.000000000000,
+                    -0.000000000000,
+                    0.032749671199,
+                    0.000000000000,
+                    0.017783936393,
+                    -0.016374835600,
+                    -0.000000000000,
+                    -0.017783936393,
+                    -0.016374835600,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.00342542420012,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.17613193885178,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [ -0., -0.000000000000,     0.030027364470,
-               0.,  0.016268353265,    -0.015013682235,
-              -0., -0.016268353265,    -0.015013682235]
+                [
+                    -0.0,
+                    -0.000000000000,
+                    0.030027364470,
+                    0.0,
+                    0.016268353265,
+                    -0.015013682235,
+                    -0.0,
+                    -0.016268353265,
+                    -0.015013682235,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.003958389711,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.003858590593,  # dfocc, tight
@@ -12196,47 +13363,95 @@ _std_suite = [
             "OMP2 CORRELATION ENERGY": -0.177275218950,  # dfocc, tight
             "OMP2 SAME-SPIN CORRELATION ENERGY": -0.039018136779,  # dfocc, tight
             "OMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0., -0.000000000000,     0.016299403030,
-                    0.,  0.006629703904,    -0.008149701515,
-                    0., -0.006629703904,    -0.008149701515]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.016299403030,
+                    0.0,
+                    0.006629703904,
+                    -0.008149701515,
+                    0.0,
+                    -0.006629703904,
+                    -0.008149701515,
+                ]
             ).reshape((-1, 3)),
             "OMP2.5 REFERENCE CORRECTION ENERGY": -0.003337076220,  # dfocc, tight
             "OMP2.5 CORRELATION ENERGY": -0.184376187039,  # dfocc, tight
             "OMP2.5 SAME-SPIN CORRELATION ENERGY": -0.038623138676,  # dfocc, tight
             "OMP2.5 TOTAL GRADIENT": np.array(  # dfocc, tight
-                 [  0., -0.000000000000,     0.016424136331,
-                    0.,  0.006638670952,    -0.008212068165,
-                    0., -0.006638670952,    -0.008212068165]
+                [
+                    0.0,
+                    -0.000000000000,
+                    0.016424136331,
+                    0.0,
+                    0.006638670952,
+                    -0.008212068165,
+                    0.0,
+                    -0.006638670952,
+                    -0.008212068165,
+                ]
             ).reshape((-1, 3)),
             "OMP3 REFERENCE CORRECTION ENERGY": -0.003497196377,  # dfocc, tight
             "OMP3 CORRELATION ENERGY": -0.191533494486,  # dfocc, tight
             "OMP3 SAME-SPIN CORRELATION ENERGY": -0.038268825438,  # dfocc, tight
             "OMP3 TOTAL GRADIENT": np.array(  # dfocc, tight
-                  [ 0.,  0.000000000000,     0.016608946514,
-                    0.,  0.006684114421,    -0.008304473257,
-                    0., -0.006684114421,    -0.008304473257]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.016608946514,
+                    0.0,
+                    0.006684114421,
+                    -0.008304473257,
+                    0.0,
+                    -0.006684114421,
+                    -0.008304473257,
+                ]
             ).reshape((-1, 3)),
             "OREMP2 REFERENCE CORRECTION ENERGY": -0.003392270931,  # dfocc, tight
             "OREMP2 CORRELATION ENERGY": -0.193345261634,  # dfocc, tight
             "OREMP2 TOTAL GRADIENT": np.array(  # dfocc, tight
-              [ 0.,  0.000000000000,     0.018940651737,
-                0.,  0.008076829692,    -0.009470325868,
-                0., -0.008076829692,    -0.009470325868]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.018940651737,
+                    0.0,
+                    0.008076829692,
+                    -0.009470325868,
+                    0.0,
+                    -0.008076829692,
+                    -0.009470325868,
+                ]
             ).reshape((-1, 3)),
             "OLCCD REFERENCE CORRECTION ENERGY": -0.003391400191,  # dfocc, tight
             "OLCCD CORRELATION ENERGY": -0.197584841222,  # dfocc, tight
             "OLCCD SAME-SPIN CORRELATION ENERGY": -0.037040959020,  # dfocc, tight
             "OLCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-                [        0.000000000000,     0.000000000000,     0.020521012807,
-                        -0.000000000000,     0.009009479704,    -0.010260506404,
-                         0.000000000000,    -0.009009479704,    -0.010260506404]
+                [
+                    0.000000000000,
+                    0.000000000000,
+                    0.020521012807,
+                    -0.000000000000,
+                    0.009009479704,
+                    -0.010260506404,
+                    0.000000000000,
+                    -0.009009479704,
+                    -0.010260506404,
+                ]
             ).reshape((-1, 3)),
             "OCCD REFERENCE CORRECTION ENERGY": -0.00351897455648,  # dfocc, tight
             "OCCD CORRELATION ENERGY": -0.19283677235185,  # dfocc, tight
             "OCCD TOTAL GRADIENT": np.array(  # dfocc, tight
-            [  0.,  0.000000000000,     0.017781687051,
-              -0.,  0.007590501825,    -0.008890843526,
-               0., -0.007590501825,    -0.008890843526]
+                [
+                    0.0,
+                    0.000000000000,
+                    0.017781687051,
+                    -0.0,
+                    0.007590501825,
+                    -0.008890843526,
+                    0.0,
+                    -0.007590501825,
+                    -0.008890843526,
+                ]
             ).reshape((-1, 3)),
             "O(T) CORRECTION ENERGY": -0.005145029773,  # dfocc, tight
             "A-O(T) CORRECTION ENERGY": -0.005024912482,  # dfocc, tight
@@ -12542,369 +13757,377 @@ _std_suite = [
 
 
 def compute_derived_qcvars(std_suite_list):
-  for calc in std_suite_list:
-    if calc["data"]:
-        if "MP2 CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["MP2 TOTAL ENERGY"] = calc["data"]["MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            if "MP2 SINGLES ENERGY" in calc["data"]:
-                calc["data"]["MP2 DOUBLES ENERGY"] = (
-                    calc["data"]["MP2 CORRELATION ENERGY"] - calc["data"]["MP2 SINGLES ENERGY"]
-                )
-                if "MP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    calc["data"]["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                        calc["data"]["MP2 CORRELATION ENERGY"]
-                        - calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
-                        - calc["data"]["MP2 SINGLES ENERGY"]
-                    )
-                    calc["data"]["SCS-MP2 CORRELATION ENERGY"] = (
-                        (1 / 3) * calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
-                        + (6 / 5) * calc["data"]["MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
-                        + calc["data"]["MP2 SINGLES ENERGY"]
-                    )
-                    calc["data"]["SCS-MP2 TOTAL ENERGY"] = (
-                        calc["data"]["SCS-MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-                    )
-
-        if "MP3 CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["MP3 TOTAL ENERGY"] = calc["data"]["MP3 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+    for calc in std_suite_list:
+        if calc["data"]:
             if "MP2 CORRELATION ENERGY" in calc["data"]:
-                calc["data"]["MP2.5 CORRELATION ENERGY"] = 0.5 * (
-                    calc["data"]["MP3 CORRELATION ENERGY"] + calc["data"]["MP2 CORRELATION ENERGY"]
-                )
-                calc["data"]["MP2.5 TOTAL ENERGY"] = (
-                    calc["data"]["MP2.5 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-                )
-
-            if "MP3 SINGLES ENERGY" in calc["data"]:
-                calc["data"]["MP3 DOUBLES ENERGY"] = (
-                    calc["data"]["MP3 CORRELATION ENERGY"] - calc["data"]["MP3 SINGLES ENERGY"]
+                calc["data"]["MP2 TOTAL ENERGY"] = (
+                    calc["data"]["MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
                 )
                 if "MP2 SINGLES ENERGY" in calc["data"]:
-                    calc["data"]["MP2.5 SINGLES ENERGY"] = 0.5 * (
-                        calc["data"]["MP3 SINGLES ENERGY"] + calc["data"]["MP2 SINGLES ENERGY"]
-                    )
-                    calc["data"]["MP2.5 DOUBLES ENERGY"] = (
-                        calc["data"]["MP2.5 CORRELATION ENERGY"] - calc["data"]["MP2.5 SINGLES ENERGY"]
-                    )
-                if "MP3 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    calc["data"]["MP3 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                        calc["data"]["MP3 CORRELATION ENERGY"]
-                        - calc["data"]["MP3 SAME-SPIN CORRELATION ENERGY"]
-                        - calc["data"]["MP3 SINGLES ENERGY"]
+                    calc["data"]["MP2 DOUBLES ENERGY"] = (
+                        calc["data"]["MP2 CORRELATION ENERGY"] - calc["data"]["MP2 SINGLES ENERGY"]
                     )
                     if "MP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                        calc["data"]["MP2.5 SAME-SPIN CORRELATION ENERGY"] = 0.5 * (
-                            calc["data"]["MP3 SAME-SPIN CORRELATION ENERGY"]
-                            + calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
+                        calc["data"]["MP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                            calc["data"]["MP2 CORRELATION ENERGY"]
+                            - calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
+                            - calc["data"]["MP2 SINGLES ENERGY"]
                         )
-                        calc["data"]["MP2.5 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                            calc["data"]["MP2.5 CORRELATION ENERGY"]
-                            - calc["data"]["MP2.5 SAME-SPIN CORRELATION ENERGY"]
-                            - calc["data"]["MP2.5 SINGLES ENERGY"]
+                        calc["data"]["SCS-MP2 CORRELATION ENERGY"] = (
+                            (1 / 3) * calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
+                            + (6 / 5) * calc["data"]["MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
+                            + calc["data"]["MP2 SINGLES ENERGY"]
                         )
-
-        if (
-            "MP3 TOTAL GRADIENT" in calc["data"]
-            and "MP2 TOTAL GRADIENT" in calc["data"]
-            and "HF TOTAL GRADIENT" in calc["data"]
-        ):
-            calc["data"]["MP2.5 TOTAL GRADIENT"] = 0.5 * (
-                calc["data"]["MP3 TOTAL GRADIENT"] + calc["data"]["MP2 TOTAL GRADIENT"]
-            )
-
-        if "MP4(SDQ) CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["MP4(SDQ) TOTAL ENERGY"] = (
-                calc["data"]["MP4(SDQ) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-            if "MP4(T) CORRECTION ENERGY" in calc["data"]:
-                calc["data"]["MP4 CORRELATION ENERGY"] = (
-                    calc["data"]["MP4(SDQ) CORRELATION ENERGY"] + calc["data"]["MP4(T) CORRECTION ENERGY"]
-                )
-                calc["data"]["MP4 TOTAL ENERGY"] = (
-                    calc["data"]["MP4 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-                )
-                if "MP3 CORRELATION ENERGY" in calc["data"]:
-                    calc["data"]["MP4 CORRECTION ENERGY"] = (
-                        calc["data"]["MP4 CORRELATION ENERGY"] - calc["data"]["MP3 CORRELATION ENERGY"]
-                    )
-
-        if "CISD CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CISD TOTAL ENERGY"] = (
-                calc["data"]["CISD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "QCISD CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["QCISD TOTAL ENERGY"] = (
-                calc["data"]["QCISD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-            if "QCISD(T) CORRECTION ENERGY" in calc["data"]:
-                calc["data"]["QCISD(T) CORRELATION ENERGY"] = (
-                    calc["data"]["QCISD CORRELATION ENERGY"] + calc["data"]["QCISD(T) CORRECTION ENERGY"]
-                )
-                calc["data"]["QCISD(T) TOTAL ENERGY"] = (
-                    calc["data"]["QCISD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-                )
-
-        if "FCI CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["FCI TOTAL ENERGY"] = calc["data"]["FCI CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-
-        if "REMP2 CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["REMP2 TOTAL ENERGY"] = (
-                calc["data"]["REMP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-            if "REMP2 SINGLES ENERGY" in calc["data"]:
-                calc["data"]["REMP2 DOUBLES ENERGY"] = (
-                    calc["data"]["REMP2 CORRELATION ENERGY"] - calc["data"]["REMP2 SINGLES ENERGY"]
-                )
-                if "REMP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    calc["data"]["REMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                        calc["data"]["REMP2 CORRELATION ENERGY"]
-                        - calc["data"]["REMP2 SAME-SPIN CORRELATION ENERGY"]
-                        - calc["data"]["REMP2 SINGLES ENERGY"]
-                    )
-
-        if "LCCD CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["LCCD TOTAL ENERGY"] = (
-                calc["data"]["LCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-            if "LCCD SINGLES ENERGY" in calc["data"]:
-                calc["data"]["LCCD DOUBLES ENERGY"] = (
-                    calc["data"]["LCCD CORRELATION ENERGY"] - calc["data"]["LCCD SINGLES ENERGY"]
-                )
-                if "LCCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    calc["data"]["LCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                        calc["data"]["LCCD CORRELATION ENERGY"]
-                        - calc["data"]["LCCD SAME-SPIN CORRELATION ENERGY"]
-                        - calc["data"]["LCCD SINGLES ENERGY"]
-                    )
-
-        if "LCCSD CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["LCCSD TOTAL ENERGY"] = (
-                calc["data"]["LCCSD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-            if "LCCSD SINGLES ENERGY" in calc["data"]:
-                calc["data"]["LCCSD DOUBLES ENERGY"] = (
-                    calc["data"]["LCCSD CORRELATION ENERGY"] - calc["data"]["LCCSD SINGLES ENERGY"]
-                )
-                if "LCCSD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    calc["data"]["LCCSD OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                        calc["data"]["LCCSD CORRELATION ENERGY"]
-                        - calc["data"]["LCCSD SAME-SPIN CORRELATION ENERGY"]
-                        - calc["data"]["LCCSD SINGLES ENERGY"]
-                    )
-
-        if "CCD CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CCD TOTAL ENERGY"] = calc["data"]["CCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            if "CCD SINGLES ENERGY" in calc["data"]:
-                calc["data"]["CCD DOUBLES ENERGY"] = (
-                    calc["data"]["CCD CORRELATION ENERGY"] - calc["data"]["CCD SINGLES ENERGY"]
-                )
-                if "CCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    calc["data"]["CCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                        calc["data"]["CCD CORRELATION ENERGY"]
-                        - calc["data"]["CCD SAME-SPIN CORRELATION ENERGY"]
-                        - calc["data"]["CCD SINGLES ENERGY"]
-                    )
-
-        if "CCSD CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CCSD TOTAL ENERGY"] = (
-                calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-            if "CCSD SINGLES ENERGY" in calc["data"]:
-                calc["data"]["CCSD DOUBLES ENERGY"] = (
-                    calc["data"]["CCSD CORRELATION ENERGY"] - calc["data"]["CCSD SINGLES ENERGY"]
-                )
-                if "CCSD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    calc["data"]["CCSD OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                        calc["data"]["CCSD CORRELATION ENERGY"]
-                        - calc["data"]["CCSD SAME-SPIN CORRELATION ENERGY"]
-                        - calc["data"]["CCSD SINGLES ENERGY"]
-                    )
-
-        if "T(CCSD) CORRECTION ENERGY" in calc["data"]:
-            calc["data"]["CCSD+T(CCSD) CORRELATION ENERGY"] = (
-                calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["T(CCSD) CORRECTION ENERGY"]
-            )
-            calc["data"]["CCSD+T(CCSD) TOTAL ENERGY"] = (
-                calc["data"]["CCSD+T(CCSD) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "(T) CORRECTION ENERGY" in calc["data"]:
-            calc["data"]["CCSD(T) CORRELATION ENERGY"] = (
-                calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["(T) CORRECTION ENERGY"]
-            )
-            calc["data"]["CCSD(T) TOTAL ENERGY"] = (
-                calc["data"]["CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "A-(T) CORRECTION ENERGY" in calc["data"]:
-            calc["data"]["A-CCSD(T) CORRELATION ENERGY"] = (
-                calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["A-(T) CORRECTION ENERGY"]
-            )
-            calc["data"]["A-CCSD(T) TOTAL ENERGY"] = (
-                calc["data"]["A-CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "CCSDT-1A CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CCSDT-1A TOTAL ENERGY"] = (
-                calc["data"]["CCSDT-1A CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "CCSDT-1B CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CCSDT-1B TOTAL ENERGY"] = (
-                calc["data"]["CCSDT-1B CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "CCSDT-2 CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CCSDT-2 TOTAL ENERGY"] = (
-                calc["data"]["CCSDT-2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "CCSDT-3 CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CCSDT-3 TOTAL ENERGY"] = (
-                calc["data"]["CCSDT-3 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "CCSDT CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CCSDT TOTAL ENERGY"] = (
-                calc["data"]["CCSDT CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "(Q) CORRECTION ENERGY" in calc["data"]:
-            calc["data"]["CCSDT(Q) CORRELATION ENERGY"] = (
-                calc["data"]["CCSDT CORRELATION ENERGY"] + calc["data"]["(Q) CORRECTION ENERGY"]
-            )
-            calc["data"]["CCSDT(Q) TOTAL ENERGY"] = (
-                calc["data"]["CCSDT(Q) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "CCSDTQ CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["CCSDTQ TOTAL ENERGY"] = (
-                calc["data"]["CCSDTQ CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-
-        if "OMP2 CORRELATION ENERGY" in calc["data"]:
-            if calc["data"]["OMP2 CORRELATION ENERGY"] == _knownmissing:
-                calc["data"]["OMP2 TOTAL ENERGY"] = _knownmissing
-                calc["data"]["OMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
-            else:
-                calc["data"]["OMP2 TOTAL ENERGY"] = (
-                    calc["data"]["OMP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-                )
-                if "OMP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    if calc["data"]["OMP2 SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
-                        calc["data"]["OMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
-                    else:
-                        calc["data"]["OMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                            calc["data"]["OMP2 CORRELATION ENERGY"]
-                            - calc["data"]["OMP2 REFERENCE CORRECTION ENERGY"]
-                            - calc["data"]["OMP2 SAME-SPIN CORRELATION ENERGY"]
+                        calc["data"]["SCS-MP2 TOTAL ENERGY"] = (
+                            calc["data"]["SCS-MP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
                         )
 
-        if "OMP2.5 CORRELATION ENERGY" in calc["data"]:
-            if calc["data"]["OMP2.5 CORRELATION ENERGY"] == _knownmissing:
-                calc["data"]["OMP2.5 TOTAL ENERGY"] = _knownmissing
-                calc["data"]["OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
-            else:
-                calc["data"]["OMP2.5 TOTAL ENERGY"] = (
-                    calc["data"]["OMP2.5 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            if "MP3 CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["MP3 TOTAL ENERGY"] = (
+                    calc["data"]["MP3 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
                 )
-                if "OMP2.5 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    if calc["data"]["OMP2.5 SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
-                        calc["data"]["OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
-                    else:
-                        calc["data"]["OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                            calc["data"]["OMP2.5 CORRELATION ENERGY"]
-                            - calc["data"]["OMP2.5 REFERENCE CORRECTION ENERGY"]
-                            - calc["data"]["OMP2.5 SAME-SPIN CORRELATION ENERGY"]
+                if "MP2 CORRELATION ENERGY" in calc["data"]:
+                    calc["data"]["MP2.5 CORRELATION ENERGY"] = 0.5 * (
+                        calc["data"]["MP3 CORRELATION ENERGY"] + calc["data"]["MP2 CORRELATION ENERGY"]
+                    )
+                    calc["data"]["MP2.5 TOTAL ENERGY"] = (
+                        calc["data"]["MP2.5 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
+
+                if "MP3 SINGLES ENERGY" in calc["data"]:
+                    calc["data"]["MP3 DOUBLES ENERGY"] = (
+                        calc["data"]["MP3 CORRELATION ENERGY"] - calc["data"]["MP3 SINGLES ENERGY"]
+                    )
+                    if "MP2 SINGLES ENERGY" in calc["data"]:
+                        calc["data"]["MP2.5 SINGLES ENERGY"] = 0.5 * (
+                            calc["data"]["MP3 SINGLES ENERGY"] + calc["data"]["MP2 SINGLES ENERGY"]
+                        )
+                        calc["data"]["MP2.5 DOUBLES ENERGY"] = (
+                            calc["data"]["MP2.5 CORRELATION ENERGY"] - calc["data"]["MP2.5 SINGLES ENERGY"]
+                        )
+                    if "MP3 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        calc["data"]["MP3 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                            calc["data"]["MP3 CORRELATION ENERGY"]
+                            - calc["data"]["MP3 SAME-SPIN CORRELATION ENERGY"]
+                            - calc["data"]["MP3 SINGLES ENERGY"]
+                        )
+                        if "MP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                            calc["data"]["MP2.5 SAME-SPIN CORRELATION ENERGY"] = 0.5 * (
+                                calc["data"]["MP3 SAME-SPIN CORRELATION ENERGY"]
+                                + calc["data"]["MP2 SAME-SPIN CORRELATION ENERGY"]
+                            )
+                            calc["data"]["MP2.5 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                                calc["data"]["MP2.5 CORRELATION ENERGY"]
+                                - calc["data"]["MP2.5 SAME-SPIN CORRELATION ENERGY"]
+                                - calc["data"]["MP2.5 SINGLES ENERGY"]
+                            )
+
+            if (
+                "MP3 TOTAL GRADIENT" in calc["data"]
+                and "MP2 TOTAL GRADIENT" in calc["data"]
+                and "HF TOTAL GRADIENT" in calc["data"]
+            ):
+                calc["data"]["MP2.5 TOTAL GRADIENT"] = 0.5 * (
+                    calc["data"]["MP3 TOTAL GRADIENT"] + calc["data"]["MP2 TOTAL GRADIENT"]
+                )
+
+            if "MP4(SDQ) CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["MP4(SDQ) TOTAL ENERGY"] = (
+                    calc["data"]["MP4(SDQ) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+                if "MP4(T) CORRECTION ENERGY" in calc["data"]:
+                    calc["data"]["MP4 CORRELATION ENERGY"] = (
+                        calc["data"]["MP4(SDQ) CORRELATION ENERGY"] + calc["data"]["MP4(T) CORRECTION ENERGY"]
+                    )
+                    calc["data"]["MP4 TOTAL ENERGY"] = (
+                        calc["data"]["MP4 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
+                    if "MP3 CORRELATION ENERGY" in calc["data"]:
+                        calc["data"]["MP4 CORRECTION ENERGY"] = (
+                            calc["data"]["MP4 CORRELATION ENERGY"] - calc["data"]["MP3 CORRELATION ENERGY"]
                         )
 
-        if "OMP3 CORRELATION ENERGY" in calc["data"]:
-            if calc["data"]["OMP3 CORRELATION ENERGY"] == _knownmissing:
-                calc["data"]["OMP3 TOTAL ENERGY"] = _knownmissing
-                calc["data"]["OMP3 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
-            else:
-                calc["data"]["OMP3 TOTAL ENERGY"] = (
-                    calc["data"]["OMP3 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            if "CISD CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CISD TOTAL ENERGY"] = (
+                    calc["data"]["CISD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
                 )
-                if "OMP3 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    if calc["data"]["OMP3 SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
-                        calc["data"]["OMP3 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
-                    else:
-                        calc["data"]["OMP3 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                            calc["data"]["OMP3 CORRELATION ENERGY"]
-                            - calc["data"]["OMP3 REFERENCE CORRECTION ENERGY"]
-                            - calc["data"]["OMP3 SAME-SPIN CORRELATION ENERGY"]
+
+            if "QCISD CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["QCISD TOTAL ENERGY"] = (
+                    calc["data"]["QCISD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+                if "QCISD(T) CORRECTION ENERGY" in calc["data"]:
+                    calc["data"]["QCISD(T) CORRELATION ENERGY"] = (
+                        calc["data"]["QCISD CORRELATION ENERGY"] + calc["data"]["QCISD(T) CORRECTION ENERGY"]
+                    )
+                    calc["data"]["QCISD(T) TOTAL ENERGY"] = (
+                        calc["data"]["QCISD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
+
+            if "FCI CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["FCI TOTAL ENERGY"] = (
+                    calc["data"]["FCI CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "REMP2 CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["REMP2 TOTAL ENERGY"] = (
+                    calc["data"]["REMP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+                if "REMP2 SINGLES ENERGY" in calc["data"]:
+                    calc["data"]["REMP2 DOUBLES ENERGY"] = (
+                        calc["data"]["REMP2 CORRELATION ENERGY"] - calc["data"]["REMP2 SINGLES ENERGY"]
+                    )
+                    if "REMP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        calc["data"]["REMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                            calc["data"]["REMP2 CORRELATION ENERGY"]
+                            - calc["data"]["REMP2 SAME-SPIN CORRELATION ENERGY"]
+                            - calc["data"]["REMP2 SINGLES ENERGY"]
                         )
 
-        if "OREMP2 CORRELATION ENERGY" in calc["data"]:
-            if calc["data"]["OREMP2 CORRELATION ENERGY"] == _knownmissing:
-                calc["data"]["OREMP2 TOTAL ENERGY"] = _knownmissing
-                calc["data"]["OREMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
-            else:
-                calc["data"]["OREMP2 TOTAL ENERGY"] = (
-                    calc["data"]["OREMP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+            if "LCCD CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["LCCD TOTAL ENERGY"] = (
+                    calc["data"]["LCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
                 )
-                if "OREMP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                    if calc["data"]["OREMP2 SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
-                        calc["data"]["OREMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
-                    else:
-                        calc["data"]["OREMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                            calc["data"]["OREMP2 CORRELATION ENERGY"]
-                            - calc["data"]["OREMP2 REFERENCE CORRECTION ENERGY"]
-                            - calc["data"]["OREMP2 SAME-SPIN CORRELATION ENERGY"]
+                if "LCCD SINGLES ENERGY" in calc["data"]:
+                    calc["data"]["LCCD DOUBLES ENERGY"] = (
+                        calc["data"]["LCCD CORRELATION ENERGY"] - calc["data"]["LCCD SINGLES ENERGY"]
+                    )
+                    if "LCCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        calc["data"]["LCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                            calc["data"]["LCCD CORRELATION ENERGY"]
+                            - calc["data"]["LCCD SAME-SPIN CORRELATION ENERGY"]
+                            - calc["data"]["LCCD SINGLES ENERGY"]
                         )
 
-        if "OLCCD CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["OLCCD TOTAL ENERGY"] = (
-                calc["data"]["OLCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-            if "OLCCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                if calc["data"]["OLCCD SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
-                    calc["data"]["OLCCD OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+            if "LCCSD CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["LCCSD TOTAL ENERGY"] = (
+                    calc["data"]["LCCSD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+                if "LCCSD SINGLES ENERGY" in calc["data"]:
+                    calc["data"]["LCCSD DOUBLES ENERGY"] = (
+                        calc["data"]["LCCSD CORRELATION ENERGY"] - calc["data"]["LCCSD SINGLES ENERGY"]
+                    )
+                    if "LCCSD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        calc["data"]["LCCSD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                            calc["data"]["LCCSD CORRELATION ENERGY"]
+                            - calc["data"]["LCCSD SAME-SPIN CORRELATION ENERGY"]
+                            - calc["data"]["LCCSD SINGLES ENERGY"]
+                        )
+
+            if "CCD CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CCD TOTAL ENERGY"] = (
+                    calc["data"]["CCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+                if "CCD SINGLES ENERGY" in calc["data"]:
+                    calc["data"]["CCD DOUBLES ENERGY"] = (
+                        calc["data"]["CCD CORRELATION ENERGY"] - calc["data"]["CCD SINGLES ENERGY"]
+                    )
+                    if "CCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        calc["data"]["CCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                            calc["data"]["CCD CORRELATION ENERGY"]
+                            - calc["data"]["CCD SAME-SPIN CORRELATION ENERGY"]
+                            - calc["data"]["CCD SINGLES ENERGY"]
+                        )
+
+            if "CCSD CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CCSD TOTAL ENERGY"] = (
+                    calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+                if "CCSD SINGLES ENERGY" in calc["data"]:
+                    calc["data"]["CCSD DOUBLES ENERGY"] = (
+                        calc["data"]["CCSD CORRELATION ENERGY"] - calc["data"]["CCSD SINGLES ENERGY"]
+                    )
+                    if "CCSD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        calc["data"]["CCSD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                            calc["data"]["CCSD CORRELATION ENERGY"]
+                            - calc["data"]["CCSD SAME-SPIN CORRELATION ENERGY"]
+                            - calc["data"]["CCSD SINGLES ENERGY"]
+                        )
+
+            if "T(CCSD) CORRECTION ENERGY" in calc["data"]:
+                calc["data"]["CCSD+T(CCSD) CORRELATION ENERGY"] = (
+                    calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["T(CCSD) CORRECTION ENERGY"]
+                )
+                calc["data"]["CCSD+T(CCSD) TOTAL ENERGY"] = (
+                    calc["data"]["CCSD+T(CCSD) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "(T) CORRECTION ENERGY" in calc["data"]:
+                calc["data"]["CCSD(T) CORRELATION ENERGY"] = (
+                    calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["(T) CORRECTION ENERGY"]
+                )
+                calc["data"]["CCSD(T) TOTAL ENERGY"] = (
+                    calc["data"]["CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "A-(T) CORRECTION ENERGY" in calc["data"]:
+                calc["data"]["A-CCSD(T) CORRELATION ENERGY"] = (
+                    calc["data"]["CCSD CORRELATION ENERGY"] + calc["data"]["A-(T) CORRECTION ENERGY"]
+                )
+                calc["data"]["A-CCSD(T) TOTAL ENERGY"] = (
+                    calc["data"]["A-CCSD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "CCSDT-1A CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CCSDT-1A TOTAL ENERGY"] = (
+                    calc["data"]["CCSDT-1A CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "CCSDT-1B CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CCSDT-1B TOTAL ENERGY"] = (
+                    calc["data"]["CCSDT-1B CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "CCSDT-2 CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CCSDT-2 TOTAL ENERGY"] = (
+                    calc["data"]["CCSDT-2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "CCSDT-3 CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CCSDT-3 TOTAL ENERGY"] = (
+                    calc["data"]["CCSDT-3 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "CCSDT CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CCSDT TOTAL ENERGY"] = (
+                    calc["data"]["CCSDT CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "(Q) CORRECTION ENERGY" in calc["data"]:
+                calc["data"]["CCSDT(Q) CORRELATION ENERGY"] = (
+                    calc["data"]["CCSDT CORRELATION ENERGY"] + calc["data"]["(Q) CORRECTION ENERGY"]
+                )
+                calc["data"]["CCSDT(Q) TOTAL ENERGY"] = (
+                    calc["data"]["CCSDT(Q) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "CCSDTQ CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["CCSDTQ TOTAL ENERGY"] = (
+                    calc["data"]["CCSDTQ CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+
+            if "OMP2 CORRELATION ENERGY" in calc["data"]:
+                if calc["data"]["OMP2 CORRELATION ENERGY"] == _knownmissing:
+                    calc["data"]["OMP2 TOTAL ENERGY"] = _knownmissing
+                    calc["data"]["OMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
                 else:
-                    calc["data"]["OLCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                        calc["data"]["OLCCD CORRELATION ENERGY"]
-                        - calc["data"]["OLCCD REFERENCE CORRECTION ENERGY"]
-                        - calc["data"]["OLCCD SAME-SPIN CORRELATION ENERGY"]
+                    calc["data"]["OMP2 TOTAL ENERGY"] = (
+                        calc["data"]["OMP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
+                    if "OMP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        if calc["data"]["OMP2 SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
+                            calc["data"]["OMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+                        else:
+                            calc["data"]["OMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                                calc["data"]["OMP2 CORRELATION ENERGY"]
+                                - calc["data"]["OMP2 REFERENCE CORRECTION ENERGY"]
+                                - calc["data"]["OMP2 SAME-SPIN CORRELATION ENERGY"]
+                            )
+
+            if "OMP2.5 CORRELATION ENERGY" in calc["data"]:
+                if calc["data"]["OMP2.5 CORRELATION ENERGY"] == _knownmissing:
+                    calc["data"]["OMP2.5 TOTAL ENERGY"] = _knownmissing
+                    calc["data"]["OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+                else:
+                    calc["data"]["OMP2.5 TOTAL ENERGY"] = (
+                        calc["data"]["OMP2.5 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
+                    if "OMP2.5 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        if calc["data"]["OMP2.5 SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
+                            calc["data"]["OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+                        else:
+                            calc["data"]["OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                                calc["data"]["OMP2.5 CORRELATION ENERGY"]
+                                - calc["data"]["OMP2.5 REFERENCE CORRECTION ENERGY"]
+                                - calc["data"]["OMP2.5 SAME-SPIN CORRELATION ENERGY"]
+                            )
+
+            if "OMP3 CORRELATION ENERGY" in calc["data"]:
+                if calc["data"]["OMP3 CORRELATION ENERGY"] == _knownmissing:
+                    calc["data"]["OMP3 TOTAL ENERGY"] = _knownmissing
+                    calc["data"]["OMP3 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+                else:
+                    calc["data"]["OMP3 TOTAL ENERGY"] = (
+                        calc["data"]["OMP3 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
+                    if "OMP3 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        if calc["data"]["OMP3 SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
+                            calc["data"]["OMP3 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+                        else:
+                            calc["data"]["OMP3 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                                calc["data"]["OMP3 CORRELATION ENERGY"]
+                                - calc["data"]["OMP3 REFERENCE CORRECTION ENERGY"]
+                                - calc["data"]["OMP3 SAME-SPIN CORRELATION ENERGY"]
+                            )
+
+            if "OREMP2 CORRELATION ENERGY" in calc["data"]:
+                if calc["data"]["OREMP2 CORRELATION ENERGY"] == _knownmissing:
+                    calc["data"]["OREMP2 TOTAL ENERGY"] = _knownmissing
+                    calc["data"]["OREMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+                else:
+                    calc["data"]["OREMP2 TOTAL ENERGY"] = (
+                        calc["data"]["OREMP2 CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
+                    if "OREMP2 SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                        if calc["data"]["OREMP2 SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
+                            calc["data"]["OREMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+                        else:
+                            calc["data"]["OREMP2 OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                                calc["data"]["OREMP2 CORRELATION ENERGY"]
+                                - calc["data"]["OREMP2 REFERENCE CORRECTION ENERGY"]
+                                - calc["data"]["OREMP2 SAME-SPIN CORRELATION ENERGY"]
+                            )
+
+            if "OLCCD CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["OLCCD TOTAL ENERGY"] = (
+                    calc["data"]["OLCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+                if "OLCCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                    if calc["data"]["OLCCD SAME-SPIN CORRELATION ENERGY"] == _knownmissing:
+                        calc["data"]["OLCCD OPPOSITE-SPIN CORRELATION ENERGY"] = _knownmissing
+                    else:
+                        calc["data"]["OLCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                            calc["data"]["OLCCD CORRELATION ENERGY"]
+                            - calc["data"]["OLCCD REFERENCE CORRECTION ENERGY"]
+                            - calc["data"]["OLCCD SAME-SPIN CORRELATION ENERGY"]
+                        )
+
+            if "OCCD CORRELATION ENERGY" in calc["data"]:
+                calc["data"]["OCCD TOTAL ENERGY"] = (
+                    calc["data"]["OCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                )
+                if "OCCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
+                    calc["data"]["OCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
+                        calc["data"]["OCCD CORRELATION ENERGY"]
+                        - calc["data"]["OCCD REFERENCE CORRECTION ENERGY"]
+                        - calc["data"]["OCCD SAME-SPIN CORRELATION ENERGY"]
                     )
 
-        if "OCCD CORRELATION ENERGY" in calc["data"]:
-            calc["data"]["OCCD TOTAL ENERGY"] = (
-                calc["data"]["OCCD CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-            )
-            if "OCCD SAME-SPIN CORRELATION ENERGY" in calc["data"]:
-                calc["data"]["OCCD OPPOSITE-SPIN CORRELATION ENERGY"] = (
-                    calc["data"]["OCCD CORRELATION ENERGY"]
-                    - calc["data"]["OCCD REFERENCE CORRECTION ENERGY"]
-                    - calc["data"]["OCCD SAME-SPIN CORRELATION ENERGY"]
-                )
+            if "O(T) CORRECTION ENERGY" in calc["data"]:
+                if calc["data"]["O(T) CORRECTION ENERGY"] == _knownmissing:
+                    calc["data"]["OCCD(T) CORRELATION ENERGY"] = _knownmissing
+                    calc["data"]["OCCD(T) TOTAL ENERGY"] = _knownmissing
+                else:
+                    calc["data"]["OCCD(T) CORRELATION ENERGY"] = (
+                        calc["data"]["OCCD CORRELATION ENERGY"] + calc["data"]["O(T) CORRECTION ENERGY"]
+                    )
+                    calc["data"]["OCCD(T) TOTAL ENERGY"] = (
+                        calc["data"]["OCCD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
 
-        if "O(T) CORRECTION ENERGY" in calc["data"]:
-            if calc["data"]["O(T) CORRECTION ENERGY"] == _knownmissing:
-                calc["data"]["OCCD(T) CORRELATION ENERGY"] = _knownmissing
-                calc["data"]["OCCD(T) TOTAL ENERGY"] = _knownmissing
-            else:
-                calc["data"]["OCCD(T) CORRELATION ENERGY"] = (
-                    calc["data"]["OCCD CORRELATION ENERGY"] + calc["data"]["O(T) CORRECTION ENERGY"]
-                )
-                calc["data"]["OCCD(T) TOTAL ENERGY"] = (
-                    calc["data"]["OCCD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-                )
+            if "A-O(T) CORRECTION ENERGY" in calc["data"]:
+                if calc["data"]["A-O(T) CORRECTION ENERGY"] == _knownmissing:
+                    calc["data"]["A-OCCD(T) CORRELATION ENERGY"] = _knownmissing
+                    calc["data"]["A-OCCD(T) TOTAL ENERGY"] = _knownmissing
+                else:
+                    calc["data"]["A-OCCD(T) CORRELATION ENERGY"] = (
+                        calc["data"]["OCCD CORRELATION ENERGY"] + calc["data"]["A-O(T) CORRECTION ENERGY"]
+                    )
+                    calc["data"]["A-OCCD(T) TOTAL ENERGY"] = (
+                        calc["data"]["A-OCCD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
+                    )
 
-        if "A-O(T) CORRECTION ENERGY" in calc["data"]:
-            if calc["data"]["A-O(T) CORRECTION ENERGY"] == _knownmissing:
-                calc["data"]["A-OCCD(T) CORRELATION ENERGY"] = _knownmissing
-                calc["data"]["A-OCCD(T) TOTAL ENERGY"] = _knownmissing
-            else:
-                calc["data"]["A-OCCD(T) CORRELATION ENERGY"] = (
-                    calc["data"]["OCCD CORRELATION ENERGY"] + calc["data"]["A-O(T) CORRECTION ENERGY"]
-                )
-                calc["data"]["A-OCCD(T) TOTAL ENERGY"] = (
-                    calc["data"]["A-OCCD(T) CORRELATION ENERGY"] + calc["data"]["HF TOTAL ENERGY"]
-                )
-
-    calc["data"].update(_std_generics[f"{calc['meta']['system']}_{calc['meta']['basis']}_{calc['meta']['fcae']}"])
+        calc["data"].update(_std_generics[f"{calc['meta']['system']}_{calc['meta']['basis']}_{calc['meta']['fcae']}"])
 
 
 def answer_hash(**kwargs):

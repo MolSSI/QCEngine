@@ -228,8 +228,25 @@ def contractual_mp2(
                         qc_module == "psi4-occ"
                         and reference == "rhf"
                         and corl_type in ["df", "cd"]
-                        and method in [ "mp2",  "mp2.5",  "mp3",  "remp2",  "lccd", "ccsd", "ccsd(t)", "a-ccsd(t)",
-                                       "omp2", "omp2.5", "omp3", "oremp2", "olccd", "occd", "occd(t)", "a-occd(t)"]
+                        and method
+                        in [
+                            "mp2",
+                            "mp2.5",
+                            "mp3",
+                            "remp2",
+                            "lccd",
+                            "ccsd",
+                            "ccsd(t)",
+                            "a-ccsd(t)",
+                            "omp2",
+                            "omp2.5",
+                            "omp3",
+                            "oremp2",
+                            "olccd",
+                            "occd",
+                            "occd(t)",
+                            "a-occd(t)",
+                        ]
                     )
                 )
                 and pv in ["MP2 SAME-SPIN CORRELATION ENERGY", "MP2 OPPOSITE-SPIN CORRELATION ENERGY"]
@@ -250,7 +267,14 @@ def contractual_mp2(
                 ]
             )
             or (
-                ((qc_module == "psi4-occ" and reference == "rohf" and corl_type == "conv" and method in ["omp2", "omp2.5", "omp3", "oremp2", "olccd"]))
+                (
+                    (
+                        qc_module == "psi4-occ"
+                        and reference == "rohf"
+                        and corl_type == "conv"
+                        and method in ["omp2", "omp2.5", "omp3", "oremp2", "olccd"]
+                    )
+                )
                 and pv
                 in [
                     "MP2 CORRELATION ENERGY",
@@ -330,9 +354,16 @@ def contractual_mp2p5(
             )
             and pv in ["MP2.5 SAME-SPIN CORRELATION ENERGY", "MP2.5 OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (
-            ((qc_module == "psi4-detci" and method in ["mp3"])
-            or (qc_module == "psi4-occ" and reference == "rohf" and corl_type in ["conv", "df", "cd"] and method in ["omp2.5", "omp3"]))
-                # Note SS/OS might be obtainable but no reference to verify
+            (
+                (qc_module == "psi4-detci" and method in ["mp3"])
+                or (
+                    qc_module == "psi4-occ"
+                    and reference == "rohf"
+                    and corl_type in ["conv", "df", "cd"]
+                    and method in ["omp2.5", "omp3"]
+                )
+            )
+            # Note SS/OS might be obtainable but no reference to verify
             and pv
             in [
                 "MP2.5 CORRELATION ENERGY",
@@ -375,37 +406,48 @@ def contractual_mp3(
         expected = True
         if (
             (
-                (qc_module.startswith("cfour") and method in ["mp3", "mp4(sdq)", "mp4"])
-                or (
-                    qc_module == "psi4-occ"
-                    and reference == "rhf"
-                    and corl_type in ["df", "cd"]
-                    and method in ["mp2.5", "mp3", "omp2.5", "omp3"]
+                (
+                    (qc_module.startswith("cfour") and method in ["mp3", "mp4(sdq)", "mp4"])
+                    or (
+                        qc_module == "psi4-occ"
+                        and reference == "rhf"
+                        and corl_type in ["df", "cd"]
+                        and method in ["mp2.5", "mp3", "omp2.5", "omp3"]
+                    )
+                    or (qc_module.startswith("nwchem") and method in ["mp3", "mp4"])
                 )
-                or (qc_module.startswith("nwchem") and method in ["mp3", "mp4"])
+                and pv in ["MP3 SAME-SPIN CORRELATION ENERGY", "MP3 OPPOSITE-SPIN CORRELATION ENERGY"]
             )
-            and pv in ["MP3 SAME-SPIN CORRELATION ENERGY", "MP3 OPPOSITE-SPIN CORRELATION ENERGY"]
-        ) or (
-            ((qc_module == "psi4-detci" and method == "mp3"))
-            and pv
-            in [
-                "MP3 SAME-SPIN CORRELATION ENERGY",
-                "MP3 OPPOSITE-SPIN CORRELATION ENERGY",
-                "MP3 SINGLES ENERGY",
-                "MP3 DOUBLES ENERGY",
-            ]
-        ) or (
-            ((qc_module == "psi4-occ" and reference == "rohf" and corl_type in ["conv", "df", "cd"] and method in ["omp2.5", "omp3"]))
-            # Note SS/OS might be obtainable but no reference to verify
-            and pv
-            in [
-                "MP3 CORRELATION ENERGY",
-                "MP3 TOTAL ENERGY",
-                "MP3 SAME-SPIN CORRELATION ENERGY",
-                "MP3 SINGLES ENERGY",
-                "MP3 DOUBLES ENERGY",
-                "MP3 OPPOSITE-SPIN CORRELATION ENERGY",
-            ]
+            or (
+                ((qc_module == "psi4-detci" and method == "mp3"))
+                and pv
+                in [
+                    "MP3 SAME-SPIN CORRELATION ENERGY",
+                    "MP3 OPPOSITE-SPIN CORRELATION ENERGY",
+                    "MP3 SINGLES ENERGY",
+                    "MP3 DOUBLES ENERGY",
+                ]
+            )
+            or (
+                (
+                    (
+                        qc_module == "psi4-occ"
+                        and reference == "rohf"
+                        and corl_type in ["conv", "df", "cd"]
+                        and method in ["omp2.5", "omp3"]
+                    )
+                )
+                # Note SS/OS might be obtainable but no reference to verify
+                and pv
+                in [
+                    "MP3 CORRELATION ENERGY",
+                    "MP3 TOTAL ENERGY",
+                    "MP3 SAME-SPIN CORRELATION ENERGY",
+                    "MP3 SINGLES ENERGY",
+                    "MP3 DOUBLES ENERGY",
+                    "MP3 OPPOSITE-SPIN CORRELATION ENERGY",
+                ]
+            )
         ):
             expected = False
 
@@ -598,12 +640,15 @@ def contractual_remp2(
     for pv in contractual_qcvars:
         expected = True
         if (
-            (
-                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "remp2")
-            )
+            ((qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "remp2"))
             and pv in ["REMP2 SAME-SPIN CORRELATION ENERGY", "REMP2 OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (
-            (qc_module == "psi4-occ" and reference in ["rhf", "uhf", "rohf"] and corl_type in ["conv", "df", "cd"] and method == "oremp2")
+            (
+                qc_module == "psi4-occ"
+                and reference in ["rhf", "uhf", "rohf"]
+                and corl_type in ["conv", "df", "cd"]
+                and method == "oremp2"
+            )
             and pv
             in [
                 "REMP2 CORRELATION ENERGY",
@@ -1138,11 +1183,8 @@ def contractual_omp2(
     for pv in contractual_qcvars:
         expected = True
         if (
-            (
-                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp2")
-            )
-            and pv in ["OMP2 SAME-SPIN CORRELATION ENERGY", "OMP2 OPPOSITE-SPIN CORRELATION ENERGY"]
-        ):
+            (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp2")
+        ) and pv in ["OMP2 SAME-SPIN CORRELATION ENERGY", "OMP2 OPPOSITE-SPIN CORRELATION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
@@ -1173,11 +1215,8 @@ def contractual_omp2p5(
     for pv in contractual_qcvars:
         expected = True
         if (
-            (
-                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp2.5")
-            )
-            and pv in ["OMP2.5 SAME-SPIN CORRELATION ENERGY", "OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"]
-        ):
+            (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp2.5")
+        ) and pv in ["OMP2.5 SAME-SPIN CORRELATION ENERGY", "OMP2.5 OPPOSITE-SPIN CORRELATION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
@@ -1208,11 +1247,8 @@ def contractual_omp3(
     for pv in contractual_qcvars:
         expected = True
         if (
-            (
-                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp3")
-            )
-            and pv in ["OMP3 SAME-SPIN CORRELATION ENERGY", "OMP3 OPPOSITE-SPIN CORRELATION ENERGY"]
-        ):
+            (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "omp3")
+        ) and pv in ["OMP3 SAME-SPIN CORRELATION ENERGY", "OMP3 OPPOSITE-SPIN CORRELATION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
@@ -1243,12 +1279,14 @@ def contractual_oremp2(
     for pv in contractual_qcvars:
         expected = True
         if (
+            # usual for oo (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "oremp2")
             (
-                # usual for oo (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "oremp2")
-                (qc_module == "psi4-occ" and reference in ["rhf", "uhf", "rohf"] and corl_type in ["df", "cd"] and method == "oremp2")
+                qc_module == "psi4-occ"
+                and reference in ["rhf", "uhf", "rohf"]
+                and corl_type in ["df", "cd"]
+                and method == "oremp2"
             )
-            and pv in ["OREMP2 SAME-SPIN CORRELATION ENERGY", "OREMP2 OPPOSITE-SPIN CORRELATION ENERGY"]
-        ):
+        ) and pv in ["OREMP2 SAME-SPIN CORRELATION ENERGY", "OREMP2 OPPOSITE-SPIN CORRELATION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
@@ -1279,11 +1317,8 @@ def contractual_olccd(
     for pv in contractual_qcvars:
         expected = True
         if (
-            (
-                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "olccd")
-            )
-            and pv in ["OLCCD SAME-SPIN CORRELATION ENERGY", "OLCCD OPPOSITE-SPIN CORRELATION ENERGY"]
-        ):
+            (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "olccd")
+        ) and pv in ["OLCCD SAME-SPIN CORRELATION ENERGY", "OLCCD OPPOSITE-SPIN CORRELATION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
@@ -1315,10 +1350,12 @@ def contractual_occd(
         expected = True
         if (
             (
-                (qc_module == "psi4-occ" and reference in ["rhf", "uhf", "rohf"] and corl_type in ["df", "cd"] and method in ["occd", "occd(t)", "a-occd(t)"])
+                qc_module == "psi4-occ"
+                and reference in ["rhf", "uhf", "rohf"]
+                and corl_type in ["df", "cd"]
+                and method in ["occd", "occd(t)", "a-occd(t)"]
             )
-            and pv in ["OCCD SAME-SPIN CORRELATION ENERGY", "OCCD OPPOSITE-SPIN CORRELATION ENERGY"]
-        ):
+        ) and pv in ["OCCD SAME-SPIN CORRELATION ENERGY", "OCCD OPPOSITE-SPIN CORRELATION ENERGY"]:
             expected = False
 
         yield (pv, pv, expected)
