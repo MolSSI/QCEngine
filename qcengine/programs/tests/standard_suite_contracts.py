@@ -691,21 +691,41 @@ def contractual_lccd(
         expected = True
         if (
             (
-                (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "lccd")
-                or (qc_module == "cfour-ncc" and reference in ["rhf"] and method == "lccd")
-                or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method == "lccd")
-                or (qc_module == "gamess" and reference in ["rhf"] and method == "lccd")
+                (
+                    (qc_module == "psi4-occ" and reference == "rhf" and corl_type in ["df", "cd"] and method == "lccd")
+                    or (qc_module == "cfour-ncc" and reference in ["rhf"] and method == "lccd")
+                    or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method == "lccd")
+                    or (qc_module == "gamess" and reference in ["rhf"] and method == "lccd")
+                )
+                and pv in ["LCCD SAME-SPIN CORRELATION ENERGY", "LCCD OPPOSITE-SPIN CORRELATION ENERGY"]
             )
-            and pv in ["LCCD SAME-SPIN CORRELATION ENERGY", "LCCD OPPOSITE-SPIN CORRELATION ENERGY"]
-        ) or (
-            (qc_module == "nwchem-tce" and reference in ["rohf"] and method in ["lccd"])
-            and pv
-            in [
-                "LCCD SAME-SPIN CORRELATION ENERGY",
-                "LCCD OPPOSITE-SPIN CORRELATION ENERGY",
-                "LCCD SINGLES ENERGY",
-                "LCCD DOUBLES ENERGY",
-            ]
+            or (
+                (qc_module == "nwchem-tce" and reference in ["rohf"] and method in ["lccd"])
+                and pv
+                in [
+                    "LCCD SAME-SPIN CORRELATION ENERGY",
+                    "LCCD OPPOSITE-SPIN CORRELATION ENERGY",
+                    "LCCD SINGLES ENERGY",
+                    "LCCD DOUBLES ENERGY",
+                ]
+            )
+            or (
+                (
+                    qc_module == "psi4-occ"
+                    and reference in ["rhf", "uhf", "rohf"]
+                    and corl_type in ["conv", "df", "cd"]
+                    and method == "olccd"
+                )
+                and pv
+                in [
+                    "LCCD CORRELATION ENERGY",
+                    "LCCD TOTAL ENERGY",
+                    "LCCD SAME-SPIN CORRELATION ENERGY",
+                    "LCCD SINGLES ENERGY",
+                    "LCCD DOUBLES ENERGY",
+                    "LCCD OPPOSITE-SPIN CORRELATION ENERGY",
+                ]
+            )
         ):
             expected = False
 
