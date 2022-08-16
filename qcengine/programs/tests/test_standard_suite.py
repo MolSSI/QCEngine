@@ -27,7 +27,7 @@
 #
 # * (E4) Calculation the QC program thinks it can run but we know better -- `return_result` wrong.
 #   example: NWChem ROHF MP2 that's missing singles contribution
-#   handle: add "wrong" typle to test like `_w1`
+#   handle: add "wrong" tuple to test like `_w1`
 #   result: runner checks assertion fails at expected result and triggers pytest.xfail
 
 
