@@ -17,6 +17,14 @@ Changelog
 .. +++++++++
 
 
+v0.24.1 / 2022-08-16
+--------------------
+
+Enhancements
+++++++++++++
+- (:pr:`375`) testing - in standard suite, add reference values for occ, a-ccsd(t), olccd grad, remp2, omp2, omp2.5, omp3, oremp2, density fitted ccsd, ccsd(t), a-ccsd(t).
+
+
 v0.24.0 / 2022-07-08
 --------------------
 
