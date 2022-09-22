@@ -27,6 +27,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
     driver = inp["driver"]
     reference = inp["reference"]
     fcae = inp["fcae"]
+    sdsc = inp.get("sdsc", "") or ("sc" if reference == "rohf" else "sd")
 
     if basis == "cfour-qz2p" and qcprog in ["gamess", "nwchem", "qchem"]:
         pytest.skip(f"basis {basis} not available in {qcprog} library")
@@ -103,6 +104,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
         scf_type=scf_type,
         reference=reference,
         corl_type=corl_type,
+        sdsc=sdsc,
     )
     ref_block = std_suite[chash]
 
@@ -116,6 +118,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
         reference=reference,
         corl_type="conv",
         scf_type="pk",
+        sdsc=sdsc,
     )
     ref_block_conv = std_suite[chash_conv]
 
@@ -139,13 +142,13 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
     if "error" in inp:
         errtype, errmatch, reason = inp["error"]
         with pytest.raises(errtype) as e:
-            qcng.compute(atin, qcprog, raise_error=True, return_dict=True, local_options=local_options)
+            qcng.compute(atin, qcprog, raise_error=True, return_dict=True, task_config=local_options)
 
         assert re.search(errmatch, str(e.value)), f"Not found: {errtype} '{errmatch}' in {e.value}"
         # _recorder(qcprog, qc_module_in, driver, method, reference, fcae, scf_type, corl_type, "error", "nyi: " + reason)
         return
 
-    wfn = qcng.compute(atin, qcprog, raise_error=True, local_options=local_options)
+    wfn = qcng.compute(atin, qcprog, raise_error=True, task_config=local_options)
 
     print("WFN")
     pp.pprint(wfn.dict())
@@ -212,6 +215,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
         method,
         corl_type,
         fcae,
+        sdsc,
     ]
     asserter_args = [
         [wfn.extras["qcvars"], wfn.properties],

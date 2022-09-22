@@ -44,6 +44,9 @@ def muster_modelchem(method: str, driver: "DriverEnum") -> Dict[str, Any]:
     elif method == "mp4":
         opts["calc_level"] = "mp4"
 
+    elif method == "bccd":
+        opts["calc_level"] = "b-ccd"
+
     elif method == "cc2":
         opts["calc_level"] = "cc2"
 
@@ -56,6 +59,9 @@ def muster_modelchem(method: str, driver: "DriverEnum") -> Dict[str, Any]:
     elif method == "ccsd(t)":
         # Can't use (T) b/c bug in xsymcor lops it off
         opts["calc_level"] = "ccsd[t]"
+
+    elif method == "bccd(t)":
+        opts["calc_level"] = "b-ccd(t)"
 
     elif method == "ccsdt":
         opts["calc_level"] = "ccsdt"

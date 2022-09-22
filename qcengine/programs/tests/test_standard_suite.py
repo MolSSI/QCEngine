@@ -58,7 +58,7 @@ def clsd_open_pmols():
 _q1 = (qcng.exceptions.InputError, "unknown SCFTYPE", "no ROHF reference for NWChem hand-coded MP2.")
 _q2 = (qcng.exceptions.InputError, "CCTYP IS PROGRAMMED ONLY FOR SCFTYP=RHF OR ROHF", "no UHF CC in GAMESS.")
 _q3 = (qcng.exceptions.InputError, "ccsd: nopen is not zero", "no non-RHF reference for NWChem hand-coded CC.")
-_q6 = (qcng.exceptions.InputError, "Only RHF/UHF Hessians are currently implemented.", "no ROHF Hessian for Psi4 HF.")
+_q6 = (qcng.exceptions.InputError, r"Only RHF/UHF(/RKS|) Hessians are currently implemented.", "no ROHF Hessian for Psi4 HF.")
 _q45 = (qcng.exceptions.UnknownError, "non-Abelian symmetry not permitted", "temporary excuse of failure. I think NWChem has fixed upstream.")
 
 _w1 = ("MP2 CORRELATION ENERGY", "nonstandard answer: NWChem TCE MP2 doesn't report singles (affects ROHF)")
@@ -412,15 +412,15 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
         pytest.param({"call": "gamess", "reference": "rohf", "fcae": "ae", "keywords": {"contrl__scftyp": "rohf", "ccinp__ncore": 0, "ccinp__maxcc": 50},                                                                }, id="ccsd rohf ae: gamess",     marks=using("gamess")),
         pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"qc_module": "tce", "scf__rohf": True},                                                                                          }, id="ccsd rohf ae: nwchem-tce", marks=using("nwchem")),
         pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"scf__rohf": True},                                                                                                 "error": {0: _q3 }}, id="ccsd rohf ae: nwchem",     marks=using("nwchem")),
-        pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "qc_module": "ccenergy"},                                                                                   }, id="ccsd rohf ae: psi4",       marks=using("psi4_mp2qcsk")),  # TODO another way for ccenergy? (fc, too)
+        pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "sdsc": "sd", "keywords": {"reference": "rohf", "qc_module": "ccenergy"},                                                                                   }, id="ccsd rohf ae: psi4",       marks=using("psi4_mp2qcsk")),  # TODO another way for ccenergy? (fc, too)
 
-        pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "fc", "keywords": {"dropmo": [1], "REFerence": "roHF", "SCF_CONV": 12, "CC_CONV": 12, "orbitals": 0, "cc_program": "vcc", "print": 2},              }, id="ccsd rohf fc: cfour-vcc",  marks=using("cfour")),
-        pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "fc", "keywords": {"dropmo": [1], "REFerence": "roHF", "SCF_CONV": 12, "CC_CONV": 12, "orbitals": 0, "cc_program": "ecc"},                          }, id="ccsd rohf fc: cfour-ecc",  marks=using("cfour")),
-      # pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "fc", "keywords": {"dropmo": 1, "reference": "rohf", "orbitals": 0},                                                                                }, id="ccsd rohf fc: cfour",      marks=using("cfour")),
-        pytest.param({"call": "gamess", "reference": "rohf", "fcae": "fc", "keywords": {"contrl__scftyp": "rohf", "ccinp__iconv": 9, "scf__conv": 9},                                                       "wrong": {0: _w2 }}, id="ccsd rohf fc: gamess",     marks=using("gamess")),
-        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "fc", "keywords": {"tce__freeze": 1, "qc_module": "tce", "scf__rohf": True},                                                                        }, id="ccsd rohf fc: nwchem-tce", marks=using("nwchem")),
-        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "fc", "keywords": {"ccsd__freeze": 1, "scf__rohf": True},                                                                              "error": {0: _q3 }}, id="ccsd rohf fc: nwchem",     marks=using("nwchem")),
-        pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "fc", "keywords": {"e_convergence": 8, "r_convergence": 7, "freeze_core": True, "reference": "rohf", "qc_module": "ccenergy"},                      }, id="ccsd rohf fc: psi4",       marks=using("psi4_mp2qcsk")),
+        pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "fc", "sdsc": "sd", "keywords": {"dropmo": [1], "REFerence": "roHF", "SCF_CONV": 12, "CC_CONV": 12, "orbitals": 0, "cc_program": "vcc", "print": 2},              }, id="ccsd rohf fc: cfour-vcc",  marks=using("cfour")),
+        pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "fc", "sdsc": "sd", "keywords": {"dropmo": [1], "REFerence": "roHF", "SCF_CONV": 12, "CC_CONV": 12, "orbitals": 0, "cc_program": "ecc"},                          }, id="ccsd rohf fc: cfour-ecc",  marks=using("cfour")),
+      # pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "fc", "sdsc": "sd", "keywords": {"dropmo": 1, "reference": "rohf", "orbitals": 0},                                                                                }, id="ccsd rohf fc: cfour",      marks=using("cfour")),
+        pytest.param({"call": "gamess", "reference": "rohf", "fcae": "fc",              "keywords": {"contrl__scftyp": "rohf", "ccinp__iconv": 9, "scf__conv": 9},                                                       "wrong": {0: _w2 }}, id="ccsd rohf fc: gamess",     marks=using("gamess")),
+        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "fc", "sdsc": "sd", "keywords": {"tce__freeze": 1, "qc_module": "tce", "scf__rohf": True},                                                                        }, id="ccsd rohf fc: nwchem-tce", marks=using("nwchem")),
+        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "fc",              "keywords": {"ccsd__freeze": 1, "scf__rohf": True},                                                                              "error": {0: _q3 }}, id="ccsd rohf fc: nwchem",     marks=using("nwchem")),
+        pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "fc", "sdsc": "sd", "keywords": {"e_convergence": 8, "r_convergence": 7, "freeze_core": True, "reference": "rohf", "qc_module": "ccenergy"},                      }, id="ccsd rohf fc: psi4",       marks=using("psi4_mp2qcsk")),
         # yapf: enable
     ],
 )
