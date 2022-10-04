@@ -297,7 +297,10 @@ class OpenMMHarness(ProgramHarness):
         context = openmm.Context(openmm_system, integrator, platform, properties)
 
         # Set positions from our Open Force Field `Molecule`
-        context.setPositions(off_mol.conformers[0])
+        try:
+            context.setPositions(off_mol.conformers[0])
+        except ValueError:
+            context.setPositions(off_mol.conformers[0].to_openmm())
 
         # Compute the energy of the configuration
         state = context.getState(getEnergy=True)
