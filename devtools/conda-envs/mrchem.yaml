@@ -2,7 +2,7 @@ name: test
 channels:
   - conda-forge
 dependencies:
-  - mrchem=1=*openmpi*_1
+  - mrchem >=1.1=*openmpi*
 
     # Core
   - python

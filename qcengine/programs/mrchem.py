@@ -165,6 +165,10 @@ class MRChemHarness(ProgramHarness):
                 # fill up return_result
                 if input_model.driver == "energy":
                     output_data["return_result"] = mrchem_output["properties"]["scf_energy"]["E_tot"]
+                elif input_model.driver == "gradient":
+                    output_data["return_result"] = mrchem_output["properties"]["geometric_derivative"]["geom-1"][
+                        "total"
+                    ]
                 elif input_model.driver == "properties":
                     output_data["return_result"] = {
                         f"{ks[1]}": {f"{ks[2]}": _nested_get(mrchem_output, ks)} for ks in computed_rsp_props
@@ -213,6 +217,11 @@ class MRChemHarness(ProgramHarness):
             opts["WaveFunction"]["method"] = input_model.model.method
         else:
             opts["WaveFunction"] = {"method": input_model.model.method}
+
+        # The molecular gradient is just a first-order property for MRChem
+        if input_model.driver == "gradient":
+            opts.update({"Properties": {"geometric_derivative": True}})
+
         # Log the job settings as constructed from the input model
         logger.debug("JOB_OPTS from InputModel")
         logger.debug(pp.pformat(opts))
