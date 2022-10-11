@@ -28,12 +28,12 @@ jobs:
             runs-on: ubuntu-latest
 
           - conda-env: torchani
-            python-version: 3.6
+            python-version: 3.8
             label: ANI
             runs-on: ubuntu-latest
 
           - conda-env: openmm
-            python-version: 3.6
+            python-version: 3.8
             label: OpenMM
             runs-on: ubuntu-latest
 
@@ -54,7 +54,7 @@ jobs:
             # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
 
           - conda-env: mrchem
-            python-version: 3.6
+            python-version: 3.8
             label: MRChem
             runs-on: ubuntu-latest
 
