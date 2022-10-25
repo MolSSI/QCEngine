@@ -36,6 +36,7 @@ Enhancements
 - (:pr:`376`) Cfour - added parsing for BCCD and BCCD(T) methods.
 - (:pr:`376`) NWChem - B2PLYP double-hybrid can now be run and parsed. Added CC2 parsing.
 - (:pr:`376`) testing - added parsing contracts for ZAPT2, CEPA(1), CEPA(3), ACPF, AQCC, BCCD, BCCD(T), CC2, CC3, and DH-DFT. Added conventional references for most.
+- (:pr:`378`) OpenFF - Support OpenFF Toolkit v0.11+
 
 Bug Fixes
 +++++++++

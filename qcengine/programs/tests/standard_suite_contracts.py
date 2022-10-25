@@ -999,7 +999,7 @@ def contractual_ccd(
                 or (qc_module == "cfour-ncc" and reference in ["rhf"] and method == "ccd")
                 or (qc_module == "nwchem-tce" and reference in ["rhf", "uhf"] and method == "ccd")
                 or (qc_module == "gamess" and reference in ["rhf"] and method == "ccd")
-                or (qc_module == "psi4-occ" and reference in ["rhf"] and method == "ccd")
+                or (qc_module == "psi4-occ" and reference in ["rhf", "uhf"] and method == "ccd")
             )
             and pv in ["CCD SAME-SPIN CORRELATION ENERGY", "CCD OPPOSITE-SPIN CORRELATION ENERGY"]
         ) or (
