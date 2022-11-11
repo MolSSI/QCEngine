@@ -60,10 +60,8 @@ def harvest_outfile_pass(outtext):
     module = None
     error = ""
 
-    #    TODO: BCC
-    #          CI
+    #    TODO: CI
     #          other ROHF tests
-    #          vcc/ecc
 
     NUMBER = r"(?x:" + regex.NUMBER + ")"
     DECIMAL = r"(?x:" + regex.DECIMAL + ")"
@@ -117,7 +115,10 @@ def harvest_outfile_pass(outtext):
     mobj = re.search(r"^\s+" + r"(?:E\(SCF\)=)" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*$", outtext, re.MULTILINE)
     if mobj:
         logger.debug("matched scf2")
-        psivar["SCF TOTAL ENERGY"] = mobj.group(1)
+        mobj5 = re.search(r"BRUECKNER\s+IBRKNR\s+ON", outtext)
+        if not mobj5:
+            # interferes with ROHF BCCD
+            psivar["SCF TOTAL ENERGY"] = mobj.group(1)
 
     if "SCF TOTAL ENERGY" not in psivar:
         # can be too greedy and match across scf cycles
@@ -457,7 +458,7 @@ def harvest_outfile_pass(outtext):
             psivar["QCISD(T) CORRELATION ENERGY"] = psivar["QCISD(T) TOTAL ENERGY"] - psivar["SCF TOTAL ENERGY"]
 
     # Process CC Iterations
-    mobj = re.search(
+    cciterations = re.compile(
         # fmt: off
         r'^\s+' + r'(?P<fullCC>(?P<iterCC>L?CC(?:\w+(?:-(?:1|1b|2|3))?))(?:\(T\))?)' + r'\s+(?:energy will be calculated.)\s*' +
         r'(?:.*?)' +
@@ -465,15 +466,19 @@ def harvest_outfile_pass(outtext):
         r'^\s*(?:-+)\s*' +
         r'^\s*(?:A miracle (?P<ccprog>has come|come) to pass. The CC iterations have converged.)\s*$',
         # fmt: on
-        outtext,
-        re.MULTILINE | re.DOTALL,
+        re.MULTILINE
+        | re.DOTALL,
     )
-    if mobj:
-        logger.debug("matched cc with full %s iterating %s" % (mobj.group("fullCC"), mobj.group("iterCC")))
-        module = {"has come": "vcc", "come": "ecc"}[mobj.group("ccprog")]
+    mobj_list = [m.groupdict() for m in cciterations.finditer(outtext)]
+    if mobj_list:
+        first_match = mobj_list[0]
+        last_match = mobj_list[-1]
+
+        logger.debug("matched cc with full %s iterating %s" % (last_match["fullCC"], last_match["iterCC"]))
+        module = {"has come": "vcc", "come": "ecc"}[last_match["ccprog"]]
 
         mobj4 = re.search(r"CALCLEVEL\s+ICLLVL\s+CCSDT-1b", outtext)
-        mtd = mobj.group("iterCC").upper()
+        mtd = last_match["iterCC"].upper()
         if mtd == "CCSDT-1":
             if mobj4 and module == "vcc":
                 mtd = "CCSDT-1B"
@@ -481,12 +486,20 @@ def harvest_outfile_pass(outtext):
                 mtd = "CCSDT-1A"
         elif mtd == "CCSDT-1b":
             mtd = "CCSDT-1B"
-        psivar[f"{mtd} CORRELATION ENERGY"] = mobj.group("corl")
-        psivar[f"{mtd} TOTAL ENERGY"] = mobj.group("tot")
 
-        mobj3 = re.search(r"SCF reference function:  RHF", outtext)
-        if mobj3 and mtd not in ["CCSDT-1A", "CCSDT-1B", "CCSDT-2", "CCSDT-3", "CCSDT"]:
-            psivar[f"{mtd} DOUBLES ENERGY"] = mobj.group("corl")
+        mobj5 = re.search(r"BRUECKNER\s+IBRKNR\s+ON", outtext)
+        if mobj5 and mtd == "CCSD":
+            # BCCD corl = last Brueckner iter total E - first Brueckner iter HF E
+            psivar[f"BCCD CORRELATION ENERGY"] = Decimal(last_match["tot"]) - psivar["SCF TOTAL ENERGY"]
+            psivar[f"BCCD TOTAL ENERGY"] = last_match["tot"]
+            logger.debug("matched Brueckner iter")
+        else:
+            psivar[f"{mtd} CORRELATION ENERGY"] = last_match["corl"]
+            psivar[f"{mtd} TOTAL ENERGY"] = last_match["tot"]
+
+            mobj3 = re.search(r"SCF reference function:  RHF", outtext)
+            if mobj3 and mtd not in ["CCSDT-1A", "CCSDT-1B", "CCSDT-2", "CCSDT-3", "CCSDT"]:
+                psivar[f"{mtd} DOUBLES ENERGY"] = last_match["corl"]
 
     mobj = re.search(
         # fmt: off
@@ -558,10 +571,12 @@ def harvest_outfile_pass(outtext):
     if mobj:
         logger.debug("matched ccsd(t) vcc")
         psivar["SCF TOTAL ENERGY"] = mobj.group(1)
-        psivar["CCSD TOTAL ENERGY"] = mobj.group(2)
-        psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(2))
-        psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(1))
-        psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(3)
+        mobj5 = re.search(r"BRUECKNER\s+IBRKNR\s+ON", outtext)
+        if not mobj5:
+            psivar["CCSD TOTAL ENERGY"] = mobj.group(2)
+            psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(2))
+            psivar["CCSD(T) CORRELATION ENERGY"] = Decimal(mobj.group(3)) - Decimal(mobj.group(1))
+            psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(3)
         module = "vcc"
 
     mobj = re.search(
@@ -575,9 +590,15 @@ def harvest_outfile_pass(outtext):
     )
     if mobj:
         logger.debug("matched ccsd(t) vcc v2")
-        psivar["CCSD TOTAL ENERGY"] = mobj.group(1)
-        psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(2)) - Decimal(mobj.group(1))
-        psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(2)
+        mobj5 = re.search(r"BRUECKNER\s+IBRKNR\s+ON", outtext)
+        if mobj5:
+            psivar["B(T) CORRECTION ENERGY"] = Decimal(mobj.group(2)) - Decimal(mobj.group(1))
+            psivar["BCCD(T) TOTAL ENERGY"] = mobj.group(2)
+            psivar["BCCD(T) CORRELATION ENERGY"] = psivar["BCCD CORRELATION ENERGY"] + psivar["B(T) CORRECTION ENERGY"]
+        else:
+            psivar["CCSD TOTAL ENERGY"] = mobj.group(1)
+            psivar["(T) CORRECTION ENERGY"] = Decimal(mobj.group(2)) - Decimal(mobj.group(1))
+            psivar["CCSD(T) TOTAL ENERGY"] = mobj.group(2)
         module = "vcc"
 
     mobj = re.search(
@@ -825,13 +846,15 @@ def harvest_outfile_pass(outtext):
         else:
             ss = Decimal(mobj.group(3)) + Decimal(mobj.group(4))
 
-        if not (
-            re.search(r"executable xvcc finished", outtext)
-            and re.search(r"The reference state is a ROHF wave function.", outtext)
-        ):
-            psivar["%s SAME-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = ss
-        psivar["%s OPPOSITE-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(5)
-        psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(6)
+        mobj5 = re.search(r"BRUECKNER\s+IBRKNR\s+ON", outtext)
+        if not mobj5:
+            if not (
+                re.search(r"executable xvcc finished", outtext)
+                and re.search(r"The reference state is a ROHF wave function.", outtext)
+            ):
+                psivar["%s SAME-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = ss
+            psivar["%s OPPOSITE-SPIN CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(5)
+            psivar["%s CORRELATION ENERGY" % (mobj.group("iterCC"))] = mobj.group(6)
 
     mobj = re.search(
         # fmt: off
@@ -1086,6 +1109,10 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCD CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCD TOTAL ENERGY"]
 
+    if "BCCD TOTAL ENERGY" in psivar and "BCCD CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["BCCD CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["BCCD TOTAL ENERGY"]
+
     if "CCSD TOTAL ENERGY" in psivar and "CCSD CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCSD TOTAL ENERGY"]
@@ -1101,6 +1128,10 @@ def harvest_outfile_pass(outtext):
     if "A-CCSD(T) TOTAL ENERGY" in psivar and "A-CCSD(T) CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["A-CCSD(T) CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["A-CCSD(T) TOTAL ENERGY"]
+
+    if "BCCD(T) TOTAL ENERGY" in psivar and "BCCD(T) CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["BCCD(T) CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["BCCD(T) TOTAL ENERGY"]
 
     if "CC3 TOTAL ENERGY" in psivar and "CC3 CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CC3 CORRELATION ENERGY"]

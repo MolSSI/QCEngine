@@ -214,16 +214,17 @@ def harvest_outfile_pass(outtext):
             # fmt: off
             r'^\s+' + r'DFT energy' + r'\s+' + NUMBER + r'\s*' +
             r'^\s+' + r'Unscaled MP2 energy' + r'\s+' + NUMBER + r'\s*' +
-            r'^\s+' + r'Total DFT+MP2 energy' + r'\s+' + NUMBER + r'\s*$',
+            r'^\s+' + r'Total DFT\+MP2 energy' + r'\s+' + NUMBER + r'\s*$',
             # fmt: on
             outtext,
             re.MULTILINE,
         )
         if mobj:
             logger.debug("matched dft-mp2")
-            psivar["DFT TOTAL ENERGY"] = mobj.group(1)
-            psivar["MP2 CORRELATION ENERGY"] = mobj.group(2)
-            psivar["MP2 TOTAL ENERGY"] = mobj.group(3)
+            psivar.pop("DFT TOTAL ENERGY")  # remove previously defined DFT energy w/o DH contribution
+            psivar["DFT FUNCTIONAL TOTAL ENERGY"] = mobj.group(1)
+            psivar["CURRENT REFERENCE ENERGY"] = mobj.group(1)
+            psivar["DFT TOTAL ENERGY"] = mobj.group(3)
 
         # 3) MP2 with CCSD or CCSD(T) calculation (through CCSD(T) directive)
         mobj = re.search(
@@ -1077,7 +1078,9 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT ENERGY"] = psivar["LCCSD TOTAL ENERGY"]
 
     if "DFT TOTAL ENERGY" in psivar:
-        psivar["CURRENT REFERENCE ENERGY"] = psivar["DFT TOTAL ENERGY"]
+        if "CURRENT REFERENCE ENERGY" not in psivar:
+            # already set for DH-DFT
+            psivar["CURRENT REFERENCE ENERGY"] = psivar["DFT TOTAL ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["DFT TOTAL ENERGY"]
 
     # Process TCE CURRENT energies
@@ -1091,6 +1094,10 @@ def harvest_outfile_pass(outtext):
     if "CCD TOTAL ENERGY" in psivar and "CCD CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCD CORRELATION ENERGY"]
         psivar["CURRENT ENERGY"] = psivar["CCD TOTAL ENERGY"]
+
+    if "CC2 TOTAL ENERGY" in psivar and "CC2 CORRELATION ENERGY" in psivar:
+        psivar["CURRENT CORRELATION ENERGY"] = psivar["CC2 CORRELATION ENERGY"]
+        psivar["CURRENT ENERGY"] = psivar["CC2 TOTAL ENERGY"]
 
     if "CCSD TOTAL ENERGY" in psivar and "CCSD CORRELATION ENERGY" in psivar:
         psivar["CURRENT CORRELATION ENERGY"] = psivar["CCSD CORRELATION ENERGY"]

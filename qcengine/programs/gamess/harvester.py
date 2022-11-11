@@ -248,8 +248,8 @@ def harvest_outfile_pass(outtext):
         )
         if mobj:
             logger.debug("matched mp2 b")
-            qcvar["MP2 CORRELATION ENERGY"] = mobj.group(2)
-            qcvar["MP2 TOTAL ENERGY"] = mobj.group(3)
+            qcvar["ZAPT2 CORRELATION ENERGY"] = mobj.group(2)
+            qcvar["ZAPT2 TOTAL ENERGY"] = mobj.group(3)
 
         mobj = re.search(
             # fmt: off
@@ -633,6 +633,10 @@ def harvest_outfile_pass(outtext):
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["MP2 CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["MP2 TOTAL ENERGY"]
 
+    if "ZAPT2 TOTAL ENERGY" in qcvar and "ZAPT2 CORRELATION ENERGY" in qcvar:
+        qcvar["CURRENT CORRELATION ENERGY"] = qcvar["ZAPT2 CORRELATION ENERGY"]
+        qcvar["CURRENT ENERGY"] = qcvar["ZAPT2 TOTAL ENERGY"]
+
     if "CISD TOTAL ENERGY" in qcvar and "CISD CORRELATION ENERGY" in qcvar:
         qcvar["CURRENT CORRELATION ENERGY"] = qcvar["CISD CORRELATION ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["CISD TOTAL ENERGY"]
@@ -664,6 +668,7 @@ def harvest_outfile_pass(outtext):
     if "DFT TOTAL ENERGY" in qcvar:
         qcvar["CURRENT REFERENCE ENERGY"] = qcvar["DFT TOTAL ENERGY"]
         qcvar["CURRENT ENERGY"] = qcvar["DFT TOTAL ENERGY"]
+        qcvar.pop("HF TOTAL ENERGY")
 
     if "FCI TOTAL ENERGY" in qcvar:  # and 'FCI CORRELATION ENERGY' in qcvar:
         qcvar["CURRENT ENERGY"] = qcvar["FCI TOTAL ENERGY"]

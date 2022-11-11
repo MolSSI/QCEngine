@@ -17,6 +17,31 @@ Changelog
 .. +++++++++
 
 
+v0.25.0 / 2022-11-DD
+--------------------
+
+Breaking Changes
+++++++++++++++++
+- (:pr:`376`) GAMESS - slight breaking changes of (1) ROHF MP2 ZAPT quantities now stored in "ZAPT" variables, not "MP2"
+  variables; and (2) "HF TOTAL ENERGY" no longer stores DFT energy in DFT computation.
+- (:pr:`376`) testing - reference quantities now indexed by "standard" or "semicanonical" orbitals since program defaults
+  differ (mostly in CCSD ROHF FC). Downstream projects using the stdsuite interface will need to add an extra argument to query
+  reference data.
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`376`) Cfour - added parsing for BCCD and BCCD(T) methods.
+- (:pr:`376`) NWChem - B2PLYP double-hybrid can now be run and parsed. Added CC2 parsing.
+- (:pr:`376`) testing - added parsing contracts for ZAPT2, CEPA(1), CEPA(3), ACPF, AQCC, BCCD, BCCD(T), CC2, CC3, and DH-DFT. Added conventional references for most.
+- (:pr:`378`) OpenFF - Support OpenFF Toolkit v0.11+
+
+Bug Fixes
++++++++++
+
+
 v0.24.1 / 2022-08-16
 --------------------
 

@@ -153,7 +153,6 @@ def test_optimization_protocols(input_data):
 
 
 @using("geometric")
-@using("rdkit")
 def test_geometric_retries(failure_engine, input_data):
 
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
@@ -165,10 +164,11 @@ def test_geometric_retries(failure_engine, input_data):
     }
     input_data["input_specification"]["model"] = {"method": "something"}
     input_data["keywords"]["program"] = failure_engine.name
+    input_data["keywords"]["coordsys"] = "cart"  # needed by geometric v1.0 to play nicely with failure_engine
 
     input_data = OptimizationInput(**input_data)
 
-    ret = qcng.compute_procedure(input_data, "geometric", local_options={"ncores": 13}, raise_error=True)
+    ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13}, raise_error=True)
     assert ret.success is True
     assert ret.trajectory[0].provenance.retries == 1
     assert ret.trajectory[0].provenance.ncores == 13
@@ -178,7 +178,7 @@ def test_geometric_retries(failure_engine, input_data):
 
     # Ensure we still fail
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
-    ret = qcng.compute_procedure(input_data, "geometric", local_options={"ncores": 13, "retries": 1})
+    ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13, "retries": 1})
     assert ret.success is False
     assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
     assert len(ret.input_data["trajectory"]) == 2
