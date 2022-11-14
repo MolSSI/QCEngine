@@ -347,3 +347,29 @@ def test_torsiondrive_generic():
     assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
 
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
+
+
+@using("mrchem")
+@pytest.mark.parametrize(
+    "optimizer",
+    [
+        pytest.param("geometric", marks=using("geometric")),
+        pytest.param("optking", marks=using("optking")),
+        pytest.param("berny", marks=using("berny")),
+    ],
+)
+def test_optimization_mrchem(input_data, optimizer):
+
+    input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
+    input_data["input_specification"]["model"] = {"method": "HF"}
+    input_data["input_specification"]["keywords"] = {"world_prec": 1.0e-4}
+    input_data["keywords"]["program"] = "mrchem"
+
+    input_data = OptimizationInput(**input_data)
+
+    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True)
+    assert 10 > len(ret.trajectory) > 1
+
+    assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-3) == 1.3860734486984705
+    assert ret.provenance.creator.lower() == optimizer
+    assert ret.trajectory[0].provenance.creator.lower() == "mrchem"
