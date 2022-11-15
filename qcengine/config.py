@@ -190,7 +190,7 @@ def _load_defaults() -> None:
 
         LOGGER.info("Found 'qcengine.yaml' at path: {}".format(load_path))
         with open(load_path, "r") as stream:
-            user_config = yaml.load(stream)
+            user_config = yaml.load(stream, Loader=yaml.SafeLoader)
 
         for k, v in user_config.items():
             NODE_DESCRIPTORS[k] = NodeDescriptor(name=k, **v)
