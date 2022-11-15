@@ -80,7 +80,7 @@ def test_compute_gradient(program, model, keywords):
     inp = AtomicInput(
         molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"}, keywords=keywords
     )
-    if program in ["adcc", "mrchem"]:
+    if program in ["adcc"]:
         with pytest.raises(qcng.exceptions.InputError) as e:
             qcng.compute(inp, program, raise_error=True)
 

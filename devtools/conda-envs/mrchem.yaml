@@ -2,7 +2,9 @@ name: test
 channels:
   - conda-forge
 dependencies:
-  - mrchem=1=*openmpi*_1
+  - mrchem >=1.1=*openmpi*
+  - geometric
+  - optking
 
     # Core
   - python
@@ -17,3 +19,7 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
+
+  - pip
+  - pip:
+    - pyberny
