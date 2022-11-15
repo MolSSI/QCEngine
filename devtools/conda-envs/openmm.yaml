@@ -4,7 +4,7 @@ channels:
 dependencies:
   - rdkit
   - openmm
-  - openff-toolkit
+  - openff-toolkit ==0.11.3
   - openff-forcefields
   - openmmforcefields
   - geometric
