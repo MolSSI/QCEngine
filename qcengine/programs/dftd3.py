@@ -315,6 +315,8 @@ def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:
     d3mbj:   s6      a1       s8      a2      alpha6=None version=6
     atmgr:   s6=1.0  sr6=None s8=None a2=None alpha6      version=3 (needs -abc, too)
 
+    2-body variant here. that is, d3zero2b
+
     Parameters
     ----------
     dashlvl : {'d2', 'd3zero', d3bj', 'd3mzero', 'd3mbj', 'atmgr'}
@@ -339,15 +341,15 @@ def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:
     dashlvl = dashlvl.lower()
     if dashlvl == "d2":
         return dashformatter.format(dashcoeff["s6"], dashcoeff["sr6"], 0.0, 0.0, dashcoeff["alpha6"], 2)
-    elif dashlvl == "d3zero":
+    elif dashlvl == "d3zero2b":
         return dashformatter.format(
             dashcoeff["s6"], dashcoeff["sr6"], dashcoeff["s8"], dashcoeff["sr8"], dashcoeff["alpha6"], 3
         )
-    elif dashlvl == "d3bj":
+    elif dashlvl == "d3bj2b":
         return dashformatter.format(dashcoeff["s6"], dashcoeff["a1"], dashcoeff["s8"], dashcoeff["a2"], 0.0, 4)
-    elif dashlvl == "d3mzero":
+    elif dashlvl == "d3mzero2b":
         return dashformatter.format(dashcoeff["s6"], dashcoeff["sr6"], dashcoeff["s8"], dashcoeff["beta"], 14.0, 5)
-    elif dashlvl == "d3mbj":
+    elif dashlvl == "d3mbj2b":
         return dashformatter.format(dashcoeff["s6"], dashcoeff["a1"], dashcoeff["s8"], dashcoeff["a2"], 0.0, 6)
     elif dashlvl == "atmgr":
         # need to set first four parameters to something other than None, otherwise DFTD3 gets mad or a bit wrong

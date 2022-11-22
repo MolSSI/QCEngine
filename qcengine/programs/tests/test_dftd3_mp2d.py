@@ -1397,7 +1397,7 @@ def eneyne_ne_qcschemamols():
 
 
 db3lypd3bj = {
-    "dashlevel": "d3bj",
+    "dashlevel": "d3bj2b",
     "dashparams": {"s8": 1.9889, "s6": 1.0, "a2": 4.4211, "a1": 0.3981},
     "dashparams_citation": "",
     "fctldash": "b3lyp-d3(bj)",
@@ -1407,7 +1407,7 @@ db3lypd3bjcustom["fctldash"] = ""
 db3lypd3bjcustom["dashparams"]["a2"] = 5.4211
 
 dpbed3zero = {
-    "dashlevel": "d3zero",
+    "dashlevel": "d3zero2b",
     "dashparams": {"s6": 1.0, "s8": 0.722, "sr6": 1.217, "sr8": 1.0, "alpha6": 14.0},
     "dashparams_citation": "",
     "fctldash": "pbe-d3",

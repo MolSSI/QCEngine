@@ -44,9 +44,22 @@ dashcoeff = {
             "core-dsd-blyp": {"params": {"s6": 0.41, "alpha6": 60.0, "sr6": 1.1}},
         },
     },
-    "d3zero": {
+    "d3zeroatm": {
+        "formal": "D3ATM",
+        "alias": [],
+        "description": "    Grimme's -D3 (zero-damping) Dispersion Correction with ATM",
+        "citation": "    Grimme S.; Antony J.; Ehrlich S.; Krieg H. (2010), J. Chem. Phys., 132: 154104\n",
+        "bibtex": "Grimme:2010:154104",
+        "default": collections.OrderedDict(
+            [("s6", 1.0), ("s8", 0.0), ("sr6", 1.0), ("alpha6", 14.0), ("sr8", 1.0), ("s9", 1.0)]
+        ),
+        "definitions": {
+            # D3 parameters loaded from d3zero2b and from authoritative source below and s9 parameter added
+        },
+    },
+    "d3zero2b": {
         "formal": "D3",
-        "alias": ["d3"],
+        "alias": ["d3", "d3zero", "d32b"],
         "description": "    Grimme's -D3 (zero-damping) Dispersion Correction",
         "citation": "    Grimme S.; Antony J.; Ehrlich S.; Krieg H. (2010), J. Chem. Phys., 132: 154104\n",
         "bibtex": "Grimme:2010:154104",
@@ -348,9 +361,20 @@ dashcoeff = {
             "hf": {"params": {"s6": 1.0, "s8": 1.746, "sr6": 1.158, "alpha6": 14.0, "sr8": 1.000}},
         },
     },
-    "d3bj": {
-        "formal": "D3(BJ)",
+    "d3bjatm": {
+        "formal": "D3(BJ)ATM",
         "alias": [],
+        "description": "    Grimme's -D3 (BJ-damping) Dispersion Correction with ATM",
+        "citation": "    Grimme S.; Ehrlich S.; Goerigk L. (2011), J. Comput. Chem., 32: 1456\n",
+        "bibtex": "Grimme:2011:1456",
+        "default": collections.OrderedDict([("s6", 1.0), ("s8", 1.0), ("a1", 0.0), ("a2", 1.0), ("s9", 1.0)]),
+        "definitions": {
+            # D3 parameters loaded from d3bj2b and from authoritative source below and s9 parameter added
+        },
+    },
+    "d3bj2b": {
+        "formal": "D3(BJ)",
+        "alias": ["d3bj"],
         "description": "    Grimme's -D3 (BJ-damping) Dispersion Correction",
         "citation": "    Grimme S.; Ehrlich S.; Goerigk L. (2011), J. Comput. Chem., 32: 1456\n",
         "bibtex": "Grimme:2011:1456",
@@ -620,9 +644,21 @@ dashcoeff = {
             "core-dsd-blyp": {"params": {"s6": 0.500, "s8": 0.2130, "a1": 0.0000, "a2": 6.0519}},
         },
     },
-    "d3mzero": {
+    "d3mzeroatm": {
+        "formal": "D3MATM",
+        "alias": [],
+        "description": "    Grimme's -D3 (zero-damping, short-range refitted) Dispersion Correction with ATM",
+        "citation": "    Grimme S.; Antony J.; Ehrlich S.; Krieg H. (2010), J. Chem. Phys., 132: 154104\n"
+        + "    Smith, D. G. A.; Burns, L. A.; Patkowski, K.; Sherrill, C. D. (2016), J. Phys. Chem. Lett.; 7: 2197\n",
+        "bibtex": "Grimme:2010:154104",
+        "default": collections.OrderedDict([("s6", 1.0), ("s8", 1.0), ("sr6", 1.0), ("beta", 1.0), ("s9", 1.0)]),
+        "definitions": {
+            # D3 parameters loaded from d3mzero2b and from authoritative source below and s9 parameter added
+        },
+    },
+    "d3mzero2b": {
         "formal": "D3M",
-        "alias": ["d3m"],
+        "alias": ["d3m", "d3mzero", "d3m2b"],
         "description": "    Grimme's -D3 (zero-damping, short-range refitted) Dispersion Correction",
         "citation": "    Grimme S.; Antony J.; Ehrlich S.; Krieg H. (2010), J. Chem. Phys., 132: 154104\n"
         + "    Smith, D. G. A.; Burns, L. A.; Patkowski, K.; Sherrill, C. D. (2016), J. Phys. Chem. Lett.; 7: 2197\n",
@@ -641,9 +677,21 @@ dashcoeff = {
             "hf": {"params": {"s6": 1.000, "s8": 0.885517, "sr6": 1.383214, "beta": 0.075488}},  # JBS 01/2021
         },
     },
-    "d3mbj": {
-        "formal": "D3M(BJ)",
+    "d3mbjatm": {
+        "formal": "D3M(BJ)ATM",
         "alias": [],
+        "description": "    Grimme's -D3 (BJ-damping, short-range refitted) Dispersion Correction with ATM",
+        "citation": "    Grimme S.; Ehrlich S.; Goerigk L. (2011), J. Comput. Chem., 32: 1456\n"
+        + "    Smith, D. G. A.; Burns, L. A.; Patkowski, K.; Sherrill, C. D. (2016), J. Phys. Chem. Lett.; 7: 2197\n",
+        "bibtex": "Grimme:2011:1456",
+        "default": collections.OrderedDict([("s6", 1.0), ("s8", 1.0), ("a1", 1.0), ("a2", 1.0), ("s9", 1.0)]),
+        "definitions": {
+            # D3 parameters loaded from d3mbj2b and from authoritative source below and s9 parameter added
+        },
+    },
+    "d3mbj2b": {
+        "formal": "D3M(BJ)",
+        "alias": ["d3mbj"],
         "description": "    Grimme's -D3 (BJ-damping, short-range refitted) Dispersion Correction",
         "citation": "    Grimme S.; Ehrlich S.; Goerigk L. (2011), J. Comput. Chem., 32: 1456\n"
         + "    Smith, D. G. A.; Burns, L. A.; Patkowski, K.; Sherrill, C. D. (2016), J. Phys. Chem. Lett.; 7: 2197\n",
@@ -662,19 +710,33 @@ dashcoeff = {
             "hf": {"params": {"s6": 1.000, "s8": 0.713190, "a1": 0.079541, "a2": 3.627854}},  # JBS 01/2021
         },
     },
-    "d3op": {
-        "formal": "D3(op)",
+    "d3opatm": {
+        "formal": "D3(op)ATM",
         "alias": [],
+        "description": "    D3 dispersion correction with optimized power damping function with ATM. Based on rational damping function and additional zero-damping like power function.",
+        "citation": "    S. Grimme, S. Ehrlich, and L. Goerigk., Comput. Chem., 32:1456–1465, 2011. doi:10.1002/jcc.21759.\n"
+        + "    Jonathon Witte, Narbe Mardirossian, Jeffrey B Neaton, and Martin Head-Gordon., J. Chem. Theory Comput., 13(5):2043–2052, 2017. doi:10.1021/acs.jctc.7b00176.\n",
+        "bibtex": "Grimme:2011:1456",
+        "default": collections.OrderedDict(
+            [("s6", 1.0), ("s8", 1.0), ("a1", 1.0), ("a2", 1.0), ("beta", 0.0), ("s9", 1.0)]
+        ),
+        "definitions": {
+            # D3 parameters loaded from d3op2b and from authoritative source below and s9 parameter added
+        },
+    },
+    "d3op2b": {
+        "formal": "D3(op)",
+        "alias": ["d3op"],
         "description": "    D3 dispersion correction with optimized power damping function. Based on rational damping function and additional zero-damping like power function.",
         "citation": "    S. Grimme, S. Ehrlich, and L. Goerigk., Comput. Chem., 32:1456–1465, 2011. doi:10.1002/jcc.21759.\n"
         + "    Jonathon Witte, Narbe Mardirossian, Jeffrey B Neaton, and Martin Head-Gordon., J. Chem. Theory Comput., 13(5):2043–2052, 2017. doi:10.1021/acs.jctc.7b00176.\n",
         "bibtex": "Grimme:2011:1456",
         "default": collections.OrderedDict(
-            [("a1", 1.0), ("a2", 1.0), ("alp", 14.0), ("s6", 1.0), ("s8", 1.0), ("s9", 1.0), ("bet", 0.0)]
+            [("s6", 1.0), ("s8", 1.0), ("a1", 1.0), ("a2", 1.0), ("beta", 0.0)],
         ),
         "definitions": {
             # will be loaded later
-            # From https://github.com/awvwgk/simple-dftd3/blob/main/assets/parameters.toml
+            # From https://github.com/dftd3/simple-dftd3/blob/main/assets/parameters.toml
         },
     },
     "nl": {
@@ -829,6 +891,14 @@ dashcoeff = {
 }
 
 
+for d in ["d3zero", "d3bj", "d3mzero", "d3mbj", "d3op"]:
+    for k, v in dashcoeff[d + "2b"]["definitions"].items():
+        dashcoeff[d + "atm"]["definitions"][k] = copy.deepcopy(dashcoeff[d + "2b"]["definitions"][k])
+        dashcoeff[d + "atm"]["definitions"][k]["params"][
+            "s9"
+        ] = 1.0  # in upstream but unreleased (twice: this one adds s9 to the params list for atm)
+
+
 def _get_d4bj_definitions() -> dict:
     """DFTD4 provides access to damping parameters on per functional basis.
     But we want all of them.
@@ -912,11 +982,11 @@ try:
 
         # The names here are the subset allowed by qcng with the names used in dftd3
         allowed = {
-            "bj": ["a1", "a2", "s6", "s8"],
-            "zero": ["rs6", "rs8", "alp", "s6", "s8"],
-            "mbj": ["a1", "a2", "s6", "s8"],
-            "mzero": ["rs6", "rs8", "alp", "s6", "s8", "bet"],
-            "op": ["a1", "a2", "s6", "s8", "bet"],
+            "bj": ["a1", "a2", "s6", "s8", "s9"],
+            "zero": ["rs6", "rs8", "alp", "s6", "s8", "s9"],
+            "mbj": ["a1", "a2", "s6", "s8", "s9"],
+            "mzero": ["rs6", "rs8", "alp", "s6", "s8", "bet", "s9"],
+            "op": ["a1", "a2", "s6", "s8", "bet", "s9"],
         }
         # mapping from dftd3 to qcng names, also, we have to reverse it later again
         rename = {
@@ -941,11 +1011,17 @@ try:
             for key, params in get_all_damping_params([dashlevel]).items()
         }
 
-    dashcoeff["d3bj"]["definitions"].update(_get_d3_definitions("bj"))
-    dashcoeff["d3zero"]["definitions"].update(_get_d3_definitions("zero"))
-    dashcoeff["d3mbj"]["definitions"].update(_get_d3_definitions("mbj"))
-    dashcoeff["d3mzero"]["definitions"].update(_get_d3_definitions("mzero"))
-    dashcoeff["d3op"]["definitions"].update(_get_d3_definitions("op"))
+    dashcoeff["d3bjatm"]["definitions"].update(_get_d3_definitions("bj"))
+    dashcoeff["d3zeroatm"]["definitions"].update(_get_d3_definitions("zero"))
+    dashcoeff["d3mbjatm"]["definitions"].update(_get_d3_definitions("mbj"))
+    dashcoeff["d3mzeroatm"]["definitions"].update(_get_d3_definitions("mzero"))
+    dashcoeff["d3opatm"]["definitions"].update(_get_d3_definitions("op"))
+
+    for d in ["d3zero", "d3bj", "d3mzero", "d3mbj", "d3op"]:
+        for k, v in dashcoeff[d + "atm"]["definitions"].items():
+            dashcoeff[d + "atm"]["definitions"][k]["params"][
+                "s9"
+            ] = 1.0  # in upstream but unreleased (twice: this one establishes 1.0 if upstream is still 0.0)
 
 except ModuleNotFoundError:
     pass
@@ -967,7 +1043,7 @@ def get_dispersion_aliases():
     return alias
 
 
-def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_supplement=None, verbose=1):
+def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_supplement=None, verbose: int = 1):
     """Use the three paths of empirical dispersion parameter information
     (DFT functional, dispersion correction level, and particular
     parameters) to populate the parameter array and validate a
@@ -995,7 +1071,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
         in "definitions" field full functional names, rather than
         fctl less dashlvl. Used to validate dict_builder fctls with
         dispersion or identify disp level from just `name_hint`.
-    verbose : int, optional
+    verbose
         Amount of printing.
 
     Returns
@@ -1033,7 +1109,13 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
 
     """
     if verbose > 1:
-        print("dftd3.from_arrays HINTS:", name_hint, level_hint, param_tweaks, bool(dashcoeff_supplement))
+        print(
+            "empirical_dispersion_resources.from_arrays HINTS:",
+            name_hint,
+            level_hint,
+            param_tweaks,
+            bool(dashcoeff_supplement),
+        )
 
     # << 0 >> prep
     if dashcoeff_supplement is not None:
@@ -1212,7 +1294,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
 
     if verbose > 1:
         print(
-            f"dftd3.from_arrays RESOLVED: dashlevel={dashleveleff}, dashparams={disp_params}, fctldash={fctldasheff}, dashparams_citation={citeff}"
+            f"empirical_dispersion_resources.from_arrays RESOLVED: dashlevel={dashleveleff}, dashparams={disp_params}, fctldash={fctldasheff}, dashparams_citation={citeff}"
         )
 
     return {

@@ -242,7 +242,7 @@ class SDFTD3Harness(ProgramHarness):
             input_data["model"]["method"] = method
         qcvkey = method.upper() if method is not None else None
 
-        # send `from_arrays` the dftd3 behavior of functional specification overrides explicit parameters specification
+        # send `from_arrays` the s-dftd3 behavior of functional specification overrides explicit parameters specification
         # * differs from dftd3 harness behavior where parameters extend or override functional
         # * stash the resolved plan in extras or, if errored, leave it for the proper dftd3 api to reject
         param_tweaks = None if method else input_model.keywords.get("params_tweaks", None)
@@ -264,6 +264,18 @@ class SDFTD3Harness(ProgramHarness):
             if d3.startswith("d3") and method.lower().endswith(alias):
                 method = method[: -(len(alias) + 1)]
                 input_data["model"]["method"] = method
+
+        # consolidate dispersion level aliases
+        if input_model.keywords.pop("apply_qcengine_aliases", False):
+            level_hint = input_model.keywords.get("level_hint", None)
+            if level_hint:
+                level_hint = get_dispersion_aliases()[level_hint.lower()]
+                if level_hint.endswith("atm"):
+                    level_hint = level_hint[:-3]
+                if level_hint.endswith("2b"):
+                    level_hint = level_hint[:-2]
+                    input_data["keywords"]["params_tweaks"] = {**planinfo["dashparams"], "s9": 0.0}
+                input_data["keywords"]["level_hint"] = level_hint
 
         input_model = AtomicInput(**input_data)
 
