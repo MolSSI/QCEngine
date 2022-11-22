@@ -892,6 +892,7 @@ dashcoeff = {
 }
 
 
+# for d3*atm, only skeleton entries with metadata defined above. below copies in parameters from d3*2b
 for d in ["d3zero", "d3bj", "d3mzero", "d3mbj", "d3op"]:
     for k, v in dashcoeff[d + "2b"]["definitions"].items():
         dashcoeff[d + "atm"]["definitions"][k] = copy.deepcopy(dashcoeff[d + "2b"]["definitions"][k])
@@ -1118,6 +1119,7 @@ def from_arrays(
     try:
         # try/except block retrofits Psi4 for pre-2b/atm-split in dashcoeff
         import psi4
+
         if "d3bj" in psi4.procrouting.empirical_dispersion._engine_can_do["dftd3"]:
             psi4.procrouting.empirical_dispersion._engine_can_do["dftd3"] = [
                 "d2",
@@ -1150,7 +1152,7 @@ def from_arrays(
                 try:
                     dashcoeff[disp]
                 except KeyError:
-                    # try/except block accommodates callers from pre-2b/atm-split in dashcoeff
+                    # try/except block accommodates dashcoeff_supplement from pre-2b/atm-split in dashcoeff
                     disp = get_dispersion_aliases()[disp]
                     dashcoeff_supplement[disp] = ddisp
                 if params["params"].keys() != dashcoeff[disp]["default"].keys():
