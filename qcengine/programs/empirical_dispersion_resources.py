@@ -2,6 +2,7 @@
 
 import collections
 import copy
+from typing import Dict, List, Optional, Union
 
 from ..exceptions import InputError
 
@@ -1043,7 +1044,13 @@ def get_dispersion_aliases():
     return alias
 
 
-def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_supplement=None, verbose: int = 1):
+def from_arrays(
+    name_hint: Optional[str] = None,
+    level_hint: Optional[str] = None,
+    param_tweaks: Union[List[float], Dict[str, float]] = None,
+    dashcoeff_supplement: Optional[Dict[str, Dict]] = None,
+    verbose: int = 1,
+):
     """Use the three paths of empirical dispersion parameter information
     (DFT functional, dispersion correction level, and particular
     parameters) to populate the parameter array and validate a
@@ -1051,22 +1058,22 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
 
     Parameters
     ----------
-    name_hint : str, optional
+    name_hint
         Name of functional (func only, func & disp, or disp only) for
         which to compute dispersion (e.g., blyp, BLYP-D2, blyp-d3bj,
         blyp-d3(bj), hf+d). Any or all parameters initialized from
         `dashcoeff[dashlevel][functional-without-dashlevel]` or
         `dashcoeff_supplement[dashlevel][functional-with-dashlevel]
         can be overwritten via `param_tweaks`.
-    level_hint : str, optional
+    level_hint
         Name of dispersion correction to be applied (e.g., d, D2,
         d3(bj), das2010). Must be key in `dashcoeff` or "alias" or
         "formal" to one.
-    param_tweaks : list or dict, optional
+    param_tweaks
         Values for the same keys as `dashcoeff[dashlevel]['default']`
         (and same order if list) used to override any or all values
         initialized by `name_hint`.  Extra parameters will error.
-    dashcoeff_supplement: dict, optional
+    dashcoeff_supplement
         Dictionary of the same structure as `dashcoeff` that contains
         in "definitions" field full functional names, rather than
         fctl less dashlvl. Used to validate dict_builder fctls with
@@ -1079,7 +1086,7 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     dict
         Metadata defining dispersion calculation.
 
-        dashlevel : {'d1', 'd2', 'd3zero', 'd3bj', 'd3mzero', 'd3mbj', 'd3op', 'chg', 'das2009', 'das2010', 'nl', "d4bjeeqatm"}
+        dashlevel : {'d1', 'd2', 'd3zero2b', 'd3bj2b', 'd3mzero2b', 'd3mbj2b', 'd3op2b', 'd3zeroatm', 'd3bjatm', 'd3mzeroatm', 'd3mbjatm', 'd3opatm', 'chg', 'das2009', 'das2010', 'nl', "d4bjeeqatm"}
             Name (de-aliased, de-formalized, lowercase) of dispersion
             correction -- atom data, dispersion model, damping functional
             form -- to be applied. Resolved from `name_hint` and/or
@@ -1108,6 +1115,24 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     * Function intended to be idempotent.
 
     """
+    try:
+        # try/except block retrofits Psi4 for pre-2b/atm-split in dashcoeff
+        import psi4
+        if "d3bj" in psi4.procrouting.empirical_dispersion._engine_can_do["dftd3"]:
+            psi4.procrouting.empirical_dispersion._engine_can_do["dftd3"] = [
+                "d2",
+                "d3zero2b",
+                "d3bj2b",
+                "d3mzero2b",
+                "d3mbj2b",
+            ]
+            for d in ["d3zero", "d3bj", "d3mzero", "d3mbj"]:
+                psi4.procrouting.empirical_dispersion._capable_engines_for_disp[
+                    d + "2b"
+                ] = psi4.procrouting.empirical_dispersion._capable_engines_for_disp.pop(d)
+    except ImportError:
+        pass
+
     if verbose > 1:
         print(
             "empirical_dispersion_resources.from_arrays HINTS:",
@@ -1120,8 +1145,14 @@ def from_arrays(name_hint=None, level_hint=None, param_tweaks=None, dashcoeff_su
     # << 0 >> prep
     if dashcoeff_supplement is not None:
         supplement_dashlevel_lookup = {}
-        for disp, ddisp in dashcoeff_supplement.items():
+        for disp, ddisp in dashcoeff_supplement.copy().items():
             for func, params in ddisp["definitions"].items():
+                try:
+                    dashcoeff[disp]
+                except KeyError:
+                    # try/except block accommodates callers from pre-2b/atm-split in dashcoeff
+                    disp = get_dispersion_aliases()[disp]
+                    dashcoeff_supplement[disp] = ddisp
                 if params["params"].keys() != dashcoeff[disp]["default"].keys():
                     if verbose > 2:
                         print(
