@@ -17,20 +17,36 @@ Changelog
 .. +++++++++
 
 
-v0.26.0 / 2022-MM-DD (Unreleased)
+v0.26.0 / 2022-11-DD (Unreleased)
 --------------------
 
-.. Breaking Changes
-.. ++++++++++++++++
+Breaking Changes
+++++++++++++++++
 
-.. New Features
-.. ++++++++++++
+- (:pr:`385`) Dispersion - the dispersion parameters resources file has been altered so that for D3 variants there's a
+  2b set (e.g., d3bj2b) that is pure 2-body and doesn't accept s9 (effectively fixed at 0.0) and a atm set (e.g.,
+  d3zeroatm) that does accept s9 (by default 1.0 but user-variable). Previous D3 levels are aliased to 2b. Only
+  downstreams that call the dispersion resources directly should be affected, and retrofits are in place for the known
+  victim/instigator (Psi4). @loriab
 
-.. Enhancements
-.. ++++++++++++
+New Features
+++++++++++++
 
-.. Bug Fixes
-.. +++++++++
+Enhancements
+++++++++++++
+- (:pr:`380`) MRChem - added gradient and thus geometry optimizations support. @robertodr
+- (:pr:`385`) dftd3 - the classic interface now accepts e.g., ``d3mbj2b`` as a level hint. @loriab
+- (:pr:`385`) s-dftd3 - added keyword ``apply_qcengine_aliases`` that when True allows the levels and aliases in the
+  dispersion resources (e.g., ``d3``, ``d3atm``, ``d32b``) to be given as ``level_hint``. The resource parameters are
+  passed to s-dftd3 as param_tweaks. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`383`) yaml - uses safe loading. @mbanck, @loriab
+- (:pr:`385`) dftd3 - the pairwise analysis requested through ``AtomicInput.keywords["pair_resolved"] = True`` and
+  returned in ``AtomicResult.extras["qcvars"]["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"]`` was elementwise too
+  large by a factor of 2. It now matches the ``s-dftd3`` harness and fulfills that the sum of the array equals the
+  2-body dispersion energy. @loriab
 
 
 v0.25.0 / 2022-11-11
@@ -39,20 +55,20 @@ v0.25.0 / 2022-11-11
 Breaking Changes
 ++++++++++++++++
 - (:pr:`376`) GAMESS - slight breaking changes of (1) ROHF MP2 ZAPT quantities now stored in "ZAPT" variables, not "MP2"
-  variables; and (2) "HF TOTAL ENERGY" no longer stores DFT energy in DFT computation.
+  variables; and (2) "HF TOTAL ENERGY" no longer stores DFT energy in DFT computation. @loriab
 - (:pr:`376`) testing - reference quantities now indexed by "standard" or "semicanonical" orbitals since program defaults
   differ (mostly in CCSD ROHF FC). Downstream projects using the stdsuite interface will need to add an extra argument to query
-  reference data.
+  reference data. @loriab
 
 New Features
 ++++++++++++
 
 Enhancements
 ++++++++++++
-- (:pr:`376`) Cfour - added parsing for BCCD and BCCD(T) methods.
-- (:pr:`376`) NWChem - B2PLYP double-hybrid can now be run and parsed. Added CC2 parsing.
-- (:pr:`376`) testing - added parsing contracts for ZAPT2, CEPA(1), CEPA(3), ACPF, AQCC, BCCD, BCCD(T), CC2, CC3, and DH-DFT. Added conventional references for most.
-- (:pr:`378`) OpenFF - Support OpenFF Toolkit v0.11+
+- (:pr:`376`) Cfour - added parsing for BCCD and BCCD(T) methods. @loriab
+- (:pr:`376`) NWChem - B2PLYP double-hybrid can now be run and parsed. Added CC2 parsing. @loriab
+- (:pr:`376`) testing - added parsing contracts for ZAPT2, CEPA(1), CEPA(3), ACPF, AQCC, BCCD, BCCD(T), CC2, CC3, and DH-DFT. Added conventional references for most. @loriab
+- (:pr:`378`) OpenFF - Support OpenFF Toolkit v0.11+. @Yoshanuikabundi
 
 Bug Fixes
 +++++++++
@@ -63,7 +79,7 @@ v0.24.1 / 2022-08-16
 
 Enhancements
 ++++++++++++
-- (:pr:`375`) testing - in standard suite, add reference values for occ, a-ccsd(t), olccd grad, remp2, omp2, omp2.5, omp3, oremp2, density fitted ccsd, ccsd(t), a-ccsd(t).
+- (:pr:`375`) testing - in standard suite, add reference values for occ, a-ccsd(t), olccd grad, remp2, omp2, omp2.5, omp3, oremp2, density fitted ccsd, ccsd(t), a-ccsd(t). @loriab
 
 
 v0.24.0 / 2022-07-08

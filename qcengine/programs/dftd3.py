@@ -201,7 +201,7 @@ class DFTD3Harness(ProgramHarness):
                     atom1 = int(data[0]) - 1
                     atom2 = int(data[1]) - 1
                     Edisp = Decimal(data[-1])
-                    D3pairs[atom1, atom2] = Edisp / Decimal(Grimme_h2kcal)
+                    D3pairs[atom1, atom2] = Decimal(0.5) * Edisp / Decimal(Grimme_h2kcal)
                     D3pairs[atom2, atom1] = D3pairs[atom1, atom2]
 
             elif re.match(" normal termination of dftd3", ln):
@@ -297,6 +297,7 @@ class DFTD3Harness(ProgramHarness):
         output_data["extras"]["local_keywords"] = input_model.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
         if input_model.keywords.get("pair_resolved", False):
+            assert abs(D3pairs.sum() - float(retres)) < 1.0e-6, f"pairwise sum {D3pairs.sum()} != energy {float(retres)}"
             output_data["extras"]["qcvars"]["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
         output_data["success"] = True
 
