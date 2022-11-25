@@ -1049,7 +1049,8 @@ pref["eneyne"]["SAPT0-D3M"] = dict(
     zip(
         dmm,
         [
-            np.array(
+            0.5
+            * np.array(
                 [
                     [
                         0.00000000e00,
@@ -1878,13 +1879,21 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
     ids=["qmol", "pmol", "qcmol"],
 )
 @pytest.mark.parametrize(
-    "inp",
+    "inp, extrakw, program",
     [
-        pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "SAPT0-D3M"}, marks=using("dftd3")),
-        pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
+        pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "SAPT0-D3M"}, {}, "dftd3", marks=using("dftd3")),
+        pytest.param(
+            {"parent": "eneyne", "subject": "dimer", "lbl": "SAPT0-D3M"},
+            {"apply_qcengine_aliases": True, "level_hint": "d3m"},
+            "s-dftd3",
+            marks=using("s-dftd3"),
+        ),
+        pytest.param(
+            {"parent": "eneyne", "subject": "dimer", "lbl": "PBE-D4(BJ,EEQ)ATM"}, {}, "dftd4", marks=using("dftd4")
+        ),
     ],
 )
-def test_sapt_pairwise(inp, subjects, request):
+def test_sapt_pairwise(inp, program, extrakw, subjects, request):
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     expected_pairwise = pref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1894,14 +1903,13 @@ def test_sapt_pairwise(inp, subjects, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
-
     atin = AtomicInput(
         molecule=mol,
         driver="energy",
         model={"method": inp["lbl"]},
         keywords={
             "pair_resolved": True,
+            **extrakw,
         },
     )
     jrec = qcng.compute(atin, program, raise_error=True)
