@@ -102,7 +102,7 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, req
     #  <<  Run
 
     inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=use_keywords)
-    ret = qcng.compute(inp, program, raise_error=True, local_options=config.dict())
+    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 
@@ -166,7 +166,7 @@ def test_local_options_scratch(program, model, keywords):
     #  <<  Run
 
     inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
-    ret = qcng.compute(inp, program, raise_error=True, local_options=config.dict())
+    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 
@@ -243,7 +243,7 @@ def test_local_options_ncores(program, model, keywords, ncores):
     #  <<  Run
 
     inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
-    ret = qcng.compute(inp, program, raise_error=True, local_options=config.dict())
+    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 
