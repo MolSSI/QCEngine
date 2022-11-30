@@ -898,7 +898,7 @@ for d in ["d3zero", "d3bj", "d3mzero", "d3mbj", "d3op"]:
         dashcoeff[d + "atm"]["definitions"][k] = copy.deepcopy(dashcoeff[d + "2b"]["definitions"][k])
         dashcoeff[d + "atm"]["definitions"][k]["params"][
             "s9"
-        ] = 1.0  # in upstream but unreleased (twice: this one adds s9 to the params list for atm)
+        ] = 1.0  # set twice: this one adds s9 to the params list for atm
 
 
 def _get_d4bj_definitions() -> dict:
@@ -1023,7 +1023,7 @@ try:
         for k, v in dashcoeff[d + "atm"]["definitions"].items():
             dashcoeff[d + "atm"]["definitions"][k]["params"][
                 "s9"
-            ] = 1.0  # in upstream but unreleased (twice: this one establishes 1.0 if upstream is still 0.0)
+            ] = 1.0  # set twice: this one establishes 1.0 if upstream is still 0.0 (pre v0.7.0 simple-dftd3)
 
 except ModuleNotFoundError:
     pass

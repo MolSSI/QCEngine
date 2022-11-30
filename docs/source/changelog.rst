@@ -17,7 +17,7 @@ Changelog
 .. +++++++++
 
 
-v0.26.0 / 2022-11-DD (Unreleased)
+v0.26.0 / 2022-11-30
 --------------------
 
 Breaking Changes
@@ -36,9 +36,9 @@ Enhancements
 ++++++++++++
 - (:pr:`380`) MRChem - added gradient and thus geometry optimizations support. @robertodr
 - (:pr:`385`) dftd3 - the classic interface now accepts e.g., ``d3mbj2b`` as a level hint. @loriab
-- (:pr:`385`) s-dftd3 - added keyword ``apply_qcengine_aliases`` that when True allows the levels and aliases in the
-  dispersion resources (e.g., ``d3``, ``d3atm``, ``d32b``) to be given as ``level_hint``. The resource parameters are
-  passed to s-dftd3 as param_tweaks. @loriab
+- (:pr:`385`) s-dftd3 - added keyword ``apply_qcengine_aliases`` that when True and ``level_hint`` present allows the
+  levels and aliases in the dispersion resources (e.g., ``d3``, ``d3atm``, ``d32b``) to be given as ``level_hint``. The
+  resource parameters are passed to s-dftd3 as param_tweaks. @loriab
 
 Bug Fixes
 +++++++++
