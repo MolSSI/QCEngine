@@ -317,7 +317,7 @@ def test_torsiondrive_generic():
         optimization_spec=OptimizationSpecification(
             procedure="geomeTRIC",
             keywords={
-                "coordsys": "dlc",
+                "coordsys": "cart",
                 "maxiter": 500,
                 "program": "rdkit",
             },
