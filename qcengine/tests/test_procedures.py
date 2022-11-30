@@ -318,7 +318,7 @@ def test_torsiondrive_generic():
             procedure="geomeTRIC",
             keywords={
                 "coordsys": "dlc",
-                "maxiter": 340,
+                "maxiter": 500,
                 "program": "rdkit",
             },
         ),
