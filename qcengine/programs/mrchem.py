@@ -101,6 +101,7 @@ class MRChemHarness(ProgramHarness):
 
         job_input = self.build_input(input_model, config)
         input_data = copy.deepcopy(job_input["mrchem_json"])
+
         output_data = {
             "keywords": input_data,
             "schema_name": "qcschema_output",
@@ -132,6 +133,10 @@ class MRChemHarness(ProgramHarness):
                 mrchem_output = mrchem_json["output"]
                 output_data["success"] = mrchem_output["success"]
                 output_data["provenance"] = mrchem_output["provenance"]
+                # parallel set up
+                output_data["provenance"].update(job_input["parallel"])
+                # remove nthreads, above info is more detailed anyway
+                output_data["provenance"].pop("nthreads")
                 # update the "routine" under "provenance"
                 output_data["provenance"]["routine"] = " ".join(job_input["command"])
 
@@ -204,8 +209,18 @@ class MRChemHarness(ProgramHarness):
         sys.path.append(exc["stdout"].split()[-1])
         from mrchem import translate_input, validate
 
+        ranks_per_node = config.ncores // config.cores_per_rank if config.use_mpiexec else 1
         mrchemrec = {
             "scratch_directory": config.scratch_directory,
+            # parallel set up
+            "parallel": {
+                "ncores": config.ncores,
+                "nnodes": config.nnodes,
+                "ranks_per_node": ranks_per_node,
+                "cores_per_rank": config.cores_per_rank,
+                "total_cores": config.nnodes * ranks_per_node * config.cores_per_rank,
+                "total_ranks": config.nnodes * ranks_per_node,
+            },
         }
 
         opts = copy.deepcopy(input_model.keywords)
