@@ -65,9 +65,7 @@ class Psi4Harness(ProgramHarness):
 
         if psiapi and not psithon:
             psiimport = str(Path(which_import("psi4")).parent.parent)
-            env = os.environ.copy()
-            env["PYTHONPATH"] = psiimport
-            with popen(["python", "-c", "import psi4; print(psi4.executable[:-5])"], popen_kwargs={"env": env}) as exc:
+            with popen(["python", "-c", "import psi4; print(psi4.executable[:-5])"]) as exc:
                 exc["proc"].wait(timeout=30)
             os.environ["PATH"] += os.pathsep + exc["stdout"].split()[-1]
 
