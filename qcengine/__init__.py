@@ -11,7 +11,6 @@ from .procedures import get_procedure, list_all_procedures, list_available_proce
 from .programs import get_program, list_all_programs, list_available_programs, register_program, unregister_program
 from .stock_mols import get_molecule
 
-
 # Handle versioneer
 __version__ = get_information("version")
 __git_revision__ = get_information("git_revision")
