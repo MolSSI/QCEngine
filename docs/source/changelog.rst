@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2022-MM-DD
+.. vX.Y.0 / 2023-MM-DD
 .. --------------------
 ..
 .. Breaking Changes
@@ -15,6 +15,27 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+
+
+v0.27.0 / 2023-MM-DD (Unreleased)
+--------------------
+
+.. Breaking Changes
+.. ++++++++++++++++
+
+.. New Features
+.. ++++++++++++
+
+Enhancements
+++++++++++++
+- UNMERGED (:pr:`388`) MRChem - more detailed info about the parallel setup saved to output provenance. @robertodr
+- UNMERGED (:pr:`393`) MCTC-GCP - Adds b973c and r2scan3c methods to the gcp (mctc only, not classic) harness. @hokru
+- UNMERGED (:pr:`393`) DFTD4 - Allows ga, gc, wf parameters to be tweaked (needed for r2scan-3c). This feature requires dftd4 3.5.0. @hokru
+
+Bug Fixes
++++++++++
+- UNMERGED (:pr:`389`) Psi4 - rationalize Psi4 exe/module detection.
+- UNMERGED (:pr:`394`) Entos/QCore & ADCC - changes to CI conda environment. @loriab
 
 
 v0.26.0 / 2022-11-30
