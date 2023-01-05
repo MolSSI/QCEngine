@@ -35,7 +35,7 @@ Enhancements
 Bug Fixes
 +++++++++
 - UNMERGED (:pr:`389`) Psi4 - rationalize Psi4 exe/module detection.
-- UNMERGED (:pr:`394`) Entos/QCore & ADCC - changes to CI conda environment. @loriab
+- (:pr:`394`) Entos/QCore & ADCC - changes to CI conda environment. @loriab
 
 
 v0.26.0 / 2022-11-30
