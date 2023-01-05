@@ -881,7 +881,17 @@ dashcoeff = {
         "bibtex": "Caldeweyher:2019:154122",
         "doi": "10.1063/1.5090222150",
         "default": collections.OrderedDict(
-            [("a1", 1.0), ("a2", 1.0), ("alp", 16.0), ("s6", 1.0), ("s8", 1.0), ("s9", 1.0)]
+            [
+                ("a1", 1.0),
+                ("a2", 1.0),
+                ("alp", 16.0),
+                ("s6", 1.0),
+                ("s8", 1.0),
+                ("s9", 1.0),
+                ("ga", 3.0),
+                ("gc", 2.0),
+                ("wf", 6.0),
+            ]
         ),
         "definitions": {
             # D4 parameters loaded below from authoritative source below. Keep a couple for reference
@@ -968,6 +978,11 @@ def _get_d4bj_definitions() -> dict:
 
 
 dashcoeff["d4bjeeqatm"]["definitions"].update(_get_d4bj_definitions())
+# defaults ga, gc, wf are not in the toml parameter file and need to be provided by qcengine
+for k, v in dashcoeff["d4bjeeqatm"]["definitions"].items():
+    dashcoeff["d4bjeeqatm"]["definitions"][k]["params"]["ga"] = 3.0
+    dashcoeff["d4bjeeqatm"]["definitions"][k]["params"]["gc"] = 2.0
+    dashcoeff["d4bjeeqatm"]["definitions"][k]["params"]["wf"] = 6.0
 
 try:
 
