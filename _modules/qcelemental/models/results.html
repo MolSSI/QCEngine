@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcelemental.models.results &mdash; QCEngine 0+untagged.1.gc68b547 documentation</title>
+  <title>qcelemental.models.results &mdash; QCEngine 0+untagged.1.g1887e71 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -46,7 +46,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gc68b547
+                0+untagged.1.g1887e71
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -123,7 +123,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">AtomicResultProperties</span><span class="p">(</span><span class="n">ProtoModel</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Named properties of quantum chemistry computations following the MolSSI QCSchema.</span>
 
 <span class="sd">    All arrays are stored flat but must be reshapable into the dimensions in attribute ``shape``, with abbreviations as follows:</span>
@@ -406,7 +406,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">WavefunctionProperties</span><span class="p">(</span><span class="n">ProtoModel</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wavefunction properties resulting from a computation. Matrix quantities are stored in column-major order. Presence and contents configurable by protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wavefunction properties resulting from a computation. Matrix quantities are stored in column-major order. Presence and contents configurable by protocol.&quot;&quot;&quot;</span>
 
     <span class="c1"># Class properties</span>
     <span class="n">_return_results_names</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -604,7 +604,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">WavefunctionProtocolEnum</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wavefunction to keep from a computation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wavefunction to keep from a computation.&quot;&quot;&quot;</span>
 
     <span class="nb">all</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
     <span class="n">orbitals_and_eigenvalues</span> <span class="o">=</span> <span class="s2">&quot;orbitals_and_eigenvalues&quot;</span>
@@ -613,7 +613,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">ErrorCorrectionProtocol</span><span class="p">(</span><span class="n">ProtoModel</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Configuration for how QCEngine handles error correction</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Configuration for how QCEngine handles error correction</span>
 
 <span class="sd">    WARNING: These protocols are currently experimental and only supported by NWChem tasks</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -635,7 +635,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">NativeFilesProtocolEnum</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;CMS program files to keep from a computation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;CMS program files to keep from a computation.&quot;&quot;&quot;</span>
 
     <span class="nb">all</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
     <span class="nb">input</span> <span class="o">=</span> <span class="s2">&quot;input&quot;</span>
@@ -643,7 +643,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">AtomicResultProtocols</span><span class="p">(</span><span class="n">ProtoModel</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Protocols regarding the manipulation of computational result data.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Protocols regarding the manipulation of computational result data.&quot;&quot;&quot;</span>
 
     <span class="n">wavefunction</span><span class="p">:</span> <span class="n">WavefunctionProtocolEnum</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">WavefunctionProtocolEnum</span><span class="o">.</span><span class="n">none</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">WavefunctionProtocolEnum</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
@@ -665,7 +665,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <div class="viewcode-block" id="AtomicInput"><a class="viewcode-back" href="../../../single_compute.html#qcelemental.models.AtomicInput">[docs]</a><span class="k">class</span> <span class="nc">AtomicInput</span><span class="p">(</span><span class="n">ProtoModel</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;The MolSSI Quantum Chemistry Schema&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The MolSSI Quantum Chemistry Schema&quot;&quot;&quot;</span>
 
     <span class="nb">id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The optional ID for the computation.&quot;</span><span class="p">)</span>
     <span class="n">schema_name</span><span class="p">:</span> <span class="n">constr</span><span class="p">(</span><span class="n">strip_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^(qc_?schema_input)$&quot;</span><span class="p">)</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -707,7 +707,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <div class="viewcode-block" id="AtomicResult"><a class="viewcode-back" href="../../../single_compute.html#qcelemental.models.AtomicResult">[docs]</a><span class="k">class</span> <span class="nc">AtomicResult</span><span class="p">(</span><span class="n">AtomicInput</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Results from a CMS program execution.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Results from a CMS program execution.&quot;&quot;&quot;</span>
 
     <span class="n">schema_name</span><span class="p">:</span> <span class="n">constr</span><span class="p">(</span><span class="n">strip_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;^(qc_?schema_output)$&quot;</span><span class="p">)</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="n">qcschema_output_default</span><span class="p">,</span>
@@ -736,7 +736,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;schema_name&quot;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_input_to_output</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;If qcschema_input is passed in, cast it to output, otherwise no&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;If qcschema_input is passed in, cast it to output, otherwise no&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="n">qcschema_input_default</span><span class="p">,</span> <span class="n">qcschema_output_default</span><span class="p">]:</span>
             <span class="k">return</span> <span class="n">qcschema_output_default</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -863,7 +863,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">ResultProperties</span><span class="p">(</span><span class="n">AtomicResultProperties</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;QC Result Properties Schema.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;QC Result Properties Schema.</span>
 
 <span class="sd">    .. deprecated:: 0.12</span>
 <span class="sd">       Use :py:func:`qcelemental.models.AtomicResultProperties` instead.</span>
@@ -881,7 +881,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">ResultProtocols</span><span class="p">(</span><span class="n">AtomicResultProtocols</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;QC Result Protocols Schema.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;QC Result Protocols Schema.</span>
 
 <span class="sd">    .. deprecated:: 0.12</span>
 <span class="sd">       Use :py:func:`qcelemental.models.AtomicResultProtocols` instead.</span>
@@ -899,7 +899,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">ResultInput</span><span class="p">(</span><span class="n">AtomicInput</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;QC Input Schema.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;QC Input Schema.</span>
 
 <span class="sd">    .. deprecated:: 0.12</span>
 <span class="sd">       Use :py:func:`qcelemental.models.AtomicInput` instead.</span>
@@ -914,7 +914,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 <span class="k">class</span> <span class="nc">Result</span><span class="p">(</span><span class="n">AtomicResult</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;QC Result Schema.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;QC Result Schema.</span>
 
 <span class="sd">    .. deprecated:: 0.12</span>
 <span class="sd">       Use :py:func:`qcelemental.models.AtomicResult` instead.</span>
@@ -935,7 +935,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2022, The Molecular Sciences Software Institute.</p>
+    <p>&#169; Copyright 2018-2023, The Molecular Sciences Software Institute.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

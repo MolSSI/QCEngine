@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.mdi_server &mdash; QCEngine 0+untagged.1.gc68b547 documentation</title>
+  <title>qcengine.mdi_server &mdash; QCEngine 0+untagged.1.g1887e71 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -46,7 +46,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="../../index.html" class="icon icon-home"> QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gc68b547
+                0+untagged.1.g1887e71
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -156,7 +156,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">local_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize an MDIServer object for communication with MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an MDIServer object for communication with MDI</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -260,7 +260,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="bp">self</span><span class="o">.</span><span class="n">comm</span> <span class="o">=</span> <span class="n">MDI_Accept_Communicator</span><span class="p">()</span>
 
 <div class="viewcode-block" id="MDIServer.update_molecule"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.update_molecule">[docs]</a>    <span class="k">def</span> <span class="nf">update_molecule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update the molecule</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the molecule</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -298,7 +298,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;@ command</span>
 <div class="viewcode-block" id="MDIServer.send_node"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_node">[docs]</a>    <span class="k">def</span> <span class="nf">send_node</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send the name of the current node through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the name of the current node through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -311,7 +311,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;NATOMS command</span>
 <div class="viewcode-block" id="MDIServer.send_natoms"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_natoms">[docs]</a>    <span class="k">def</span> <span class="nf">send_natoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send the number of atoms through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the number of atoms through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -324,7 +324,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;COORDS command</span>
 <div class="viewcode-block" id="MDIServer.send_coords"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_coords">[docs]</a>    <span class="k">def</span> <span class="nf">send_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send the nuclear coordinates through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the nuclear coordinates through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -340,7 +340,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &gt;COORDS command</span>
 <div class="viewcode-block" id="MDIServer.recv_coords"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_coords">[docs]</a>    <span class="k">def</span> <span class="nf">recv_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -356,7 +356,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;ENERGY command</span>
 <div class="viewcode-block" id="MDIServer.send_energy"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_energy">[docs]</a>    <span class="k">def</span> <span class="nf">send_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send the total energy through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the total energy through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -373,7 +373,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;FORCES command</span>
 <div class="viewcode-block" id="MDIServer.send_forces"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_forces">[docs]</a>    <span class="k">def</span> <span class="nf">send_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send the nuclear forces through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the nuclear forces through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -397,7 +397,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the SCF command</span>
 <div class="viewcode-block" id="MDIServer.run_energy"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.run_energy">[docs]</a>    <span class="k">def</span> <span class="nf">run_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Run an energy calculation&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run an energy calculation&quot;&quot;&quot;</span>
         <span class="nb">input</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">AtomicInput</span><span class="p">(</span>
             <span class="n">molecule</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span>
         <span class="p">)</span>
@@ -407,7 +407,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;ELEMENTS command</span>
 <div class="viewcode-block" id="MDIServer.send_elements"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_elements">[docs]</a>    <span class="k">def</span> <span class="nf">send_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Send the atomic number of each nucleus through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the atomic number of each nucleus through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -421,7 +421,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &gt;ELEMENTS command</span>
 <div class="viewcode-block" id="MDIServer.recv_elements"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_elements">[docs]</a>    <span class="k">def</span> <span class="nf">recv_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Receive a set of atomic numbers through MDI and assign them to the atoms in the current molecule</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a set of atomic numbers through MDI and assign them to the atoms in the current molecule</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -439,7 +439,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;MASSES command</span>
 <div class="viewcode-block" id="MDIServer.send_masses"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_masses">[docs]</a>    <span class="k">def</span> <span class="nf">send_masses</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send the nuclear masses through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the nuclear masses through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -453,7 +453,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &gt;MASSES command</span>
 <div class="viewcode-block" id="MDIServer.recv_masses"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_masses">[docs]</a>    <span class="k">def</span> <span class="nf">recv_masses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masses</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Receive a set of nuclear masses through MDI and assign them to the atoms in the current molecule</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a set of nuclear masses through MDI and assign them to the atoms in the current molecule</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -467,7 +467,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;TOTCHARGE command</span>
 <div class="viewcode-block" id="MDIServer.send_total_charge"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_total_charge">[docs]</a>    <span class="k">def</span> <span class="nf">send_total_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send the total system charge through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the total system charge through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -480,7 +480,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &gt;TOTCHARGE command</span>
 <div class="viewcode-block" id="MDIServer.recv_total_charge"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_total_charge">[docs]</a>    <span class="k">def</span> <span class="nf">recv_total_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charge</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Receive the total system charge through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive the total system charge through MDI</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -499,7 +499,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &lt;ELEC_MULT command</span>
 <div class="viewcode-block" id="MDIServer.send_multiplicity"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_multiplicity">[docs]</a>    <span class="k">def</span> <span class="nf">send_multiplicity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send the electronic multiplicity through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the electronic multiplicity through MDI</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -512,7 +512,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the &gt;ELEC_MULT command</span>
 <div class="viewcode-block" id="MDIServer.recv_multiplicity"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_multiplicity">[docs]</a>    <span class="k">def</span> <span class="nf">recv_multiplicity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multiplicity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Receive the electronic multiplicity through MDI</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive the electronic multiplicity through MDI</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -531,12 +531,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="c1"># Respond to the EXIT command</span>
 <div class="viewcode-block" id="MDIServer.stop"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Stop listening for MDI commands&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop listening for MDI commands&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_listening</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     <span class="c1"># Enter server mode, listening for commands from the driver</span>
 <div class="viewcode-block" id="MDIServer.start"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Receive commands through MDI and respond to them as defined by the MDI Standard&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive commands through MDI and respond to them as defined by the MDI Standard&quot;&quot;&quot;</span>
 
         <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_listening</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">world_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -566,7 +566,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2018-2022, The Molecular Sciences Software Institute.</p>
+    <p>&#169; Copyright 2018-2023, The Molecular Sciences Software Institute.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
