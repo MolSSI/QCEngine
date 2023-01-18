@@ -104,6 +104,7 @@ class RDKitHarness(ProgramHarness):
 
         self.found(raise_error=True)
         import rdkit
+        from rdkit import Chem
         from rdkit.Chem import AllChem
 
         # Failure flag
@@ -115,34 +116,42 @@ class RDKitHarness(ProgramHarness):
         method = input_data.model.method.lower()
         driver = input_data.driver
 
-        if method == "uff":
-            ff = AllChem.UFFGetMoleculeForceField(mol)
-            all_params = AllChem.UFFHasAllMoleculeParams(mol)
-        elif method in ["mmff94", "mmff94s"]:
-            props = AllChem.MMFFGetMoleculeProperties(mol, mmffVariant=input_data.model.method)
-            ff = AllChem.MMFFGetMoleculeForceField(mol, props)
-            all_params = AllChem.MMFFHasAllMoleculeParams(mol)
-        else:
-            raise InputError("RDKit only supports the UFF, MMFF94, and MMFF94s methods currently.")
-
-        if all_params is False:
-            raise InputError("RDKit parameters not found for all atom types in molecule.")
-
-        ff.Initialize()
-
-        ret_data["properties"] = {"return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")}
-
-        if driver == "energy":
-            ret_data["return_result"] = ret_data["properties"]["return_energy"]
-        elif driver == "gradient":
-            coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
-            ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
-        else:
-            raise InputError(f"Driver {input_model.driver} not implemented for RDKit.")
-
-        ret_data["provenance"] = Provenance(
-            creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField"
-        )
+        if driver in ["energy", "gradient"]:
+            if method == "uff":
+                ff = AllChem.UFFGetMoleculeForceField(mol)
+                all_params = AllChem.UFFHasAllMoleculeParams(mol)
+                ret_data["provenance"] = Provenance(
+                    creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField"
+                )
+            elif method in ["mmff94", "mmff94s"]:
+                props = AllChem.MMFFGetMoleculeProperties(mol, mmffVariant=input_data.model.method)
+                ff = AllChem.MMFFGetMoleculeForceField(mol, props)
+                all_params = AllChem.MMFFHasAllMoleculeParams(mol)
+                ret_data["provenance"] = Provenance(
+                    creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.MMFFGetMoleculeForceField"
+                )
+            else:
+                raise InputError("RDKit only supports the UFF, MMFF94, and MMFF94s methods for energy/gradient calculations currently.")
+            if all_params is False:
+                raise InputError("RDKit parameters not found for all atom types in molecule.")
+            ff.Initialize()
+            if driver == "energy":
+                ret_data["properties"] = {"return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")}
+            elif driver == "gradient":
+                coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
+                ret_data["properties"] = {"return_gradient": [x * coef for x in ff.CalcGrad()]}
+            else:
+                pass
+        elif driver == "hessian":
+            raise InputError("RDKit does not support hessian calculation yet.")
+        else:   # the driver is properties
+            mol_smiles = Chem.MolToSmiles(Chem.RemoveHs(mol))
+            ret_data["return_result"] = {
+                "Canonical SMILES": mol_smiles
+            }
+            ret_data["provenance"] = Provenance(
+                creator="rdkit", version=rdkit.__version__, routine="Chem.MolToSmiles"
+            )
 
         ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True
