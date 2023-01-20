@@ -145,9 +145,10 @@ class RDKitHarness(ProgramHarness):
         elif driver == "hessian":
             raise InputError("RDKit does not support hessian calculation yet.")
         else:   # the driver is properties
+            # Hydrogen should be implicit in SMILES string, but not expected to be in database entries.
             mol_smiles = Chem.MolToSmiles(Chem.RemoveHs(mol))
             ret_data["return_result"] = {
-                "Canonical SMILES": mol_smiles
+                "canonical_smiles": mol_smiles
             }
             ret_data["provenance"] = Provenance(
                 creator="rdkit", version=rdkit.__version__, routine="Chem.MolToSmiles"
