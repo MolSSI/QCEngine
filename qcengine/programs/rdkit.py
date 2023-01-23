@@ -116,6 +116,14 @@ class RDKitHarness(ProgramHarness):
         method = input_data.model.method.lower()
         driver = input_data.driver
 
+        def get_descriptors(molecule):
+            descriptors = {
+                # Hydrogen should be implicit in SMILES string, but not expected to be in database entries.
+                "canonical_smiles": Chem.MolToSmiles(Chem.RemoveHs(molecule))
+            }
+
+            return descriptors
+
         if driver in ["energy", "gradient"]:
             if method == "uff":
                 ff = AllChem.UFFGetMoleculeForceField(mol)
@@ -136,23 +144,27 @@ class RDKitHarness(ProgramHarness):
                 raise InputError("RDKit parameters not found for all atom types in molecule.")
             ff.Initialize()
             if driver == "energy":
-                ret_data["properties"] = {"return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")}
+                ret_data["return_result"] = ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")
+                ret_data["properties"] = {"return_energy": ret_data["return_result"]}
             elif driver == "gradient":
                 coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
-                ret_data["properties"] = {"return_gradient": [x * coef for x in ff.CalcGrad()]}
+                ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
+                ret_data["properties"] = {"return_gradient": ret_data["return_result"]}
             else:
                 pass
         elif driver == "hessian":
             raise InputError("RDKit does not support hessian calculation yet.")
-        else:   # the driver is properties
-            # Hydrogen should be implicit in SMILES string, but not expected to be in database entries.
-            mol_smiles = Chem.MolToSmiles(Chem.RemoveHs(mol))
-            ret_data["return_result"] = {
-                "canonical_smiles": mol_smiles
-            }
-            ret_data["provenance"] = Provenance(
-                creator="rdkit", version=rdkit.__version__, routine="Chem.MolToSmiles"
-            )
+        elif driver == "properties":
+            if method == "descriptors":
+                ret_data["properties"] = {}
+                ret_data["return_result"] = get_descriptors(mol)
+                ret_data["provenance"] = Provenance(
+                    creator="rdkit", version=rdkit.__version__, routine="get_molecular_descriptors"
+                )
+            else:
+                raise InputError(f"QCEngine has implemented the following methods for the \"properties\" driver in RDKit:\n\t\"descriptors\"")
+        else:
+            raise InputError(f"RDKit does not support the {driver} driver.")
 
         ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True
