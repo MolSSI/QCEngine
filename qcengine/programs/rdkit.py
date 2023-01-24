@@ -116,10 +116,11 @@ class RDKitHarness(ProgramHarness):
         method = input_data.model.method.lower()
         driver = input_data.driver
 
-        def get_descriptors(molecule):
+        def get_mol_descriptors(molecule):
+            Chem.AssignStereochemistryFrom3D(molecule)
             descriptors = {
                 # Hydrogen should be implicit in SMILES string, but not expected to be in database entries.
-                "canonical_smiles": Chem.MolToSmiles(Chem.RemoveHs(molecule))
+                "canonical_smiles": Chem.MolToSmiles(Chem.RemoveHs(molecule), isomericSmiles=True)
             }
 
             return descriptors
@@ -157,7 +158,7 @@ class RDKitHarness(ProgramHarness):
         elif driver == "properties":
             if method == "descriptors":
                 ret_data["properties"] = {}
-                ret_data["return_result"] = get_descriptors(mol)
+                ret_data["return_result"] = get_mol_descriptors(mol)
                 ret_data["provenance"] = Provenance(
                     creator="rdkit", version=rdkit.__version__, routine="get_molecular_descriptors"
                 )
