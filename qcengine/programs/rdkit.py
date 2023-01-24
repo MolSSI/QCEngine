@@ -140,7 +140,9 @@ class RDKitHarness(ProgramHarness):
                     creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.MMFFGetMoleculeForceField"
                 )
             else:
-                raise InputError("RDKit only supports the UFF, MMFF94, and MMFF94s methods for energy/gradient calculations currently.")
+                raise InputError(
+                    "RDKit only supports the UFF, MMFF94, and MMFF94s methods for energy/gradient calculations currently."
+                )
             if all_params is False:
                 raise InputError("RDKit parameters not found for all atom types in molecule.")
             ff.Initialize()
@@ -163,7 +165,9 @@ class RDKitHarness(ProgramHarness):
                     creator="rdkit", version=rdkit.__version__, routine="get_molecular_descriptors"
                 )
             else:
-                raise InputError(f"QCEngine has implemented the following methods for the \"properties\" driver in RDKit:\n\t\"descriptors\"")
+                raise InputError(
+                    f'QCEngine has implemented the following methods for the "properties" driver in RDKit:\n\t"descriptors"'
+                )
         else:
             raise InputError(f"RDKit does not support the {driver} driver.")
 
