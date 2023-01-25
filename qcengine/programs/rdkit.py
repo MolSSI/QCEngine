@@ -151,11 +151,11 @@ class RDKitHarness(ProgramHarness):
             ff.Initialize()
             if driver == "energy":
                 ret_data["return_result"] = ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")
-                ret_data["properties"] += {"return_energy": ret_data["return_result"]}
+                ret_data["properties"]["return_energy"] = ret_data["return_result"]
             elif driver == "gradient":
                 coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
                 ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
-                ret_data["properties"] += {"return_gradient": ret_data["return_result"]}
+                ret_data["properties"]["return_gradient"] = ret_data["return_result"]
             else:
                 pass
         elif driver == "hessian":
