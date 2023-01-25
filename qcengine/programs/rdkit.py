@@ -116,6 +116,9 @@ class RDKitHarness(ProgramHarness):
         method = input_data.model.method.lower()
         driver = input_data.driver
 
+        # CI tests fail without this property set
+        ret_data["properties"] = {"calcinfo_natoms": len(jmol.symbols)}
+
         def get_mol_descriptors(molecule):
             Chem.AssignStereochemistryFrom3D(molecule)
             descriptors = {
@@ -148,18 +151,17 @@ class RDKitHarness(ProgramHarness):
             ff.Initialize()
             if driver == "energy":
                 ret_data["return_result"] = ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")
-                ret_data["properties"] = {"return_energy": ret_data["return_result"]}
+                ret_data["properties"] += {"return_energy": ret_data["return_result"]}
             elif driver == "gradient":
                 coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
                 ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
-                ret_data["properties"] = {"return_gradient": ret_data["return_result"]}
+                ret_data["properties"] += {"return_gradient": ret_data["return_result"]}
             else:
                 pass
         elif driver == "hessian":
             raise InputError("RDKit does not support hessian calculation yet.")
         elif driver == "properties":
             if method == "descriptors":
-                ret_data["properties"] = {}
                 ret_data["return_result"] = get_mol_descriptors(mol)
                 ret_data["provenance"] = Provenance(
                     creator="rdkit", version=rdkit.__version__, routine="get_molecular_descriptors"
