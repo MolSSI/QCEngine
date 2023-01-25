@@ -117,7 +117,7 @@ class RDKitHarness(ProgramHarness):
         driver = input_data.driver
 
         # CI tests fail without this property set
-        ret_data["properties"] = {"calcinfo_natoms": len(jmol.symbols)}
+        ret_data["properties"] = {"calcinfo_natom": len(jmol.symbols)}
 
         def get_mol_descriptors(molecule):
             Chem.AssignStereochemistryFrom3D(molecule)
