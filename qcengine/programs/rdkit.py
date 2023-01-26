@@ -149,13 +149,13 @@ class RDKitHarness(ProgramHarness):
             if all_params is False:
                 raise InputError("RDKit parameters not found for all atom types in molecule.")
             ff.Initialize()
+            ret_data["properties"]["return_energy"] = ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")
             if driver == "energy":
-                ret_data["return_result"] = ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")
-                ret_data["properties"]["return_energy"] = ret_data["return_result"]
+                ret_data["return_result"] = ret_data["properties"]["return_energy"]
             elif driver == "gradient":
                 coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
-                ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
-                ret_data["properties"]["return_gradient"] = ret_data["return_result"]
+                ret_data["properties"]["return_gradient"] = [x * coef for x in ff.CalcGrad()]
+                ret_data["return_result"] = ret_data["properties"]["return_gradient"]
             else:
                 pass
         elif driver == "hessian":
