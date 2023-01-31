@@ -162,7 +162,8 @@ class RDKitHarness(ProgramHarness):
             raise InputError("RDKit does not support hessian calculation yet.")
         elif driver == "properties":
             if method == "descriptors":
-                ret_data["return_result"] = get_mol_descriptors(mol)
+                ret_data["properties"]["descriptors"] = get_mol_descriptors(mol)
+                ret_data["return_result"] = ret_data["properties"]["descriptors"]
                 ret_data["provenance"] = Provenance(
                     creator="rdkit", version=rdkit.__version__, routine="get_molecular_descriptors"
                 )

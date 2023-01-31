@@ -63,3 +63,4 @@ def test_get_descriptors(ala):
     result = qcng.compute(resi, "rdkit")
     expected = "C[C@H](N)C(=O)O"
     assert result.return_result["canonical_smiles"] == expected
+    assert result.properties.descriptors.canonical_smiles == expected
