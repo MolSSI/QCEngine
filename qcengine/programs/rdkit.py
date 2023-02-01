@@ -51,7 +51,32 @@ class RDKitHarness(ProgramHarness):
             rw_mol.AddAtom(Chem.Atom(sym.title()))
 
         # Add in connectivity
-        bond_types = {1: Chem.BondType.SINGLE, 2: Chem.BondType.DOUBLE, 3: Chem.BondType.TRIPLE}
+        bond_types = {
+            # see http://rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol
+            # class rdkit.Chem.rdchem.BondType {values}
+            0: Chem.BondType.UNSPECIFIED, 
+            1: Chem.BondType.SINGLE, 
+            2: Chem.BondType.DOUBLE, 
+            3: Chem.BondType.TRIPLE, 
+            4: Chem.BondType.QUADRUPLE, 
+            5: Chem.BondType.QUINTUPLE, 
+            6: Chem.BondType.HEXTUPLE, 
+            7: Chem.BondType.ONEANDAHALF, 
+            8: Chem.BondType.TWOANDAHALF, 
+            9: Chem.BondType.THREEANDAHALF, 
+            10: Chem.BondType.FOURANDAHALF, 
+            11: Chem.BondType.FIVEANDAHALF, 
+            12: Chem.BondType.AROMATIC, 
+            13: Chem.BondType.IONIC, 
+            14: Chem.BondType.HYDROGEN, 
+            15: Chem.BondType.THREECENTER, 
+            16: Chem.BondType.DATIVEONE, 
+            17: Chem.BondType.DATIVE, 
+            18: Chem.BondType.DATIVEL, 
+            19: Chem.BondType.DATIVER, 
+            20: Chem.BondType.OTHER, 
+            21: Chem.BondType.ZERO
+            }
         for atom1, atom2, bo in jmol.connectivity:
             rw_mol.AddBond(atom1, atom2, bond_types[bo])
 
