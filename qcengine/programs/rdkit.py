@@ -50,35 +50,53 @@ class RDKitHarness(ProgramHarness):
         for sym in jmol.symbols:
             rw_mol.AddAtom(Chem.Atom(sym.title()))
 
-        # Add in connectivity
-        bond_types = {
-            # see http://rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol
-            # class rdkit.Chem.rdchem.BondType {values}
-            0: Chem.BondType.UNSPECIFIED, 
-            1: Chem.BondType.SINGLE, 
-            2: Chem.BondType.DOUBLE, 
-            3: Chem.BondType.TRIPLE, 
-            4: Chem.BondType.QUADRUPLE, 
-            5: Chem.BondType.QUINTUPLE, 
-            6: Chem.BondType.HEXTUPLE, 
-            7: Chem.BondType.ONEANDAHALF, 
-            8: Chem.BondType.TWOANDAHALF, 
-            9: Chem.BondType.THREEANDAHALF, 
-            10: Chem.BondType.FOURANDAHALF, 
-            11: Chem.BondType.FIVEANDAHALF, 
-            12: Chem.BondType.AROMATIC, 
-            13: Chem.BondType.IONIC, 
-            14: Chem.BondType.HYDROGEN, 
-            15: Chem.BondType.THREECENTER, 
-            16: Chem.BondType.DATIVEONE, 
-            17: Chem.BondType.DATIVE, 
-            18: Chem.BondType.DATIVEL, 
-            19: Chem.BondType.DATIVER, 
-            20: Chem.BondType.OTHER, 
-            21: Chem.BondType.ZERO
+        def return_bondtype(bond):
+            # flexible bond typing would allow for calculated(float) bond orders
+            # to be included in possible calculations (via NBO or something)
+            # in the future while allowing informatics processes more comprehensive 
+            # molecular description.
+            bond_types = {
+                # see http://rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol
+                # class rdkit.Chem.rdchem.BondType {values}
+                0: Chem.BondType.UNSPECIFIED, 
+                1: Chem.BondType.SINGLE, 
+                2: Chem.BondType.DOUBLE, 
+                3: Chem.BondType.TRIPLE, 
+                4: Chem.BondType.QUADRUPLE, 
+                5: Chem.BondType.QUINTUPLE, 
+                6: Chem.BondType.HEXTUPLE, 
+                7: Chem.BondType.ONEANDAHALF, 
+                8: Chem.BondType.TWOANDAHALF, 
+                9: Chem.BondType.THREEANDAHALF, 
+                10: Chem.BondType.FOURANDAHALF, 
+                11: Chem.BondType.FIVEANDAHALF, 
+                12: Chem.BondType.AROMATIC, 
+                13: Chem.BondType.IONIC, 
+                14: Chem.BondType.HYDROGEN, 
+                15: Chem.BondType.THREECENTER, 
+                16: Chem.BondType.DATIVEONE, 
+                17: Chem.BondType.DATIVE, 
+                18: Chem.BondType.DATIVEL, 
+                19: Chem.BondType.DATIVER, 
+                20: Chem.BondType.OTHER, 
+                21: Chem.BondType.ZERO
             }
+            if float(bond).is_integer():
+                bondtype = bond_types[bond]
+            else:
+                half_orders = {
+                    0: 21, 0.5: 0, 1: 1, 1.5: 7, 2: 2, 2.5: 8,
+                    3: 3, 3.5: 9, 4: 4 4.5: 10, 5: 5
+                }
+                nearest_half = round(bond * 2) / 2
+                bondtype = bond_types[half_orders[nearest_half]]
+            
+            return bondtype
+
+        # Add in connectivity
         for atom1, atom2, bo in jmol.connectivity:
-            rw_mol.AddBond(atom1, atom2, bond_types[bo])
+            bondtype = return_bondtype(bo)
+            rw_mol.AddBond(atom1, atom2, bondtype)
 
         mol = rw_mol.GetMol()
 
