@@ -3,6 +3,7 @@ Calls the RDKit package.
 """
 
 from typing import TYPE_CHECKING, Dict
+from importlib import import_module
 
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which_import
@@ -34,6 +35,51 @@ class RDKitHarness(ProgramHarness):
         pass
 
     @staticmethod
+    def return_bondtype(bond):
+        from rdkit import Chem
+        # flexible bond typing would allow for calculated(float) bond orders
+        # to be included in possible calculations (via NBO or something)
+        # in the future while allowing informatics processes more comprehensive
+        # molecular description.
+        bond_types = {
+            # see http://rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol
+            # class rdkit.Chem.rdchem.BondType {values}
+            0: Chem.BondType.UNSPECIFIED,
+            1: Chem.BondType.SINGLE,
+            2: Chem.BondType.DOUBLE,
+            3: Chem.BondType.TRIPLE,
+            4: Chem.BondType.QUADRUPLE,
+            5: Chem.BondType.QUINTUPLE,
+            6: Chem.BondType.HEXTUPLE,
+            7: Chem.BondType.ONEANDAHALF,
+            8: Chem.BondType.TWOANDAHALF,
+            9: Chem.BondType.THREEANDAHALF,
+            10: Chem.BondType.FOURANDAHALF,
+            11: Chem.BondType.FIVEANDAHALF,
+            12: Chem.BondType.AROMATIC,
+            13: Chem.BondType.IONIC,
+            14: Chem.BondType.HYDROGEN,
+            15: Chem.BondType.THREECENTER,
+            16: Chem.BondType.DATIVEONE,
+            17: Chem.BondType.DATIVE,
+            18: Chem.BondType.DATIVEL,
+            19: Chem.BondType.DATIVER,
+            20: Chem.BondType.OTHER,
+            21: Chem.BondType.ZERO
+        }
+        if float(bond).is_integer():
+            bondtype = bond_types[bond]
+        else:
+            half_orders = {
+                0: 21, 0.5: 0, 1: 1, 1.5: 7, 2: 2, 2.5: 8,
+                3: 3, 3.5: 9, 4: 4, 4.5: 10, 5: 5
+            }
+            nearest_half = round(bond * 2) / 2
+            bondtype = bond_types[half_orders[nearest_half]]
+
+        return bondtype
+
+    @staticmethod
     def _process_molecule_rdkit(jmol):
         from rdkit import Chem
 
@@ -50,55 +96,15 @@ class RDKitHarness(ProgramHarness):
         for sym in jmol.symbols:
             rw_mol.AddAtom(Chem.Atom(sym.title()))
 
-        def return_bondtype(bond):
-            # flexible bond typing would allow for calculated(float) bond orders
-            # to be included in possible calculations (via NBO or something)
-            # in the future while allowing informatics processes more comprehensive 
-            # molecular description.
-            bond_types = {
-                # see http://rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol
-                # class rdkit.Chem.rdchem.BondType {values}
-                0: Chem.BondType.UNSPECIFIED, 
-                1: Chem.BondType.SINGLE, 
-                2: Chem.BondType.DOUBLE, 
-                3: Chem.BondType.TRIPLE, 
-                4: Chem.BondType.QUADRUPLE, 
-                5: Chem.BondType.QUINTUPLE, 
-                6: Chem.BondType.HEXTUPLE, 
-                7: Chem.BondType.ONEANDAHALF, 
-                8: Chem.BondType.TWOANDAHALF, 
-                9: Chem.BondType.THREEANDAHALF, 
-                10: Chem.BondType.FOURANDAHALF, 
-                11: Chem.BondType.FIVEANDAHALF, 
-                12: Chem.BondType.AROMATIC, 
-                13: Chem.BondType.IONIC, 
-                14: Chem.BondType.HYDROGEN, 
-                15: Chem.BondType.THREECENTER, 
-                16: Chem.BondType.DATIVEONE, 
-                17: Chem.BondType.DATIVE, 
-                18: Chem.BondType.DATIVEL, 
-                19: Chem.BondType.DATIVER, 
-                20: Chem.BondType.OTHER, 
-                21: Chem.BondType.ZERO
-            }
-            if float(bond).is_integer():
-                bondtype = bond_types[bond]
-            else:
-                half_orders = {
-                    0: 21, 0.5: 0, 1: 1, 1.5: 7, 2: 2, 2.5: 8,
-                    3: 3, 3.5: 9, 4: 4 4.5: 10, 5: 5
-                }
-                nearest_half = round(bond * 2) / 2
-                bondtype = bond_types[half_orders[nearest_half]]
-            
-            return bondtype
-
         # Add in connectivity
         for atom1, atom2, bo in jmol.connectivity:
-            bondtype = return_bondtype(bo)
+            bondtype = RDKitHarness.return_bondtype(bo)
             rw_mol.AddBond(atom1, atom2, bondtype)
 
         mol = rw_mol.GetMol()
+
+        if jmol.name is not None:
+            mol.SetProp("_Name", jmol.name)
 
         # Write out the conformer
         natom = len(jmol.symbols)
@@ -115,7 +121,8 @@ class RDKitHarness(ProgramHarness):
             )
 
         mol.AddConformer(conf)
-        Chem.rdmolops.SanitizeMol(mol)
+        s_flags = Chem.rdmolops.SanitizeFlags.SANITIZE_ALL ^ Chem.rdmolops.SanitizeFlags.SANITIZE_KEKULIZE
+        Chem.rdmolops.SanitizeMol(mol, sanitizeOps=s_flags, catchErrors=True)
 
         return mol
 
@@ -162,15 +169,6 @@ class RDKitHarness(ProgramHarness):
         # CI tests fail without this property set
         ret_data["properties"] = {"calcinfo_natom": len(jmol.symbols)}
 
-        def get_mol_descriptors(molecule):
-            Chem.AssignStereochemistryFrom3D(molecule)
-            descriptors = {
-                # Hydrogen should be implicit in SMILES string, but not expected to be in database entries.
-                "canonical_smiles": Chem.MolToSmiles(Chem.RemoveHs(molecule), isomericSmiles=True)
-            }
-
-            return descriptors
-
         if driver in ["energy", "gradient"]:
             if method == "uff":
                 ff = AllChem.UFFGetMoleculeForceField(mol)
@@ -205,10 +203,12 @@ class RDKitHarness(ProgramHarness):
             raise InputError("RDKit does not support hessian calculation yet.")
         elif driver == "properties":
             if method == "descriptors":
-                ret_data["properties"]["descriptors"] = get_mol_descriptors(mol)
-                ret_data["return_result"] = ret_data["properties"]["descriptors"]
+                get_descriptors = DescriptorConstructor(mol)
+                descriptors = get_descriptors.construct_dict()
+                ret_data["properties"]["descriptors"] = descriptors
+                ret_data["return_result"] = descriptors
                 ret_data["provenance"] = Provenance(
-                    creator="rdkit", version=rdkit.__version__, routine="get_molecular_descriptors"
+                    creator="rdkit", version=rdkit.__version__, routine="compute_descriptors"
                 )
             else:
                 raise InputError(
@@ -222,3 +222,77 @@ class RDKitHarness(ProgramHarness):
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
         return AtomicResult(**{**input_data.dict(), **ret_data})
+
+class DescriptorConstructor:
+
+    def __init__(self, molecule):
+        self.Chem = import_module('rdkit.Chem')
+        self.Descriptors = import_module('rdkit.Chem.Descriptors')
+        self.Descriptors3D = import_module('rdkit.Chem.Descriptors3D')
+        self.molecule = molecule
+        self.construct_dict()
+    @property
+    def stereochemistry(self):
+        Chem = self.Chem
+        mol = self.molecule
+        try:
+            mol.GetProp("_StereochemDone")
+        except KeyError:
+            Chem.AssignStereochemistryFrom3D(mol)
+
+        def get_doublebond_stereo(mol):
+            stereobonds = []
+            for bond in mol.GetBonds():  # loop through the bonds
+                is_stereo = False
+                stereo = bond.GetStereo()  # get stereochemistry information from them
+                # assign a label based on the BondStereo type
+                if stereo == Chem.BondStereo.STEREOZ or stereo == Chem.BondStereo.STEREOCIS:
+                    is_stereo = True
+                    s_label = 'Z'
+                elif stereo == Chem.BondStereo.STEREOE or stereo == Chem.BondStereo.STEREOTRANS:
+                    is_stereo = True
+                    s_label = 'E'
+                else:  # skip over bonds without e/z stereochemistry
+                    is_stereo = False
+                if is_stereo:
+                    # get the atom indices
+                    idx1 = bond.GetBeginAtomIdx()
+                    idx2 = bond.GetEndAtomIdx()
+                    stereobonds += [(idx1, idx2, s_label)]  # add the bonds to the list
+            if stereobonds != []:  # set a new property if not empty
+                mol.SetProp("double-bond stereo", str(stereobonds))
+            else:
+                stereobonds = None
+
+            return stereobonds
+
+        db_stereo = get_doublebond_stereo(mol)
+        if db_stereo is not None:
+            stereochem = Chem.FindMolChiralCenters(mol) + get_doublebond_stereo(mol)
+        else:
+            stereochem = Chem.FindMolChiralCenters(mol)
+
+        return stereochem
+
+    @property
+    def canonical_smiles(self):
+        Chem = self.Chem
+        mol = self.molecule
+        try:
+            mol.GetProp("_StereochemDone")
+        except KeyError:
+            Chem.AssignStereochemistryFrom3D(mol)
+
+        # Hydrogen should be implicit in SMILES string, but not expected to be in database entries.
+        smiles = Chem.MolToSmiles(Chem.RemoveHs(mol), isomericSmiles=True)
+
+        return smiles
+
+    def construct_dict(self):
+        descriptors = {
+            "canonical_smiles": self.canonical_smiles,
+            "stereochemistry": self.stereochemistry,
+        }
+
+        return descriptors
+
