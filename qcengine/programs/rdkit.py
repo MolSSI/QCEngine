@@ -272,6 +272,9 @@ class DescriptorConstructor:
         else:
             stereochem = Chem.FindMolChiralCenters(mol)
 
+        if stereochem == []:
+            stereochem = None
+
         return stereochem
 
     @property
