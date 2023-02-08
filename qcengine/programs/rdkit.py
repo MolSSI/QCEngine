@@ -121,8 +121,8 @@ class RDKitHarness(ProgramHarness):
             )
 
         mol.AddConformer(conf)
-        s_flags = Chem.rdmolops.SanitizeFlags.SANITIZE_ALL ^ Chem.rdmolops.SanitizeFlags.SANITIZE_KEKULIZE
-        Chem.rdmolops.SanitizeMol(mol, sanitizeOps=s_flags, catchErrors=True)
+        s_flags = Chem.rdmolops.SanitizeFlags.SANITIZE_ALL^Chem.rdmolops.SanitizeFlags.SANITIZE_KEKULIZE
+        Chem.rdmolops.SanitizeMol(mol, sanitizeOps=s_flags)
 
         return mol
 
