@@ -121,7 +121,10 @@ class RDKitHarness(ProgramHarness):
             )
 
         mol.AddConformer(conf)
-        s_flags = Chem.rdmolops.SanitizeFlags.SANITIZE_ALL^Chem.rdmolops.SanitizeFlags.SANITIZE_KEKULIZE
+
+        # set sanitization flags to preserve aromaticity in heterocycles
+        s_flags = Chem.rdmolops.SanitizeFlags.SANITIZE_CLEANUP|Chem.rdmolops.SanitizeFlags.SANITIZE_FINDRADICALS|Chem.rdmolops.SanitizeFlags.SANITIZE_CLEANUPCHIRALITY|Chem.rdmolops.SanitizeFlags.SANITIZE_PROPERTIES|Chem.rdmolops.SanitizeFlags.SANITIZE_ADJUSTHS|Chem.rdmolops.SanitizeFlags.SANITIZE_SETHYBRIDIZATION
+        # sanitize molecule
         Chem.rdmolops.SanitizeMol(mol, sanitizeOps=s_flags)
 
         return mol
@@ -229,16 +232,31 @@ class DescriptorConstructor:
         self.Chem = import_module('rdkit.Chem')
         self.Descriptors = import_module('rdkit.Chem.Descriptors')
         self.Descriptors3D = import_module('rdkit.Chem.Descriptors3D')
-        self.molecule = molecule
-        self.construct_dict()
+        self.molecule = self.Chem.Mol(molecule)
+        self.process_mol()
+
+    def process_mol(self):
+        Chem = self.Chem
+        Chem.AssignStereochemistryFrom3D(self.molecule)
+
+        # Create RDKit(C++) parameters object
+        parameters = Chem.AdjustQueryParameters()
+
+        # Set parameters
+        parameters.adjustConjugatedFiveRings = True
+        parameters.aromatizeIfPossible = True
+        parameters.useStereoCareForBonds = True
+        parameters.makeAtomsGeneric = False
+
+        # process the molecule according to query parameters
+        mol = Chem.AdjustQueryProperties(self.molecule, params=parameters)
+
+        self.molecule = Chem.Mol(mol)
+
     @property
     def stereochemistry(self):
         Chem = self.Chem
         mol = self.molecule
-        try:
-            mol.GetProp("_StereochemDone")
-        except KeyError:
-            Chem.AssignStereochemistryFrom3D(mol)
 
         def get_doublebond_stereo(mol):
             stereobonds = []
@@ -280,21 +298,112 @@ class DescriptorConstructor:
     @property
     def canonical_smiles(self):
         Chem = self.Chem
-        mol = self.molecule
-        try:
-            mol.GetProp("_StereochemDone")
-        except KeyError:
-            Chem.AssignStereochemistryFrom3D(mol)
+        mol = Chem.Mol(self.molecule)    # make a new copy so that RemoveHs won't edit the original in place.
 
         # Hydrogen should be implicit in SMILES string, but not expected to be in database entries.
         smiles = Chem.MolToSmiles(Chem.RemoveHs(mol), isomericSmiles=True)
 
         return smiles
 
+    @property
+    def aromaticity(self):
+        Chem = self.Chem
+        mol = self.molecule
+        arom_bonds = []
+        arom_atoms = []
+
+        # Get the bonds and find aromatic ones
+        bonds = mol.GetBonds()
+        for bond in bonds:
+            if bond.GetIsAromatic():
+                arom_bonds += [bond.GetIdx()]  # add bond index to list
+                # Adjusting properties doesn't set atom aromaticity, just bonds, so set atoms too.
+                atom1 = bond.GetBeginAtom()
+                atom1.SetIsAromatic(True)
+                atom2 = bond.GetEndAtom()
+                atom2.SetIsAromatic(True)
+
+        for atom in mol.GetAromaticAtoms():
+            arom_atoms += [atom.GetIdx()]
+
+        # If not empty, make a dictionary so aromatic atoms or bonds can be returned later
+        if arom_bonds == []:
+            indices = None    # for readability
+        else:
+            indices = {"bond_indices": arom_bonds, "atom_indices": arom_atoms}
+
+        # Create property for aromaticity info
+        mol.SetProp("aromaticity", str(indices))
+
+        return indices
+
+    @property
+    def ring_info(self):
+        Chem = self.Chem
+        mol = self.molecule
+        ring_info = {}
+
+        def isRingAromatic(mol, ring):
+            for idx in ring:
+                if not mol.GetBondWithIdx(idx).GetIsAromatic():
+                    return False
+
+            return True
+
+        def isRingHeterocyclic(mol, atom_ring):
+            isHeterocycle = False
+
+            for idx in atom_ring:
+                atom = mol.GetAtomWithIdx(idx)
+                symbol = atom.GetSymbol()
+                if symbol == 'C' or isHeterocycle:
+                    continue
+                else:
+                    isHeterocycle = True
+
+            return isHeterocycle
+
+        ri = mol.GetRingInfo()
+        atom_rings = ri.AtomRings()
+        bond_rings = ri.BondRings()
+
+        nrings = len(atom_rings)
+
+        if nrings == 0:
+            ring_info = None
+        else:
+            ring_info['num_rings'] = nrings
+            ring_info['rings'] = {}
+            for index, ring in enumerate(bond_rings):
+                ring_info['rings'][index] = {}
+                ring_info['rings'][index]['size'] = len(atom_rings[index])
+                ring_info['rings'][index]['aromatic'] = isRingAromatic(mol, ring)
+                ring_info['rings'][index]['heterocyclic'] = isRingHeterocyclic(mol, atom_rings[index])
+                ring_info['rings'][index]['atoms'] = list(atom_rings[index])
+
+        return ring_info
+
+    @property
+    def gasteiger_charges(self):
+        Chem = self.Chem
+        mol = self.molecule
+
+        mol.ComputeGasteigerCharges(nIter=48, throwOnParamFailure=True)
+        g_charges = []
+
+        # Charges are a property of the atoms in the molecule, so they must be iterated through to retrieve
+        for atom in mol.GetAtoms():
+            g_charges += [float(atom.GetProp("_GasteigerCharge"))]
+
+        return g_charges
+
     def construct_dict(self):
         descriptors = {
             "canonical_smiles": self.canonical_smiles,
             "stereochemistry": self.stereochemistry,
+            "aromaticity": self.aromaticity,
+            "ring_info": self.ring_info,
+            "gasteiger_charges": self.gasteiger_charges,
         }
 
         return descriptors
