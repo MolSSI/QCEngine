@@ -11,7 +11,7 @@ from qcengine import stock_mols
 
 @pytest.fixture
 def ala():
-    mol = stock_mols.get_molecule("L-alanine")
+    mol = stock_mols.get_molecule("Ala")
     return mol
 
 
