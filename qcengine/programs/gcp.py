@@ -171,7 +171,10 @@ class GCPHarness(ProgramHarness):
         # temp until actual options object
         method = input_model.model.method.upper()
         if method not in available_levels:
-            raise InputError(f"GCP does not have method: {method}")
+            if method in mctc_gcp_levels and executable == "gcp":
+                raise InputError(f"GCP does not have method {method} but MCTC-GCP does.")
+            else:
+                raise InputError(f"GCP does not have method: {method}")
 
         # Need 'real' field later and that's only guaranteed for molrec
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
