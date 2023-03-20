@@ -92,7 +92,7 @@ def test_berny_stdout(input_data):
 
     input_data["initial_molecule"] = qcng.get_molecule("water")
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
-    input_data["keywords"]["program"] = "psi4"
+    input_data["input_specification"]["keywords"] = {"program": "psi4"}
 
     input_data = OptimizationInput(**input_data)
 

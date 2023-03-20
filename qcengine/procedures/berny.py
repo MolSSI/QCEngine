@@ -57,7 +57,7 @@ class BernyProcedure(ProcedureHarness):
         input_data = input_data.dict()
         geom_qcng = input_data["initial_molecule"]
         comput = {**input_data["input_specification"], "molecule": geom_qcng}
-        program = input_data["keywords"].pop("program")
+        program = comput["keywords"].pop("program")
         trajectory = []
         output_data = input_data.copy()
         try:
