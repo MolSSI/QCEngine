@@ -144,7 +144,7 @@ class NodeDescriptor(pydantic.BaseModel):
         extra = "forbid"
 
 
-class TaskConfig(pydantic.BaseModel):
+class TaskConfig(pydantic.BaseSettings):
     """Description of the configuration used to launch a task."""
 
     # Specifications
@@ -162,8 +162,9 @@ class TaskConfig(pydantic.BaseModel):
         False, description="Leave scratch directory and contents on disk after completion."
     )
 
-    class Config:
+    class Config(pydantic.BaseSettings.Config):
         extra = "forbid"
+        env_prefix = "QCENGINE_"
 
 
 def _load_defaults() -> None:
@@ -270,6 +271,19 @@ def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     return ret
 
 
+def read_qcengine_task_environment() -> Dict[str, Any]:
+    """
+    Reads the qcengine task-related environment variables and returns a dictionary of the values.
+    """
+
+    ret = {}
+    for k, v in os.environ.items():
+        if k.startswith("QCENGINE_"):
+            ret[k[9:].lower()] = v
+
+    return ret
+
+
 def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = None) -> TaskConfig:
     """
     Returns the configuration key for qcengine.
@@ -278,7 +292,9 @@ def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = 
     if task_config is None:
         task_config = {}
 
-    task_config = parse_environment(task_config)
+    task_config_env = read_qcengine_task_environment()
+    task_config = {**task_config_env, **task_config}
+
     config = {}
 
     # Node data
@@ -288,7 +304,7 @@ def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = 
     config["retries"] = task_config.pop("retries", node.retries)
 
     # Jobs per node
-    jobs_per_node = task_config.pop("jobs_per_node", None) or node.jobs_per_node
+    jobs_per_node = int(task_config.pop("jobs_per_node", None) or node.jobs_per_node)
 
     # Handle memory
     memory = task_config.pop("memory", None)
@@ -300,12 +316,12 @@ def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = 
     config["memory"] = memory
 
     # Get the number of cores available to each task
-    ncores = task_config.pop("ncores", int(ncores / jobs_per_node))
+    ncores = int(task_config.pop("ncores", int(ncores / jobs_per_node)))
     if ncores < 1:
         raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
     config["ncores"] = ncores
-    config["nnodes"] = task_config.pop("nnodes", 1)
+    config["nnodes"] = int(task_config.pop("nnodes", 1))
 
     # Add in the MPI launch command template
     config["mpiexec_command"] = node.mpiexec_command
