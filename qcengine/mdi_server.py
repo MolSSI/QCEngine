@@ -287,8 +287,13 @@ class MDIServer:
 
         forces = np.reshape(self.compute_return.return_result, (-1,))
 
-        if len(forces) != 3*len(self.molecule.geometry):
-            raise Exception("MDI: The length of the forces is not what was expected.  Expected: " + str(3*len(self.molecule.geometry)) + "   Actual: " + str(len(forces)))
+        if len(forces) != 3 * len(self.molecule.geometry):
+            raise Exception(
+                "MDI: The length of the forces is not what was expected.  Expected: "
+                + str(3 * len(self.molecule.geometry))
+                + "   Actual: "
+                + str(len(forces))
+            )
 
         MDI_Send(forces, len(forces), MDI_DOUBLE, self.comm)
         return forces
