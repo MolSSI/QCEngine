@@ -285,7 +285,7 @@ class MDIServer:
             input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
         )
 
-        forces = np.reshape(self.compute_return.return_result, (-1,))
+        forces = np.reshape(-1.0 * self.compute_return.return_result, (-1,))
 
         if len(forces) != 3 * len(self.molecule.geometry):
             raise Exception(
