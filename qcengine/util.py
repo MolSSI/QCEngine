@@ -383,6 +383,7 @@ def execute(
     infiles: Optional[Dict[str, str]] = None,
     outfiles: Optional[List[str]] = None,
     *,
+    outfiles_track: Optional[List[str]] = None,
     as_binary: Optional[List[str]] = None,
     scratch_name: Optional[str] = None,
     scratch_directory: Optional[str] = None,
@@ -410,6 +411,11 @@ def execute(
     outfiles : List[str] = None
         Output file names to be collected after execution into
         values. May be {}.
+    outfiles_track: List[str], optional
+        Keys of `outfiles` to keep track of without loading their contents in memory.
+        For specified filename in `outfiles_track`, the file path instead of contents
+        is stored in `outfiles`. To ensure tracked files are not deleted after execution,
+        you must set `scratch_messy=True`.
     as_binary : List[str] = None
         Keys of `infiles` or `outfiles` to be treated as bytes.
     scratch_name : str, optional
@@ -434,7 +440,6 @@ def execute(
         Run command through the shell.
     exit_code: int, optional
         The exit code above which the process is considered failure.
-
     Raises
     ------
     FileExistsError
@@ -477,7 +482,9 @@ def execute(
     ) as scrdir:
         popen_kwargs["cwd"] = scrdir
         popen_kwargs["shell"] = shell
-        with disk_files(infiles, outfiles, cwd=scrdir, as_binary=as_binary) as extrafiles:
+        with disk_files(
+            infiles, outfiles, cwd=scrdir, as_binary=as_binary, outfiles_track=outfiles_track
+        ) as extrafiles:
             with popen(command, popen_kwargs=popen_kwargs) as proc:
                 # Wait for the subprocess to complete or the timeout to expire
                 if interupt_after is None:
@@ -568,7 +575,8 @@ def disk_files(
     *,
     cwd: Optional[str] = None,
     as_binary: Optional[List[str]] = None,
-) -> Dict[str, Union[str, bytes]]:
+    outfiles_track: Optional[List[str]] = None,
+) -> Dict[str, Union[str, bytes, Path]]:
     """Write and collect files.
 
     Parameters
@@ -583,10 +591,13 @@ def disk_files(
         Directory to which to write and read files.
     as_binary : List[str] = None
         Keys in `infiles` (`outfiles`) to be written (read) as bytes, not decoded.
-
+    outfiles_track: List[str], optional
+        Keys of `outfiles` to keep track of (i.e. file contents not loaded in memory).
+        For specified filename in `outfiles_track`, the file path instead of contents
+        is stored in `outfiles`.
     Yields
     ------
-    Dict[str] = str
+    Dict[str, Union[str, bytes, Path]]
         outfiles with RHS filled in.
 
     """
@@ -597,6 +608,8 @@ def disk_files(
     if as_binary is None:
         as_binary = []
     assert set(as_binary) <= (set(infiles) | set(outfiles))
+
+    outfiles_track = outfiles_track or []
 
     try:
         for fl, content in infiles.items():
@@ -611,20 +624,31 @@ def disk_files(
         yield outfiles
 
     finally:
+        outfiles_track = [
+            fpath.name if "*" in track else track for track in outfiles_track for fpath in lwd.glob(track)
+        ]
         for fl in outfiles.keys():
+            filename = lwd / fl
             omode = "rb" if fl in as_binary else "r"
             try:
-                filename = lwd / fl
                 with open(filename, omode) as fp:
-                    outfiles[fl] = fp.read()
-                    LOGGER.info(f"... Writing ({omode}): {filename}")
+                    if fl not in outfiles_track:
+                        outfiles[fl] = fp.read()
+                        LOGGER.info(f"... Reading ({omode}): {filename}")
+                    else:
+                        outfiles[fl] = filename
+                        LOGGER.info(f"... Tracking: {filename}")
             except (OSError, FileNotFoundError):
                 if "*" in fl:
                     gfls = {}
                     for gfl in lwd.glob(fl):
                         with open(gfl, omode) as fp:
-                            gfls[gfl.name] = fp.read()
-                            LOGGER.info(f"... Writing ({omode}): {gfl}")
+                            if gfl.name not in outfiles_track:
+                                gfls[gfl.name] = fp.read()
+                                LOGGER.info(f"... Reading ({omode}): {gfl}")
+                            else:
+                                gfls[gfl.name] = gfl
+                                LOGGER.info(f"... Tracking: {gfl}")
                     if not gfls:
                         gfls = None
                     outfiles[fl] = gfls
