@@ -58,6 +58,7 @@ class BernyProcedure(ProcedureHarness):
         geom_qcng = input_data["initial_molecule"]
         comput = {**input_data["input_specification"], "molecule": geom_qcng}
         program = input_data["keywords"].pop("program")
+        task_config = config.dict()
         trajectory = []
         output_data = input_data.copy()
         try:
@@ -67,7 +68,7 @@ class BernyProcedure(ProcedureHarness):
             opt = berny.Berny(geom_berny, logger=log, **input_data["keywords"])
             for geom_berny in opt:
                 geom_qcng["geometry"] = np.stack(geom_berny.coords * berny.angstrom)
-                ret = qcengine.compute(comput, program)
+                ret = qcengine.compute(comput, program, task_config=task_config)
                 if ret.success:
                     trajectory.append(ret.dict())
                     opt.send((ret.properties.return_energy, ret.return_result))
