@@ -31,13 +31,6 @@ try:
 except ImportError:
     use_mdi = False
 
-try:
-    from mpi4py import MPI
-
-    use_mpi4py = True
-except ImportError:
-    use_mpi4py = False
-
 
 class MDIServer:
     def __init__(
@@ -107,15 +100,6 @@ class MDIServer:
         # MPI variables
         self.mpi_world = None
         self.world_rank = 0
-
-        # Get correct intra-code MPI communicator
-        if use_mpi4py:
-            self.mpi_world = MDI_MPI_get_world_comm()
-            self.world_rank = self.mpi_world.Get_rank()
-
-            # QCEngine does not currently support multiple MPI ranks
-            if self.mpi_world.Get_size() != 1:
-                MPI.COMM_WORLD.Abort()
 
         # Flag to stop listening for MDI commands
         self.stop_listening = False
@@ -446,8 +430,6 @@ class MDIServer:
                 command = MDI_Recv_Command(self.comm)
             else:
                 command = None
-            if use_mpi4py:
-                command = self.mpi_world.bcast(command, root=0)
             if self.world_rank == 0:
                 print("MDI command received: " + str(command))
 
