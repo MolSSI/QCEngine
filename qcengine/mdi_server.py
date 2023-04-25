@@ -292,6 +292,12 @@ class MDIServer:
             input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
         )
 
+        # If there is an error message, print it out
+        if hasattr(self.compute_return, "error"):
+            print("---------------- QCEngine Compute Error ----------------\n\n")
+            print(str(self.compute_return.error.error_message))
+            print("\n\n-------------- End QCEngine Compute Error --------------", flush=True)
+
     # Respond to the <ELEMENTS command
     def send_elements(self):
         """Send the atomic number of each nucleus through MDI
