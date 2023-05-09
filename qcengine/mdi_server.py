@@ -294,9 +294,11 @@ class MDIServer:
 
         # If there is an error message, print it out
         if hasattr(self.compute_return, "error"):
-            print("---------------- QCEngine Compute Error ----------------\n\n")
-            print(str(self.compute_return.error.error_message))
-            print("\n\n-------------- End QCEngine Compute Error --------------", flush=True)
+            if self.compute_return.error is not None:
+                print("---------------- QCEngine Compute Error ----------------\n\n")
+                print(str(self.compute_return.error.error_message))
+                print("\n\n-------------- End QCEngine Compute Error --------------", flush=True)
+
 
     # Respond to the <ELEMENTS command
     def send_elements(self):
