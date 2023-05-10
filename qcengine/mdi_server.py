@@ -97,6 +97,9 @@ class MDIServer:
         # Output of most recent compute call
         self.compute_return = None
 
+        # Set whether the current energy is valid
+        self.energy_is_current = False
+
         # MPI variables
         self.mpi_world = None
         self.world_rank = 0
@@ -231,6 +234,7 @@ class MDIServer:
             MDI_Recv(3 * natom, MDI_DOUBLE, self.comm, buf=coords)
         new_geometry = np.reshape(coords, (-1, 3))
         self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{"geometry": new_geometry}})
+        self.energy_is_current = False
 
     # Respond to the <ENERGY command
     def send_energy(self) -> float:
@@ -245,7 +249,8 @@ class MDIServer:
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute energy on an unvalidated molecule")
         self.run_energy()
-        energy = self.compute_return.return_result
+        properties = self.compute_return.properties.dict()
+        energy = properties["return_energy"]
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
         return energy
 
@@ -261,15 +266,10 @@ class MDIServer:
         # Ensure that the molecule currently passes validation
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute gradients on an unvalidated molecule")
+        self.run_energy()
+        properties = self.compute_return.properties.dict()
 
-        input = qcel.models.AtomicInput(
-            molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
-        )
-        self.compute_return = compute(
-            input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
-        )
-
-        forces = np.reshape(-1.0 * self.compute_return.return_result, (-1,))
+        forces = np.reshape(-1.0 * properties["return_gradient"], (-1,))
 
         if len(forces) != 3 * len(self.molecule.geometry):
             raise Exception(
@@ -284,20 +284,24 @@ class MDIServer:
 
     # Respond to the SCF command
     def run_energy(self) -> None:
-        """Run an energy calculation"""
-        input = qcel.models.AtomicInput(
-            molecule=self.molecule, driver="energy", model=self.model, keywords=self.keywords
-        )
-        self.compute_return = compute(
-            input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
-        )
 
-        # If there is an error message, print it out
-        if hasattr(self.compute_return, "error"):
-            if self.compute_return.error is not None:
-                print("---------------- QCEngine Compute Error ----------------\n\n")
-                print(str(self.compute_return.error.error_message))
-                print("\n\n-------------- End QCEngine Compute Error --------------", flush=True)
+        if not self.energy_is_current:
+            """Run an energy calculation"""
+            input = qcel.models.AtomicInput(
+                molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
+            )
+            self.compute_return = compute(
+                input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
+            )
+
+            # If there is an error message, print it out
+            if hasattr(self.compute_return, "error"):
+                if self.compute_return.error is not None:
+                    print("---------------- QCEngine Compute Error ----------------\n\n")
+                    print(str(self.compute_return.error.error_message))
+                    print("\n\n-------------- End QCEngine Compute Error --------------", flush=True)
+
+            self.energy_is_current = True
 
 
     # Respond to the <ELEMENTS command
@@ -359,6 +363,7 @@ class MDIServer:
         if masses is None:
             masses = MDI_Recv(natom, MDI_DOUBLE, self.comm)
         self.update_molecule("masses", masses)
+        self.energy_is_current = False
 
     # Respond to the <TOTCHARGE command
     def send_total_charge(self) -> float:
@@ -385,6 +390,7 @@ class MDIServer:
         if charge is None:
             charge = MDI_Recv(1, MDI_DOUBLE, self.comm)
         self.total_charge = charge
+        self.energy_is_current = False
 
         # Allow a validation error here, because a future >ELEC_MULT command might resolve it
         try:
@@ -417,6 +423,7 @@ class MDIServer:
         if multiplicity is None:
             multiplicity = MDI_Recv(1, MDI_INT, self.comm)
         self.multiplicity = multiplicity
+        self.energy_is_current = False
 
         # Allow a validation error here, because a future >TOTCHARGE command might resolve it
         try:
