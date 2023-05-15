@@ -111,6 +111,7 @@ class MDIServer:
         self.commands = {
             "<@": self.send_node,
             "<NATOMS": self.send_natoms,
+            ">NATOMS": self.recv_natoms,
             "<COORDS": self.send_coords,
             "<ENERGY": self.send_energy,
             "<FORCES": self.send_forces,
@@ -202,6 +203,26 @@ class MDIServer:
         natom = len(self.molecule.geometry)
         MDI_Send(natom, 1, MDI_INT, self.comm)
         return natom
+
+    # Respond to the >NATOMS command
+    def recv_natoms(self, natoms: Optional[int] = None) -> None:
+        """Receive the number of atoms in the system through MDI and create a new molecule with them
+
+        Parameters
+        ----------
+        natoms : int, optional
+            New number of atoms. If None, receive through MDI.
+        """
+        natom = len(self.molecule.geometry)
+        if natoms is None:
+            natoms = MDI_Recv(1, MDI_INT, self.comm)
+
+        mol_string = ""
+        for iatom in range(natoms):
+            mol_string += "He " + str(1.0*iatom) + " 0.0 0.0\n"
+        self.molecule = qcel.models.Molecule.from_data(mol_string)
+
+        self.energy_is_current = False
 
     # Respond to the <COORDS command
     def send_coords(self) -> np.ndarray:
