@@ -83,6 +83,8 @@ class GAMESSHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             dexe["outfiles"]["input"] = job_inputs["infiles"]["gamess.inp"]
             return self.parse_output(dexe["outfiles"], input_model)
+        else:
+            raise ValueError("QCEngine execution of GAMESS failed:\n\n" + str(dexe))
 
     def build_input(
         self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
