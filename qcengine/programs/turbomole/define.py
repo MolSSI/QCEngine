@@ -65,6 +65,8 @@ def prepare_stdin(
     # Load data from keywords
     unrestricted = keywords.get("unrestricted", False)
     grid = keywords.get("grid", "m3")
+    scf_conv = keywords.get("scf_conv", 8)
+    scf_iters = keywords.get("scf_iters", 150)
 
     methods_flat = list(it.chain(*[m for m in METHODS.values()]))
     if method not in methods_flat:
@@ -191,8 +193,8 @@ def prepare_stdin(
         "ri": set_ri(keywords),
         "dsp": set_dsp(keywords),
         "title": "QCEngine Turbomole",
-        "scf_conv": 8,
-        "scf_iters": 150,
+        "scf_conv": scf_conv,
+        "scf_iters": scf_iters,
         "basis": basis,
     }
 
