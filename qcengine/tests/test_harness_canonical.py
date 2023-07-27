@@ -157,7 +157,9 @@ def test_psi4_restarts(monkeypatch):
     # create the psi4 task
     inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"), driver="energy", model={"method": "hf", "basis": "6-31G"})
     def mock_execute(*args, **kwargs):
-        "mock the output of a failed psi4 task with missing error message"
+        """
+        Mock the output of a failed psi4 task with missing error message.
+        """
 
         mock_output = {
             "sucess": False,

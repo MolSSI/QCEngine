@@ -108,7 +108,7 @@ class Psi4Harness(ProgramHarness):
                 error_message = output_data["error"]["error_message"]
                 error_type = output_data["error"].get("error_type", "unknown_error")
         else:
-            error_message = "Unknown error, error message is not found, possible segmentation fault"
+            error_message = "Unknown error, error message is not found, possible segmentation fault!"
             error_type = "internal_error"
 
         return error_message, error_type
