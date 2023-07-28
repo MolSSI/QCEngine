@@ -1,6 +1,7 @@
 """
 Tests the DQM compute dispatch module
 """
+import msgpack
 import numpy as np
 import pytest
 from qcelemental.models import AtomicInput, BasisSet
@@ -153,7 +154,9 @@ def test_psi4_restarts(monkeypatch):
     """
     Make sure that a random error is raised which can be restarted if psi4 fails with no error message
     """
-    import msgpack
+    if not has_program("psi4"):
+        pytest.skip("Program psi4 not found.")
+
     # create the psi4 task
     inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"), driver="energy", model={"method": "hf", "basis": "6-31G"})
     def mock_execute(*args, **kwargs):
