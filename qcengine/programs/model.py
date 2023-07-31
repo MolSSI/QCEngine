@@ -1,7 +1,10 @@
 import abc
 from typing import Any, Dict, List, Optional, Tuple
 
-from pydantic import BaseModel
+try:
+    from pydantic.v1 import BaseModel
+except ImportError:
+    from pydantic import BaseModel
 
 
 class ProgramHarness(BaseModel, abc.ABC):

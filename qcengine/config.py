@@ -9,8 +9,10 @@ import os
 import socket
 from typing import Any, Dict, Optional, Union
 
-import pydantic
-
+try:
+    import pydantic.v1 as pydantic
+except ImportError:
+    import pydantic
 from .extras import get_information
 
 __all__ = ["get_config", "get_provenance_augments", "global_repr", "NodeDescriptor"]
@@ -44,7 +46,9 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
         _global_values["ncores"] = cpu_cnt
 
         _global_values["cpuinfo"] = cpuinfo.get_cpu_info()
-        _global_values["cpu_brand"] = _global_values["cpuinfo"]["brand"]
+        # Change in newer versions of cpuinfo where brand_was renamed to brand_raw
+        # (See: https://github.com/workhorsy/py-cpuinfo/pull/123)
+        _global_values["cpu_brand"] = _global_values["cpuinfo"].get("brand", _global_values["cpuinfo"]["brand_raw"])
 
     if key is None:
         return _global_values.copy()

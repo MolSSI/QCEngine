@@ -5,7 +5,10 @@ Tests the DQM compute module configuration
 import copy
 import os
 
-import pydantic
+try:
+    import pydantic.v1 as pydantic
+except ImportError:
+    import pydantic
 import pytest
 
 import qcengine as qcng
