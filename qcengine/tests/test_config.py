@@ -4,7 +4,10 @@ Tests the QCEngine compute module configuration
 
 import copy
 
-import pydantic
+try:
+    import pydantic.v1 as pydantic
+except ImportError:
+    import pydantic
 import pytest
 
 import qcengine as qcng

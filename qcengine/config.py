@@ -9,7 +9,10 @@ import os
 import socket
 from typing import Any, Dict, Optional, Union
 
-import pydantic
+try:
+    import pydantic.v1 as pydantic
+except ImportError:
+    import pydantic
 
 from .extras import get_information
 

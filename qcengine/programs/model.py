@@ -2,7 +2,10 @@ import abc
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel
+try:
+    from pydantic.v1 import BaseModel
+except ImportError:
+    from pydantic import BaseModel
 from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
 
 from qcengine.exceptions import KnownErrorException
