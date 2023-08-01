@@ -21,20 +21,17 @@ Changelog
 v0.27.0 / 2023-08-DD
 --------------------
 
-Breaking Changes
-++++++++++++++++
-
-New Features
-++++++++++++
-
-Enhancements
-++++++++++++
-
 Bug Fixes
 +++++++++
-- (:pr:`394`) Entos/Qcore - updated model environments.
 - (:pr:`414`) Import `pydantic.v1` from pydantic v2 so that QCEngine can work with any >=1.8.2 pydantic
   until QCEngine is updated for v2. If using v2, use QCElemental >=v0.26.0 that has a similar change.
+  QCEngineRecords received similar treatment. @Lnaden, @loriab
+- (:pr:`414`) Versioneer - update so works with Python 3.12.
+- (:pr:`414`) Maintenance
+   - Sphinx - fix build errors.
+   - Lint - pin black to 2022 format.
+   - GHA - switch to mamba solver. @loriab
+- (:pr:`394`) Entos/Qcore - updated model environments. @loriab
 
 
 v0.26.0 / 2022-11-30

@@ -17,56 +17,56 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          #- conda-env: psi
-          #  python-version: 3.7
-          #  label: Psi4-release
-          #  runs-on: ubuntu-latest
+          - conda-env: psi
+            python-version: 3.7
+            label: Psi4-release
+            runs-on: ubuntu-latest
 
-          #- conda-env: psi-nightly
-          #  python-version: "3.10"
-          #  label: Psi4-nightly
-          #  runs-on: ubuntu-latest
+          - conda-env: psi-nightly
+            python-version: "3.10"
+            label: Psi4-nightly
+            runs-on: ubuntu-latest
 
-          #- conda-env: torchani
-          #  python-version: 3.8
-          #  label: ANI
-          #  runs-on: ubuntu-latest
+          - conda-env: torchani
+            python-version: 3.8
+            label: ANI
+            runs-on: ubuntu-latest
 
-          #- conda-env: openmm
-          #  python-version: 3.8
-          #  label: OpenMM
-          #  runs-on: ubuntu-latest
+          - conda-env: openmm
+            python-version: 3.8
+            label: OpenMM
+            runs-on: ubuntu-latest
 
           - conda-env: xtb
             python-version: "3.10"
             label: xTB
             runs-on: ubuntu-latest
 
-          #- conda-env: qcore
-          #  python-version: 3.7
-          #  label: QCore
-          #  runs-on: ubuntu-latest
+          - conda-env: qcore
+            python-version: 3.7
+            label: QCore
+            runs-on: ubuntu-latest
 
-          #- conda-env: nwchem
-          #  python-version: 3.8
-          #  label: NWChem
-          #  runs-on: ubuntu-20.04
-          #  # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
+          - conda-env: nwchem
+            python-version: 3.8
+            label: NWChem
+            runs-on: ubuntu-20.04
+            # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
 
-          #- conda-env: mrchem
-          #  python-version: 3.8
-          #  label: MRChem
-          #  runs-on: ubuntu-latest
+          - conda-env: mrchem
+            python-version: 3.8
+            label: MRChem
+            runs-on: ubuntu-latest
 
-          #- conda-env: adcc
-          #  python-version: 3.8
-          #  label: ADCC
-          #  runs-on: ubuntu-latest
+          - conda-env: adcc
+            python-version: 3.8
+            label: ADCC
+            runs-on: ubuntu-latest
 
-          #- conda-env: opt-disp
-          #  python-version: 3.8
-          #  label: optimization-dispersion
-          #  runs-on: ubuntu-latest
+          - conda-env: opt-disp
+            python-version: 3.8
+            label: optimization-dispersion
+            runs-on: ubuntu-latest
 
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }}" # • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
