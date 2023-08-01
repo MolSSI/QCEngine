@@ -16,6 +16,7 @@ qchem_forgive = [
     "root.provenance.routine",
     "root.provenance.creator",
     "root.extras",
+    "root.molecule.extras",
 ]
 
 

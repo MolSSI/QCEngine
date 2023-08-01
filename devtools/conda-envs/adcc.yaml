@@ -10,7 +10,6 @@ dependencies:
 
   # Core
   - python
-  - pyyaml
   - py-cpuinfo
   - psutil
   - qcelemental >=0.26.0
