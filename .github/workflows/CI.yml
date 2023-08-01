@@ -102,7 +102,7 @@ jobs:
     - name: Special Config - Faux Pydantic Upgrade
       run: |
         echo ${CONDA_PREFIX}
-        sed -i s;from\ pydantic\ ;from\ pydantic.v1\ ;g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
+        sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
     - name: Environment Information
       run: |
