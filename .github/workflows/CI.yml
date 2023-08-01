@@ -83,6 +83,12 @@ jobs:
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
+        show-channel-urls: true
+        miniforge-variant: Mambaforge
+        use-mamba: true
+        add-pip-as-python-dependency: true
+        #channels: conda-forge
+        # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
 
     - name: Special Config - NWChem
       if: "(matrix.cfg.label == 'NWChem')"
@@ -97,17 +103,18 @@ jobs:
     - name: Special Config - QCEngine Dep
       if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
-        conda remove qcengine --force
+        mamba remove qcengine --force
 
     - name: Special Config - Faux Pydantic Upgrade
       if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
+      # QCEngine CI and Psi4 are circularly dependent, so a hack is in order
       run: |
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
     - name: Environment Information
       run: |
-        conda info
-        conda list --show-channel-urls
+        mamba info
+        mamba list
 
     - name: Install QCEngine
       run: |
@@ -154,11 +161,15 @@ jobs:
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
+        miniforge-variant: Mambaforge
+        use-mamba: true
+        add-pip-as-python-dependency: true
+        channels: conda-forge
 
     - name: Environment Information
       run: |
-        conda info
-        conda list --show-channel-urls
+        mamba info
+        mamba list --show-channel-urls
 
     - name: Build Documentation
       run: |
