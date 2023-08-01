@@ -18,22 +18,23 @@ Changelog
 .. +++++++++
 
 
-.. v0.27.0 / 2023-08-DD
-Unreleased
+v0.27.0 / 2023-08-DD
 --------------------
 
-.. Breaking Changes
-.. ++++++++++++++++
+Breaking Changes
+++++++++++++++++
 
-.. New Features
-.. ++++++++++++
+New Features
+++++++++++++
 
-.. Enhancements
-.. ++++++++++++
+Enhancements
+++++++++++++
 
 Bug Fixes
 +++++++++
 - (:pr:`394`) Entos/Qcore - updated model environments.
+- (:pr:`414`) Import `pydantic.v1` from pydantic v2 so that QCEngine can work with any >=1.8.2 pydantic
+  until QCEngine is updated for v2. If using v2, use QCElemental >=v0.26.0 that has a similar change.
 
 
 v0.26.0 / 2022-11-30
