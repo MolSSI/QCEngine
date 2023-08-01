@@ -72,7 +72,7 @@ jobs:
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -87,7 +87,7 @@ jobs:
         miniforge-variant: Mambaforge
         use-mamba: true
         add-pip-as-python-dependency: true
-        #channels: conda-forge
+        # note: conda-forge chnl req'd for Mambaforge, but we'll spec in file, not here `channels: conda-forge,...`
         # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
 
     - name: Special Config - NWChem
@@ -100,6 +100,8 @@ jobs:
       run: |
         qcore --accept-license
 
+      # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
+      #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
       if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
@@ -109,8 +111,6 @@ jobs:
     - name: Special Config - Faux Pydantic Upgrade
       if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
-        ls -l ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages
-        ls -l ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
     - name: Environment Information
@@ -134,7 +134,7 @@ jobs:
         pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
 
   release_sphinx:
     needs: [build]
@@ -154,7 +154,7 @@ jobs:
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Create Environment
       uses: conda-incubator/setup-miniconda@v2
