@@ -100,8 +100,8 @@ jobs:
         conda remove qcengine --force
 
     - name: Special Config - Faux Pydantic Upgrade
+      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
-        echo ${CONDA_PREFIX}
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
     - name: Environment Information
