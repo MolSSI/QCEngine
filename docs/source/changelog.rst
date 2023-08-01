@@ -1,7 +1,8 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2022-MM-DD
+.. vX.Y.0 / 2023-MM-DD
+.. Unreleased
 .. --------------------
 ..
 .. Breaking Changes
@@ -15,6 +16,24 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+
+
+.. v0.27.0 / 2023-08-DD
+Unreleased
+--------------------
+
+.. Breaking Changes
+.. ++++++++++++++++
+
+.. New Features
+.. ++++++++++++
+
+.. Enhancements
+.. ++++++++++++
+
+Bug Fixes
++++++++++
+- (:pr:`394`) Entos/Qcore - updated model environments.
 
 
 v0.26.0 / 2022-11-30
