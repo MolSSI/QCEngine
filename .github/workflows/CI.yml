@@ -105,10 +105,12 @@ jobs:
       run: |
         mamba remove qcengine --force
 
+      # QCEngine CI and Psi4 are circularly dependent, so a hack is in order
     - name: Special Config - Faux Pydantic Upgrade
       if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
-      # QCEngine CI and Psi4 are circularly dependent, so a hack is in order
       run: |
+        ls -l ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages
+        ls -l ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
     - name: Environment Information
