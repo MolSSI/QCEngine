@@ -7,7 +7,6 @@ dependencies:
   - adcc>=0.15.7
   - psi4=1.8.1
   - conda-forge/label/libint_dev::libint
-  - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
 
   # Core
   - python
@@ -15,7 +14,7 @@ dependencies:
   - py-cpuinfo
   - psutil
   - qcelemental >=0.26.0
-  - pydantic>=1.0.0
+  - pydantic
   - msgpack-python
 
     # Testing
