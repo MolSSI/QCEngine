@@ -114,12 +114,11 @@ jobs:
         python -m pip install . --no-deps
 
     - name: QCEngineRecords
-      if: false
       run: |
         qcengine info
         export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
         #pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
-        pip install git+https://github.com/loriab/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
+        pip install git+https://github.com/loriab/QCEngineRecords.git@${QCER_VER}
         python -c "import qcengine; print(qcengine.config.global_repr())"
 
     - name: PyTest
