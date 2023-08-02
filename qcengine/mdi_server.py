@@ -219,7 +219,7 @@ class MDIServer:
 
         mol_string = ""
         for iatom in range(natoms):
-            mol_string += "He " + str(1.0*iatom) + " 0.0 0.0\n"
+            mol_string += "He " + str(1.0 * iatom) + " 0.0 0.0\n"
         self.molecule = qcel.models.Molecule.from_data(mol_string)
 
         self.energy_is_current = False
@@ -323,7 +323,6 @@ class MDIServer:
                     print("\n\n-------------- End QCEngine Compute Error --------------", flush=True)
 
             self.energy_is_current = True
-
 
     # Respond to the <ELEMENTS command
     def send_elements(self):
