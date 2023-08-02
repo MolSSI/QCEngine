@@ -1,6 +1,7 @@
 """
 Tests the DQM compute dispatch module
 """
+import msgpack
 import numpy as np
 import pytest
 from qcelemental.models import AtomicInput, BasisSet
@@ -148,3 +149,27 @@ def test_compute_bad_models(program, model):
 
     with pytest.raises(qcng.exceptions.InputError) as exc:
         ret = qcng.compute(inp, program, raise_error=True)
+
+
+def test_psi4_restarts(monkeypatch):
+    """
+    Make sure that a random error is raised which can be restarted if psi4 fails with no error message
+    """
+    if not has_program("psi4"):
+        pytest.skip("Program psi4 not found.")
+
+    # create the psi4 task
+    inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"), driver="energy", model={"method": "hf", "basis": "6-31G"})
+
+    def mock_execute(*args, **kwargs):
+        """
+        Mock the output of a failed psi4 task with missing error message.
+        """
+
+        mock_output = {"sucess": False, "outfiles": {"data.msgpack": msgpack.dumps({"missing": "data"})}}
+        return True, mock_output
+
+    monkeypatch.setattr("qcengine.programs.psi4.execute", mock_execute)
+
+    with pytest.raises(qcng.exceptions.RandomError):
+        _ = qcng.compute(input_data=inp, program="psi4", raise_error=True, task_config={"retries": 0})
