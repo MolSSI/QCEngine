@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MDIServer &mdash; QCEngine 0+untagged.1.g1887e71 documentation</title>
+  <title>MDIServer &mdash; QCEngine 0+untagged.1.g47f9c40 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -13,10 +13,9 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -46,14 +45,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> QCEngine
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g1887e71
+                0+untagged.1.g47f9c40
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -109,7 +112,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../api.html">QCEngine API</a></li>
       <li class="breadcrumb-item active">MDIServer</li>
       <li class="wy-breadcrumbs-aside">
@@ -129,10 +132,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p class="rubric">Methods Summary</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.recv_coords" title="qcengine.MDIServer.recv_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recv_coords</span></code></a>([coords])</p></td>
 <td><p>Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule</p></td>
@@ -192,12 +191,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </table>
 <p class="rubric">Methods Documentation</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mdi_options</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
 <li><p><strong>program</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
 <li><p><strong>raise_error</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – </p></li>
-<li><p><strong>local_options</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>local_options</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>] </em><em>| </em><em>None</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -206,10 +205,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">recv_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.recv_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.recv_coords" title="Permalink to this definition"></a></dt>
 <dd><p>Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>coords</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – New nuclear coordinates. If None, receive through MDI.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -220,7 +219,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">recv_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.recv_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.recv_elements" title="Permalink to this definition"></a></dt>
 <dd><p>Receive a set of atomic numbers through MDI and assign them to the atoms in the current molecule</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional) – New element numbers. If None, receive through MDI.</p>
 </dd>
 </dl>
@@ -231,10 +230,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">recv_masses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.recv_masses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.recv_masses" title="Permalink to this definition"></a></dt>
 <dd><p>Receive a set of nuclear masses through MDI and assign them to the atoms in the current molecule</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>masses</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, optional) – New nuclear masses. If None, receive through MDI.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -245,10 +244,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">recv_multiplicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multiplicity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.recv_multiplicity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.recv_multiplicity" title="Permalink to this definition"></a></dt>
 <dd><p>Receive the electronic multiplicity through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>multiplicity</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – New multiplicity of the system. If None, receive through MDI.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -259,10 +258,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">recv_total_charge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.recv_total_charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.recv_total_charge" title="Permalink to this definition"></a></dt>
 <dd><p>Receive the total system charge through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>charge</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – New charge of the system. If None, receive through MDI.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -273,7 +272,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">run_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.run_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.run_energy" title="Permalink to this definition"></a></dt>
 <dd><p>Run an energy calculation</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -284,10 +283,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_coords</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_coords" title="Permalink to this definition"></a></dt>
 <dd><p>Send the nuclear coordinates through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>coords</strong> – Nuclear coordinates</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>np.ndarray</p>
 </dd>
 </dl>
@@ -298,10 +297,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_elements" title="Permalink to this definition"></a></dt>
 <dd><p>Send the atomic number of each nucleus through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>elements</strong> – Element of each atom</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -312,10 +311,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_energy" title="Permalink to this definition"></a></dt>
 <dd><p>Send the total energy through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>energy</strong> – Energy of the system</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
@@ -326,10 +325,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_forces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_forces" title="Permalink to this definition"></a></dt>
 <dd><p>Send the nuclear forces through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>forces</strong> – Forces on the nuclei</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>np.ndarray</p>
 </dd>
 </dl>
@@ -340,10 +339,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_masses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_masses" title="Permalink to this definition"></a></dt>
 <dd><p>Send the nuclear masses through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>masses</strong> – Atomic masses</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>np.ndarray</p>
 </dd>
 </dl>
@@ -354,10 +353,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_multiplicity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_multiplicity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_multiplicity" title="Permalink to this definition"></a></dt>
 <dd><p>Send the electronic multiplicity through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>multiplicity</strong> – Multiplicity of the system</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
@@ -368,10 +367,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_natoms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_natoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_natoms" title="Permalink to this definition"></a></dt>
 <dd><p>Send the number of atoms through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>natom</strong> – Number of atoms</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
@@ -382,10 +381,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_node</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_node" title="Permalink to this definition"></a></dt>
 <dd><p>Send the name of the current node through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>node</strong> – Name of the current node</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
@@ -396,10 +395,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">send_total_charge</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.send_total_charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.send_total_charge" title="Permalink to this definition"></a></dt>
 <dd><p>Send the total system charge through MDI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>charge</strong> – Total charge of the system</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)">float</a></p>
 </dd>
 </dl>
@@ -410,7 +409,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.start" title="Permalink to this definition"></a></dt>
 <dd><p>Receive commands through MDI and respond to them as defined by the MDI Standard</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -421,7 +420,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.stop" title="Permalink to this definition"></a></dt>
 <dd><p>Stop listening for MDI commands</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
@@ -432,7 +431,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-name descname"><span class="pre">update_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.update_molecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.update_molecule" title="Permalink to this definition"></a></dt>
 <dd><p>Update the molecule</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Key of the molecular element to update</p></li>
 <li><p><strong>value</strong> – Update value</p></li>

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>compute_procedure &mdash; QCEngine 0+untagged.1.g1887e71 documentation</title>
+  <title>compute_procedure &mdash; QCEngine 0+untagged.1.g47f9c40 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -13,10 +13,9 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -46,14 +45,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> QCEngine
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g1887e71
+                0+untagged.1.g47f9c40
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -120,7 +123,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../api.html">QCEngine API</a></li>
       <li class="breadcrumb-item active">compute_procedure</li>
       <li class="wy-breadcrumbs-aside">
@@ -139,9 +142,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sig-prename descclassname"><span class="pre">qcengine.</span></span><span class="sig-name descname"><span class="pre">compute_procedure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procedure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/compute.html#compute_procedure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.compute_procedure" title="Permalink to this definition"></a></dt>
 <dd><p>Runs a procedure (a collection of the quantum chemistry executions)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>input_data</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em> or </em><a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.OptimizationInput.html#qcelemental.models.OptimizationInput" title="(in QCElemental vv0.25.0+2.g292350f.dirty)"><em>qcelemental.models.OptimizationInput</em></a>) – A JSON input specific to the procedure executed in dictionary or model from QCElemental.models</p></li>
+<li><p><strong>input_data</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em> or </em><a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.OptimizationInput.html#qcelemental.models.OptimizationInput" title="(in QCElemental vv0.25.1+2.g86b4700.dirty)"><em>qcelemental.models.OptimizationInput</em></a>) – A JSON input specific to the procedure executed in dictionary or model from QCElemental.models</p></li>
 <li><p><strong>procedure</strong> (<em>{&quot;geometric&quot;</em><em>, </em><em>&quot;berny&quot;}</em>) – The name of the procedure to run</p></li>
 <li><p><strong>raise_error</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>option</em>) – Determines if compute should raise an error or not.</p></li>
 <li><p><strong>task_config</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]) – A dictionary of local configuration options corresponding to a TaskConfig object.</p></li>
@@ -149,10 +152,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li><p><strong>return_dict</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em><em>, </em><em>default True</em>) – Returns a dict instead of qcelemental.models.AtomicInput</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A QC Schema representation of the requested output, type depends on return_dict key.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>, OptimizationResult, FailedOperation</p>
 </dd>
 </dl>

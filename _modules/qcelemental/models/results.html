@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcelemental.models.results &mdash; QCEngine 0+untagged.1.g1887e71 documentation</title>
+  <title>qcelemental.models.results &mdash; QCEngine 0+untagged.1.g47f9c40 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -12,10 +12,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -43,14 +42,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> QCEngine
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g1887e71
+                0+untagged.1.g47f9c40
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -92,7 +95,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">qcelemental.models.results</li>
       <li class="wy-breadcrumbs-aside">
@@ -109,7 +112,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">constr</span><span class="p">,</span> <span class="n">validator</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pydantic.v1</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">constr</span><span class="p">,</span> <span class="n">validator</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># Will also trap ModuleNotFoundError</span>
+    <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">constr</span><span class="p">,</span> <span class="n">validator</span>
 
 <span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">provenance_stamp</span>
 <span class="kn">from</span> <span class="nn">.basemodels</span> <span class="kn">import</span> <span class="n">ProtoModel</span><span class="p">,</span> <span class="n">qcschema_draft</span>
@@ -119,7 +126,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="n">Array</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">pydantic.typing</span> <span class="kn">import</span> <span class="n">ReprArgs</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pydantic.v1.typing</span> <span class="kn">import</span> <span class="n">ReprArgs</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># Will also trap ModuleNotFoundError</span>
+        <span class="kn">from</span> <span class="nn">pydantic.typing</span> <span class="kn">import</span> <span class="n">ReprArgs</span>
 
 
 <span class="k">class</span> <span class="nc">AtomicResultProperties</span><span class="p">(</span><span class="n">ProtoModel</span><span class="p">):</span>
@@ -143,16 +153,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">nuclear_repulsion_energy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The nuclear repulsion energy.&quot;</span><span class="p">)</span>
     <span class="n">return_energy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The energy of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`\ =\ :attr:`~qcelemental.models.DriverEnum.energy` computations.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;The energy of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`</span><span class="se">\\</span><span class="s2"> =</span><span class="se">\\</span><span class="s2"> :attr:`~qcelemental.models.DriverEnum.energy` computations.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">return_gradient</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Array</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The gradient of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`\ =\ :attr:`~qcelemental.models.DriverEnum.gradient` computations.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;The gradient of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`</span><span class="se">\\</span><span class="s2"> =</span><span class="se">\\</span><span class="s2"> :attr:`~qcelemental.models.DriverEnum.gradient` computations.&quot;</span><span class="p">,</span>
         <span class="n">units</span><span class="o">=</span><span class="s2">&quot;E_h/a0&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">return_hessian</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Array</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The Hessian of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`\ =\ :attr:`~qcelemental.models.DriverEnum.hessian` computations.&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;The Hessian of the requested method, identical to :attr:`~qcelemental.models.AtomicResult.return_result` for :attr:`~qcelemental.models.AtomicInput.driver`</span><span class="se">\\</span><span class="s2"> =</span><span class="se">\\</span><span class="s2"> :attr:`~qcelemental.models.DriverEnum.hessian` computations.&quot;</span><span class="p">,</span>
         <span class="n">units</span><span class="o">=</span><span class="s2">&quot;E_h/a0^2&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -539,7 +549,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;scf_eigenvalues_a&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_eigenvalues_b&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_occupations_a&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_occupations_b&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_assert1d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-
         <span class="k">try</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
@@ -597,7 +606,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="s2">&quot;occupations_b&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">def</span> <span class="nf">_assert_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-
         <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Return quantity </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> does not exist in the values.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
@@ -757,7 +765,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;wavefunction&quot;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_wavefunction_protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-
         <span class="c1"># We are pre, gotta do extra checks</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span>
@@ -826,7 +833,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;stdout&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_stdout_protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-
         <span class="c1"># Do not propagate validation errors</span>
         <span class="k">if</span> <span class="s2">&quot;protocols&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Protocols was not properly formed.&quot;</span><span class="p">)</span>
@@ -841,7 +847,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;native_files&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_native_file_protocol</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-
         <span class="n">ancp</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;protocols&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">native_files</span>
         <span class="k">if</span> <span class="n">ancp</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span>
