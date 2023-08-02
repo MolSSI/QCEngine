@@ -206,7 +206,7 @@ class TorsionDriveProcedure(ProcedureHarness):
         )
 
         return compute_procedure(
-            input_data, procedure=input_model.optimization_spec.procedure, local_options=config.dict()
+            input_data, procedure=input_model.optimization_spec.procedure, task_config=config.dict()
         )
 
     @staticmethod
