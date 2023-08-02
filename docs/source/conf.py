@@ -90,7 +90,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -190,8 +190,8 @@ texinfo_documents = [
 # -- Extension configuration -------------------------------------------------
 
 extlinks = {
-    'issue': ('https://github.com/MolSSI/QCEngine/issues/%s', 'GH#'),
-    'pr': ('https://github.com/MolSSI/QCEngine/pull/%s', 'GH#')
+    'issue': ('https://github.com/MolSSI/QCEngine/issues/%s', 'GH#%s'),
+    'pr': ('https://github.com/MolSSI/QCEngine/pull/%s', 'GH#%s')
 }
 
 # -- Options for intersphinx extension ---------------------------------------

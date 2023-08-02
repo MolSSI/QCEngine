@@ -13,7 +13,10 @@ from .programs import get_program
 from .util import compute_wrapper, environ_context, handle_output_metadata, model_wrapper
 
 if TYPE_CHECKING:
-    from pydantic.main import BaseModel
+    try:
+        from pydantic.v1.main import BaseModel
+    except ImportError:
+        from pydantic.main import BaseModel
     from qcelemental.models import AtomicResult
 
 

@@ -72,7 +72,7 @@ jobs:
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -83,6 +83,12 @@ jobs:
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
+        show-channel-urls: true
+        miniforge-variant: Mambaforge
+        use-mamba: true
+        add-pip-as-python-dependency: true
+        # note: conda-forge chnl req'd for Mambaforge, but we'll spec in file, not here `channels: conda-forge,...`
+        # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
 
     - name: Special Config - NWChem
       if: "(matrix.cfg.label == 'NWChem')"
@@ -94,15 +100,30 @@ jobs:
       run: |
         qcore --accept-license
 
+    # note: psi4 on c-f pins to a single qcel and qcng, so this may be handy for solve-and-replace
+    #- name: Special Config - QCElemental Dep
+    #  if: (matrix.cfg.label == 'ADCC')
+    #  run: |
+    #    conda remove qcelemental --force
+    #    python -m pip install qcelemental>=0.26.0 --no-deps
+
+      # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
+      #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
       if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
         conda remove qcengine --force
 
+      # QCEngine CI and Psi4 are circularly dependent, so a hack is in order
+    - name: Special Config - Faux Pydantic Upgrade
+      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'optimization-dispersion')"
+      run: |
+        sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
+
     - name: Environment Information
       run: |
-        conda info
-        conda list --show-channel-urls
+        mamba info
+        mamba list
 
     - name: Install QCEngine
       run: |
@@ -120,7 +141,7 @@ jobs:
         pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
 
   release_sphinx:
     needs: [build]
@@ -140,7 +161,7 @@ jobs:
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Create Environment
       uses: conda-incubator/setup-miniconda@v2
@@ -149,11 +170,15 @@ jobs:
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
+        miniforge-variant: Mambaforge
+        use-mamba: true
+        add-pip-as-python-dependency: true
+        channels: conda-forge
 
     - name: Environment Information
       run: |
-        conda info
-        conda list --show-channel-urls
+        mamba info
+        mamba list --show-channel-urls
 
     - name: Build Documentation
       run: |
