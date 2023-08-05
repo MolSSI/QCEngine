@@ -21,6 +21,7 @@ def input_data():
 
 
 @using("psi4")
+@pytest.mark.parametrize("ncores", [1, 2])
 @pytest.mark.parametrize(
     "optimizer",
     [
@@ -29,7 +30,7 @@ def input_data():
         pytest.param("berny", marks=using("berny")),
     ],
 )
-def test_geometric_psi4(input_data, optimizer):
+def test_geometric_psi4(input_data, optimizer, ncores):
 
     input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
@@ -38,12 +39,21 @@ def test_geometric_psi4(input_data, optimizer):
 
     input_data = OptimizationInput(**input_data)
 
-    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True)
+    task_config = {
+        "ncores": ncores,
+    }
+
+    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True, task_config=task_config)
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
     assert ret.provenance.creator.lower() == optimizer
     assert ret.trajectory[0].provenance.creator.lower() == "psi4"
+
+    if optimizer == "optking" and ncores == 2:
+        pytest.xfail("not passing threads to psi4")
+    else:
+        assert ret.trajectory[0].provenance.nthreads == ncores
 
     # Check keywords passing
     for single in ret.trajectory:
@@ -317,7 +327,7 @@ def test_torsiondrive_generic():
         optimization_spec=OptimizationSpecification(
             procedure="geomeTRIC",
             keywords={
-                "coordsys": "tric",
+                "coordsys": "hdlc",
                 "maxiter": 500,
                 "program": "rdkit",
             },
