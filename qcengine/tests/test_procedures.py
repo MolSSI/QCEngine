@@ -21,7 +21,7 @@ def input_data():
 
 
 @using("psi4")
-@pytest.mark.parametrize("ncores", [1, 2])
+@pytest.mark.parametrize("ncores", [1, 4])
 @pytest.mark.parametrize(
     "optimizer",
     [
@@ -50,7 +50,7 @@ def test_geometric_psi4(input_data, optimizer, ncores):
     assert ret.provenance.creator.lower() == optimizer
     assert ret.trajectory[0].provenance.creator.lower() == "psi4"
 
-    if optimizer == "optking" and ncores == 2:
+    if optimizer == "optking" and ncores == 4:
         pytest.xfail("not passing threads to psi4")
     else:
         assert ret.trajectory[0].provenance.nthreads == ncores

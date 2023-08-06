@@ -84,7 +84,7 @@ class NodeDescriptor(pydantic.BaseModel):
     
     The default value, ``None``, will allow QCEngine to autodetect the number of cores.""",
     )
-    jobs_per_node: int = 1
+    jobs_per_node: int = 2
     retries: int = 0
 
     # Cluster options
