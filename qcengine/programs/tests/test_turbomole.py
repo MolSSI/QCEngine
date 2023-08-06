@@ -43,6 +43,12 @@ def h2o_ricc2_def2svp():
         pytest.param("pbe0", {"grid": "m5"}, -76.27371135900, marks=using("turbomole")),
         pytest.param("ricc2", {}, -76.1603807755, marks=using("turbomole")),
         pytest.param("rimp2", {}, -76.1593614075, marks=using("turbomole")),
+        pytest.param(
+            "hf",
+            {"scf_conv": 4, "scf_iters": 1},
+            -75.95536954370,
+            marks=[using("turbomole"), pytest.mark.xfail(raises=AssertionError, strict=True)],
+        ),
     ],
 )
 def test_turbomole_energy(method, keywords, ref_energy, h2o):

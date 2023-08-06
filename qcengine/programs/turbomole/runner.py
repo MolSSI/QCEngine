@@ -131,6 +131,7 @@ class TurbomoleHarness(ProgramHarness):
 
         env = os.environ.copy()
         env["PARA_ARCH"] = "SMP"
+        env["TM_PAR_OMP"] = "on"
         env["PARNODES"] = str(config.ncores)
         env["SMPCPUS"] = str(config.ncores)
         turbomolerec["environment"] = env
@@ -238,6 +239,9 @@ class TurbomoleHarness(ProgramHarness):
             inputs["infiles"],
             inputs["outfiles"],
             shell=True,
+            environment=inputs["environment"],
+            # TODO:
+            # scratch_directory="/path/to/userdefined/scratch",
             # TODO: scratch_messy?
             # scratch_messy=False,
         )
