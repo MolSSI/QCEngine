@@ -77,7 +77,7 @@ def parse_args():
     run_procedure = subparsers.add_parser(
         "run-procedure",
         parents=[parent_parser],
-        help="Run a procedure on a given task. " "Output is printed as a JSON blob.",
+        help="Run a procedure on a given task. Output is printed as a JSON blob.",
     )
     run_procedure.add_argument("procedure", type=str, help="The procedure to run.")
     run_procedure.add_argument(
