@@ -54,31 +54,40 @@ class Psi4Harness(ProgramHarness):
         """
         psithon = which("psi4", return_bool=True)
         psiapi = which_import("psi4", return_bool=True)
+        error_msg = ""
 
         if psithon and not psiapi:
             with popen([which("psi4"), "--module"]) as exc:
                 exc["proc"].wait(timeout=30)
             if "module does not exist" in exc["stderr"]:
-                pass  # --module argument only in Psi4 DDD branch
+                pass  # --module argument only in Psi4 DDD branch, so >=1.6
             else:
-                sys.path.append(exc["stdout"].split()[-1])
+                so, se = exc["stdout"], exc["stderr"]
+                error_msg = f" In particular, psi4 command found but unable to load psi4 module into sys.path. stdout: {so}, stderr: {se}"
+                psimod = Path(so.rstrip())  # stdout is string & Path is tolerant, so safe op; at worst, psimod='.'
+                if not se and psimod.exists():
+                    sys.path.append(psimod)
+                    psiapi = which_import("psi4", return_bool=True)
 
         if psiapi and not psithon:
-            psiimport = str(Path(which_import("psi4")).parent.parent)
-            env = os.environ.copy()
-            env["PYTHONPATH"] = psiimport
-            with popen(["python", "-c", "import psi4; print(psi4.executable[:-5])"], popen_kwargs={"env": env}) as exc:
+            with popen(["python", "-c", "import psi4; print(psi4.executable)"]) as exc:
                 exc["proc"].wait(timeout=30)
-            os.environ["PATH"] += os.pathsep + exc["stdout"].split()[-1]
+            so, se = exc["stdout"], exc["stderr"]
+            error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
+            psiexe = Path(so.rstrip())  # stdout is string & Path is tolerant, so safe op; at worst, psiexe='.'
+            if not se and psiexe.exists():
+                os.environ["PATH"] += os.pathsep + str(psiexe.parent)
+                psithon = which("psi4", return_bool=True)
 
-        if psithon or psiapi:
+        if psithon and psiapi:
             return True
 
         return which(
             "psi4",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install psi4 -c psi4`. Check it's in your PATH with `which psi4`.",
+            raise_msg="Please install via `conda install psi4 -c conda-forge/label/libint_dev -c conda-forge`. Check it's in your PATH with `which psi4`."
+            + error_msg,
         )
 
     def get_version(self) -> str:
@@ -88,7 +97,9 @@ class Psi4Harness(ProgramHarness):
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
-            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[-1])
+            if exc["stderr"]:
+                raise TypeError("Error retriving Psi4 version: " + exc["stderr"])
+            self.version_cache[which_prog] = safe_version(exc["stdout"].rstrip())
 
         candidate_version = self.version_cache[which_prog]
 
