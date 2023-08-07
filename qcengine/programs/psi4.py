@@ -75,6 +75,8 @@ class Psi4Harness(ProgramHarness):
             so, se = exc["stdout"], exc["stderr"]
             error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
             psiexe = Path(so.rstrip())  # stdout is string & Path is tolerant, so safe op; at worst, psiexe='.'
+            # yes, everthing up to here could be got from `import psi4; psiexe = psi4.executable`. but, we try not to
+            #   load programs/modules in the `def found` fns.
             if not se and psiexe.exists():
                 os.environ["PATH"] += os.pathsep + str(psiexe.parent)
                 psithon = which("psi4", return_bool=True)

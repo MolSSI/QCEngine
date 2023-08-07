@@ -20,7 +20,7 @@ class OptKingProcedure(ProcedureHarness):
             "optking",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install optking -c psi4/label/dev`.",
+            raise_msg="Please install via `conda install optking -c conda-forge`.",
         )
 
     def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
