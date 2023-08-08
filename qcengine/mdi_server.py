@@ -31,13 +31,6 @@ try:
 except ImportError:
     use_mdi = False
 
-try:
-    from mpi4py import MPI
-
-    use_mpi4py = True
-except ImportError:
-    use_mpi4py = False
-
 
 class MDIServer:
     def __init__(
@@ -104,18 +97,12 @@ class MDIServer:
         # Output of most recent compute call
         self.compute_return = None
 
+        # Set whether the current energy is valid
+        self.energy_is_current = False
+
         # MPI variables
         self.mpi_world = None
         self.world_rank = 0
-
-        # Get correct intra-code MPI communicator
-        if use_mpi4py:
-            self.mpi_world = MDI_MPI_get_world_comm()
-            self.world_rank = self.mpi_world.Get_rank()
-
-            # QCEngine does not currently support multiple MPI ranks
-            if self.mpi_world.Get_size() != 1:
-                MPI.COMM_WORLD.Abort()
 
         # Flag to stop listening for MDI commands
         self.stop_listening = False
@@ -124,6 +111,7 @@ class MDIServer:
         self.commands = {
             "<@": self.send_node,
             "<NATOMS": self.send_natoms,
+            ">NATOMS": self.recv_natoms,
             "<COORDS": self.send_coords,
             "<ENERGY": self.send_energy,
             "<FORCES": self.send_forces,
@@ -216,6 +204,26 @@ class MDIServer:
         MDI_Send(natom, 1, MDI_INT, self.comm)
         return natom
 
+    # Respond to the >NATOMS command
+    def recv_natoms(self, natoms: Optional[int] = None) -> None:
+        """Receive the number of atoms in the system through MDI and create a new molecule with them
+
+        Parameters
+        ----------
+        natoms : int, optional
+            New number of atoms. If None, receive through MDI.
+        """
+        natom = len(self.molecule.geometry)
+        if natoms is None:
+            natoms = MDI_Recv(1, MDI_INT, self.comm)
+
+        mol_string = ""
+        for iatom in range(natoms):
+            mol_string += "He " + str(1.0 * iatom) + " 0.0 0.0\n"
+        self.molecule = qcel.models.Molecule.from_data(mol_string)
+
+        self.energy_is_current = False
+
     # Respond to the <COORDS command
     def send_coords(self) -> np.ndarray:
         """Send the nuclear coordinates through MDI
@@ -247,6 +255,7 @@ class MDIServer:
             MDI_Recv(3 * natom, MDI_DOUBLE, self.comm, buf=coords)
         new_geometry = np.reshape(coords, (-1, 3))
         self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{"geometry": new_geometry}})
+        self.energy_is_current = False
 
     # Respond to the <ENERGY command
     def send_energy(self) -> float:
@@ -261,7 +270,8 @@ class MDIServer:
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute energy on an unvalidated molecule")
         self.run_energy()
-        energy = self.compute_return.return_result
+        properties = self.compute_return.properties.dict()
+        energy = properties["return_energy"]
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
         return energy
 
@@ -277,27 +287,42 @@ class MDIServer:
         # Ensure that the molecule currently passes validation
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute gradients on an unvalidated molecule")
+        self.run_energy()
+        properties = self.compute_return.properties.dict()
 
-        input = qcel.models.AtomicInput(
-            molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
-        )
-        self.compute_return = compute(
-            input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
-        )
+        forces = np.reshape(-1.0 * properties["return_gradient"], (-1,))
 
-        forces = self.compute_return.return_result
+        if len(forces) != 3 * len(self.molecule.geometry):
+            raise Exception(
+                "MDI: The length of the forces is not what was expected.  Expected: "
+                + str(3 * len(self.molecule.geometry))
+                + "   Actual: "
+                + str(len(forces))
+            )
+
         MDI_Send(forces, len(forces), MDI_DOUBLE, self.comm)
         return forces
 
     # Respond to the SCF command
     def run_energy(self) -> None:
-        """Run an energy calculation"""
-        input = qcel.models.AtomicInput(
-            molecule=self.molecule, driver="energy", model=self.model, keywords=self.keywords
-        )
-        self.compute_return = compute(
-            input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
-        )
+
+        if not self.energy_is_current:
+            """Run an energy calculation"""
+            input = qcel.models.AtomicInput(
+                molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
+            )
+            self.compute_return = compute(
+                input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
+            )
+
+            # If there is an error message, print it out
+            if hasattr(self.compute_return, "error"):
+                if self.compute_return.error is not None:
+                    print("---------------- QCEngine Compute Error ----------------\n\n")
+                    print(str(self.compute_return.error.error_message))
+                    print("\n\n-------------- End QCEngine Compute Error --------------", flush=True)
+
+            self.energy_is_current = True
 
     # Respond to the <ELEMENTS command
     def send_elements(self):
@@ -358,6 +383,7 @@ class MDIServer:
         if masses is None:
             masses = MDI_Recv(natom, MDI_DOUBLE, self.comm)
         self.update_molecule("masses", masses)
+        self.energy_is_current = False
 
     # Respond to the <TOTCHARGE command
     def send_total_charge(self) -> float:
@@ -384,6 +410,7 @@ class MDIServer:
         if charge is None:
             charge = MDI_Recv(1, MDI_DOUBLE, self.comm)
         self.total_charge = charge
+        self.energy_is_current = False
 
         # Allow a validation error here, because a future >ELEC_MULT command might resolve it
         try:
@@ -416,6 +443,7 @@ class MDIServer:
         if multiplicity is None:
             multiplicity = MDI_Recv(1, MDI_INT, self.comm)
         self.multiplicity = multiplicity
+        self.energy_is_current = False
 
         # Allow a validation error here, because a future >TOTCHARGE command might resolve it
         try:
@@ -437,8 +465,6 @@ class MDIServer:
                 command = MDI_Recv_Command(self.comm)
             else:
                 command = None
-            if use_mpi4py:
-                command = self.mpi_world.bcast(command, root=0)
             if self.world_rank == 0:
                 print("MDI command received: " + str(command))
 
