@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.config &mdash; QCEngine 0+untagged.1.gd18cfda documentation</title>
+  <title>qcengine.config &mdash; QCEngine 0+untagged.1.ge5a43ba documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -49,7 +49,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gd18cfda
+                0+untagged.1.ge5a43ba
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -253,7 +253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;forbid&quot;</span></div>
 
 
-<span class="k">class</span> <span class="nc">TaskConfig</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TaskConfig</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseSettings</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Description of the configuration used to launch a task.&quot;&quot;&quot;</span>
 
     <span class="c1"># Specifications</span>
@@ -271,8 +271,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Leave scratch directory and contents on disk after completion.&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+    <span class="k">class</span> <span class="nc">Config</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseSettings</span><span class="o">.</span><span class="n">Config</span><span class="p">):</span>
         <span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;forbid&quot;</span>
+        <span class="n">env_prefix</span> <span class="o">=</span> <span class="s2">&quot;QCENGINE_&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">_load_defaults</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -379,6 +380,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="k">return</span> <span class="n">ret</span>
 
 
+<span class="k">def</span> <span class="nf">read_qcengine_task_environment</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads the qcengine task-related environment variables and returns a dictionary of the values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;QCENGINE_&quot;</span><span class="p">):</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">9</span><span class="p">:]</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+
+
 <div class="viewcode-block" id="get_config"><a class="viewcode-back" href="../../api/qcengine.get_config.html#qcengine.config.get_config">[docs]</a><span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">hostname</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">task_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TaskConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the configuration key for qcengine.</span>
@@ -387,7 +401,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="k">if</span> <span class="n">task_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">task_config</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="n">task_config</span> <span class="o">=</span> <span class="n">parse_environment</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
+    <span class="n">task_config_env</span> <span class="o">=</span> <span class="n">read_qcengine_task_environment</span><span class="p">()</span>
+    <span class="n">task_config</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">task_config_env</span><span class="p">,</span> <span class="o">**</span><span class="n">task_config</span><span class="p">}</span>
+
     <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Node data</span>
@@ -397,7 +413,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;retries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;retries&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">retries</span><span class="p">)</span>
 
     <span class="c1"># Jobs per node</span>
-    <span class="n">jobs_per_node</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;jobs_per_node&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">jobs_per_node</span>
+    <span class="n">jobs_per_node</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;jobs_per_node&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">jobs_per_node</span><span class="p">)</span>
 
     <span class="c1"># Handle memory</span>
     <span class="n">memory</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;memory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -409,12 +425,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;memory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">memory</span>
 
     <span class="c1"># Get the number of cores available to each task</span>
-    <span class="n">ncores</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ncores&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncores</span> <span class="o">/</span> <span class="n">jobs_per_node</span><span class="p">))</span>
+    <span class="n">ncores</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ncores&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncores</span> <span class="o">/</span> <span class="n">jobs_per_node</span><span class="p">)))</span>
     <span class="k">if</span> <span class="n">ncores</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Number of jobs per node exceeds the number of available cores.&quot;</span><span class="p">)</span>
 
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;ncores&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ncores</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;nnodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;nnodes&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;nnodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">task_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;nnodes&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
     <span class="c1"># Add in the MPI launch command template</span>
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;mpiexec_command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">mpiexec_command</span>
