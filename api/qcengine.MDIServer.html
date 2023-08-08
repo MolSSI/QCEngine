@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MDIServer &mdash; QCEngine 0+untagged.1.g034fd1a documentation</title>
+  <title>MDIServer &mdash; QCEngine 0+untagged.1.g5935117 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -52,7 +52,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g034fd1a
+                0+untagged.1.g5935117
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -145,46 +145,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.recv_multiplicity" title="qcengine.MDIServer.recv_multiplicity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recv_multiplicity</span></code></a>([multiplicity])</p></td>
 <td><p>Receive the electronic multiplicity through MDI</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.recv_total_charge" title="qcengine.MDIServer.recv_total_charge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recv_total_charge</span></code></a>([charge])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.recv_natoms" title="qcengine.MDIServer.recv_natoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recv_natoms</span></code></a>([natoms])</p></td>
+<td><p>Receive the number of atoms in the system through MDI and create a new molecule with them</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.recv_total_charge" title="qcengine.MDIServer.recv_total_charge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recv_total_charge</span></code></a>([charge])</p></td>
 <td><p>Receive the total system charge through MDI</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.run_energy" title="qcengine.MDIServer.run_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_energy</span></code></a>()</p></td>
-<td><p>Run an energy calculation</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.run_energy" title="qcengine.MDIServer.run_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_energy</span></code></a>()</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">rtype<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_coords" title="qcengine.MDIServer.send_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_coords</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_coords" title="qcengine.MDIServer.send_coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_coords</span></code></a>()</p></td>
 <td><p>Send the nuclear coordinates through MDI</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_elements" title="qcengine.MDIServer.send_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_elements</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_elements" title="qcengine.MDIServer.send_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_elements</span></code></a>()</p></td>
 <td><p>Send the atomic number of each nucleus through MDI</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_energy" title="qcengine.MDIServer.send_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_energy</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_energy" title="qcengine.MDIServer.send_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_energy</span></code></a>()</p></td>
 <td><p>Send the total energy through MDI</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_forces" title="qcengine.MDIServer.send_forces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_forces</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_forces" title="qcengine.MDIServer.send_forces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_forces</span></code></a>()</p></td>
 <td><p>Send the nuclear forces through MDI</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_masses" title="qcengine.MDIServer.send_masses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_masses</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_masses" title="qcengine.MDIServer.send_masses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_masses</span></code></a>()</p></td>
 <td><p>Send the nuclear masses through MDI</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_multiplicity" title="qcengine.MDIServer.send_multiplicity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_multiplicity</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_multiplicity" title="qcengine.MDIServer.send_multiplicity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_multiplicity</span></code></a>()</p></td>
 <td><p>Send the electronic multiplicity through MDI</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_natoms" title="qcengine.MDIServer.send_natoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_natoms</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_natoms" title="qcengine.MDIServer.send_natoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_natoms</span></code></a>()</p></td>
 <td><p>Send the number of atoms through MDI</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_node" title="qcengine.MDIServer.send_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_node</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_node" title="qcengine.MDIServer.send_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_node</span></code></a>()</p></td>
 <td><p>Send the name of the current node through MDI</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_total_charge" title="qcengine.MDIServer.send_total_charge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_total_charge</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.send_total_charge" title="qcengine.MDIServer.send_total_charge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_total_charge</span></code></a>()</p></td>
 <td><p>Send the total system charge through MDI</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.start" title="qcengine.MDIServer.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.start" title="qcengine.MDIServer.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>()</p></td>
 <td><p>Receive commands through MDI and respond to them as defined by the MDI Standard</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.stop" title="qcengine.MDIServer.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.stop" title="qcengine.MDIServer.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop</span></code></a>()</p></td>
 <td><p>Stop listening for MDI commands</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.MDIServer.update_molecule" title="qcengine.MDIServer.update_molecule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_molecule</span></code></a>(key, value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.MDIServer.update_molecule" title="qcengine.MDIServer.update_molecule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_molecule</span></code></a>(key, value)</p></td>
 <td><p>Update the molecule</p></td>
 </tr>
 </tbody>
@@ -254,6 +262,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qcengine.MDIServer.recv_natoms">
+<span class="sig-name descname"><span class="pre">recv_natoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">natoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.recv_natoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.recv_natoms" title="Permalink to this definition"></a></dt>
+<dd><p>Receive the number of atoms in the system through MDI and create a new molecule with them</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>natoms</strong> (<a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – New number of atoms. If None, receive through MDI.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qcengine.MDIServer.recv_total_charge">
 <span class="sig-name descname"><span class="pre">recv_total_charge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.recv_total_charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.recv_total_charge" title="Permalink to this definition"></a></dt>
 <dd><p>Receive the total system charge through MDI</p>
@@ -270,8 +292,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <dl class="py method">
 <dt class="sig sig-object py" id="qcengine.MDIServer.run_energy">
 <span class="sig-name descname"><span class="pre">run_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/mdi_server.html#MDIServer.run_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.MDIServer.run_energy" title="Permalink to this definition"></a></dt>
-<dd><p>Run an energy calculation</p>
-<dl class="field-list simple">
+<dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>

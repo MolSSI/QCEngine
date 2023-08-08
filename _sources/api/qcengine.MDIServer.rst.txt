@@ -14,6 +14,7 @@ MDIServer
       ~MDIServer.recv_elements
       ~MDIServer.recv_masses
       ~MDIServer.recv_multiplicity
+      ~MDIServer.recv_natoms
       ~MDIServer.recv_total_charge
       ~MDIServer.run_energy
       ~MDIServer.send_coords
@@ -35,6 +36,7 @@ MDIServer
    .. automethod:: recv_elements
    .. automethod:: recv_masses
    .. automethod:: recv_multiplicity
+   .. automethod:: recv_natoms
    .. automethod:: recv_total_charge
    .. automethod:: run_energy
    .. automethod:: send_coords
