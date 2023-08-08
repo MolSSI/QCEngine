@@ -73,7 +73,8 @@ def test_psi4_interactive_task():
 
     assert "Final Energy" in ret.stdout
     assert ret.success
-    assert ret.extras.pop("psiapi_evaluated", False)
+    is_psiapi_evaluated = ret.extras.pop("psiapi_evaluated", False)
+    assert is_psiapi_evaluated
 
 
 @using("psi4_runqcsk")
