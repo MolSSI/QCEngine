@@ -1,11 +1,11 @@
 QCEngine
 ========
-[![Travis build](https://img.shields.io/travis/MolSSI/QCEngine/master.svg?logo=linux&logoColor=white)](https://travis-ci.org/MolSSI/QCEngine)
+[![Build Status](https://github.com/MolSSI/QCEngine/workflows/CI/badge.svg?branch=master)](https://github.com/MolSSI/QCEngine/actions?query=workflow%3ACI)
 [![codecov](https://img.shields.io/codecov/c/github/MolSSI/QCEngine.svg?logo=Codecov&logoColor=white)](https://codecov.io/gh/MolSSI/QCEngine)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/MolSSI/QCEngine.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/MolSSI/QCEngine/context:python)
-[![Documentation Status](https://img.shields.io/github/workflow/status/MolSSI/QCEngine/CI/master?label=docs&logo=readthedocs&logoColor=white)](http://docs.qcarchive.molssi.org/projects/qcengine/en/latest/)
+[![Documentation Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/CI.yml?label=docs&logo=readthedocs&logoColor=white)](https://molssi.github.io/QCEngine/)
 [![Conda (channel only)](https://img.shields.io/conda/vn/conda-forge/qcengine?color=blue&logo=anaconda&logoColor=white)](https://anaconda.org/conda-forge/qcengine)
 [![Chat on Slack](https://img.shields.io/badge/chat-on_slack-808493.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM)
+![python](https://img.shields.io/badge/python-3.7+-blue.svg)
 
 <!--[![Azure Build Status](https://dev.azure.com/MolSSI/QCArchive/_apis/build/status/MolSSI.QCEngine?branchName=master)](https://dev.azure.com/MolSSI/QCArchive/_build/latest?definitionId=5&branchName=master)-->
 Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QCSchema)) for quantum chemistry.
@@ -52,7 +52,7 @@ The results contain a complete record of the computation:
 Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz
 ```
 
-See the [documentation](https://qcengine.readthedocs.io/en/latest/) for more information.
+See the [documentation](https://molssi.github.io/QCEngine/) for more information.
 
 # License
 
