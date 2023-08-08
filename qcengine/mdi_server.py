@@ -31,12 +31,7 @@ try:
 except ImportError:
     use_mdi = False
 
-try:
-    from mpi4py import MPI
-
-    use_mpi4py = True
-except ImportError:
-    use_mpi4py = False
+use_mpi4py = which_import("mpi4py", return_bool=True)
 
 
 class MDIServer:
@@ -110,6 +105,8 @@ class MDIServer:
 
         # Get correct intra-code MPI communicator
         if use_mpi4py:
+            from mpi4py import MPI
+
             self.mpi_world = MDI_MPI_get_world_comm()
             self.world_rank = self.mpi_world.Get_rank()
 
