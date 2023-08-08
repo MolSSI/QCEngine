@@ -61,7 +61,7 @@ class Psi4Harness(ProgramHarness):
             with popen([which("psi4"), "--module"]) as exc:
                 exc["proc"].wait(timeout=30)
             if "module does not exist" in exc["stderr"]:
-                pass  # --module argument only in Psi4 DDD branch, so >=1.6
+                psiapi = True  # --module argument only in Psi4 DDD branch (or >=1.6) so grandfather in this check
             else:
                 so, se = exc["stdout"], exc["stderr"]
                 error_msg = f" In particular, psi4 command found but unable to load psi4 module into sys.path. stdout: {so}, stderr: {se}"
@@ -220,7 +220,7 @@ class Psi4Harness(ProgramHarness):
                     psi4.core.set_num_threads(config.ncores, quiet=True)
                     psi4.set_memory(f"{config.memory}GiB", quiet=True)
                     # psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
-                    if pversion < parse_version("1.6a2"):  # adjust to where DDD merged
+                    if pversion < parse_version("1.6"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
                         output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
