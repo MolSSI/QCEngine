@@ -1,8 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2023-MM-DD
-.. Unreleased
+.. vX.Y.0 / 2023-MM-DD (Unreleased)
 .. --------------------
 ..
 .. Breaking Changes
@@ -16,6 +15,52 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+
+
+v0.28.0 / 2023-MM-DD (Unreleased)
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+- (:pr:`400`) Config - task configuration can now be set via CLI (`qcengine run -h` for details) or
+  by environment variables beginning with `QCENGINE_`.
+
+Enhancements
+++++++++++++
+- (:pr:`410`) TorsionDrive - silence warnings by using the ``task_config`` argument internally. @jthorton
+- (:pr:`409`) Psi4 - improve no-valid-error message so classifies as a RandomError and is eligible for
+  restart. @jthorton
+- (:pr:`405`) Turbomole - correctly enable OpenMP and environment passing. Pass SCF convergence and
+  maximum iterations to define. @cvsik
+- (:pr:`403`) PyBerny - fix optimizer to respect the task_config options. @q-posev
+- (:pr:`386`) CI - turn on formerly LGTM now GitHub CodeQL analysis. @lgtm-migrator
+
+Bug Fixes
++++++++++
+- (:pr:`401`) MDI - fix bug in the shape of the MDI forces structure. @taylor-a-barnes
+- (:issue:`399`, :pr:`401`) MPI - remove MPI setup for MDI. This eliminates a bug where interfering
+  MPI environment variables were getting set upon ``import qcengine`` when pymdi and mpi4py packages
+  were present. @awvwgk, @taylor-a-barnes
+
+Misc.
++++++
+- (:pr:`419`) CI - remove disabled LGTM and update badges. @loriab
+
+MUST (Unmerged)
++++++++++++++++
+- UNMERGED (:pr:`418`) Psi4 - make Psi4 exe/module detection and version parsing more robust. @Flamefire, @loriab
+- UNMERGED (:pr:`393`) MCTC-GCP - Adds b973c and r2scan3c methods to the gcp (mctc only, not classic) harness. @hokru
+- UNMERGED (:pr:`393`) DFTD4 - Allows ga, gc, wf parameters to be tweaked (needed for r2scan-3c). This feature requires dftd4 3.5.0. @hokru
+
+WIP (Unmerged)
+++++++++++++++
+- UNMERGED (:pr:`421`) GAMESS - error handling and memory @taylor-a-barnes
+- UNMERGED (:pr:`405`, :issue:`415`, :pr:`417`) Config - change default `jobs_per_node` from 2 to more expected 1 so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading machines, affecting default `ncores`. The net effect (both changes) for default cores running on Hyperthreading machines is unchanged. @cvsik, @loriab
+- UNMERGED (:pr:`388`) MRChem - more detailed info about the parallel setup saved to output provenance. @robertodr
+- UNSOLVED (:issue:`397`) extras failed
 
 
 v0.27.0 / 2023-08-02
