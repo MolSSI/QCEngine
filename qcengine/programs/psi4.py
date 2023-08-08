@@ -55,6 +55,7 @@ class Psi4Harness(ProgramHarness):
         psithon = which("psi4", return_bool=True)
         psiapi = which_import("psi4", return_bool=True)
         error_msg = ""
+        error_which = which
 
         if psithon and not psiapi:
             with popen([which("psi4"), "--module"]) as exc:
@@ -64,9 +65,10 @@ class Psi4Harness(ProgramHarness):
             else:
                 so, se = exc["stdout"], exc["stderr"]
                 error_msg = f" In particular, psi4 command found but unable to load psi4 module into sys.path. stdout: {so}, stderr: {se}"
+                error_which = which_import
                 psimod = Path(so.rstrip())  # stdout is string & Path is tolerant, so safe op; at worst, psimod='.'
-                if not se and psimod.exists():
-                    sys.path.append(psimod)
+                if (exc["proc"].returncode == 0) and (not se) and psimod.exists():
+                    sys.path.append(str(psimod))
                     psiapi = which_import("psi4", return_bool=True)
 
         if psiapi and not psithon:
@@ -77,14 +79,14 @@ class Psi4Harness(ProgramHarness):
             psiexe = Path(so.rstrip())  # stdout is string & Path is tolerant, so safe op; at worst, psiexe='.'
             # yes, everthing up to here could be got from `import psi4; psiexe = psi4.executable`. but, we try not to
             #   load programs/modules in the `def found` fns.
-            if not se and psiexe.exists():
+            if (exc["proc"].returncode == 0) and (not se) and psiexe.exists():
                 os.environ["PATH"] += os.pathsep + str(psiexe.parent)
                 psithon = which("psi4", return_bool=True)
 
         if psithon and psiapi:
             return True
 
-        return which(
+        return error_which(
             "psi4",
             return_bool=True,
             raise_error=raise_error,
@@ -99,8 +101,8 @@ class Psi4Harness(ProgramHarness):
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
-            if exc["stderr"]:
-                raise TypeError("Error retriving Psi4 version: " + exc["stderr"])
+            if (exc["proc"].returncode != 0) or exc["stderr"]:
+                raise TypeError(f"Error {exc['proc'].returncode} retrieving Psi4 version: " + exc["stderr"])
             self.version_cache[which_prog] = safe_version(exc["stdout"].rstrip())
 
         candidate_version = self.version_cache[which_prog]
