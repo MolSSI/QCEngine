@@ -908,6 +908,9 @@ try:
     new_d4_api = parse_version(d4_version) >= parse_version("3.5.0")
 except ModuleNotFoundError:
     new_d4_api = False
+except ImportError:
+    # handles when no dftd4 present
+    new_d4_api = False
 
 # different defaults for dftd4 versions < 3.5.0
 if new_d4_api is False:
