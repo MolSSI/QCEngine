@@ -910,7 +910,7 @@ except (ModuleNotFoundError, ImportError):
     new_d4_api = False
 
 # different defaults for dftd4 versions < 3.5.0
-if new_d4_api is False:
+if not new_d4_api:
     dashcoeff["d4bjeeqatm"]["default"] = collections.OrderedDict(
         [("a1", 1.0), ("a2", 1.0), ("alp", 16.0), ("s6", 1.0), ("s8", 1.0), ("s9", 1.0)]
     )
