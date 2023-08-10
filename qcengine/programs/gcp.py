@@ -160,16 +160,25 @@ class GCPHarness(ProgramHarness):
             # thus code blocks with FILE below are not used yet.
             # 'file',
         ]
+        # some methods not available in legacy version
+        mctc_gcp_levels = ["B973C", "R2SCAN3C"]
+
+        executable = self._defaults["name"].lower()
+        if executable == "mctc-gcp":
+            available_levels.extend(mctc_gcp_levels)
+
         available_levels = [f.upper() for f in available_levels]
         # temp until actual options object
         method = input_model.model.method.upper()
         if method not in available_levels:
-            raise InputError(f"GCP does not have method: {method}")
+            if method in mctc_gcp_levels and executable == "gcp":
+                raise InputError(f"GCP does not have method {method} but MCTC-GCP does.")
+            else:
+                raise InputError(f"GCP does not have method: {method}")
 
         # Need 'real' field later and that's only guaranteed for molrec
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
 
-        executable = self._defaults["name"].lower()
         calldash = {"gcp": "-", "mctc-gcp": "--"}[executable]
 
         command = [executable, "gcp_geometry.xyz", calldash + "level", method]

@@ -5,6 +5,7 @@ import copy
 from typing import Dict, List, Optional, Union
 
 from ..exceptions import InputError
+from qcelemental.util import parse_version
 
 ## ==> Dispersion Aliases and Parameters <== ##
 
@@ -881,7 +882,17 @@ dashcoeff = {
         "bibtex": "Caldeweyher:2019:154122",
         "doi": "10.1063/1.5090222150",
         "default": collections.OrderedDict(
-            [("a1", 1.0), ("a2", 1.0), ("alp", 16.0), ("s6", 1.0), ("s8", 1.0), ("s9", 1.0)]
+            [
+                ("a1", 1.0),
+                ("a2", 1.0),
+                ("alp", 16.0),
+                ("s6", 1.0),
+                ("s8", 1.0),
+                ("s9", 1.0),
+                ("ga", 3.0),
+                ("gc", 2.0),
+                ("wf", 6.0),
+            ]
         ),
         "definitions": {
             # D4 parameters loaded below from authoritative source below. Keep a couple for reference
@@ -891,6 +902,18 @@ dashcoeff = {
     },
 }
 
+try:
+    from dftd4 import __version__ as d4_version
+
+    new_d4_api = parse_version(d4_version) >= parse_version("3.5.0")
+except (ModuleNotFoundError, ImportError):
+    new_d4_api = False
+
+# different defaults for dftd4 versions < 3.5.0
+if not new_d4_api:
+    dashcoeff["d4bjeeqatm"]["default"] = collections.OrderedDict(
+        [("a1", 1.0), ("a2", 1.0), ("alp", 16.0), ("s6", 1.0), ("s8", 1.0), ("s9", 1.0)]
+    )
 
 # for d3*atm, only skeleton entries with metadata defined above. below copies in parameters from d3*2b
 for d in ["d3zero", "d3bj", "d3mzero", "d3mbj", "d3op"]:
@@ -963,6 +986,13 @@ def _get_d4bj_definitions() -> dict:
             )
         except KeyError:
             continue
+
+    # defaults ga, gc, wf are not in the toml parameter file and need to be provided by qcengine
+    if new_d4_api:
+        for entry in definitions.keys():
+            definitions[entry]["params"]["ga"] = 3.0
+            definitions[entry]["params"]["gc"] = 2.0
+            definitions[entry]["params"]["wf"] = 6.0
 
     return definitions
 
