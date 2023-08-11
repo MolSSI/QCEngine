@@ -27,8 +27,8 @@ New Features
 ++++++++++++
 - (:pr:`400`) Config - task configuration can now be set via CLI (`qcengine run -h` for details) or
   by environment variables beginning with `QCENGINE_`. @bennybp
-- (:pr:`393`, :issue:`392`) (#393, #392) MCTC-GCP - Adds b973c and r2scan3c methods to the gcp (mctc only, not classic) harness. @hokru
-- (:pr:`393`) DFTD4 - Allows ga, gc, wf parameters to be tweaked (needed for r2scan-3c). This feature requires dftd4 3.5.0. GH-393 @hokru
+- (:pr:`393`, :issue:`392`) MCTC-GCP - Adds b973c and r2scan3c methods to the gcp (mctc only, not classic) harness. @hokru
+- (:pr:`393`) DFTD4 - Allows ga, gc, wf parameters to be tweaked (needed for r2scan-3c). This feature requires dftd4 3.5.0. @hokru
 
 Enhancements
 ++++++++++++
