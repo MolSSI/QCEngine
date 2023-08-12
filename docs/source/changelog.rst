@@ -17,7 +17,7 @@ Changelog
 .. +++++++++
 
 
-v0.28.0 / 2023-MM-DD (Unreleased)
+v0.28.0 / 2023-08-15 (Unreleased)
 --------------------
 
 Breaking Changes
@@ -39,6 +39,7 @@ Enhancements
   maximum iterations to define. @cvsik
 - (:pr:`403`, :issue:`402`) PyBerny - fix optimizer to respect the task_config options. @q-posev
 - (:pr:`386`) CI - turn on formerly LGTM now GitHub CodeQL analysis. @lgtm-migrator
+- (:pr:`388`) MRChem - more detailed info about the parallel setup saved to output provenance. @robertodr
 
 Bug Fixes
 +++++++++
@@ -53,18 +54,17 @@ Misc.
 
 MUST (Unmerged)
 +++++++++++++++
-- UNMERGED (:pr:`418`, :pr:`389`) Psi4 - make Psi4 exe/module detection and version parsing more robust. @Flamefire, @loriab
+- UNMERGED (:pr:`418`, :pr:`389`, :issue:`292`) Psi4 - make Psi4 exe/module detection and version parsing more robust. @Flamefire, @coltonbh, @loriab
 - UNMERGED (:pr:`422`) CI - turn on crontab CI running to better notice external trouble. @loriab
 - UNMERGED (:pr:`423`, :issue:`377`) NWChem - allow two answers for test ``test_atom_labels[nwchem]`` to accommodate SCF
   solutions in different versions. @loriab
+- UNMERGED (:pr:`424`) testing - update SVWN Hessian reference values from Psi4. @loriab
 
 WIP (Unmerged)
 ++++++++++++++
 - UNMERGED (:pr:`421`) GAMESS - error handling and memory @taylor-a-barnes
 - UNMERGED (:pr:`405`, :issue:`415`, :pr:`417`) Config - change default `jobs_per_node` from 2 to more expected 1 so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading machines, affecting default `ncores`. The net effect (both changes) for default cores running on Hyperthreading machines is unchanged. @cvsik, @loriab
-- UNMERGED (:pr:`388`) MRChem - more detailed info about the parallel setup saved to output provenance. @robertodr
 - UNSOLVED (:issue:`397`) extras failed
-- UNSOLVED (:issue:`292`) pyenv which
 
 
 v0.27.0 / 2023-08-02
