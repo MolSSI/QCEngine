@@ -28,7 +28,7 @@ if __name__ == "__main__":
         cmdclass=versioneer.get_cmdclass(),
         packages=setuptools.find_packages(),
         setup_requires=[] + pytest_runner,
-        install_requires=["pyyaml", "py-cpuinfo", "psutil", "qcelemental>=0.29.0dev1", "pydantic>=2.1.0", "pydantic-settings"],
+        install_requires=["pyyaml", "py-cpuinfo", "psutil", "qcelemental", "pydantic>=2.1.0", "pydantic-settings"],
         entry_points={"console_scripts": ["qcengine=qcengine.cli:main"]},
         extras_require={
             "docs": [
