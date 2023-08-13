@@ -7,7 +7,7 @@ import logging
 import pprint
 import re
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
@@ -39,7 +39,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
     """
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "NWChem",
         "scratch": True,
         "thread_safe": False,
@@ -49,9 +49,6 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
     }
     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
     version_cache: Dict[str, str] = {}
-
-    class Config(ErrorCorrectionProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -321,7 +318,7 @@ task python
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="NWChem", version=self.get_version(), routine="nwchem").dict()
+        provenance = Provenance(creator="NWChem", version=self.get_version(), routine="nwchem").model_dump()
         if module is not None:
             provenance["module"] = module
 
@@ -346,4 +343,4 @@ task python
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.model_dump(), **output_data})

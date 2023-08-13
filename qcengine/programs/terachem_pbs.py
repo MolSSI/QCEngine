@@ -4,7 +4,7 @@ Calls TeraChem in its "server mode" via a protobuf interface.
 import logging
 from importlib import import_module
 from os import getenv
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Union
 
 from qcelemental.models import AtomicResult, FailedOperation
 from qcelemental.util import which_import
@@ -31,7 +31,7 @@ _pbs_defaults = {
 class TeraChemPBSHarness(ProgramHarness):
     """QCEngine Harness for interfacing with the TeraChem running in Protocol Buffer Server Mode"""
 
-    _defaults = _pbs_defaults
+    _defaults: ClassVar[Dict[str, Any]] = _pbs_defaults
     _tcpb_package: str = "tcpb"
     _tcpb_min_version: str = "0.7.0"
     _tcpb_client: str = "TCProtobufClient"
@@ -40,9 +40,6 @@ class TeraChemPBSHarness(ProgramHarness):
         "port": int(getenv("TERACHEM_PBS_PORT", 11111)),
     }
     _env_vars_external: str = "TERACHEM_PBS_HOST, TERACHEM_PBS_PORT"
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @classmethod
     def found(cls, raise_error: bool = False) -> bool:

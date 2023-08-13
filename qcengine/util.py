@@ -18,10 +18,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
-try:
-    from pydantic.v1 import BaseModel, ValidationError
-except ImportError:
-    from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError
 from qcelemental.models import AtomicResult, FailedOperation, OptimizationResult
 
 from qcengine.config import TaskConfig

@@ -5,7 +5,8 @@ channels:
 dependencies:
   - python
   - networkx
-  - pydantic=1
+  - pydantic>=2.1
+  - pydantic-settings
   - numpy
   - pint
 

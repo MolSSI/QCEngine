@@ -9,6 +9,7 @@ import pytest
 import qcelemental as qcel
 from pkg_resources import parse_version
 from qcelemental.util import which, which_import
+from pydantic import ConfigDict
 
 import qcengine as qcng
 
@@ -95,8 +96,9 @@ def failure_engine():
             "managed_memory": False,
         }
 
-        class Config(qcng.programs.ProgramHarness.Config):
-            allow_mutation: True
+        model_config = ConfigDict(
+            frozen=False,
+        )
 
         @staticmethod
         def found(raise_error: bool = False) -> bool:

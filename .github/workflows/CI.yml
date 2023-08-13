@@ -103,10 +103,11 @@ jobs:
         qcore --accept-license
 
     # note: psi4 on c-f pins to a single qcel and qcng, so this may be handy for solve-and-replace
-    #- name: Special Config - QCElemental Dep
+    - name: Special Config - QCElemental Dep
     #  if: (matrix.cfg.label == 'ADCC')
-    #  run: |
-    #    conda remove qcelemental --force
+      run: |
+        conda remove qcelemental --force
+        python -m pip install git+https://github.com/Lnaden/QCElemental.git@Pydanticv2Overhaul --no-deps
     #    python -m pip install qcelemental>=0.26.0 --no-deps
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412

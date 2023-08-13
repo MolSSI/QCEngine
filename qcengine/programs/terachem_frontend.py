@@ -1,7 +1,7 @@
 """Harness for TeraChem Frontend"""
 import logging
 from os import getenv
-from typing import Any, Dict
+from typing import Any, ClassVar, Dict
 
 from .terachem_pbs import TeraChemPBSHarness, _pbs_defaults
 

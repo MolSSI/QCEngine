@@ -9,10 +9,8 @@ import os
 import socket
 from typing import Any, Dict, Optional, Union
 
-try:
-    import pydantic.v1 as pydantic
-except ImportError:
-    import pydantic
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .extras import get_information
 
@@ -64,7 +62,7 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
         return _global_values[key]
 
 
-class NodeDescriptor(pydantic.BaseModel):
+class NodeDescriptor(BaseModel):
     """
     Description of an individual node
     """
@@ -78,7 +76,7 @@ class NodeDescriptor(pydantic.BaseModel):
     memory_safety_factor: int = 10  # Percentage of memory as a safety factor
 
     # Specifications
-    ncores: Optional[int] = pydantic.Field(
+    ncores: Optional[int] = Field(
         None,
         description="""Number of cores accessible to each task on this node
     
@@ -88,7 +86,7 @@ class NodeDescriptor(pydantic.BaseModel):
     retries: int = 0
 
     # Cluster options
-    is_batch_node: bool = pydantic.Field(
+    is_batch_node: bool = Field(
         False,
         help="""Whether the node running QCEngine is a batch node
     
@@ -103,7 +101,7 @@ class NodeDescriptor(pydantic.BaseModel):
     ``mpiexec_command`` must always be used even for serial jobs (e.g., getting the version number)
     """,
     )
-    mpiexec_command: Optional[str] = pydantic.Field(
+    mpiexec_command: Optional[str] = Field(
         None,
         description="""Invocation for launching node-parallel tasks with MPI
         
@@ -140,31 +138,40 @@ class NodeDescriptor(pydantic.BaseModel):
             if "{ranks_per_node}" not in self.mpiexec_command:
                 raise ValueError("mpiexec_command must explicitly state the number of ranks per node")
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(
+        extra="forbid",
+    )
 
 
-class TaskConfig(pydantic.BaseSettings):
+#   class Config:
+#        extra = "forbid"
+#        allow_mutation = False
+#        json_encoders = {np.ndarray: lambda v: v.flatten().tolist(), complex: lambda v: (v.real, v.imag)}
+# ---
+#    model_config = ConfigDict(
+#        extra="forbid",
+#        frozen=True,
+#    )
+
+
+class TaskConfig(BaseSettings):
     """Description of the configuration used to launch a task."""
 
     # Specifications
-    ncores: int = pydantic.Field(None, description="Number cores per task on each node")
-    nnodes: int = pydantic.Field(None, description="Number of nodes per task")
-    memory: float = pydantic.Field(
-        None, description="Amount of memory in GiB (2^30 bytes; not GB = 10^9 bytes) per node."
-    )
+    ncores: int = Field(None, description="Number cores per task on each node")
+    nnodes: int = Field(None, description="Number of nodes per task")
+    memory: float = Field(None, description="Amount of memory in GiB (2^30 bytes; not GB = 10^9 bytes) per node.")
     scratch_directory: Optional[str]  # What location to use as scratch
     retries: int  # Number of retries on random failures
     mpiexec_command: Optional[str]  # Command used to launch MPI tasks, see NodeDescriptor
     use_mpiexec: bool = False  # Whether it is necessary to use MPI to run an executable
-    cores_per_rank: int = pydantic.Field(1, description="Number of cores per MPI rank")
-    scratch_messy: bool = pydantic.Field(
-        False, description="Leave scratch directory and contents on disk after completion."
-    )
+    cores_per_rank: int = Field(1, description="Number of cores per MPI rank")
+    scratch_messy: bool = Field(False, description="Leave scratch directory and contents on disk after completion.")
 
-    class Config(pydantic.BaseSettings.Config):
-        extra = "forbid"
-        env_prefix = "QCENGINE_"
+    model_config = SettingsConfigDict(
+        extra="forbid",
+        env_prefix="QCENGINE_",
+    )
 
 
 def _load_defaults() -> None:
