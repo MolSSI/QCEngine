@@ -133,6 +133,7 @@ jobs:
         mamba list
         python -c "import qcelemental as q;print(q.__file__, q.__version__)"
         python -c "import qcengine as q;print(q.__file__, q.__version__)"
+        git describe
 
     - name: QCEngineRecords
       run: |
