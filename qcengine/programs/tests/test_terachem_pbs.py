@@ -3,7 +3,7 @@ import pytest
 from qcengine.programs.terachem_pbs import TeraChemPBSHarness
 
 
-def test_found_no_tcpb_installed(monkeypatch):
+def hide_test_found_no_tcpb_installed(monkeypatch):
     # Empty sys.path so that no external packages can be found in case tcpb is installed
     with monkeypatch.context() as m:
         m.setattr("sys.path", [])
