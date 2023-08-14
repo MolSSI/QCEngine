@@ -15,6 +15,18 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+..
+.. Misc.
+.. +++++
+..
+.. MUST (Unmerged)
+.. +++++++++++++++
+..
+.. WIP (Unmerged)
+.. ++++++++++++++
+.. - UNMERGED (:pr:`421`) GAMESS - error handling and memory @taylor-a-barnes
+.. - UNMERGED (:pr:`405`, :issue:`415`, :pr:`417`) Config - change default `jobs_per_node` from 2 to more expected 1 so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading machines, affecting default `ncores`. The net effect (both changes) for default cores running on Hyperthreading machines is unchanged. @cvsik, @loriab
+.. - UNSOLVED (:issue:`397`) extras failed
 
 
 v0.28.0 / 2023-08-15 (Unreleased)
@@ -40,6 +52,9 @@ Enhancements
 - (:pr:`403`, :issue:`402`) PyBerny - fix optimizer to respect the task_config options. @q-posev
 - (:pr:`386`) CI - turn on formerly LGTM now GitHub CodeQL analysis. @lgtm-migrator
 - (:pr:`388`) MRChem - more detailed info about the parallel setup saved to output provenance. @robertodr
+- (:pr:`424`) testing - update SVWN Hessian reference values from Psi4. @loriab
+- (:pr:`423`, :issue:`377`) NWChem - allow two answers for test ``test_atom_labels[nwchem]`` to accommodate SCF
+  solutions in different versions. @loriab
 
 Bug Fixes
 +++++++++
@@ -47,24 +62,12 @@ Bug Fixes
 - (:issue:`399`, :pr:`401`) MPI - remove MPI setup for MDI. This eliminates a bug where interfering
   MPI environment variables were getting set upon ``import qcengine`` when pymdi and mpi4py packages
   were present. @awvwgk, @taylor-a-barnes
+- (:pr:`418`, :pr:`389`, :issue:`292`) Psi4 - make Psi4 exe/module detection and version parsing more robust. @Flamefire, @coltonbh, @loriab
 
 Misc.
 +++++
 - (:pr:`419`) CI - remove disabled LGTM and update badges. @loriab
-
-MUST (Unmerged)
-+++++++++++++++
-- UNMERGED (:pr:`418`, :pr:`389`, :issue:`292`) Psi4 - make Psi4 exe/module detection and version parsing more robust. @Flamefire, @coltonbh, @loriab
 - UNMERGED (:pr:`422`) CI - turn on crontab CI running to better notice external trouble. @loriab
-- UNMERGED (:pr:`423`, :issue:`377`) NWChem - allow two answers for test ``test_atom_labels[nwchem]`` to accommodate SCF
-  solutions in different versions. @loriab
-- UNMERGED (:pr:`424`) testing - update SVWN Hessian reference values from Psi4. @loriab
-
-WIP (Unmerged)
-++++++++++++++
-- UNMERGED (:pr:`421`) GAMESS - error handling and memory @taylor-a-barnes
-- UNMERGED (:pr:`405`, :issue:`415`, :pr:`417`) Config - change default `jobs_per_node` from 2 to more expected 1 so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading machines, affecting default `ncores`. The net effect (both changes) for default cores running on Hyperthreading machines is unchanged. @cvsik, @loriab
-- UNSOLVED (:issue:`397`) extras failed
 
 
 v0.27.0 / 2023-08-02
@@ -221,7 +224,7 @@ Bug Fixes
 - (:pr:`322`) Psi4 - allowed more test cases with gradients and Hessians after a compatibility PR started
   saving them. @loriab
 - (:pr:`323`) Turbomole - learned to store calcinfo_natom so that gradients and Hessians can be computed
-  after QCElemental started using that quantity for shape checking in 
+  after QCElemental started using that quantity for shape checking in
   [v0.22.0](https://github.com/MolSSI/QCElemental/blob/master/docs/source/changelog.rst#0220--2021-08-26)
   @eljost
 
