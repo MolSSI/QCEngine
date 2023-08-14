@@ -50,13 +50,13 @@ class AdccHarness(ProgramHarness):
             "adcc",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install adcc -c adcc`.",
+            raise_msg="Please install via `conda install adcc -c conda-forge`.",
         )
         found_psi4 = which_import(
             "psi4",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install psi4 for adcc harness via `conda install psi4 -c psi4`.",
+            raise_msg="Please install psi4 for adcc harness via `conda install psi4 -c conda-forge/label/libint_dev -c conda-forge`.",
         )
         return found_adcc and found_psi4
 
