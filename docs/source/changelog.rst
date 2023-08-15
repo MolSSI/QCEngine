@@ -29,7 +29,7 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.28.0 / 2023-08-15 (Unreleased)
+v0.28.0 / 2023-08-15
 --------------------
 
 Breaking Changes
@@ -67,7 +67,7 @@ Bug Fixes
 Misc.
 +++++
 - (:pr:`419`) CI - remove disabled LGTM and update badges. @loriab
-- UNMERGED (:pr:`422`) CI - turn on crontab CI running to better notice external trouble. @loriab
+- (:pr:`422`) CI - turn on crontab CI running to better notice external trouble. @loriab
 
 
 v0.27.0 / 2023-08-02
