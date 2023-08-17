@@ -59,7 +59,7 @@ class Psi4Harness(ProgramHarness):
 
         if psithon and not psiapi:
             with popen([which("psi4"), "--module"]) as exc:
-                exc["proc"].wait(timeout=30)
+                exc["proc"].wait(timeout=3)
             if "module does not exist" in exc["stderr"]:
                 psiapi = True  # --module argument only in Psi4 DDD branch (or >=1.6) so grandfathered in
             else:
@@ -75,7 +75,7 @@ class Psi4Harness(ProgramHarness):
 
         if psiapi and not psithon:
             with popen(["python", "-c", "import psi4; print(psi4.executable)"]) as exc:
-                exc["proc"].wait(timeout=30)
+                exc["proc"].wait(timeout=3)
             so, se = exc["stdout"], exc["stderr"]
             print(f"""found (no psithon) {exc["proc"].returncode=} {so=} {se=}""")
             error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
@@ -88,6 +88,7 @@ class Psi4Harness(ProgramHarness):
                     psithon = which("psi4", return_bool=True)
 
         if psithon and psiapi:
+            print(f"{psithon=} {psiapi=}")
             return True
 
         return error_which(
@@ -104,11 +105,11 @@ class Psi4Harness(ProgramHarness):
         which_prog = which("psi4")
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
-                exc["proc"].wait(timeout=30)
+                exc["proc"].wait(timeout=3)
             print(f"""get_version {exc["proc"].returncode=} {exc["stdout"]=} {exc["stderr"]=}""")
             if (exc["proc"].returncode != 0) or exc["stderr"]:
                 raise TypeError(f"Error {exc['proc'].returncode} retrieving Psi4 version: " + exc["stderr"])
-            self.version_cache[which_prog] = safe_version(exc["stdout"].rstrip())
+            self.version_cache[which_prog] = safe_version(exc["stdout"].rstrip().split()[-1])
 
         candidate_version = self.version_cache[which_prog]
 
