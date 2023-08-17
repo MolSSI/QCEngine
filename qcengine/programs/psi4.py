@@ -59,7 +59,7 @@ class Psi4Harness(ProgramHarness):
 
         if psithon and not psiapi:
             with popen([which("psi4"), "--module"]) as exc:
-                exc["proc"].wait(timeout=3)
+                exc["proc"].wait(timeout=30)
             if "module does not exist" in exc["stderr"]:
                 psiapi = True  # --module argument only in Psi4 DDD branch (or >=1.6) so grandfathered in
             else:
@@ -74,7 +74,7 @@ class Psi4Harness(ProgramHarness):
 
         if psiapi and not psithon:
             with popen(["python", "-c", "import psi4; print(psi4.executable)"]) as exc:
-                exc["proc"].wait(timeout=3)
+                exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
             error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
             # yes, everthing up to here could be got from `import psi4; psiexe = psi4.executable`. but, we try not to
@@ -103,7 +103,7 @@ class Psi4Harness(ProgramHarness):
         which_prog = which("psi4")
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
-                exc["proc"].wait(timeout=3)
+                exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
             if (not so) or (se) or (rc != 0):
                 raise TypeError(f"Error {rc} retrieving Psi4 version: stdout: {so}, stderr: {se}")
