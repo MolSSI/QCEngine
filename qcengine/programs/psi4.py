@@ -86,7 +86,6 @@ class Psi4Harness(ProgramHarness):
                     psithon = which("psi4", return_bool=True)
 
         if psithon and psiapi:
-            print(f"{psithon=} {psiapi=}")
             return True
 
         return error_which(
