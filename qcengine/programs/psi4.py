@@ -63,12 +63,11 @@ class Psi4Harness(ProgramHarness):
             if "module does not exist" in exc["stderr"]:
                 psiapi = True  # --module argument only in Psi4 DDD branch (or >=1.6) so grandfathered in
             else:
-                so, se = exc["stdout"], exc["stderr"]
-                print(f"""found (no psiapi) {exc["proc"].returncode=} {so=} {se=}""")
+                so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
                 error_msg = f" In particular, psi4 command found but unable to load psi4 module into sys.path. stdout: {so}, stderr: {se}"
                 error_which = which_import
-                if (so) and (not se) and (exc["proc"].returncode == 0):
-                    psimod = Path(so.rstrip())  # stdout is string & Path is tolerant, so safe op
+                if (so) and (not se) and (rc == 0):
+                    psimod = Path(so)
                     if psimod.exists():
                         sys.path.append(str(psimod))
                         psiapi = which_import("psi4", return_bool=True)
@@ -76,13 +75,12 @@ class Psi4Harness(ProgramHarness):
         if psiapi and not psithon:
             with popen(["python", "-c", "import psi4; print(psi4.executable)"]) as exc:
                 exc["proc"].wait(timeout=3)
-            so, se = exc["stdout"], exc["stderr"]
-            print(f"""found (no psithon) {exc["proc"].returncode=} {so=} {se=}""")
+            so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
             error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
             # yes, everthing up to here could be got from `import psi4; psiexe = psi4.executable`. but, we try not to
             #   load programs/modules in the `def found` fns.
-            if (so) and (not se) and (exc["proc"].returncode == 0):
-                psiexe = Path(so.rstrip())  # stdout is string & Path is tolerant, so safe op
+            if (so) and (not se) and (rc == 0):
+                psiexe = Path(so)
                 if psiexe.exists():
                     os.environ["PATH"] += os.pathsep + str(psiexe.parent)
                     psithon = which("psi4", return_bool=True)
@@ -106,10 +104,11 @@ class Psi4Harness(ProgramHarness):
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=3)
-            print(f"""get_version {exc["proc"].returncode=} {exc["stdout"]=} {exc["stderr"]=}""")
-            if (exc["proc"].returncode != 0) or exc["stderr"]:
-                raise TypeError(f"Error {exc['proc'].returncode} retrieving Psi4 version: " + exc["stderr"])
-            self.version_cache[which_prog] = safe_version(exc["stdout"].rstrip().split()[-1])
+            so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
+            if (not so) or (se) or (rc != 0):
+                raise TypeError(f"Error {rc} retrieving Psi4 version: stdout: {so}, stderr: {se}")
+            # Windows echos the command, so split stdout to collect response
+            self.version_cache[which_prog] = safe_version(so.split()[-1])
 
         candidate_version = self.version_cache[which_prog]
 
