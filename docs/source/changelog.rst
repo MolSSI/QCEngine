@@ -29,7 +29,7 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.28.1 / 2023-08-17
+v0.28.1 / 2023-08-18
 --------------------
 
 Bug Fixes
