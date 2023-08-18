@@ -29,6 +29,14 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.28.1 / 2023-08-18
+--------------------
+
+Bug Fixes
++++++++++
+- (:pr:`426`) Psi4 - fix ``get_version`` on Windows where whole path and command were getting passed to version parser. @loriab
+
+
 v0.28.0 / 2023-08-15
 --------------------
 
