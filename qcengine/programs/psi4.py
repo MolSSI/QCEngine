@@ -104,10 +104,11 @@ class Psi4Harness(ProgramHarness):
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
-            if (not so) or (se) or (rc != 0):
+            if (so) and (not se) and (rc == 0):
+                # Windows echos the command, so split stdout to collect response
+                self.version_cache[which_prog] = safe_version(so.split()[-1])
+            else:
                 raise TypeError(f"Error {rc} retrieving Psi4 version: stdout: {so}, stderr: {se}")
-            # Windows echos the command, so split stdout to collect response
-            self.version_cache[which_prog] = safe_version(so.split()[-1])
 
         candidate_version = self.version_cache[which_prog]
 
