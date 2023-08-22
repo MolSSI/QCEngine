@@ -88,7 +88,7 @@ class NodeDescriptor(BaseModel):
     # Cluster options
     is_batch_node: bool = Field(
         False,
-        help="""Whether the node running QCEngine is a batch node
+        description="""Whether the node running QCEngine is a batch node
     
     Some clusters are configured such that tasks are launched from a special "batch" or "MOM" onto the compute nodes.
     The compute nodes on such clusters often have a different CPU architecture than the batch nodes and 
@@ -141,17 +141,6 @@ class NodeDescriptor(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-
-
-#   class Config:
-#        extra = "forbid"
-#        allow_mutation = False
-#        json_encoders = {np.ndarray: lambda v: v.flatten().tolist(), complex: lambda v: (v.real, v.imag)}
-# ---
-#    model_config = ConfigDict(
-#        extra="forbid",
-#        frozen=True,
-#    )
 
 
 class TaskConfig(BaseSettings):

@@ -200,7 +200,7 @@ class CFOURHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").dict()
+        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").model_dump()
         if module is not None:
             provenance["module"] = module
 
@@ -224,4 +224,4 @@ class CFOURHarness(ProgramHarness):
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.model_dump(), **output_data})

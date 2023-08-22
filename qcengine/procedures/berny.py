@@ -54,11 +54,11 @@ class BernyProcedure(ProcedureHarness):
         log.addHandler(logging.StreamHandler(log_stream))
         log.setLevel("INFO")
 
-        input_data = input_data.dict()
+        input_data = input_data.model_dump()
         geom_qcng = input_data["initial_molecule"]
         comput = {**input_data["input_specification"], "molecule": geom_qcng}
         program = input_data["keywords"].pop("program")
-        task_config = config.dict()
+        task_config = config.model_dump()
         trajectory = []
         output_data = input_data.copy()
         try:
@@ -70,14 +70,14 @@ class BernyProcedure(ProcedureHarness):
                 geom_qcng["geometry"] = np.stack(geom_berny.coords * berny.angstrom)
                 ret = qcengine.compute(comput, program, task_config=task_config)
                 if ret.success:
-                    trajectory.append(ret.dict())
+                    trajectory.append(ret.model_dump())
                     opt.send((ret.properties.return_energy, ret.return_result))
                 else:
                     # qcengine.compute returned FailedOperation
                     raise UnknownError("Gradient computation failed")
 
         except UnknownError:
-            error = ret.error.dict()  # ComputeError
+            error = ret.error.model_dump()  # ComputeError
         except Exception:
             error = {"error_type": "unknown", "error_message": f"Berny error:\n{traceback.format_exc()}"}
         else:

@@ -40,13 +40,13 @@ class GeometricProcedure(ProcedureHarness):
         except ModuleNotFoundError:
             raise ModuleNotFoundError("Could not find geomeTRIC in the Python path.")
 
-        input_data = input_model.dict()
+        input_data = input_model.model_dump()
 
         # Temporary patch for geomeTRIC
         input_data["initial_molecule"]["symbols"] = list(input_data["initial_molecule"]["symbols"])
 
         # Set retries to two if zero while respecting local_config
-        local_config = config.dict()
+        local_config = config.model_dump()
         local_config["retries"] = local_config.get("retries", 2) or 2
         input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 

@@ -225,9 +225,9 @@ class Psi4Harness(ProgramHarness):
                     if pversion < parse_version("1.6"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
-                        output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
+                        output_data = psi4.schema_wrapper.run_qcschema(input_model).model_dump()
                     else:
-                        output_data = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
+                        output_data = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).model_dump()
                     # success here means execution returned. output_data may yet be qcel.models.AtomicResult or qcel.models.FailedOperation
                     success = True
                     if output_data.get("success", False):
@@ -254,7 +254,7 @@ class Psi4Harness(ProgramHarness):
                     if success:
                         output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
                     else:
-                        output_data = input_model.dict()
+                        output_data = input_model.model_dump()
 
                 if success:
                     if output_data.get("success", False) is False:

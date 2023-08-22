@@ -25,7 +25,7 @@ def _process_failure_and_return(model, return_dict, raise_error):
         if raise_error:
             raise InputError(model.error.error_message)
         elif return_dict:
-            return model.dict()
+            return model.model_dump()
         else:
             return model
     else:
@@ -69,7 +69,7 @@ def compute(
         A QCSchema representation of the requested output, type depends on return_dict key.
     """
 
-    output_data = input_data.copy()  # lgtm [py/multiple-definition]
+    output_data = input_data.model_copy()  # lgtm [py/multiple-definition]
     with compute_wrapper(capture_output=False, raise_error=raise_error) as metadata:
 
         # Grab the executor and build the input model

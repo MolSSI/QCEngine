@@ -38,10 +38,10 @@ class OptKingProcedure(ProcedureHarness):
         if self.found(raise_error=True):
             import optking
 
-        input_data = input_model.dict()
+        input_data = input_model.model_dump()
 
         # Set retries to two if zero while respecting local_config
-        local_config = config.dict()
+        local_config = config.model_dump()
         local_config["retries"] = local_config.get("retries", 2) or 2
         input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
