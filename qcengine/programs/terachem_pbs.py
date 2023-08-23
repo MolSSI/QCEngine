@@ -32,14 +32,14 @@ class TeraChemPBSHarness(ProgramHarness):
     """QCEngine Harness for interfacing with the TeraChem running in Protocol Buffer Server Mode"""
 
     _defaults: ClassVar[Dict[str, Any]] = _pbs_defaults
-    _tcpb_package: str = "tcpb"
-    _tcpb_min_version: str = "0.7.0"
-    _tcpb_client: str = "TCProtobufClient"
-    _env_vars: Dict[str, Any] = {
+    _tcpb_package: ClassVar[str] = "tcpb"
+    _tcpb_min_version: ClassVar[str] = "0.7.0"
+    _tcpb_client: ClassVar[str] = "TCProtobufClient"
+    _env_vars: ClassVar[Dict[str, Any]] = {
         "host": getenv("TERACHEM_PBS_HOST", "127.0.0.1"),
         "port": int(getenv("TERACHEM_PBS_PORT", 11111)),
     }
-    _env_vars_external: str = "TERACHEM_PBS_HOST, TERACHEM_PBS_PORT"
+    _env_vars_external: ClassVar[str] = "TERACHEM_PBS_HOST, TERACHEM_PBS_PORT"
 
     @classmethod
     def found(cls, raise_error: bool = False) -> bool:
