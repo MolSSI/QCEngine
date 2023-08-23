@@ -90,7 +90,7 @@ class GCPHarness(ProgramHarness):
             output_model = FailedOperation(
                 success=False,
                 error={"error_type": "execution_error", "error_message": dexe["stderr"]},
-                input_data=input_model.dict(),
+                input_data=input_model.model_dump(),
             )
 
         return output_model
@@ -174,7 +174,7 @@ class GCPHarness(ProgramHarness):
                 raise InputError(f"GCP does not have method: {method}")
 
         # Need 'real' field later and that's only guaranteed for molrec
-        molrec = qcel.molparse.from_schema(input_model.molecule.dict())
+        molrec = qcel.molparse.from_schema(input_model.molecule.model_dump())
 
         calldash = {"gcp": "-", "mctc-gcp": "--"}[executable]
 
@@ -195,7 +195,7 @@ class GCPHarness(ProgramHarness):
             "outfiles": ["gcp_gradient"],
             "scratch_messy": config.scratch_messy,
             "scratch_directory": config.scratch_directory,
-            "input_result": input_model.copy(deep=True),
+            "input_result": input_model.model_copy(deep=True),
             "blocking_files": [os.path.join(pathlib.Path.home(), ".gcppar." + socket.gethostname())],
         }
 
@@ -275,7 +275,7 @@ class GCPHarness(ProgramHarness):
         output_data["extras"]["qcvars"] = calcinfo
 
         output_data["success"] = True
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.model_dump(), **output_data})
 
 
 class MCTCGCPHarness(GCPHarness):

@@ -25,8 +25,8 @@ if TYPE_CHECKING:
 
 class OpenMMHarness(ProgramHarness):
 
-    _CACHE = {}
-    _CACHE_MAX_SIZE = 10
+    _CACHE: ClassVar[Dict] = {}
+    _CACHE_MAX_SIZE: ClassVar[int] = 10
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "OpenMM",
