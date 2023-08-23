@@ -217,9 +217,7 @@ class MDIServer:
         if natoms is None:
             natoms = MDI_Recv(1, MDI_INT, self.comm)
 
-        mol_string = ""
-        for iatom in range(natoms):
-            mol_string += "He " + str(1.0 * iatom) + " 0.0 0.0\n"
+        mol_string = " 0.0 0.0\n".join(["He " + str(1.0 * iatom) for iatom in range(natoms)])
         self.molecule = qcel.models.Molecule.from_data(mol_string)
 
         self.energy_is_current = False
