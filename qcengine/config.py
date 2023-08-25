@@ -293,7 +293,7 @@ def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = 
         task_config = {}
 
     task_config_env = read_qcengine_task_environment()
-    task_config = {**task_config_env, **task_config}
+    task_config = {**task_config_env, **parse_environment(task_config)}
 
     config = {}
 
