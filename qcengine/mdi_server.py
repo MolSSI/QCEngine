@@ -307,6 +307,10 @@ class MDIServer:
     def run_energy(self) -> None:
 
         if not self.energy_is_current:
+            """Ensure that the orientation of the molecule remains fixed"""
+            self.update_molecule("fix_com", True)
+            self.update_molecule("fix_orientation", True)
+
             """Run an energy calculation"""
             input = qcel.models.AtomicInput(
                 molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
