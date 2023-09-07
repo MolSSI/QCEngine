@@ -259,11 +259,9 @@ def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     """Collects local environment variable values into ``data`` for any keys with RHS starting with ``$``."""
     ret = {}
     for k, var in data.items():
-        if isinstance(var, str) and var.startswith("$"):
-            var = var.replace("$", "", 1)
-            if var in os.environ:
-                var = os.environ[var]
-            else:
+        if isinstance(var, str):
+            var = os.path.expanduser(os.path.expandvars(var))
+            if var.startswith("$"):
                 var = None
 
         ret[k] = var
