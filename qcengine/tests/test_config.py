@@ -60,18 +60,25 @@ def test_node_skip_environ():
     assert node.scratch_directory is None
 
 
-@pytest.mark.parametrize("envvars,scr,ans", [
-    ({"SCRATCH": "/my_scratch"}, "$SCRATCH", "/my_scratch"),
-    ({"SCRATCH": "/my_scratch"}, "${SCRATCH}", "/my_scratch"),
-    # ({"SCRATCH": "/my_scratch"}, "%SCRATCH%", "/my_scratch"),  # only valid on Windows
-    ({"PBS_DIR": "/cluster/scr/job", "JOBNUM": "12345"}, "$PBS_DIR/psi_scratch/$JOBNUM", "/cluster/scr/job/psi_scratch/12345"),
-    ({"QCSCR": "qcscr", "USER": "johndoe"}, "/scratch/${USER}/$QCSCR", "/scratch/johndoe/qcscr"),
-    ({}, "~", f"{os.environ.get('HOME')}"),
-    ({"QCSCR": "qcscr"}, "~/scratch/$QCSCR", f"{os.environ.get('HOME')}/scratch/qcscr"),
-    ({}, "$HOME", f"{os.environ.get('HOME')}"),
-    # ({}, "$RANDOM_NOVAR", "$RANDOM_NOVAR"),  # new behavior?
-    ({}, "$RANDOM_NOVAR", None),  # longstanding behavior
-])
+@pytest.mark.parametrize(
+    "envvars,scr,ans",
+    [
+        ({"SCRATCH": "/my_scratch"}, "$SCRATCH", "/my_scratch"),
+        ({"SCRATCH": "/my_scratch"}, "${SCRATCH}", "/my_scratch"),
+        # ({"SCRATCH": "/my_scratch"}, "%SCRATCH%", "/my_scratch"),  # only valid on Windows
+        (
+            {"PBS_DIR": "/cluster/scr/job", "JOBNUM": "12345"},
+            "$PBS_DIR/psi_scratch/$JOBNUM",
+            "/cluster/scr/job/psi_scratch/12345",
+        ),
+        ({"QCSCR": "qcscr", "USER": "johndoe"}, "/scratch/${USER}/$QCSCR", "/scratch/johndoe/qcscr"),
+        ({}, "~", f"{os.environ.get('HOME')}"),
+        ({"QCSCR": "qcscr"}, "~/scratch/$QCSCR", f"{os.environ.get('HOME')}/scratch/qcscr"),
+        ({}, "$HOME", f"{os.environ.get('HOME')}"),
+        # ({}, "$RANDOM_NOVAR", "$RANDOM_NOVAR"),  # new behavior?
+        ({}, "$RANDOM_NOVAR", None),  # longstanding behavior
+    ],
+)
 def test_envvar(envvars, scr, ans):
     with environ_context(env=envvars):
         tc = qcng.get_config(task_config={"scratch_directory": scr})
