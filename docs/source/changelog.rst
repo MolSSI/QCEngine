@@ -29,6 +29,30 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.28.2 / 2023-MM-DD (Unreleased)
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+
+MUST (Unmerged)
++++++++++++++++
+- UNMERGED (:pr:`427`) Config - Once again, expand environment variables (now more flexibly) and newly expand ``~``
+  passed into TaskConfig. Particularly relevant for scratch setting.
+
+
 v0.28.1 / 2023-08-18
 --------------------
 

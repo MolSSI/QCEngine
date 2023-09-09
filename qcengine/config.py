@@ -259,11 +259,9 @@ def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     """Collects local environment variable values into ``data`` for any keys with RHS starting with ``$``."""
     ret = {}
     for k, var in data.items():
-        if isinstance(var, str) and var.startswith("$"):
-            var = var.replace("$", "", 1)
-            if var in os.environ:
-                var = os.environ[var]
-            else:
+        if isinstance(var, str):
+            var = os.path.expanduser(os.path.expandvars(var))
+            if var.startswith("$"):
                 var = None
 
         ret[k] = var
@@ -293,7 +291,7 @@ def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = 
         task_config = {}
 
     task_config_env = read_qcengine_task_environment()
-    task_config = {**task_config_env, **task_config}
+    task_config = {**task_config_env, **parse_environment(task_config)}
 
     config = {}
 
