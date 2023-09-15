@@ -270,6 +270,11 @@ class MDIServer:
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute energy on an unvalidated molecule")
         self.run_energy()
+
+        # Confirm that the calculation completed successfully
+        if not hasattr(self.compute_return, 'properties'):
+            raise Exception("MDI Calculation failed: \n\n" + str(self.compute_return.error) + "\n\n" + str(self.compute_return.error.error_message))
+
         properties = self.compute_return.properties.dict()
         energy = properties["return_energy"]
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
