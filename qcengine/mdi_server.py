@@ -272,8 +272,13 @@ class MDIServer:
         self.run_energy()
 
         # Confirm that the calculation completed successfully
-        if not hasattr(self.compute_return, 'properties'):
-            raise Exception("MDI Calculation failed: \n\n" + str(self.compute_return.error) + "\n\n" + str(self.compute_return.error.error_message))
+        if not hasattr(self.compute_return, "properties"):
+            raise Exception(
+                "MDI Calculation failed: \n\n"
+                + str(self.compute_return.error)
+                + "\n\n"
+                + str(self.compute_return.error.error_message)
+            )
 
         properties = self.compute_return.properties.dict()
         energy = properties["return_energy"]
@@ -310,7 +315,6 @@ class MDIServer:
 
     # Respond to the SCF command
     def run_energy(self) -> None:
-
         if not self.energy_is_current:
             """Ensure that the orientation of the molecule remains fixed"""
             self.update_molecule("fix_com", True)
