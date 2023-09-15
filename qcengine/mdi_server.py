@@ -275,8 +275,6 @@ class MDIServer:
         if not hasattr(self.compute_return, "properties"):
             raise Exception(
                 "MDI Calculation failed: \n\n"
-                + str(self.compute_return.error)
-                + "\n\n"
                 + str(self.compute_return.error.error_message)
             )
 
