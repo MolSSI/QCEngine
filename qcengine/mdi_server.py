@@ -273,10 +273,7 @@ class MDIServer:
 
         # Confirm that the calculation completed successfully
         if not hasattr(self.compute_return, "properties"):
-            raise Exception(
-                "MDI Calculation failed: \n\n"
-                + str(self.compute_return.error.error_message)
-            )
+            raise Exception("MDI Calculation failed: \n\n" + str(self.compute_return.error.error_message))
 
         properties = self.compute_return.properties.dict()
         energy = properties["return_energy"]
