@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Single Compute &mdash; QCEngine 0+untagged.1.g1b27a14 documentation</title>
+  <title>Single Compute &mdash; QCEngine 0+untagged.1.gc7ba717 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b0704a97"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=f6e35c0c"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
@@ -52,7 +52,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g1b27a14
+                0+untagged.1.gc7ba717
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -912,6 +912,7 @@ non-quantum chemistry models are often a simple <code class="docutils literal no
 <span class="w">         </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;orbitals_and_eigenvalues&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;occupations_and_eigenvalues&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;return_results&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;none&quot;</span>
 <span class="w">         </span><span class="p">],</span>
@@ -1012,7 +1013,7 @@ non-quantum chemistry models are often a simple <code class="docutils literal no
 </dl>
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">driver</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.DriverEnum.html#qcelemental.models.DriverEnum" title="(in QCElemental vv0.25.1+2.g86b4700.dirty)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DriverEnum</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">driver</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">DriverEnum</span></code></em><em class="property"> <span class="pre">[Required]</span></em></dt>
 <dd><p>Allowed computation driver values.</p>
 </dd></dl>
 
@@ -1054,7 +1055,7 @@ non-quantum chemistry models are often a simple <code class="docutils literal no
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">provenance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.Provenance.html#qcelemental.models.Provenance" title="(in QCElemental vv0.25.1+2.g86b4700.dirty)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Provenance</span></code></a></em><em class="property"> <span class="pre">[Optional]</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">provenance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Provenance</span></code></em><em class="property"> <span class="pre">[Optional]</span></em></dt>
 <dd><p>Provenance information.</p>
 </dd></dl>
 
@@ -1886,6 +1887,7 @@ non-quantum chemistry models are often a simple <code class="docutils literal no
 <span class="w">         </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">            </span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;orbitals_and_eigenvalues&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;occupations_and_eigenvalues&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;return_results&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="s2">&quot;none&quot;</span>
 <span class="w">         </span><span class="p">],</span>
@@ -2683,7 +2685,7 @@ non-quantum chemistry models are often a simple <code class="docutils literal no
 </dl>
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.ComputeError.html#qcelemental.models.ComputeError" title="(in QCElemental vv0.25.1+2.g86b4700.dirty)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComputeError</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">ComputeError</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
 <dd><p>Complete description of the error from an unsuccessful program execution.</p>
 </dd></dl>
 
@@ -2702,7 +2704,7 @@ non-quantum chemistry models are often a simple <code class="docutils literal no
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.AtomicResultProperties.html#qcelemental.models.AtomicResultProperties" title="(in QCElemental vv0.25.1+2.g86b4700.dirty)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResultProperties</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResultProperties</span></code></em><em class="property"> <span class="pre">[Required]</span></em></dt>
 <dd><p>Named properties of quantum chemistry computations following the MolSSI QCSchema.</p>
 <p>All arrays are stored flat but must be reshapable into the dimensions in attribute <code class="docutils literal notranslate"><span class="pre">shape</span></code>, with abbreviations as follows:</p>
 <ul class="simple">
@@ -2713,7 +2715,7 @@ non-quantum chemistry models are often a simple <code class="docutils literal no
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">provenance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.models.Provenance.html#qcelemental.models.Provenance" title="(in QCElemental vv0.25.1+2.g86b4700.dirty)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Provenance</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">provenance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Provenance</span></code></em><em class="property"> <span class="pre">[Required]</span></em></dt>
 <dd><p>Provenance information.</p>
 </dd></dl>
 

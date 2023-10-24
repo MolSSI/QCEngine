@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcelemental.models.results &mdash; QCEngine 0+untagged.1.g1b27a14 documentation</title>
+  <title>qcelemental.models.results &mdash; QCEngine 0+untagged.1.gc7ba717 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
@@ -14,7 +14,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b0704a97"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=f6e35c0c"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -49,7 +49,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g1b27a14
+                0+untagged.1.gc7ba717
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -616,6 +616,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="nb">all</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
     <span class="n">orbitals_and_eigenvalues</span> <span class="o">=</span> <span class="s2">&quot;orbitals_and_eigenvalues&quot;</span>
+    <span class="n">occupations_and_eigenvalues</span> <span class="o">=</span> <span class="s2">&quot;occupations_and_eigenvalues&quot;</span>
     <span class="n">return_results</span> <span class="o">=</span> <span class="s2">&quot;return_results&quot;</span>
     <span class="n">none</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
 
@@ -811,6 +812,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="p">]</span>
         <span class="k">elif</span> <span class="n">wfnp</span> <span class="o">==</span> <span class="s2">&quot;orbitals_and_eigenvalues&quot;</span><span class="p">:</span>
             <span class="n">return_keep</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;orbitals_a&quot;</span><span class="p">,</span> <span class="s2">&quot;orbitals_b&quot;</span><span class="p">,</span> <span class="s2">&quot;eigenvalues_a&quot;</span><span class="p">,</span> <span class="s2">&quot;eigenvalues_b&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">wfnp</span> <span class="o">==</span> <span class="s2">&quot;occupations_and_eigenvalues&quot;</span><span class="p">:</span>
+            <span class="n">return_keep</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;occupations_a&quot;</span><span class="p">,</span> <span class="s2">&quot;occupations_b&quot;</span><span class="p">,</span> <span class="s2">&quot;eigenvalues_a&quot;</span><span class="p">,</span> <span class="s2">&quot;eigenvalues_b&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Protocol `wavefunction:</span><span class="si">{</span><span class="n">wfnp</span><span class="si">}</span><span class="s2">` is not understood.&quot;</span><span class="p">)</span>
 
