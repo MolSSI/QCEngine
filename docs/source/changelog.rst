@@ -43,14 +43,14 @@ Enhancements
 
 Bug Fixes
 +++++++++
+- (:pr:`427`) Config - Once again, expand environment variables (now more flexibly) and newly expand ``~``
+  passed into TaskConfig. Particularly relevant for scratch setting. @yueyericardo
 
 Misc.
 +++++
 
 MUST (Unmerged)
 +++++++++++++++
-- UNMERGED (:pr:`427`) Config - Once again, expand environment variables (now more flexibly) and newly expand ``~``
-  passed into TaskConfig. Particularly relevant for scratch setting.
 
 
 v0.28.1 / 2023-08-18
