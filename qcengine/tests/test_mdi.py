@@ -64,7 +64,17 @@ def test_mdi_water():
 
     # Test the <FORCES command
     forces = engine.send_forces()
-    expected = [0.0, 0.0, 0.00073827952, 0.0, 0.020208584243, -0.00036913976, 0.0, -0.020208584243, -0.00036913976]
+    expected = [
+        -0.0000635769828,
+        0.0,
+        0.000735537025,
+        0.0000317884914,
+        0.0202085843,
+        -0.000367768513,
+        0.0000317884914,
+        -0.0202085843,
+        -0.000367768513,
+    ]
     assert compare_values(expected, forces, atol=1.0e-6)
 
     # Test the >MASSES command

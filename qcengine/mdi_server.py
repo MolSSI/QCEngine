@@ -270,6 +270,11 @@ class MDIServer:
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute energy on an unvalidated molecule")
         self.run_energy()
+
+        # Confirm that the calculation completed successfully
+        if not hasattr(self.compute_return, "properties"):
+            raise Exception("MDI Calculation failed: \n\n" + str(self.compute_return.error.error_message))
+
         properties = self.compute_return.properties.dict()
         energy = properties["return_energy"]
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
@@ -305,8 +310,11 @@ class MDIServer:
 
     # Respond to the SCF command
     def run_energy(self) -> None:
-
         if not self.energy_is_current:
+            """Ensure that the orientation of the molecule remains fixed"""
+            self.update_molecule("fix_com", True)
+            self.update_molecule("fix_orientation", True)
+
             """Run an energy calculation"""
             input = qcel.models.AtomicInput(
                 molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
