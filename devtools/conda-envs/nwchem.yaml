@@ -10,7 +10,6 @@ dependencies:
   - qcelemental >=0.24.0
   - pydantic>=1.0.0
   - networkx>=2.4.0
-  - importlib-resources
 
     # Testing
   - pytest
