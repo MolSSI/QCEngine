@@ -2,7 +2,7 @@ name: test
 channels:
   - conda-forge/label/libint_dev
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - psi4
   - rdkit
@@ -11,7 +11,6 @@ dependencies:
     # Mixed Tests
   - dftd3-python
   - dftd4-python
-  - psi4::mp2d >=1.1.0
   - gcp
   - geometric
   - optking
