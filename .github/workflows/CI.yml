@@ -29,6 +29,16 @@ jobs:
             label: Psi4-nightly
             runs-on: ubuntu-latest
 
+          - conda-env: psi-cf
+            python-version: "3.12"
+            label: Psi4-cf
+            runs-on: ubuntu-latest
+
+          - conda-env: psi-cf
+            python-version: "3.12"
+            label: Psi4-cf
+            runs-on: windows-latest
+
           - conda-env: torchani
             python-version: 3.8
             label: ANI
