@@ -144,7 +144,7 @@ jobs:
       run: |
         import qcelemental as qcel
         import psi4
-        print(f'{qcel.util.which("psi4.bat")=}")
+        print(f'{qcel.util.which("psi4.bat")=}')
         print(f'{qcel.util.which("psi4.exe")=}')
         print(f'{qcel.util.which("psi4")=}')
 
