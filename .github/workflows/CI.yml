@@ -114,9 +114,9 @@ jobs:
         pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
         python -c "import qcengine; print(qcengine.config.global_repr())"
 
-    - name: Misc
+    - name: Misc A
       run: |
-        cat > labelfail.py <<EOF
+        cat > labelfailA.py <<EOF
         import pprint
         import qcelemental as qcel
         from qcelemental.testing import compare, compare_values
@@ -160,7 +160,103 @@ jobs:
                 scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
             ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
         EOF
-        python labelfail.py
+        python labelfailA.py
+
+    - name: Misc B
+      run: |
+        cat > labelfailB.py <<EOF
+        import pprint
+        import qcelemental as qcel
+        from qcelemental.testing import compare, compare_values
+        import qcengine as qcng
+        import psi4
+
+        kmol = qcel.models.Molecule.from_data(
+            """
+          H       0 0 0
+          H5      5 0 0
+          H_other 0 5 0
+          H_4sq   5 5 0
+          units au
+        """
+        )
+
+        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
+        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
+
+        atin = qcel.models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}, "extras": {"psiapi": True}}
+        )
+
+        #atres = psi4.schema_wrapper.run_qcschema(atin)
+        atres = qcng.compute(atin, qcprog)
+        pprint.pprint(atres.dict(), width=200)
+
+        nre = 1.0828427
+        assert compare_values(
+            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
+        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
+
+        nmo = 36
+        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
+
+        scf = -1.656138508
+        scf_alt = -1.705577613  # some versions of NWChem land on this value
+        mp2 = -1.7926264513
+        mp2_alt = -1.870251459939
+        assert compare_values(
+                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
+            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
+        EOF
+        python labelfailB.py
+
+    - name: Misc C
+      run: |
+        cat > labelfailC.py <<EOF
+        import pprint
+        import qcelemental as qcel
+        from qcelemental.testing import compare, compare_values
+        import qcengine as qcng
+        import psi4
+
+        kmol = qcel.models.Molecule.from_data(
+            """
+          H       0 0 0
+          H5      5 0 0
+          H_other 0 5 0
+          H_4sq   5 5 0
+          units au
+        """
+        )
+
+        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
+        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
+
+        atin = qcel.models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
+        )
+
+        #atres = psi4.schema_wrapper.run_qcschema(atin)
+        atres = qcng.compute(atin, qcprog)
+        pprint.pprint(atres.dict(), width=200)
+
+        nre = 1.0828427
+        assert compare_values(
+            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
+        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
+
+        nmo = 36
+        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
+
+        scf = -1.656138508
+        scf_alt = -1.705577613  # some versions of NWChem land on this value
+        mp2 = -1.7926264513
+        mp2_alt = -1.870251459939
+        assert compare_values(
+                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
+            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
+        EOF
+        python labelfailC.py
 
     - name: PyTest
       run: |
