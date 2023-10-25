@@ -141,7 +141,7 @@ jobs:
         )
 
         atres = psi4.schema_wrapper.run_qcschema(atin)
-        #atres = qcng.compute(atin, qcprog)
+        #atres = qcng.compute(atin, "psi4")
         pprint.pprint(atres.dict(), width=200)
 
         nre = 1.0828427
@@ -189,7 +189,7 @@ jobs:
         )
 
         #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, qcprog)
+        atres = qcng.compute(atin, "psi4")
         pprint.pprint(atres.dict(), width=200)
 
         nre = 1.0828427
@@ -237,7 +237,7 @@ jobs:
         )
 
         #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, qcprog)
+        atres = qcng.compute(atin, "psi4")
         pprint.pprint(atres.dict(), width=200)
 
         nre = 1.0828427
