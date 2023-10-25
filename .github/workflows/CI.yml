@@ -103,10 +103,11 @@ jobs:
         qcore --accept-license
 
     # note: psi4 on c-f pins to a single qcel and qcng, so this may be handy for solve-and-replace
-    #- name: Special Config - QCElemental Dep
+    - name: Special Config - QCElemental Dep
     #  if: (matrix.cfg.label == 'ADCC')
-    #  run: |
-    #    conda remove qcelemental --force
+      run: |
+        conda remove qcelemental --force
+        python -m pip install git+https://github.com/loriab/QCElemental.git@v0.29.0.dev1 --no-deps
     #    python -m pip install qcelemental>=0.26.0 --no-deps
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
@@ -122,14 +123,17 @@ jobs:
       run: |
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
+    - name: Install QCEngine
+      run: |
+        python -m pip install . --no-deps
+
     - name: Environment Information
       run: |
         mamba info
         mamba list
-
-    - name: Install QCEngine
-      run: |
-        python -m pip install . --no-deps
+        python -c "import qcelemental as q;print(q.__file__, q.__version__)"
+        python -c "import qcengine as q;print(q.__file__, q.__version__)"
+        git describe
 
     - name: QCEngineRecords
       run: |

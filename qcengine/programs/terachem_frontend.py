@@ -1,7 +1,7 @@
 """Harness for TeraChem Frontend"""
 import logging
 from os import getenv
-from typing import Any, Dict
+from typing import Any, ClassVar, Dict
 
 from .terachem_pbs import TeraChemPBSHarness, _pbs_defaults
 
@@ -15,7 +15,8 @@ _fe_defaults = {
 class TeraChemFrontEndHarness(TeraChemPBSHarness):
     """QCEngine Harness for interfacing with the TeraChem Frontend (Protocol Buffer Server + file server)"""
 
-    _defaults = {**_pbs_defaults, **_fe_defaults}
+    # TODO need _pbs_defaults or inherited?
+    _defaults: ClassVar[Dict[str, Any]] = {**_pbs_defaults, **_fe_defaults}
     _tcpb_min_version = "0.9.0"
     _tcpb_client = "TCFrontEndClient"
     _env_vars: Dict[str, Any] = {

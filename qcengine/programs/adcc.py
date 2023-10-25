@@ -1,7 +1,7 @@
 """
 Calls adcc
 """
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
 from qcelemental.models import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which_import
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class AdccHarness(ProgramHarness):
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "adcc",
         "scratch": False,
         "thread_safe": False,
@@ -28,9 +28,6 @@ class AdccHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:

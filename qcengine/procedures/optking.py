@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any, ClassVar, Dict, Union
 
 from qcelemental.models import OptimizationInput, OptimizationResult
 from qcelemental.util import safe_version, which_import
@@ -8,12 +8,9 @@ from .model import ProcedureHarness
 
 class OptKingProcedure(ProcedureHarness):
 
-    _defaults = {"name": "OptKing", "procedure": "optimization"}
+    _defaults: ClassVar[Dict[str, Any]] = {"name": "OptKing", "procedure": "optimization"}
 
     version_cache: Dict[str, str] = {}
-
-    class Config(ProcedureHarness.Config):
-        pass
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(
@@ -41,10 +38,10 @@ class OptKingProcedure(ProcedureHarness):
         if self.found(raise_error=True):
             import optking
 
-        input_data = input_model.dict()
+        input_data = input_model.model_dump()
 
         # Set retries to two if zero while respecting local_config
-        local_config = config.dict()
+        local_config = config.model_dump()
         local_config["retries"] = local_config.get("retries", 2) or 2
         input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 

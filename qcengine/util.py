@@ -18,10 +18,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
-try:
-    from pydantic.v1 import BaseModel, ValidationError
-except ImportError:
-    from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError
 from qcelemental.models import AtomicResult, FailedOperation, OptimizationResult
 
 from qcengine.config import TaskConfig
@@ -70,7 +67,7 @@ def model_wrapper(input_data: Dict[str, Any], model: BaseModel) -> BaseModel:
                 f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}"
             ) from None
     elif isinstance(input_data, model):
-        input_data = input_data.copy()
+        input_data = input_data.model_copy()
     else:
         raise InputError("Input type of {} not understood.".format(type(model)))
 
@@ -168,7 +165,7 @@ def handle_output_metadata(
     if isinstance(output_data, dict):
         output_fusion = output_data  # Error handling
     else:
-        output_fusion = output_data.dict()
+        output_fusion = output_data.model_dump()
 
     # Do not override if computer generates
     output_fusion["stdout"] = output_fusion.get("stdout", None) or metadata["stdout"]

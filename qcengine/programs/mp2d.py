@@ -4,7 +4,7 @@ import pprint
 import re
 import sys
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
@@ -21,7 +21,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 class MP2DHarness(ProgramHarness):
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MP2D",
         "scratch": True,
         "thread_safe": True,
@@ -30,9 +30,6 @@ class MP2DHarness(ProgramHarness):
         "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:

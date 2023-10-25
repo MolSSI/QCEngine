@@ -2,7 +2,7 @@
 The qcore QCEngine Harness
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List, Set
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Set
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet
@@ -31,7 +31,7 @@ def qcore_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
 
 
 class QcoreHarness(ProgramHarness):
-    _defaults: Dict[str, Any] = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Qcore",
         "scratch": False,
         "thread_safe": False,
@@ -87,9 +87,6 @@ class QcoreHarness(ProgramHarness):
     # This map order converts qcore ordering to CCA ordering
     # Entos spherical basis ordering for each angular momentum. Follows reverse order of CCA.
     _qcore_to_cca_ao_order = {"spherical": get_ao_conversion(cca_ao_order_spherical(10), qcore_ao_order_spherical(10))}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(
@@ -250,7 +247,7 @@ class QcoreHarness(ProgramHarness):
 
 
 class EntosHarness(QcoreHarness):
-    _defaults: Dict[str, Any] = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Entos",
         "scratch": True,
         "thread_safe": False,
