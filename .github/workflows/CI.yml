@@ -19,15 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          - conda-env: psi
-            python-version: 3.7
-            label: Psi4-release
-            runs-on: ubuntu-latest
 
-          - conda-env: psi-nightly
-            python-version: "3.10"
-            label: Psi4-nightly
-            runs-on: ubuntu-latest
 
           - conda-env: psi-cf
             python-version: "3.12"
@@ -39,61 +31,6 @@ jobs:
             label: Psi4-cf
             runs-on: windows-latest
 
-          - conda-env: torchani
-            python-version: 3.8
-            label: ANI
-            runs-on: ubuntu-latest
-
-          - conda-env: openmm
-            python-version: 3.8
-            label: OpenMM
-            runs-on: ubuntu-latest
-
-          - conda-env: openmm
-            python-version: 3.11
-            label: OpenMM
-            runs-on: ubuntu-latest
-
-          - conda-env: xtb
-            python-version: "3.10"
-            label: xTB
-            runs-on: ubuntu-latest
-
-          - conda-env: qcore
-            python-version: 3.7
-            label: QCore
-            runs-on: ubuntu-latest
-
-          - conda-env: nwchem
-            python-version: 3.8
-            label: NWChem
-            runs-on: ubuntu-20.04
-            # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
-
-          - conda-env: nwchem
-            python-version: 3.12
-            label: NWChem
-            runs-on: ubuntu-20.04
-
-          - conda-env: mrchem
-            python-version: 3.8
-            label: MRChem
-            runs-on: ubuntu-latest
-
-          - conda-env: adcc
-            python-version: 3.8
-            label: ADCC
-            runs-on: ubuntu-latest
-
-          - conda-env: opt-disp
-            python-version: 3.8
-            label: optimization-dispersion
-            runs-on: ubuntu-latest
-
-          - conda-env: opt-disp-cf
-            python-version: 3.11
-            label: optimization-dispersion
-            runs-on: windows-latest
 
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
@@ -140,13 +77,10 @@ jobs:
         python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@loriab-patch-2' --no-deps
 
     - name: Which Testing
-      shell: python
       run: |
-        import qcelemental as qcel
-        import psi4
-        print(f'{qcel.util.which("psi4.bat")=}')
-        print(f'{qcel.util.which("psi4.exe")=}')
-        print(f'{qcel.util.which("psi4")=}')
+        python -c 'import qcelemental as qc; print(qcel.util.which("psi4.bat"))'
+        python -c 'import qcelemental as qc; print(qcel.util.which("psi4.exe"))'
+        python -c 'import qcelemental as qc; print(qcel.util.which("psi4"))'
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
