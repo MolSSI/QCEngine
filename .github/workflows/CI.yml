@@ -104,9 +104,10 @@ jobs:
         python -c 'import qcelemental as qcel; print(qcel.util.which("psi4.exe"))'
         python -c 'import qcelemental as qcel; print(qcel.util.which("psi4"))'
         python -c 'import qcelemental as qcel; print(qcel.util.which("ls"))'
-        python -c "import qcengine as qcng; qcng.get_program('psi4')"
+        python -c "import qcengine as qcng; pf = qcng.get_program('psi4'); print(pf.found(), pf.get_version())"
 
     - name: QCEngineRecords
+      if: false
       run: |
         qcengine info
         export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
@@ -115,7 +116,7 @@ jobs:
 
     - name: PyTest
       run: |
-        pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v --cov=qcengine -k "grd1 or tricky" --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3

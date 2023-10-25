@@ -255,7 +255,7 @@ class Psi4Harness(ProgramHarness):
                     success, output = execute(
                         run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
                     )
-                    print("AAAA", success, output)
+                    print("AAAA", success, output, deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext"))
                     if success:
                         output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
                     else:
