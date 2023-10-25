@@ -29,7 +29,7 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.28.2 / 2023-MM-DD (Unreleased)
+v0.29.0 / 2023-MM-DD (Unreleased)
 --------------------
 
 Breaking Changes
@@ -45,6 +45,7 @@ Bug Fixes
 +++++++++
 - (:pr:`427`) Config - Once again, expand environment variables (now more flexibly) and newly expand ``~``
   passed into TaskConfig. Particularly relevant for scratch setting. @yueyericardo
+- (:pr:`428`) MDI - Ensure that molecule orientation remains fixed for MDI. @taylor-a-barnes
 
 Misc.
 +++++

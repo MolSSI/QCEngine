@@ -11,7 +11,7 @@ dependencies:
     # Mixed Tests
   - dftd3-python
   - dftd4-python
-  - gcp
+  - gcp-correction
   - geometric
   - optking
   - pymdi
