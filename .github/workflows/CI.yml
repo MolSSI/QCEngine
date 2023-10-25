@@ -81,6 +81,7 @@ jobs:
         python -c 'import qcelemental as qcel; print(qcel.util.which("psi4.bat"))'
         python -c 'import qcelemental as qcel; print(qcel.util.which("psi4.exe"))'
         python -c 'import qcelemental as qcel; print(qcel.util.which("psi4"))'
+        python -c 'import qcelemental as qcel; print(qcel.util.which("ls"))'
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
