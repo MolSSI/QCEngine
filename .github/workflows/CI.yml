@@ -139,6 +139,15 @@ jobs:
         conda remove qcelemental --force
         python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@loriab-patch-2' --no-deps
 
+    - name: Which Testing
+      shell: python
+      run: |
+        import qcelemental as qcel
+        import psi4
+        print(f'{qcel.util.which("psi4.bat")=}")
+        print(f'{qcel.util.which("psi4.exe")=}')
+        print(f'{qcel.util.which("psi4")=}')
+
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
