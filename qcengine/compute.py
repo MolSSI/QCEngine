@@ -13,10 +13,7 @@ from .programs import get_program
 from .util import compute_wrapper, environ_context, handle_output_metadata, model_wrapper
 
 if TYPE_CHECKING:
-    try:
-        from pydantic.v1.main import BaseModel
-    except ImportError:
-        from pydantic.main import BaseModel
+    from pydantic.main import BaseModel
     from qcelemental.models import AtomicResult
 
 
@@ -28,7 +25,7 @@ def _process_failure_and_return(model, return_dict, raise_error):
         if raise_error:
             raise InputError(model.error.error_message)
         elif return_dict:
-            return model.dict()
+            return model.model_dump()
         else:
             return model
     else:

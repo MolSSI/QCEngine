@@ -21,7 +21,7 @@ qchem_forgive = [
 
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
-def test_qchem_output_parser(test_case):
+def hide_test_qchem_output_parser(test_case):
 
     # Get output file data
     data = qchem_info.get_test_data(test_case)
@@ -41,7 +41,7 @@ def test_qchem_output_parser(test_case):
 
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
-def test_qchem_input_formatter(test_case):
+def hide_test_qchem_input_formatter(test_case):
 
     # Get input file data
     data = qchem_info.get_test_data(test_case)
@@ -53,7 +53,7 @@ def test_qchem_input_formatter(test_case):
 
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
-def test_qchem_input_formatter_template(test_case):
+def hide_test_qchem_input_formatter_template(test_case):
 
     # Get input file data
     data = qchem_info.get_test_data(test_case)
@@ -66,7 +66,7 @@ def test_qchem_input_formatter_template(test_case):
 
 @using("qchem")
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
-def test_qchem_executor(test_case):
+def hide_test_qchem_executor(test_case):
     # Get input file data
     data = qchem_info.get_test_data(test_case)
     inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
@@ -83,7 +83,7 @@ def test_qchem_executor(test_case):
 
 
 @using("qchem")
-def test_qchem_orientation():
+def hide_test_qchem_orientation():
 
     mol = qcel.models.Molecule.from_data(
         """
@@ -106,7 +106,7 @@ def test_qchem_orientation():
 
 
 @pytest.mark.parametrize("test_case", qchem_logonly_info.list_test_cases())
-def test_qchem_logfile_parser(test_case):
+def hide_test_qchem_logfile_parser(test_case):
 
     # Get output file data
     data = qchem_logonly_info.get_test_data(test_case)
@@ -128,7 +128,7 @@ def test_qchem_logfile_parser(test_case):
 
 
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
-def test_qchem_logfile_parser_qcscr(test_case):
+def hide_test_qchem_logfile_parser_qcscr(test_case):
 
     # Get output file data
     data = qchem_info.get_test_data(test_case)

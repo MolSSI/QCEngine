@@ -16,7 +16,8 @@ dependencies:
   - py-cpuinfo
   - psutil
   - qcelemental=0.24.0
-  - pydantic=1.8.2  # test minimun stated version.
+  - pydantic>=2.1  # test minimum stated version.
+  - pydantic-settings
   - msgpack-python
 
     # Testing

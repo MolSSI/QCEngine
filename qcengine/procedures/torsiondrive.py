@@ -1,7 +1,7 @@
 import io
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Tuple, Union
 
 import numpy as np
 from qcelemental.models import FailedOperation, Molecule
@@ -16,10 +16,7 @@ if TYPE_CHECKING:
 
 class TorsionDriveProcedure(ProcedureHarness):
 
-    _defaults = {"name": "TorsionDrive", "procedure": "torsiondrive"}
-
-    class Config(ProcedureHarness.Config):
-        pass
+    _defaults: ClassVar[Dict[str, Any]] = {"name": "TorsionDrive", "procedure": "torsiondrive"}
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(
@@ -101,7 +98,7 @@ class TorsionDriveProcedure(ProcedureHarness):
 
             torsiondrive.td_api.update_state(state, {**task_results})
 
-        output_data = input_model.dict()
+        output_data = input_model.model_dump()
         output_data["provenance"] = {
             "creator": "TorsionDrive",
             "routine": "torsiondrive.td_api.next_jobs_from_state",
@@ -176,7 +173,7 @@ class TorsionDriveProcedure(ProcedureHarness):
 
         from qcengine import compute_procedure
 
-        input_molecule = input_model.initial_molecule[0].copy(deep=True).dict()
+        input_molecule = input_model.initial_molecule[0].model_copy(deep=True).model_dump()
         input_molecule["geometry"] = np.array(job).reshape(len(input_molecule["symbols"]), 3)
         input_molecule = Molecule.from_data(input_molecule)
 
@@ -206,7 +203,7 @@ class TorsionDriveProcedure(ProcedureHarness):
         )
 
         return compute_procedure(
-            input_data, procedure=input_model.optimization_spec.procedure, task_config=config.dict()
+            input_data, procedure=input_model.optimization_spec.procedure, task_config=config.model_dump()
         )
 
     @staticmethod
