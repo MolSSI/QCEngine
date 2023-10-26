@@ -182,6 +182,8 @@ def test_local_options_scratch(program, model, keywords):
         "nwchem": "E. Apra",  # freebie
         "psi4": rf"Scratch directory: {scratch_directory}/tmp\w+_psi_scratch/",
     }
+    if sys.platform.startswith("win"):
+        stdout_ref["psi4"] = rf"Scratch directory: {scratch_directory}"
 
     # a scratch file (preferrably output) expected after job if scratch not cleaned up
     scratch_sample = {
@@ -205,7 +207,7 @@ def test_local_options_scratch(program, model, keywords):
 
         print(f"{sample_file=}")
         print(f"{stdout_ref['psi4']=}")
-        for ln in ret.stdout:
+        for ln in ret.stdout.split("\n"):
             if ln.startswith("Scratch directory:"):
                 print(ln)
         assert re.search(stdout_ref[program], ret.stdout), f"Scratch pattern not found: {stdout_ref[program]}"

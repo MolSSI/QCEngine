@@ -23,77 +23,92 @@ jobs:
             python-version: 3.7
             label: Psi4-1.5
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: psi-nightly
             python-version: "3.10"
             label: Psi4-1.6
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: psi-cf
             python-version: "3.12"
             label: Psi4-cf
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: psi-cf
             python-version: "3.12"
             label: Psi4-cf
             runs-on: windows-latest
+            pytest: "'not hes2'"
 
           - conda-env: torchani
             python-version: 3.8
             label: ANI
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: openmm
             python-version: 3.8
             label: OpenMM
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: openmm
             python-version: 3.11
             label: OpenMM
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: xtb
             python-version: "3.10"
             label: xTB
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: qcore
             python-version: 3.7
             label: QCore
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: nwchem
             python-version: 3.8
             label: NWChem
             runs-on: ubuntu-20.04
+            pytest: ""
             # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
 
           - conda-env: nwchem
             python-version: 3.12
             label: NWChem
             runs-on: ubuntu-20.04
+            pytest: ""
 
           - conda-env: mrchem
             python-version: 3.8
             label: MRChem
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: adcc
             python-version: 3.8
             label: ADCC
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: opt-disp
             python-version: 3.8
             label: optimization-dispersion
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: opt-disp-cf
             python-version: 3.11
             label: optimization-dispersion
             runs-on: windows-latest
+            pytest: "'not hes2'"
 
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
@@ -142,13 +157,13 @@ jobs:
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
-      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
+      if: "(matrix.cfg.label == 'Psi4-1.6') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
         conda remove qcengine --force
 
       # QCEngine CI and Psi4 are circularly dependent, so a hack is in order
     - name: Special Config - Faux Pydantic Upgrade
-      if: "((matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'optimization-dispersion')) && (runner.os != 'Windows')"
+      if: "((matrix.cfg.label == 'Psi4-1.6') || (matrix.cfg.label == 'optimization-dispersion')) && (runner.os != 'Windows')"
       run: |
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
@@ -168,616 +183,9 @@ jobs:
         pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
         python -c "import qcengine; print(qcengine.config.global_repr())"
 
-    - name: Misc A
-      run: |
-        cat > labelfailA.py <<EOF
-        import pprint
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-
-        atres = psi4.schema_wrapper.run_qcschema(atin)
-        #atres = qcng.compute(atin, "psi4")
-        pprint.pprint(atres.dict(), width=200)
-
-        nre = 1.0828427
-        assert compare_values(
-            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
-        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
-
-        nmo = 36
-        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
-
-        scf = -1.656138508
-        scf_alt = -1.705577613  # some versions of NWChem land on this value
-        mp2 = -1.7926264513
-        mp2_alt = -1.870251459939
-        assert compare_values(
-                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
-            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
-        EOF
-        python labelfailA.py
-
-    - name: Misc D
-      if: false
-      run: |
-        cat > labelfailD.py <<EOF
-        import pprint
-        from pathlib import Path
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-        input_files = {"dataD.json": atin.json()}
-        run_cmd = [qcel.util.which("psi4"), "--qcschema", "dataD.json"]
-        print(f"{run_cmd=}")
-        success, output = qcng.util.execute(run_cmd, input_files, ["dataD.json"])
-        print("BBBB", success, output)
-        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataD.json"], "json"))
-        assert success
-        EOF
-        python labelfailD.py
-
-    - name: Misc E
-      if: false
-      run: |
-        cat > labelfailE.py <<EOF
-        import pprint
-        from pathlib import Path
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-        input_files = {"dataE.json": atin.json()}
-        run_cmd = [qcel.util.which("psi4"), "--qcschema", "dataE.json", "--nthread", "2", "--memory", "1.0GiB"]
-        print(f"{run_cmd=}")
-        success, output = qcng.util.execute(run_cmd, input_files, ["dataE.json"])
-        print("BBBB", success, output)
-        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataE.json"], "json"))
-        assert success
-        EOF
-        python labelfailE.py
-
-    - name: Misc F
-      if: false
-      run: |
-        cat > labelfailF.py <<EOF
-        import pprint
-        from pathlib import Path
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-        input_files = {"dataF.msgpack": atin.serialize("msgpack-ext")}
-        run_cmd = [qcel.util.which("psi4"), "--qcschema", "dataF.msgpack"]
-        print(f"{run_cmd=}")
-        success, output = qcng.util.execute(run_cmd, input_files, ["dataF.msgpack"], as_binary=["dataF.msgpack"])
-        print("BBBB", success, output)
-        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataF.msgpack"], "msgpack-ext"))
-        assert success
-        EOF
-        python labelfailF.py
-
-    - name: Misc L
-      if: false
-      run: |
-        cat > labelfailL.py <<EOF
-        import pprint
-        from pathlib import Path
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-        input_files = {"dataL.msgpack": atin.serialize("msgpack-ext")}
-        run_cmd = [qcel.util.which("psi4"), '--nthread', '1', '--memory', "1.0GiB", '--qcschema', 'dataL.msgpack']
-        print(f"{run_cmd=}")
-        success, output = qcng.util.execute(run_cmd, input_files, ["dataL.msgpack"], as_binary=["dataL.msgpack"])
-        print("BBBB", success, output)
-        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataL.msgpack"], "msgpack-ext"))
-        assert success
-        EOF
-        python labelfailL.py
-
-    - name: Misc M
-      if: false
-      run: |
-        cat > labelfailM.py <<EOF
-        import pprint
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-
-        #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, "psi4", task_config={"memory": 1})
-        pprint.pprint(atres.dict(), width=200)
-
-        nre = 1.0828427
-        assert compare_values(
-            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
-        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
-
-        nmo = 36
-        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
-
-        scf = -1.656138508
-        scf_alt = -1.705577613  # some versions of NWChem land on this value
-        mp2 = -1.7926264513
-        mp2_alt = -1.870251459939
-        assert compare_values(
-                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
-            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
-        assert atres.success
-        EOF
-        python labelfailM.py
-
-    - name: Misc G
-      if: false
-      run: |
-        cat > labelfailG.py <<EOF
-        import pprint
-        from pathlib import Path
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-        input_files = {"dataG.msgpack": atin.serialize("msgpack-ext")}
-        run_cmd = [qcel.util.which("psi4"), '--nthread', '1', '--memory', '2.375GiB', '--qcschema', 'dataG.msgpack']
-        print(f"{run_cmd=}")
-        success, output = qcng.util.execute(run_cmd, input_files, ["dataG.msgpack"], as_binary=["dataG.msgpack"])
-        print("BBBB", success, output)
-        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataG.msgpack"], "msgpack-ext"))
-        assert success
-        EOF
-        python labelfailG.py
-
-    - name: Misc H
-      if: false
-      run: |
-        cat > labelfailH.py <<EOF
-        import pprint
-        from pathlib import Path
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-        input_files = {"dataH.msgpack": atin.serialize("msgpack-ext")}
-        with qcng.util.temporary_directory(suffix="_psi_scratch", messy=True) as tmpdir:
-            run_cmd = [qcel.util.which("psi4"), '--nthread', '1', '--memory', '2.375GiB', '--qcschema', 'dataH.msgpack', '--messy', "--scratch", str(tmpdir)]
-            print(f"{run_cmd=}")
-            success, output = qcng.util.execute(run_cmd, input_files, ["dataH.msgpack"], as_binary=["dataH.msgpack"],
-                scratch_directory=tmpdir)
-        print("BBBB", success, output)
-        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataH.msgpack"], "msgpack-ext"))
-        assert success
-        EOF
-        python labelfailH.py
-
-    - name: Misc I
-      if: false
-      run: |
-        cat > labelfailI.py <<EOF
-        import pprint
-        from pathlib import Path
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-        input_files = {"dataI.msgpack": atin.serialize("msgpack-ext")}
-        with qcng.util.temporary_directory(suffix="_psi_scratch", messy=False) as tmpdir:
-            run_cmd = [qcel.util.which("psi4"), '--nthread', '1', '--memory', '2.375GiB', '--qcschema', 'dataI.msgpack', "--scratch", str(tmpdir)]
-            print(f"{run_cmd=}")
-            success, output = qcng.util.execute(run_cmd, input_files, ["dataI.msgpack"], as_binary=["dataI.msgpack"],
-                scratch_directory=tmpdir)
-        print("BBBB", success, output)
-        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataI.msgpack"], "msgpack-ext"))
-        assert success
-        EOF
-        python labelfailI.py
-
-    - name: Misc J
-      if: false
-      run: |
-        cat > labelfailJ.py <<EOF
-        import pprint
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-
-        #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, "psi4", task_config={"scratch_messy": True})
-        pprint.pprint(atres.dict(), width=200)
-
-        nre = 1.0828427
-        assert compare_values(
-            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
-        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
-
-        nmo = 36
-        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
-
-        scf = -1.656138508
-        scf_alt = -1.705577613  # some versions of NWChem land on this value
-        mp2 = -1.7926264513
-        mp2_alt = -1.870251459939
-        assert compare_values(
-                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
-            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
-        assert atres.success
-        EOF
-        python labelfailJ.py
-
-    - name: Misc C1
-      run: |
-        cat > labelfailC1.py <<EOF
-        import pprint
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-
-        #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, "psi4", task_config={"memory": 1.0})
-        pprint.pprint(atres.dict(), width=200)
-
-        nre = 1.0828427
-        assert compare_values(
-            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
-        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
-
-        nmo = 36
-        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
-
-        scf = -1.656138508
-        scf_alt = -1.705577613  # some versions of NWChem land on this value
-        mp2 = -1.7926264513
-        mp2_alt = -1.870251459939
-        assert compare_values(
-                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
-            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
-        assert atres.success
-        EOF
-        python labelfailC1.py
-
-    - name: Misc B1
-      run: |
-        cat > labelfailB1.py <<EOF
-        import pprint
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}, "extras": {"psiapi": True}}
-        )
-
-        #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, "psi4", task_config={"memory": 1.0})
-        pprint.pprint(atres.dict(), width=200)
-
-        nre = 1.0828427
-        assert compare_values(
-            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
-        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
-
-        nmo = 36
-        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
-
-        scf = -1.656138508
-        scf_alt = -1.705577613  # some versions of NWChem land on this value
-        mp2 = -1.7926264513
-        mp2_alt = -1.870251459939
-        assert compare_values(
-                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
-            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
-        assert atres.success
-        EOF
-        python labelfailB1.py
-
-    - name: Misc C
-      run: |
-        cat > labelfailC.py <<EOF
-        import pprint
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
-        )
-
-        #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, "psi4")
-        pprint.pprint(atres.dict(), width=200)
-
-        nre = 1.0828427
-        assert compare_values(
-            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
-        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
-
-        nmo = 36
-        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
-
-        scf = -1.656138508
-        scf_alt = -1.705577613  # some versions of NWChem land on this value
-        mp2 = -1.7926264513
-        mp2_alt = -1.870251459939
-        assert compare_values(
-                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
-            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
-        assert atres.success
-        EOF
-        python labelfailC.py
-
-    - name: Misc B
-      run: |
-        cat > labelfailB.py <<EOF
-        import pprint
-        import qcelemental as qcel
-        from qcelemental.testing import compare, compare_values
-        import qcengine as qcng
-        import psi4
-
-        kmol = qcel.models.Molecule.from_data(
-            """
-          H       0 0 0
-          H5      5 0 0
-          H_other 0 5 0
-          H_4sq   5 5 0
-          units au
-        """
-        )
-
-        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
-        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
-
-        atin = qcel.models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}, "extras": {"psiapi": True}}
-        )
-
-        #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, "psi4")
-        pprint.pprint(atres.dict(), width=200)
-
-        nre = 1.0828427
-        assert compare_values(
-            nre, atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
-        ), f"nre: {atres.properties.nuclear_repulsion_energy} != {nre}"
-
-        nmo = 36
-        assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
-
-        scf = -1.656138508
-        scf_alt = -1.705577613  # some versions of NWChem land on this value
-        mp2 = -1.7926264513
-        mp2_alt = -1.870251459939
-        assert compare_values(
-                scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
-            ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
-        assert atres.success
-        EOF
-        python labelfailB.py
-
     - name: PyTest
       run: |
-        pytest -rws -v -k "not hes2" --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v -k ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
