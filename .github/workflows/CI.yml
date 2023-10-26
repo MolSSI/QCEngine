@@ -41,7 +41,8 @@ jobs:
             python-version: "3.12"
             label: Psi4-cf
             runs-on: windows-latest
-            pytest: "'not hes2'"
+            #pytest: "-k 'not hes2'"
+            pytest: "-k 'scratch'"
 
           - conda-env: torchani
             python-version: 3.8
@@ -108,7 +109,7 @@ jobs:
             python-version: 3.11
             label: optimization-dispersion
             runs-on: windows-latest
-            pytest: "'not hes2'"
+            pytest: "-k 'not hes2'"
 
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
@@ -185,7 +186,7 @@ jobs:
 
     - name: PyTest
       run: |
-        pytest -rws -v -k ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
