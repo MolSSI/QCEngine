@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.config &mdash; QCEngine 0+untagged.1.gc7ba717 documentation</title>
+  <title>qcengine.config &mdash; QCEngine 0+untagged.1.g3f91816 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
@@ -14,7 +14,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=f6e35c0c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=07ed1da6"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -49,7 +49,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             QCEngine
           </a>
               <div class="version">
-                0+untagged.1.gc7ba717
+                0+untagged.1.g3f91816
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -152,6 +152,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="c1"># Work through VMs and logical cores.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(),</span> <span class="s2">&quot;cpu_affinity&quot;</span><span class="p">):</span>
             <span class="n">cpu_cnt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">()</span><span class="o">.</span><span class="n">cpu_affinity</span><span class="p">())</span>
+            <span class="n">full_physical_cnt</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(</span><span class="n">logical</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">full_logical_cnt</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(</span><span class="n">logical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">cpu_cnt</span> <span class="o">==</span> <span class="n">full_logical_cnt</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">full_physical_cnt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="c1"># cpu_affinity isn&#39;t capturing deliberate setting but just VMs, so use physical</span>
+                <span class="n">cpu_cnt</span> <span class="o">=</span> <span class="n">full_physical_cnt</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cpu_cnt</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(</span><span class="n">logical</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">cpu_cnt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -193,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="s2">    </span>
 <span class="s2">    The default value, ``None``, will allow QCEngine to autodetect the number of cores.&quot;&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">jobs_per_node</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">jobs_per_node</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># Cluster options</span>
