@@ -329,7 +329,7 @@ jobs:
             **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
         )
         input_files = {"dataH.msgpack": atin.serialize("msgpack-ext")}
-        with temporary_directory(suffix="_psi_scratch", messy=True) as tmpdir:
+        with qcng.util.temporary_directory(suffix="_psi_scratch", messy=True) as tmpdir:
             run_cmd = [qcel.util.which("psi4"), '--nthread', '1', '--memory', '2.375GiB', '--qcschema', 'dataH.msgpack', '--messy', "--scratch", str(tmpdir)]
             print(f"{run_cmd=}")
             success, output = qcng.util.execute(run_cmd, input_files, ["dataH.msgpack"], as_binary=["dataH.msgpack"],
