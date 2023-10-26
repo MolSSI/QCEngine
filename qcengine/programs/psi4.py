@@ -248,14 +248,12 @@ class Psi4Harness(ProgramHarness):
                         "--qcschema",
                         "data.msgpack",
                     ]
-                    print(f"{run_cmd=}")
                     if config.scratch_messy:
                         run_cmd.append("--messy")
                     input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
                     success, output = execute(
                         run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
                     )
-                    print("AAAA", success, output, deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext"))
                     if success:
                         output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
                     else:
