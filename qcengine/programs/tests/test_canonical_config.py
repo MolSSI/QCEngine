@@ -203,6 +203,11 @@ def test_local_options_scratch(program, model, keywords):
         sample_file = list(Path(scratch_directory).glob(scratch_sample[program]))
         assert len(sample_file) == 1, f"Scratch sample not found: {scratch_sample[program]} in {scratch_directory}"
 
+        print(f"{sample_file=}")
+        print(f"{stdout_ref['psi4']=}")
+        for ln in ret.stdout:
+            if ln.startswith("Scratch directory:"):
+                print(ln)
         assert re.search(stdout_ref[program], ret.stdout), f"Scratch pattern not found: {stdout_ref[program]}"
 
 
