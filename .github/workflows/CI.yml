@@ -194,6 +194,7 @@ jobs:
         success, output = qcng.util.execute(run_cmd, input_files, ["dataD.json"])
         print("BBBB", success, output)
         print("CCCC", qcel.util.deserialize(output["outfiles"]["dataD.json"], "json"))
+        assert success
         EOF
         python labelfailD.py
 
@@ -229,6 +230,7 @@ jobs:
         success, output = qcng.util.execute(run_cmd, input_files, ["dataE.json"])
         print("BBBB", success, output)
         print("CCCC", qcel.util.deserialize(output["outfiles"]["dataE.json"], "json"))
+        assert success
         EOF
         python labelfailE.py
 
@@ -264,8 +266,45 @@ jobs:
         success, output = qcng.util.execute(run_cmd, input_files, ["dataF.msgpack"], as_binary=["dataF.msgpack"])
         print("BBBB", success, output)
         print("CCCC", qcel.util.deserialize(output["outfiles"]["dataF.msgpack"], "msgpack-ext"))
+        assert success
         EOF
         python labelfailF.py
+
+    - name: Misc L
+      run: |
+        cat > labelfailL.py <<EOF
+        import pprint
+        from pathlib import Path
+        import qcelemental as qcel
+        from qcelemental.testing import compare, compare_values
+        import qcengine as qcng
+        import psi4
+
+        kmol = qcel.models.Molecule.from_data(
+            """
+          H       0 0 0
+          H5      5 0 0
+          H_other 0 5 0
+          H_4sq   5 5 0
+          units au
+        """
+        )
+
+        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
+        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
+
+        atin = qcel.models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
+        )
+        input_files = {"dataL.msgpack": atin.serialize("msgpack-ext")}
+        run_cmd = [qcel.util.which("psi4"), '--nthread', '1', '--memory', "1.0GiB", '--qcschema', 'dataL.msgpack']
+        print(f"{run_cmd=}")
+        success, output = qcng.util.execute(run_cmd, input_files, ["dataL.msgpack"], as_binary=["dataL.msgpack"])
+        print("BBBB", success, output)
+        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataL.msgpack"], "msgpack-ext"))
+        assert success
+        EOF
+        python labelfailL.py
 
     - name: Misc G
       run: |
@@ -299,6 +338,7 @@ jobs:
         success, output = qcng.util.execute(run_cmd, input_files, ["dataG.msgpack"], as_binary=["dataG.msgpack"])
         print("BBBB", success, output)
         print("CCCC", qcel.util.deserialize(output["outfiles"]["dataG.msgpack"], "msgpack-ext"))
+        assert success
         EOF
         python labelfailG.py
 
@@ -337,6 +377,7 @@ jobs:
         print("BBBB", success, output)
         print("CCCC", qcel.util.deserialize(output["outfiles"]["dataH.msgpack"], "msgpack-ext"))
         EOF
+        assert success
         python labelfailH.py
 
     - name: Misc I
@@ -373,6 +414,7 @@ jobs:
                 scratch_directory=tmpdir)
         print("BBBB", success, output)
         print("CCCC", qcel.util.deserialize(output["outfiles"]["dataI.msgpack"], "msgpack-ext"))
+        assert success
         EOF
         python labelfailI.py
 
@@ -421,6 +463,7 @@ jobs:
         assert compare_values(
                 scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
             ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
+        assert atres.success
         EOF
         python labelfailJ.py
 
@@ -469,6 +512,7 @@ jobs:
         assert compare_values(
                 scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
             ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
+        assert atres.success
         EOF
         python labelfailC.py
 
@@ -517,6 +561,7 @@ jobs:
         assert compare_values(
                 scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
             ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
+        assert atres.success
         EOF
         python labelfailB.py
 
