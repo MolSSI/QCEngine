@@ -188,12 +188,84 @@ jobs:
         atin = qcel.models.AtomicInput(
             **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
         )
-        input_files = {"data.json": atin.json()}
-        success, output = qcng.util.execute([qcel.util.which("psi4"), "--qcschema", "data.json"], input_files, ["data.json"])
+        input_files = {"dataD.json": atin.json()}
+        run_cmd = [qcel.util.which("psi4"), "--qcschema", "dataD.json"]
+        print(f"{run_cmd=}")
+        success, output = qcng.util.execute(run_cmd, input_files, ["dataD.json"])
         print("BBBB", success, output)
-        print("CCCC", qcel.util.deserialize(output["outfiles"]["data.json"], "json"))
+        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataD.json"], "json"))
         EOF
         python labelfailD.py
+
+    - name: Misc E
+      run: |
+        cat > labelfailE.py <<EOF
+        import pprint
+        from pathlib import Path
+        import qcelemental as qcel
+        from qcelemental.testing import compare, compare_values
+        import qcengine as qcng
+        import psi4
+
+        kmol = qcel.models.Molecule.from_data(
+            """
+          H       0 0 0
+          H5      5 0 0
+          H_other 0 5 0
+          H_4sq   5 5 0
+          units au
+        """
+        )
+
+        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
+        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
+
+        atin = qcel.models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
+        )
+        input_files = {"dataE.json": atin.json()}
+        run_cmd = [qcel.util.which("psi4"), "--qcschema", "dataE.json", "--nthread", "2", "--memory", "1.0GiB"]
+        print(f"{run_cmd=}")
+        success, output = qcng.util.execute(run_cmd, input_files, ["dataE.json"])
+        print("BBBB", success, output)
+        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataE.json"], "json"))
+        EOF
+        python labelfailE.py
+
+    - name: Misc F
+      run: |
+        cat > labelfailF.py <<EOF
+        import pprint
+        from pathlib import Path
+        import qcelemental as qcel
+        from qcelemental.testing import compare, compare_values
+        import qcengine as qcng
+        import psi4
+
+        kmol = qcel.models.Molecule.from_data(
+            """
+          H       0 0 0
+          H5      5 0 0
+          H_other 0 5 0
+          H_4sq   5 5 0
+          units au
+        """
+        )
+
+        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
+        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
+
+        atin = qcel.models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
+        )
+        input_files = {"dataF.msgpack": atin.serialize("msgpack-ext")}
+        run_cmd = [qcel.util.which("psi4"), "--qcschema", "dataF.msgpack"]
+        print(f"{run_cmd=}")
+        success, output = qcng.util.execute(run_cmd, input_files, ["dataF.msgpack"], as_binary=["dataF.msgpack"])
+        print("BBBB", success, output)
+        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataF.msgpack"], "msgpack-ext"))
+        EOF
+        python labelfailF.py
 
     - name: Misc C
       run: |
