@@ -267,6 +267,78 @@ jobs:
         EOF
         python labelfailF.py
 
+    - name: Misc G
+      run: |
+        cat > labelfailG.py <<EOF
+        import pprint
+        from pathlib import Path
+        import qcelemental as qcel
+        from qcelemental.testing import compare, compare_values
+        import qcengine as qcng
+        import psi4
+
+        kmol = qcel.models.Molecule.from_data(
+            """
+          H       0 0 0
+          H5      5 0 0
+          H_other 0 5 0
+          H_4sq   5 5 0
+          units au
+        """
+        )
+
+        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
+        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
+
+        atin = qcel.models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
+        )
+        input_files = {"dataG.msgpack": atin.serialize("msgpack-ext")}
+        run_cmd = [qcel.util.which("psi4"), '--nthread', '1', '--memory', '2.375GiB', '--qcschema', 'dataG.msgpack']
+        print(f"{run_cmd=}")
+        success, output = qcng.util.execute(run_cmd, input_files, ["dataG.msgpack"], as_binary=["dataG.msgpack"])
+        print("BBBB", success, output)
+        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataG.msgpack"], "msgpack-ext"))
+        EOF
+        python labelfailG.py
+
+    - name: Misc H
+      run: |
+        cat > labelfailH.py <<EOF
+        import pprint
+        from pathlib import Path
+        import qcelemental as qcel
+        from qcelemental.testing import compare, compare_values
+        import qcengine as qcng
+        import psi4
+
+        kmol = qcel.models.Molecule.from_data(
+            """
+          H       0 0 0
+          H5      5 0 0
+          H_other 0 5 0
+          H_4sq   5 5 0
+          units au
+        """
+        )
+
+        assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
+        assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
+
+        atin = qcel.models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": "aug-cc-pvdz"}, "driver": "energy", "keywords": {"scf_type": "pk", "mp2_type": "conv"}}
+        )
+        input_files = {"dataH.msgpack": atin.serialize("msgpack-ext")}
+        with temporary_directory(suffix="_psi_scratch", messy=True) as tmpdir:
+            run_cmd = [qcel.util.which("psi4"), '--nthread', '1', '--memory', '2.375GiB', '--qcschema', 'dataH.msgpack', '--messy', "--scratch", str(tmpdir)]
+            print(f"{run_cmd=}")
+            success, output = qcng.util.execute(run_cmd, input_files, ["dataH.msgpack"], as_binary=["dataH.msgpack"],
+                scratch_directory=tmpdir)
+        print("BBBB", success, output)
+        print("CCCC", qcel.util.deserialize(output["outfiles"]["dataH.msgpack"], "msgpack-ext"))
+        EOF
+        python labelfailH.py
+
     - name: Misc C
       run: |
         cat > labelfailC.py <<EOF
