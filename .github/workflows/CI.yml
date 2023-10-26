@@ -601,7 +601,6 @@ jobs:
         )
 
         #atres = psi4.schema_wrapper.run_qcschema(atin)
-        atres = qcng.compute(atin, "psi4")
         atres = qcng.compute(atin, "psi4", task_config={"memory": 1.0})
         pprint.pprint(atres.dict(), width=200)
 
