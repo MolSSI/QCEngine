@@ -723,7 +723,7 @@ jobs:
 
     - name: PyTest
       run: |
-        pytest -rws -v --cov=qcengine -k "label" --color=yes --cov-report=xml qcengine/
+        pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
