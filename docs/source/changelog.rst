@@ -25,7 +25,6 @@ Changelog
 .. WIP (Unmerged)
 .. ++++++++++++++
 .. - UNMERGED (:pr:`421`) GAMESS - error handling and memory @taylor-a-barnes
-.. - UNMERGED (:pr:`405`, :issue:`415`, :pr:`417`) Config - change default `jobs_per_node` from 2 to more expected 1 so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading machines, affecting default `ncores`. The net effect (both changes) for default cores running on Hyperthreading machines is unchanged. @cvsik, @loriab
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
@@ -46,6 +45,10 @@ Bug Fixes
 - (:pr:`427`) Config - Once again, expand environment variables (now more flexibly) and newly expand ``~``
   passed into TaskConfig. Particularly relevant for scratch setting. @yueyericardo
 - (:pr:`428`) MDI - Ensure that molecule orientation remains fixed for MDI. @taylor-a-barnes
+- (:pr:`405`, :issue:`415`, :pr:`417`) Config - change default ``jobs_per_node`` from 2 to more expected 1
+  so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading
+  machines, affecting default ``ncores``. The net effect (both changes) for default cores running on
+  Hyperthreading machines is unchanged. @cvsik, @loriab
 
 Misc.
 +++++
