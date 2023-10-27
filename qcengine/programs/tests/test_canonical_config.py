@@ -184,7 +184,7 @@ def test_local_options_scratch(program, model, keywords):
         "psi4": rf"Scratch directory: {scratch_directory}/tmp\w+_psi_scratch/",
     }
     if sys.platform.startswith("win"):
-        stdout_ref["psi4"] = rf"Scratch directory: {scratch_directory}"
+        stdout_ref["psi4"] = rf"Scratch directory: {str(Path(scratch_directory))}"
 
     # a scratch file (preferrably output) expected after job if scratch not cleaned up
     scratch_sample = {
@@ -206,8 +206,8 @@ def test_local_options_scratch(program, model, keywords):
         sample_file = list(Path(scratch_directory).glob(scratch_sample[program]))
         assert len(sample_file) == 1, f"Scratch sample not found: {scratch_sample[program]} in {scratch_directory}"
 
-        print(f"{sample_file=}")
-        print(f"{stdout_ref['psi4']=}")
+        print(f"sample_file={sample_file}")
+        print(f"stdout_ref={stdout_ref['psi4']}")
         for ln in ret.stdout.split("\n"):
             if ln.startswith("Scratch directory:"):
                 print(ln)
