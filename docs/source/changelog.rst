@@ -49,9 +49,11 @@ Bug Fixes
   so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading
   machines, affecting default ``ncores``. The net effect (both changes) for default cores running on
   Hyperthreading machines is unchanged. @cvsik, @loriab
+UNMERGED - (:pr:`433`) Turbomole, Q-Chem - Use raw strings when needed to avoid py312 warnings.
 
 Misc.
 +++++
+UNMERGED - (:pr:`433`) CI - Check py312 and some Windows lanes.
 
 MUST (Unmerged)
 +++++++++++++++
