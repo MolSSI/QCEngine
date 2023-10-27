@@ -134,7 +134,8 @@ jobs:
         # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
 
     - name: Special Config - NWChem
-      if: "(matrix.cfg.label == 'NWChem')"
+      if: false
+      #if: "(matrix.cfg.label == 'NWChem')"
       run: |
         sudo apt-get -y install nwchem
 
@@ -143,14 +144,8 @@ jobs:
       run: |
         qcore --accept-license
 
-    # note: psi4 on c-f pins to a single qcel and qcng, so this may be handy for solve-and-replace
-    #- name: Special Config - QCElemental Dep
-    #  if: (matrix.cfg.label == 'ADCC')
-    #  run: |
-    #    conda remove qcelemental --force
-    #    python -m pip install qcelemental>=0.26.0 --no-deps
-
     - name: Special Config - QCElemental Dep
+      if: false
       run: |
         conda remove qcelemental --force
         python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@loriab-patch-2' --no-deps
@@ -158,7 +153,7 @@ jobs:
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
-      if: "(matrix.cfg.label == 'Psi4-1.6') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
+      if: "(startsWith(matrix.cfg.label, 'Psi4')) || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
         conda remove qcengine --force
 
