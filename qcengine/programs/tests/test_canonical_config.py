@@ -184,7 +184,7 @@ def test_local_options_scratch(program, model, keywords):
         "psi4": rf"Scratch directory: {scratch_directory}/tmp\w+_psi_scratch/",
     }
     if sys.platform.startswith("win"):
-        #stdout_ref["psi4"] = f"Scratch directory: {str(Path(scratch_directory))}"
+        # too hard to regex Windows paths that need escape chars
         stdout_ref["psi4"] = f"Scratch directory: "
 
     # a scratch file (preferrably output) expected after job if scratch not cleaned up
@@ -207,11 +207,6 @@ def test_local_options_scratch(program, model, keywords):
         sample_file = list(Path(scratch_directory).glob(scratch_sample[program]))
         assert len(sample_file) == 1, f"Scratch sample not found: {scratch_sample[program]} in {scratch_directory}"
 
-        print(f"sample_file={sample_file}")
-        print(f"stdout_ref={stdout_ref['psi4']}")
-        for ln in ret.stdout.split("\n"):
-            if ln.startswith("Scratch directory:"):
-                print(ln)
         assert re.search(stdout_ref[program], ret.stdout), f"Scratch pattern not found: {stdout_ref[program]}"
 
 
