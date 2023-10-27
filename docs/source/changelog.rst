@@ -57,7 +57,6 @@ UNMERGED - (:pr:`433`) CI - Check py312 and some Windows lanes.
 
 MUST (Unmerged)
 +++++++++++++++
-- (:pr:`433`)
 
 
 v0.28.1 / 2023-08-18
