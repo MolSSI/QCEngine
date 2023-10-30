@@ -1,0 +1,35 @@
+name: test
+channels:
+  - conda-forge/label/libint_dev
+  - conda-forge
+  - nodefaults
+dependencies:
+  - psi4
+  - rdkit
+  - mopac
+
+    # Mixed Tests
+  - dftd3-python
+  - dftd4-python
+  - gcp-correction
+  - geometric
+  - optking
+  - pymdi
+
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental >=0.26.0
+  - pydantic=1.10.13
+  - msgpack-python
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+
+  - pip
+  - pip:
+    - pyberny

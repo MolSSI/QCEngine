@@ -1,19 +1,17 @@
 name: test
 channels:
-  - psi4/label/dev
   - conda-forge
 dependencies:
-  - psi4=1.6
-  - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
+  - nwchem
 
     # Core
   - python
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.26.0
+  - qcelemental >=0.24.0
   - pydantic>=1.0.0
-  - msgpack-python
+  - networkx>=2.4.0
 
     # Testing
   - pytest

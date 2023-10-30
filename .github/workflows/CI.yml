@@ -21,56 +21,84 @@ jobs:
         cfg:
           - conda-env: psi
             python-version: 3.7
-            label: Psi4-release
+            label: Psi4-1.5
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: psi-nightly
             python-version: "3.10"
-            label: Psi4-nightly
+            label: Psi4-1.6
             runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: psi-cf
+            python-version: "3.12"
+            label: Psi4-1.8
+            runs-on: windows-latest
+            pytest: "-k 'not (hes2 or qchem)'"
 
           - conda-env: torchani
             python-version: 3.8
             label: ANI
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: openmm
             python-version: 3.8
             label: OpenMM
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: xtb
             python-version: "3.10"
             label: xTB
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: qcore
             python-version: 3.7
             label: QCore
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: nwchem
             python-version: 3.8
-            label: NWChem
+            label: NWChem70
             runs-on: ubuntu-20.04
+            pytest: ""
             # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
+
+          - conda-env: nwchem-cf
+            python-version: 3.12
+            label: NWChem
+            runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: mrchem
             python-version: 3.8
             label: MRChem
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: adcc
             python-version: 3.8
             label: ADCC
             runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: opt-disp
             python-version: 3.8
             label: optimization-dispersion
             runs-on: ubuntu-latest
+            pytest: ""
 
-    name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }}" # • ${{ matrix.cfg.runs-on }}"
+          - conda-env: opt-disp-cf
+            python-version: 3.11
+            label: optimization-dispersion
+            runs-on: windows-latest
+            pytest: "-k 'not (hes2 or qchem)'"
+
+    name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
@@ -93,7 +121,7 @@ jobs:
         # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
 
     - name: Special Config - NWChem
-      if: "(matrix.cfg.label == 'NWChem')"
+      if: "(matrix.cfg.label == 'NWChem70')"
       run: |
         sudo apt-get -y install nwchem
 
@@ -102,23 +130,22 @@ jobs:
       run: |
         qcore --accept-license
 
-    # note: psi4 on c-f pins to a single qcel and qcng, so this may be handy for solve-and-replace
-    #- name: Special Config - QCElemental Dep
-    #  if: (matrix.cfg.label == 'ADCC')
-    #  run: |
-    #    conda remove qcelemental --force
-    #    python -m pip install qcelemental>=0.26.0 --no-deps
+    - name: Special Config - QCElemental Dep
+      if: false
+      run: |
+        conda remove qcelemental --force
+        python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@loriab-patch-2' --no-deps
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
-      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
+      if: "(startsWith(matrix.cfg.label, 'Psi4')) || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
       run: |
         conda remove qcengine --force
 
       # QCEngine CI and Psi4 are circularly dependent, so a hack is in order
     - name: Special Config - Faux Pydantic Upgrade
-      if: "(matrix.cfg.label == 'Psi4-nightly') || (matrix.cfg.label == 'optimization-dispersion')"
+      if: "((matrix.cfg.label == 'Psi4-1.6') || (matrix.cfg.label == 'optimization-dispersion')) && (runner.os != 'Windows')"
       run: |
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
@@ -140,7 +167,7 @@ jobs:
 
     - name: PyTest
       run: |
-        pytest -rws -v --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
