@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Changelog &mdash; QCEngine 0+untagged.1.g3f91816 documentation</title>
+  <title>Changelog &mdash; QCEngine 0+untagged.1.g1e771c6 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=07ed1da6"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=f23bfae2"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
@@ -52,7 +52,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             QCEngine
           </a>
               <div class="version">
-                0+untagged.1.g3f91816
+                0+untagged.1.g1e771c6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -82,7 +82,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">QCEngine API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#v0-28-2-2023-mm-dd-unreleased">v0.28.2 / 2023-MM-DD (Unreleased)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v0-29-0-2023-mm-dd-unreleased">v0.29.0 / 2023-MM-DD (Unreleased)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#breaking-changes">Breaking Changes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#new-features">New Features</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#enhancements">Enhancements</a></li>
@@ -315,8 +315,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              
   <section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading"></a></h1>
-<section id="v0-28-2-2023-mm-dd-unreleased">
-<h2>v0.28.2 / 2023-MM-DD (Unreleased)<a class="headerlink" href="#v0-28-2-2023-mm-dd-unreleased" title="Permalink to this heading"></a></h2>
+<section id="v0-29-0-2023-mm-dd-unreleased">
+<h2>v0.29.0 / 2023-MM-DD (Unreleased)<a class="headerlink" href="#v0-29-0-2023-mm-dd-unreleased" title="Permalink to this heading"></a></h2>
 <section id="breaking-changes">
 <h3>Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permalink to this heading"></a></h3>
 </section>
@@ -328,16 +328,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 <section id="bug-fixes">
 <h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/427">GH#427</a>) Config - Once again, expand environment variables (now more flexibly) and newly expand <code class="docutils literal notranslate"><span class="pre">~</span></code>
+passed into TaskConfig. Particularly relevant for scratch setting. &#64;yueyericardo</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/428">GH#428</a>) MDI - Ensure that molecule orientation remains fixed for MDI. &#64;taylor-a-barnes</p></li>
+<li><p>(<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/405">GH#405</a>, <a class="reference external" href="https://github.com/MolSSI/QCEngine/issues/415">GH#415</a>, <a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/417">GH#417</a>) Config - change default <code class="docutils literal notranslate"><span class="pre">jobs_per_node</span></code> from 2 to more expected 1
+so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading
+machines, affecting default <code class="docutils literal notranslate"><span class="pre">ncores</span></code>. The net effect (both changes) for default cores running on
+Hyperthreading machines is unchanged. &#64;cvsik, &#64;loriab</p></li>
+</ul>
+<p>UNMERGED - (<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/433">GH#433</a>) Turbomole, Q-Chem - Use raw strings when needed to avoid py312 warnings.</p>
 </section>
 <section id="misc">
 <h3>Misc.<a class="headerlink" href="#misc" title="Permalink to this heading"></a></h3>
+<p>UNMERGED - (<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/433">GH#433</a>) CI - Check py312 and some Windows lanes.</p>
 </section>
 <section id="must-unmerged">
 <h3>MUST (Unmerged)<a class="headerlink" href="#must-unmerged" title="Permalink to this heading"></a></h3>
-<ul class="simple">
-<li><p>UNMERGED (<a class="reference external" href="https://github.com/MolSSI/QCEngine/pull/427">GH#427</a>) Config - Once again, expand environment variables (now more flexibly) and newly expand <code class="docutils literal notranslate"><span class="pre">~</span></code>
-passed into TaskConfig. Particularly relevant for scratch setting.</p></li>
-</ul>
 </section>
 </section>
 <section id="v0-28-1-2023-08-18">
