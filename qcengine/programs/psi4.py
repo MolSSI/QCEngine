@@ -250,12 +250,18 @@ class Psi4Harness(ProgramHarness):
                     ]
                     if config.scratch_messy:
                         run_cmd.append("--messy")
-                    input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
+                    extra_infiles = input_model.extras.get("extra_infiles", {})
+                    extra_outfiles = input_model.extras.get("extra_outfiles", [])
+                    input_files = {"data.msgpack": input_model.serialize("msgpack-ext"), **extra_infiles}
+                    output_files = ["data.msgpack", *extra_outfiles]
                     success, output = execute(
-                        run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
+                        run_cmd, input_files, output_files, as_binary=["data.msgpack"], scratch_directory=tmpdir
                     )
                     if success:
                         output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
+                        for k, v in output["outfiles"].items():
+                            if k != "data.msgpack" and v is not None:
+                                output_data["native_files"][k] = v
                     else:
                         output_data = input_model.dict()
 
