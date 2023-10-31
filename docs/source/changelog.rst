@@ -28,17 +28,8 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.29.0 / 2023-MM-DD (Unreleased)
+v0.29.0 / 2023-10-31
 --------------------
-
-Breaking Changes
-++++++++++++++++
-
-New Features
-++++++++++++
-
-Enhancements
-++++++++++++
 
 Bug Fixes
 +++++++++
@@ -46,17 +37,15 @@ Bug Fixes
   passed into TaskConfig. Particularly relevant for scratch setting. @yueyericardo
 - (:pr:`428`) MDI - Ensure that molecule orientation remains fixed for MDI. @taylor-a-barnes
 - (:pr:`405`, :issue:`415`, :pr:`417`) Config - change default ``jobs_per_node`` from 2 to more expected 1
-  so a single job fills the node. Alter CPU count formula to return physical cores on Hyerthreading
+  so a single job fills the node. Alter CPU count formula to return physical cores on Hyperthreading
   machines, affecting default ``ncores``. The net effect (both changes) for default cores running on
-  Hyperthreading machines is unchanged. @cvsik, @loriab
-UNMERGED - (:pr:`433`) Turbomole, Q-Chem - Use raw strings when needed to avoid py312 warnings.
+  Hyperthreading machines is unchanged. Nevertheless, fixes some Windows problems. @cvsik, @loriab
+- (:pr:`433`) Turbomole, Q-Chem - Use raw strings when needed to avoid py312 warnings. @loriab
+- (:pr:`435`) GAMESS - Collect the correct MP2 module in parsing for newer versions (>2021,<=2023). @loriab
 
 Misc.
 +++++
-UNMERGED - (:pr:`433`) CI - Check py312 and some Windows lanes.
-
-MUST (Unmerged)
-+++++++++++++++
+- (:pr:`433`) CI - Check py312 and some Windows lanes. @loriab
 
 
 v0.28.1 / 2023-08-18

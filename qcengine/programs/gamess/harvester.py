@@ -207,7 +207,9 @@ def harvest_outfile_pass(outtext):
             r"^\s+" + r"METHOD" + r"\s+=\s+" + r"\d+" + r"\s+" + r"NWORD" + r"\s+=\s+" + r"\d+" + r"\s*" +
             r"^\s+" + r"MP2PRP" + r"\s+=\s+" + r"\w+" + r"\s+" + r"OSPT" + r"\s+=\s+" + r"\w+"+ r"\s*" +
             r"^\s+" + r"CUTOFF" + r"\s+=\s+" + NUMBER + r"\s+" + r"CPHFBS" + r"\s+=\s+" + r"\w+"+ r"\s*" +
-            r"^\s+" + r"CODE" + r"\s+=\s+" + r"(?P<code>\w+)"  + r"\s*$",
+            r"^\s+" + r"CODE" + r"\s+=\s+" + r"(?P<code>\w+)"  + r"\s*",
+            # Oct 2023: terminating `$` removed from `+ r"\s*$",` to allow it to match gamess 2021
+            #   and gamess 2023 that has both `CODE` and `SCSPT` on the line.
             # fmt: on
             outtext,
             re.MULTILINE,
