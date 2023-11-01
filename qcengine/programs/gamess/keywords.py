@@ -14,6 +14,9 @@ def format_keyword(keyword: str, val: Any, lop_off: bool = True) -> Tuple[str, s
     elif str(val) == "False":
         text += ".false."
 
+    elif isinstance(val, list):
+        text += ",".join(map(str, val))
+
     # No Transform
     else:
         text += str(val).lower()
