@@ -97,7 +97,7 @@ class GaussianHarness(ProgramHarness):
             "scratch_directory": config.scratch_directory
             }
 
-        input_file = '''%mem=6000000
+        input_file = '''%mem=20MW
 #P HF/6-31G(d) scf=tight
 
 test1 HF/6-31G(d) sp formaldehyde
