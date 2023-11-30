@@ -114,8 +114,7 @@ r4=1.0
 a3=120.
 a4=120.
 d4=180.
-
-        '''
+'''
         gaussian_ret['infiles']["input.inp"] = input_file
 
         return gaussian_ret
