@@ -77,7 +77,7 @@ class DFTD3Harness(ProgramHarness):
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             dexe["outfiles"]["input"] = job_inputs["infiles"][".dftd3par.local"]
-            dexe["outfiles"]["dftd3_geometry.xyz"] = job_inputs["infiles"]["dftd3_geometry.xyz"]
+            dexe["outfiles"]["dftd3_geometry.tmol"] = job_inputs["infiles"]["dftd3_geometry.tmol"]
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
@@ -133,7 +133,7 @@ class DFTD3Harness(ProgramHarness):
         molrec = qcel.molparse.from_schema(input_model.molecule.dict())
         # jobrec['molecule']['real'] = molrec['real']
 
-        command = ["dftd3", "dftd3_geometry.xyz"]
+        command = ["dftd3", "dftd3_geometry.tmol"]
         if input_model.driver == "gradient":
             command.append("-grad")
         if input_model.extras["info"]["dashlevel"] == "atmgr":
@@ -147,7 +147,7 @@ class DFTD3Harness(ProgramHarness):
             ".dftd3par.local": dftd3_coeff_formatter(
                 input_model.extras["info"]["dashlevel"], input_model.extras["info"]["dashparams"]
             ),
-            "dftd3_geometry.xyz": qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format=""),
+            "dftd3_geometry.tmol": qcel.molparse.to_string(molrec, dtype="turbomole", units="Bohr", ghost_format=""),
         }
 
         return {
