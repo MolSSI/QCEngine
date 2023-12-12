@@ -1,5 +1,5 @@
 """
-Calls the GAUSSIAN excutable
+Calls the GAUSSIAN executable
 """
 
 import os
@@ -8,6 +8,8 @@ import tempfile
 import warnings
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
+import cclib
+from cclib.method import Nuclear
 
 import numpy as np
 from qcelemental import constants
@@ -42,7 +44,7 @@ class GaussianHarness(ProgramHarness):
             "g09",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install Gaussian. Check it's in your PATH with `which g09`.",
+            raise_msg="Please install Gaussian. Check it's in your PATH with `which g09`."
         )
 
     def get_version(self) -> str:
@@ -54,17 +56,6 @@ class GaussianHarness(ProgramHarness):
         which_prog = which("g09")
         if which_prog not in self.version_cache:
             success, output = execute([which_prog, "v.com"], {"v.com": ""})
-
-            #mobj = re.search(r"Gaussian\s+([\d.]+)\s+for", exc["stdout"])
-            #if not mobj:
-            #    mobj = re.search(r"Gaussian version:\s+([\d.]+)\s+", exc["stdout"])
-
-            #if mobj:
-            #    self.version_cache[which_prog] = safe_version(mobj.group(1))
-
-            # if "QC not defined" in exc["stdout"]:
-            #else:
-            #    return safe_version("09")
 
         return self.version_cache[which_prog]
 
@@ -82,18 +73,28 @@ class GaussianHarness(ProgramHarness):
         exe_success, proc = self.execute(job_inputs)
 
         # Determine whether the calculation succeeded
-        print("SUCCESS", exe_success)
         if exe_success:
             # If execution succeeded, collect results
-            return self.parse_output(proc["outfiles"], input_model)
-
+            result = self.parse_output(proc, input_model)
+            
+            return result
+ 
+        else:
+            proc['outfiles']['stderr'] = proc['outfiles']['output.log']
+            outfile = proc['outfiles']['output.log']
+            
+            if 'Error termination via ' in outfile:
+                raise InputError(proc['outfiles']['output.log'])
+            else:
+                # Return UnknownError for error propagation
+                raise UnknownError(proc["outfiles"]["output.log"])
 
     def build_input(
         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         gaussian_ret = {
             "infiles": {},
-            "commands": [which("g09"),  "input.inp"],
+            "commands": [which("g09"),  "input.inp", "output.log"],
             "scratch_directory": config.scratch_directory
             }
 
@@ -115,24 +116,35 @@ a3=120.
 a4=120.
 d4=180.
 '''
-        gaussian_ret['infiles']["input.inp"] = input_file
+        gaussian_ret['infiles']['input.inp'] = input_file
 
         return gaussian_ret
 
-    def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
+    def execute(self,
+                inputs,
+                extra_outfiles: Optional[Dict[str, str]] = None,
+                extra_commands: Optional[List[str]] = None,
+                scratch_name = None,
+                timeout: Optional[int] = None
+               ):
 
         success, dexe = execute(
-        inputs["commands"],
-        inputs["infiles"],
-        )
-        print(dexe['proc'].stdout.read())
-        print(dexe['proc'].stderr.read())
+            inputs["commands"],
+            inputs["infiles"],
+            outfiles = ['output.log'],
+            scratch_messy = True
+            )
+        
+        if (dexe['outfiles']['output.log'] is None) or (
+           'Error termination via' in dexe['outfiles']['output.log']):
+           print ('THERE IS AN ERROR!')
+           
+           success = False
+        
         return success, dexe
-
+ 
     def parse_output(self, outfiles: Dict[str, str], input_model: AtomicInput) -> AtomicResult:
-        print("IN PARSE OUTPUT")
-
-        #output_data = {}
+        output_data = {}
         stdout = outfiles.pop('stdout')
         stderr = outfiles.pop('stderr')
 
