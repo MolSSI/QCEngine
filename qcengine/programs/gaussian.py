@@ -117,7 +117,7 @@ class GaussianHarness(ProgramHarness):
         gaussian_ret = {
             'infiles': {'input.inp': '\n'.join(input_file)},
             'commands': [which("g09"),  'input.inp', 'output.log'],
-            'scratch_directory": config.scratch_directory
+            'scratch_directory': config.scratch_directory
             }
 
         return gaussian_ret
