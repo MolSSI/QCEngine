@@ -92,31 +92,33 @@ class GaussianHarness(ProgramHarness):
     def build_input(
         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
+
+        # Build keywords
+        keywords = {k.upper(): v for k, v in input_model.keywords.items()}
+        keywords['MEM_TOTAL'] = str(int(config.memory * 1024 / 100))
+
+        # Begin input file
+        input_file = []
+        input_file.append('%mem={}MW'.format(keywords['MEM_TOTAL]))
+        input_file.append("#P HF/6-31G(d) scf=tight\n")
+        input_file.append("write your comment here\n")
+  
+        # Create a mol object
+        mol = input_model.molecule
+        input_file.append(f'{int(mol.molecular_charge)} {mol.molecular_multiplicity}')
+
+        # Write the geometry
+        for real, sym, geom in zip(mol.real, mol.symbols, mol.geometry):
+            if real is False:
+                raise InputError("Cannot handle ghost atoms yet.")
+            input_file.append(f"{sym} {geom[0]:14.8f} {geom[1]:14.8f} {geom[2]:14.8f}")
+        input_file.append("\n")
+
         gaussian_ret = {
-            "infiles": {},
-            "commands": [which("g09"),  "input.inp", "output.log"],
-            "scratch_directory": config.scratch_directory
+            'infiles': {'input.inp': '\n'.join(input_file)},
+            'commands': [which("g09"),  'input.inp', 'output.log'],
+            'scratch_directory": config.scratch_directory
             }
-
-        input_file = '''%mem=20MW
-#P HF/6-31G(d) scf=tight
-
-test1 HF/6-31G(d) sp formaldehyde
-
-0 1
-C1
-O2  1  r2
-H3  1  r3  2  a3
-H4  1  r4  2  a4  3  d4
-
-r2=1.20
-r3=1.0
-r4=1.0
-a3=120.
-a4=120.
-d4=180.
-'''
-        gaussian_ret['infiles']['input.inp'] = input_file
 
         return gaussian_ret
 
