@@ -187,7 +187,12 @@ class TorsionDriveProcedure(ProcedureHarness):
         keywords = input_model.optimization_spec.keywords
         keywords.setdefault("constraints", {})
         keywords["constraints"].setdefault("set", [])
-        keywords["constraints"]["set"].extend([{"type": "dihedral", "indices": dihedral, "value": int(angle)} for dihedral, angle in zip(dihedrals, angles)])
+        keywords["constraints"]["set"].extend(
+            [
+                {"type": "dihedral", "indices": dihedral, "value": int(angle)}
+                for dihedral, angle in zip(dihedrals, angles)
+            ]
+        )
 
         input_data = OptimizationInput(
             keywords=keywords,
