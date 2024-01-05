@@ -61,7 +61,10 @@ class MACEHarness(ProgramHarness):
 
             model = mace_off(model=model_name, return_raw_model=True)
         else:
-            model = torch.load(name, map_location=torch.device("cpu"))
+            try:
+                model = torch.load(name, map_location=torch.device("cpu"))
+            except FileNotFoundError:
+                raise InputError("The mace harness can only run local models or a MACE-OFF23 model (`small`, `medium`, `large`")
         comp_mod = jit.compile(model)
         self._CACHE[model_name] = (comp_mod, float(model.r_max), model.atomic_numbers)
         return self._CACHE[model_name]
