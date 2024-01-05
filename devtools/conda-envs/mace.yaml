@@ -25,3 +25,4 @@ dependencies:
 
   - pip:
     - matscipy
+    - git+https://github.com/ACEsuit/mace.git@develop
