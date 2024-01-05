@@ -55,8 +55,10 @@ class MACEHarness(ProgramHarness):
 
         import torch
         from e3nn.util import jit
+
         if model_name in ["small", "medium", "large"]:
             from mace.calculators.foundations_models import mace_off
+
             model = mace_off(model=model_name, return_raw_model=True)
         else:
             model = torch.load(name, map_location=torch.device("cpu"))
@@ -64,9 +66,7 @@ class MACEHarness(ProgramHarness):
         self._CACHE[model_name] = (comp_mod, float(model.r_max), model.atomic_numbers)
         return self._CACHE[model_name]
 
-    def compute(
-        self, input_data: "AtomicInput", config: "TaskConfig"
-    ) -> Union["AtomicResult", "FailedOperation"]:
+    def compute(self, input_data: "AtomicInput", config: "TaskConfig") -> Union["AtomicResult", "FailedOperation"]:
 
         self.found(raise_error=True)
 
@@ -97,8 +97,7 @@ class MACEHarness(ProgramHarness):
 
         config = Configuration(
             atomic_numbers=atomic_numbers,
-            positions=input_data.molecule.geometry
-            * ureg.conversion_factor("bohr", "angstrom"),
+            positions=input_data.molecule.geometry * ureg.conversion_factor("bohr", "angstrom"),
             pbc=pbc,
             cell=cell,
         )
@@ -112,33 +111,22 @@ class MACEHarness(ProgramHarness):
         input_dict = next(iter(data_loader)).to_dict()
         model.to(device)
         mace_data = model(input_dict, compute_force=True)
-        ret_data["properties"] = {
-            "return_energy": mace_data["energy"]
-            * ureg.conversion_factor("eV", "hartree")
-        }
+        ret_data["properties"] = {"return_energy": mace_data["energy"] * ureg.conversion_factor("eV", "hartree")}
 
         if input_data.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
         elif input_data.driver == "gradient":
             ret_data["return_result"] = (
-                np.asarray(
-                    -1.0
-                    * mace_data["forces"]
-                    * ureg.conversion_factor("eV / angstrom", "hartree / bohr")
-                )
+                np.asarray(-1.0 * mace_data["forces"] * ureg.conversion_factor("eV / angstrom", "hartree / bohr"))
                 .ravel()
                 .tolist()
             )
 
         else:
-            raise InputError(
-                "MACE only supports the energy and gradient driver methods."
-            )
+            raise InputError("MACE only supports the energy and gradient driver methods.")
 
         ret_data["extras"] = input_data.extras.copy()
-        ret_data["provenance"] = Provenance(
-            creator="mace", version=mace.__version__, routine="mace"
-        )
+        ret_data["provenance"] = Provenance(creator="mace", version=mace.__version__, routine="mace")
         ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True
 
