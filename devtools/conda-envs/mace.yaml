@@ -1,0 +1,27 @@
+name: mace
+channels:
+  - conda-forge
+dependencies:
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental >=0.12.0
+  - pydantic>=1.0.0
+
+  # mace deps
+  - pytorch>=2.0.0
+  - numpy
+  - scipy
+  - ase
+  - opt_einsum
+  - e3nn
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+
+  - pip:
+    - matscipy
