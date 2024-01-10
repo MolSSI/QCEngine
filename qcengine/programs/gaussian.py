@@ -95,12 +95,25 @@ class GaussianHarness(ProgramHarness):
 
         # Build keywords
         keywords = {k.upper(): v for k, v in input_model.keywords.items()}
-        keywords['MEM_TOTAL'] = str(int(config.memory * 1024 / 100))
+        keywords = {'scf_damp': 'true',
+                    'scf_diis': 'false'
+                    }
+        if input_model.driver == "energy":
+            keywords["JOBTYPE"] = "sp"
+        elif input_model.driver == "gradient":
+            keywords["JOBTYPE"] = "force"
+        elif input_model.driver == "hessian":
+            keywords["JOBTYPE"] = "freq"
+        else:
+            raise InputError(f"Driver {input_model.driver} not implemented for Gaussian.")
 
+        if input_model.molecule.fix_com or input_model.molecule.fix_orientation:
+            keywords["SYM_IGNORE"] = "TRUE"
+        
         # Begin input file
         input_file = []
-        input_file.append('%mem={}MW'.format(keywords['MEM_TOTAL]))
-        input_file.append("#P HF/6-31G(d) scf=tight\n")
+        input_file.append('%mem={}MW'.format(int(config.memory * 1024 / 100))
+        input_file.append("#P {}/{}".format(input_model.model.method, input_model.model.basis) + '\n')
         input_file.append("write your comment here\n")
   
         # Create a mol object
@@ -110,8 +123,8 @@ class GaussianHarness(ProgramHarness):
         # Write the geometry
         for real, sym, geom in zip(mol.real, mol.symbols, mol.geometry):
             if real is False:
-                raise InputError("Cannot handle ghost atoms yet.")
-            input_file.append(f"{sym} {geom[0]:14.8f} {geom[1]:14.8f} {geom[2]:14.8f}")
+                raise InputError('Cannot handle ghost atoms yet.')
+            input_file.append(f'{sym} {geom[0]:14.8f} {geom[1]:14.8f} {geom[2]:14.8f}')
         input_file.append("\n")
 
         gaussian_ret = {
