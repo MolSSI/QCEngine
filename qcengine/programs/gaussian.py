@@ -50,13 +50,30 @@ class GaussianHarness(ProgramHarness):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        # Get the node configuration
-        #config = get_config()
-
         which_prog = which("g09")
-        if which_prog not in self.version_cache:
-            success, output = execute([which_prog, "v.com"], {"v.com": ""})
+        v_input = '''%mem=20MW
+#P HF/sto-3g
 
+#test HF/sto-3g for H atom
+
+0 2
+H
+
+'''
+        if which_prog not in self.version_cache:
+            success, output = execute([which_prog, 'v.com', 'v.log'],
+                                      {'v.com': v_input},
+                                      ['v.log']
+                                     )
+            if success:
+                outtext = output['outfiles']['v.log']
+                outtext = outtext.splitlines()
+                for line in outtext:
+                    if 'Gaussian 09' in line:
+                        version_line = line.split('Gaussian 09:')[-1]
+                        version_line = version_line.split()[0]
+                        self.version_cache[which_prog] = safe_version(version_line)
+                        
         return self.version_cache[which_prog]
 
     def compute(self, input_model: "AtomicInput", config: TaskConfig) -> "AtomicResult":
