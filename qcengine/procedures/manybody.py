@@ -14,11 +14,12 @@ nppp10 = partial(np.array_str, max_line_width=120, precision=10, suppress_small=
 #import numpy as np
 from pydantic import ConfigDict, field_validator, FieldValidationInfo, computed_field, BaseModel, Field
 from qcelemental.models import FailedOperation, Molecule, DriverEnum, ProtoModel, AtomicResult, AtomicInput
-from qcelemental.models.procedures_layered import ManyBodyInput, ManyBodyResult, BsseEnum
+from qcelemental.models.procedures_layered import BsseEnum, ManyBodyInput, ManyBodyResult, ManyBodyResultProperties
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
 from ..extras import provenance_stamp
+from ..exceptions import UnknownError
 
 #if TYPE_CHECKING:
 #    from ..config import TaskConfig
@@ -44,11 +45,11 @@ class ManyBodyProcedure(ProcedureHarness):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which_import("optking")
+        which_prog = which_import("psi4")
         if which_prog not in self.version_cache:
             import psi4
 
-            self.version_cache[which_prog] = safe_version(optking.__version__)
+            self.version_cache[which_prog] = safe_version(psi4.__version__)
 
         return self.version_cache[which_prog]
 
@@ -75,6 +76,7 @@ class ManyBodyProcedure(ProcedureHarness):
             molecule=input_model.molecule,
             driver=input_model.specification.driver,
             **input_model.specification.keywords.model_dump(exclude_unset=True),
+            input_data=input_model,  # storage, to reconstitute ManyBodyResult
         )
 
         print("\n<<<  (2) QCEngine harness ManyBodyComputerQCNG init  >>>")
@@ -431,6 +433,12 @@ class AtomicComputerQCNG(BaseComputerQCNG):
 
 class ManyBodyComputerQCNG(BaseComputerQCNG):
 
+    input_data: ManyBodyInput = Field(
+        ...,
+        description="Input schema containing the relevant settings for performing the many body "
+            "expansion. This is entirely redundant with the piecemeal assembly of this Computer class "
+            "and is only stored to be available for error handling and exact reconstruction of ManyBodyResult.",
+    )
     bsse_type: List[BsseEnum] = Field(
         [BsseEnum.cp],
         description="Requested BSSE treatments. First in list determines which interaction or total "
@@ -477,20 +485,24 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
         # note that once processed, only values should be used; keys turn into nbodies_per_mc_level
         # a method fills in for lower unlisted nbody levels
     )
-#    short_circuit_mbe: bool = Field(
-#        False,
-#        description="When True, compute each n-body level in the many-body expansion up through ``max_nbody``. When "
-#            "False, only compute enough for the overall interaction energy. This keyword is irrelevant for a "
-#            "two-fragment system. But for the interaction energy of a three-fragment system, for example, 2-body "
-#            "subsystems can be skipped with ``mbe_intermediate_data= False``.",
-#    )  # TODO NYI psi-side ie_only
-#ALT    max_nbody: int = Field(
-#ALT        -1,
     max_nbody: Optional[int] = Field(
         None,
         validate_default=True,
         description="Maximum number of bodies to include in the many-body treatment. Possible: max_nbody <= nfragments. "
             "Default: max_nbody = nfragments.",
+    )
+    short_circuit_mbe: Optional[bool] = Field(  # after max_nbody
+        False,
+        validate_default=True,
+        description="Target the interaction energy (IE) over the many body expansion (MBE) analysis, thereby omitting "
+            "intermediate-body calculations. When False (default), compute each n-body level in the many-body expansion "
+            "up through ``max_nbody``. When True (only allowed for ``max_nbody = nfragments``), only compute enough for "
+            "the overall interaction energy: max_nbody-body and 1-body. When True, properties ``INTERACTION {driver} "
+            "THROUGH {max_nbody}-BODY`` will be available, ``TOTAL {driver} THROUGH {max_nbody}-BODY`` will be available "
+            "depending on ``return_total_data``, and ``{max_nbody}-BODY CONTRIBUTION TO {driver}`` won't be available "
+            "(except for dimers). This keyword produces no savings for a two-fragment molecule. But for the interaction "
+            "energy of a three-fragment molecule, for example, 2-body subsystems can be skipped with "
+            "``short_circuit_mbe=True``."
     )
     task_list: Dict[str, Any] = {}  #MBETaskComputers] = {}
 
@@ -629,6 +641,19 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
 
     # TODO also, perhaps change nbodies_per_mc_level into dict of lists so that pos'n/label indexing coincides
 
+    @field_validator("short_circuit_mbe")
+    @classmethod
+    def set_short_circuit_mbe(cls, v: Optional[bool], info: FieldValidationInfo) -> bool:
+        print(f"hit short_circuit_mbe validator with {v}", end="")
+        scm = v
+        nfr = len(info.data["molecule"].fragments)
+
+        if (scm is True) and (info.data["max_nbody"] != nfr):
+            raise ValueError(f"Cannot skip intermediate n-body jobs when {max_nbody=} != nfragments={nfr}.")
+
+        print(f" ... setting {scm=}")
+        return scm
+
     @classmethod
     def from_qcschema(cls, input_model: ManyBodyInput):
 
@@ -636,6 +661,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
             molecule=input_model.molecule,
             driver=input_model.specification.driver,
             **input_model.specification.keywords.model_dump(exclude_unset=True),
+            input_data=input_model,  # storage, to reconstitute ManyBodyResult
         )
 
         return computer_model
@@ -699,10 +725,10 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
             count += 1
 
             compute_dict = build_nbody_compute_list(
-                ["nocp"], list(range(1, self.max_nbody + 1)), self.nfragments, self.return_total_data
+                ["nocp"], list(range(1, self.max_nbody + 1)), self.nfragments, self.return_total_data, self.short_circuit_mbe
             )
         else:
-            compute_dict = build_nbody_compute_list(self.bsse_type, nbodies, self.nfragments, self.return_total_data)
+            compute_dict = build_nbody_compute_list(self.bsse_type, nbodies, self.nfragments, self.return_total_data, self.short_circuit_mbe)
 
         def labeler(item) -> str:
 #            mc_level_lbl = mc_level_idx + 1
@@ -813,6 +839,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
             "bsse_type": self.bsse_type,
             "nfragments": self.nfragments,
             "return_total_data": self.return_total_data,
+            "short_circuit_mbe": self.short_circuit_mbe,
             "molecule": self.molecule,
             "embedding_charges": bool(self.embedding_charges),
             "max_nbody": self.max_nbody,
@@ -887,7 +914,10 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
         }
 
         properties = {
+            "calcinfo_nmc": len(self.nbodies_per_mc_level),
+            "calcinfo_nfr": self.nfragments,  # or len(self.molecule.fragments)
             "calcinfo_natom": len(self.molecule.symbols),
+            "calcinfo_nmbe": len(self.task_list),
             "nuclear_repulsion_energy": self.molecule.nuclear_repulsion_energy(),
             "return_energy": ret_energy,
         }
@@ -937,8 +967,10 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
 
 
 def delabeler(item: str, return_obj: bool = False) -> Union[Tuple[str, str, str], Tuple[int, Tuple[int], Tuple[int]]]:
-    """Transform labels like string "1_((2,), (1, 2))" into string tuple ("1", "2", "1, 2") or object tuple (1, (2,), (1, 2))."""
+    """Transform labels like string "1_((2,), (1, 2))" into string tuple ("1", "2", "1, 2") or
+    object tuple (1, (2,), (1, 2)).
 
+    """
     mc, _, fragbas = item.partition("_")
     frag, bas = literal_eval(fragbas)
 
@@ -947,3 +979,33 @@ def delabeler(item: str, return_obj: bool = False) -> Union[Tuple[str, str, str]
     else:
         return mc, ", ".join(map(str, frag)), ", ".join(map(str, bas))
 
+
+qcvars_to_manybodyproperties = {}
+for skprop in ManyBodyResultProperties.model_fields.keys():
+    qcvar = skprop.replace("_body", "-body").replace("_corr", "-corr").replace("_", " ").upper()
+    qcvars_to_manybodyproperties[qcvar] = skprop
+qcvars_to_manybodyproperties["CURRENT ENERGY"] = "return_energy"
+qcvars_to_manybodyproperties["CURRENT GRADIENT"] = "return_gradient"
+qcvars_to_manybodyproperties["CURRENT HESSIAN"] = "return_hessian"
+
+
+def build_manybodyproperties(qcvars: Dict) -> ManyBodyResultProperties:
+    """For results extracted from QC output in QCDB terminology, translate to QCSchema terminology.
+
+    Parameters
+    ----------
+    qcvars : PreservingDict
+        Dictionary of calculation information in QCDB QCVariable terminology.
+
+    Returns
+    -------
+    atprop : ManyBodyResultProperties
+        Object of calculation information in QCSchema ManyBodyResultProperties terminology.
+
+    """
+    atprop = {}
+    for pv, dpv in qcvars.items():
+        if pv in qcvars_to_manybodyproperties:
+            atprop[qcvars_to_manybodyproperties[pv]] = dpv
+
+    return ManyBodyResultProperties(**atprop)
