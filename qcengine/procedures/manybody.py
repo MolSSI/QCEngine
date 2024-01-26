@@ -14,7 +14,7 @@ nppp10 = partial(np.array_str, max_line_width=120, precision=10, suppress_small=
 #import numpy as np
 from pydantic import ConfigDict, field_validator, FieldValidationInfo, computed_field, BaseModel, Field
 from qcelemental.models import FailedOperation, Molecule, DriverEnum, ProtoModel, AtomicResult, AtomicInput
-from qcelemental.models.procedures_layered import BsseEnum, ManyBodyInput, ManyBodyResult, ManyBodyResultProperties
+from qcelemental.models.procedures_layered import BsseEnum, ManyBodyKeywords, ManyBodyInput, ManyBodyResult, ManyBodyResultProperties
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
@@ -103,12 +103,30 @@ class ManyBodyProcedure(ProcedureHarness):
         pp.pprint(plan.model_dump())
 
         plan.compute()
-        output_model = plan.get_results()
 
-        print("\n<<<  (4) QCEngine harness ManyBodyComputerQCNG get_results >>>")
-        pp.pprint(output_model.model_dump())
+        try:
+            results_list = {k: v.get_results() for k, v in plan.task_list.items()}
+            all_good = all(v.success for v in results_list.values())
 
-        return output_model
+            if not all_good:
+                for k, v in results_list.items():
+                    if not v.success:
+                        ret = v
+                        raise UnknownError("ManyBody component computation failed")
+        except UnknownError:
+            error = ret.error.model_dump()  # ComputeError
+        except Exception:
+            error = {"error_type": "unknown", "error_message": f"Berny error:\n{traceback.format_exc()}"}
+        else:
+            output_model = plan.get_results()
+
+            print("\n<<<  (4) QCEngine harness ManyBodyComputerQCNG get_results >>>")
+            pp.pprint(output_model.model_dump())
+
+            return output_model
+        return FailedOperation(input_data=input_model, error=error)
+
+
 
 #        output_data = input_model
 #        input_data = input_model.model_dump()
@@ -441,8 +459,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
     )
     bsse_type: List[BsseEnum] = Field(
         [BsseEnum.cp],
-        description="Requested BSSE treatments. First in list determines which interaction or total "
-            "energy/gradient/Hessian returned.",
+        description=ManyBodyKeywords.model_fields["bsse_type"].description,
     )
     molecule: Molecule = Field(
         ...,
@@ -466,43 +483,26 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
     return_total_data: Optional[bool] = Field(  # after driver, embedding_charges
         None,
         validate_default=True,
-        description="When True, returns the total data (energy/gradient/Hessian) of the system, otherwise returns "
-            "interaction data. Default is False for energies, True for gradients and Hessians. Note that the calculation "
-            "of counterpoise corrected total energies implies the calculation of the energies of monomers in the monomer "
-            "basis, hence specifying ``return_total_data = True`` may carry out more computations than "
-            "``return_total_data = False``. For gradients and Hessians, ``return_total_data = False`` is rarely useful.",
+        description=ManyBodyKeywords.model_fields["return_total_data"].description,
     )
     levels: Optional[Dict[Union[int, Literal["supersystem"]], str]] = Field(
         None,
         validate_default=True,
-        description="Dictionary of different levels of theory for different levels of expansion. Note that the primary "
-            "method_string is not used when this keyword is given. ``supersystem`` computes all higher order n-body "
-            "effects up to the number of fragments. Note that if both this and max_nbody are provided, they must be "
-            "consistent. Examples: "
+        description=ManyBodyKeywords.model_fields["levels"].description + \
+            "Examples above are processed in the ManyBodyComputer, and once processed, only the values should be used. "
+            "The keys turn into nbodies_per_mc_level, as notated below. "
             "* {1: 'ccsd(t)', 2: 'mp2', 'supersystem': 'scf'} -> nbodies_per_mc_level=[[1], [2], ['supersystem']] "
-            "* {2: 'ccsd(t)/cc-pvdz', 3: 'mp2'} -> nbodies_per_mc_level=[[1, 2], [3]] "
-            "* Now invalid: {1: 2, 2: 'ccsd(t)/cc-pvdz', 3: 'mp2'} ",
-        # note that once processed, only values should be used; keys turn into nbodies_per_mc_level
-        # a method fills in for lower unlisted nbody levels
+            "* {2: 'ccsd(t)/cc-pvdz', 3: 'mp2'} -> nbodies_per_mc_level=[[1, 2], [3]] ",
     )
     max_nbody: Optional[int] = Field(
         None,
         validate_default=True,
-        description="Maximum number of bodies to include in the many-body treatment. Possible: max_nbody <= nfragments. "
-            "Default: max_nbody = nfragments.",
+        description=ManyBodyKeywords.model_fields["max_nbody"].description,
     )
-    short_circuit_mbe: Optional[bool] = Field(  # after max_nbody
+    supersystem_ie_only: Optional[bool] = Field(  # after max_nbody
         False,
         validate_default=True,
-        description="Target the interaction energy (IE) over the many body expansion (MBE) analysis, thereby omitting "
-            "intermediate-body calculations. When False (default), compute each n-body level in the many-body expansion "
-            "up through ``max_nbody``. When True (only allowed for ``max_nbody = nfragments``), only compute enough for "
-            "the overall interaction energy: max_nbody-body and 1-body. When True, properties ``INTERACTION {driver} "
-            "THROUGH {max_nbody}-BODY`` will be available, ``TOTAL {driver} THROUGH {max_nbody}-BODY`` will be available "
-            "depending on ``return_total_data``, and ``{max_nbody}-BODY CONTRIBUTION TO {driver}`` won't be available "
-            "(except for dimers). This keyword produces no savings for a two-fragment molecule. But for the interaction "
-            "energy of a three-fragment molecule, for example, 2-body subsystems can be skipped with "
-            "``short_circuit_mbe=True``."
+        description=ManyBodyKeywords.model_fields["supersystem_ie_only"].description,
     )
     task_list: Dict[str, Any] = {}  #MBETaskComputers] = {}
 
@@ -641,18 +641,16 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
 
     # TODO also, perhaps change nbodies_per_mc_level into dict of lists so that pos'n/label indexing coincides
 
-    @field_validator("short_circuit_mbe")
+    @field_validator("supersystem_ie_only")
     @classmethod
     def set_short_circuit_mbe(cls, v: Optional[bool], info: FieldValidationInfo) -> bool:
-        print(f"hit short_circuit_mbe validator with {v}", end="")
-        scm = v
+        sio = v
         nfr = len(info.data["molecule"].fragments)
 
-        if (scm is True) and (info.data["max_nbody"] != nfr):
+        if (sio is True) and (info.data["max_nbody"] != nfr):
             raise ValueError(f"Cannot skip intermediate n-body jobs when {max_nbody=} != nfragments={nfr}.")
 
-        print(f" ... setting {scm=}")
-        return scm
+        return sio
 
     @classmethod
     def from_qcschema(cls, input_model: ManyBodyInput):
@@ -725,10 +723,12 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
             count += 1
 
             compute_dict = build_nbody_compute_list(
-                ["nocp"], list(range(1, self.max_nbody + 1)), self.nfragments, self.return_total_data, self.short_circuit_mbe
-            )
+                ["nocp"], list(range(1, self.max_nbody + 1)),
+                self.nfragments, self.return_total_data, self.supersystem_ie_only)
         else:
-            compute_dict = build_nbody_compute_list(self.bsse_type, nbodies, self.nfragments, self.return_total_data, self.short_circuit_mbe)
+            compute_dict = build_nbody_compute_list(
+                self.bsse_type, nbodies,
+                self.nfragments, self.return_total_data, self.supersystem_ie_only)
 
         def labeler(item) -> str:
 #            mc_level_lbl = mc_level_idx + 1
@@ -839,7 +839,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
             "bsse_type": self.bsse_type,
             "nfragments": self.nfragments,
             "return_total_data": self.return_total_data,
-            "short_circuit_mbe": self.short_circuit_mbe,
+            "supersystem_ie_only": self.supersystem_ie_only,
             "molecule": self.molecule,
             "embedding_charges": bool(self.embedding_charges),
             "max_nbody": self.max_nbody,
@@ -935,20 +935,27 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
             properties["return_gradient"] = ret_gradient
             properties["return_hessian"] = ret_ptype
 
-        component_results = self.model_dump()['task_list']
+        atprop = build_manybodyproperties(qcvars["nbody"])
+#        print("ATPROP")
+#        pp.pprint(atprop.model_dump())
+
+        for qcv, val in qcvars.items():
+            if isinstance(val, dict):
+                if qcv in [
+                ]:
+                    for qcv2, val2 in val.items():
+                            qcvars[str(qcv2)] = val2
+            else:
+                qcvars[qcv] = val
+
+        component_results = self.model_dump()['task_list']  # TODO when/where include the indiv outputs
 #        for k, val in component_results.items():
 #            val['molecule'] = val['molecule'].to_schema(dtype=2)
 
-        # TODO nbody_model = ManyBodyResult(
-        nbody_model = AtomicResult(
+        nbody_model = ManyBodyResult(
             **{
-                'driver': self.driver,
-                'model': {
-                    'method': "(auto)", #self.method,
-                    'basis': "(auto)", #self.basis,
-                },
-                'molecule': self.molecule,
-                'properties': properties,
+                'input_data': self.input_data,
+                'properties': {**atprop.model_dump(), **properties},
                 'provenance': provenance_stamp(__name__),
                 'extras': {
                     'qcvars': qcvars,

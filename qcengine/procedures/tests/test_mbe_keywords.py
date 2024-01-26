@@ -59,10 +59,10 @@ def test_mbe_rtd(mbe_data, driver, kws, ans):
     pytest.param({"max_nbody": 2}, [2, {2: "???method???"}, [[1, 2]] ]),
     pytest.param({"max_nbody": 1}, [1, {1: "???method???"}, [[1]] ]),
 
-    # TODO? when short_circuit_mbe=T, nbodies_per_mc_level and levels isn't really accurate
-    pytest.param({"short_circuit_mbe": True}, [3, {3: "???method???"}, [[1, 2, 3]] ]),
-    pytest.param({"short_circuit_mbe": False, "max_nbody": 2}, [2, {2: "???method???"}, [[1, 2]] ]),
-    pytest.param({"short_circuit_mbe": True, "max_nbody": 3}, [3, {3: "???method???"}, [[1, 2, 3]] ]),
+    # TODO? when supersystem_ie_only=T, nbodies_per_mc_level and levels isn't really accurate
+    pytest.param({"supersystem_ie_only": True}, [3, {3: "???method???"}, [[1, 2, 3]] ]),
+    pytest.param({"supersystem_ie_only": False, "max_nbody": 2}, [2, {2: "???method???"}, [[1, 2]] ]),
+    pytest.param({"supersystem_ie_only": True, "max_nbody": 3}, [3, {3: "???method???"}, [[1, 2, 3]] ]),
 
     pytest.param({"levels": {3: "mp2"}}, [3, {3: "mp2"}, [[1, 2, 3]] ]),
     pytest.param({"levels": {3: "ccsd", 2: "ccsd"}}, [3, {2: "ccsd", 3: "ccsd"}, [[1, 2], [3]] ]),
@@ -135,7 +135,7 @@ def test_mbe_level_5mer(mbe_data, kws, ans):
     pytest.param({"max_nbody": -1}),
     pytest.param({"max_nbody": 4}),
     pytest.param({"levels": {1: 2, 3: "mp2", 2: "ccsd"}}),  # `2: 1 is old syntax and doesn't pass typing
-    pytest.param({"max_nbody": 1, "short_circuit_mbe": True})
+    pytest.param({"max_nbody": 1, "supersystem_ie_only": True})
 ])
 def test_mbe_level_fails(mbe_data, kws):
     mbe_data["specification"]["keywords"] = kws

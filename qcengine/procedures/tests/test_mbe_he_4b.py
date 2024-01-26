@@ -355,16 +355,16 @@ def test_nbody_he_3b_vmfc(program, basis, keywords, he_tetramer, request):
 
 
 @pytest.mark.parametrize("program,basis,keywords", _qcprog_lanes)
-def test_nbody_he_4b_nocp_scm(program, basis, keywords, he_tetramer, request):
+def test_nbody_he_4b_nocp_sio(program, basis, keywords, he_tetramer, request):
     # e, wfn = energy('MP2/aug-cc-pVDZ', molecule=he_tetramer, bsse_type="nocp",
-    #                  return_total_data=False, short_circuit_mbe=True, return_wfn=True)
+    #                  return_total_data=False, supersystem_ie_only=True, return_wfn=True)
 
     atomic_spec = AtomicSpecification(model={"method": "mp2", "basis": basis}, program=program, driver="energy", keywords=keywords)
-    mbe_keywords = ManyBodyKeywords(bsse_type=["nocp"], return_total_data=False, short_circuit_mbe=True)
+    mbe_keywords = ManyBodyKeywords(bsse_type=["nocp"], return_total_data=False, supersystem_ie_only=True)
     mbe_model = ManyBodyInput(specification={"specification": atomic_spec, "keywords": mbe_keywords, "driver": "energy"}, molecule=he_tetramer)
 
     ret = qcng.compute_procedure(mbe_model, "manybody", raise_error=True)
-    print("SSSSSSS [9] NOCP,4b,rtd=F,scm=T")
+    print("SSSSSSS [9] NOCP,4b,rtd=F,sio=T")
     pprint.pprint(ret.model_dump(), width=200)
 
     refs = he4_refs_df if "psi4-df" in request.node.name else he4_refs_conv
@@ -398,16 +398,16 @@ def test_nbody_he_4b_nocp_scm(program, basis, keywords, he_tetramer, request):
 
 
 @pytest.mark.parametrize("program,basis,keywords", _qcprog_lanes)
-def test_nbody_he_4b_nocp_rtd_scm(program, basis, keywords, he_tetramer, request):
+def test_nbody_he_4b_nocp_rtd_sio(program, basis, keywords, he_tetramer, request):
     # e, wfn = energy('MP2/aug-cc-pVDZ', molecule=he_tetramer, bsse_type="nocp",
-    #                  return_total_data=True, short_circuit_mbe=True, return_wfn=True)
+    #                  return_total_data=True, supersystem_ie_only=True, return_wfn=True)
 
     atomic_spec = AtomicSpecification(model={"method": "mp2", "basis": basis}, program=program, driver="energy", keywords=keywords)
-    mbe_keywords = ManyBodyKeywords(bsse_type="nocp", return_total_data=True, short_circuit_mbe=True)
+    mbe_keywords = ManyBodyKeywords(bsse_type="nocp", return_total_data=True, supersystem_ie_only=True)
     mbe_model = ManyBodyInput(specification={"specification": atomic_spec, "keywords": mbe_keywords, "driver": "energy"}, molecule=he_tetramer)
 
     ret = qcng.compute_procedure(mbe_model, "manybody", raise_error=True)
-    print("SSSSSSS [10] NOCP,4b,rtd=T,scm=T")
+    print("SSSSSSS [10] NOCP,4b,rtd=T,sio=T")
     pprint.pprint(ret.model_dump(), width=200)
 
     refs = he4_refs_df if "psi4-df" in request.node.name else he4_refs_conv
@@ -441,12 +441,12 @@ def test_nbody_he_4b_nocp_rtd_scm(program, basis, keywords, he_tetramer, request
 
 
 @pytest.mark.parametrize("program,basis,keywords", _qcprog_lanes)
-def test_nbody_he_4b_cp_scm(program, basis, keywords, he_tetramer, request):
+def test_nbody_he_4b_cp_sio(program, basis, keywords, he_tetramer, request):
     # e, wfn = energy('MP2/aug-cc-pVDZ', molecule=he_tetramer, bsse_type="cp",
-    #                  return_total_data=False, short_circuit_mbe=True, return_wfn=True)
+    #                  return_total_data=False, supersystem_ie_only=True, return_wfn=True)
 
     atomic_spec = AtomicSpecification(model={"method": "mp2", "basis": basis}, program=program, driver="energy", keywords=keywords)
-    mbe_keywords = ManyBodyKeywords(bsse_type=["cp"], return_total_data=False, short_circuit_mbe=True)
+    mbe_keywords = ManyBodyKeywords(bsse_type=["cp"], return_total_data=False, supersystem_ie_only=True)
     mbe_model = ManyBodyInput(specification={"specification": atomic_spec, "keywords": mbe_keywords, "driver": "energy"}, molecule=he_tetramer)
 
     if program == "gamess":
@@ -456,7 +456,7 @@ def test_nbody_he_4b_cp_scm(program, basis, keywords, he_tetramer, request):
         pytest.xfail("GAMESS can't do ghosts")
 
     ret = qcng.compute_procedure(mbe_model, "manybody", raise_error=True)
-    print("SSSSSSS [11] CP,4b,rtd=F,scm=T")
+    print("SSSSSSS [11] CP,4b,rtd=F,sio=T")
     pprint.pprint(ret.model_dump(), width=200)
 
     refs = he4_refs_df if "psi4-df" in request.node.name else he4_refs_conv
@@ -489,12 +489,12 @@ def test_nbody_he_4b_cp_scm(program, basis, keywords, he_tetramer, request):
 
 
 @pytest.mark.parametrize("program,basis,keywords", _qcprog_lanes)
-def test_nbody_he_4b_cp_rtd_scm(program, basis, keywords, he_tetramer, request):
+def test_nbody_he_4b_cp_rtd_sio(program, basis, keywords, he_tetramer, request):
     # e, wfn = energy('MP2/aug-cc-pVDZ', molecule=he_tetramer, bsse_type="cp",
-    #                  return_total_data=True, short_circuit_mbe=True, return_wfn=True)
+    #                  return_total_data=True, supersystem_ie_only=True, return_wfn=True)
 
     atomic_spec = AtomicSpecification(model={"method": "mp2", "basis": basis}, program=program, driver="energy", keywords=keywords)
-    mbe_keywords = ManyBodyKeywords(bsse_type="cp", return_total_data=True, short_circuit_mbe=True)
+    mbe_keywords = ManyBodyKeywords(bsse_type="cp", return_total_data=True, supersystem_ie_only=True)
     mbe_model = ManyBodyInput(specification={"specification": atomic_spec, "keywords": mbe_keywords, "driver": "energy"}, molecule=he_tetramer)
 
     if program == "gamess":
@@ -504,7 +504,7 @@ def test_nbody_he_4b_cp_rtd_scm(program, basis, keywords, he_tetramer, request):
         pytest.xfail("GAMESS can't do ghosts")
 
     ret = qcng.compute_procedure(mbe_model, "manybody", raise_error=True)
-    print("SSSSSSS [12] CP,4b,rtd=T,scm=T")
+    print("SSSSSSS [12] CP,4b,rtd=T,sio=T")
     pprint.pprint(ret.model_dump(), width=200)
 
     refs = he4_refs_df if "psi4-df" in request.node.name else he4_refs_conv
