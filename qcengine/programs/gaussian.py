@@ -184,17 +184,20 @@ H
         return success, dexe
  
     def parse_output(self, outfiles: Dict[str, str], input_model: AtomicInput) -> AtomicResult:
+        
         output_data = {}
         properties = {}
+        cclib_vars = {}
         
         tmp_output_path = outfiles['scratch_directory']
         tmp_output_file = os.path.join(tmp_output_path, 'output.log')
         data = cclib.io.ccread(tmp_output_file)
+        cclib_vars = data.getattributes(True)
         
         last_occupied_energy = data.moenergies[0][data.homos[0]]
         #output_data['HOMO ENERGY'] = last_occupied_energy
         
-        scf_energy = data.scfenergies[0] / 27.21138505  # to Hartree
+        scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
         #output_data['SCF ENERGY'] = scf_energy
         
         if input_model.driver == 'energy':
@@ -217,7 +220,7 @@ H
         output_data['success'] = True
         #print ('output_data: ', output_data)
 
-        provenance = Provenance(creator="Gaussian 09", version=self.get_version(), routine='g09').dict()
+        provenance = Provenance(creator="Gaussian", version=self.get_version(), routine='g09').dict()
 
         stdout = outfiles.pop('stdout')
         stderr = outfiles.pop('stderr')
@@ -226,6 +229,10 @@ H
 
         method = input_model.model.method.lower()
         #method = method[4:] if method.startswith("") else method
+
+        # filter unwanted data
+        to_remove = ['atomnos', 'atomcoords', 'natom']
+        output_data['extras'] = {'cclib': {k:v for k, v in cclib_vars.items() if k not in to_remove}}
         
         merged_data = {**input_model.dict(), **output_data}
 
