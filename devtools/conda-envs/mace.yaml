@@ -11,18 +11,9 @@ dependencies:
   - pydantic>=1.0.0
 
   # mace deps
-  - pytorch>=2.0.0
-  - numpy
-  - scipy
-  - ase
-  - opt_einsum
-  - e3nn
+  - pymace
 
     # Testing
   - pytest
   - pytest-cov
   - codecov
-
-  - pip:
-    - matscipy
-    - git+https://github.com/ACEsuit/mace.git@develop

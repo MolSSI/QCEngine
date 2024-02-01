@@ -33,7 +33,7 @@ class MACEHarness(ProgramHarness):
             "mace",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via github ",
+            raise_msg="Please install via `mamba install pymace -c conda-forge`",
         )
 
     def get_version(self) -> str:
@@ -65,7 +65,7 @@ class MACEHarness(ProgramHarness):
                 model = torch.load(name, map_location=torch.device("cpu"))
             except FileNotFoundError:
                 raise InputError(
-                    "The mace harness can only run local models or a MACE-OFF23 model (`small`, `medium`, `large`"
+                    "The mace harness can only run local models or a MACE-OFF23 model (`small`, `medium`, `large`)"
                 )
         comp_mod = jit.compile(model)
         self._CACHE[model_name] = (comp_mod, float(model.r_max), model.atomic_numbers)
