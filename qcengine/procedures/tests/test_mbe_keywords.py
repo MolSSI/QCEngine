@@ -6,7 +6,7 @@ import pytest
 from qcelemental.models import DriverEnum, Molecule #OptimizationInput, FailedOperation
 #from qcelemental.models.common_models import Model
 #from qcelemental.models.procedures import OptimizationSpecification, QCInputSpecification, TDKeywords, TorsionDriveInput
-from qcelemental.models.procedures_layered import ManyBodyInput
+from qcelemental.models.procedures_manybody import ManyBodyInput
 
 import qcengine as qcng
 
@@ -26,6 +26,54 @@ def mbe_data():
             },
             "keywords": {
                 "bsse_type": "cp",
+            },
+            "driver": "gradient",
+        },
+        "molecule": henehh,
+    }
+
+
+@pytest.fixture(scope="function")
+def mbe_data_multilevel():
+    henehh = Molecule(symbols=["He", "Ne", "H", "H"], fragments=[[0], [1], [2, 3]], geometry=[0, 0, 0, 2, 0, 0, 0, 1, 0, 0, -1, 0])
+    return {
+        "specification": {
+            "specification": {
+                "(auto)": { #p4-hf-dz": {
+                    "model": {
+                        "method": "hf",
+                        "basis": "cc-pvdz",
+                    },
+                    "driver": "energy",
+                    "program": "psi4",
+                },
+                "p4-mp2-dz": {
+                    "model": {
+                        "method": "mp2",
+                        "basis": "cc-pvdz",
+                    },
+                    "driver": "energy",
+                    "program": "psi4",
+                },
+                "c4-hf-dz": {
+                    "model": {
+                        "method": "hf",
+                        "basis": "cc-pvdz",
+                    },
+                    "driver": "energy",
+                    "program": "cfour",
+                },
+                "c4-ccsd-tz": {
+                    "model": {
+                        "method": "ccsd",
+                        "basis": "cc-pvtz",
+                    },
+                    "driver": "energy",
+                    "program": "cfour",
+                },
+            },
+            "keywords": {
+                "bsse_type": "nocp",
             },
             "driver": "gradient",
         },
@@ -54,15 +102,15 @@ def test_mbe_rtd(mbe_data, driver, kws, ans):
 
 
 @pytest.mark.parametrize("kws,ans", [
-    pytest.param({}, [3, {3: "???method???"}, [[1, 2, 3]] ]),  # TODO fix up ???method???
-    pytest.param({"max_nbody": 3}, [3, {3: "???method???"}, [[1, 2, 3]] ]),
-    pytest.param({"max_nbody": 2}, [2, {2: "???method???"}, [[1, 2]] ]),
-    pytest.param({"max_nbody": 1}, [1, {1: "???method???"}, [[1]] ]),
+    pytest.param({}, [3, {3: "(auto)"}, [[1, 2, 3]] ]),
+    pytest.param({"max_nbody": 3}, [3, {3: "(auto)"}, [[1, 2, 3]] ]),
+    pytest.param({"max_nbody": 2}, [2, {2: "(auto)"}, [[1, 2]] ]),
+    pytest.param({"max_nbody": 1}, [1, {1: "(auto)"}, [[1]] ]),
 
     # TODO? when supersystem_ie_only=T, nbodies_per_mc_level and levels isn't really accurate
-    pytest.param({"supersystem_ie_only": True}, [3, {3: "???method???"}, [[1, 2, 3]] ]),
-    pytest.param({"supersystem_ie_only": False, "max_nbody": 2}, [2, {2: "???method???"}, [[1, 2]] ]),
-    pytest.param({"supersystem_ie_only": True, "max_nbody": 3}, [3, {3: "???method???"}, [[1, 2, 3]] ]),
+    pytest.param({"supersystem_ie_only": True}, [3, {3: "(auto)"}, [[1, 2, 3]] ]),
+    pytest.param({"supersystem_ie_only": False, "max_nbody": 2}, [2, {2: "(auto)"}, [[1, 2]] ]),
+    pytest.param({"supersystem_ie_only": True, "max_nbody": 3}, [3, {3: "(auto)"}, [[1, 2, 3]] ]),
 
     pytest.param({"levels": {3: "mp2"}}, [3, {3: "mp2"}, [[1, 2, 3]] ]),
     pytest.param({"levels": {3: "ccsd", 2: "ccsd"}}, [3, {2: "ccsd", 3: "ccsd"}, [[1, 2], [3]] ]),
@@ -100,6 +148,30 @@ def test_mbe_level_bodies(mbe_data, kws, ans):
     assert comp_model.max_nbody == ans[0]
     assert list(comp_model.levels.items()) == list(ans[1].items())  # compare as OrderedDict
     assert comp_model.nbodies_per_mc_level == ans[2]
+
+
+@pytest.mark.parametrize("kws,ans", [
+    pytest.param({}, [3, {3: "(auto)"}, [[1, 2, 3]], {"1_((1,), (1,))": ("hf", "psi4")}]),
+    pytest.param({"levels": {3: "p4-mp2-dz"}}, [3, {3: "p4-mp2-dz"}, [[1, 2, 3]], {"1_((3,), (3,))": ("mp2", "psi4")} ]),
+    pytest.param({"levels": {1: "p4-mp2-dz", 3: "c4-ccsd-tz"}}, [3, {1: "p4-mp2-dz", 3: "c4-ccsd-tz"}, [[1], [2, 3]], {"1_((1,), (1,))": ("mp2", "psi4"), "2_((1, 2, 3), (1, 2, 3))": ("ccsd", "cfour")} ]),
+])
+def test_mbe_multilevel(mbe_data_multilevel, kws, ans):
+    mbe_data_multilevel["specification"]["keywords"] = kws
+
+    input_model = ManyBodyInput(**mbe_data_multilevel)
+    comp_model = qcng.procedures.manybody.ManyBodyComputerQCNG.from_qcschema(input_model, build_tasks=True)
+
+    assert comp_model.nfragments == 3
+    assert comp_model.max_nbody == ans[0]
+    assert list(comp_model.levels.items()) == list(ans[1].items())  # compare as OrderedDict
+    assert comp_model.nbodies_per_mc_level == ans[2]
+
+    import pprint
+    pprint.pprint(comp_model.model_dump(), width=200)
+
+    for k, v in ans[3].items():
+        assert comp_model.task_list[k].method == v[0]
+        assert comp_model.task_list[k].program == v[1]
 
 
 @pytest.mark.parametrize("kws,ans", [

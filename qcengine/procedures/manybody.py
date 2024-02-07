@@ -14,7 +14,7 @@ nppp10 = partial(np.array_str, max_line_width=120, precision=10, suppress_small=
 #import numpy as np
 from pydantic import ConfigDict, field_validator, FieldValidationInfo, computed_field, BaseModel, Field
 from qcelemental.models import FailedOperation, Molecule, DriverEnum, ProtoModel, AtomicResult, AtomicInput
-from qcelemental.models.procedures_layered import BsseEnum, ManyBodyKeywords, ManyBodyInput, ManyBodyResult, ManyBodyResultProperties
+from qcelemental.models.procedures_manybody import BsseEnum, ManyBodyKeywords, ManyBodyInput, ManyBodyResult, ManyBodyResultProperties
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
@@ -84,23 +84,26 @@ class ManyBodyProcedure(ProcedureHarness):
         pprint.pprint(plan.model_dump(), width=200)
 
         for mc_level_idx, mtd in enumerate(plan.levels.values()):
-            # TODO method, basis, cbsmeta = expand_cbs_methods(mtd, basis, driver, cbsmeta=cbsmeta, **kwargs)
+            atspec = plan.input_data.specification.specification[mtd]
 
+            # TODO method, basis, cbsmeta = expand_cbs_methods(mtd, basis, driver, cbsmeta=cbsmeta, **kwargs)
             # analytic
             #logger.info(f"PLANNING MB:  {mc_level_idx=} {packet=}")
+
             plan.build_tasks(
                 AtomicComputerQCNG,
                 mc_level_idx=mc_level_idx,
-                program=input_model.specification.specification.program,
-                driver=input_model.specification.specification.driver,
-                method=input_model.specification.specification.model.method,
-                basis=input_model.specification.specification.model.basis,
-                keywords=input_model.specification.specification.keywords,
+                program=atspec.program,
+                driver=atspec.driver,  # use manybodyspecification.driver instead?
+                method=atspec.model.method,
+                basis=atspec.model.basis,
+                keywords=atspec.keywords,
+                #protocols=atspec.protocols,
                 #**kwargs,
             )
 
-        print("\n<<<  (3) QCEngine harness ManyBodyComputerQCNG build_levels  >>>")
-        pp.pprint(plan.model_dump())
+        #print("\n<<<  (3) QCEngine harness ManyBodyComputerQCNG build_levels  >>>")
+        #pp.pprint(plan.model_dump())
 
         plan.compute()
 
@@ -417,10 +420,10 @@ class AtomicComputerQCNG(BaseComputerQCNG):
 
         return atomic_model
 
-    def compute(self) -> None:
+    def compute(self, client: Optional["qcportal.FractalClient"] = None) -> None:
         """Run quantum chemistry single-point.
 
-        NOTE: client removed (compared to psi4.driver.AtomicComputer)
+        NOTE: client logic removed (compared to psi4.driver.AtomicComputer)
         """
         from ..compute import compute as qcng_compute
 
@@ -440,7 +443,7 @@ class AtomicComputerQCNG(BaseComputerQCNG):
         #logger.debug(pp.pformat(self.result.model_dump()))
         self.computed = True
 
-    def get_results(self) -> AtomicResult:
+    def get_results(self, client: Optional["qcportal.FractalClient"] = None) -> AtomicResult:
         """Return results as Atomic-flavored QCSchema.
 
         NOTE: client removed (compared to psi4.driver.AtomicComputer)
@@ -553,7 +556,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
             pass
             # TODO levels = {plan.max_nbody: method}
             #v = {info.data["nfragments"]: "???method???"}
-            v = {len(info.data["molecule"].fragments): "???method???"}
+            v = {len(info.data["molecule"].fragments): "(auto)"}
         else:
             # rearrange bodies in order with supersystem last lest body count fail in organization loop below
             v = dict(sorted(v.items(), key=lambda item: 1000 if item[0] == "supersystem" else item[0]))
@@ -624,7 +627,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
         elif v != levels_max_nbody:
             #raise ValueError(f"levels={levels_max_nbody} contradicts user max_nbody={v}.")
             # TODO reconsider logic. move this from levels to here?
-            info.data["levels"] = {v: "???method???"}
+            info.data["levels"] = {v: "(auto)"}
         else:
             pass
             # TODO once was           return min(v, nfragments)
@@ -653,7 +656,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
         return sio
 
     @classmethod
-    def from_qcschema(cls, input_model: ManyBodyInput):
+    def from_qcschema(cls, input_model: ManyBodyInput, build_tasks: bool = False):
 
         computer_model = cls(
             molecule=input_model.molecule,
@@ -661,6 +664,29 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
             **input_model.specification.keywords.model_dump(exclude_unset=True),
             input_data=input_model,  # storage, to reconstitute ManyBodyResult
         )
+
+        print("\n<<<  (Z) QCEngine harness ManyBodyComputerQCNG.from_qcschema  >>>")
+        pprint.pprint(computer_model.model_dump(), width=200)
+
+        if build_tasks:
+            # Note: self.input_data or input input_model.
+            #   Also, we've always tried to keep build_tasks separate (see psi4.driver.task_planner).
+            #   Clearly one _can_ init from ManyBodyInput -- make this sep fn?
+
+            for mc_level_idx, mtd in enumerate(computer_model.levels.values()):
+                atspec = computer_model.input_data.specification.specification[mtd]
+
+                computer_model.build_tasks(
+                    AtomicComputerQCNG,
+                    mc_level_idx=mc_level_idx,
+                    program=atspec.program,
+                    driver=atspec.driver,  # use manybodyspecification.driver instead?
+                    method=atspec.model.method,
+                    basis=atspec.model.basis,
+                    keywords=atspec.keywords,
+                    #protocols=atspec.protocols,
+                    #**kwargs,
+                )
 
         return computer_model
 
@@ -769,10 +795,10 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
         # uncalled function
         return [t.plan() for t in self.task_list.values()]
 
-    def compute(self):
+    def compute(self, client: Optional["qcportal.FractalClient"] = None) -> None:
         """Run quantum chemistry.
 
-        NOTE: client removed (compared to psi4.driver.ManyBodyComputer)
+        NOTE: client logic removed (compared to psi4.driver.ManyBodyComputer)
         """
         from psi4.driver.p4util import banner
 
@@ -780,15 +806,16 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
         #logger.info(info)
 
         for t in self.task_list.values():
-            t.compute()
+            t.compute(client=client)
 
     def prepare_results(
         self,
         results: Optional[Dict[str, "MBETaskComputers"]] = None,
+        client: Optional["qcportal.FractalClient"] = None,
     ) -> Dict[str, Any]:
         """Process the results from all n-body component molecular systems and model chemistry levels into final quantities.
 
-        NOTE: client removed (compared to psi4.driver.ManyBodyComputer)
+        NOTE: client removed (compared to psi4.driver.ManyBodyComputer) (multilevel call, too)
 
 #        Parameters
 #        ----------
@@ -815,16 +842,19 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
 #
         """
         from psi4.driver.driver_nbody import assemble_nbody_components
+        from psi4.driver.driver_nbody_multilevel import prepare_results as multilevel_prepare_results
 
         if results is None:
             results = {}
 
 #        # formerly nlevels
         mc_level_labels = {i.split("_")[0] for i in self.task_list}
-        if len(mc_level_labels) > 1 and not results:
-            return psi4.driver.driver_nbody_multilevel.prepare_results(self, client)
+        if len(mc_level_labels) > 1 and not results:  # seeming fix to recursion
+#        if len(self.nbodies_per_mc_level) > 1 and not results:  # max recursion
+            return multilevel_prepare_results(self, client=client)
 
-        results_list = {k: v.get_results() for k, v in (results.items() or self.task_list.items())}
+        results_list = {k: v.get_results(client=client) for k, v in (results.items() or self.task_list.items())}
+
         trove = {  # AtomicResult.properties return None if missing
             "energy": {k: v.properties.return_energy for k, v in results_list.items()},
             "gradient": {k: v.properties.return_gradient for k, v in results_list.items()},
@@ -892,7 +922,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
         return nbody_results
 
 
-    def get_results(self) -> AtomicResult:
+    def get_results(self, client: Optional["qcportal.FractalClient"] = None) -> ManyBodyResult:
         """Return results as ManyBody-flavored QCSchema.
 
         NOTE: client removed (compared to psi4.driver.ManyBodyComputer)
@@ -902,7 +932,7 @@ class ManyBodyComputerQCNG(BaseComputerQCNG):
         info = "\n" + banner(f" ManyBody Results ", strNotOutfile=True) + "\n"
         #logger.info(info)
 
-        results = self.prepare_results()
+        results = self.prepare_results(client=client)
         ret_energy = results.pop("ret_energy")
         ret_ptype = results.pop("ret_ptype")
         ret_gradient = results.pop("ret_gradient", None)

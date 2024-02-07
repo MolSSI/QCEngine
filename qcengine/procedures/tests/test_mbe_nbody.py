@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 
 from qcelemental.models import Molecule
-from qcelemental.models.procedures_layered import ManyBodyInput
+from qcelemental.models.procedures_manybody import ManyBodyInput
 from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
