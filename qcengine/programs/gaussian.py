@@ -61,8 +61,8 @@ H
 
 '''
         if which_prog not in self.version_cache:
-            success, output = execute([which_prog, 'v.com', 'v.log'],
-                                      {'v.com': v_input},
+            success, output = execute([which_prog, 'v.inp', 'v.log'],
+                                      {'v.inp': v_input},
                                       ['v.log']
                                      )
             if success:
@@ -105,7 +105,7 @@ H
          
             else:
                 # Return UnknownError for error propagation
-                raise UnknownError(proc["outfiles"]["output.log"])
+                raise UnknownError(proc['outfiles']['output.log'])
 
     def build_input(
         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
@@ -153,7 +153,7 @@ H
 
         gaussian_ret = {
             'infiles': {'input.inp': '\n'.join(input_file)},
-            'commands': [which("g09"),  'input.inp', 'output.log'],
+            'commands': [which("g09"),  'input.inp', 'output.log']
             #'scratch_directory': config.scratch_directory
             }
 
@@ -169,8 +169,8 @@ H
                ):
 
         success, dexe = execute(
-            inputs["commands"],
-            inputs["infiles"],
+            inputs['commands'],
+            inputs['infiles'],
             outfiles = ['output.log'],
             scratch_messy = True
             )
