@@ -383,3 +383,45 @@ def test_openmm_gaff_keywords(gaff_settings):
         ret = qcng.compute(inp, program, raise_error=False)
         assert ret.success is True
         assert ret.return_result == pytest.approx(expected_result, rel=1e-6)
+
+
+@using("mace")
+def test_mace_energy():
+    """
+    Test calculating the energy with mace
+    """
+    water = qcng.get_molecule("water")
+    atomic_input = AtomicInput(
+        molecule=water,
+        model={"method": "small", "basis": None},
+        driver="energy"
+    )
+
+    result = qcng.compute(atomic_input, "mace")
+    assert result.success
+    assert pytest.approx(result.return_result) == -76.47683956098838
+
+
+@using("mace")
+def test_mace_gradient():
+    """
+    Test calculating the gradient with mace
+    """
+    water = qcng.get_molecule("water")
+    expected_result = np.array(
+        [
+            [0.0, -2.1590400539385646e-18, -0.04178551770271103],
+            [0.0, -0.029712483642769006, 0.020892758851355515],
+            [0.0, 0.029712483642769006, 0.020892758851355518]
+        ]
+    )
+
+    atomic_input = AtomicInput(
+        molecule=water,
+        model={"method": "small", "basis": None},
+        driver="gradient"
+    )
+
+    result = qcng.compute(atomic_input, "mace")
+    assert result.success
+    assert pytest.approx(result.return_result) == expected_result
