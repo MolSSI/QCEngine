@@ -74,7 +74,9 @@ def mill_qcvars(mill: "AlignmentMill", qcvars: Dict[str, Any]) -> Dict[str, Any]
 
     milled = {}
     for k, v in qcvars.items():
-        if k.endswith("GRADIENT"):
+        if isinstance(v, str) and v == "KnownMissing":
+            milled[k] = v
+        elif k.endswith("GRADIENT"):
             milled[k] = mill.align_gradient(v)
         elif k.endswith("HESSIAN"):
             milled[k] = mill.align_hessian(v)

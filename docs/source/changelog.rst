@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2022-MM-DD
+.. vX.Y.0 / 2023-MM-DD (Unreleased)
 .. --------------------
 ..
 .. Breaking Changes
@@ -15,6 +15,167 @@ Changelog
 ..
 .. Bug Fixes
 .. +++++++++
+..
+.. Misc.
+.. +++++
+..
+.. MUST (Unmerged)
+.. +++++++++++++++
+..
+.. WIP (Unmerged)
+.. ++++++++++++++
+.. - UNMERGED (:pr:`421`) GAMESS - error handling and memory @taylor-a-barnes
+.. - UNSOLVED (:issue:`397`) extras failed
+
+
+v0.29.0 / 2023-10-31
+--------------------
+
+Bug Fixes
++++++++++
+- (:pr:`427`) Config - Once again, expand environment variables (now more flexibly) and newly expand ``~``
+  passed into TaskConfig. Particularly relevant for scratch setting. @yueyericardo
+- (:pr:`428`) MDI - Ensure that molecule orientation remains fixed for MDI. @taylor-a-barnes
+- (:pr:`405`, :issue:`415`, :pr:`417`) Config - change default ``jobs_per_node`` from 2 to more expected 1
+  so a single job fills the node. Alter CPU count formula to return physical cores on Hyperthreading
+  machines, affecting default ``ncores``. The net effect (both changes) for default cores running on
+  Hyperthreading machines is unchanged. Nevertheless, fixes some Windows problems. @cvsik, @loriab
+- (:pr:`433`) Turbomole, Q-Chem - Use raw strings when needed to avoid py312 warnings. @loriab
+- (:pr:`435`) GAMESS - Collect the correct MP2 module in parsing for newer versions (>2021,<=2023). @loriab
+
+Misc.
++++++
+- (:pr:`433`) CI - Check py312 and some Windows lanes. @loriab
+
+
+v0.28.1 / 2023-08-18
+--------------------
+
+Bug Fixes
++++++++++
+- (:pr:`426`) Psi4 - fix ``get_version`` on Windows where whole path and command were getting passed to version parser. @loriab
+
+
+v0.28.0 / 2023-08-15
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+- (:pr:`400`) Config - task configuration can now be set via CLI (`qcengine run -h` for details) or
+  by environment variables beginning with `QCENGINE_`. @bennybp
+- (:pr:`393`, :issue:`392`) MCTC-GCP - Adds b973c and r2scan3c methods to the gcp (mctc only, not classic) harness. @hokru
+- (:pr:`393`) DFTD4 - Allows ga, gc, wf parameters to be tweaked (needed for r2scan-3c). This feature requires dftd4 3.5.0. @hokru
+
+Enhancements
+++++++++++++
+- (:pr:`410`, :issue:`408`) TorsionDrive - silence warnings by using the ``task_config`` argument internally. @jthorton
+- (:pr:`409`) Psi4 - improve no-valid-error message so classifies as a RandomError and is eligible for
+  restart. @jthorton
+- (:pr:`405`) Turbomole - correctly enable OpenMP and environment passing. Pass SCF convergence and
+  maximum iterations to define. @cvsik
+- (:pr:`403`, :issue:`402`) PyBerny - fix optimizer to respect the task_config options. @q-posev
+- (:pr:`386`) CI - turn on formerly LGTM now GitHub CodeQL analysis. @lgtm-migrator
+- (:pr:`388`) MRChem - more detailed info about the parallel setup saved to output provenance. @robertodr
+- (:pr:`424`) testing - update SVWN Hessian reference values from Psi4. @loriab
+- (:pr:`423`, :issue:`377`) NWChem - allow two answers for test ``test_atom_labels[nwchem]`` to accommodate SCF
+  solutions in different versions. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`401`) MDI - fix bug in the shape of the MDI forces structure. @taylor-a-barnes
+- (:issue:`399`, :pr:`401`) MPI - remove MPI setup for MDI. This eliminates a bug where interfering
+  MPI environment variables were getting set upon ``import qcengine`` when pymdi and mpi4py packages
+  were present. @awvwgk, @taylor-a-barnes
+- (:pr:`418`, :pr:`389`, :issue:`292`) Psi4 - make Psi4 exe/module detection and version parsing more robust. @Flamefire, @coltonbh, @loriab
+
+Misc.
++++++
+- (:pr:`419`) CI - remove disabled LGTM and update badges. @loriab
+- (:pr:`422`) CI - turn on crontab CI running to better notice external trouble. @loriab
+
+
+v0.27.0 / 2023-08-02
+--------------------
+
+Bug Fixes
++++++++++
+- (:pr:`414`) Import `pydantic.v1` from pydantic v2 so that QCEngine can work with any >=1.8.2 pydantic
+  until QCEngine is updated for v2. If using v2, use QCElemental >=v0.26.0 that has a similar change.
+  QCEngineRecords received similar treatment. @Lnaden, @loriab
+- (:pr:`414`) Versioneer - update so works with Python 3.12.
+- (:pr:`414`) Maintenance
+   - Sphinx - fix build errors.
+   - Lint - pin black to 2022 format.
+   - GHA - switch to mamba solver. @loriab
+- (:pr:`394`) Entos/Qcore - updated model environments. @loriab
+
+
+v0.26.0 / 2022-11-30
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+- (:pr:`385`) Dispersion - the dispersion parameters resources file has been altered so that for D3 variants there's a
+  2b set (e.g., d3bj2b) that is pure 2-body and doesn't accept s9 (effectively fixed at 0.0) and a atm set (e.g.,
+  d3zeroatm) that does accept s9 (by default 1.0 but user-variable). Previous D3 levels are aliased to 2b. Only
+  downstreams that call the dispersion resources directly should be affected, and retrofits are in place for the known
+  victim/instigator (Psi4). @loriab
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`380`) MRChem - added gradient and thus geometry optimizations support. @robertodr
+- (:pr:`385`) dftd3 - the classic interface now accepts e.g., ``d3mbj2b`` as a level hint. @loriab
+- (:pr:`385`) s-dftd3 - added keyword ``apply_qcengine_aliases`` that when True and ``level_hint`` present allows the
+  levels and aliases in the dispersion resources (e.g., ``d3``, ``d3atm``, ``d32b``) to be given as ``level_hint``. The
+  resource parameters are passed to s-dftd3 as param_tweaks. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`383`) yaml - uses safe loading. @mbanck, @loriab
+- (:pr:`385`) dftd3 - the pairwise analysis requested through ``AtomicInput.keywords["pair_resolved"] = True`` and
+  returned in ``AtomicResult.extras["qcvars"]["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"]`` was elementwise too
+  large by a factor of 2. It now matches the ``s-dftd3`` harness and fulfills that the sum of the array equals the
+  2-body dispersion energy. @loriab
+
+
+v0.25.0 / 2022-11-11
+--------------------
+
+Breaking Changes
+++++++++++++++++
+- (:pr:`376`) GAMESS - slight breaking changes of (1) ROHF MP2 ZAPT quantities now stored in "ZAPT" variables, not "MP2"
+  variables; and (2) "HF TOTAL ENERGY" no longer stores DFT energy in DFT computation. @loriab
+- (:pr:`376`) testing - reference quantities now indexed by "standard" or "semicanonical" orbitals since program defaults
+  differ (mostly in CCSD ROHF FC). Downstream projects using the stdsuite interface will need to add an extra argument to query
+  reference data. @loriab
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`376`) Cfour - added parsing for BCCD and BCCD(T) methods. @loriab
+- (:pr:`376`) NWChem - B2PLYP double-hybrid can now be run and parsed. Added CC2 parsing. @loriab
+- (:pr:`376`) testing - added parsing contracts for ZAPT2, CEPA(1), CEPA(3), ACPF, AQCC, BCCD, BCCD(T), CC2, CC3, and DH-DFT. Added conventional references for most. @loriab
+- (:pr:`378`) OpenFF - Support OpenFF Toolkit v0.11+. @Yoshanuikabundi
+
+Bug Fixes
++++++++++
+
+
+v0.24.1 / 2022-08-16
+--------------------
+
+Enhancements
+++++++++++++
+- (:pr:`375`) testing - in standard suite, add reference values for occ, a-ccsd(t), olccd grad, remp2, omp2, omp2.5, omp3, oremp2, density fitted ccsd, ccsd(t), a-ccsd(t). @loriab
 
 
 v0.24.0 / 2022-07-08
@@ -90,7 +251,7 @@ Bug Fixes
 - (:pr:`322`) Psi4 - allowed more test cases with gradients and Hessians after a compatibility PR started
   saving them. @loriab
 - (:pr:`323`) Turbomole - learned to store calcinfo_natom so that gradients and Hessians can be computed
-  after QCElemental started using that quantity for shape checking in 
+  after QCElemental started using that quantity for shape checking in
   [v0.22.0](https://github.com/MolSSI/QCElemental/blob/master/docs/source/changelog.rst#0220--2021-08-26)
   @eljost
 

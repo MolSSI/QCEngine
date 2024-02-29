@@ -36,7 +36,7 @@ def test_dftd4_task_b97m_m01():
 @using("dftd4")
 def test_dftd4_task_tpss_m02():
 
-    thr = 1.0e-8
+    thr = 2.0e-8
 
     return_result = np.array(
         [

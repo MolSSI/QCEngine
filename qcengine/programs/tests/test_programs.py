@@ -73,7 +73,8 @@ def test_psi4_interactive_task():
 
     assert "Final Energy" in ret.stdout
     assert ret.success
-    assert ret.extras.pop("psiapi_evaluated", False)
+    is_psiapi_evaluated = ret.extras.pop("psiapi_evaluated", False)
+    assert is_psiapi_evaluated
 
 
 @using("psi4_runqcsk")
@@ -220,12 +221,12 @@ def test_random_failure_no_retries(failure_engine):
 def test_random_failure_with_retries(failure_engine):
 
     failure_engine.iter_modes = ["random_error", "random_error", "random_error"]
-    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 2})
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, task_config={"retries": 2})
     assert ret.input_data["provenance"]["retries"] == 2
     assert ret.error.error_type == "random_error"
 
     failure_engine.iter_modes = ["random_error", "input_error"]
-    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 4})
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, task_config={"retries": 4})
     assert ret.input_data["provenance"]["retries"] == 1
     assert ret.error.error_type == "input_error"
 
@@ -234,7 +235,7 @@ def test_random_failure_with_success(failure_engine):
 
     failure_engine.iter_modes = ["random_error", "pass"]
     failure_engine.ncalls = 0
-    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, local_options={"retries": 1})
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, task_config={"retries": 1})
 
     assert ret.success, ret.error.error_message
     assert ret.provenance.retries == 1

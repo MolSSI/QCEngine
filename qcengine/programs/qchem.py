@@ -358,7 +358,7 @@ $end
 
         properties["calcinfo_natom"] = len(input_dict["molecule"]["symbols"])
 
-        mobj = re.search(r"\n\s*(\d+)\s+" + NUMBER + "\s+" + NUMBER + r"\s+Convergence criterion met\s*\n", outtext)
+        mobj = re.search(r"\n\s*(\d+)\s+" + NUMBER + r"\s+" + NUMBER + r"\s+Convergence criterion met\s*\n", outtext)
         if mobj:
             properties["scf_iterations"] = int(mobj.group(1))
 

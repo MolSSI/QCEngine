@@ -44,7 +44,7 @@ def test_simple_ghost(driver, program, basis, keywords, hene):
 
     if program == "gamess":
         with pytest.raises(qcng.exceptions.InputError) as e:
-            res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+            qcng.compute(resi, program, raise_error=True, return_dict=True)
         pytest.xfail("no ghosts with gamess")
 
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
@@ -291,9 +291,24 @@ def test_atom_labels(qcprog, basis, keywords):
     assert compare(nmo, atres.properties.calcinfo_nmo, label="nmo"), f"nmo: {atres.properties.calcinfo_nmo} != {nmo}"
 
     scf = -1.656138508
-    assert compare_values(
-        scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
-    ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
-
+    scf_alt = -1.705577613  # some versions of NWChem land on this value
     mp2 = -1.7926264513
-    assert compare_values(mp2, atres.return_result, atol=3.0e-6, label="ene"), f"ene: {atres.return_result} != {mp2}"
+    mp2_alt = -1.870251459939
+    try:
+        assert compare_values(
+            scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
+        ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
+    except AssertionError as exc:
+        if qcprog == "nwchem":
+            assert compare_values(
+                scf_alt, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
+            ), f"scf ene: {atres.properties.scf_total_energy} != {scf_alt}"
+            assert compare_values(
+                mp2_alt, atres.return_result, atol=3.0e-6, label="ene"
+            ), f"ene: {atres.return_result} != {mp2_alt}"
+        else:
+            raise AssertionError from exc
+    else:
+        assert compare_values(
+            mp2, atres.return_result, atol=3.0e-6, label="ene"
+        ), f"ene: {atres.return_result} != {mp2}"

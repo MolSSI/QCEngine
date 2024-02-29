@@ -30,6 +30,30 @@ def parse_args():
     parser = argparse.ArgumentParser(description="A CLI for the QCEngine.")
     parser.add_argument("--version", action="version", version=f"{__version__}")
 
+    parent_parser = argparse.ArgumentParser(add_help=False)
+    task_group = parent_parser.add_argument_group(
+        "Task Configuration", "Extra configuration related to running the computation"
+    )
+    task_group.add_argument("--ncores", type=int, help="The number of cores to use for the task")
+    task_group.add_argument("--nnodes", type=int, help="The number of nodes to use")
+    task_group.add_argument("--memory", type=float, help="The amount of memory (in GiB) to use")
+    task_group.add_argument("--scratch-directory", type=str, help="Where to store temporary files")
+    task_group.add_argument("--retries", type=int, help="Number of retries for random failures")
+    task_group.add_argument("--mpiexec-command", type=str, help="Command used to launch MPI tasks")
+    task_group.add_argument(
+        "--use-mpiexec",
+        action="store_true",
+        default=None,
+        help="Whether it is necessary to use MPI to run an executable",
+    )
+    task_group.add_argument("--cores-per-rank", type=int, help="Number of cores per MPI rank")
+    task_group.add_argument(
+        "--scratch-messy",
+        action="store_true",
+        default=None,
+        help="Leave the scratch directory and contents on disk after completion",
+    )
+
     subparsers = parser.add_subparsers(dest="command")
 
     info = subparsers.add_parser("info", help="Print information about QCEngine setup, version, and environment.")
@@ -37,7 +61,9 @@ def parse_args():
         "category", nargs="*", default="all", choices=info_choices, help="The information categories to show."
     )
 
-    run = subparsers.add_parser("run", help="Run a program on a given task. Output is printed as a JSON blob.")
+    run = subparsers.add_parser(
+        "run", parents=[parent_parser], help="Run a program on a given task. Output is printed as a JSON blob."
+    )
     run.add_argument("program", type=str, help="The program to run.")
     run.add_argument(
         "data",
@@ -49,7 +75,9 @@ def parse_args():
     )
 
     run_procedure = subparsers.add_parser(
-        "run-procedure", help="Run a procedure on a given task. " "Output is printed as a JSON blob."
+        "run-procedure",
+        parents=[parent_parser],
+        help="Run a procedure on a given task. Output is printed as a JSON blob.",
     )
     run_procedure.add_argument("procedure", type=str, help="The procedure to run.")
     run_procedure.add_argument(
@@ -164,12 +192,29 @@ def main(args=None):
     # Grab CLI args if not present
     if args is None:
         args = parse_args()
+
+    # Break out a task config
+    task_config = {
+        "ncores": args.pop("ncores", None),
+        "memory": args.pop("memory", None),
+        "nnodes": args.pop("nnodes", None),
+        "scratch_directory": args.pop("scratch_directory", None),
+        "retries": args.pop("retries", None),
+        "mpiexec_command": args.pop("mpiexec_command", None),
+        "use_mpiexec": args.pop("use_mpiexec", None),
+        "cores_per_rank": args.pop("cores_per_rank", None),
+        "scratch_messy": args.pop("scratch_messy", None),
+    }
+
+    # Prune None values and let other config functions handle defaults
+    task_config = {k: v for k, v in task_config.items() if v is not None}
+
     command = args.pop("command")
     if command == "info":
         info_cli(args)
     elif command == "run":
-        ret = compute(data_arg_helper(args["data"]), args["program"])
+        ret = compute(data_arg_helper(args["data"]), args["program"], task_config=task_config)
         print(ret.json())
     elif command == "run-procedure":
-        ret = compute_procedure(data_arg_helper(args["data"]), args["procedure"])
+        ret = compute_procedure(data_arg_helper(args["data"]), args["procedure"], task_config=task_config)
         print(ret.json())

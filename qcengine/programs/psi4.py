@@ -54,31 +54,46 @@ class Psi4Harness(ProgramHarness):
         """
         psithon = which("psi4", return_bool=True)
         psiapi = which_import("psi4", return_bool=True)
+        error_msg = ""
+        error_which = which
 
         if psithon and not psiapi:
             with popen([which("psi4"), "--module"]) as exc:
                 exc["proc"].wait(timeout=30)
             if "module does not exist" in exc["stderr"]:
-                pass  # --module argument only in Psi4 DDD branch
+                psiapi = True  # --module argument only in Psi4 DDD branch (or >=1.6) so grandfathered in
             else:
-                sys.path.append(exc["stdout"].split()[-1])
+                so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
+                error_msg = f" In particular, psi4 command found but unable to load psi4 module into sys.path. stdout: {so}, stderr: {se}"
+                error_which = which_import
+                if (so) and (not se) and (rc == 0):
+                    psimod = Path(so)
+                    if psimod.exists():
+                        sys.path.append(str(psimod))
+                        psiapi = which_import("psi4", return_bool=True)
 
         if psiapi and not psithon:
-            psiimport = str(Path(which_import("psi4")).parent.parent)
-            env = os.environ.copy()
-            env["PYTHONPATH"] = psiimport
-            with popen(["python", "-c", "import psi4; print(psi4.executable[:-5])"], popen_kwargs={"env": env}) as exc:
+            with popen(["python", "-c", "import psi4; print(psi4.executable)"]) as exc:
                 exc["proc"].wait(timeout=30)
-            os.environ["PATH"] += os.pathsep + exc["stdout"].split()[-1]
+            so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
+            error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
+            # yes, everthing up to here could be got from `import psi4; psiexe = psi4.executable`. but, we try not to
+            #   load programs/modules in the `def found` fns.
+            if (so) and (not se) and (rc == 0):
+                psiexe = Path(so)
+                if psiexe.exists():
+                    os.environ["PATH"] += os.pathsep + str(psiexe.parent)
+                    psithon = which("psi4", return_bool=True)
 
-        if psithon or psiapi:
+        if psithon and psiapi:
             return True
 
-        return which(
+        return error_which(
             "psi4",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install psi4 -c psi4`. Check it's in your PATH with `which psi4`.",
+            raise_msg="Please install via `conda install psi4 -c conda-forge/label/libint_dev -c conda-forge`. Check it's in your PATH with `which psi4`."
+            + error_msg,
         )
 
     def get_version(self) -> str:
@@ -88,7 +103,12 @@ class Psi4Harness(ProgramHarness):
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
-            self.version_cache[which_prog] = safe_version(exc["stdout"].split()[-1])
+            so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
+            if (so) and (not se) and (rc == 0):
+                # Windows echos the command, so split stdout to collect response
+                self.version_cache[which_prog] = safe_version(so.split()[-1])
+            else:
+                raise TypeError(f"Error {rc} retrieving Psi4 version: stdout: {so}, stderr: {se}")
 
         candidate_version = self.version_cache[which_prog]
 
@@ -108,7 +128,7 @@ class Psi4Harness(ProgramHarness):
                 error_message = output_data["error"]["error_message"]
                 error_type = output_data["error"].get("error_type", "unknown_error")
         else:
-            error_message = "Unknown error, error message is not found, possibly segfaulted"
+            error_message = "Unknown error, error message is not found, possible segmentation fault!"
             error_type = "internal_error"
 
         return error_message, error_type
@@ -205,7 +225,7 @@ class Psi4Harness(ProgramHarness):
                     psi4.core.set_num_threads(config.ncores, quiet=True)
                     psi4.set_memory(f"{config.memory}GiB", quiet=True)
                     # psi4.core.IOManager.shared_object().set_default_path(str(tmpdir))
-                    if pversion < parse_version("1.6a2"):  # adjust to where DDD merged
+                    if pversion < parse_version("1.6"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
                         output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()

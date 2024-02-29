@@ -51,7 +51,7 @@ class TurbomoleHarness(ProgramHarness):
                 tmpdir = Path(tmpdir)
                 stdout = execute_define("\n", cwd=tmpdir)
             # Tested with V7.3 and V7.4.0
-            version_re = re.compile("TURBOMOLE (?:rev\. )?(V.+?)\s+")
+            version_re = re.compile(r"TURBOMOLE (?:rev\. )?(V.+?)\s+")
             mobj = version_re.search(stdout)
             version = mobj[1]
             self.version_cache[which_prog] = safe_version(version)
@@ -77,7 +77,7 @@ class TurbomoleHarness(ProgramHarness):
         return control_subbed
 
     def append_control(self, control, to_append):
-        return self.sub_control(control, "\$end", f"{to_append}\n$end")
+        return self.sub_control(control, r"\$end", f"{to_append}\n$end")
 
     def build_input(
         self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
@@ -131,6 +131,7 @@ class TurbomoleHarness(ProgramHarness):
 
         env = os.environ.copy()
         env["PARA_ARCH"] = "SMP"
+        env["TM_PAR_OMP"] = "on"
         env["PARNODES"] = str(config.ncores)
         env["SMPCPUS"] = str(config.ncores)
         turbomolerec["environment"] = env
@@ -163,7 +164,7 @@ class TurbomoleHarness(ProgramHarness):
             ricore = mem_mb * ri_fraction
             ri_per_core = int(ricore / config.ncores)
             # Update $ricore entry in the control file
-            control = self.sub_control(control, "\$ricore\s+(\d+)", f"$ricore {ri_per_core} MiB per_core")
+            control = self.sub_control(control, r"\$ricore\s+(\d+)", f"$ricore {ri_per_core} MiB per_core")
         # Calculate remaining memory
         maxcor = mem_mb - ricore
         assert maxcor > 0, "Not enough memory for maxcor! Need {-maxcor} MB more!"
@@ -171,7 +172,7 @@ class TurbomoleHarness(ProgramHarness):
         # maxcore per_core
         per_core = int(maxcor / config.ncores)
         # Update $maxcor entry in the control file
-        control = self.sub_control(control, "\$maxcor\s+(\d+)\s+MiB\s+per_core", f"$maxcor {per_core} MiB per_core")
+        control = self.sub_control(control, r"\$maxcor\s+(\d+)\s+MiB\s+per_core", f"$maxcor {per_core} MiB per_core")
 
         ############################
         # DETERMINE SHELL COMMANDS #
@@ -238,6 +239,9 @@ class TurbomoleHarness(ProgramHarness):
             inputs["infiles"],
             inputs["outfiles"],
             shell=True,
+            environment=inputs["environment"],
+            # TODO:
+            # scratch_directory="/path/to/userdefined/scratch",
             # TODO: scratch_messy?
             # scratch_messy=False,
         )

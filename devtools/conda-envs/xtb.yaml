@@ -11,7 +11,7 @@ dependencies:
   - py-cpuinfo
   - psutil
   - qcelemental >=0.11.1
-  - pydantic >=0.30.1
+  - pydantic >=1.8.2
 
     # Extras
   - gcp-correction

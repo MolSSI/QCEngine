@@ -21,6 +21,7 @@ def input_data():
 
 
 @using("psi4")
+@pytest.mark.parametrize("ncores", [1, 4])
 @pytest.mark.parametrize(
     "optimizer",
     [
@@ -29,7 +30,7 @@ def input_data():
         pytest.param("berny", marks=using("berny")),
     ],
 )
-def test_geometric_psi4(input_data, optimizer):
+def test_geometric_psi4(input_data, optimizer, ncores):
 
     input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
@@ -38,12 +39,21 @@ def test_geometric_psi4(input_data, optimizer):
 
     input_data = OptimizationInput(**input_data)
 
-    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True)
+    task_config = {
+        "ncores": ncores,
+    }
+
+    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True, task_config=task_config)
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
     assert ret.provenance.creator.lower() == optimizer
     assert ret.trajectory[0].provenance.creator.lower() == "psi4"
+
+    if optimizer == "optking":
+        pytest.xfail("not passing threads to psi4")
+    else:
+        assert ret.trajectory[0].provenance.nthreads == ncores
 
     # Check keywords passing
     for single in ret.trajectory:
@@ -153,7 +163,6 @@ def test_optimization_protocols(input_data):
 
 
 @using("geometric")
-@using("rdkit")
 def test_geometric_retries(failure_engine, input_data):
 
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
@@ -165,10 +174,11 @@ def test_geometric_retries(failure_engine, input_data):
     }
     input_data["input_specification"]["model"] = {"method": "something"}
     input_data["keywords"]["program"] = failure_engine.name
+    input_data["keywords"]["coordsys"] = "cart"  # needed by geometric v1.0 to play nicely with failure_engine
 
     input_data = OptimizationInput(**input_data)
 
-    ret = qcng.compute_procedure(input_data, "geometric", local_options={"ncores": 13}, raise_error=True)
+    ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13}, raise_error=True)
     assert ret.success is True
     assert ret.trajectory[0].provenance.retries == 1
     assert ret.trajectory[0].provenance.ncores == 13
@@ -178,7 +188,7 @@ def test_geometric_retries(failure_engine, input_data):
 
     # Ensure we still fail
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
-    ret = qcng.compute_procedure(input_data, "geometric", local_options={"ncores": 13, "retries": 1})
+    ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13, "retries": 1})
     assert ret.success is False
     assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
     assert len(ret.input_data["trajectory"]) == 2
@@ -317,8 +327,8 @@ def test_torsiondrive_generic():
         optimization_spec=OptimizationSpecification(
             procedure="geomeTRIC",
             keywords={
-                "coordsys": "dlc",
-                "maxiter": 300,
+                "coordsys": "hdlc",
+                "maxiter": 500,
                 "program": "rdkit",
             },
         ),
@@ -347,3 +357,29 @@ def test_torsiondrive_generic():
     assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
 
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
+
+
+@using("mrchem")
+@pytest.mark.parametrize(
+    "optimizer",
+    [
+        pytest.param("geometric", marks=using("geometric")),
+        pytest.param("optking", marks=using("optking")),
+        pytest.param("berny", marks=using("berny")),
+    ],
+)
+def test_optimization_mrchem(input_data, optimizer):
+
+    input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
+    input_data["input_specification"]["model"] = {"method": "HF"}
+    input_data["input_specification"]["keywords"] = {"world_prec": 1.0e-4}
+    input_data["keywords"]["program"] = "mrchem"
+
+    input_data = OptimizationInput(**input_data)
+
+    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True)
+    assert 10 > len(ret.trajectory) > 1
+
+    assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-3) == 1.3860734486984705
+    assert ret.provenance.creator.lower() == optimizer
+    assert ret.trajectory[0].provenance.creator.lower() == "mrchem"

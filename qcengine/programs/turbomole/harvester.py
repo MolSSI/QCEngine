@@ -8,7 +8,7 @@ from ..util import PreservingDict
 
 
 def parse_decimal(regex, text, method="search"):
-    with_float = re.compile(regex + "([\d\-\.]+)")
+    with_float = re.compile(regex + r"([\d\-\.]+)")
     matches = getattr(with_float, method)(text)
 
     if method == "search":
@@ -21,7 +21,7 @@ def parse_reference_energy(stdout: str):
     energy_dict = PreservingDict()
 
     # Total energy from dscf or ridft
-    total_energy_re = re.compile("total energy\s+=\s+([\d\-\.]+)")
+    total_energy_re = re.compile(r"total energy\s+=\s+([\d\-\.]+)")
     mobj = total_energy_re.search(stdout)
     total_energy = Decimal(mobj[1])
 
@@ -46,9 +46,9 @@ def parse_ricc2(stdout: str):
     # As CC2 starts from a MP2 guess that is also reported there may be
     # multiple matches for the following regex. Thats why we capture all
     # matches with 'findall'.
-    matches = parse_decimal("Final (.+?) energy\s+:\s+", stdout, "findall")
+    matches = parse_decimal(r"Final (.+?) energy\s+:\s+", stdout, "findall")
     if len(matches) == 0:
-        matches = parse_decimal("E(MP2)\s+:\s+", stdout, "search")
+        matches = parse_decimal(r"E(MP2)\s+:\s+", stdout, "search")
 
     ricc2_dict["CURRENT ENERGY"] = matches[-1][1]
 
@@ -57,11 +57,11 @@ def parse_ricc2(stdout: str):
 
 def parse_gradient(gradient):
     grad_re = re.compile(
-        "\$grad.+"
-        "cycle =\s+(?P<cycle>\d+)\s+"
-        "(?P<energy_type>.+?) energy =\s+(?P<energy>[\d\.\-]+)\s+"
-        "\|dE/dxyz\| =\s+(?P<grad_norm>[\d\.]+)"
-        "(?P<coords_gradients>.+)\$end",
+        r"\$grad.+"
+        r"cycle =\s+(?P<cycle>\d+)\s+"
+        r"(?P<energy_type>.+?) energy =\s+(?P<energy>[\d\.\-]+)\s+"
+        r"\|dE/dxyz\| =\s+(?P<grad_norm>[\d\.]+)"
+        r"(?P<coords_gradients>.+)\$end",
         re.DOTALL,
     )
     mobj = grad_re.match(gradient)

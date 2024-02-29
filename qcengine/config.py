@@ -9,7 +9,10 @@ import os
 import socket
 from typing import Any, Dict, Optional, Union
 
-import pydantic
+try:
+    import pydantic.v1 as pydantic
+except ImportError:
+    import pydantic
 
 from .extras import get_information
 
@@ -40,6 +43,11 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
         # Work through VMs and logical cores.
         if hasattr(psutil.Process(), "cpu_affinity"):
             cpu_cnt = len(psutil.Process().cpu_affinity())
+            full_physical_cnt = psutil.cpu_count(logical=False)
+            full_logical_cnt = psutil.cpu_count(logical=True)
+            if (cpu_cnt == full_logical_cnt) and (full_physical_cnt is not None):
+                # cpu_affinity isn't capturing deliberate setting but just VMs, so use physical
+                cpu_cnt = full_physical_cnt
         else:
             cpu_cnt = psutil.cpu_count(logical=False)
             if cpu_cnt is None:
@@ -81,7 +89,7 @@ class NodeDescriptor(pydantic.BaseModel):
     
     The default value, ``None``, will allow QCEngine to autodetect the number of cores.""",
     )
-    jobs_per_node: int = 2
+    jobs_per_node: int = 1
     retries: int = 0
 
     # Cluster options
@@ -141,7 +149,7 @@ class NodeDescriptor(pydantic.BaseModel):
         extra = "forbid"
 
 
-class TaskConfig(pydantic.BaseModel):
+class TaskConfig(pydantic.BaseSettings):
     """Description of the configuration used to launch a task."""
 
     # Specifications
@@ -159,8 +167,9 @@ class TaskConfig(pydantic.BaseModel):
         False, description="Leave scratch directory and contents on disk after completion."
     )
 
-    class Config:
+    class Config(pydantic.BaseSettings.Config):
         extra = "forbid"
+        env_prefix = "QCENGINE_"
 
 
 def _load_defaults() -> None:
@@ -190,7 +199,7 @@ def _load_defaults() -> None:
 
         LOGGER.info("Found 'qcengine.yaml' at path: {}".format(load_path))
         with open(load_path, "r") as stream:
-            user_config = yaml.load(stream)
+            user_config = yaml.load(stream, Loader=yaml.SafeLoader)
 
         for k, v in user_config.items():
             NODE_DESCRIPTORS[k] = NodeDescriptor(name=k, **v)
@@ -255,14 +264,25 @@ def parse_environment(data: Dict[str, Any]) -> Dict[str, Any]:
     """Collects local environment variable values into ``data`` for any keys with RHS starting with ``$``."""
     ret = {}
     for k, var in data.items():
-        if isinstance(var, str) and var.startswith("$"):
-            var = var.replace("$", "", 1)
-            if var in os.environ:
-                var = os.environ[var]
-            else:
+        if isinstance(var, str):
+            var = os.path.expanduser(os.path.expandvars(var))
+            if var.startswith("$"):
                 var = None
 
         ret[k] = var
+
+    return ret
+
+
+def read_qcengine_task_environment() -> Dict[str, Any]:
+    """
+    Reads the qcengine task-related environment variables and returns a dictionary of the values.
+    """
+
+    ret = {}
+    for k, v in os.environ.items():
+        if k.startswith("QCENGINE_"):
+            ret[k[9:].lower()] = v
 
     return ret
 
@@ -275,7 +295,9 @@ def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = 
     if task_config is None:
         task_config = {}
 
-    task_config = parse_environment(task_config)
+    task_config_env = read_qcengine_task_environment()
+    task_config = {**task_config_env, **parse_environment(task_config)}
+
     config = {}
 
     # Node data
@@ -285,7 +307,7 @@ def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = 
     config["retries"] = task_config.pop("retries", node.retries)
 
     # Jobs per node
-    jobs_per_node = task_config.pop("jobs_per_node", None) or node.jobs_per_node
+    jobs_per_node = int(task_config.pop("jobs_per_node", None) or node.jobs_per_node)
 
     # Handle memory
     memory = task_config.pop("memory", None)
@@ -297,12 +319,12 @@ def get_config(*, hostname: Optional[str] = None, task_config: Dict[str, Any] = 
     config["memory"] = memory
 
     # Get the number of cores available to each task
-    ncores = task_config.pop("ncores", int(ncores / jobs_per_node))
+    ncores = int(task_config.pop("ncores", int(ncores / jobs_per_node)))
     if ncores < 1:
         raise KeyError("Number of jobs per node exceeds the number of available cores.")
 
     config["ncores"] = ncores
-    config["nnodes"] = task_config.pop("nnodes", 1)
+    config["nnodes"] = int(task_config.pop("nnodes", 1))
 
     # Add in the MPI launch command template
     config["mpiexec_command"] = node.mpiexec_command
