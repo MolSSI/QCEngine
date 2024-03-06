@@ -199,30 +199,18 @@ def harvest(in_mol: Molecule, outfiles) -> Tuple[PreservingDict, None, None, Mol
     out_psivar = PreservingDict()
     # Parse the Madness output
     # This is a weird unpacking but i'm sure i'll find a more elegant way to do this later
-    moldft_info = outfiles.get("moldft")
-    moldft_outfiles = moldft_info.get("outfiles")
+    moldft_outfiles = outfiles.get("outfiles")
     # At this point scf prints a list of json outputs where each list refers to the scf at givin protocol
     # Here I load the scf_info and calc_info as json
     # scf_info = json.loads(moldft_outfiles.get("scf_info.json"))
-    calc_info = json.loads(moldft_outfiles.get("calc_info.json"))
+    calc_info = json.loads(moldft_outfiles.get("mad.calc_info.json"))
     # Write harvest scf_info and harvest calc_info
     out_calc_vars = harvest_calc_info(calc_info)
     # out_scf_vars = harvest_scf_info(scf_info)
     out_psivar.update(out_calc_vars)
     # out_psivar.update(out_scf_vars)
 
-    if "molresponse" in outfiles.keys():
-        molresponse_info = outfiles.get("moldft")
-        molresponse_outfiles = molresponse_info.get("outfiles")
-        # At this point scf prints a list of json outputs where each list refers to the scf at given protocol
-        # Here I load the scf_info and calc_info as json
-        response_info = json.loads(molresponse_outfiles.get("response_base.json"))
-        response_params, response_data_dict = read_molrespone_json(response_info)
-
-    Idontneed_vars, out_mol, out_grad, version, error = harvest_moldft_output(outfiles["moldft"]["stdout"])
-    if "molresponse" in outfiles.keys():
-        response_psi_var = harvest_response_file(outfiles["molresponse"]["stdout"])
-        out_psivar.update(response_psi_var)
+    Idontneed_vars, out_mol, out_grad, version, error = harvest_moldft_output(outfiles["stdout"])
     # If available, read higher-accuracy gradients
     #  These were output using a Python Task in Madness to read them out of the database
     if outfiles.get("mad.grad") is not None:
@@ -243,21 +231,6 @@ def harvest(in_mol: Molecule, outfiles) -> Tuple[PreservingDict, None, None, Mol
                     """Madness outfile (NRE: %f) inconsistent with MADNESS input (NRE: %f)."""
                     % (out_mol.nuclear_repulsion_energy(), in_mol.nuclear_repulsion_energy())
                 )
-    # else:
-    #    raise ValueError("""No coordinate information extracted from Madness output.""")
-
-    # If present, align the gradients and hessian with the original molecular coordinates
-    #  Madness rotates the coordinates of the input molecule. `out_mol` contains the coordinates for the
-    #  rotated molecule, which we can use to determine how to rotate the gradients/hessian
-    # amol, data = out_mol.align(in_mol, atoms_map=False, mols_align=True, verbose=0)
-
-    # mill = data["mill"]  # Retrieve tool with alignment routines
-
-    # if out_grad is not None:
-    #    out_grad = mill.align_gradient(np.array(out_grad).reshape(-1, 3))
-    # if out_hess is not None:
-    #    out_hess = mill.align_hessian(np.array(out_hess))
-    # TODO create a madness json that outputs basic info like the version and github hash?
 
     return out_psivar, out_hess, out_grad, out_mol, version, error
 
@@ -371,106 +344,3 @@ def read_molrespone_json(response_info):
         else:
             proto_data.append(read_frequency_proto_iter_data(iter_data, n_states, n_orbitals))
     return response_parameters, proto_data
-
-
-def harvest_response_file(outtext):
-    psivar = PreservingDict()
-    psivar_coord = None
-    psivar_grad = None
-    version = ""
-    error = ""  # TODO (wardlt): The error string is never used.
-    pass_psivar = []
-    pass_coord = []
-    pass_grad = []
-    # Write now we split at Converge
-    counter = 1
-
-    splits = re.split(r"Converged!", outtext, re.MULTILINE)
-    print(splits)
-    splits = splits[-1]
-    data = re.split(r"Iteration", splits, re.MULTILINE)[-1]
-    print(data)
-
-    NUMBER = r"(?x:" + regex.NUMBER + ")"  # NUMBER
-    NUMSPACE = NUMBER + r"\s*"  # NUMBER + SPACE
-
-    OPTIONS = [
-        r"Number of Response States:",
-        r"Number of Ground States:",
-        r"k =",
-    ]
-    PSIVAR = ["NUM STATES", "NUM ORBITALS", "K"]
-    optDict = dict(zip(OPTIONS, PSIVAR))
-
-    for var, VAR in optDict.items():
-        mobj = re.search(r"^\s*" + var + r"\s*" + NUMBER + r"\s*$", outtext, re.MULTILINE)
-        # print(mobj)
-        if mobj:
-            psivar[VAR] = mobj.group(1)
-    # Grab the Orbital Energies  There are NUM ORBITALS
-    num_states = int(psivar["NUM STATES"])
-    num_orbitals = int(psivar["NUM ORBITALS"])
-
-    print(num_states)
-    print(num_orbitals)
-    # print(NUMSPACE)
-    NUMSPACEORB = str()
-    for i in range(num_orbitals):
-        NUMSPACEORB += NUMSPACE
-    # print(NUMSPACEORB)
-
-    var = r"Orbital Energies: \[\*\]"
-    VAR = "ORBITAL ENERGIES"
-    mobj = re.search(
-        r"^\s*" + var + r"\s*" + NUMSPACEORB + r"$",
-        outtext,
-        re.MULTILINE,
-    )
-    # print(mobj)
-
-    if mobj:
-        oe_list = []
-        for i in range(num_orbitals):
-            oe_list.append(mobj.group(i + 1))
-
-        psivar[VAR] = np.array(oe_list, dtype=float)
-
-    psivar = grab_tensor(r"Ground state overlap:", "OVERLAP", num_orbitals, num_orbitals, psivar, outtext)
-    psivar = grab_tensor(r"Ground state hamiltonian:", "HAMILTONIAN", num_orbitals, num_orbitals, psivar, outtext)
-    psivar = grab_tensor(r"Polarizability Final", "POLARIZABILITY", num_states, num_states, psivar, data)
-    return psivar
-
-
-# Translate a madness tensor defined within json output to a numpy array
-
-
-def grab_tensor(var, VAR, row, col, psivar, data):
-    first_line = r"^\s*" + var + r"\s+"
-    NUMBER = r"(?x:" + regex.NUMBER + ")"  # NUMBER
-    NUMSPACE = NUMBER + r"\s*"  # NUMBER + SPACE
-    # print(first_line)
-
-    CAPTURE_LINE = str()
-    for j in range(col):
-        CAPTURE_LINE += NUMSPACE
-    total = first_line
-    for i in range(row):
-        front = r"^\[" + str(i) + r",\*\]\s*"
-        line = front + CAPTURE_LINE
-        total += line
-    #    print(line)
-
-    mobj = re.search(
-        total,
-        data,
-        re.MULTILINE,
-    )
-    # print(mobj)
-    if mobj:
-        oe_list = []
-        for i in range(row):
-            for j in range(col):
-                oe_list.append(mobj.group(i + 1))
-        tensor = np.array(oe_list)
-        psivar[VAR] = tensor.reshape((row, col))
-    return psivar
