@@ -2,7 +2,6 @@
 Tests the DQM compute dispatch module
 """
 
-
 import numpy as np
 import pytest
 from qcelemental.models import AtomicInput, Molecule

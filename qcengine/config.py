@@ -37,7 +37,7 @@ def get_global(key: Optional[str] = None) -> Union[str, Dict[str, Any]]:
     if _global_values is None:
         _global_values = {}
         _global_values["hostname"] = socket.gethostname()
-        _global_values["memory"] = round(psutil.virtual_memory().available / (1024 ** 3), 3)
+        _global_values["memory"] = round(psutil.virtual_memory().available / (1024**3), 3)
         _global_values["username"] = getpass.getuser()
 
         # Work through VMs and logical cores.

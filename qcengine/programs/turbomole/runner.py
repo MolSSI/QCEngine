@@ -1,6 +1,7 @@
 """
 Calls the Turbomole executable.
 """
+
 import os
 import re
 from decimal import Decimal
@@ -155,7 +156,7 @@ class TurbomoleHarness(ProgramHarness):
         control = turbomolerec["infiles"]["control"]
 
         # Calculate total available memory in MB
-        mem_mb = config.memory * (1024 ** 3) / 1e6
+        mem_mb = config.memory * (1024**3) / 1e6
         ri_fraction = 0.25
         # Total amount of memory allocated to ricore
         ricore = 0

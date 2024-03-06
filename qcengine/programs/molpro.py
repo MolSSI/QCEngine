@@ -184,7 +184,7 @@ class MolproHarness(ProgramHarness):
                 unrestricted = True
 
             # Memory is in megawords per core for Molpro
-            memory_mw_core = int(config.memory * (1024 ** 3) / 8e6 / config.ncores)
+            memory_mw_core = int(config.memory * (1024**3) / 8e6 / config.ncores)
             input_file.append("memory,{},M".format(memory_mw_core))
             input_file.append("")
 
@@ -338,7 +338,7 @@ class MolproHarness(ProgramHarness):
         molpro_variable_map = {
             "_ENUC": "nuclear_repulsion_energy",
             "_DFTFUN": "scf_xc_energy",
-            "_NELEC": ["calcinfo_nalpha", "calcinfo_nbeta"]
+            "_NELEC": ["calcinfo_nalpha", "calcinfo_nbeta"],
             # "_EMP2_SCS": "scs_mp2_total_energy"
         }
 

@@ -1,6 +1,7 @@
 """
 Tests the DQM compute dispatch module
 """
+
 import msgpack
 import numpy as np
 import pytest

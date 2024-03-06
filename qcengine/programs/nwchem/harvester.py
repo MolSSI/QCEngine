@@ -583,9 +583,9 @@ def harvest_outfile_pass(outtext):
                     if ext_energy_list[nroot] in e_val:
                         symm = k
                         # in hartree
-                        psivar[
-                            f"EOM-{cc_name} ROOT 0 -> ROOT {nroot + 1} EXCITATION ENERGY - {symm} SYMMETRY"
-                        ] = ext_energy_list[nroot]
+                        psivar[f"EOM-{cc_name} ROOT 0 -> ROOT {nroot + 1} EXCITATION ENERGY - {symm} SYMMETRY"] = (
+                            ext_energy_list[nroot]
+                        )
                         psivar[f"EOM-{cc_name} ROOT 0 -> ROOT {nroot + 1} TOTAL ENERGY - {symm} SYMMETRY"] = psivar[
                             f"{cc_name} TOTAL ENERGY"
                         ] + Decimal(ext_energy_list[nroot])
