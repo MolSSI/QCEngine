@@ -106,7 +106,7 @@ def test_mad_hf_be(program, basis, keywords, Be):
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
     # print(res["stdout"])
 
-    assert res["driver"] == "optimizatino"
+    assert res["driver"] == "optimization"
     assert "provenance" in res
     assert res["success"] is True
 
