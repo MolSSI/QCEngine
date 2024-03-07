@@ -3,6 +3,7 @@ Calls the OpenMM executable.
 
 Requires RDKit
 """
+
 import datetime
 import hashlib
 import os
