@@ -26,7 +26,7 @@ from .model import ProgramHarness
 class GaussianHarness(ProgramHarness):
 
     _defaults = {
-        "name": "Gaussian",
+        "name": "gaussian",
         "scratch": True,
         "thread_safe": False,
         "thread_parallel": True,
@@ -70,9 +70,10 @@ H
                 outtext = outtext.splitlines()
                 for line in outtext:
                     if 'Gaussian 09' in line:
-                        version_line = line.split('Gaussian 09:')[-1]
-                        version_line = version_line.split()[0]
-                        self.version_cache[which_prog] = safe_version(version_line)
+                        #version_line = line.split('Gaussian 09:')[-1]
+                        #version_line = version_line.split()[0]
+                        #self.version_cache[which_prog] = safe_version(version_line)
+                        self.version_cache[which_prog] = '2009'
                         
         return self.version_cache[which_prog]
 
@@ -220,7 +221,7 @@ H
         output_data['success'] = True
         #print ('output_data: ', output_data)
 
-        provenance = Provenance(creator="Gaussian", version=self.get_version(), routine='g09').dict()
+        provenance = Provenance(creator="gaussian", version=self.get_version(), routine='g09').dict()
 
         stdout = outfiles.pop('stdout')
         stderr = outfiles.pop('stderr')
@@ -233,6 +234,10 @@ H
         # filter unwanted data
         to_remove = ['atomnos', 'atomcoords', 'natom']
         output_data['extras'] = {'cclib': {k:v for k, v in cclib_vars.items() if k not in to_remove}}
+
+        # HACK - scf_values can have NaN
+        # remove for now
+        output_data['extras']['cclib'].pop('scfvalues')
         
         merged_data = {**input_model.dict(), **output_data}
 
