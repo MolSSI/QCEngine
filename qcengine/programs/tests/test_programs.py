@@ -417,9 +417,14 @@ def test_aimnet2_gradient():
     result = qcng.compute(atomic_input, "aimnet2")
     assert result.success
     # make sure the gradient is now the return result
-    assert pytest.approx(result.return_result) == [
-        [-0.0, 2.6080331227973375e-09, -0.04097248986363411],
-        [-0.0, -0.029529934749007225, 0.020486244931817055],
-        [-0.0, 0.029529931023716927, 0.020486244931817055],
-    ]
+    assert np.allclose(
+        result.return_result,
+        np.array(
+            [
+                [-0.0, 2.6080331227973375e-09, -0.04097248986363411],
+                [-0.0, -0.029529934749007225, 0.020486244931817055],
+                [-0.0, 0.029529931023716927, 0.020486244931817055],
+            ]
+        ),
+    )
     assert pytest.approx(result.properties.return_energy) == -76.47412023758551
