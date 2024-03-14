@@ -383,3 +383,40 @@ def test_openmm_gaff_keywords(gaff_settings):
         ret = qcng.compute(inp, program, raise_error=False)
         assert ret.success is True
         assert ret.return_result == pytest.approx(expected_result, rel=1e-6)
+
+
+@using("pyaimnet2")
+@pytest.mark.parametrize("model, expected_energy", [
+    pytest.param("b973c", -76.39604306960972, id="b973c"),
+    pytest.param("wb97m-d3", -76.47412023758551, id="wb97m-d3")
+])
+def test_aimnet2_energy(model, expected_energy):
+    """Test computing the energies of water with two aimnet2 models."""
+
+    water = qcng.get_molecule("water")
+    atomic_input = AtomicInput(molecule=water, model={"method": model, "basis": None}, driver="energy")
+
+    result = qcng.compute(atomic_input, "aimnet2")
+    assert result.success
+    assert pytest.approx(result.return_result) == expected_energy
+    assert "charges" in result.extras
+    assert "charges_std" in result.extras
+    assert "forces_std" in result.extras
+
+
+@using("pyaimnet2")
+def test_aimnet2_gradient():
+    """Test computing the gradient of water using one aimnet2 model."""
+
+    water = qcng.get_molecule("water")
+    atomic_input = AtomicInput(molecule=water, model={"method": "wb97m-d3", "basis": None}, driver="gradient")
+
+    result = qcng.compute(atomic_input, "aimnet2")
+    assert result.success
+    # make sure the gradient is now the return result
+    assert pytest.approx(result.return_result) == [
+        [-0.0, 2.6080331227973375e-09, -0.04097248986363411],
+        [-0.0, -0.029529934749007225, 0.020486244931817055],
+        [-0.0, 0.029529931023716927, 0.020486244931817055]
+    ]
+    assert pytest.approx(result.properties.return_energy) == -76.47412023758551
