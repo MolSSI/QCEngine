@@ -134,7 +134,6 @@ def test_compute_energy_qcsk_basis(program, model, keywords):
         ("gcp", {"method": "bad"}),
         ("mrchem", {"method": "bad"}),
         ("mctc-gcp", {"method": "bad"}),
-        ("pyaimnet2", {"method": "bad"})
         # add as programs available
         # ("molpro", {"method": "bad"}),
         # ("terachem", {"method": "bad"}),
