@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 from qcengine.programs.model import ProgramHarness
 from qcelemental.util import safe_version, which_import
 from qcelemental.models import AtomicResult, Provenance
@@ -23,7 +23,7 @@ class AIMNET2Harness(ProgramHarness):
         "managed_memory": False,
     }
 
-    version_cache: dict[str, str] = {}
+    version_cache: Dict[str, str] = {}
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -92,8 +92,12 @@ class AIMNET2Harness(ProgramHarness):
             "success": False,
             "properties": {
                 "return_energy": out["energy"].item() * ureg.conversion_factor("eV", "hartree"),
-                "return_gradient": (-1.0 * out["forces"][0].detach().numpy() * ureg.conversion_factor("eV / angstrom", "hartree / bohr")).ravel().tolist(),
-                "calcinfo_natom": len(input_data.molecule.atomic_numbers)
+                "return_gradient": (
+                    -1.0 * out["forces"][0].detach().numpy() * ureg.conversion_factor("eV / angstrom", "hartree / bohr")
+                )
+                .ravel()
+                .tolist(),
+                "calcinfo_natom": len(input_data.molecule.atomic_numbers),
             },
             "extras": input_data.extras.copy(),
         }
@@ -103,7 +107,7 @@ class AIMNET2Harness(ProgramHarness):
                 "charges": out["charges"].detach()[0].cpu().numpy(),
                 "charges_std": out["charges_std"].detach()[0].cpu().numpy(),
                 "energy_std": out["energy_std"].item(),
-                "forces_std": out["forces_std"].detach()[0].cpu().numpy()
+                "forces_std": out["forces_std"].detach()[0].cpu().numpy(),
             }
         )
         if input_data.driver == "energy":
@@ -112,11 +116,11 @@ class AIMNET2Harness(ProgramHarness):
             # assume the output is eV/bohr
             ret_data["return_result"] = ret_data["properties"]["return_gradient"]
         else:
-            raise InputError(f"AIMNET2 can only compute energy and gradients driver methods. Requested {input_data.driver} not supported.")
+            raise InputError(
+                f"AIMNET2 can only compute energy and gradients driver methods. Requested {input_data.driver} not supported."
+            )
 
-        ret_data["provenance"] = Provenance(
-            creator="pyaimnet2", version=self.get_version(), routine="load_model"
-        )
+        ret_data["provenance"] = Provenance(creator="pyaimnet2", version=self.get_version(), routine="load_model")
 
         ret_data["success"] = True
 
