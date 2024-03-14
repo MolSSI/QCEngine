@@ -385,7 +385,7 @@ def test_openmm_gaff_keywords(gaff_settings):
         assert ret.return_result == pytest.approx(expected_result, rel=1e-6)
 
 
-@using("pyaimnet2")
+@using("aimnet2")
 @pytest.mark.parametrize(
     "model, expected_energy",
     [
@@ -407,7 +407,7 @@ def test_aimnet2_energy(model, expected_energy):
     assert "forces_std" in result.extras
 
 
-@using("pyaimnet2")
+@using("aimnet2")
 def test_aimnet2_gradient():
     """Test computing the gradient of water using one aimnet2 model."""
 
