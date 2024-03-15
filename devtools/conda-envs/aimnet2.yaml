@@ -1,0 +1,19 @@
+name: test
+channels:
+  - conda-forge
+dependencies:
+
+    # Core
+  - python
+  - pip
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental >=0.12.0
+  - pydantic>=1.0.0
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+  - pyaimnet2
