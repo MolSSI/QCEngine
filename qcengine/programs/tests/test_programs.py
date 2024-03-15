@@ -428,3 +428,5 @@ def test_aimnet2_gradient():
         ),
     )
     assert pytest.approx(result.properties.return_energy) == -76.47412023758551
+    # make sure the other properties were also saved
+    assert "charges" in result.extras
