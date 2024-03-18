@@ -94,7 +94,6 @@ def test_psi4_wavefunction_task():
 
 @using("psi4")
 def test_psi4_internal_failure():
-
     mol = Molecule.from_data(
         """0 3
      O    0.000000000000     0.000000000000    -0.068516245955
@@ -206,7 +205,6 @@ def test_mopac_task():
 
 
 def test_random_failure_no_retries(failure_engine):
-
     failure_engine.iter_modes = ["input_error"]
     ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False)
     assert ret.error.error_type == "input_error"
@@ -219,7 +217,6 @@ def test_random_failure_no_retries(failure_engine):
 
 
 def test_random_failure_with_retries(failure_engine):
-
     failure_engine.iter_modes = ["random_error", "random_error", "random_error"]
     ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, task_config={"retries": 2})
     assert ret.input_data["provenance"]["retries"] == 2
@@ -232,7 +229,6 @@ def test_random_failure_with_retries(failure_engine):
 
 
 def test_random_failure_with_success(failure_engine):
-
     failure_engine.iter_modes = ["random_error", "pass"]
     failure_engine.ncalls = 0
     ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, task_config={"retries": 1})
@@ -383,3 +379,37 @@ def test_openmm_gaff_keywords(gaff_settings):
         ret = qcng.compute(inp, program, raise_error=False)
         assert ret.success is True
         assert ret.return_result == pytest.approx(expected_result, rel=1e-6)
+
+
+@using("mace")
+def test_mace_energy():
+    """
+    Test calculating the energy with mace
+    """
+    water = qcng.get_molecule("water")
+    atomic_input = AtomicInput(molecule=water, model={"method": "small", "basis": None}, driver="energy")
+
+    result = qcng.compute(atomic_input, "mace")
+    assert result.success
+    assert pytest.approx(result.return_result) == -76.47683956098838
+
+
+@using("mace")
+def test_mace_gradient():
+    """
+    Test calculating the gradient with mace
+    """
+    water = qcng.get_molecule("water")
+    expected_result = np.array(
+        [
+            [0.0, -2.1590400539385646e-18, -0.04178551770271103],
+            [0.0, -0.029712483642769006, 0.020892758851355515],
+            [0.0, 0.029712483642769006, 0.020892758851355518],
+        ]
+    )
+
+    atomic_input = AtomicInput(molecule=water, model={"method": "small", "basis": None}, driver="gradient")
+
+    result = qcng.compute(atomic_input, "mace")
+    assert result.success
+    assert pytest.approx(result.return_result) == expected_result

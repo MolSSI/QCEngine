@@ -185,6 +185,7 @@ _programs = {
     "turbomole": which("define", return_bool=True),
     "xtb": which_import("xtb", return_bool=True),
     "mrchem": is_program_new_enough("mrchem", "1.0.0"),
+    "mace": is_program_new_enough("mace", "0.3.2"),
 }
 _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 
