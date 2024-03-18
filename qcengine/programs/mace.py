@@ -97,8 +97,8 @@ class MACEHarness(ProgramHarness):
         z_table = AtomicNumberTable([int(z) for z in atomic_numbers])
         atomic_numbers = input_data.molecule.atomic_numbers
         pbc = (False, False, False)
-        # create some large cell, is this needed?
-        cell = np.array([[100.0, 0.0, 0.0], [0.0, 100.0, 0.0], [0.0, 0.0, 100.0]])
+        # set the cell as None and mace will automatically create a cell big enough to include all atoms
+        cell = None
 
         config = Configuration(
             atomic_numbers=atomic_numbers,
