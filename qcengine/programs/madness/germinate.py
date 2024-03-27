@@ -13,7 +13,7 @@ _xc_functionals = [
 def muster_modelchem(
     method: str,
     derint: int,
-) -> Tuple[str, Dict[str, Any]]:
+) -> Dict[str, Any]:
     """Converts the QC method into MADNESS keywords
     Options include energy calculation with moldft
     Geometry optimization with moldft
@@ -23,38 +23,37 @@ def muster_modelchem(
        method (str): Name of the QC method to use
        derint (str): Index of the run type
     Returns:
-       (str): Task command for MADNESS
        (dict): Any options for MADNESS
     """
 
     # Standardize the method name
     method = method.lower()
 
+    # Initialize the options
     opts = {}
+    moldft_opts = opts["moldft"] = {}
+    molresponse_opts = opts["molresponse"] = {}
 
-    # Map the run type to
-    # runtyp = {"energy": "energy", "gradient": "gradient", "hessian": "hessian", "properties": "property"}[derint]
-    runtyp = {"energy": "energy", "optimization": "gopt", "hessian": "hessian", "properties": "molresponse"}[derint]
+    runtyp = {"energy": "energy", "optimization": "gopt", "hessian": "hessian", "properties": "response"}[derint]
 
     # Write out the theory directive
     if runtyp == "energy":
         if method == "optimization":
-            opts["dft__gopt"] = True
-        elif method.split()[0] in _xc_functionals:
-            opts["dft__xc"] = method
-        else:
-            raise InputError(f"Method not recognized: {method}")
-        mdccmd = f""
-    elif runtyp == "molresponse":
-        if method.split()[0] in _xc_functionals:
-            opts["dft__xc"] = method
-            opts["response__xc"] = method
-            opts["response__archive"] = "restartdata"
-        else:
-            raise InputError(f"Method not recognized: {method}")
-        mdccmd = f"response"  ## we will split the options with the word response later
+            moldft_opts["dft__gopt"] = True
 
-    ## all we have to do is add options to the dft block in order to change the run type
-    ## default in energy
-    # do nothing
-    return mdccmd, opts
+        elif method.split()[0] in _xc_functionals:
+            moldft_opts["dft__xc"] = method
+
+        else:
+            raise InputError(f"Method not recognized: {method}")
+    elif runtyp == "response":
+        if method.split()[0] in _xc_functionals:
+
+            moldft_opts["dft__xc"] = method
+            molresponse_opts["response__xc"] = method
+            molresponse_opts["response__archive"] = "restartdata"
+
+        else:
+            raise InputError(f"Method not recognized: {method}")
+
+    return opts
