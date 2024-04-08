@@ -6,7 +6,6 @@ channels:
 dependencies:
   - adcc>=0.15.7
   - psi4>=1.8.1
-  - conda-forge/label/libint_dev::libint
 
   # Core
   - python
