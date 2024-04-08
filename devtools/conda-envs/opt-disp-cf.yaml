@@ -1,6 +1,5 @@
 name: test
 channels:
-  - conda-forge/label/libint_dev
   - conda-forge
   - nodefaults
 dependencies:
