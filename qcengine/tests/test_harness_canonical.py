@@ -31,7 +31,7 @@ _canonical_methods = [
     ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
     ("gcp", {"method": "hf3c"}, {}),
     ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
-    ("madness", {"method": "hf"}, {}),
+    ("madness", {"method": "hf"}, {"eprec": 1.0e-3}),
     ("cfour", {"method": "hf", "basis": "6-31G"}, {}),
     ("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}),
     ("mctc-gcp", {"method": "dft/sv"}, {}),
@@ -134,7 +134,6 @@ def test_compute_energy_qcsk_basis(program, model, keywords):
         ("adcc", {"method": "bad"}),
         ("gcp", {"method": "bad"}),
         ("mrchem", {"method": "bad"}),
-        ("madness", {"method": "bad"}),
         ("mctc-gcp", {"method": "bad"}),
         # add as programs available
         # ("molpro", {"method": "bad"}),

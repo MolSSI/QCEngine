@@ -26,7 +26,7 @@ _canonical_methods = [
     ("mp2d", {"method": "MP2-DMP2"}, {}),
     # needs attn ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
     ("nwchem", {"method": "hf", "basis": "6-31G"}, {}),
-    ("madness", {"method": "hf"}, {}),
+    ("madness", {"method": "hf"}, {"moldft": {"eprec": 1.0e-3}}),
     # needs attn ("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}),
     ("psi4", {"method": "hf", "basis": "6-31G"}, {"gradient_write": True}),
     # needs attn ("qchem", {"method": "hf", "basis": "6-31G"}, {}),
