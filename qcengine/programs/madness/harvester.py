@@ -284,7 +284,6 @@ def harvest_calc_info(calc_info):
 def tensor_to_numpy(j):
     array = np.empty(j["size"])
     array[:] = j["vals"]
-    print(tuple(j["dims"]))
     return np.reshape(array, tuple(j["dims"]))
 
 

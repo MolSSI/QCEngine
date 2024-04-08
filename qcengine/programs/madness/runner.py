@@ -17,6 +17,7 @@ from qcelemental.models import AtomicResult, Provenance, AtomicInput
 from qcelemental.util import safe_version, which
 from qcengine.config import TaskConfig, get_config
 from qcengine.exceptions import UnknownError
+from qcengine.programs.mrchem import extract_properties
 from .harvester import extract_formatted_properties, tensor_to_numpy
 from .keywords import format_keywords
 from ..model import ProgramHarness
@@ -27,6 +28,11 @@ from ..util import error_stamp
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 logger = logging.getLogger(__name__)
+
+extra_outfiles = {"moldft": ["mad.calc_info.json", "mad.scf_info.json"], "molresponse": ["response_base.json"]}
+calc_info_json = "mad.calc_info.json"
+scfinfo_json = "mad.scf_info.json"
+response_json = "response_base.json"
 
 
 class MadnessHarness(ProgramHarness):
@@ -126,23 +132,9 @@ class MadnessHarness(ProgramHarness):
         for app, job_inputs in job_inputs.items():
             output = {}
 
-            print("app:", app)
-            print("job_inputs:", job_inputs)
-            print("____________________________________")
-
             outfiles = extra_outfiles[app]
             command = job_inputs["command"]
             infiles = job_inputs["infiles"]
-
-            # print evertything
-            print("command", command)
-            print("infiles", infiles)
-            print("outfiles", outfiles)
-            print("parent", parent)
-            print("scratch_name", app)
-            print("scratch_suffix", "_madness")
-
-            print("____________________________________")
 
             if app == "moldft":
                 success, dexe = execute(
@@ -165,12 +157,9 @@ class MadnessHarness(ProgramHarness):
                     scratch_messy=True,
                     scratch_exist_ok=True,
                 )
-            print("____________________________________")
+            output = {"stdout": dexe["stdout"], "stderr": dexe["stderr"], "outfiles": dexe["outfiles"]}
 
-            print("success", success)
-            print("dexe", dexe)
-
-            stdin = job_inputs["infiles"]["input"]
+            stdin = job_inputs["infiles"]
             if "There is an error in the input file" in output["stdout"]:
                 raise InputError(error_stamp(stdin, output["stdout"], output["stderr"]))
             if "not compiled" in output["stdout"]:
@@ -181,6 +170,7 @@ class MadnessHarness(ProgramHarness):
                 output["outfiles"]["stdout"] = output["stdout"]
                 output["outfiles"]["stderr"] = output["stderr"]
                 output["outfiles"]["input"] = stdin
+                output["success"] = success
                 app_succeed.append(app)
                 all_output[app] = output
             else:
@@ -225,12 +215,14 @@ class MadnessHarness(ProgramHarness):
                     # opts["dft__hessian"] = True
                 elif run_type == "optimization":
                     opts["dft__gopt"] = True
+                if len(input_model.keywords["moldft"]) == 0:
+                    opts["dft__save"] = True
+                # if the number of execs is greater than 1, we need to save moldft archive
+                if len(input_model.keywords) > 1:
+                    opts["dft__save"] = True
             elif exec == "molresponse":
-                opts["dft__save"] = True
-                opts["response__archive"] = "../moldft/restartdata"
+                opts["response__archive"] = "../mad.restartdata"
                 opts["response__xc"] = method
-
-            print(opts)
 
             logger.debug("JOB_OPTS")
             logger.debug(pp.pformat(opts))
@@ -239,11 +231,9 @@ class MadnessHarness(ProgramHarness):
             if exec == "moldft":
                 exec_rec["infiles"]["input"] = exec_commands + molcmd
             else:
-                exec_rec["infiles"]["molresponse.in"] = exec_commands
-            print(exec_rec["infiles"])
+                exec_rec["infiles"]["response.in"] = exec_commands
 
             madnessrec[exec] = exec_rec
-        print(madnessrec)
 
         return madnessrec
 
@@ -259,12 +249,10 @@ class MadnessHarness(ProgramHarness):
             scratch_directory=inputs["scratch_directory"],
             scratch_messy=True,
         )
-        print("success", success)
-        print("dexe", dexe)
 
         return success, dexe
 
-    def extract_properties(moldft_calcinfo: Dict[str, Any], scfinfo) -> Dict[str, Any]:
+    def extract_moldft_properties(self, moldft_calcinfo: Dict[str, Any], scfinfo: Dict[str, Any]) -> Dict[str, Any]:
         """Translate MRChem output to QCSChema properties.
 
         Parameters
@@ -283,66 +271,105 @@ class MadnessHarness(ProgramHarness):
 
         properties["scf_dipole_moment"] = tensor_to_numpy(scfinfo["scf_dipole_moment"])
 
-        properties["nuclear_repulsion_energy"] = moldft_calcinfo["e_nrep"][-1]
-        properties["scf_xc_energy"] = moldft_calcinfo["e_xc"][-1]
-        properties["scf_total_energy"] = moldft_calcinfo["e_tot"][-1]
-        properties["scf_iterations"] = moldft_calcinfo["iterations"]
-        properties["scf_dipole_moment"] = scfinfo = ["scf_dipole_moment"]
+        scf_data = moldft_calcinfo["scf_e_data"]
 
-        properties["scf_gradient"] = tensor_to_numpy(scfinfo["gradient"])
+        properties["nuclear_repulsion_energy"] = scf_data["e_nrep"][-1]
+        properties["scf_xc_energy"] = scf_data["e_xc"][-1]
+        properties["scf_total_energy"] = scf_data["e_tot"][-1]
+        properties["scf_iterations"] = scf_data["iterations"]
 
-        return properties
+        extra_properties = {}
+        extra_properties["cpu_time"] = moldft_calcinfo["time_tag"]["cpu_time"]
+        extra_properties["wall_time"] = moldft_calcinfo["time_tag"]["wall_time"]
+        extra_properties["iterations"] = scf_data["iterations"]
+
+        # properties["scf_gradient"] = tensor_to_numpy(scfinfo["gradient"])
+
+        return properties, extra_properties
+
+    def extract_response_properties(self, response_json):
+
+        extra_properties = {}
+        polarizability = tensor_to_numpy(response_json["response_data"]["data"]["alpha"][0])
+        extra_properties["polarizability"] = polarizability[-1, :].reshape(3, 3)
+
+        extra_properties["omega"] = response_json["parameters"]["omega"]
+        extra_properties["cpu_time"] = response_json["time_data"]["cpu_time"]
+        extra_properties["wall_time"] = response_json["time_data"]["wall_time"]
+        extra_properties["iterations"] = response_json["response_data"]["iterations"]
+
+        properties = {}
+        properties["scf_iterations"] = response_json["response_data"]["iterations"]
+
+        return properties, extra_properties
+        # prepare a list of computed response properties
+
+        # fill up return_result
 
     def parse_output(self, outfiles, input_model: "AtomicInput") -> "AtomicResult":  # lgtm: [py/similar-function]
 
         output_data = {}
-        for app, outfiles in outfiles.items():
+
+        driver = input_model.driver
+
+        # things to collect
+        # 1. If the application succeded
+        # 2. Standard output and error for each application
+        # 4. The native files for each application
+        # 3. The properties for each application from the native files
+
+        # Then based on the driver we will also collect either moldft energy or all properties
+        all_success = {}
+        all_std_out = {}
+        all_std_err = {}
+        all_native_files = {}
+        all_properties = {}
+        all_extras = {}
+        total_iterations = []
+
+        for app, output in outfiles.items():
+            all_success[app] = output["success"]
+            all_std_out[app] = output["stdout"]
+            all_std_err[app] = output["stderr"]
+            all_native_files[app] = output["outfiles"]
+
+            # collect native files from outfiles
             if app == "moldft":
+                moldft_calcinfo = json.loads(output["outfiles"][calc_info_json])
+                scfinfo = json.loads(output["outfiles"][scfinfo_json])
+                all_properties[app], all_extras[app] = self.extract_moldft_properties(moldft_calcinfo, scfinfo)
+            elif app == "molresponse":
+                response_base_file = json.loads(output["outfiles"][response_json])
+                (
+                    all_properties[app],
+                    extra_properties,
+                ) = self.extract_response_properties(response_base_file)
+                all_extras[app] = extra_properties
+                all_success[app] = response_base_file["converged"]
 
-                # Get the qcvars
-                moldft_out = {}
-                moldft_out["stdout"] = outfiles["stdout"]
-                moldft_out["stderr"] = outfiles["stderr"]
+            total_iterations.append(all_properties[app]["scf_iterations"])
+            del all_properties[app]["scf_iterations"]
+        output_data["success"] = True if np.array([v for v in all_success.values()]).all() else False
+        output_data["stdout"] = " ".join(["\n"] + [v for v in all_std_out.values()])
+        output_data["stderr"] = " ".join(["\n"] + [v for v in all_std_err.values()])
+        output_data["native_files"] = all_native_files
+        output_data["extras"] = all_extras
 
-                calcinfo = json.loads(outfiles["outfiles"]["calc_info"])
-                scfinfo = json.loads(outfiles["outfiles"]["scf_info"])
+        #
+        all_prop = {}
+        for app, prop in all_properties.items():
+            all_prop.update(prop)
+        # first sum up total interations for each application
+        total_scf_iter = sum(total_iterations)
+        all_prop["scf_iterations"] = total_scf_iter
+        output_data["properties"] = all_prop
 
-                output_data["properties"] = extract_properties(calcinfo, scfinfo)
+        if input_model.driver == "energy":
+            output_data["return_result"] = output_data["properties"]["return_energy"]
+        elif input_model.driver == "properties":
+            output_data["return_result"] = output_data["properties"]
+        else:
+            raise InputError(f"Driver {input_model.driver} not implemented for MRChem.")
+        # Get the qcvars
 
-                return_result = scfinfo["scf_energy"]
-                if isinstance(return_result, Decimal):
-                    retres = float(return_result)
-
-                # Get the formatted properties
-                qcprops = extract_formatted_properties(qcvars)
-                # Format them inout an output
-                m_native_files = {k: v for k, v in moldft_out["outfiles"].items() if v is not None}
-                native_files = {
-                    "input": m_native_files["input"],
-                    "calc_info": m_native_files["mad.calc_info.json"],
-                    "scf_info": m_native_files["mad.scf_info.json"],
-                }
-                output_data = {
-                    "schema_name": "qcschema_output",
-                    "schema_version": 1,
-                    "extras": {"outfiles": outfiles, **input_model.extras},
-                    "native_files": native_files,
-                    "properties": qcprops,
-                    "provenance": Provenance(creator="MADNESS", version=self.get_version(), routine="madness"),
-                    "return_result": retres,
-                    "stdout": stdout,
-                }
-                # got to even out who needs plump/flat/Decimal/float/ndarray/list
-                # Decimal --> str preserves precision
-                output_data["extras"]["qcvars"] = {
-                    k.upper(): str(v) if isinstance(v, Decimal) else v
-                    for k, v in qcel.util.unnp(qcvars, flat=True).items()
-                }
-                output_data["extras"]["outfiles"] = {
-                    "input": native_files["input"],
-                    "calc_info": json.loads(native_files["calc_info"]),
-                    "scf_info": json.loads(native_files["scf_info"]),
-                }
-
-                output_data["success"] = True
         return AtomicResult(**{**input_model.dict(), **output_data})
