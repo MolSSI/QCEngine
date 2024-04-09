@@ -33,7 +33,7 @@ _canonical_methods = [
     ("cfour", {"method": "hf", "basis": "6-31G"}, {}),
     ("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}),
     ("mctc-gcp", {"method": "dft/sv"}, {}),
-    ("mace", {"method": "small"}, {})
+    ("mace", {"method": "small"}, {}),
     ("aimnet2", {"method": "b973c"}, {})
     # add as programs available
     # ("terachem", {"method": "bad"}),
