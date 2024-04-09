@@ -1,0 +1,19 @@
+name: mace
+channels:
+  - conda-forge
+dependencies:
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental >=0.12.0
+  - pydantic>=1.0.0
+
+  # mace deps
+  - pymace
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov

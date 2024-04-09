@@ -58,7 +58,7 @@ def clsd_open_pmols():
 _q1 = (qcng.exceptions.InputError, "unknown SCFTYPE", "no ROHF reference for NWChem hand-coded MP2.")
 _q2 = (qcng.exceptions.InputError, "CCTYP IS PROGRAMMED ONLY FOR SCFTYP=RHF OR ROHF", "no UHF CC in GAMESS.")
 _q3 = (qcng.exceptions.InputError, "ccsd: nopen is not zero", "no non-RHF reference for NWChem hand-coded CC.")
-_q6 = (qcng.exceptions.InputError, r"Only RHF/UHF(/RKS|) Hessians are currently implemented.", "no ROHF Hessian for Psi4 HF.")
+_q6 = (qcng.exceptions.InputError, r"Only RHF/UHF(/RKS|/RKS/UKS|) Hessians are currently implemented.", "no ROHF Hessian for Psi4 HF.")
 _q45 = (qcng.exceptions.UnknownError, "non-Abelian symmetry not permitted", "temporary excuse of failure. I think NWChem has fixed upstream.")
 
 _w1 = ("MP2 CORRELATION ENERGY", "nonstandard answer: NWChem TCE MP2 doesn't report singles (affects ROHF)")

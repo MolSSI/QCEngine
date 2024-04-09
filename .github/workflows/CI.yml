@@ -98,6 +98,12 @@ jobs:
             runs-on: windows-latest
             pytest: "-k 'not (hes2 or qchem)'"
 
+          - conda-env: mace
+            python-version: "3.10"
+            label: MACE
+            runs-on: ubuntu-latest
+            pytest: ""
+
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
 
