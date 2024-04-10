@@ -184,6 +184,12 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             val = opts.pop("geometry__autosym")
             molcmd = re.sub(r"geometry ([^\n]*)", rf"geometry \1 autosym {val}", molcmd)
 
+        # Added these keywords so that coordinates (and gradients) are not shifted or reoriented
+        if opts.get("geometry__noautosym", False):
+            molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 noautosym", molcmd)
+        if opts.pop("geometry__nocenter", False):
+            molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 nocenter", molcmd)
+
         # Handle calc type and quantum chemical method
         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
         opts.update(mdcopts)
