@@ -135,10 +135,26 @@ H
            
         keywords = {'scf_damp': 'true',
                     'scf_diis': 'false'}
+
+        save_fchk = False
+        
+        if input_model.protocols.native_files == 'all':
+            save_fchk = True
+            keywords['native_files'] = 'fcheck'
+            output['native_files'] = {'input': str}
+        if (save_fchk):
+            with open('Test.FChk', 'r') as f:
+                output['native_files']['fchk'] = f.read()
+                       
         # Begin input file
         input_file = []
         input_file.append('%mem={}MB'.format(int(config.memory * 1024)))
-        input_file.append("#P {}/{}".format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw) + '\n')
+        input_file.append("#P {}/{}".format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw))
+
+        if (save_fchk):
+            input_file.append(' formcheck')
+
+        input_file.append("\n")
         input_file.append("write your comment here\n")
   
         # Create a mol object
@@ -163,6 +179,7 @@ H
     def execute(self,
                 inputs,
                 *,
+                extra_infiles: Optional[Dict[str, str]] = None,
                 extra_outfiles: Optional[Dict[str, str]] = None,
                 extra_commands: Optional[List[str]] = None,
                 scratch_name = None,
