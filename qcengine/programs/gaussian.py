@@ -137,25 +137,16 @@ H
                     'scf_diis': 'false'}
 
         save_fchk = False
-        
+
         if input_model.protocols.native_files == 'all':
             save_fchk = True
-            keywords['native_files'] = 'fcheck'
-            output['native_files'] = {'input': str}
-        if (save_fchk):
-            with open('Test.FChk', 'r') as f:
-                output['native_files']['fchk'] = f.read()
-                       
+            gaussian_kw.append('formcheck')
+
         # Begin input file
         input_file = []
         input_file.append('%mem={}MB'.format(int(config.memory * 1024)))
-        input_file.append("#P {}/{}".format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw))
-
-        if (save_fchk):
-            input_file.append(' formcheck')
-
-        input_file.append("\n")
-        input_file.append("write your comment here\n")
+        input_file.append('#P {}/{}'.format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw) + '\n')
+        input_file.append('write your comment here\n')
   
         # Create a mol object
         mol = input_model.molecule
@@ -167,6 +158,10 @@ H
                 raise InputError('Cannot handle ghost atoms yet.')
             input_file.append(f'{sym} {geom[0]:14.8f} {geom[1]:14.8f} {geom[2]:14.8f}')
         input_file.append("\n")
+
+#        print ('*' * 100)
+#        print ('\n'.join(input_file))
+#        print ('*' * 100)
 
         gaussian_ret = {
             'infiles': {'input.inp': '\n'.join(input_file)},
@@ -255,7 +250,19 @@ H
         # HACK - scf_values can have NaN
         # remove for now
         output_data['extras']['cclib'].pop('scfvalues')
-        
+
+        if (input_model.protocols.native_files == 'all'):
+            output_data['native_files'] = {}
+            
+            tmp_input_file = os.path.join(tmp_output_path, 'input.inp')
+            with open(tmp_input_file, 'rt') as f:
+                output_data['native_files']['input.inp'] = f.read()
+                
+            # formcheck keyword always creates the Test.FChk file
+            tmp_check_file = os.path.join(tmp_output_path, 'Test.FChk')
+            with open(tmp_check_file, 'rt') as f:
+                output_data['native_files']['gaussian.fchk'] = f.read()
+                
         merged_data = {**input_model.dict(), **output_data}
 
         return AtomicResult(**merged_data)
