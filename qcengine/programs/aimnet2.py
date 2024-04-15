@@ -94,26 +94,21 @@ class AIMNET2Harness(ProgramHarness):
                 "return_energy": out["energy"].item() * ureg.conversion_factor("eV", "hartree"),
                 "return_gradient": (
                     -1.0 * out["forces"][0].detach().numpy() * ureg.conversion_factor("eV / angstrom", "hartree / bohr")
-                )
-                .ravel()
-                .tolist(),
+                ),
                 "calcinfo_natom": len(input_data.molecule.atomic_numbers),
             },
             "extras": input_data.extras.copy(),
         }
         # update with calculated extras
-        ret_data["extras"].update(
-            {
-                "charges": out["charges"].detach()[0].cpu().numpy(),
-                "charges_std": out["charges_std"].detach()[0].cpu().numpy(),
-                "energy_std": out["energy_std"].item(),
-                "forces_std": out["forces_std"].detach()[0].cpu().numpy(),
-            }
-        )
+        ret_data["extras"]["aimnet2"] = {
+            "charges": out["charges"].detach()[0].cpu().numpy(),
+            "ensemble_charges_std": out["charges_std"].detach()[0].cpu().numpy(),
+            "ensemble_energy_std": out["energy_std"].item(),
+            "ensemble_forces_std": out["forces_std"].detach()[0].cpu().numpy(),
+        }
         if input_data.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
         elif input_data.driver == "gradient":
-            # assume the output is eV/bohr
             ret_data["return_result"] = ret_data["properties"]["return_gradient"]
         else:
             raise InputError(
