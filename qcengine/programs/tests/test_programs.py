@@ -432,9 +432,9 @@ def test_aimnet2_energy(model, expected_energy):
     result = qcng.compute(atomic_input, "aimnet2")
     assert result.success
     assert pytest.approx(result.return_result) == expected_energy
-    assert "charges" in result.extras
-    assert "charges_std" in result.extras
-    assert "forces_std" in result.extras
+    assert "charges" in result.extras["aimnet2"]
+    assert "ensemble_charges_std" in result.extras["aimnet2"]
+    assert "ensemble_forces_std" in result.extras["aimnet2"]
 
 
 @using("aimnet2")
@@ -459,4 +459,4 @@ def test_aimnet2_gradient():
     )
     assert pytest.approx(result.properties.return_energy) == -76.47412023758551
     # make sure the other properties were also saved
-    assert "charges" in result.extras
+    assert "charges" in result.extras["aimnet2"]
