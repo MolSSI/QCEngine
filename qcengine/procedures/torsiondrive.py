@@ -183,19 +183,16 @@ class TorsionDriveProcedure(ProcedureHarness):
         dihedrals = input_model.keywords.dihedrals
         angles = grid_point.split()
 
-        keywords = {
-            **input_model.optimization_spec.keywords,
-            "constraints": {
-                "set": [
-                    {
-                        "type": "dihedral",
-                        "indices": dihedral,
-                        "value": int(angle),
-                    }
-                    for dihedral, angle in zip(dihedrals, angles)
-                ]
-            },
-        }
+        # update the keywords with extra constraints for the target torsion
+        keywords = input_model.optimization_spec.keywords
+        keywords.setdefault("constraints", {})
+        keywords["constraints"].setdefault("set", [])
+        keywords["constraints"]["set"].extend(
+            [
+                {"type": "dihedral", "indices": dihedral, "value": int(angle)}
+                for dihedral, angle in zip(dihedrals, angles)
+            ]
+        )
 
         input_data = OptimizationInput(
             keywords=keywords,

@@ -359,6 +359,60 @@ def test_torsiondrive_generic():
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
 
 
+@using("mace")
+@using("torsiondrive")
+def test_torsiondrive_extra_constraints():
+
+    input_data = TorsionDriveInput(
+        keywords=TDKeywords(dihedrals=[(3, 0, 1, 2)], grid_spacing=[180]),
+        input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="small", basis=None)),
+        initial_molecule=[qcng.get_molecule("propane")],
+        optimization_spec=OptimizationSpecification(
+            procedure="geomeTRIC",
+            keywords={
+                "coordsys": "dlc",
+                # use mace as it does not have convergence issues like UFF
+                "program": "mace",
+                "constraints": {
+                    "set": [
+                        {
+                            "type": "dihedral",  # hold a dihedral through the other C-C bond fixed
+                            "indices": (0, 1, 2, 10),
+                            "value": 0.0,
+                        }
+                    ]
+                },
+            },
+        ),
+    )
+
+    ret = qcng.compute_procedure(input_data, "torsiondrive", raise_error=True)
+
+    assert ret.error is None
+    assert ret.success
+
+    expected_grid_ids = {"180", "0"}
+
+    assert {*ret.optimization_history} == expected_grid_ids
+
+    assert {*ret.final_energies} == expected_grid_ids
+    assert {*ret.final_molecules} == expected_grid_ids
+
+    assert (
+        pytest.approx(ret.final_molecules["180"].measure([3, 0, 1, 2]), abs=1.0e-2) == 180.0
+        or pytest.approx(ret.final_molecules["180"].measure([3, 0, 1, 2]), abs=1.0e-2) == -180.0
+    )
+    assert pytest.approx(ret.final_molecules["180"].measure([0, 1, 2, 10]), abs=1.0e-2) == 0.0
+    assert pytest.approx(ret.final_molecules["0"].measure([3, 0, 1, 2]), abs=1.0e-2) == 0.0
+
+    assert ret.provenance.creator.lower() == "torsiondrive"
+    assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
+    assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "mace"
+
+    assert "Using MACE-OFF23 MODEL for MACECalculator" in ret.stdout
+    assert "All optimizations converged at lowest energy. Job Finished!\n" in ret.stdout
+
+
 @using("mrchem")
 @pytest.mark.parametrize(
     "optimizer",
