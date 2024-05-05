@@ -177,6 +177,7 @@ _programs = {
     "psi4_derqcsk": is_program_new_enough("psi4", "1.5a1.dev117"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.1"),
+    "qcmanybody": which_import("qcmanybody", return_bool=True),
     "rdkit": which_import("rdkit", return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "terachem_pbs": is_program_new_enough("terachem_pbs", "0.7.2"),

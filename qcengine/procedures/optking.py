@@ -1,10 +1,14 @@
-from typing import Any, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 from qcelemental.models import OptimizationInput, OptimizationResult
 from qcelemental.util import safe_version, which_import
 
+from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput, GeneralizedOptimizationResult
+
 from .model import ProcedureHarness
 
+if TYPE_CHECKING:
+    from qcengine.config import TaskConfig
 
 class OptKingProcedure(ProcedureHarness):
 
@@ -37,7 +41,7 @@ class OptKingProcedure(ProcedureHarness):
 
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "OptimizationInput", config: "TaskConfig") -> "Optimization":
+    def compute(self, input_model: "OptimizationInput", config: "TaskConfig") -> "OptimizationResult":
         if self.found(raise_error=True):
             import optking
 
@@ -55,5 +59,37 @@ class OptKingProcedure(ProcedureHarness):
         output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
         if output_data["success"]:
             output_data = OptimizationResult(**output_data)
+
+        return output_data
+
+
+class GenOptKingProcedure(OptKingProcedure):
+
+    # note that "procedure" value below not used
+    _defaults = {"name": "GenOptKing", "procedure": "genoptimization"}
+
+    version_cache: Dict[str, str] = {}
+
+    def build_input_model(self, data: Union[Dict[str, Any], "GeneralizedOptimizationInput"]) -> "GeneralizedOptimizationInput":
+        return self._build_model(data, GeneralizedOptimizationInput)
+
+    def compute(self, input_model: "GeneralizedOptimizationInput", config: "TaskConfig") -> "GeneralizedOptimizationResult":
+        if self.found(raise_error=True):
+            import optking
+
+        input_data = input_model.dict()
+
+        # Set retries to two if zero while respecting local_config
+        local_config = config.dict()
+        local_config["retries"] = local_config.get("retries", 2) or 2
+        #TODO input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
+
+        # Run the program
+        output_data = optking.optwrapper.optimize_qcengine(input_data)
+
+        output_data["schema_name"] = "qcschema_generalizedoptimizationresult"
+        #TODO output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
+        if output_data["success"]:
+            output_data = GeneralizedOptimizationResult(**output_data)
 
         return output_data
