@@ -221,5 +221,9 @@ units ang
         "cp": 2.27 / constants.bohr2angstroms,
     }
     r_fh_computed = ret.final_molecule.measure([1, 3])
-    assert pytest.approx(r_fh_computed, 1.0e-2) == r_fh_hb[bsse_type], f"hydrogen bond length computed ({r_fh_computed}) != expected ({r_fh_hb[bsse_type]})"
-    assert len(ret.trajectory) == 2, f"trajectory protocol did not take. {len(ret.trajectory)=} != 2 (initial_and_final)"
+    assert (
+        pytest.approx(r_fh_computed, 1.0e-2) == r_fh_hb[bsse_type]
+    ), f"hydrogen bond length computed ({r_fh_computed}) != expected ({r_fh_hb[bsse_type]})"
+    assert (
+        len(ret.trajectory) == 2
+    ), f"trajectory protocol did not take. len(ret.trajectory)={len(ret.trajectory)} != 2 (initial_and_final)"
