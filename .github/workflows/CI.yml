@@ -180,7 +180,10 @@ jobs:
 
     - name: PyTest
       run: |
-        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v ${{ matrix.cfg.pytest }} \
+            --cov=qcengine --cov-report=xml \
+            --color=yes --durations 50 --durations-min 20 \
+            qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
