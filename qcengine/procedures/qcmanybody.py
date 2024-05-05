@@ -1,8 +1,6 @@
 import pprint
 from typing import TYPE_CHECKING, Any, Dict, Union
 
-from qcmanybody.qcng_computer import ManyBodyComputerQCNG
-from qcmanybody.models import ManyBodyInput, ManyBodyResult
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
@@ -10,6 +8,7 @@ from ..exceptions import UnknownError
 
 if TYPE_CHECKING:
     from ..config import TaskConfig
+    from qcmanybody.models import ManyBodyInput, ManyBodyResult
 
 
 class QCManyBodyProcedure(ProcedureHarness):
@@ -31,6 +30,7 @@ class QCManyBodyProcedure(ProcedureHarness):
         )
 
     def build_input_model(self, data: Union[Dict[str, Any], "ManyBodyInput"]) -> "ManyBodyInput":
+        from qcmanybody.models import ManyBodyInput
         return self._build_model(data, ManyBodyInput)
 
     def get_version(self) -> str:
@@ -45,6 +45,8 @@ class QCManyBodyProcedure(ProcedureHarness):
         return self.version_cache[which_prog]
 
     def compute(self, input_model: "ManyBodyInput", config: "TaskConfig") -> "ManyBodyResult":
+        from qcmanybody.qcng_computer import ManyBodyComputerQCNG
+
         output_model = ManyBodyComputerQCNG.from_manybodyinput(input_model)
 
         return output_model
