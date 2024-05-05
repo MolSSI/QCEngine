@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING, Any, Dict, Union
 from qcelemental.models import OptimizationInput, OptimizationResult
 from qcelemental.util import safe_version, which_import
 
-from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput, GeneralizedOptimizationResult
-
 from .model import ProcedureHarness
 
 if TYPE_CHECKING:
     from qcengine.config import TaskConfig
+    from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput, GeneralizedOptimizationResult
+
 
 class OptKingProcedure(ProcedureHarness):
 
@@ -70,12 +70,32 @@ class GenOptKingProcedure(OptKingProcedure):
 
     version_cache: Dict[str, str] = {}
 
+    def found(self, raise_error: bool = False) -> bool:
+        qc = which_import(
+            "optking",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="Please install via `conda install optking -c conda-forge`.",
+        )
+        dep = which_import(
+            "qcmanybody",
+            return_bool=True,
+            raise_error=raise_error,
+            raise_msg="For GenOptKing harness, please install via `conda install qcmanybody -c conda-forge`.",
+        )
+
+        return qc and dep
+
     def build_input_model(self, data: Union[Dict[str, Any], "GeneralizedOptimizationInput"]) -> "GeneralizedOptimizationInput":
+        from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
+
         return self._build_model(data, GeneralizedOptimizationInput)
 
     def compute(self, input_model: "GeneralizedOptimizationInput", config: "TaskConfig") -> "GeneralizedOptimizationResult":
-        if self.found(raise_error=True):
-            import optking
+        self.found(raise_error=True)
+
+        import optking
+        from qcmanybody.models.generalized_optimization import GeneralizedOptimizationResult
 
         input_data = input_model.dict()
 
