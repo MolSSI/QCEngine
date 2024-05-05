@@ -31,6 +31,7 @@ class QCManyBodyProcedure(ProcedureHarness):
 
     def build_input_model(self, data: Union[Dict[str, Any], "ManyBodyInput"]) -> "ManyBodyInput":
         from qcmanybody.models import ManyBodyInput
+
         return self._build_model(data, ManyBodyInput)
 
     def get_version(self) -> str:

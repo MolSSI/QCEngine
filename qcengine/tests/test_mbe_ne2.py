@@ -11,12 +11,15 @@ from qcengine.testing import using
 
 
 @using("qcmanybody")
-@pytest.mark.parametrize("qcprog", [
-    pytest.param("cfour", marks=using("cfour")),
-    pytest.param("gamess", marks=using("gamess")),
-    pytest.param("nwchem", marks=using("nwchem")),
-    pytest.param("psi4", marks=using("psi4")),
-])
+@pytest.mark.parametrize(
+    "qcprog",
+    [
+        pytest.param("cfour", marks=using("cfour")),
+        pytest.param("gamess", marks=using("gamess")),
+        pytest.param("nwchem", marks=using("nwchem")),
+        pytest.param("psi4", marks=using("psi4")),
+    ],
+)
 def test_tu6_cp_ne2(qcprog):
     """
     from https://github.com/psi4/psi4/blob/master/tests/tu6-cp-ne2/input.dat
@@ -44,7 +47,7 @@ def test_tu6_cp_ne2(qcprog):
             "specification": {
                 "model": {
                     "method": "ccsd(t)",
-                    #TODO error handling cfour "basis": "aug-cc-pvdz",
+                    # TODO error handling cfour "basis": "aug-cc-pvdz",
                     "basis": basis[qcprog],
                 },
                 "driver": "energy",
@@ -61,7 +64,9 @@ def test_tu6_cp_ne2(qcprog):
 
     for R in tu6_ie_scan:
         # TODO fix_symmetry='c1' propagate
-        nene = Molecule(symbols=["Ne", "Ne"], fragments=[[0], [1]], geometry=[0, 0, 0, 0, 0, R / constants.bohr2angstroms])
+        nene = Molecule(
+            symbols=["Ne", "Ne"], fragments=[[0], [1]], geometry=[0, 0, 0, 0, 0, R / constants.bohr2angstroms]
+        )
         mbe_data["molecule"] = nene
 
         mbe_model = ManyBodyInput(**mbe_data)
@@ -113,14 +118,15 @@ def test_mbe_error():
                 "driver": "energy",
                 "program": "cms",
             },
-            "keywords": {
-            },
+            "keywords": {},
             "driver": "energy",
         },
         "molecule": None,
     }
 
-    nene = Molecule(symbols=["Ne", "Ne"], fragments=[[0], [1]], geometry=[0, 0, 0, 0, 0, 3.0 / constants.bohr2angstroms])
+    nene = Molecule(
+        symbols=["Ne", "Ne"], fragments=[[0], [1]], geometry=[0, 0, 0, 0, 0, 3.0 / constants.bohr2angstroms]
+    )
     mbe_data["molecule"] = nene
 
     mbe_model = ManyBodyInput(**mbe_data)
@@ -151,7 +157,8 @@ def test_mbe_error():
 def test_optimization_qcmanybody(optimizer, bsse_type):
     from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
 
-    initial_molecule = Molecule.from_data("""
+    initial_molecule = Molecule.from_data(
+        """
 F         -0.04288        2.78905        0.00000
 H          0.59079        2.03435        0.00000
 --
@@ -161,7 +168,8 @@ H         -1.60642        0.21789       -0.00000
 F          2.03569       -0.60531       -0.00000
 H          1.06527       -0.77673        0.00000
 units ang
-""")
+"""
+    )
 
     at_spec = {
         "model": {
@@ -174,20 +182,20 @@ units ang
     }
 
     mbe_spec = {
-         "specification": {
-             "model": {
-                 "method": "hf",
-                 "basis": "6-31g",
-             },
-             "driver": "energy",
-             "program": "psi4",
-             "keywords": {},
-         },
-         "keywords": {
-             "bsse_type": bsse_type,
-         },
-         "driver": "energy",
-     }
+        "specification": {
+            "model": {
+                "method": "hf",
+                "basis": "6-31g",
+            },
+            "driver": "energy",
+            "program": "psi4",
+            "keywords": {},
+        },
+        "keywords": {
+            "bsse_type": bsse_type,
+        },
+        "driver": "energy",
+    }
 
     opt_data = {
         "initial_molecule": initial_molecule,
@@ -204,11 +212,12 @@ units ang
 
     ret = qcng.compute_procedure(opt_data, optimizer, raise_error=True)
     import pprint
+
     pprint.pprint(ret.dict())
 
     r_fh_hb = {
-        "none": 2.18 /constants.bohr2angstroms,
-        "nocp": 2.18 /constants.bohr2angstroms,
+        "none": 2.18 / constants.bohr2angstroms,
+        "nocp": 2.18 / constants.bohr2angstroms,
         "cp": 2.27 / constants.bohr2angstroms,
     }
     r_fh_computed = ret.final_molecule.measure([1, 3])

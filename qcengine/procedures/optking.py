@@ -86,12 +86,16 @@ class GenOptKingProcedure(OptKingProcedure):
 
         return qc and dep
 
-    def build_input_model(self, data: Union[Dict[str, Any], "GeneralizedOptimizationInput"]) -> "GeneralizedOptimizationInput":
+    def build_input_model(
+        self, data: Union[Dict[str, Any], "GeneralizedOptimizationInput"]
+    ) -> "GeneralizedOptimizationInput":
         from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
 
         return self._build_model(data, GeneralizedOptimizationInput)
 
-    def compute(self, input_model: "GeneralizedOptimizationInput", config: "TaskConfig") -> "GeneralizedOptimizationResult":
+    def compute(
+        self, input_model: "GeneralizedOptimizationInput", config: "TaskConfig"
+    ) -> "GeneralizedOptimizationResult":
         self.found(raise_error=True)
 
         import optking
@@ -102,13 +106,13 @@ class GenOptKingProcedure(OptKingProcedure):
         # Set retries to two if zero while respecting local_config
         local_config = config.dict()
         local_config["retries"] = local_config.get("retries", 2) or 2
-        #TODO input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
+        # TODO input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
         output_data = optking.optwrapper.optimize_qcengine(input_data)
 
         output_data["schema_name"] = "qcschema_generalizedoptimizationresult"
-        #TODO output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
+        # TODO output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
         if output_data["success"]:
             output_data = GeneralizedOptimizationResult(**output_data)
 
