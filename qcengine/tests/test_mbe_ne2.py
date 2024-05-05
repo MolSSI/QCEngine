@@ -6,8 +6,6 @@ from qcelemental import constants
 from qcelemental.models import Molecule
 from qcelemental.testing import compare, compare_values
 
-from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
-
 import qcengine as qcng
 from qcengine.testing import using
 
@@ -151,6 +149,7 @@ def test_mbe_error():
     ],
 )
 def test_optimization_qcmanybody(optimizer, bsse_type):
+    from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
 
     initial_molecule = Molecule.from_data("""
 F         -0.04288        2.78905        0.00000
