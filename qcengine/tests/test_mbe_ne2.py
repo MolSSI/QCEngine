@@ -190,11 +190,17 @@ units ang
             "driver": "energy",
             "program": "psi4",
             "keywords": {},
+            "protocols": {
+                "stdout": False,
+            },
         },
         "keywords": {
             "bsse_type": bsse_type,
         },
         "driver": "energy",
+        "protocols": {
+            "component_results": "all",
+        },
     }
 
     opt_data = {
@@ -211,19 +217,22 @@ units ang
     # opt_data = GeneralizedOptimizationInput(**opt_data)
 
     ret = qcng.compute_procedure(opt_data, optimizer, raise_error=True)
-    import pprint
 
-    pprint.pprint(ret.dict())
+    print("FFFFFFFFFF")
+    pprint.pprint(ret.dict(), width=200)
 
-    r_fh_hb = {
+    r_fh_hb_expected = {
         "none": 2.18 / constants.bohr2angstroms,
         "nocp": 2.18 / constants.bohr2angstroms,
         "cp": 2.27 / constants.bohr2angstroms,
-    }
+    }[bsse_type]
     r_fh_computed = ret.final_molecule.measure([1, 3])
     assert (
-        pytest.approx(r_fh_computed, 1.0e-2) == r_fh_hb[bsse_type]
-    ), f"hydrogen bond length computed ({r_fh_computed}) != expected ({r_fh_hb[bsse_type]})"
+        pytest.approx(r_fh_computed, 1.0e-2) == r_fh_hb_expected
+    ), f"hydrogen bond length computed ({r_fh_computed}) != expected ({r_fh_hb_expected})"
     assert (
         len(ret.trajectory) == 2
     ), f"trajectory protocol did not take. len(ret.trajectory)={len(ret.trajectory)} != 2 (initial_and_final)"
+    if bsse_type != "none":
+        assert (len(ret.trajectory[-1].component_results) == {"nocp": 7, "cp": 10}[bsse_type]), f"mbe protocol did not take"
+        assert (ret.trajectory[-1].component_results['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None), f"atomic protocol did not take"
