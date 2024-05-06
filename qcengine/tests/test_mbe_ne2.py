@@ -234,5 +234,9 @@ units ang
         len(ret.trajectory) == 2
     ), f"trajectory protocol did not take. len(ret.trajectory)={len(ret.trajectory)} != 2 (initial_and_final)"
     if bsse_type != "none":
-        assert (len(ret.trajectory[-1].component_results) == {"nocp": 7, "cp": 10}[bsse_type]), f"mbe protocol did not take"
-        assert (ret.trajectory[-1].component_results['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None), f"atomic protocol did not take"
+        assert (
+            len(ret.trajectory[-1].component_results) == {"nocp": 7, "cp": 10}[bsse_type]
+        ), f"mbe protocol did not take"
+        assert (
+            ret.trajectory[-1].component_results['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None
+        ), f"atomic protocol did not take"
