@@ -1,4 +1,3 @@
-import pprint
 from typing import TYPE_CHECKING, Any, Dict, Union
 
 from qcelemental.util import safe_version, which_import

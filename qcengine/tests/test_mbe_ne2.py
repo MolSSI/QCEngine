@@ -95,19 +95,6 @@ def test_tu6_cp_ne2(qcprog):
 def test_mbe_error():
     from qcmanybody.models import ManyBodyInput
 
-    keywords = {
-        "cfour": {"frozen_core": True},
-        "gamess": {"contrl__ispher": 1},
-        "nwchem": {"ccsd__freeze__atomic": True, "basis__spherical": True},
-        "psi4": {"freeze_core": True},
-    }
-    basis = {
-        "cfour": "aug-pvdz",
-        "gamess": "accd",
-        "nwchem": "aug-cc-pvdz",
-        "psi4": "aug-cc-pvdz",
-    }
-
     mbe_data = {
         "specification": {
             "specification": {
@@ -157,7 +144,6 @@ def test_mbe_error():
     ],
 )
 def test_optimization_qcmanybody(optimizer, bsse_type, sio):
-    from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
 
     initial_molecule = Molecule.from_data(
         """
@@ -220,6 +206,7 @@ units ang
             "trajectory": "initial_and_final",
         },
     }
+    # from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
     # opt_data = GeneralizedOptimizationInput(**opt_data)
 
     ret = qcng.compute_procedure(opt_data, optimizer, raise_error=True)
