@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - psi4
+  - psi4=1.9.1
   - rdkit
   - mopac
 
