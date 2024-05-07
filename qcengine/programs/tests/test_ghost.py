@@ -193,7 +193,7 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords):
             res = qcng.compute(atin, qcprog, raise_error=True)
         pytest.xfail("no ghosts with gamess")
 
-    atres = qcng.compute(atin, qcprog)
+    atres = qcng.compute(atin, qcprog, task_config={"memory": 2.2})
     pprint.pprint(atres.dict(), width=200)
 
     assert compare_values(
