@@ -179,6 +179,7 @@ jobs:
         python -c "import qcengine; print(qcengine.config.global_repr())"
 
     - name: Configure QCEngine
+      if: false
       run: |
         cat > qcengine.yaml <<EOF
         all:
