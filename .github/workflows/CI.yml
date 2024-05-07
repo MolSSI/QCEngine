@@ -178,6 +178,17 @@ jobs:
         pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
         python -c "import qcengine; print(qcengine.config.global_repr())"
 
+    - name: Configure QCEngine
+      run: |
+        cat > qcengine.yaml <<EOF
+        all:
+          hostname_pattern: "*"
+          memory: 2
+          ncores: 2
+        EOF
+        cat qcengine.yaml
+        qcengine info
+
     - name: PyTest
       run: |
         pytest -rws -v ${{ matrix.cfg.pytest }} \

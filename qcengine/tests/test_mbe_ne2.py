@@ -146,15 +146,17 @@ def test_mbe_error():
 @using("psi4")
 @using("qcmanybody")
 @pytest.mark.parametrize(
-    "optimizer,bsse_type",
+    "optimizer,bsse_type,sio",
     [
-        pytest.param("optking", "none", marks=using("optking")),
-        pytest.param("genoptking", "none", marks=using("optking")),
-        pytest.param("genoptking", "nocp", marks=using("optking")),
-        pytest.param("genoptking", "cp", marks=using("optking")),
+        pytest.param("optking", "none", None, marks=using("optking")),
+        pytest.param("genoptking", "none", None, marks=using("optking")),
+        pytest.param("genoptking", "nocp", False, marks=using("optking")),
+        # pytest.param("genoptking", "nocp", True, marks=using("optking")),
+        # pytest.param("genoptking", "cp", False, marks=using("optking")),
+        pytest.param("genoptking", "cp", True, marks=using("optking")),
     ],
 )
-def test_optimization_qcmanybody(optimizer, bsse_type):
+def test_optimization_qcmanybody(optimizer, bsse_type, sio):
     from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
 
     initial_molecule = Molecule.from_data(
@@ -193,9 +195,13 @@ units ang
             "protocols": {
                 "stdout": False,
             },
+            "extras": {
+                "psiapi": True,
+            },
         },
         "keywords": {
             "bsse_type": bsse_type,
+            "supersystem_ie_only": sio,
         },
         "driver": "energy",
         "protocols": {
@@ -221,22 +227,26 @@ units ang
     print("FFFFFFFFFF")
     pprint.pprint(ret.dict(), width=200)
 
-    r_fh_hb_expected = {
+    r_fh_hb_xptd = {
         "none": 2.18 / constants.bohr2angstroms,
         "nocp": 2.18 / constants.bohr2angstroms,
         "cp": 2.27 / constants.bohr2angstroms,
     }[bsse_type]
     r_fh_computed = ret.final_molecule.measure([1, 3])
     assert (
-        pytest.approx(r_fh_computed, 1.0e-2) == r_fh_hb_expected
-    ), f"hydrogen bond length computed ({r_fh_computed}) != expected ({r_fh_hb_expected})"
+        pytest.approx(r_fh_computed, 1.0e-2) == r_fh_hb_xptd
+    ), f"hydrogen bond length computed ({r_fh_computed}) != expected ({r_fh_hb_xptd})"
     assert (
         len(ret.trajectory) == 2
     ), f"trajectory protocol did not take. len(ret.trajectory)={len(ret.trajectory)} != 2 (initial_and_final)"
     if bsse_type != "none":
-        assert (
-            len(ret.trajectory[-1].component_results) == {"nocp": 7, "cp": 10}[bsse_type]
-        ), f"mbe protocol did not take"
+        xptd_nmbe = {
+            ("nocp", False): 7,
+            ("nocp", True): 4,
+            ("cp", False): 10,
+            ("cp", True): 7,
+        }[(bsse_type, sio)]
+        assert xptd_nmbe == len(ret.trajectory[-1].component_results), f"mbe protocol did not take"
         assert (
             ret.trajectory[-1].component_results['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None
         ), f"atomic protocol did not take"
