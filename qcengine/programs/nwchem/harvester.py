@@ -583,9 +583,9 @@ def harvest_outfile_pass(outtext):
                     if ext_energy_list[nroot] in e_val:
                         symm = k
                         # in hartree
-                        psivar[
-                            f"EOM-{cc_name} ROOT 0 -> ROOT {nroot + 1} EXCITATION ENERGY - {symm} SYMMETRY"
-                        ] = ext_energy_list[nroot]
+                        psivar[f"EOM-{cc_name} ROOT 0 -> ROOT {nroot + 1} EXCITATION ENERGY - {symm} SYMMETRY"] = (
+                            ext_energy_list[nroot]
+                        )
                         psivar[f"EOM-{cc_name} ROOT 0 -> ROOT {nroot + 1} TOTAL ENERGY - {symm} SYMMETRY"] = psivar[
                             f"{cc_name} TOTAL ENERGY"
                         ] + Decimal(ext_energy_list[nroot])
@@ -1038,6 +1038,7 @@ def harvest_outfile_pass(outtext):
     if mobj:
         psivar["DIPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
         psivar["TOTAL DIPOLE MOMENT"] = mobj.group(4)
+
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
         psivar["SCF TOTAL ENERGY"] = psivar["HF TOTAL ENERGY"]

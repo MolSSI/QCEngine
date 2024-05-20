@@ -1,6 +1,7 @@
 """
 Calls the NWChem executable.
 """
+
 import copy
 import hashlib
 import logging
