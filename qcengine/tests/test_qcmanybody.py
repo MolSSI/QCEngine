@@ -20,7 +20,7 @@ from qcengine.testing import using
         pytest.param("psi4", marks=using("psi4")),
     ],
 )
-def test_tu6_cp_ne2(qcprog):
+def test_bsse_ene_tu6_cp_ne2(qcprog):
     """
     from https://github.com/psi4/psi4/blob/master/tests/tu6-cp-ne2/input.dat
     Example potential energy surface scan and CP-correction for Ne2
@@ -136,14 +136,18 @@ def test_mbe_error():
     "optimizer,bsse_type,sio",
     [
         pytest.param("optking", "none", None, marks=using("optking")),
-        pytest.param("genoptking", "none", None, marks=using("optking")),
-        pytest.param("genoptking", "nocp", False, marks=using("optking")),
-        # pytest.param("genoptking", "nocp", True, marks=using("optking")),
-        # pytest.param("genoptking", "cp", False, marks=using("optking")),
-        pytest.param("genoptking", "cp", True, marks=using("optking")),
+        pytest.param("genoptking", "none", None, marks=using("optking_genopt")),
+        pytest.param("genoptking", "nocp", False, marks=using("optking_genopt")),
+        # pytest.param("genoptking", "nocp", True, marks=using("optking_genopt")),
+        # pytest.param("genoptking", "cp", False, marks=using("optking_genopt")),
+
+        pytest.param("geometric", "none", None, marks=using("geometric")),
+        pytest.param("gengeometric", "none", None, marks=using("geometric_genopt")),
+        pytest.param("gengeometric", "nocp", False, marks=using("geometric_genopt")),
+        pytest.param("gengeometric", "cp", True, marks=using("geometric_genopt")),
     ],
 )
-def test_optimization_qcmanybody(optimizer, bsse_type, sio):
+def test_bsse_opt_hf_trimer(optimizer, bsse_type, sio):
 
     initial_molecule = Molecule.from_data(
         """
@@ -237,3 +241,80 @@ units ang
         assert (
             ret.trajectory[-1].component_results['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None
         ), f"atomic protocol did not take"
+
+
+@using("qcmanybody")
+@pytest.mark.parametrize("bsse_type", ["mbe", "ssfc"])  # aka nocp, cp
+@pytest.mark.parametrize("qcprog,qc_keywords", [
+    pytest.param("psi4", {}, marks=using("psi4")),
+    pytest.param("cfour", {}, marks=using("cfour")),
+    pytest.param("nwchem", {}, marks=using("nwchem")),
+])
+@pytest.mark.parametrize("optimizer,opt_keywords", [
+    pytest.param("optking", {}, marks=using("optking_genopt")),
+    pytest.param("geometric", {"convergence_set": "interfrag_tight", "maxiter": 15}, marks=using("geometric_genopt")),
+])
+def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywords):
+    # in geomeTRIC: test_lif_bsse
+
+    lif = {
+        "symbols": ["Li", "F"],
+        "geometry": [0, 0, 0, 0, 0, 3],
+        "fragments": [[0], [1]],
+        "fragment_charges": [+1, -1],
+    }
+
+    mbe_spec = {
+        "schema_name": "qcschema_manybodyspecification",
+        "specification": {
+            "model": {
+                "method": "hf",
+                "basis": "6-31G",
+            },
+            "driver": "energy",
+            "program": qcprog,
+            "keywords": qc_keywords, 
+            "protocols": {
+                "stdout": False,
+            },
+        },
+        "keywords": {
+            "bsse_type": bsse_type,
+            "supersystem_ie_only": True,
+        },
+        "protocols": {
+            "component_results": "all",
+        },
+        "driver": "energy",
+    }
+
+    opt_data = {
+        "initial_molecule": lif,
+        "input_specification": mbe_spec,
+        "keywords": {
+            "program": "nonsense",
+            **opt_keywords,
+        },
+        "protocols": {
+            "trajectory": "final",
+        },
+    }
+
+    ret = qcng.compute_procedure(opt_data, "gen" + optimizer, raise_error=True)
+
+    # printing will show up if job fails
+    import pprint
+    pprint.pprint(ret.dict(), width=200)
+
+    assert ret.success
+
+    assert len(ret.trajectory[0].component_properties) == (5 if bsse_type == "ssfc" else 3)
+
+    assert ret.provenance.creator.lower() == optimizer
+    assert ret.trajectory[0].provenance.creator == "QCManyBody"
+    atres = list(ret.trajectory[0].component_results.values())[0]
+    assert atres.provenance.creator.lower() == qcprog
+
+    Rlif = ret.final_molecule.measure([0, 1])
+    Rref = 3.016 if bsse_type == "ssfc" else 2.969
+    assert compare_values(Rlif, Rref, "bond length", atol=1.e-3)

@@ -6,7 +6,7 @@ from typing import Set
 
 from ..exceptions import InputError, ResourceError
 from .berny import BernyProcedure
-from .geometric import GeometricProcedure
+from .geometric import GeometricProcedure, GenGeometricProcedure
 from .qcmanybody import QCManyBodyProcedure
 from .nwchem_opt import NWChemDriverProcedure
 from .optking import OptKingProcedure, GenOptKingProcedure
@@ -68,6 +68,7 @@ def list_available_procedures() -> Set[str]:
 
 
 register_procedure(GeometricProcedure())
+register_procedure(GenGeometricProcedure())
 register_procedure(OptKingProcedure())
 register_procedure(GenOptKingProcedure())
 register_procedure(BernyProcedure())

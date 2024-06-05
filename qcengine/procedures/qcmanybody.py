@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, Dict, Union
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
-from ..exceptions import UnknownError
 
 if TYPE_CHECKING:
     from ..config import TaskConfig
@@ -45,8 +44,8 @@ class QCManyBodyProcedure(ProcedureHarness):
         return self.version_cache[which_prog]
 
     def compute(self, input_model: "ManyBodyInput", config: "TaskConfig") -> "ManyBodyResult":
-        from qcmanybody.qcng_computer import ManyBodyComputerQCNG
+        from qcmanybody import ManyBodyComputer
 
-        output_model = ManyBodyComputerQCNG.from_manybodyinput(input_model)
+        output_model = ManyBodyComputer.from_manybodyinput(input_model)
 
         return output_model
