@@ -55,12 +55,20 @@ class GaussianHarness(ProgramHarness):
            If raise_error is True and gaussian or cclib are missing, the error message for the missing one is raised.
         '''
         qc = which(
+            "g16",
+            return_bool = True,
+            raise_error = False,
+            raise_msg = "Please install Gaussian. Check it's in your PATH with `which g16`."
+        )
+
+        if not qc:
+            qc = which(
             "g09",
             return_bool = True,
             raise_error = raise_error,
-            raise_msg = "Please install Gaussian. Check it's in your PATH with `which g09`."
+            raise_msg = "Please install Gaussian. Check it's in your PATH with `which g09` or `which g16`."
         )
-
+        
         dep = which_import(
                 "cclib",
                 return_bool = True,
@@ -68,12 +76,12 @@ class GaussianHarness(ProgramHarness):
                 raise_msg = "For gaussian harness, please install cclib by typing in `conda install -c conda-forge cclib`."
                 )
         
-        return qc, dep
+        return qc & dep
 
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which("g09")
+        #which_prog = which("g09")
         
         v_input = '''%mem=20MW
 #P HF/sto-3g
