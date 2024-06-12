@@ -15,7 +15,7 @@ import numpy as np
 from qcelemental import constants
 from qcelemental.models import AtomicInput, AtomicResult, Molecule, Provenance
 from qcelemental.molparse import regex
-from qcelemental.util import parse_version, safe_version, which
+from qcelemental.util import parse_version, safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
 
@@ -39,12 +39,36 @@ class GaussianHarness(ProgramHarness):
         pass
 
     def found(self, raise_error: bool = False) -> bool:
-        return which(
+        '''
+        It checks to see if GaussianHarness is ready for operation
+        
+        Parameters
+        ----------
+        raise_error: bool
+           Passed on to control negative return between False and ModuleNotFoundError raised.
+
+        Returns
+        -------
+        bool
+           If both gaussian and its dependency cclib are found, returns True
+           If gaussian or cclib are missing, returns False.
+           If raise_error is True and gaussian or cclib are missing, the error message for the missing one is raised.
+        '''
+        qc = which(
             "g09",
-            return_bool=True,
-            raise_error=raise_error,
-            raise_msg="Please install Gaussian. Check it's in your PATH with `which g09`."
+            return_bool = True,
+            raise_error = raise_error,
+            raise_msg = "Please install Gaussian. Check it's in your PATH with `which g09`."
         )
+
+        dep = which_import(
+                "cclib",
+                return_bool = True,
+                raise_error = raise_error,
+                raise_msg = "For gaussian harness, please install cclib by typing in `conda install -c conda-forge cclib`."
+                )
+        
+        return qc, dep
 
     def get_version(self) -> str:
         self.found(raise_error=True)
