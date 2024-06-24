@@ -12,6 +12,7 @@ dependencies:
 
   # mace deps
   - pymace
+  - numpy<2.0  # until conda package imposes
 
     # Testing
   - pytest
