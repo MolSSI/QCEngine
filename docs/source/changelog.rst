@@ -28,32 +28,18 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.30.0 / 2024-05-DD (Unreleased)
+v0.30.0 / 2024-06-DD (Unreleased)
 --------------------
-
-Breaking Changes
-++++++++++++++++
 
 New Features
 ++++++++++++
 - (:pr:`441`) MACE - Added harness for MACE-OFF23 and local MACE models. @jthorton
 - (:pr:`443`) AIMNET2 - Added harness for AIMNET2 NN ML models. @jthorton
 
-Enhancements
-++++++++++++
-
-Bug Fixes
-+++++++++
-
 Misc.
 +++++
 - (:pr:`445`) CI - fix some test regex issues.
-
-MUST (Unmerged)
-+++++++++++++++
-
-WIP (Unmerged)
-++++++++++++++
+- (:pr:`449`) Maint - bump the QCElemental compatibility range.
 
 
 v0.29.0 / 2023-10-31
