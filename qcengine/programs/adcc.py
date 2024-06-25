@@ -56,7 +56,7 @@ class AdccHarness(ProgramHarness):
             "psi4",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install psi4 for adcc harness via `conda install psi4 -c conda-forge/label/libint_dev -c conda-forge`.",
+            raise_msg="Please install psi4 for adcc harness via `conda install psi4 -c conda-forge`.",
         )
         return found_adcc and found_psi4
 

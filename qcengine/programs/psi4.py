@@ -92,7 +92,7 @@ class Psi4Harness(ProgramHarness):
             "psi4",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Please install via `conda install psi4 -c conda-forge/label/libint_dev -c conda-forge`. Check it's in your PATH with `which psi4`."
+            raise_msg="Please install via `conda install psi4 -c conda-forge`. Check it's in your PATH with `which psi4`."
             + error_msg,
         )
 

@@ -28,6 +28,38 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.31.0 / 2024-MM-DD (Unreleased)
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+- UNMERGED (:pr:`448`) QCManyBody - new procedure for computing interaction energies or truncation or full
+  many-body expansions. @loriab
+- UNMERGED (:pr:`448`) GeomeTRIC, OptKing - new derived procedures running `GeneralizedOptimizationInput`/
+  `Results` that allow using a `ManyBodySpecification` instead of `QCSpecification` to drive counterpoise-
+  corrected or partial-body optimizations. May require explicit use of `schema_name` field. Call with
+  `qcengine.compute_procedure(qcsk, "gengeometric")` or `genoptking`. This is temporary until QCSchema v2. @loriab
+
+Enhancements
+++++++++++++
+
+Bug Fixes
++++++++++
+- UNMERGED (:pr:`448`) CFour - fix error collecting molecule when it's a single atom with two-letter symbol. @loriab
+
+Misc.
++++++
+
+MUST (Unmerged)
++++++++++++++++
+
+WIP (Unmerged)
+++++++++++++++
+
+
 v0.30.0 / 2024-06-25
 --------------------
 

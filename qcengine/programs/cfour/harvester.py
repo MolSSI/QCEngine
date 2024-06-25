@@ -1004,7 +1004,9 @@ def harvest_outfile_pass(outtext):
     # Process atom geometry
     mobj = re.search(r"^\s+" + r"@GETXYZ-I,     1 atoms read from ZMAT." + r"\s*$", outtext, re.MULTILINE)
     mobj2 = re.search(
-        r"^([A-Z]+)#1" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*$", outtext, re.MULTILINE
+        r"^\s*([A-Z]+)" + r"\s*" + r"#1" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*$",
+        outtext,
+        re.MULTILINE,
     )
     if mobj and mobj2:
         logger.debug("matched atom2")  # unsavory for when atom never printed except for basis file
