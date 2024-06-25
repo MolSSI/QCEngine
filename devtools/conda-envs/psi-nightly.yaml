@@ -4,7 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - psi4=1.6
-  - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
+  #- blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
 
     # Core
   - python
@@ -14,6 +14,8 @@ dependencies:
   - qcelemental >=0.28.0
   - pydantic>=1.0.0
   - msgpack-python
+  - pint>=0.24.1
+  - numpy=1.26
 
     # Testing
   - pytest
