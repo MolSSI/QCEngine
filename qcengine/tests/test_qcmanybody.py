@@ -10,6 +10,126 @@ import qcengine as qcng
 from qcengine.testing import using
 
 
+@pytest.fixture
+def he_tetramer():
+    a2 = 2 / constants.bohr2angstroms
+    return Molecule(
+        symbols=["He", "He", "He", "He"],
+        fragments=[[0], [1], [2], [3]],
+        geometry=[0, 0, 0, 0, 0, a2, 0, a2, 0, 0, a2, a2],
+    )
+
+
+@using("qcmanybody")
+@pytest.mark.parametrize(
+    "program,basis,keywords",
+    [
+        pytest.param("cfour", "aug-pvdz", {"frozen_core": False}, id="cfour_conv", marks=using("cfour")),
+        pytest.param(
+            "gamess", "accd", {"contrl__ispher": 1, "mp2__nacore": 0}, id="gamess_conv", marks=using("gamess")
+        ),
+        pytest.param(
+            "nwchem",
+            "aug-cc-pvdz",
+            {"basis__spherical": True, "scf__thresh": 1.0e-8, "mp2__freeze": False},
+            id="nwchem_conv",
+            marks=using("nwchem"),
+        ),
+        pytest.param(
+            "psi4",
+            "aug-cc-pvdz",
+            {"e_convergence": 1.0e-10, "d_convergence": 1.0e-10, "scf_type": "pk", "mp2_type": "conv"},
+            id="psi4_conv",
+            marks=using("psi4"),
+        ),
+    ],
+)
+@pytest.mark.parametrize(
+    "mbe_keywords,anskey,calcinfo_nmbe",
+    [
+        pytest.param(
+            {"bsse_type": "nocp", "return_total_data": False, "max_nbody": 3},
+            "nocp_corrected_interaction_energy_through_3_body",
+            14,
+            id="3b_nocp",
+        ),
+    ],
+)
+def test_nbody_he4_single(program, basis, keywords, mbe_keywords, anskey, calcinfo_nmbe, he_tetramer, request):
+    from qcmanybody.models import AtomicSpecification, ManyBodyInput
+
+    atomic_spec = AtomicSpecification(
+        model={"method": "mp2", "basis": basis},
+        program=program,
+        driver="energy",
+        keywords=keywords,
+        protocols={"stdout": False},
+    )
+    mbe_model = ManyBodyInput(
+        specification={
+            "specification": atomic_spec,
+            "keywords": mbe_keywords,
+            "driver": "energy",
+            "protocols": {"component_results": "all"},
+        },
+        molecule=he_tetramer,
+    )
+
+    ret = qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
+    print(f"SSSSSSS {request.node.name}")
+    pprint.pprint(ret.dict(), width=200)
+
+    assert ret.extras == {}, f"[w] extras wrongly present: {ret.extras.keys()}"
+
+    refs = {
+        "nocp_corrected_total_energy_through_1_body": -11.530668717083888,
+        "nocp_corrected_total_energy_through_2_body": -11.522851206178828,
+        "nocp_corrected_total_energy_through_3_body": -11.523095269671348,
+        "nocp_corrected_total_energy_through_4_body": -11.523038093664368,
+        "nocp_corrected_interaction_energy_through_1_body": 0.0,
+        "nocp_corrected_interaction_energy_through_2_body": 0.007817510905059777,
+        "nocp_corrected_interaction_energy_through_3_body": 0.0075734474125397355,
+        "nocp_corrected_interaction_energy_through_4_body": 0.007630623419519367,
+        "nocp_corrected_2_body_contribution_to_energy": 0.007817510905059777,
+        "nocp_corrected_3_body_contribution_to_energy": -0.00024406349252004134,
+        "nocp_corrected_4_body_contribution_to_energy": 5.717600697963121e-05,
+    }
+
+    ans = refs[anskey]
+    ref_nmbe = calcinfo_nmbe
+    atol = 1.0e-8
+
+    for skp, ref in refs.items():
+        if not "4_body" in skp:
+            assert compare_values(ref, getattr(ret.properties, skp), atol=atol, label=f"[b] skprop {skp}")
+        else:
+            assert getattr(ret.properties, skp) is None
+
+    assert compare_values(
+        refs["nocp_corrected_total_energy_through_3_body"],
+        ret.properties.nocp_corrected_total_energy,
+        atol=atol,
+        label=f"[d] skprop tot",
+    )
+    assert compare_values(
+        refs["nocp_corrected_interaction_energy_through_3_body"],
+        ret.properties.nocp_corrected_interaction_energy,
+        atol=atol,
+        label=f"[d] skprop IE",
+    )
+
+    assert compare_values(ans, ret.properties.return_energy, atol=atol, label=f"[f] skprop {skp}")
+    assert compare_values(ans, ret.return_result, atol=atol, label=f"[g] ret")
+
+    assert ret.properties.calcinfo_nmbe == ref_nmbe, f"[i] {ret.properties.calcinfo_nmbe=} != {ref_nmbe}"
+    assert (
+        len(ret.component_results) == ref_nmbe
+    ), f"[k] {len(ret.component_results)=} != {ref_nmbe}; mbe protocol did not take"
+    if ref_nmbe > 0:
+        an_atres = next(iter(ret.component_results.values()))
+        assert an_atres.stdout is None, f"[l] atomic protocol did not take"
+
+
 @using("qcmanybody")
 @pytest.mark.parametrize(
     "qcprog",
