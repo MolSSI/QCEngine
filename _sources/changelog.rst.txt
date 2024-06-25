@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2023-MM-DD (Unreleased)
+.. vX.Y.0 / 2024-MM-DD (Unreleased)
 .. --------------------
 ..
 .. Breaking Changes
@@ -26,6 +26,20 @@ Changelog
 .. ++++++++++++++
 .. - UNMERGED (:pr:`421`) GAMESS - error handling and memory @taylor-a-barnes
 .. - UNSOLVED (:issue:`397`) extras failed
+
+
+v0.30.0 / 2024-06-25
+--------------------
+
+New Features
+++++++++++++
+- (:pr:`441`) MACE - Added harness for MACE-OFF23 and local MACE models. @jthorton
+- (:pr:`443`) AIMNET2 - Added harness for AIMNET2 NN ML models. @jthorton
+
+Misc.
++++++
+- (:pr:`445`) CI - fix some test regex issues.
+- (:pr:`449`) Maint - bump the QCElemental compatibility range.
 
 
 v0.29.0 / 2023-10-31
