@@ -47,7 +47,6 @@ def test_bsse_ene_tu6_cp_ne2(qcprog):
             "specification": {
                 "model": {
                     "method": "ccsd(t)",
-                    # TODO error handling cfour "basis": "aug-cc-pvdz",
                     "basis": basis[qcprog],
                 },
                 "driver": "energy",
@@ -73,8 +72,8 @@ def test_bsse_ene_tu6_cp_ne2(qcprog):
         print("IIIIIII")
         pprint.pprint(mbe_model.dict(), width=200)
         if qcprog == "gamess":
-            with pytest.raises(ValueError) as exe:
-                qcng.compute_procedure(mbe_model, "manybody", raise_error=True)
+            with pytest.raises(RuntimeError) as exe:
+                qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
             assert "GAMESS+QCEngine can't handle ghost atoms yet" in str(exe.value)
             pytest.xfail("GAMESS can't do ghosts")
 
@@ -137,10 +136,8 @@ def test_mbe_error():
     [
         pytest.param("optking", "none", None, marks=using("optking")),
         pytest.param("genoptking", "none", None, marks=using("optking_genopt")),
-        pytest.param("genoptking", "nocp", False, marks=using("optking_genopt")),
-        # pytest.param("genoptking", "nocp", True, marks=using("optking_genopt")),
-        # pytest.param("genoptking", "cp", False, marks=using("optking_genopt")),
-
+        pytest.param("genoptking", "nocp", True, marks=using("optking_genopt")),
+        pytest.param("genoptking", "cp", False, marks=using("optking_genopt")),
         pytest.param("geometric", "none", None, marks=using("geometric")),
         pytest.param("gengeometric", "none", None, marks=using("geometric_genopt")),
         pytest.param("gengeometric", "nocp", False, marks=using("geometric_genopt")),
@@ -164,6 +161,8 @@ units ang
     )
 
     at_spec = {
+        # schema_name needed for differentiation in genopt
+        "schema_name": "qcschema_input",
         "model": {
             "method": "hf",
             "basis": "6-31g",
@@ -174,6 +173,8 @@ units ang
     }
 
     mbe_spec = {
+        # schema_name needed for differentiation in genopt
+        "schema_name": "qcschema_manybodyspecification",
         "specification": {
             "model": {
                 "method": "hf",
@@ -245,15 +246,23 @@ units ang
 
 @using("qcmanybody")
 @pytest.mark.parametrize("bsse_type", ["mbe", "ssfc"])  # aka nocp, cp
-@pytest.mark.parametrize("qcprog,qc_keywords", [
-    pytest.param("psi4", {}, marks=using("psi4")),
-    pytest.param("cfour", {}, marks=using("cfour")),
-    pytest.param("nwchem", {}, marks=using("nwchem")),
-])
-@pytest.mark.parametrize("optimizer,opt_keywords", [
-    pytest.param("optking", {}, marks=using("optking_genopt")),
-    pytest.param("geometric", {"convergence_set": "interfrag_tight", "maxiter": 15}, marks=using("geometric_genopt")),
-])
+@pytest.mark.parametrize(
+    "qcprog,qc_keywords",
+    [
+        pytest.param("psi4", {}, marks=using("psi4")),
+        pytest.param("cfour", {}, marks=using("cfour")),
+        pytest.param("nwchem", {}, marks=using("nwchem")),
+    ],
+)
+@pytest.mark.parametrize(
+    "optimizer,opt_keywords",
+    [
+        pytest.param("optking", {}, marks=using("optking_genopt")),
+        pytest.param(
+            "geometric", {"convergence_set": "interfrag_tight", "maxiter": 15}, marks=using("geometric_genopt")
+        ),
+    ],
+)
 def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywords):
     # in geomeTRIC: test_lif_bsse
 
@@ -273,7 +282,7 @@ def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywo
             },
             "driver": "energy",
             "program": qcprog,
-            "keywords": qc_keywords, 
+            "keywords": qc_keywords,
             "protocols": {
                 "stdout": False,
             },
@@ -303,7 +312,6 @@ def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywo
     ret = qcng.compute_procedure(opt_data, "gen" + optimizer, raise_error=True)
 
     # printing will show up if job fails
-    import pprint
     pprint.pprint(ret.dict(), width=200)
 
     assert ret.success
@@ -317,4 +325,4 @@ def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywo
 
     Rlif = ret.final_molecule.measure([0, 1])
     Rref = 3.016 if bsse_type == "ssfc" else 2.969
-    assert compare_values(Rlif, Rref, "bond length", atol=1.e-3)
+    assert compare_values(Rlif, Rref, "bond length", atol=1.0e-3)

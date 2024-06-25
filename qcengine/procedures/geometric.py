@@ -72,7 +72,7 @@ class GeometricProcedure(ProcedureHarness):
 
 class GenGeometricProcedure(GeometricProcedure):
 
-#    # note that "procedure" value below not used
+    # note that "procedure" value below not used
     _defaults = {"name": "GenGeometric", "procedure": "genoptimization"}
 
     version_cache: Dict[str, str] = {}

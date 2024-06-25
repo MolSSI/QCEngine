@@ -109,7 +109,7 @@ class GenOptKingProcedure(OptKingProcedure):
         input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
-        output_data = optking.optwrapper.optimize_qcengine(input_data)
+        output_data = optking.optimize_qcengine(input_data)
 
         output_data["schema_name"] = "qcschema_generalizedoptimizationresult"
         output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)

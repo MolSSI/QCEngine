@@ -57,9 +57,14 @@ def is_program_new_enough(program, version_feature_introduced):
     form is equal to or later than `version_feature_introduced`.
 
     """
-    if program not in qcng.list_available_programs():
-        return False
-    candidate_version = qcng.get_program(program).get_version()
+    if program in qcng.list_all_procedures():
+        if program not in qcng.list_available_procedures():
+            return False
+        candidate_version = qcng.get_procedure(program).get_version()
+    else:
+        if program not in qcng.list_available_programs():
+            return False
+        candidate_version = qcng.get_program(program).get_version()
 
     return parse_version(candidate_version) >= parse_version(version_feature_introduced)
 
@@ -164,7 +169,7 @@ _programs = {
     "mctc-gcp": is_program_new_enough("mctc-gcp", "2.3.0"),
     "gcp": which("gcp", return_bool=True),
     "geometric": which_import("geometric", return_bool=True),
-    "geometric_genopt": is_program_new_enough("geometric", "1.1.0"),
+    "geometric_genopt": is_program_new_enough("gengeometric", "1.1.0"),
     "berny": which_import("berny", return_bool=True),
     "mdi": is_mdi_new_enough("1.2"),
     "molpro": is_program_new_enough("molpro", "2018.1"),
@@ -172,7 +177,7 @@ _programs = {
     "mp2d": which("mp2d", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),
     "optking": which_import("optking", return_bool=True),
-    "optking_genopt": is_program_new_enough("optking", "0.3.0"),
+    "optking_genopt": is_program_new_enough("genoptking", "0.3.0"),
     "psi4": is_program_new_enough("psi4", "1.2"),
     "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
