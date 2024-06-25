@@ -4,19 +4,19 @@ channels:
   - conda-forge
 dependencies:
   - psi4=1.6
-  #- blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
-  - libblas=*=*mkl
+  - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
+  - mkl=2021.4.0=h8d4b97c_729
 
     # Core
   - python
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.28.0
+  - qcelemental=0.27.1
   - pydantic>=1.0.0
   - msgpack-python
-  - pint>=0.24.1
-  - numpy=1.26
+  - pint=0.17
+  - numpy=1.22.4
 
     # Testing
   - pytest
