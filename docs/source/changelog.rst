@@ -28,7 +28,7 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.30.0 / 2024-06-DD (Unreleased)
+v0.30.0 / 2024-06-25
 --------------------
 
 New Features
