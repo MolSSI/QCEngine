@@ -171,6 +171,7 @@ jobs:
         python -m pip install . --no-deps
 
     - name: QCEngineRecords
+      if: "(matrix.cfg.label != 'Psi4-1.6')"
       run: |
         qcengine info
         export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
