@@ -121,10 +121,10 @@ def test_nbody_he4_single(program, basis, keywords, mbe_keywords, anskey, calcin
     assert compare_values(ans, ret.properties.return_energy, atol=atol, label=f"[f] skprop {skp}")
     assert compare_values(ans, ret.return_result, atol=atol, label=f"[g] ret")
 
-    assert ret.properties.calcinfo_nmbe == ref_nmbe, f"[i] {ret.properties.calcinfo_nmbe=} != {ref_nmbe}"
+    assert ret.properties.calcinfo_nmbe == ref_nmbe, f"[i] {ret.properties.calcinfo_nmbe} != {ref_nmbe}"
     assert (
         len(ret.component_results) == ref_nmbe
-    ), f"[k] {len(ret.component_results)=} != {ref_nmbe}; mbe protocol did not take"
+    ), f"[k] {len(ret.component_results)} != {ref_nmbe}; mbe protocol did not take"
     if ref_nmbe > 0:
         an_atres = next(iter(ret.component_results.values()))
         assert an_atres.stdout is None, f"[l] atomic protocol did not take"
