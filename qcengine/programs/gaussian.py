@@ -81,7 +81,9 @@ class GaussianHarness(ProgramHarness):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        #which_prog = which("g09")
+        which_prog = which("g16")
+        if which_prog is None:
+            which_prog = which('g09')
         
         v_input = '''%mem=20MW
 #P HF/sto-3g
@@ -106,6 +108,9 @@ H
                         #version_line = version_line.split()[0]
                         #self.version_cache[which_prog] = safe_version(version_line)
                         self.version_cache[which_prog] = '2009'
+                    
+                    if "Gaussian 16" in line:
+                        self.version_cache[which_prog] = '2016'
                         
         return self.version_cache[which_prog]
 
@@ -242,11 +247,15 @@ H
         last_occupied_energy = data.moenergies[0][data.homos[0]]
         #output_data['HOMO ENERGY'] = last_occupied_energy
         
-        scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
+        #scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
         #output_data['SCF ENERGY'] = scf_energy
         
         if input_model.driver == 'energy':
             output_data['return_result'] = scf_energy
+        if input_model.driver == 'gradient':
+            output_data['return_result'] = data.grads
+            #output_data['return_gradient'] = data.grads
+        
         #print (os.system('ccget --list ' + tmp_output_file)) #data available in the output for parsing
 
         #if input_model.driver == 'energy':
@@ -255,10 +264,27 @@ H
         #print (input_model)
 
         properties = {
-            'nuclear_repulsion_energy': Nuclear(data).repulsion_energy(),
-            'scf_total_energy': scf_energy,
-            'return_energy': scf_energy
-            }
+            'nuclear_repulsion_energy': Nuclear(data).repulsion_energy()
+        }
+
+        if input_model.model.method.lower() == 'hf':
+            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
+            properties['scf_total_energy'] = scf_energy
+            properties['return_energy'] = scf_energy
+            output_data['return_result'] = scf_energy
+
+        if input_model.model.method.lower() == 'mp2':
+            mp2_energy = data.mpenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
+            #print ('mp2 energy is: ', mp2_energy[0])
+            properties['mp2_total_energy'] = mp2_energy[0]
+            properties['return_energy'] = mp2_energy[0]
+            output_data['return_result'] = mp2_energy[0]
+
+        if input_model.model.method.lower() == 'ccsd(t)':
+           cc_energy = data.ccenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
+           properties['ccsd_prt_pr_total_energy'] = cc_energy
+           properties['return_energy'] = cc_energy
+           output_data['return_result'] = cc_energy           
         
         output_data['properties'] = properties
         output_data['stdout'] = outfiles['outfiles']['output.log']
