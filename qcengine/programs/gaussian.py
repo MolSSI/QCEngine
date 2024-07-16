@@ -267,24 +267,27 @@ H
             'nuclear_repulsion_energy': Nuclear(data).repulsion_energy()
         }
 
-        if input_model.model.method.lower() == 'hf':
+        if input_model.model.method.lower().startswith('mp'):
             scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
+            mp2_energy = data.mpenergies[0] / constants.conversion_factor("hartree", "eV")
             properties['scf_total_energy'] = scf_energy
-            properties['return_energy'] = scf_energy
-            output_data['return_result'] = scf_energy
-
-        if input_model.model.method.lower() == 'mp2':
-            mp2_energy = data.mpenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
-            #print ('mp2 energy is: ', mp2_energy[0])
             properties['mp2_total_energy'] = mp2_energy[0]
             properties['return_energy'] = mp2_energy[0]
             output_data['return_result'] = mp2_energy[0]
 
-        if input_model.model.method.lower() == 'ccsd(t)':
-           cc_energy = data.ccenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
-           properties['ccsd_prt_pr_total_energy'] = cc_energy
-           properties['return_energy'] = cc_energy
-           output_data['return_result'] = cc_energy           
+        elif input_model.model.method.lower().startswith('cc'):
+            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
+            cc_energy = data.ccenergies[0] / constants.conversion_factor("hartree", "eV")
+            properties['scf_total_energy'] = scf_energy
+            properties['ccsd_prt_pr_total_energy'] = cc_energy
+            properties['return_energy'] = cc_energy
+            output_data['return_result'] = cc_energy           
+
+        else: # input_model.model.method.lower() in ['hf', 'scf']:
+            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
+            properties['scf_total_energy'] = scf_energy
+            properties['return_energy'] = scf_energy
+            output_data['return_result'] = scf_energy
         
         output_data['properties'] = properties
         output_data['stdout'] = outfiles['outfiles']['output.log']
