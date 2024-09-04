@@ -73,7 +73,7 @@ class Psi4Harness(ProgramHarness):
                         psiapi = which_import("psi4", return_bool=True)
 
         if psiapi and not psithon:
-            with popen(["python", "-c", "import psi4; print(psi4.executable)"]) as exc:
+            with popen([sys.executable, "-c", "import psi4; print(psi4.executable)"]) as exc:
                 exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
             error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
