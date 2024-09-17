@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - master
+      - next2024
   pull_request:
     branches:
       - master
+      - next2024
   schedule:
     - cron: "9 16 * * 1"
 
@@ -19,11 +21,12 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          - conda-env: psi
-            python-version: 3.7
-            label: Psi4-1.5
-            runs-on: ubuntu-latest
-            pytest: ""
+          #- conda-env: psi
+          #  python-version: 3.7
+          #  label: Psi4-1.5
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
+          #  Note: removed Sep 2024 b/c too hard to reconcile w/pyd v2
 
           - conda-env: psi-nightly
             python-version: "3.10"
@@ -55,11 +58,12 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: qcore
-            python-version: 3.7
-            label: QCore
-            runs-on: ubuntu-latest
-            pytest: ""
+          #- conda-env: qcore
+          #  python-version: 3.7
+          #  label: QCore
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
+          #  Note: removed Sep 2024 b/c too hard to reconcile w/pyd v2
 
           - conda-env: nwchem
             python-version: 3.8
@@ -114,20 +118,18 @@ jobs:
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Create Environment
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
         show-channel-urls: true
-        miniforge-variant: Mambaforge
-        use-mamba: true
         add-pip-as-python-dependency: true
         # note: conda-forge chnl req'd for Mambaforge, but we'll spec in file, not here `channels: conda-forge,...`
         # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
@@ -163,8 +165,8 @@ jobs:
 
     - name: Environment Information
       run: |
-        mamba info
-        mamba list
+        conda info
+        conda list
 
     - name: Install QCEngine
       run: |
@@ -183,7 +185,7 @@ jobs:
         pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
 
   release_sphinx:
     needs: [build]
@@ -203,24 +205,22 @@ jobs:
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Create Environment
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
-        miniforge-variant: Mambaforge
-        use-mamba: true
         add-pip-as-python-dependency: true
         channels: conda-forge
 
     - name: Environment Information
       run: |
-        mamba info
-        mamba list --show-channel-urls
+        conda info
+        conda list --show-channel-urls
 
     - name: Build Documentation
       run: |
