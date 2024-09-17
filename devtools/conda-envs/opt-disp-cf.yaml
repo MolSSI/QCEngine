@@ -23,8 +23,8 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental
-  - pydantic
+  - qcelemental >=0.26.0
+  - pydantic=2
   - msgpack-python
 
     # Testing
