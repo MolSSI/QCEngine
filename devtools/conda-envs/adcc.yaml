@@ -12,7 +12,7 @@ dependencies:
   - py-cpuinfo
   - psutil
   - qcelemental >=0.24.0
-  - pydantic=1
+  - pydantic=2
   - msgpack-python
 
     # Testing
