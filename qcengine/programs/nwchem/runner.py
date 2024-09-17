@@ -104,6 +104,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             success, output = execute(command, {"v.nw": ""}, scratch_directory=config.scratch_directory)
 
             if success:
+                print("REV", output["stdout"])
                 for line in output["stdout"].splitlines():
                     if "nwchem branch" in line:
                         branch = line.strip().split()[-1]
