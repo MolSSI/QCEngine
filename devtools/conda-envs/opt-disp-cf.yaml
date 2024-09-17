@@ -24,7 +24,7 @@ dependencies:
   - py-cpuinfo
   - psutil
   - qcelemental
-  - pydantic
+  - pydantic=2
   - msgpack-python
 
     # Testing
