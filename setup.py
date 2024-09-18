@@ -41,10 +41,11 @@ if __name__ == "__main__":
         entry_points={"console_scripts": ["qcengine=qcengine.cli:main"]},
         extras_require={
             "docs": [
-                "sphinx==1.2.3",  # autodoc was broken in 1.3.1
+                "sphinx",
                 "sphinxcontrib-napoleon",
                 "sphinx_rtd_theme",
                 "numpydoc",
+                "autodoc-pydantic>=2.0",
             ],
             "tests": ["pytest", "pytest-cov"],
             "lint": ["black>=22.1.0,<23.0a0"],

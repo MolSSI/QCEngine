@@ -9,7 +9,7 @@ import os
 import socket
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .extras import get_information
@@ -93,7 +93,7 @@ class NodeDescriptor(BaseModel):
     # Cluster options
     is_batch_node: bool = Field(
         False,
-        help="""Whether the node running QCEngine is a batch node
+        description="""Whether the node running QCEngine is a batch node
     
     Some clusters are configured such that tasks are launched from a special "batch" or "MOM" onto the compute nodes.
     The compute nodes on such clusters often have a different CPU architecture than the batch nodes and 
@@ -143,8 +143,7 @@ class NodeDescriptor(BaseModel):
             if "{ranks_per_node}" not in self.mpiexec_command:
                 raise ValueError("mpiexec_command must explicitly state the number of ranks per node")
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class TaskConfig(BaseSettings):
