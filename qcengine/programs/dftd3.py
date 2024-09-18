@@ -40,9 +40,6 @@ class DFTD3Harness(ProgramHarness):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
-        pass
-
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         return which(

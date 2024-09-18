@@ -50,9 +50,6 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
     version_cache: Dict[str, str] = {}
 
-    class Config(ErrorCorrectionProgramHarness.Config):
-        pass
-
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         """Whether NWChem harness is ready for operation, with both the QC program and any particular dependencies found.

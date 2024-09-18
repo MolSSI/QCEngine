@@ -24,9 +24,6 @@ class MopacHarness(ProgramHarness):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
-        pass
-
     def __init__(self, **kwargs):
         extras = {  # All units taken from within MOPAC
             "bohr_to_angstroms": 0.5291772083,

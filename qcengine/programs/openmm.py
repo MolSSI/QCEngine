@@ -39,9 +39,6 @@ class OpenMMHarness(ProgramHarness):
 
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
-        pass
-
     # def _get_off_forcefield(self, hashstring, offxml):
     #
     #     from openff.toolkit.typing.engines import smirnoff

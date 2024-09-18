@@ -1,7 +1,7 @@
 """Harness for TeraChem Frontend"""
 import logging
 from os import getenv
-from typing import Any, Dict
+from typing import Any, ClassVar, Dict
 
 from .terachem_pbs import TeraChemPBSHarness, _pbs_defaults
 
@@ -18,7 +18,7 @@ class TeraChemFrontEndHarness(TeraChemPBSHarness):
     _defaults = {**_pbs_defaults, **_fe_defaults}
     _tcpb_min_version = "0.9.0"
     _tcpb_client = "TCFrontEndClient"
-    _env_vars: Dict[str, Any] = {
+    _env_vars: ClassVar[Dict[str, Any]] = {
         **TeraChemPBSHarness._env_vars,
         **{
             "frontend_host": getenv("TERACHEM_FE_HOST", "127.0.0.1"),

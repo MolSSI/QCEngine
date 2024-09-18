@@ -30,9 +30,6 @@ class RDKitHarness(ProgramHarness):
 
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
-        pass
-
     @staticmethod
     def _process_molecule_rdkit(jmol):
         from rdkit import Chem

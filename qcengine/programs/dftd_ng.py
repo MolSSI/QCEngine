@@ -31,9 +31,6 @@ class DFTD4Harness(ProgramHarness):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
-        pass
-
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         """Check for the availability of the Python API of dftd4"""
@@ -194,9 +191,6 @@ class SDFTD3Harness(ProgramHarness):
         "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:

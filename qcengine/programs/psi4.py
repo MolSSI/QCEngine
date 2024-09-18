@@ -32,9 +32,6 @@ class Psi4Harness(ProgramHarness):
     }
     version_cache: Dict[str, str] = {}
 
-    class Config(ProgramHarness.Config):
-        pass
-
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         """Whether Psi4 harness is ready for operation.
