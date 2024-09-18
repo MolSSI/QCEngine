@@ -12,6 +12,7 @@ dependencies:
   - psutil
   - qcelemental >=0.12.0
   - pydantic>=2
+  - pydantic-settings
 
     # Testing
   - pytest

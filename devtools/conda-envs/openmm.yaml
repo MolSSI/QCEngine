@@ -17,6 +17,7 @@ dependencies:
   - psutil
   - qcelemental >=0.11.1
   - pydantic >=2
+  - pydantic-settings
   - pint <0.22
 
     # Testing
