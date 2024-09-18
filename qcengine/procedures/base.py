@@ -7,10 +7,10 @@ from typing import Set
 from ..exceptions import InputError, ResourceError
 from .berny import BernyProcedure
 from .geometric import GeometricProcedure
+from .model import ProcedureHarness
 from .nwchem_opt import NWChemDriverProcedure
 from .optking import OptKingProcedure
 from .torsiondrive import TorsionDriveProcedure
-from .model import ProcedureHarness
 
 __all__ = ["register_procedure", "get_procedure", "list_all_procedures", "list_available_procedures"]
 
