@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Union
 
 from qcelemental.models import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which_import
@@ -21,7 +21,7 @@ class MACEHarness(ProgramHarness):
 
     _CACHE = {}
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MACE",
         "scratch": False,
         "thread_safe": True,

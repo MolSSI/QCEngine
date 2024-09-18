@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which_import
@@ -17,7 +17,7 @@ class AIMNET2Harness(ProgramHarness):
 
     _CACHE = {}
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "AIMNET2",
         "scratch": False,
         "thread_safe": True,

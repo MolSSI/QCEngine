@@ -2,7 +2,7 @@
 Calls the TorchANI package.
 """
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import parse_version, safe_version, which_import
@@ -21,7 +21,7 @@ class TorchANIHarness(ProgramHarness):
 
     _CACHE = {}
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "TorchANI",
         "scratch": False,
         "thread_safe": True,

@@ -7,7 +7,7 @@ Therefore, this harness only has to provide a thin wrapper to integrate the
 respective dispersion correction.
 """
 
-from typing import Dict
+from typing import Any, ClassVar, Dict
 
 from qcelemental.models import AtomicInput, AtomicResult
 from qcelemental.util import parse_version, safe_version, which_import
@@ -21,7 +21,7 @@ from .model import ProgramHarness
 class DFTD4Harness(ProgramHarness):
     """Calculation harness for the DFT-D4 dispersion correction."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "dftd4",
         "scratch": False,
         "thread_safe": True,
@@ -182,7 +182,7 @@ class SDFTD3Harness(ProgramHarness):
     it must be explicitly disabled by setting the *s9* value to zero.
     """
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "s-dftd3",
         "scratch": False,
         "thread_safe": True,

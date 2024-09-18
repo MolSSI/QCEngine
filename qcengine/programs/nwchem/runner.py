@@ -7,7 +7,7 @@ import logging
 import pprint
 import re
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
@@ -39,7 +39,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
     """
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "NWChem",
         "scratch": True,
         "thread_safe": False,

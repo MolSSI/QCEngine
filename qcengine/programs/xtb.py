@@ -9,7 +9,7 @@ For more information on xtb-python and the actual QCSchema integration,
 visit `its documentation <https://xtb-python.readthedocs.io>`_.
 """
 
-from typing import Dict
+from typing import Any, ClassVar, Dict
 
 from qcelemental.models import AtomicInput, AtomicResult
 from qcelemental.util import safe_version, which_import
@@ -21,7 +21,7 @@ from .model import ProgramHarness
 class XTBHarness(ProgramHarness):
     """Calculation harness for the extended tight binding (xtb) package."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "xtb",
         "scratch": False,
         "thread_safe": True,

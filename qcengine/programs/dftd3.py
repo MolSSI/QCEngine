@@ -7,7 +7,7 @@ import re
 import socket
 import sys
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
@@ -30,7 +30,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 class DFTD3Harness(ProgramHarness):
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "DFTD3",
         "scratch": True,
         "thread_safe": True,

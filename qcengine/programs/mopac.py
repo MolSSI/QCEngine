@@ -2,7 +2,7 @@
 Calls the Psi4 executable.
 """
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
 from qcelemental.models import AtomicResult
 from qcelemental.util import which
@@ -14,7 +14,7 @@ from .model import ProgramHarness
 
 class MopacHarness(ProgramHarness):
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MOPAC",
         "scratch": True,  # Input/output file
         "thread_safe": True,
