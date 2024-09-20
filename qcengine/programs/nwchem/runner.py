@@ -108,9 +108,8 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
                     if "nwchem branch" in line:
                         branch = line.strip().split()[-1]
                     if "nwchem revision" in line:
-                        revision = "+" + line.strip().split()[-1]
-                revision = "" if (revision == "+N/A") else revision
-                self.version_cache[which_prog] = safe_version(branch + revision)
+                        revision = line.strip().split()[-1]
+                self.version_cache[which_prog] = safe_version(branch + "+" + revision)
             else:
                 raise UnknownError(output["stderr"])
 
