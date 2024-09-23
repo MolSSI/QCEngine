@@ -339,6 +339,8 @@ def popen(
             # Retrieve the standard output for the process
             ret["stdout"] = stdout.getvalue().decode()
             ret["stderr"] = stderr.getvalue().decode()
+            ret["proc"].stdout.close()
+            ret["proc"].stderr.close()
 
 
 @contextmanager
