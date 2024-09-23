@@ -8,7 +8,7 @@ from qcelemental.models.common_models import Model
 from qcelemental.models.procedures import OptimizationSpecification, QCInputSpecification, TDKeywords, TorsionDriveInput
 
 import qcengine as qcng
-from qcengine.testing import failure_engine, using
+from qcengine.testing import failure_engine, schema_versions, using
 
 
 @pytest.fixture(scope="function")
@@ -30,20 +30,24 @@ def input_data():
         pytest.param("berny", marks=using("berny")),
     ],
 )
-def test_geometric_psi4(input_data, optimizer, ncores):
+def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request):
+    models, models_out = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True))
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
     input_data["input_specification"]["keywords"] = {"scf_properties": ["wiberg_lowdin_indices"]}
     input_data["keywords"]["program"] = "psi4"
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
     task_config = {
         "ncores": ncores,
     }
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, optimizer, raise_error=True, task_config=task_config)
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
@@ -383,3 +387,57 @@ def test_optimization_mrchem(input_data, optimizer):
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-3) == 1.3860734486984705
     assert ret.provenance.creator.lower() == optimizer
     assert ret.trajectory[0].provenance.creator.lower() == "mrchem"
+
+
+def checkver_and_convert_proc(mdl, tnm, prepost):
+    import json
+
+    import pydantic
+    import qcelemental as qcel
+
+    def check_model_v1(m):
+        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} !⊆ v1.BaseModel"
+        assert isinstance(
+            m, qcel.models.v1.basemodels.ProtoModel
+        ), f"type({m.__class__.__name__}) = {type(m)} !⊆ v1.ProtoModel"
+        assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
+
+    def check_model_v2(m):
+        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} !⊆ BaseModel"
+        assert isinstance(
+            m, qcel.models.v2.basemodels.ProtoModel
+        ), f"type({m.__class__.__name__}) = {type(m)} !⊆ v2.ProtoModel"
+        assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
+
+    if prepost == "pre":
+        dict_in = isinstance(mdl, dict)
+        if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
+            if dict_in:
+                mdl = qcel.models.v1.OptimizationInput(**mdl)
+            check_model_v1(mdl)
+        elif "as_v2" in tnm or "to_v1" in tnm:
+            if dict_in:
+                mdl = qcel.models.v2.OptimizationInput(**mdl)
+            check_model_v2(mdl)
+            mdl = mdl.convert_v(1)
+
+        if dict_in:
+            mdl = mdl.model_dump()
+
+    elif prepost == "post":
+        dict_in = isinstance(mdl, dict)
+        if "as_v1" in tnm or "to_v1" in tnm or "None" in tnm:
+            if dict_in:
+                mdl = qcel.models.v1.OptimizationResult(**mdl)
+            check_model_v1(mdl)
+        elif "as_v2" in tnm or "to_v2" in tnm:
+            if dict_in:
+                mdl = qcel.models.v2.OptimizationResult(**mdl)
+            mdl = mdl.convert_v(2)
+            check_model_v2(mdl)
+
+        if dict_in:
+            # imitates compute(..., return_dict=True)
+            mdl = json.loads(mdl.json())
+
+    return mdl

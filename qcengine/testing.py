@@ -211,3 +211,70 @@ def using(program):
         _using_cache[program] = skip
 
     return _using_cache[program]
+
+
+@pytest.fixture(scope="function", params=[None, "as_v1", "as_v2", "to_v1", "to_v2"])
+def schema_versions(request):
+    if request.param == "as_v1":
+        return qcel.models.v1, qcel.models.v1
+    elif request.param == "to_v2":
+        return qcel.models.v1, qcel.models.v2
+    elif request.param == "as_v2":
+        return qcel.models.v2, qcel.models.v2
+    elif request.param == "to_v1":
+        return qcel.models.v2, qcel.models.v1
+    else:
+        return qcel.models, qcel.models
+
+
+def checkver_and_convert(mdl, tnm, prepost):
+    import json
+
+    import pydantic
+
+    def check_model_v1(m):
+        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} !⊆ v1.BaseModel"
+        assert isinstance(
+            m, qcel.models.v1.basemodels.ProtoModel
+        ), f"type({m.__class__.__name__}) = {type(m)} !⊆ v1.ProtoModel"
+        assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
+
+    def check_model_v2(m):
+        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} !⊆ BaseModel"
+        assert isinstance(
+            m, qcel.models.v2.basemodels.ProtoModel
+        ), f"type({m.__class__.__name__}) = {type(m)} !⊆ v2.ProtoModel"
+        assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
+
+    if prepost == "pre":
+        dict_in = isinstance(mdl, dict)
+        if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
+            if dict_in:
+                mdl = qcel.models.v1.AtomicInput(**mdl)
+            check_model_v1(mdl)
+        elif "as_v2" in tnm or "to_v1" in tnm:
+            if dict_in:
+                mdl = qcel.models.v2.AtomicInput(**mdl)
+            check_model_v2(mdl)
+            mdl = mdl.convert_v(1)
+
+        if dict_in:
+            mdl = mdl.model_dump()
+
+    elif prepost == "post":
+        dict_in = isinstance(mdl, dict)
+        if "as_v1" in tnm or "to_v1" in tnm or "None" in tnm:
+            if dict_in:
+                mdl = qcel.models.v1.AtomicResult(**mdl)
+            check_model_v1(mdl)
+        elif "as_v2" in tnm or "to_v2" in tnm:
+            if dict_in:
+                mdl = qcel.models.v2.AtomicResult(**mdl)
+            mdl = mdl.convert_v(2)
+            check_model_v2(mdl)
+
+        if dict_in:
+            # imitates compute(..., return_dict=True)
+            mdl = json.loads(mdl.json())
+
+    return mdl

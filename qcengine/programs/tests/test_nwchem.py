@@ -5,7 +5,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, schema_versions, using
 
 # Molecule where autoz fails
 _auto_z_problem = xyz = """C                    15.204188380000    -3.519180270000   -10.798726560000
@@ -48,8 +48,8 @@ H                    20.850425490000     3.414376060000     2.960577230000"""
 
 
 @pytest.fixture
-def nh2():
-    smol = """
+def nh2_data():
+    return """
  # R=1.008 #A=105.0
  0 2
  N   0.000000000000000   0.000000000000000  -0.145912918634892
@@ -58,14 +58,19 @@ def nh2():
  units au
  symmetry c1
 """
-    return qcel.models.Molecule.from_data(smol)
 
 
 @using("nwchem")
-def test_b3lyp(nh2):
+def test_b3lyp(nh2_data, schema_versions, request):
+    models, models_out = schema_versions
+    nh2 = models.Molecule.from_data(nh2_data)
+
     # Run NH2
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "b3lyp", "basis": "3-21g"}}
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
     assert compare_values(-55.554037, res["return_result"], atol=1e-3)
@@ -86,9 +91,16 @@ def test_b3lyp(nh2):
 
 
 @using("nwchem")
-def test_hess(nh2):
+def test_hess(nh2_data, schema_versions, request):
+    models, models_out = schema_versions
+    nh2 = models.Molecule.from_data(nh2_data)
+
     resi = {"molecule": nh2, "driver": "hessian", "model": {"method": "b3lyp", "basis": "3-21g"}}
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False)
+    res = checkver_and_convert(res, request.node.name, "post")
+
     assert compare_values(-3.5980754370e-02, res.return_result[0, 0], atol=1e-3)
     assert compare_values(0, res.return_result[1, 0], atol=1e-3)
     assert compare_values(0.018208307756, res.return_result[3, 0], atol=1e-3)
@@ -98,27 +110,40 @@ def test_hess(nh2):
     shifted_nh2, _ = nh2.scramble(do_shift=False, do_mirror=False, do_rotate=True, do_resort=False)
 
     resi["molecule"] = shifted_nh2
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False)
+    res_shifted = checkver_and_convert(res_shifted, request.node.name, "post")
+
     assert not np.allclose(res.return_result, res_shifted.return_result, atol=1e-8)
     assert np.isclose(np.linalg.det(res.return_result), np.linalg.det(res_shifted.return_result))
 
 
 @using("nwchem")
-def test_gradient(nh2):
+def test_gradient(nh2_data, schema_versions, request):
+    models, models_out = schema_versions
+    nh2 = models.Molecule.from_data(nh2_data)
+
     resi = {
         "molecule": nh2,
         "driver": "gradient",
         "model": {"method": "b3lyp", "basis": "3-21g"},
         "keywords": {"dft__convergence__gradient": "1e-6"},
     }
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
+
     assert compare_values(4.22418267e-2, res["return_result"][2], atol=1e-7)  # Beyond accuracy of NWChem stdout
 
     # Rotate the molecule and verify that the gradient changes
     shifted_nh2, _ = nh2.scramble(do_shift=False, do_mirror=False, do_rotate=True, do_resort=False)
 
     resi["molecule"] = shifted_nh2
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     assert not compare_values(4.22418267e-2, res_shifted["return_result"][2], atol=1e-7)
 
@@ -150,7 +175,7 @@ H 0 1 0
 
 
 @using("nwchem")
-def test_dipole(h20):
+def test_dipole(h20, schema_versions, request):
     # Run NH2
     resi = {
         "molecule": h20,
@@ -158,7 +183,10 @@ def test_dipole(h20):
         "model": {"method": "dft", "basis": "3-21g"},
         "keywords": {"dft__xc": "b3lyp", "property__dipole": True},
     }
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
     assert compare_values(-75.764944, res["return_result"], atol=1e-3)
@@ -194,7 +222,7 @@ H 0 1 0
 
 
 @using("nwchem")
-def test_homo_lumo(h20v2):
+def test_homo_lumo(h20v2, schema_versions, request):
     # Run NH2
     resi = {
         "molecule": h20v2,
@@ -202,7 +230,10 @@ def test_homo_lumo(h20v2):
         "model": {"method": "dft", "basis": "3-21g"},
         "keywords": {"dft__xc": "b3lyp"},
     }
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
     assert compare_values(-75.968095, res["return_result"], atol=1e-3)
