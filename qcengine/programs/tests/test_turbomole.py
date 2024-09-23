@@ -5,35 +5,29 @@ from qcelemental.testing import compare_values
 
 import qcengine as qcng
 from qcengine.programs.turbomole.harvester import parse_hessian
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, schema_versions, using
 
 
 @pytest.fixture
-def h2o():
-    mol = qcelemental.models.Molecule.from_data(
-        """
+def h2o_data():
+    return """
             O 0.000000000000     0.000000000000    -0.068516245955
             H 0.000000000000    -0.790689888800     0.543701278274
             H 0.000000000000     0.790689888800     0.543701278274
     """
-    )
-    return mol
 
 
 @pytest.fixture
-def h2o_ricc2_def2svp():
+def h2o_ricc2_def2svp_data():
     """NumForce calls only make sense for stationary points. So this
     geometry was optimized at the ricc2/def2-svp level of theory and
     can be used to run NumForce with ricc2."""
 
-    mol = qcelemental.models.Molecule.from_data(
-        """
+    return """
         O     0.0000000    0.0000000   -0.0835835
         H     0.7501772    0.0000000    0.5210589
         H    -0.7501772    0.0000000    0.5210589
     """
-    )
-    return mol
 
 
 @pytest.mark.parametrize(
@@ -51,10 +45,15 @@ def h2o_ricc2_def2svp():
         ),
     ],
 )
-def test_turbomole_energy(method, keywords, ref_energy, h2o):
+def test_turbomole_energy(method, keywords, ref_energy, h2o_data, schema_versions, request):
+    models, _ = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": method, "basis": "def2-SVP"}, "keywords": keywords}
 
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "turbomole", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == "energy"
     assert res["success"] is True
@@ -71,7 +70,10 @@ def test_turbomole_energy(method, keywords, ref_energy, h2o):
         pytest.param("rimp2", {}, 0.061576, marks=using("turbomole")),
     ],
 )
-def test_turbomole_gradient(method, keywords, ref_norm, h2o):
+def test_turbomole_gradient(method, keywords, ref_norm, h2o_data, schema_versions, request):
+    models, _ = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+
     resi = {
         "molecule": h2o,
         "driver": "gradient",
@@ -79,7 +81,9 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o):
         "keywords": keywords,
     }
 
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "turbomole", raise_error=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     assert res.driver == "gradient"
     assert res.success is True
@@ -91,7 +95,10 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o):
 
 
 @using("turbomole")
-def test_turbomole_ri_dsp(h2o):
+def test_turbomole_ri_dsp(h2o_data, schema_versions, request):
+    models, _ = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+
     resi = {
         "molecule": h2o,
         "driver": "energy",
@@ -99,7 +106,9 @@ def test_turbomole_ri_dsp(h2o):
         "keywords": {"ri": True, "d3bj": True},
     }
 
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "turbomole", raise_error=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     assert res.driver == "energy"
     assert res.success is True
@@ -129,7 +138,10 @@ def assert_hessian(H, ref_eigvals, ref_size):
         ("b-p", {"grid": "m5", "ri": True}, (1.59729409e-01, 7.21364827e-01, 9.63399519e-01)),
     ],
 )
-def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
+def test_turbomole_hessian(method, keywords, ref_eigvals, h2o_data, schema_versions, request):
+    models, _ = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+
     resi = {
         "molecule": h2o,
         "driver": "hessian",
@@ -140,7 +152,10 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
         "keywords": keywords,
     }
 
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "turbomole", raise_error=True)
+    res = checkver_and_convert(res, request.node.name, "post")
+
     H = res.return_result
     size = h2o.geometry.size
 
@@ -157,7 +172,10 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o):
         ("ricc2", {}, (1.65405531e-01, 9.63690706e-01, 1.24676634e00)),
     ],
 )
-def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp):
+def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp_data, schema_versions, request):
+    models, _ = schema_versions
+    h2o_ricc2_def2svp = models.Molecule.from_data(h2o_ricc2_def2svp_data)
+
     resi = {
         "molecule": h2o_ricc2_def2svp,
         "driver": "hessian",
@@ -168,7 +186,10 @@ def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp)
         "keywords": keywords,
     }
 
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "turbomole", raise_error=True)
+    res = checkver_and_convert(res, request.node.name, "post")
+
     H = res.return_result
 
     size = h2o_ricc2_def2svp.geometry.size

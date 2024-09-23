@@ -4,20 +4,23 @@ import pprint
 import numpy as np
 import pytest
 import qcelemental as qcel
-from qcelemental.models import AtomicInput
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
 from qcengine.programs import empirical_dispersion_resources
-from qcengine.testing import is_program_new_enough, using
+from qcengine.testing import checkver_and_convert, is_program_new_enough, schema_versions, using
 
 
 @using("dftd3")
 @pytest.mark.parametrize("method", ["b3lyp-d3", "b3lyp-d3m", "b3lyp-d3bj", "b3lyp-d3mbj"])
-def test_dftd3_task(method):
-    json_data = {"molecule": qcng.get_molecule("eneyne"), "driver": "energy", "model": {"method": method}}
+def test_dftd3_task(method, schema_versions, request):
+    models, _ = schema_versions
 
+    json_data = {"molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)), "driver": "energy", "model": {"method": method}}
+
+    json_data = checkver_and_convert(json_data, request.node.name, "pre")
     ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True)
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret["driver"] == "energy"
     assert "provenance" in ret
@@ -30,9 +33,11 @@ def test_dftd3_task(method):
 
 
 @using("dftd3")
-def test_dftd3_error():
+def test_dftd3_error(schema_versions, request):
+    models, _ = schema_versions
+
     json_data = {
-        "molecule": qcng.get_molecule("eneyne"),
+        "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
         "driver": "energy",
         "model": {"method": "b3lyp-d3(bj)"},
         "keywords": {},
@@ -42,6 +47,8 @@ def test_dftd3_error():
     with pytest.raises(qcng.exceptions.InputError) as exc:
         input_data = json_data.copy()
         input_data["driver"] = "properties"
+
+        input_data = checkver_and_convert(input_data, request.node.name, "pre")
         ret = qcng.compute(input_data, "dftd3", raise_error=True)
 
     assert "Driver properties not implemented" in str(exc.value)
@@ -50,6 +57,8 @@ def test_dftd3_error():
     with pytest.raises(qcng.exceptions.InputError) as exc:
         input_data = json_data.copy()
         input_data["model"]["method"] = "b3lyp-quadD"
+
+        input_data = checkver_and_convert(input_data, request.node.name, "pre")
         ret = qcng.compute(input_data, "dftd3", raise_error=True)
 
     assert "correction level" in str(exc.value)
@@ -1514,7 +1523,9 @@ def test_dftd3__from_arrays__supplement():
 
 
 @using("dftd3")
-def test_3():
+def test_3(schema_versions, request):
+    models, _ = schema_versions
+
     sys = qcel.molparse.from_string(seneyne)["qm"]
 
     resinp = {
@@ -1525,7 +1536,10 @@ def test_3():
         "model": {"method": "b3lyp"},
         "keywords": {"level_hint": "d3bj"},
     }
+
+    resinp = checkver_and_convert(resinp, request.node.name, "pre")
     res = qcng.compute(resinp, "dftd3", raise_error=True)
+    res = checkver_and_convert(res, request.node.name, "post")
     res = res.dict()
 
     # res = dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
@@ -1634,7 +1648,9 @@ def test_qcdb__energy_d3():
         ({"parent": "ne", "name": "mp2d-mp2-dmp2", "subject": "atom", "lbl": "MP2-DMP2"}),
     ],
 )
-def test_mp2d__run_mp2d__2body(inp, subjects, request):
+def test_mp2d__run_mp2d__2body(inp, subjects, schema_versions, request):
+    models, _ = schema_versions
+
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1652,7 +1668,9 @@ def test_mp2d__run_mp2d__2body(inp, subjects, request):
         "model": {"method": inp["name"]},
         "keywords": {},
     }
+    resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, "mp2d", raise_error=True)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
     # assert len(jrec['extras']['qcvars']) == 8
@@ -1726,7 +1744,9 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
     ],
     # fmt: on
 )
-def test_dftd3__run_dftd3__2body(inp, program, subjects, request):
+def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, request):
+    models, _ = schema_versions
+
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1736,12 +1756,14 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    atin = AtomicInput(
+    atin = models.AtomicInput(
         molecule=mol,
         driver="gradient",
         **inp["qcsk"],
     )
+    atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
     pprint.pprint(jrec)
 
@@ -1790,7 +1812,9 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, request):
     ],
     # fmt: on
 )
-def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
+def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
+    models, _ = schema_versions
+
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1802,12 +1826,14 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
 
     program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
-    atin = AtomicInput(
+    atin = models.AtomicInput(
         molecule=mol,
         driver="gradient",
         **inp["qcsk"],
     )
+    atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
     with pytest.raises(AssertionError) as exc:
@@ -1837,7 +1863,9 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
         ({"parent": "ne", "name": "d3-atmgr", "subject": "atom", "lbl": "ATM"}),
     ],
 )
-def test_dftd3__run_dftd3__3body(inp, subjects, request):
+def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
+    models, _ = schema_versions
+
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1855,7 +1883,9 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
         "model": {"method": inp["name"]},
         "keywords": {},
     }
+    resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, "dftd3", raise_error=True)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
     assert len(jrec["extras"]["qcvars"]) == 8
@@ -1901,7 +1931,9 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
         ),
     ],
 )
-def test_sapt_pairwise(inp, program, extrakw, subjects, request):
+def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request):
+    models, _ = schema_versions
+
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     expected_pairwise = pref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1911,7 +1943,7 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    atin = AtomicInput(
+    atin = models.AtomicInput(
         molecule=mol,
         driver="energy",
         model={"method": inp["lbl"]},
@@ -1920,7 +1952,9 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, request):
             **extrakw,
         },
     )
+    atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
     assert compare_values(expected, jrec["extras"]["qcvars"]["CURRENT ENERGY"], atol=1.0e-7)
@@ -1961,7 +1995,9 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, request):
         ({"parent": "ne", "name": "hf/minis", "subject": "atom", "lbl": "GCP"}),
     ],
 )
-def test_gcp(inp, subjects, program, request):
+def test_gcp(inp, subjects, program, schema_versions, request):
+    models, _ = schema_versions
+
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1979,7 +2015,9 @@ def test_gcp(inp, subjects, program, request):
         "model": {"method": inp["name"]},
         "keywords": {},
     }
+    resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, program, raise_error=True)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
     # assert len(jrec["extras"]["qcvars"]) == 8
