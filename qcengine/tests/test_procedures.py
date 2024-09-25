@@ -3,9 +3,6 @@ Tests the DQM compute dispatch module
 """
 
 import pytest
-from qcelemental.models import DriverEnum, FailedOperation, OptimizationInput
-from qcelemental.models.common_models import Model
-from qcelemental.models.procedures import OptimizationSpecification, QCInputSpecification, TDKeywords, TorsionDriveInput
 
 import qcengine as qcng
 from qcengine.testing import failure_engine, schema_versions, using
@@ -31,7 +28,7 @@ def input_data():
     ],
 )
 def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request):
-    models, models_out = schema_versions
+    models, _ = schema_versions
 
     input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True))
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
@@ -68,16 +65,20 @@ def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request)
 
 @using("psi4")
 @using("geometric")
-def test_geometric_local_options(input_data):
+def test_geometric_local_options(input_data, schema_versions, request):
+    models, _ = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True))
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
     input_data["keywords"]["program"] = "psi4"
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
     # Set some extremely large number to test
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True, local_options={"memory": "5000"})
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert pytest.approx(ret.trajectory[0].provenance.memory, 1) == 4900
 
     # Make sure we cleaned up
@@ -87,87 +88,107 @@ def test_geometric_local_options(input_data):
 
 @using("rdkit")
 @using("geometric")
-def test_geometric_stdout(input_data):
+def test_geometric_stdout(input_data, schema_versions, request):
+    models, _ = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("water")
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     input_data["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     input_data["keywords"]["program"] = "rdkit"
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert ret.success is True
     assert "Converged!" in ret.stdout
 
 
 @using("psi4")
 @using("berny")
-def test_berny_stdout(input_data):
+def test_berny_stdout(input_data, schema_versions, request):
+    models, _ = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("water")
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
     input_data["keywords"]["program"] = "psi4"
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "berny", raise_error=True)
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert ret.success is True
     assert "All criteria matched" in ret.stdout
 
 
 @using("psi4")
 @using("berny")
-def test_berny_failed_gradient_computation(input_data):
+def test_berny_failed_gradient_computation(input_data, schema_versions, request):
+    models, _ = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("water")
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
     input_data["input_specification"]["keywords"] = {"badpsi4key": "badpsi4value"}
     input_data["keywords"]["program"] = "psi4"
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "berny", raise_error=False)
-    assert isinstance(ret, FailedOperation)
+    # TODO ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
+    assert isinstance(ret, models.FailedOperation)
     assert ret.success is False
     assert ret.error.error_type == qcng.exceptions.InputError.error_type
 
 
 @using("geometric")
 @using("rdkit")
-def test_geometric_rdkit_error(input_data):
+def test_geometric_rdkit_error(input_data, schema_Verisons, request):
+    models, _ = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("water").copy(exclude={"connectivity_"})
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True)).copy(exclude={"connectivity_"})
     input_data["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     input_data["keywords"]["program"] = "rdkit"
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric")
+    # TODO ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert ret.success is False
     assert isinstance(ret.error.error_message, str)
 
 
 @using("rdkit")
 @using("geometric")
-def test_optimization_protocols(input_data):
+def test_optimization_protocols(input_data, schema_versions, request):
+    models, _ = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("water")
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     input_data["input_specification"]["model"] = {"method": "UFF"}
     input_data["keywords"]["program"] = "rdkit"
     input_data["protocols"] = {"trajectory": "initial_and_final"}
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
-    assert ret.success, ret.error.error_message
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
 
+    assert ret.success, ret.error.error_message
     assert len(ret.trajectory) == 2
     assert ret.initial_molecule.get_hash() == ret.trajectory[0].molecule.get_hash()
     assert ret.final_molecule.get_hash() == ret.trajectory[1].molecule.get_hash()
 
 
 @using("geometric")
-def test_geometric_retries(failure_engine, input_data):
+def test_geometric_retries(failure_engine, input_data, schema_versions, request):
+    models, _ = schema_versions
 
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
     failure_engine.iter_modes.extend(["pass"] * 20)
@@ -180,9 +201,12 @@ def test_geometric_retries(failure_engine, input_data):
     input_data["keywords"]["program"] = failure_engine.name
     input_data["keywords"]["coordsys"] = "cart"  # needed by geometric v1.0 to play nicely with failure_engine
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13}, raise_error=True)
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert ret.success is True
     assert ret.trajectory[0].provenance.retries == 1
     assert ret.trajectory[0].provenance.ncores == 13
@@ -192,7 +216,10 @@ def test_geometric_retries(failure_engine, input_data):
 
     # Ensure we still fail
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
+
     ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13, "retries": 1})
+    # TODO ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert ret.success is False
     assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
     assert len(ret.input_data["trajectory"]) == 2
@@ -255,14 +282,18 @@ def test_geometric_retries(failure_engine, input_data):
         ),
     ],
 )
-def test_geometric_generic(input_data, program, model, bench):
+def test_geometric_generic(input_data, program, model, bench, schema_versions, request):
+    models, _ = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("water")
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     input_data["input_specification"]["model"] = model
     input_data["keywords"]["program"] = program
     input_data["input_specification"]["extras"] = {"_secret_tags": {"mysecret_tag": "data1"}}  # pragma: allowlist secret
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert ret.success is True
     assert "Converged!" in ret.stdout
 
@@ -279,26 +310,33 @@ def test_geometric_generic(input_data, program, model, bench):
 
 @using("nwchem")
 @pytest.mark.parametrize("linopt", [0, 1])
-def test_nwchem_relax(linopt):
+def test_nwchem_relax(linopt, schema_versions, request):
+    models, _ = schema_versions
+
     # Make the input file
     input_data = {
         "input_specification": {
             "model": {"method": "HF", "basis": "sto-3g"},
             "keywords": {"set__driver:linopt": linopt},
         },
-        "initial_molecule": qcng.get_molecule("hydrogen"),
+        "initial_molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
     }
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
     # Run the relaxation
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "nwchemdriver", raise_error=True)
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+
     assert 10 > len(ret.trajectory) > 1
 
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
 
 
 @using("nwchem")
-def test_nwchem_restart(tmpdir):
+def test_nwchem_restart(tmpdir, schema_versions, request):
+    models, _ = schema_versions
+
     # Make the input file
     input_data = {
         "input_specification": {
@@ -306,28 +344,39 @@ def test_nwchem_restart(tmpdir):
             "keywords": {"driver__maxiter": 2, "set__driver:linopt": 0},
             "extras": {"allow_restarts": True},
         },
-        "initial_molecule": qcng.get_molecule("hydrogen"),
+        "initial_molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
     }
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
     # Run an initial step, which should not converge
     local_opts = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
+
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=False)
     assert not ret.success
 
     # Run it again, which should converge
     new_ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=True)
+    new_ret = checkver_and_convert_proc(new_ret, request.node.name, "post")
     assert new_ret.success
 
 
 @using("rdkit")
 @using("torsiondrive")
-def test_torsiondrive_generic():
+def test_torsiondrive_generic(schema_versions, request):
+    models, _ = schema_versions
+    TorsionDriveInput = models.TorsionDriveInput
+    TDKeywords = models.TDKeywords
+    OptimizationSpecification = models.OptimizationSpecification
+    QCInputSpecification = models.QCInputSpecification
+    DriverEnum = models.DriverEnum
+    Model = models.Model
+    Molecule = models.Molecule
 
     input_data = TorsionDriveInput(
         keywords=TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
         input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="UFF", basis=None)),
-        initial_molecule=[qcng.get_molecule("ethane")] * 2,
+        initial_molecule=[Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
         optimization_spec=OptimizationSpecification(
             procedure="geomeTRIC",
             keywords={
@@ -338,7 +387,9 @@ def test_torsiondrive_generic():
         ),
     )
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "torsiondrive", raise_error=True)
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
 
     assert ret.error is None
     assert ret.success
@@ -372,18 +423,21 @@ def test_torsiondrive_generic():
         pytest.param("berny", marks=using("berny")),
     ],
 )
-def test_optimization_mrchem(input_data, optimizer):
+def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
+    models, _ = schema_versions
 
-    input_data["initial_molecule"] = qcng.get_molecule("hydrogen")
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True))
     input_data["input_specification"]["model"] = {"method": "HF"}
     input_data["input_specification"]["keywords"] = {"world_prec": 1.0e-4}
     input_data["keywords"]["program"] = "mrchem"
 
-    input_data = OptimizationInput(**input_data)
+    input_data = models.OptimizationInput(**input_data)
 
+    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, optimizer, raise_error=True)
-    assert 10 > len(ret.trajectory) > 1
+    ret = checkver_and_convert_proc(ret, request.node.name, "post")
 
+    assert 10 > len(ret.trajectory) > 1
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-3) == 1.3860734486984705
     assert ret.provenance.creator.lower() == optimizer
     assert ret.trajectory[0].provenance.creator.lower() == "mrchem"
@@ -396,17 +450,17 @@ def checkver_and_convert_proc(mdl, tnm, prepost):
     import qcelemental as qcel
 
     def check_model_v1(m):
-        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} !⊆ v1.BaseModel"
+        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.BaseModel"
         assert isinstance(
             m, qcel.models.v1.basemodels.ProtoModel
-        ), f"type({m.__class__.__name__}) = {type(m)} !⊆ v1.ProtoModel"
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.ProtoModel"
         assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
 
     def check_model_v2(m):
-        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} !⊆ BaseModel"
+        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ BaseModel"
         assert isinstance(
             m, qcel.models.v2.basemodels.ProtoModel
-        ), f"type({m.__class__.__name__}) = {type(m)} !⊆ v2.ProtoModel"
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v2.ProtoModel"
         assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
 
     if prepost == "pre":
@@ -438,6 +492,6 @@ def checkver_and_convert_proc(mdl, tnm, prepost):
 
         if dict_in:
             # imitates compute(..., return_dict=True)
-            mdl = json.loads(mdl.json())
+            mdl = json.loads(mdl.model_dump_json())
 
     return mdl

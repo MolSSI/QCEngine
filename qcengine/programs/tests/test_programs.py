@@ -8,7 +8,7 @@ import pytest
 from qcelemental.models import AtomicInput, Molecule
 
 import qcengine as qcng
-from qcengine.testing import failure_engine, using
+from qcengine.testing import failure_engine, schema_versions, using
 
 
 def test_missing_key():

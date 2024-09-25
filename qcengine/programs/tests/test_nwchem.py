@@ -62,7 +62,7 @@ def nh2_data():
 
 @using("nwchem")
 def test_b3lyp(nh2_data, schema_versions, request):
-    models, models_out = schema_versions
+    models, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     # Run NH2
@@ -92,7 +92,7 @@ def test_b3lyp(nh2_data, schema_versions, request):
 
 @using("nwchem")
 def test_hess(nh2_data, schema_versions, request):
-    models, models_out = schema_versions
+    models, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     resi = {"molecule": nh2, "driver": "hessian", "model": {"method": "b3lyp", "basis": "3-21g"}}
@@ -121,7 +121,7 @@ def test_hess(nh2_data, schema_versions, request):
 
 @using("nwchem")
 def test_gradient(nh2_data, schema_versions, request):
-    models, models_out = schema_versions
+    models, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     resi = {
@@ -164,18 +164,20 @@ def test_gradient(nh2_data, schema_versions, request):
 
 
 @pytest.fixture
-def h20():
-    water = """
+def h20_data():
+    return """
 -1 2
 O 0 0 0
 H 0 0 1
 H 0 1 0
     """
-    return qcel.models.Molecule.from_data(water)
 
 
 @using("nwchem")
-def test_dipole(h20, schema_versions, request):
+def test_dipole(h20_data, schema_versions, request):
+    models, _ = schema_versions
+    h20 = models.Molecule.from_data(h20_data)
+
     # Run NH2
     resi = {
         "molecule": h20,
@@ -212,17 +214,19 @@ def test_dipole(h20, schema_versions, request):
 
 
 @pytest.fixture
-def h20v2():
-    water = """
+def h20v2_data():
+    return """
 O 0 0 0
 H 0 0 1
 H 0 1 0
     """
-    return qcel.models.Molecule.from_data(water)
 
 
 @using("nwchem")
-def test_homo_lumo(h20v2, schema_versions, request):
+def test_homo_lumo(h20v2_data, schema_versions, request):
+    models, _ = schema_versions
+    h20v2 = models.Molecule.from_data(h20v2_data)
+
     # Run NH2
     resi = {
         "molecule": h20v2,
@@ -257,8 +261,9 @@ def test_homo_lumo(h20v2, schema_versions, request):
 
 
 @using("nwchem")
-def test_geometry_bug():
+def test_geometry_bug(schema_versions, request):
     """Make sure that the harvester does not crash if NWChem's autosym moves atoms too far"""
+    models, _ = schema_versions
 
     # Example molecule that has an RMSD of 2e-4 after NWChem symmetrizes the coordinates
     xyz = """6
@@ -269,65 +274,65 @@ H       1.00658338       1.81556366       0.00348335
 H      -0.54657475       1.79916975      -0.87390126
 H      -0.52288871       1.72555240       0.89907326
 H       0.44142019      -0.33354425      -0.77152059"""
-    mol = qcel.models.Molecule.from_data(xyz)
-    qcng.compute(
-        {"molecule": mol, "model": {"method": "b3lyp", "basis": "6-31g"}, "driver": "gradient"},
-        "nwchem",
-        raise_error=True,
-    )
+    mol = models.Molecule.from_data(xyz)
+    atin = {"molecule": mol, "model": {"method": "b3lyp", "basis": "6-31g"}, "driver": "gradient"}
+
+    atin = checkver_and_convert(atin, request.node.name, "pre")
+    atres = qcng.compute(atin, "nwchem", raise_error=True)
+    atres = checkver_and_convert(atres, request.node.name, "post")
 
 
 @using("nwchem")
-def test_autoz_error():
+def test_autoz_error(schema_versions, request):
     """Test ability to turn off autoz"""
+    models, _ = schema_versions
+
     # Large molecule that leads to an AutoZ error
-    mol = qcel.models.Molecule.from_data(_auto_z_problem)
-    result = qcng.compute(
-        {
+    mol = models.Molecule.from_data(_auto_z_problem)
+    resi = {        
             "molecule": mol,
             "model": {"method": "hf", "basis": "sto-3g"},
             "driver": "energy",
             "protocols": {"error_correction": {"default_policy": False}},
-        },  # Turn off error correction
-        "nwchem",
-        raise_error=False,
-    )
+        }  # Turn off error correction
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    result = qcng.compute(resi, "nwchem", raise_error=False)
 
     assert not result.success
     assert "Error when generating redundant atomic coordinates" in result.error.error_message
 
     # Turn off autoz
-    result = qcng.compute(
-        {
+    resi = {
             "molecule": mol,
             "model": {"method": "hf", "basis": "sto-3g"},
             "driver": "energy",
             "keywords": {"geometry__noautoz": True},
-        },
-        "nwchem",
-        raise_error=False,
-    )
+        }
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    result = qcng.compute(resi, "nwchem", raise_error=False)
 
     # Ok if it crashes for other reasons
     assert "Error when generating redundant atomic coordinates" not in result.error.error_message
 
 
 @using("nwchem")
-def test_autoz_error_correction():
+def test_autoz_error_correction(schema_versions, request):
     """See if error correction for autoz works"""
+    models, _ = schema_versions
 
     # Large molecule that leads to an AutoZ error
-    mol = qcel.models.Molecule.from_data(_auto_z_problem)
-    result = qcng.compute(
-        {
+    mol = models.Molecule.from_data(_auto_z_problem)
+    resi = {
             "molecule": mol,
             "model": {"method": "hf", "basis": "sto-3g"},
             "driver": "energy",
             "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-1},
-        },
-        "nwchem",
-        raise_error=True,
-    )
+        }
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    result = qcng.compute(resi, "nwchem", raise_error=True)
+    result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success
     assert "geom_binvr" in result.extras["observed_errors"]
@@ -347,9 +352,11 @@ def test_autoz_error_correction():
     ],
 )
 @using("nwchem")
-def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
-    result = qcng.compute(
-        {
+def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema_versions, request):
+    models, _ = schema_versions
+    h20v2 = models.Molecule.from_data(h20v2_data)
+
+    resi = {
             "molecule": h20v2,
             "model": {"method": method, "basis": "sto-3g"},
             "driver": "energy",
@@ -358,10 +365,11 @@ def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
                 "qc_module": use_tce,
                 "scf__uhf": True,
             },  # UHF needed for SCF test
-        },
-        "nwchem",
-        raise_error=True,
-    )
+        }
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    result = qcng.compute(resi, "nwchem", raise_error=True)
+    result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success
     assert "convergence_failed" in result.extras["observed_errors"]
@@ -369,9 +377,12 @@ def test_conv_threshold(h20v2, method, keyword, init_iters, use_tce):
 
 
 @using("nwchem")
-def test_restart(nh2, tmpdir):
+def test_restart(nh2_data, tmpdir, schema_versions, request):
     # Create a molecule that takes 5-8 steps for NWChem to relax it,
     #  but only run the relaxation for 4 steps
+    models, _ = schema_versions
+    nh2 = models.Molecule.from_data(nh2_data)
+
     resi = {
         "molecule": nh2,
         "driver": "gradient",
@@ -383,12 +394,10 @@ def test_restart(nh2, tmpdir):
 
     # Run once: It should fail to converge
     local_options = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
-    result = qcng.compute(
-        resi,
-        "nwchem",
-        local_options=local_options,
-        raise_error=False,
-    )
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    result = qcng.compute(resi, "nwchem", local_options=local_options, raise_error=False)
+
     assert not result.success
     assert "computation failed to converge" in str(result.error)
 
@@ -399,4 +408,5 @@ def test_restart(nh2, tmpdir):
         local_options=local_options,
         raise_error=False,
     )
+    result = checkver_and_convert(result, request.node.name, "post")
     assert result.success

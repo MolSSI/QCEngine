@@ -78,7 +78,7 @@ def is_mdi_new_enough(version_feature_introduced):
 
 
 @pytest.fixture(scope="function")
-def failure_engine():
+def failure_engine(schema_versions):
     unique_name = "testing_random_name"
 
     class FailEngine(qcng.programs.ProgramHarness):
@@ -116,7 +116,7 @@ def failure_engine():
             grad = [0, 0, -grad_value, 0, 0, grad_value]
 
             if mode == "pass":
-                return qcel.models.AtomicResult(
+                return schema_versions[0].AtomicResult(
                     **{
                         **input_data.dict(),
                         **{
@@ -233,17 +233,17 @@ def checkver_and_convert(mdl, tnm, prepost):
     import pydantic
 
     def check_model_v1(m):
-        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} !⊆ v1.BaseModel"
+        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.BaseModel"
         assert isinstance(
             m, qcel.models.v1.basemodels.ProtoModel
-        ), f"type({m.__class__.__name__}) = {type(m)} !⊆ v1.ProtoModel"
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.ProtoModel"
         assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
 
     def check_model_v2(m):
-        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} !⊆ BaseModel"
+        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ BaseModel"
         assert isinstance(
             m, qcel.models.v2.basemodels.ProtoModel
-        ), f"type({m.__class__.__name__}) = {type(m)} !⊆ v2.ProtoModel"
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v2.ProtoModel"
         assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
 
     if prepost == "pre":
@@ -275,6 +275,6 @@ def checkver_and_convert(mdl, tnm, prepost):
 
         if dict_in:
             # imitates compute(..., return_dict=True)
-            mdl = json.loads(mdl.json())
+            mdl = json.loads(mdl.model_dump_json())
 
     return mdl
