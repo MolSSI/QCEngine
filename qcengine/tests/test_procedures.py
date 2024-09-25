@@ -3,6 +3,7 @@ Tests the DQM compute dispatch module
 """
 
 import pytest
+import qcelemental as qcel
 
 import qcengine as qcng
 from qcengine.testing import failure_engine, schema_versions, using
@@ -140,7 +141,7 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
     ret = qcng.compute_procedure(input_data, "berny", raise_error=False)
     # TODO ret = checkver_and_convert_proc(ret, request.node.name, "post")
 
-    assert isinstance(ret, models.FailedOperation)
+    assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
     assert ret.success is False
     assert ret.error.error_type == qcng.exceptions.InputError.error_type
 
@@ -366,9 +367,9 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
 def test_torsiondrive_generic(schema_versions, request):
     models, _ = schema_versions
     TorsionDriveInput = models.TorsionDriveInput
-    TDKeywords = models.TDKeywords
-    OptimizationSpecification = models.OptimizationSpecification
-    QCInputSpecification = models.QCInputSpecification
+    TDKeywords = models.procedures.TDKeywords
+    OptimizationSpecification = models.procedures.OptimizationSpecification
+    QCInputSpecification = models.procedures.QCInputSpecification
     DriverEnum = models.DriverEnum
     Model = models.Model
     Molecule = models.Molecule
@@ -447,7 +448,6 @@ def checkver_and_convert_proc(mdl, tnm, prepost):
     import json
 
     import pydantic
-    import qcelemental as qcel
 
     def check_model_v1(m):
         assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.BaseModel"
