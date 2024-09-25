@@ -148,7 +148,7 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
 
 @using("geometric")
 @using("rdkit")
-def test_geometric_rdkit_error(input_data, schema_Verisons, request):
+def test_geometric_rdkit_error(input_data, schema_versions, request):
     models, _ = schema_versions
 
     input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True)).copy(exclude={"connectivity_"})
