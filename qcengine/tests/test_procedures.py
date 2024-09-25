@@ -467,6 +467,7 @@ def checkver_and_convert_proc(mdl, tnm, prepost):
         dict_in = isinstance(mdl, dict)
         if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
             if dict_in:
+                # TODO this only works for TD b/c none are dicts. probably discarded when conversions in the compute()
                 mdl = qcel.models.v1.OptimizationInput(**mdl)
             check_model_v1(mdl)
         elif "as_v2" in tnm or "to_v1" in tnm:
