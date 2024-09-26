@@ -46,9 +46,9 @@ def test_xtb_task_gfn1xtb_m01(schema_versions, request):
         driver="gradient",
     )
 
-    atomic_input = checkver_and_convert(atomic_input, request.name, "pre")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
-    atomic_result = checkver_and_convert(atomic_result, request.name, "post")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
@@ -91,9 +91,9 @@ def test_xtb_task_gfn1xtb_m02(schema_versions, request):
         },
     )
 
-    atomic_input = checkver_and_convert(atomic_input, request.name, "pre")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
-    atomic_result = checkver_and_convert(atomic_result, request.name, "post")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
@@ -135,9 +135,9 @@ def test_xtb_task_gfn1xtb_m03(schema_versions, request):
         },
     )
 
-    atomic_input = checkver_and_convert(atomic_input, request.name, "pre")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
-    atomic_result = checkver_and_convert(atomic_result, request.name, "post")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
@@ -179,9 +179,9 @@ def test_xtb_task_gfn1xtb_m04(schema_versions, request):
         driver="properties",
     )
 
-    atomic_input = checkver_and_convert(atomic_input, request.name, "pre")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
-    atomic_result = checkver_and_convert(atomic_result, request.name, "post")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result["dipole"], abs=thr) == return_result["dipole"]
@@ -203,9 +203,9 @@ def test_xtb_task_gfn1xtb_m05(schema_versions, request):
         driver="energy",
     )
 
-    atomic_input = checkver_and_convert(atomic_input, request.name, "pre")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
-    atomic_result = checkver_and_convert(atomic_result, request.name, "post")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
@@ -245,9 +245,9 @@ def test_xtb_task_gfn2xtb_m01(schema_versions, request):
         driver="gradient",
     )
 
-    atomic_input = checkver_and_convert(atomic_input, request.name, "pre")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
-    atomic_result = checkver_and_convert(atomic_result, request.name, "post")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
