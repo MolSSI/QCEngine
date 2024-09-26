@@ -227,7 +227,7 @@ def schema_versions(request):
         return qcel.models, qcel.models
 
 
-def checkver_and_convert(mdl, tnm, prepost):
+def checkver_and_convert(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=None):
     import json
 
     import pydantic
@@ -237,14 +237,16 @@ def checkver_and_convert(mdl, tnm, prepost):
         assert isinstance(
             m, qcel.models.v1.basemodels.ProtoModel
         ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.ProtoModel"
-        assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
+        if vercheck:
+            assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
 
     def check_model_v2(m):
         assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ BaseModel"
         assert isinstance(
             m, qcel.models.v2.basemodels.ProtoModel
         ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v2.ProtoModel"
-        assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
+        if vercheck:
+            assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
 
     if prepost == "pre":
         dict_in = isinstance(mdl, dict)
@@ -265,11 +267,17 @@ def checkver_and_convert(mdl, tnm, prepost):
         dict_in = isinstance(mdl, dict)
         if "as_v1" in tnm or "to_v1" in tnm or "None" in tnm:
             if dict_in:
-                mdl = qcel.models.v1.AtomicResult(**mdl)
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v1.AtomicResult(**mdl)
             check_model_v1(mdl)
         elif "as_v2" in tnm or "to_v2" in tnm:
             if dict_in:
-                mdl = qcel.models.v2.AtomicResult(**mdl)
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v2.AtomicResult(**mdl)
             mdl = mdl.convert_v(2)
             check_model_v2(mdl)
 

@@ -18,8 +18,9 @@ def h2o(schema_versions):
 
 
 @pytest.fixture
-def fh():
-    return qcel.models.Molecule(
+def fh(schema_versions):
+    models, _ = schema_versions
+    return models.Molecule(
         geometry=[[0.000000000000, 0.000000000000, -1.642850273986], [0.000000000000, 0.000000000000, 0.087149726014]],
         symbols=["H", "F"],
         fix_com=True,
@@ -105,13 +106,15 @@ def test_dipole(h2o, schema_versions, request):
 
 
 @using("mrchem")
-def test_gradient(fh):
+def test_gradient(fh, schema_versions, request):
+    models, _ = schema_versions
+
     mr_kws = {
         "world_prec": 1.0e-3,
         "world_size": 6,
     }
 
-    inp = qcel.models.AtomicInput(
+    inp = models.AtomicInput(
         molecule=fh,
         driver="gradient",
         model={
@@ -120,7 +123,9 @@ def test_gradient(fh):
         keywords=mr_kws,
     )
 
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
     assert compare_values(
