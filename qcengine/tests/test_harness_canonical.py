@@ -1,6 +1,8 @@
 """
 Tests the DQM compute dispatch module
 """
+import copy
+
 import msgpack
 import numpy as np
 import pytest
@@ -91,6 +93,7 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
         molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"}, keywords=keywords
     )
     if program in ["adcc"]:
+        inp = checkver_and_convert(inp, request.node.name, "pre")
         with pytest.raises(qcng.exceptions.InputError) as e:
             qcng.compute(inp, program, raise_error=True)
 
@@ -161,8 +164,8 @@ def test_compute_bad_models(program, model, schema_versions, request):
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
-    adriver = model.pop("driver", "energy")
-    amodel = model
+    amodel = copy.deepcopy(model)
+    adriver = amodel.pop("driver", "energy")
     inp = models.AtomicInput(molecule=models.Molecule(**qcng.get_molecule("hydrogen",return_dict=True)), driver=adriver, model=amodel)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
