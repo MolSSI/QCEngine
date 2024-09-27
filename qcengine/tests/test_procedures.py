@@ -139,7 +139,7 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
 
     input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "berny", raise_error=False)
-    # TODO ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert_proc(ret, request.node.name, "post", vercheck=False)
 
     assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
     assert ret.success is False
@@ -159,7 +159,7 @@ def test_geometric_rdkit_error(input_data, schema_versions, request):
 
     input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric")
-    # TODO ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert_proc(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
     assert isinstance(ret.error.error_message, str)
@@ -219,7 +219,7 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
 
     ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13, "retries": 1})
-    # TODO ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert_proc(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
     assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
@@ -354,6 +354,7 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
 
     input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=False)
+    ret = checkver_and_convert_proc(ret, request.node.name, "post", vercheck=False)
     assert not ret.success
 
     # Run it again, which should converge
@@ -444,7 +445,7 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
     assert ret.trajectory[0].provenance.creator.lower() == "mrchem"
 
 
-def checkver_and_convert_proc(mdl, tnm, prepost):
+def checkver_and_convert_proc(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=None):
     import json
 
     import pydantic
@@ -454,25 +455,32 @@ def checkver_and_convert_proc(mdl, tnm, prepost):
         assert isinstance(
             m, qcel.models.v1.basemodels.ProtoModel
         ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.ProtoModel"
-        assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
+        if vercheck:
+            assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
 
     def check_model_v2(m):
         assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ BaseModel"
         assert isinstance(
             m, qcel.models.v2.basemodels.ProtoModel
         ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v2.ProtoModel"
-        assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
+        if vercheck:
+            assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
 
     if prepost == "pre":
         dict_in = isinstance(mdl, dict)
         if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
             if dict_in:
-                # TODO this only works for TD b/c none are dicts. probably discarded when conversions in the compute()
-                mdl = qcel.models.v1.OptimizationInput(**mdl)
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v1.OptimizationInput(**mdl)
             check_model_v1(mdl)
         elif "as_v2" in tnm or "to_v1" in tnm:
             if dict_in:
-                mdl = qcel.models.v2.OptimizationInput(**mdl)
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v2.OptimizationInput(**mdl)
             check_model_v2(mdl)
             mdl = mdl.convert_v(1)
 
@@ -483,11 +491,17 @@ def checkver_and_convert_proc(mdl, tnm, prepost):
         dict_in = isinstance(mdl, dict)
         if "as_v1" in tnm or "to_v1" in tnm or "None" in tnm:
             if dict_in:
-                mdl = qcel.models.v1.OptimizationResult(**mdl)
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v1.OptimizationResult(**mdl)
             check_model_v1(mdl)
         elif "as_v2" in tnm or "to_v2" in tnm:
             if dict_in:
-                mdl = qcel.models.v2.OptimizationResult(**mdl)
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v2.OptimizationResult(**mdl)
             mdl = mdl.convert_v(2)
             check_model_v2(mdl)
 

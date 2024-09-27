@@ -298,6 +298,7 @@ def test_autoz_error(schema_versions, request):
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=False)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)    
 
     assert not result.success
     assert "Error when generating redundant atomic coordinates" in result.error.error_message
@@ -311,6 +312,7 @@ def test_autoz_error(schema_versions, request):
         }
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=False)
+    result = checkver_and_convert(result, request.node.name, "post",vercheck=False)
 
     # Ok if it crashes for other reasons
     assert "Error when generating redundant atomic coordinates" not in result.error.error_message
@@ -397,6 +399,7 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", local_options=local_options, raise_error=False)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
 
     assert not result.success
     assert "computation failed to converge" in str(result.error)

@@ -4,13 +4,12 @@ Tests the DQM compute dispatch module
 import msgpack
 import numpy as np
 import pytest
-from qcelemental.models import AtomicInput, BasisSet
 from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
-from qcengine.testing import has_program, using
+from qcengine.testing import checkver_and_convert, has_program, schema_versions, using
 
-qcsk_bs = BasisSet(name="custom_basis", center_data=center_data, atom_map=["bs_sto3g_h", "bs_sto3g_h"])
+qcsk_bs = {"name": "custom_basis", "center_data": center_data, "atom_map": ["bs_sto3g_h", "bs_sto3g_h"]}
 
 _canonical_methods = [
     ("dftd3", {"method": "b3lyp-d3"}, {}),
@@ -53,34 +52,42 @@ _canonical_methods_qcsk_basis = [
 ]
 
 
-def _get_molecule(program):
+def _get_molecule(program, molcls):
     if program in ["openmm", "terachem_pbs"]:
-        return qcng.get_molecule("water")
+        dmol = qcng.get_molecule("water", return_dict=True)
     else:
-        return qcng.get_molecule("hydrogen")
-
+        dmol = qcng.get_molecule("hydrogen", return_dict=True)
+    return molcls(**dmol)
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
-def test_compute_energy(program, model, keywords):
+def test_compute_energy(program, model, keywords, schema_versions, request):
+    models, _ = schema_versions
+
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
 
-    molecule = _get_molecule(program)
+    molecule = _get_molecule(program, models.Molecule)
 
-    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True)
+    ret = checkver_and_convert(ret, request.node.name, "post")
+
     assert ret.success is True
     assert isinstance(ret.return_result, float)
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
-def test_compute_gradient(program, model, keywords):
+def test_compute_gradient(program, model, keywords, schema_versions, request):
+    models, _ = schema_versions
+
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
-    molecule = _get_molecule(program)
+    molecule = _get_molecule(program, models.Molecule)
 
-    inp = AtomicInput(
+    inp = models.AtomicInput(
         molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"}, keywords=keywords
     )
     if program in ["adcc"]:
@@ -90,7 +97,9 @@ def test_compute_gradient(program, model, keywords):
         assert "gradient not implemented" in str(e.value)
 
     else:
+        inp = checkver_and_convert(inp, request.node.name, "pre")
         ret = qcng.compute(inp, program, raise_error=True)
+        ret = checkver_and_convert(ret, request.node.name, "post")
 
         assert ret.success is True
         assert isinstance(ret.return_result, np.ndarray)
@@ -100,15 +109,19 @@ def test_compute_gradient(program, model, keywords):
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods_qcsk_basis)
-def test_compute_energy_qcsk_basis(program, model, keywords):
+def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, request):
+    models, _ = schema_versions
+
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
-    molecule = _get_molecule(program)
-    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    molecule = _get_molecule(program, models.Molecule)
+    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
 
     with pytest.raises(qcng.exceptions.InputError) as e:
-        qcng.compute(inp, program, raise_error=True)
+        inp = checkver_and_convert(inp, request.node.name, "pre")
+        res = qcng.compute(inp, program, raise_error=True)
+        checkver_and_convert(res, request.node.name, "post")
 
     assert "QCSchema BasisSet for model.basis not implemented" in str(e.value)
 
@@ -142,27 +155,32 @@ def test_compute_energy_qcsk_basis(program, model, keywords):
         # ("xtb", {"method": "bad"}),
     ],
 )
-def test_compute_bad_models(program, model):
+def test_compute_bad_models(program, model, schema_versions, request):
+    models, _ = schema_versions
+
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
     adriver = model.pop("driver", "energy")
     amodel = model
-    inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"), driver=adriver, model=amodel)
+    inp = models.AtomicInput(molecule=models.Molecule(**qcng.get_molecule("hydrogen",return_dict=True)), driver=adriver, model=amodel)
 
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     with pytest.raises(qcng.exceptions.InputError) as exc:
         ret = qcng.compute(inp, program, raise_error=True)
 
 
-def test_psi4_restarts(monkeypatch):
+def test_psi4_restarts(monkeypatch, schema_versions, request):
     """
     Make sure that a random error is raised which can be restarted if psi4 fails with no error message
     """
+    models, _ = schema_versions
+
     if not has_program("psi4"):
         pytest.skip("Program psi4 not found.")
 
     # create the psi4 task
-    inp = AtomicInput(molecule=qcng.get_molecule("hydrogen"), driver="energy", model={"method": "hf", "basis": "6-31G"})
+    inp = models.AtomicInput(molecule=models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)), driver="energy", model={"method": "hf", "basis": "6-31G"})
 
     def mock_execute(*args, **kwargs):
         """
@@ -174,5 +192,6 @@ def test_psi4_restarts(monkeypatch):
 
     monkeypatch.setattr("qcengine.programs.psi4.execute", mock_execute)
 
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     with pytest.raises(qcng.exceptions.RandomError):
         _ = qcng.compute(input_data=inp, program="psi4", raise_error=True, task_config={"retries": 0})
