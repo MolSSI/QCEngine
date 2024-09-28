@@ -4,7 +4,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive, compare_values
 
 import qcengine as qcng
-from qcengine.testing import qcengine_records, using
+from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, using
 
 qchem_info = qcengine_records("qchem")
 qchem_logonly_info = qcengine_records("qchem_logonly")
@@ -66,26 +66,32 @@ def test_qchem_input_formatter_template(test_case):
 
 @using("qchem")
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
-def test_qchem_executor(test_case):
+def test_qchem_executor(test_case, schema_versions, request):
+    models, _ = schema_versions
+
     # Get input file data
     data = qchem_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = models.AtomicInput.parse_raw(data["input.json"])
 
     # Run qchem
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     result = qcng.compute(inp, "qchem")
+    result = checkver_and_convert(result, request.node.name, "post")
+
     assert result.success is True
 
     # Get output file data
-    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"])
+    output_ref = models.AtomicResult.parse_raw(data["output.json"])
 
     atol = 1e-6
     assert compare_recursive(output_ref.return_result, result.return_result, atol=atol)
 
 
 @using("qchem")
-def test_qchem_orientation():
+def test_qchem_orientation(schema_versions, request):
+    models, _ = schema_versions
 
-    mol = qcel.models.Molecule.from_data(
+    mol = models.Molecule.from_data(
         """
         He 0.0  0.7  0.7
         He 0.0 -0.7 -0.7
@@ -94,13 +100,20 @@ def test_qchem_orientation():
 
     # Compare with rotation
     inp = {"molecule": mol, "driver": "gradient", "model": {"method": "HF", "basis": "6-31g"}}
+
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, "qchem", raise_error=True)
+    ret = checkver_and_convert(ret, request.node.name, "post")
+
     assert compare_values(np.linalg.norm(ret.return_result, axis=0), [0, 0, 0.00791539])
 
     # Compare without rotations
     mol_noorient = mol.copy(update={"fix_orientation": True})
     inp = {"molecule": mol_noorient, "driver": "gradient", "model": {"method": "HF", "basis": "6-31g"}}
+
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, "qchem", raise_error=True)
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert compare_values(np.linalg.norm(ret.return_result, axis=0), [0, 0.00559696541, 0.00559696541])
 
