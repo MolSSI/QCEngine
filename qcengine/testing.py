@@ -116,7 +116,8 @@ def failure_engine(schema_versions):
             grad = [0, 0, -grad_value, 0, 0, grad_value]
 
             if mode == "pass":
-                return schema_versions[0].AtomicResult(
+                # TODO return schema_versions[0].AtomicResult(
+                return qcel.models.v1.AtomicResult(
                     **{
                         **input_data.dict(),
                         **{
