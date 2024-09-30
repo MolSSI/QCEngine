@@ -114,6 +114,12 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          - conda-env: nwchem
+            python-version: "3.10"
+            label: TeraChem
+            runs-on: ubuntu-20.04
+            pytest: ""
+
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
 
@@ -143,6 +149,11 @@ jobs:
       if: "(matrix.cfg.label == 'QCore')"
       run: |
         qcore --accept-license
+
+    - name: Special Config - Terachem
+      if: "(matrix.cfg.label == 'TeraChem')"
+      run: |
+        docker pull mtzgroup/terachem
 
     - name: Special Config - QCElemental Dep
       #if: false
