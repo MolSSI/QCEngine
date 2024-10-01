@@ -157,9 +157,9 @@ jobs:
         echo pup
         docker inspect mtzgroup/terachem
         echo cat
-        docker exec mtzgroup/terachem cat /usr/local/bin/_entrypoint.sh
+        docker exec mtzgroup/terachem:latest
         echo mouse
-        docker exec mtzgroup/terachem
+        docker exec terachem cat /usr/local/bin/_entrypoint.sh
         echo bun
         docker run --rm -a stdout --entrypoint cat mtzgroup/terachem /usr/local/bin/_entrypoint.sh
 
