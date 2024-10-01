@@ -157,11 +157,11 @@ jobs:
         echo pup
         docker inspect mtzgroup/terachem
         echo cat
-        docker run mtzgroup/terachem
+        docker exec mtzgroup/terachem cat /usr/local/bin/_entrypoint.sh
         echo mouse
-        docker run --rm --entrypoint=ls node /bin
+        docker exec mtzgroup/terachem
         echo bun
-        docker run --entrypoint "/bin/bash" mtzgroup/terachem
+        docker run --rm -a stdout --entrypoint cat mtzgroup/terachem /usr/local/bin/_entrypoint.sh
 
     - name: Special Config - QCElemental Dep
       #if: false
