@@ -6,7 +6,7 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import failure_engine, schema_versions, using
+from qcengine.testing import checkver_and_convert, failure_engine, schema_versions, using
 
 
 @pytest.fixture(scope="function")
@@ -42,9 +42,9 @@ def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request)
         "ncores": ncores,
     }
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, optimizer, raise_error=True, task_config=task_config)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert 10 > len(ret.trajectory) > 1
 
@@ -76,9 +76,9 @@ def test_geometric_local_options(input_data, schema_versions, request):
     input_data = models.OptimizationInput(**input_data)
 
     # Set some extremely large number to test
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True, local_options={"memory": "5000"})
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert pytest.approx(ret.trajectory[0].provenance.memory, 1) == 4900
 
@@ -98,9 +98,9 @@ def test_geometric_stdout(input_data, schema_versions, request):
 
     input_data = models.OptimizationInput(**input_data)
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
     assert "Converged!" in ret.stdout
@@ -117,9 +117,9 @@ def test_berny_stdout(input_data, schema_versions, request):
 
     input_data = models.OptimizationInput(**input_data)
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "berny", raise_error=True)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
     assert "All criteria matched" in ret.stdout
@@ -137,9 +137,9 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
 
     input_data = models.OptimizationInput(**input_data)
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "berny", raise_error=False)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post", vercheck=False)
+    ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
     assert ret.success is False
@@ -151,15 +151,17 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
 def test_geometric_rdkit_error(input_data, schema_versions, request):
     models, _ = schema_versions
 
-    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True)).copy(exclude={"connectivity_"})
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True)).copy(
+        exclude={"connectivity_"}
+    )
     input_data["input_specification"]["model"] = {"method": "UFF", "basis": ""}
     input_data["keywords"]["program"] = "rdkit"
 
     input_data = models.OptimizationInput(**input_data)
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric")
-    ret = checkver_and_convert_proc(ret, request.node.name, "post", vercheck=False)
+    ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
     assert isinstance(ret.error.error_message, str)
@@ -177,9 +179,9 @@ def test_optimization_protocols(input_data, schema_versions, request):
 
     input_data = models.OptimizationInput(**input_data)
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success, ret.error.error_message
     assert len(ret.trajectory) == 2
@@ -204,9 +206,9 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
 
     input_data = models.OptimizationInput(**input_data)
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13}, raise_error=True)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
     assert ret.trajectory[0].provenance.retries == 1
@@ -219,7 +221,7 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
 
     ret = qcng.compute_procedure(input_data, "geometric", task_config={"ncores": 13, "retries": 1})
-    ret = checkver_and_convert_proc(ret, request.node.name, "post", vercheck=False)
+    ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
     assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
@@ -289,11 +291,13 @@ def test_geometric_generic(input_data, program, model, bench, schema_versions, r
     input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     input_data["input_specification"]["model"] = model
     input_data["keywords"]["program"] = program
-    input_data["input_specification"]["extras"] = {"_secret_tags": {"mysecret_tag": "data1"}}  # pragma: allowlist secret
+    input_data["input_specification"]["extras"] = {
+        "_secret_tags": {"mysecret_tag": "data1"}  # pragma: allowlist secret
+    }
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre", cast_dict_as="OptimizationInput")
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
     assert "Converged!" in ret.stdout
@@ -325,9 +329,9 @@ def test_nwchem_relax(linopt, schema_versions, request):
     input_data = models.OptimizationInput(**input_data)
 
     # Run the relaxation
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "nwchemdriver", raise_error=True)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert 10 > len(ret.trajectory) > 1
 
@@ -352,14 +356,14 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
     # Run an initial step, which should not converge
     local_opts = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=False)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post", vercheck=False)
+    ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
     assert not ret.success
 
     # Run it again, which should converge
     new_ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=True)
-    new_ret = checkver_and_convert_proc(new_ret, request.node.name, "post")
+    new_ret = checkver_and_convert(new_ret, request.node.name, "post")
     assert new_ret.success
 
 
@@ -389,9 +393,9 @@ def test_torsiondrive_generic(schema_versions, request):
         ),
     )
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, "torsiondrive", raise_error=True)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.error is None
     assert ret.success
@@ -435,78 +439,11 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
 
     input_data = models.OptimizationInput(**input_data)
 
-    input_data = checkver_and_convert_proc(input_data, request.node.name, "pre")
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute_procedure(input_data, optimizer, raise_error=True)
-    ret = checkver_and_convert_proc(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert 10 > len(ret.trajectory) > 1
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-3) == 1.3860734486984705
     assert ret.provenance.creator.lower() == optimizer
     assert ret.trajectory[0].provenance.creator.lower() == "mrchem"
-
-
-def checkver_and_convert_proc(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=None):
-    import json
-
-    import pydantic
-
-    def check_model_v1(m):
-        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.BaseModel"
-        assert isinstance(
-            m, qcel.models.v1.basemodels.ProtoModel
-        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.ProtoModel"
-        if vercheck:
-            assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
-
-    def check_model_v2(m):
-        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ BaseModel"
-        assert isinstance(
-            m, qcel.models.v2.basemodels.ProtoModel
-        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v2.ProtoModel"
-        if vercheck:
-            assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
-
-    if prepost == "pre":
-        dict_in = isinstance(mdl, dict)
-        if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
-            if dict_in:
-                if cast_dict_as:
-                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
-                else:
-                    mdl = qcel.models.v1.OptimizationInput(**mdl)
-            check_model_v1(mdl)
-        elif "as_v2" in tnm or "to_v1" in tnm:
-            if dict_in:
-                if cast_dict_as:
-                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
-                else:
-                    mdl = qcel.models.v2.OptimizationInput(**mdl)
-            check_model_v2(mdl)
-            mdl = mdl.convert_v(1)
-
-        if dict_in:
-            mdl = mdl.model_dump()
-
-    elif prepost == "post":
-        dict_in = isinstance(mdl, dict)
-        if "as_v1" in tnm or "to_v1" in tnm or "None" in tnm:
-            if dict_in:
-                if cast_dict_as:
-                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
-                else:
-                    mdl = qcel.models.v1.OptimizationResult(**mdl)
-            check_model_v1(mdl)
-        elif "as_v2" in tnm or "to_v2" in tnm:
-            if dict_in:
-                if cast_dict_as:
-                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
-                else:
-                    mdl = qcel.models.v2.OptimizationResult(**mdl)
-            mdl = mdl.convert_v(2)
-            check_model_v2(mdl)
-
-        if dict_in:
-            # imitates compute(..., return_dict=True)
-            mdl = json.loads(mdl.model_dump_json())
-
-    return mdl

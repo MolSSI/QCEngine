@@ -253,11 +253,17 @@ def checkver_and_convert(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=
         dict_in = isinstance(mdl, dict)
         if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
             if dict_in:
-                mdl = qcel.models.v1.AtomicInput(**mdl)
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v1.AtomicInput(**mdl)
             check_model_v1(mdl)
         elif "as_v2" in tnm or "to_v1" in tnm:
             if dict_in:
-                mdl = qcel.models.v2.AtomicInput(**mdl)
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v2.AtomicInput(**mdl)
             check_model_v2(mdl)
             mdl = mdl.convert_v(1)
 
