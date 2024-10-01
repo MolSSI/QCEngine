@@ -155,13 +155,15 @@ jobs:
       run: |
         docker pull mtzgroup/terachem
         echo pup
-        #good docker inspect mtzgroup/terachem
+        docker inspect mtzgroup/terachem
         echo cat
-        docker exec terachem which terachem
+        docker ps -a
         echo mouse
-        docker exec terachem cat /usr/local/bin/_entrypoint.sh
         echo bun
         docker run --rm -a stdout --entrypoint cat mtzgroup/terachem /usr/local/bin/_entrypoint.sh
+
+#docker.io/mtzgroup/terachem:latest
+#Usage:  docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
 
     - name: Special Config - QCElemental Dep
       #if: false
