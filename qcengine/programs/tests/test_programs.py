@@ -5,6 +5,7 @@ Tests the DQM compute dispatch module
 
 import numpy as np
 import pytest
+from qcelemental.testing import compare_values
 
 import qcengine as qcng
 from qcengine.testing import checkver_and_convert, failure_engine, schema_versions, using
@@ -558,3 +559,105 @@ def test_aimnet2_gradient(schema_versions, request):
     assert pytest.approx(result.properties.return_energy) == -76.47412023758551
     # make sure the other properties were also saved
     assert "charges" in result.extras["aimnet2"]
+
+
+@using("psi4")
+def test_psi4_properties_driver(schema_versions, request):
+    models, _ = schema_versions
+
+    import numpy as np
+
+    json_data = {
+        "schema_name": "qcschema_input",
+        "schema_version": 1,
+        "molecule": {
+            "geometry": [
+                0.0,
+                0.0,
+                -0.1294769411935893,
+                0.0,
+                -1.494187339479985,
+                1.0274465079245698,
+                0.0,
+                1.494187339479985,
+                1.0274465079245698,
+            ],
+            "symbols": ["O", "H", "H"],
+            "fix_com": True,
+            "fix_orientation": True,
+        },
+        "driver": "properties",
+        "model": {
+            "method": "HF",
+            "basis": "6-31G",
+            "properties": [
+                "dipole",
+                "quadrupole",
+                "mulliken_charges",
+                "lowdin_charges",
+                "wiberg_lowdin_indices",
+                "mayer_indices",
+            ],
+        },
+        "keywords": {"scf_type": "df", "mp2_type": "df", "e_convergence": 9},
+    }
+
+    # Write expected output (dipole & quadrupole in au)
+    expected_return_result = {
+        "dipole": np.array([0.0, 0.0, 1.04037263345]).reshape((3,)),
+        "quadrupole": np.array([-5.42788218076, 0.0, 0.0, 0.0, -3.07521129293, 0.0, 0.0, 0.0, -4.36605314966]).reshape(
+            (3, 3)
+        ),
+        "mulliken_charges": [-0.7967275695997689, 0.3983637847998823, 0.3983637847998822],
+        "lowdin_charges": [-0.5945105406840803, 0.29725527034203636, 0.29725527034203636],
+        "wiberg_lowdin_indices": np.array(
+            [
+                0.0,
+                0.9237385044125344,
+                0.9237385044125329,
+                0.9237385044125344,
+                0.0,
+                0.006992650019441531,
+                0.9237385044125329,
+                0.006992650019441531,
+                0.0,
+            ]
+        ).reshape((3, 3)),
+        "mayer_indices": np.array(
+            [
+                0.0,
+                0.802064044935596,
+                0.8020640449355959,
+                0.802064044935596,
+                0.0,
+                0.003020025778524219,
+                0.8020640449355959,
+                0.003020025778524219,
+                0.0,
+            ]
+        ).reshape((3, 3)),
+    }
+
+    expected_properties = {
+        "calcinfo_nbasis": 13,
+        "calcinfo_nmo": 13,
+        "calcinfo_nalpha": 5,
+        "calcinfo_nbeta": 5,
+        "calcinfo_natom": 3,
+        "scf_one_electron_energy": -122.27509111304202,
+        "scf_two_electron_energy": 37.49348718008625,
+        "nuclear_repulsion_energy": 8.80146206062943,
+        "scf_total_energy": -75.98014187232634,
+        "return_energy": -75.98014187232634,
+    }
+
+    json_data = checkver_and_convert(json_data, request.node.name, "pre")
+    json_ret = qcng.compute(json_data, "psi4")
+    json_ret = checkver_and_convert(json_ret, request.node.name, "post")
+
+    assert json_ret.success
+    assert "qcschema_output" == json_ret.schema_name
+    for k in expected_return_result.keys():
+        assert compare_values(expected_return_result[k], json_ret.return_result[k], atol=1.0e-5)
+    for k in expected_properties.keys():
+        assert compare_values(expected_properties[k], getattr(json_ret.properties, k), atol=1.0e-5)

@@ -154,6 +154,7 @@ jobs:
       if: "(matrix.cfg.label == 'TeraChem')"
       run: |
         docker pull mtzgroup/terachem
+        docker run --rm -it --entrypoint=ls node /bin
 
     - name: Special Config - QCElemental Dep
       #if: false
