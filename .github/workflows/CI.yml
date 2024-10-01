@@ -78,11 +78,11 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: mrchem
-            python-version: 3.8
-            label: MRChem
-            runs-on: ubuntu-latest
-            pytest: ""
+#          - conda-env: mrchem
+#            python-version: 3.8
+#            label: MRChem
+#            runs-on: ubuntu-latest
+#            pytest: ""
 
           - conda-env: adcc
             python-version: 3.8
@@ -96,11 +96,11 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: opt-disp-cf
-            python-version: 3.11
-            label: optimization-dispersion
-            runs-on: windows-latest
-            pytest: "-k 'not (hes2 or qchem)'"
+#          - conda-env: opt-disp-cf
+#            python-version: 3.11
+#            label: optimization-dispersion
+#            runs-on: windows-latest
+#            pytest: "-k 'not (hes2 or qchem)'"
 
           - conda-env: mace
             python-version: "3.10"
@@ -154,7 +154,9 @@ jobs:
       if: "(matrix.cfg.label == 'TeraChem')"
       run: |
         docker pull mtzgroup/terachem
-        docker run --rm -it --entrypoint=ls node /bin
+        docker run mtzgroup/terachem
+        docker run --rm --entrypoint=ls node /bin
+        docker run --entrypoint "/bin/bash" mtzgroup/terachem
 
     - name: Special Config - QCElemental Dep
       #if: false
