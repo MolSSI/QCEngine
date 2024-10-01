@@ -157,9 +157,15 @@ jobs:
         echo pup
         docker inspect mtzgroup/terachem
         echo cat
-        docker ps -a
+        #ok docker ps -a
+        docker run mtzgroup/terachem terachem
+        #docker exec mtzgroup/terachem cat /usr/local/bin/_entrypoint.sh
+        #docker exec terachem which terachem
         echo mouse
+        #docker exec terachem cat /usr/local/bin/_entrypoint.sh
+        #ok docker run --rm --entrypoint=ls node /bin
         echo bun
+        #docker run --entrypoint "/bin/bash" mtzgroup/terachem
         docker run --rm -a stdout --entrypoint cat mtzgroup/terachem /usr/local/bin/_entrypoint.sh
 
 #docker.io/mtzgroup/terachem:latest

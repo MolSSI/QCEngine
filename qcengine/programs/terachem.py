@@ -31,7 +31,7 @@ class TeraChemHarness(ProgramHarness):
     @staticmethod
     def found(raise_error: bool = False) -> bool:
         return which(
-            "terachem",
+            "docker run terachem",
             return_bool=True,
             raise_error=raise_error,
             raise_msg="Please install via http://www.petachem.com/index.html",
@@ -40,7 +40,7 @@ class TeraChemHarness(ProgramHarness):
     def get_version(self) -> str:
         self.found(raise_error=True)
 
-        which_prog = which("terachem")
+        which_prog = which("docker run terachem")
         if which_prog not in self.version_cache:
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=5)
@@ -106,7 +106,8 @@ class TeraChemHarness(ProgramHarness):
         input_file = "\n".join(input_file)
 
         return {
-            "commands": ["terachem", "tc.in"],
+            # "commands": ["terachem", "tc.in"],
+            "commands": ["docker", "run", "mtzgroup/terachem", "terachem", "tc.in"],
             "infiles": {"tc.in": input_file, "geometry.xyz": xyz_file},
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.copy(deep=True),
