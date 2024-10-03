@@ -3,7 +3,7 @@ Tests the DQM compute dispatch module
 """
 
 import pytest
-from qcelemental.models import DriverEnum, OptimizationInput, FailedOperation
+from qcelemental.models import DriverEnum, FailedOperation, OptimizationInput
 from qcelemental.models.common_models import Model
 from qcelemental.models.procedures import OptimizationSpecification, QCInputSpecification, TDKeywords, TorsionDriveInput
 
@@ -263,7 +263,7 @@ def test_geometric_generic(input_data, program, model, bench):
     input_data["initial_molecule"] = qcng.get_molecule("water")
     input_data["input_specification"]["model"] = model
     input_data["keywords"]["program"] = program
-    input_data["input_specification"]["extras"] = {"_secret_tags": {"mysecret_tag": "data1"}}
+    input_data["input_specification"]["extras"] = {"_secret_tags": {"mysecret_tag": "data1"}}  # pragma: allowlist secret
 
     ret = qcng.compute_procedure(input_data, "geometric", raise_error=True)
     assert ret.success is True

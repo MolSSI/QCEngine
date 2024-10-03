@@ -1,11 +1,14 @@
 from typing import TYPE_CHECKING, Dict
-from qcengine.programs.model import ProgramHarness
-from qcelemental.util import safe_version, which_import
+
 from qcelemental.models import AtomicResult, Provenance
+from qcelemental.util import safe_version, which_import
+
 from qcengine.exceptions import InputError
+from qcengine.programs.model import ProgramHarness
 
 if TYPE_CHECKING:
     from qcelemental.models import AtomicInput
+
     from qcengine.config import TaskConfig
 
 
@@ -59,6 +62,7 @@ class AIMNET2Harness(ProgramHarness):
     def compute(self, input_data: "AtomicInput", config: "TaskConfig"):
         self.found(raise_error=True)
         import torch
+
         from qcengine.units import ureg
 
         # check we can run on the set of elements

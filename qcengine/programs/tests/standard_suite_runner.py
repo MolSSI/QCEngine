@@ -11,8 +11,8 @@ from qcelemental.testing import compare, compare_values
 import qcengine as qcng
 from qcengine.programs.util import mill_qcvars
 
-from .standard_suite_ref import answer_hash, std_suite
 from .standard_suite_contracts import *
+from .standard_suite_ref import answer_hash, std_suite
 
 pp = pprint.PrettyPrinter(width=120)
 

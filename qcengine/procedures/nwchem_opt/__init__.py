@@ -1,12 +1,12 @@
-from typing import Union, Dict, Any
+from typing import Any, Dict, Union
 
-from qcelemental.models import OptimizationInput, AtomicInput, OptimizationResult, Provenance
+from qcelemental.models import AtomicInput, OptimizationInput, OptimizationResult, Provenance
 
 from qcengine.config import TaskConfig
-from qcengine.exceptions import UnknownError, InputError
+from qcengine.exceptions import InputError, UnknownError
+from qcengine.procedures.model import ProcedureHarness
 from qcengine.procedures.nwchem_opt.harvester import harvest_as_atomic_result
 from qcengine.programs.nwchem.runner import NWChemHarness
-from qcengine.procedures.model import ProcedureHarness
 
 
 class NWChemDriverProcedure(ProcedureHarness):

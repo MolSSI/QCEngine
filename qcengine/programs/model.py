@@ -6,10 +6,11 @@ try:
     from pydantic.v1 import BaseModel
 except ImportError:
     from pydantic import BaseModel
+
 from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
 
-from qcengine.exceptions import KnownErrorException
 from qcengine.config import TaskConfig
+from qcengine.exceptions import KnownErrorException
 
 logger = logging.getLogger(__name__)
 
