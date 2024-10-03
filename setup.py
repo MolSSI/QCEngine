@@ -1,5 +1,7 @@
 import sys
+
 import setuptools
+
 import versioneer
 
 short_description = (

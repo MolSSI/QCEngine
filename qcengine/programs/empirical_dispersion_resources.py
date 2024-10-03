@@ -4,8 +4,9 @@ import collections
 import copy
 from typing import Dict, List, Optional, Union
 
-from ..exceptions import InputError
 from qcelemental.util import parse_version
+
+from ..exceptions import InputError
 
 ## ==> Dispersion Aliases and Parameters <== ##
 

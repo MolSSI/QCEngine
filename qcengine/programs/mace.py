@@ -1,12 +1,15 @@
 from typing import TYPE_CHECKING, Dict, Union
-from qcelemental.models import AtomicResult, Provenance, FailedOperation
+
+from qcelemental.models import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which_import
+
 from qcengine.exceptions import InputError
 from qcengine.programs.model import ProgramHarness
 from qcengine.units import ureg
 
 if TYPE_CHECKING:
     from qcelemental.models import AtomicInput, FailedOperation
+
     from qcengine.config import TaskConfig
 
 
