@@ -1,15 +1,15 @@
 import logging
-from qcengine.exceptions import UnknownError
 import sys
 import traceback
 from io import StringIO
 from typing import Any, Dict, Union
 
 import numpy as np
-from qcelemental.models import OptimizationInput, OptimizationResult, FailedOperation
+from qcelemental.models import FailedOperation, OptimizationInput, OptimizationResult
 from qcelemental.util import which_import
 
 import qcengine
+from qcengine.exceptions import UnknownError
 
 from ..config import TaskConfig
 from .model import ProcedureHarness

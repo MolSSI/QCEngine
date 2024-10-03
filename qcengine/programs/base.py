@@ -5,13 +5,15 @@ Imports the various compute backends
 from typing import Set
 
 from ..exceptions import InputError, ResourceError
-from .model import ProgramHarness
 from .adcc import AdccHarness
+from .aimnet2 import AIMNET2Harness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
 from .dftd_ng import DFTD4Harness, SDFTD3Harness
 from .gamess import GAMESSHarness
 from .gcp import GCPHarness, MCTCGCPHarness
+from .mace import MACEHarness
+from .model import ProgramHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
@@ -28,8 +30,6 @@ from .terachem_pbs import TeraChemPBSHarness
 from .torchani import TorchANIHarness
 from .turbomole import TurbomoleHarness
 from .xtb import XTBHarness
-from .mace import MACEHarness
-from .aimnet2 import AIMNET2Harness
 
 __all__ = ["register_program", "get_program", "list_all_programs", "list_available_programs"]
 
