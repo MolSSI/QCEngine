@@ -49,7 +49,7 @@ def test_molpro_executor(test_case, schema_versions, request):
 
     # Run Molpro
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    result = qcng.compute(inp, "molpro", local_options={"ncores": 4})
+    result = qcng.compute(inp, "molpro", task_config={"ncores": 4})
     result = checkver_and_convert(result, request.node.name, "post")
     assert result.success is True
 

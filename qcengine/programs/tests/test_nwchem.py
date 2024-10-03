@@ -289,30 +289,30 @@ def test_autoz_error(schema_versions, request):
 
     # Large molecule that leads to an AutoZ error
     mol = models.Molecule.from_data(_auto_z_problem)
-    resi = {        
-            "molecule": mol,
-            "model": {"method": "hf", "basis": "sto-3g"},
-            "driver": "energy",
-            "protocols": {"error_correction": {"default_policy": False}},
-        }  # Turn off error correction
+    resi = {
+        "molecule": mol,
+        "model": {"method": "hf", "basis": "sto-3g"},
+        "driver": "energy",
+        "protocols": {"error_correction": {"default_policy": False}},
+    }  # Turn off error correction
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=False)
-    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)    
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
 
     assert not result.success
     assert "Error when generating redundant atomic coordinates" in result.error.error_message
 
     # Turn off autoz
     resi = {
-            "molecule": mol,
-            "model": {"method": "hf", "basis": "sto-3g"},
-            "driver": "energy",
-            "keywords": {"geometry__noautoz": True},
-        }
+        "molecule": mol,
+        "model": {"method": "hf", "basis": "sto-3g"},
+        "driver": "energy",
+        "keywords": {"geometry__noautoz": True},
+    }
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=False)
-    result = checkver_and_convert(result, request.node.name, "post",vercheck=False)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
 
     # Ok if it crashes for other reasons
     assert "Error when generating redundant atomic coordinates" not in result.error.error_message
@@ -326,11 +326,11 @@ def test_autoz_error_correction(schema_versions, request):
     # Large molecule that leads to an AutoZ error
     mol = models.Molecule.from_data(_auto_z_problem)
     resi = {
-            "molecule": mol,
-            "model": {"method": "hf", "basis": "sto-3g"},
-            "driver": "energy",
-            "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-1},
-        }
+        "molecule": mol,
+        "model": {"method": "hf", "basis": "sto-3g"},
+        "driver": "energy",
+        "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-1},
+    }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=True)
@@ -359,15 +359,15 @@ def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema
     h20v2 = models.Molecule.from_data(h20v2_data)
 
     resi = {
-            "molecule": h20v2,
-            "model": {"method": method, "basis": "sto-3g"},
-            "driver": "energy",
-            "keywords": {
-                keyword: init_iters,
-                "qc_module": use_tce,
-                "scf__uhf": True,
-            },  # UHF needed for SCF test
-        }
+        "molecule": h20v2,
+        "model": {"method": method, "basis": "sto-3g"},
+        "driver": "energy",
+        "keywords": {
+            keyword: init_iters,
+            "qc_module": use_tce,
+            "scf__uhf": True,
+        },  # UHF needed for SCF test
+    }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=True)
@@ -398,7 +398,7 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
     local_options = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    result = qcng.compute(resi, "nwchem", local_options=local_options, raise_error=False)
+    result = qcng.compute(resi, "nwchem", task_config=local_options, raise_error=False)
     result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
 
     assert not result.success
@@ -408,7 +408,7 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
     result = qcng.compute(
         resi,
         "nwchem",
-        local_options=local_options,
+        task_config=local_options,
         raise_error=False,
     )
     result = checkver_and_convert(result, request.node.name, "post")

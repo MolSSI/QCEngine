@@ -8,6 +8,8 @@ from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
 from qcengine.config import TaskConfig
 from qcengine.exceptions import KnownErrorException
 
+from ..util import model_wrapper
+
 logger = logging.getLogger(__name__)
 
 
@@ -63,6 +65,16 @@ class ProgramHarness(BaseModel, abc.ABC):
         """
 
     ## Utility
+
+    # def _build_model
+
+    def build_input_model(self, data: Dict[str, Any]) -> "AtomicInput":
+        """
+        Quick wrapper around util.model_wrapper for inherited classes
+        """
+        from qcelemental.models.v1 import AtomicInput  # TODO v2
+
+        return model_wrapper(data, AtomicInput)
 
     def get_version(self) -> str:
         """Finds program, extracts version, returns normalized version string.

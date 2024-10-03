@@ -51,9 +51,9 @@ def test_protocol_native(program, model, keywords, native, schema_versions, requ
     inp = models.AtomicInput(molecule=molecule, driver="gradient", model=model, keywords=keywords, protocols=protocols)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, program, raise_error=True, local_options=config.dict())
+    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
     ret = checkver_and_convert(ret, request.node.name, "post")
-    
+
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 

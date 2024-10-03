@@ -77,7 +77,7 @@ def test_geometric_local_options(input_data, schema_versions, request):
 
     # Set some extremely large number to test
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "geometric", raise_error=True, local_options={"memory": "5000"})
+    ret = qcng.compute_procedure(input_data, "geometric", raise_error=True, task_config={"memory": "5000"})
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert pytest.approx(ret.trajectory[0].provenance.memory, 1) == 4900
@@ -357,12 +357,12 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
     local_opts = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=False)
+    ret = qcng.compute_procedure(input_data, "nwchemdriver", task_config=local_opts, raise_error=False)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
     assert not ret.success
 
     # Run it again, which should converge
-    new_ret = qcng.compute_procedure(input_data, "nwchemdriver", local_options=local_opts, raise_error=True)
+    new_ret = qcng.compute_procedure(input_data, "nwchemdriver", task_config=local_opts, raise_error=True)
     new_ret = checkver_and_convert(new_ret, request.node.name, "post")
     assert new_ret.success
 

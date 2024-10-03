@@ -36,6 +36,8 @@ Breaking Changes
 - (:pr:`453`) Deps - Require pydantic v2 dependency (don't worry, this isn't
   changing QCEngine's role as QCSchema I/O runner. Also require pydantic-settings
   for CLI. @loriab
+* as promised, `local_options` has been removed in favor of `task_config`.
+* compute and compute_procedure have been merged in favor of the former.
 
 New Features
 ++++++++++++
