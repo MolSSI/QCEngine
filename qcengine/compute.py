@@ -124,4 +124,6 @@ def compute_procedure(*args, **kwargs):
         category=FutureWarning,
         stacklevel=2,
     )
+    if "procedure" in kwargs:
+        kwargs["program"] = kwargs.pop("procedure")
     return compute(*args, **kwargs)
