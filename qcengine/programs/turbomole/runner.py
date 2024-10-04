@@ -5,7 +5,7 @@ import os
 import re
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 from qcelemental.models import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
@@ -21,7 +21,7 @@ from .methods import KEYWORDS, METHODS
 
 class TurbomoleHarness(ProgramHarness):
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Turbomole",
         "scratch": True,
         "thread_safe": False,

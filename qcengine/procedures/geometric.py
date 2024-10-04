@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any, ClassVar, Dict, Union
 
 from qcelemental.models import OptimizationInput, OptimizationResult
 from qcelemental.util import safe_version, which_import
@@ -8,12 +8,9 @@ from .model import ProcedureHarness
 
 class GeometricProcedure(ProcedureHarness):
 
-    _defaults = {"name": "geomeTRIC", "procedure": "optimization"}
+    _defaults: ClassVar[Dict[str, Any]] = {"name": "geomeTRIC", "procedure": "optimization"}
 
     version_cache: Dict[str, str] = {}
-
-    class Config(ProcedureHarness.Config):
-        pass
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(

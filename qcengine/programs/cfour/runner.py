@@ -4,7 +4,7 @@ import copy
 import pprint
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
@@ -31,7 +31,7 @@ class CFOURHarness(ProgramHarness):
 
     """
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "CFOUR",
         "scratch": True,
         "thread_safe": False,
@@ -40,9 +40,6 @@ class CFOURHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:

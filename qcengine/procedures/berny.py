@@ -2,7 +2,7 @@ import logging
 import sys
 import traceback
 from io import StringIO
-from typing import Any, Dict, Union
+from typing import Any, ClassVar, Dict, Union
 
 import numpy as np
 from qcelemental.models import FailedOperation, OptimizationInput, OptimizationResult
@@ -16,7 +16,7 @@ from .model import ProcedureHarness
 
 
 class BernyProcedure(ProcedureHarness):
-    _defaults = {"name": "Berny", "procedure": "optimization"}
+    _defaults: ClassVar[Dict[str, Any]] = {"name": "Berny", "procedure": "optimization"}
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(

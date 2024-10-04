@@ -7,7 +7,7 @@ import re
 import tempfile
 import warnings
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
 import numpy as np
 from qcelemental import constants
@@ -25,7 +25,7 @@ NUMBER = r"(?x:" + regex.NUMBER + ")"
 
 
 class QChemHarness(ProgramHarness):
-    _defaults: Dict[str, Any] = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "QChem",
         "scratch": True,
         "thread_safe": False,

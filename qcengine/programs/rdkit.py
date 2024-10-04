@@ -2,7 +2,7 @@
 Calls the RDKit package.
 """
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
 from qcelemental.models import AtomicResult, Provenance
 from qcelemental.util import safe_version, which_import
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 class RDKitHarness(ProgramHarness):
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "RDKit",
         "scratch": False,
         "thread_safe": True,
@@ -29,9 +29,6 @@ class RDKitHarness(ProgramHarness):
     }
 
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def _process_molecule_rdkit(jmol):

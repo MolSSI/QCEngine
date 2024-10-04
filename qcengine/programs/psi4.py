@@ -5,7 +5,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
 from qcelemental.models import AtomicResult, BasisSet
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 class Psi4Harness(ProgramHarness):
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Psi4",
         "scratch": True,
         "thread_safe": False,
@@ -31,9 +31,6 @@ class Psi4Harness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:

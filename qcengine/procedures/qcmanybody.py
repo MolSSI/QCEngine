@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Union
 
 from qcelemental.util import safe_version, which_import
 
@@ -11,13 +11,9 @@ if TYPE_CHECKING:
 
 class QCManyBodyProcedure(ProcedureHarness):
 
-    # v2: ClassVar[Dict[str, Any]]
-    _defaults: Dict[str, Any] = {"name": "QCManyBody", "procedure": "manybody"}
+    _defaults: ClassVar[Dict[str, Any]] = {"name": "QCManyBody", "procedure": "manybody"}
 
     version_cache: Dict[str, str] = {}
-
-    class Config(ProcedureHarness.Config):
-        pass
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(

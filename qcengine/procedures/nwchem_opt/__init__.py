@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any, ClassVar, Dict, Union
 
 from qcelemental.models import AtomicInput, OptimizationInput, OptimizationResult, Provenance
 
@@ -12,10 +12,7 @@ from qcengine.programs.nwchem.runner import NWChemHarness
 class NWChemDriverProcedure(ProcedureHarness):
     """Structural relaxation using NWChem's optimizer"""
 
-    _defaults = {"name": "NWChemDriver", "procedure": "optimization"}
-
-    class Config(ProcedureHarness.Config):
-        pass
+    _defaults: ClassVar[Dict[str, Any]] = {"name": "NWChemDriver", "procedure": "optimization"}
 
     def found(self, raise_error: bool = False) -> bool:
         nwc_harness = NWChemHarness()
