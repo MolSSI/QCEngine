@@ -6,7 +6,7 @@ Requires RDKit
 import datetime
 import hashlib
 import os
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
 import numpy as np
 from qcelemental.models import AtomicResult, BasisSet, Provenance
@@ -25,10 +25,10 @@ if TYPE_CHECKING:
 
 class OpenMMHarness(ProgramHarness):
 
-    _CACHE = {}
-    _CACHE_MAX_SIZE = 10
+    _CACHE: ClassVar[Dict] = {}
+    _CACHE_MAX_SIZE: ClassVar[int] = 10
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "OpenMM",
         "scratch": True,
         "thread_safe": True,  # true if we use separate `openmm.Context` objects per thread
@@ -38,9 +38,6 @@ class OpenMMHarness(ProgramHarness):
     }
 
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     # def _get_off_forcefield(self, hashstring, offxml):
     #
