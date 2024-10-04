@@ -74,13 +74,19 @@ The results contain a complete record of the computation:
 Input Fields
 -------------
 
-.. autopydantic_model:: qcelemental.models.AtomicInput
+Note this is QCSchema v2 ``AtomicInput``. See the QCElemental docs for the
+longstanding v1 model.
+
+.. autopydantic_model:: qcelemental.models.v2.AtomicInput
    :noindex:
 
 Returned Fields
 ---------------
 
-.. autopydantic_model:: qcelemental.models.AtomicResult
+Note this is QCSchema v2 ``AtomicResult``. See the QCElemental docs for the
+longstanding v1 model.
+
+.. autopydantic_model:: qcelemental.models.v2.AtomicResult
    :noindex:
 
 FAQ

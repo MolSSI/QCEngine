@@ -9,7 +9,7 @@ import sys
 from collections import Counter
 from functools import reduce
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 
 from qcelemental.models import AtomicResult
 from qcelemental.util import safe_version, which
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class MRChemHarness(ProgramHarness):
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MRChem",
         "scratch": False,
         "thread_safe": False,
@@ -38,9 +38,6 @@ class MRChemHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:

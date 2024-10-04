@@ -13,6 +13,7 @@ dependencies:
   - psutil
   - qcelemental >=0.24.0
   - pydantic=2
+  - pydantic-settings
   - msgpack-python
 
     # Testing

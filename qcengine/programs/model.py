@@ -1,12 +1,8 @@
 import abc
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
 
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
-
+from pydantic import BaseModel, ConfigDict
 from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
 
 from qcengine.config import TaskConfig
@@ -17,18 +13,19 @@ logger = logging.getLogger(__name__)
 
 class ProgramHarness(BaseModel, abc.ABC):
 
-    _defaults: Dict[str, Any] = {}
+    _defaults: ClassVar[Dict[str, Any]] = {}
     name: str
     scratch: bool
     thread_safe: bool
     thread_parallel: bool
     node_parallel: bool
     managed_memory: bool
-    extras: Optional[Dict[str, Any]]
+    extras: Optional[Dict[str, Any]] = None
 
-    class Config:
-        allow_mutation: False
-        extra: "forbid"
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})

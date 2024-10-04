@@ -3,7 +3,7 @@ Calls the Molpro executable.
 """
 
 import string
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Set, Tuple
 from xml.etree import ElementTree as ET
 
 from qcelemental.models import AtomicResult
@@ -15,7 +15,7 @@ from .model import ProgramHarness
 
 
 class MolproHarness(ProgramHarness):
-    _defaults: Dict[str, Any] = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Molpro",
         "scratch": True,
         "thread_safe": False,
@@ -62,9 +62,6 @@ class MolproHarness(ProgramHarness):
     # TODO Add keyword to specify unrestricted for WF method
     # _unrestricted_post_hf_methods: Set[str] = {"UMP2", "UCCSD", "UCCSD(T)"}
     _post_hf_methods: Set[str] = {*_restricted_post_hf_methods}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     def found(self, raise_error: bool = False) -> bool:
         return which(

@@ -9,6 +9,7 @@ dependencies:
   #- intel-openmp!=2019.5
   - rdkit
   - mopac
+  - pydantic-settings
 
     # Mixed Tests
   - dftd3 3.2.1

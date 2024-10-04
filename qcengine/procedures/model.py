@@ -1,10 +1,7 @@
 import abc
 from typing import Any, Dict, Union
 
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from ..util import model_wrapper
 
@@ -14,9 +11,10 @@ class ProcedureHarness(BaseModel, abc.ABC):
     name: str
     procedure: str
 
-    class Config:
-        allow_mutation: False
-        extra: "forbid"
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})

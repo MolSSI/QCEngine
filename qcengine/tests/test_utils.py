@@ -12,6 +12,7 @@ from qcengine.exceptions import InputError
 def test_model_wrapper():
 
     with pytest.raises(InputError):
+#pydantic.v1.error_wrappers.ValidationError
         util.model_wrapper({"bad": "yup"}, AtomicInput)
 
 
