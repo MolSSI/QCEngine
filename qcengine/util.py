@@ -18,10 +18,8 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
-try:
-    from pydantic.v1 import BaseModel, ValidationError
-except ImportError:
-    from pydantic import BaseModel, ValidationError
+import pydantic
+from pydantic import BaseModel
 from qcelemental.models import AtomicResult, FailedOperation, OptimizationResult
 
 from qcengine.config import TaskConfig
@@ -65,7 +63,7 @@ def model_wrapper(input_data: Dict[str, Any], model: BaseModel) -> BaseModel:
     if isinstance(input_data, dict):
         try:
             input_data = model(**input_data)
-        except ValidationError as exc:
+        except (pydantic.v1.ValidationError) as exc:
             raise InputError(
                 f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}"
             ) from None
@@ -341,6 +339,8 @@ def popen(
             # Retrieve the standard output for the process
             ret["stdout"] = stdout.getvalue().decode()
             ret["stderr"] = stderr.getvalue().decode()
+            ret["proc"].stdout.close()
+            ret["proc"].stderr.close()
 
 
 @contextmanager

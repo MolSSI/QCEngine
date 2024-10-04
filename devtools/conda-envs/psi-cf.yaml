@@ -5,6 +5,7 @@ channels:
 dependencies:
   - psi4=1.8
   - numpy<2
+  - pydantic-settings
 
     # Core
   - python

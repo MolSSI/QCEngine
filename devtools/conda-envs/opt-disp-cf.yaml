@@ -22,6 +22,7 @@ dependencies:
   - psutil
   - qcelemental >=0.26.0
   - pydantic=2
+  - pydantic-settings
   - msgpack-python
 
     # Testing
