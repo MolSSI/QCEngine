@@ -3,7 +3,7 @@
 import copy
 import pprint
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
@@ -32,7 +32,7 @@ class GAMESSHarness(ProgramHarness):
 
     """
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "GAMESS",
         "scratch": True,
         "thread_safe": False,
@@ -41,9 +41,6 @@ class GAMESSHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:

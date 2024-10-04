@@ -1,7 +1,7 @@
 import io
 from collections import defaultdict
 from contextlib import redirect_stderr, redirect_stdout
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Tuple, Union
 
 import numpy as np
 from qcelemental.models import FailedOperation, Molecule
@@ -16,10 +16,7 @@ if TYPE_CHECKING:
 
 class TorsionDriveProcedure(ProcedureHarness):
 
-    _defaults = {"name": "TorsionDrive", "procedure": "torsiondrive"}
-
-    class Config(ProcedureHarness.Config):
-        pass
+    _defaults: ClassVar[Dict[str, Any]] = {"name": "TorsionDrive", "procedure": "torsiondrive"}
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(

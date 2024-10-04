@@ -28,6 +28,38 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+vX.Y.0 / 2025-MM-DD (Unreleased)
+--------------------
+- (:pr:`453`) Deps - Require pydantic v2 dependency (don't worry, this isn't
+  changing QCEngine's role as QCSchema I/O runner. Also require pydantic-settings
+  for CLI. @loriab
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`453`) Maint - Convert internal (non-QCSchema) pydantic classes to
+  pydantic v2 API, namely `NodeDescriptor`, `TaskConfig`, `ProgramHarness`,
+  `ProcedureHarness`. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`453`) Maint - Fix a warning thrown by `execute` about unclosed files. @loriab
+
+Misc.
++++++
+- (:pr:`452`) Maint - Set up pre-commit and run over repository. @loriab
+- (:pr:`453`) CI - Dropped Entos/QCore and Psi4 v1.5 as too hard to solve with
+  pydantic v2 and modern python versions. @loriab
+
+MUST (Unmerged)
++++++++++++++++
+
+WIP (Unmerged)
+++++++++++++++
+
+
 v0.31.0 / 2025-01-17
 --------------------
 
