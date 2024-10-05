@@ -39,18 +39,18 @@ def hene_data():
     ],
 )
 def test_simple_ghost(driver, program, basis, keywords, hene_data, schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, _ = schema_versions
     hene = models.Molecule.from_data(hene_data)
 
     resi = {"molecule": hene, "driver": driver, "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     if program == "gamess":
         with pytest.raises(qcng.exceptions.InputError) as e:
-            qcng.compute(resi, program, raise_error=True, return_dict=True)
+            qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
         pytest.xfail("no ghosts with gamess")
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == driver
@@ -171,7 +171,7 @@ bimol_ref["eneyne"]["mp2_gradient"] = dict(zip(dmm, [
     ],
 )
 def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, _ = schema_versions
 
     dmol = eneyne_ne_qcschemamols()["eneyne"][subject]
     # Freeze the input orientation so that output arrays are aligned to input
@@ -196,11 +196,11 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
 
     if qcprog == "gamess" and subject in ["mAgB", "gAmB"]:
         with pytest.raises(qcng.exceptions.InputError) as e:
-            res = qcng.compute(atin, qcprog, raise_error=True)
+            qcng.compute(atin, qcprog, raise_error=True, return_version=retver)
         pytest.xfail("no ghosts with gamess")
 
     atin = checkver_and_convert(atin, request.node.name, "pre")
-    atres = qcng.compute(atin, qcprog)
+    atres = qcng.compute(atin, qcprog, return_version=retver)
     atres = checkver_and_convert(atres, request.node.name, "post")
     pprint.pprint(atres.dict(), width=200)
 
@@ -270,7 +270,7 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
     ],
 )
 def test_atom_labels(qcprog, basis, keywords, schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, _ = schema_versions
 
     kmol = models.Molecule.from_data(
         """
@@ -290,7 +290,7 @@ def test_atom_labels(qcprog, basis, keywords, schema_versions, request):
     )
 
     atin = checkver_and_convert(atin, request.node.name, "pre")
-    atres = qcng.compute(atin, qcprog)
+    atres = qcng.compute(atin, qcprog, return_version=retver)
     atres = checkver_and_convert(atres, request.node.name, "post")
     pprint.pprint(atres.dict(), width=200)
 

@@ -67,7 +67,7 @@ def test_qchem_input_formatter_template(test_case):
 @using("qchem")
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
 def test_qchem_executor(test_case, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     # Get input file data
     data = qchem_info.get_test_data(test_case)
@@ -75,7 +75,7 @@ def test_qchem_executor(test_case, schema_versions, request):
 
     # Run qchem
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    result = qcng.compute(inp, "qchem")
+    result = qcng.compute(inp, "qchem", return_version=retver)
     result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success is True
@@ -89,7 +89,7 @@ def test_qchem_executor(test_case, schema_versions, request):
 
 @using("qchem")
 def test_qchem_orientation(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     mol = models.Molecule.from_data(
         """
@@ -102,7 +102,7 @@ def test_qchem_orientation(schema_versions, request):
     inp = {"molecule": mol, "driver": "gradient", "model": {"method": "HF", "basis": "6-31g"}}
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, "qchem", raise_error=True)
+    ret = qcng.compute(inp, "qchem", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert compare_values(np.linalg.norm(ret.return_result, axis=0), [0, 0, 0.00791539])
@@ -112,7 +112,7 @@ def test_qchem_orientation(schema_versions, request):
     inp = {"molecule": mol_noorient, "driver": "gradient", "model": {"method": "HF", "basis": "6-31g"}}
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, "qchem", raise_error=True)
+    ret = qcng.compute(inp, "qchem", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert compare_values(np.linalg.norm(ret.return_result, axis=0), [0, 0.00559696541, 0.00559696541])

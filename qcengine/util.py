@@ -19,7 +19,6 @@ from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 import pydantic
-from pydantic import BaseModel
 from qcelemental.models import AtomicResult, FailedOperation, OptimizationResult
 
 from qcengine.config import TaskConfig
@@ -56,7 +55,9 @@ def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]
 
 
 # TODO v1.BaseModel
-def model_wrapper(input_data: Dict[str, Any], model: BaseModel) -> BaseModel:
+def model_wrapper(
+    input_data: Dict[str, Any], model: Union[pydantic.BaseModel, pydantic.v1.BaseModel]
+) -> Union[pydantic.BaseModel, pydantic.v1.BaseModel]:
     """
     Wrap input data in the given model, or return a controlled error
     """
@@ -149,15 +150,23 @@ def handle_output_metadata(
     metadata: Dict[str, Any],
     raise_error: bool = False,
     return_dict: bool = True,
+    convert_version: int = -1,
 ) -> Union[Dict[str, Any], "AtomicResult", "OptimizationResult", "FailedOperation"]:
     """
     Fuses general metadata and output together.
 
-    Parameters:
-        output_data: The original output object to be fused with metadata
-        metadata: Metadata produced by the compute_wrapper context manager
-        raise_error: Raise an exception if errors exist (True) or return FailedOperation (False)
-        return_dict: Return dictionary or object representation of data
+    Parameters
+    ----------
+    output_data
+        The original output object to be fused with metadata
+    metadata
+        Metadata produced by the compute_wrapper context manager
+    raise_error
+        Raise an exception if errors exist (True) or return FailedOperation (False)
+    return_dict
+        Return dictionary or object representation of data
+    convert_version
+        The schema version to convert to before return. If -1, don't convert.
 
     Returns
     -------
@@ -213,6 +222,9 @@ def handle_output_metadata(
         ret = FailedOperation(
             success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion
         )
+
+    if convert_version > 0:
+        ret = ret.convert_v(convert_version)
 
     if return_dict:
         return json.loads(ret.json())  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals

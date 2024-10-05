@@ -37,9 +37,8 @@ def compute(
     program: str,
     raise_error: bool = False,
     task_config: Optional[Dict[str, Any]] = None,
-    local_options: Optional[Dict[str, Any]] = None,
     return_dict: bool = False,
-    schema_version: int = -1,
+    return_version: int = -1,
 ) -> Union[
     "BaseModel", "FailedOperation", Dict[str, Any]
 ]:  # TODO Output base class, was AtomicResult OptimizationResult
@@ -53,18 +52,16 @@ def compute(
     input_data
         A QCSchema input specification in dictionary or model from QCElemental.models
     program
-        The CMS program or procedure with which to execute the input.
+        The CMS program or procedure with which to execute the input. E.g., "psi4", "rdkit", "geometric".
     raise_error
         Determines if compute should raise an error or not.
     retries : int, optional
         The number of random tries to retry for.
     task_config
         A dictionary of local configuration options corresponding to a TaskConfig object.
-    local_options
-        Deprecated parameter, renamed to ``task_config``
     return_dict
-        Returns a dict instead of qcelemental.models.AtomicResult
-    schema_version
+        Returns a dict instead of qcelemental.models.AtomicResult  # TODO base Result class
+    return_version
         The schema version to return. If -1, the input schema_version is used.
 
     Returns
@@ -75,20 +72,24 @@ def compute(
     """
 
     try:
+        # models, v1 or v2
         output_data = input_data.model_copy()
     except AttributeError:
+        # dicts
         output_data = input_data.copy()  # lgtm [py/multiple-definition]
 
     with compute_wrapper(capture_output=False, raise_error=raise_error) as metadata:
-
-        # Grab the executor and build the input model
+        # Grab the executor harness
         try:
             executor = get_procedure(program)
         except InputError:
             executor = get_program(program)
 
         # Build the model and validate
-        input_data = executor.build_input_model(input_data)  # calls model_wrapper
+        # * calls model_wrapper with the (Atomic|Optimization|etc)Input for which the harness was designed
+        # * upon return, input_data is a model of the type (e.g., Atomic) and version (e.g., 1 or 2) the harness prefers. for now, v1.
+        input_data, input_schema_version = executor.build_input_model(input_data, return_input_schema_version=True)
+        convert_version = input_schema_version if return_version == -1 else return_version
 
         # Build out task_config
         if task_config is None:
@@ -114,7 +115,9 @@ def compute(
                 except:
                     raise
 
-    return handle_output_metadata(output_data, metadata, raise_error=raise_error, return_dict=return_dict)
+    return handle_output_metadata(
+        output_data, metadata, raise_error=raise_error, return_dict=return_dict, convert_version=convert_version
+    )
 
 
 def compute_procedure(*args, **kwargs):

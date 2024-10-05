@@ -12,8 +12,9 @@ from qcengine.testing import checkver_and_convert, failure_engine, schema_versio
 
 
 def test_missing_key(schema_versions, request):
+    _, retver, _ = schema_versions
 
-    ret = qcng.compute({"hello": "hi"}, "bleh")
+    ret = qcng.compute({"hello": "hi"}, "bleh", return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
@@ -27,7 +28,7 @@ def test_missing_key_raises(schema_versions, request):
 
 @using("psi4")
 def test_psi4_task(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     input_data = {
         "molecule": models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -37,7 +38,7 @@ def test_psi4_task(schema_versions, request):
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "psi4", raise_error=True)
+    ret = qcng.compute(input_data, "psi4", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.driver == "energy"
@@ -53,7 +54,7 @@ def test_psi4_task(schema_versions, request):
 @using("psi4")
 @using("gcp")
 def test_psi4_hf3c_task(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     input_data = {
         "molecule": models.Molecule(**qcng.get_molecule("water", return_dict=True)),
         "driver": "energy",
@@ -62,7 +63,7 @@ def test_psi4_hf3c_task(schema_versions, request):
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "psi4", raise_error=True)
+    ret = qcng.compute(input_data, "psi4", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -71,7 +72,7 @@ def test_psi4_hf3c_task(schema_versions, request):
 
 @using("psi4_runqcsk")
 def test_psi4_interactive_task(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     input_data = {
         "molecule": models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -82,7 +83,7 @@ def test_psi4_interactive_task(schema_versions, request):
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "psi4", raise_error=True)
+    ret = qcng.compute(input_data, "psi4", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert "Final Energy" in ret.stdout
@@ -93,7 +94,7 @@ def test_psi4_interactive_task(schema_versions, request):
 
 @using("psi4_runqcsk")
 def test_psi4_wavefunction_task(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     input_data = {
         "molecule": models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -104,7 +105,7 @@ def test_psi4_wavefunction_task(schema_versions, request):
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "psi4", raise_error=True)
+    ret = qcng.compute(input_data, "psi4", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success, ret.error.error_message
@@ -113,7 +114,7 @@ def test_psi4_wavefunction_task(schema_versions, request):
 
 @using("psi4")
 def test_psi4_internal_failure(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     mol = models.Molecule.from_data(
         """0 3
@@ -129,14 +130,14 @@ def test_psi4_internal_failure(schema_versions, request):
     }
     with pytest.raises(qcng.exceptions.InputError) as exc:
         psi4_task = checkver_and_convert(psi4_task, request.node.name, "pre")
-        ret = qcng.compute(psi4_task, "psi4", raise_error=True)
+        ret = qcng.compute(psi4_task, "psi4", raise_error=True, return_version=retver)
 
     assert "reference is only" in str(exc.value)
 
 
 @using("psi4")
 def test_psi4_ref_switch(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     inp = models.AtomicInput(
         **{
@@ -148,7 +149,7 @@ def test_psi4_ref_switch(schema_versions, request):
     )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -159,7 +160,7 @@ def test_psi4_ref_switch(schema_versions, request):
 @using("rdkit")
 @pytest.mark.parametrize("method", ["UFF", "MMFF94", "MMFF94s"])
 def test_rdkit_task(method, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     input_data = {
         "molecule": models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -169,7 +170,7 @@ def test_rdkit_task(method, schema_versions, request):
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "rdkit", raise_error=True)
+    ret = qcng.compute(input_data, "rdkit", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -177,7 +178,7 @@ def test_rdkit_task(method, schema_versions, request):
 
 @using("rdkit")
 def test_rdkit_connectivity_error(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     input_data = {
         "molecule": qcng.get_molecule("water", return_dict=True),
@@ -188,19 +189,19 @@ def test_rdkit_connectivity_error(schema_versions, request):
     del input_data["molecule"]["connectivity"]
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "rdkit")
+    ret = qcng.compute(input_data, "rdkit", return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
     assert "connectivity" in ret.error.error_message
 
     with pytest.raises(qcng.exceptions.InputError):
-        qcng.compute(input_data, "rdkit", raise_error=True)
+        qcng.compute(input_data, "rdkit", raise_error=True, return_version=retver)
 
 
 @using("torchani")
 def test_torchani_task(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     input_data = {
         "molecule": models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -210,7 +211,7 @@ def test_torchani_task(schema_versions, request):
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "torchani", raise_error=True)
+    ret = qcng.compute(input_data, "torchani", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -219,6 +220,8 @@ def test_torchani_task(schema_versions, request):
 
 @using("mopac")
 def test_mopac_task(schema_versions, request):
+    _, retver, _ = schema_versions
+
     input_data = {
         "molecule": qcng.get_molecule("water", return_dict=True),
         "driver": "gradient",
@@ -227,7 +230,7 @@ def test_mopac_task(schema_versions, request):
     }
 
     input_data1 = checkver_and_convert(input_data.copy(), request.node.name, "pre")
-    ret = qcng.compute(input_data1, "mopac", raise_error=True)
+    ret = qcng.compute(input_data1, "mopac", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.extras.keys() >= {"heat_of_formation", "dip_vec"}
@@ -235,7 +238,7 @@ def test_mopac_task(schema_versions, request):
 
     # Check gradient
     input_data2 = checkver_and_convert(input_data.copy(), request.node.name, "pre")
-    ret = qcng.compute(input_data2, "mopac", raise_error=True)
+    ret = qcng.compute(input_data2, "mopac", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.extras.keys() >= {"heat_of_formation", "dip_vec"}
@@ -245,7 +248,7 @@ def test_mopac_task(schema_versions, request):
     # Check energy
     input_data3 = input_data.copy()
     input_data3["driver"] = "energy"
-    ret = qcng.compute(input_data3, "mopac", raise_error=True)
+    ret = qcng.compute(input_data3, "mopac", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.return_result == energy
@@ -253,15 +256,17 @@ def test_mopac_task(schema_versions, request):
 
 
 def test_random_failure_no_retries(failure_engine, schema_versions, request):
+    _, retver, _ = schema_versions
+
     failure_engine.iter_modes = ["input_error"]
-    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False)
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.error.error_type == "input_error"
     assert "retries" not in ret.input_data["provenance"].keys()
 
     failure_engine.iter_modes = ["random_error"]
-    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False)
+    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.error.error_type == "random_error"
@@ -269,15 +274,29 @@ def test_random_failure_no_retries(failure_engine, schema_versions, request):
 
 
 def test_random_failure_with_retries(failure_engine, schema_versions, request):
+    _, retver, _ = schema_versions
+
     failure_engine.iter_modes = ["random_error", "random_error", "random_error"]
-    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, task_config={"retries": 2})
+    ret = qcng.compute(
+        failure_engine.get_job(),
+        failure_engine.name,
+        raise_error=False,
+        task_config={"retries": 2},
+        return_version=retver,
+    )
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.input_data["provenance"]["retries"] == 2
     assert ret.error.error_type == "random_error"
 
     failure_engine.iter_modes = ["random_error", "input_error"]
-    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, task_config={"retries": 4})
+    ret = qcng.compute(
+        failure_engine.get_job(),
+        failure_engine.name,
+        raise_error=False,
+        task_config={"retries": 4},
+        return_version=retver,
+    )
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.input_data["provenance"]["retries"] == 1
@@ -285,9 +304,17 @@ def test_random_failure_with_retries(failure_engine, schema_versions, request):
 
 
 def test_random_failure_with_success(failure_engine, schema_versions, request):
+    _, retver, _ = schema_versions
+
     failure_engine.iter_modes = ["random_error", "pass"]
     failure_engine.ncalls = 0
-    ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, task_config={"retries": 1})
+    ret = qcng.compute(
+        failure_engine.get_job(),
+        failure_engine.name,
+        raise_error=False,
+        task_config={"retries": 1},
+        return_version=retver,
+    )
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success, ret.error.error_message
@@ -297,7 +324,7 @@ def test_random_failure_with_success(failure_engine, schema_versions, request):
 
 @using("openmm")
 def test_openmm_task_smirnoff(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     from qcengine.programs.openmm import OpenMMHarness
 
@@ -309,7 +336,7 @@ def test_openmm_task_smirnoff(schema_versions, request):
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
+    ret = qcng.compute(input_data, "openmm", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     cachelength = len(OpenMMHarness._CACHE)
@@ -317,7 +344,7 @@ def test_openmm_task_smirnoff(schema_versions, request):
     assert cachelength > 0
     assert ret.success is True
 
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
+    ret = qcng.compute(input_data, "openmm", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     # ensure cache has not grown
@@ -328,7 +355,7 @@ def test_openmm_task_smirnoff(schema_versions, request):
 @pytest.mark.skip("`basis` must be explicitly specified at this time")
 @using("openmm")
 def test_openmm_task_url_basis(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     from qcengine.programs.openmm import OpenMMHarness
 
@@ -344,7 +371,7 @@ def test_openmm_task_url_basis(schema_versions, request):
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
+    ret = qcng.compute(input_data, "openmm", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     cachelength = len(OpenMMHarness._CACHE)
@@ -352,7 +379,7 @@ def test_openmm_task_url_basis(schema_versions, request):
     assert cachelength > 0
     assert ret.success is True
 
-    ret = qcng.compute(input_data, "openmm", raise_error=True)
+    ret = qcng.compute(input_data, "openmm", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     # ensure cache has not grown
@@ -362,7 +389,7 @@ def test_openmm_task_url_basis(schema_versions, request):
 
 @using("openmm")
 def test_openmm_cmiles_gradient(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     program = "openmm"
 
@@ -379,7 +406,7 @@ def test_openmm_cmiles_gradient(schema_versions, request):
     inp = models.AtomicInput(molecule=molecule, driver="gradient", model=model)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, program, raise_error=False)
+    ret = qcng.compute(inp, program, raise_error=False, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -387,7 +414,7 @@ def test_openmm_cmiles_gradient(schema_versions, request):
 
 @using("openmm")
 def test_openmm_cmiles_gradient_nomatch(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     program = "openmm"
 
@@ -407,7 +434,7 @@ def test_openmm_cmiles_gradient_nomatch(schema_versions, request):
     inp = models.AtomicInput(molecule=molecule, driver="gradient", model=model)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, program, raise_error=False)
+    ret = qcng.compute(inp, program, raise_error=False, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     # if we correctly find the cmiles this should fail as the molecule and cmiles are different
@@ -437,7 +464,7 @@ def test_openmm_gaff_keywords(gaff_settings, schema_versions, request):
     """
     Test the different running settings with gaff.
     """
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     program = "openmm"
     water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
@@ -453,10 +480,10 @@ def test_openmm_gaff_keywords(gaff_settings, schema_versions, request):
     if error is not None:
         with pytest.raises(error):
             inp = checkver_and_convert(inp, request.node.name, "pre")
-            _ = qcng.compute(inp, program, raise_error=True)
+            _ = qcng.compute(inp, program, raise_error=True, return_version=retver)
     else:
         inp = checkver_and_convert(inp, request.node.name, "pre")
-        ret = qcng.compute(inp, program, raise_error=False)
+        ret = qcng.compute(inp, program, raise_error=False, return_version=retver)
         ret = checkver_and_convert(ret, request.node.name, "post")
 
         assert ret.success is True
@@ -468,12 +495,12 @@ def test_mace_energy(schema_versions, request):
     """
     Test calculating the energy with mace
     """
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     atomic_input = models.AtomicInput(molecule=water, model={"method": "small", "basis": None}, driver="energy")
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    result = qcng.compute(atomic_input, "mace")
+    result = qcng.compute(atomic_input, "mace", return_version=retver)
     result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success
@@ -485,7 +512,7 @@ def test_mace_gradient(schema_versions, request):
     """
     Test calculating the gradient with mace
     """
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     expected_result = np.array(
@@ -499,7 +526,7 @@ def test_mace_gradient(schema_versions, request):
     atomic_input = models.AtomicInput(molecule=water, model={"method": "small", "basis": None}, driver="gradient")
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    result = qcng.compute(atomic_input, "mace")
+    result = qcng.compute(atomic_input, "mace", return_version=retver)
     result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success
@@ -516,13 +543,13 @@ def test_mace_gradient(schema_versions, request):
 )
 def test_aimnet2_energy(model, expected_energy, schema_versions, request):
     """Test computing the energies of water with two aimnet2 models."""
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     atomic_input = models.AtomicInput(molecule=water, model={"method": model, "basis": None}, driver="energy")
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    result = qcng.compute(atomic_input, "aimnet2")
+    result = qcng.compute(atomic_input, "aimnet2", return_version=retver)
     result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success
@@ -535,13 +562,13 @@ def test_aimnet2_energy(model, expected_energy, schema_versions, request):
 @using("aimnet2")
 def test_aimnet2_gradient(schema_versions, request):
     """Test computing the gradient of water using one aimnet2 model."""
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
     atomic_input = models.AtomicInput(molecule=water, model={"method": "wb97m-d3", "basis": None}, driver="gradient")
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    result = qcng.compute(atomic_input, "aimnet2")
+    result = qcng.compute(atomic_input, "aimnet2", return_version=retver)
     result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success
@@ -563,7 +590,7 @@ def test_aimnet2_gradient(schema_versions, request):
 
 @using("psi4")
 def test_psi4_properties_driver(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     import numpy as np
 
@@ -652,7 +679,7 @@ def test_psi4_properties_driver(schema_versions, request):
     }
 
     json_data = checkver_and_convert(json_data, request.node.name, "pre")
-    json_ret = qcng.compute(json_data, "psi4")
+    json_ret = qcng.compute(json_data, "psi4", return_version=retver)
     json_ret = checkver_and_convert(json_ret, request.node.name, "post")
 
     assert json_ret.success

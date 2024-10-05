@@ -38,6 +38,9 @@ Breaking Changes
   for CLI. @loriab
 * as promised, `local_options` has been removed in favor of `task_config`.
 * compute and compute_procedure have been merged in favor of the former.
+* `compute` learned an optional argument  `return_version` to specify the schema_version of the
+  returned model or dictionary. By default it'll return the input schema_version. If not
+  determinable, will return v1. @loriab
 
 New Features
 ++++++++++++

@@ -62,14 +62,14 @@ def nh2_data():
 
 @using("nwchem")
 def test_b3lyp(nh2_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     # Run NH2
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "b3lyp", "basis": "3-21g"}}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
@@ -92,14 +92,14 @@ def test_b3lyp(nh2_data, schema_versions, request):
 
 @using("nwchem")
 def test_hess(nh2_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     resi = {"molecule": nh2, "driver": "hessian", "model": {"method": "b3lyp", "basis": "3-21g"}}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False)
-    res = checkver_and_convert(res, request.node.name, "post")
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False, return_version=retver)
+    res = checkver_and_convert(res, request.node.name, "post")  # , excuse_as_v2=True)
 
     assert compare_values(-3.5980754370e-02, res.return_result[0, 0], atol=1e-3)
     assert compare_values(0, res.return_result[1, 0], atol=1e-3)
@@ -112,8 +112,8 @@ def test_hess(nh2_data, schema_versions, request):
     resi["molecule"] = shifted_nh2
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False)
-    res_shifted = checkver_and_convert(res_shifted, request.node.name, "post")
+    res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False, return_version=retver)
+    res_shifted = checkver_and_convert(res_shifted, request.node.name, "post")  # , excuse_as_v2=True)
 
     assert not np.allclose(res.return_result, res_shifted.return_result, atol=1e-8)
     assert np.isclose(np.linalg.det(res.return_result), np.linalg.det(res_shifted.return_result))
@@ -121,7 +121,7 @@ def test_hess(nh2_data, schema_versions, request):
 
 @using("nwchem")
 def test_gradient(nh2_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     resi = {
@@ -131,8 +131,9 @@ def test_gradient(nh2_data, schema_versions, request):
         "keywords": {"dft__convergence__gradient": "1e-6"},
     }
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
+    # Note this is the dict-in-dict-out case so all model versions are artificial and pass
 
     assert compare_values(4.22418267e-2, res["return_result"][2], atol=1e-7)  # Beyond accuracy of NWChem stdout
 
@@ -142,7 +143,7 @@ def test_gradient(nh2_data, schema_versions, request):
     resi["molecule"] = shifted_nh2
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     assert not compare_values(4.22418267e-2, res_shifted["return_result"][2], atol=1e-7)
@@ -175,7 +176,7 @@ H 0 1 0
 
 @using("nwchem")
 def test_dipole(h20_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h20 = models.Molecule.from_data(h20_data)
 
     # Run NH2
@@ -187,8 +188,9 @@ def test_dipole(h20_data, schema_versions, request):
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
+    # note dict-in-dict-out
 
     # Make sure the calculation completed successfully
     assert compare_values(-75.764944, res["return_result"], atol=1e-3)
@@ -224,7 +226,7 @@ H 0 1 0
 
 @using("nwchem")
 def test_homo_lumo(h20v2_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h20v2 = models.Molecule.from_data(h20v2_data)
 
     # Run NH2
@@ -236,8 +238,9 @@ def test_homo_lumo(h20v2_data, schema_versions, request):
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True)
+    res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
+    # note dict-in-dict-out
 
     # Make sure the calculation completed successfully
     assert compare_values(-75.968095, res["return_result"], atol=1e-3)
@@ -263,7 +266,7 @@ def test_homo_lumo(h20v2_data, schema_versions, request):
 @using("nwchem")
 def test_geometry_bug(schema_versions, request):
     """Make sure that the harvester does not crash if NWChem's autosym moves atoms too far"""
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     # Example molecule that has an RMSD of 2e-4 after NWChem symmetrizes the coordinates
     xyz = """6
@@ -278,14 +281,14 @@ H       0.44142019      -0.33354425      -0.77152059"""
     atin = {"molecule": mol, "model": {"method": "b3lyp", "basis": "6-31g"}, "driver": "gradient"}
 
     atin = checkver_and_convert(atin, request.node.name, "pre")
-    atres = qcng.compute(atin, "nwchem", raise_error=True)
-    atres = checkver_and_convert(atres, request.node.name, "post")
+    atres = qcng.compute(atin, "nwchem", raise_error=True, return_version=retver)
+    atres = checkver_and_convert(atres, request.node.name, "post")  # , excuse_as_v2=True)
 
 
 @using("nwchem")
 def test_autoz_error(schema_versions, request):
     """Test ability to turn off autoz"""
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     # Large molecule that leads to an AutoZ error
     mol = models.Molecule.from_data(_auto_z_problem)
@@ -297,8 +300,8 @@ def test_autoz_error(schema_versions, request):
     }  # Turn off error correction
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    result = qcng.compute(resi, "nwchem", raise_error=False)
-    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
+    result = qcng.compute(resi, "nwchem", raise_error=False, return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)  # , excuse_as_v2=True)
 
     assert not result.success
     assert "Error when generating redundant atomic coordinates" in result.error.error_message
@@ -311,8 +314,8 @@ def test_autoz_error(schema_versions, request):
         "keywords": {"geometry__noautoz": True},
     }
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    result = qcng.compute(resi, "nwchem", raise_error=False)
-    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
+    result = qcng.compute(resi, "nwchem", raise_error=False, return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)  # , excuse_as_v2=True)
 
     # Ok if it crashes for other reasons
     assert "Error when generating redundant atomic coordinates" not in result.error.error_message
@@ -321,7 +324,7 @@ def test_autoz_error(schema_versions, request):
 @using("nwchem")
 def test_autoz_error_correction(schema_versions, request):
     """See if error correction for autoz works"""
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     # Large molecule that leads to an AutoZ error
     mol = models.Molecule.from_data(_auto_z_problem)
@@ -333,8 +336,8 @@ def test_autoz_error_correction(schema_versions, request):
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    result = qcng.compute(resi, "nwchem", raise_error=True)
-    result = checkver_and_convert(result, request.node.name, "post")
+    result = qcng.compute(resi, "nwchem", raise_error=True, return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post")  # , excuse_as_v2=True)
 
     assert result.success
     assert "geom_binvr" in result.extras["observed_errors"]
@@ -355,7 +358,7 @@ def test_autoz_error_correction(schema_versions, request):
 )
 @using("nwchem")
 def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h20v2 = models.Molecule.from_data(h20v2_data)
 
     resi = {
@@ -370,8 +373,8 @@ def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    result = qcng.compute(resi, "nwchem", raise_error=True)
-    result = checkver_and_convert(result, request.node.name, "post")
+    result = qcng.compute(resi, "nwchem", return_version=retver, raise_error=True)
+    result = checkver_and_convert(result, request.node.name, "post")  # , excuse_as_v2=True)
 
     assert result.success
     assert "convergence_failed" in result.extras["observed_errors"]
@@ -382,7 +385,7 @@ def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema
 def test_restart(nh2_data, tmpdir, schema_versions, request):
     # Create a molecule that takes 5-8 steps for NWChem to relax it,
     #  but only run the relaxation for 4 steps
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     resi = {
@@ -398,8 +401,8 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
     local_options = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    result = qcng.compute(resi, "nwchem", task_config=local_options, raise_error=False)
-    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
+    result = qcng.compute(resi, "nwchem", task_config=local_options, raise_error=False, return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)  # , excuse_as_v2=True)
 
     assert not result.success
     assert "computation failed to converge" in str(result.error)
@@ -410,6 +413,7 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
         "nwchem",
         task_config=local_options,
         raise_error=False,
+        return_version=retver,
     )
-    result = checkver_and_convert(result, request.node.name, "post")
+    result = checkver_and_convert(result, request.node.name, "post")  # , excuse_as_v2=True)
     assert result.success
