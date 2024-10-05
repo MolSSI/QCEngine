@@ -227,7 +227,9 @@ def handle_output_metadata(
         ret = ret.convert_v(convert_version)
 
     if return_dict:
-        return json.loads(ret.json())  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
+        return json.loads(
+            ret.model_dump_json()
+        )  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
     else:
         return ret
 

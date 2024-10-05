@@ -89,7 +89,7 @@ def compute(
         # * calls model_wrapper with the (Atomic|Optimization|etc)Input for which the harness was designed
         # * upon return, input_data is a model of the type (e.g., Atomic) and version (e.g., 1 or 2) the harness prefers. for now, v1.
         input_data, input_schema_version = executor.build_input_model(input_data, return_input_schema_version=True)
-        convert_version = input_schema_version if return_version == -1 else return_version
+        return_version = input_schema_version if return_version == -1 else return_version
 
         # Build out task_config
         if task_config is None:
@@ -116,7 +116,7 @@ def compute(
                     raise
 
     return handle_output_metadata(
-        output_data, metadata, raise_error=raise_error, return_dict=return_dict, convert_version=convert_version
+        output_data, metadata, raise_error=raise_error, return_dict=return_dict, convert_version=return_version
     )
 
 
