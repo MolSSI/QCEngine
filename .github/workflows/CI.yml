@@ -173,6 +173,12 @@ jobs:
       run: |
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
+    - name: Special Config - Forced Interface Upgrade
+      if: "(matrix.cfg.label == 'Psi4-1.6')"
+      run: |
+        grep -r "local_options" ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/
+        sed -i "s/local_options/task_config/g" ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/procrouting/*py
+
     - name: Install QCEngine
       run: |
         python -m pip install . --no-deps
