@@ -4,7 +4,8 @@ Integrates the computes together
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
-from qcelemental.models import AtomicInput, AtomicResult, FailedOperation, OptimizationResult
+import qcelemental
+from qcelemental.models import AtomicInput, AtomicResult, FailedOperation, OptimizationResult  # TODO
 
 from .config import get_config
 from .exceptions import InputError, RandomError
@@ -121,9 +122,11 @@ def compute(
 
 
 def compute_procedure(*args, **kwargs):
+    vchanges = qcelemental.models.common_models._qcsk_v2_default_v1_importpathschange
+
     warnings.warn(
-        "Using the `compute_procedure` function is deprecated in favor of using `compute`, "
-        "and as soon as version 0.70.0 it will stop working.",
+        f"Using the `compute_procedure` function is deprecated in favor of using `compute`, "
+        "and as soon as version {vchanges} it will stop working.",
         category=FutureWarning,
         stacklevel=2,
     )

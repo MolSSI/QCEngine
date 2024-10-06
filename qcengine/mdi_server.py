@@ -41,6 +41,7 @@ class MDIServer:
         model,
         keywords,
         raise_error: bool = False,
+        task_config: Optional[Dict[str, Any]] = None,
         local_options: Optional[Dict[str, Any]] = None,
     ):
         """Initialize an MDIServer object for communication with MDI
@@ -59,8 +60,9 @@ class MDIServer:
             Program-specific keywords.
         raise_error : bool, optional
             Determines if compute should raise an error or not.
-        local_options : Optional[Dict[str, Any]], optional
+        task_config : Optional[Dict[str, Any]], optional
             A dictionary of local configuration options
+            Can be passed as `local_options`, but `task_config` preferred.
         """
 
         if not use_mdi:
@@ -81,7 +83,17 @@ class MDIServer:
         self.keywords = keywords
         self.program = program
         self.raise_error = raise_error
-        self.local_options = local_options
+        if task_config is None:
+            task_config = {}
+        if local_options:
+            warnings.warn(
+                "Using the `local_options` keyword argument is deprecated in favor of using `task_config`, "
+                "and as soon as version 0.70.0 it will stop working.",
+                category=FutureWarning,
+                stacklevel=2,
+            )
+            task_config = {**local_options, **task_config}
+        self.local_options = task_config
 
         # The MDI interface does not currently support multiple fragments
         if len(self.molecule.fragments) != 1:
@@ -320,7 +332,7 @@ class MDIServer:
                 molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
             )
             self.compute_return = compute(
-                input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
+                input_data=input, program=self.program, raise_error=self.raise_error, task_config=self.local_options
             )
 
             # If there is an error message, print it out
