@@ -60,6 +60,7 @@ def compute(
         The number of random tries to retry for.
     task_config
         A dictionary of local configuration options corresponding to a TaskConfig object.
+        Formerly local_options.
     return_dict
         Returns a dict instead of qcelemental.models.AtomicResult  # TODO base Result class
     return_version
