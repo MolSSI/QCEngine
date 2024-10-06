@@ -1,6 +1,7 @@
 import abc
-from typing import Any, Dict, Union
+from typing import Any, Dict, Tuple, Union
 
+import qcelemental
 from pydantic import BaseModel, ConfigDict
 
 from ..util import model_wrapper
@@ -52,12 +53,33 @@ class ProcedureHarness(BaseModel, abc.ABC):
             If the proceudre was found or not.
         """
 
-    def _build_model(self, data: Dict[str, Any], model: "BaseModel") -> "BaseModel":
+    def _build_model(
+        self, data: Dict[str, Any], model: "BaseModel", /, *, return_input_schema_version: bool = False
+    ) -> Union["BaseModel", Tuple["BaseModel", int]]:
         """
         Quick wrapper around util.model_wrapper for inherited classes
         """
 
-        return model_wrapper(data, model)
+        v1_model = getattr(qcelemental.models.v1, model)
+        v2_model = getattr(qcelemental.models.v2, model)
+
+        if isinstance(data, v1_model):
+            mdl = model_wrapper(data, v1_model)
+        elif isinstance(data, v2_model):
+            mdl = model_wrapper(data, v2_model)
+        elif isinstance(data, dict):
+            # remember these are user-provided dictionaries, so they'll have the mandatory fields,
+            #   like driver, not the helpful discriminator fields like schema_version.
+
+            # for now, the two dictionaries look the same, so cast to the one we want
+            # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
+            mdl = model_wrapper(data, v1_model)  # TODO v2
+
+        input_schema_version = mdl.schema_version
+        if return_input_schema_version:
+            return mdl.convert_v(1), input_schema_version  # non-psi4 return_dict=False fail w/o this
+        else:
+            return mdl.convert_v(1)
 
     def get_version(self) -> str:
         """Finds procedure, extracts version, returns normalized version string.

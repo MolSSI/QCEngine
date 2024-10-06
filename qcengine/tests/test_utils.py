@@ -3,17 +3,18 @@ import sys
 import time
 
 import pytest
-from qcelemental.models import AtomicInput
+import qcelemental
 
 from qcengine import util
 from qcengine.exceptions import InputError
 
 
+# TODO add schema_versions when change model_wrapper
 def test_model_wrapper():
 
     with pytest.raises(InputError):
-#pydantic.v1.error_wrappers.ValidationError
-        util.model_wrapper({"bad": "yup"}, AtomicInput)
+        # pydantic.v1.error_wrappers.ValidationError
+        util.model_wrapper({"bad": "yup"}, qcelemental.models.AtomicInput)
 
 
 def test_compute_wrapper_capture():
