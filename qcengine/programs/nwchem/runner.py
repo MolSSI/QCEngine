@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
-from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config

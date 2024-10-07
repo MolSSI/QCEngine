@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models import AtomicResult, BasisSet
+from qcelemental.models.v2 import AtomicResult, BasisSet
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
@@ -15,7 +15,7 @@ from ..util import execute, popen, temporary_directory
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -214,6 +214,9 @@ class Psi4Harness(ProgramHarness):
                 output_data["stdout"] = output_data.pop("raw_output", None)
 
             else:
+                # psi4 QCSchema interface only speaks qcsk.v1
+                # * note that only psiapi=True calcs need this until rearrangement affects all
+                input_model = input_model.convert_v(1)
 
                 if input_model.extras.get("psiapi", False):
                     import psi4
