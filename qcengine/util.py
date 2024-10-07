@@ -19,7 +19,7 @@ from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 import pydantic
-from qcelemental.models import AtomicResult, FailedOperation, OptimizationResult
+import qcelemental
 
 from qcengine.config import TaskConfig
 
@@ -219,7 +219,11 @@ def handle_output_metadata(
         ret = output_data.__class__(**output_fusion)
     else:
         # Should only be reachable on failures
-        ret = FailedOperation(
+        model = {
+            1: qcelemental.models.v1.FailedOperation,
+            2: qcelemental.models.v2.FailedOperation,
+        }[convert_version]
+        ret = model(
             success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion
         )
 
