@@ -343,4 +343,4 @@ task python
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.model_dump(), **output_data})
