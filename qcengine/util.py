@@ -220,6 +220,7 @@ def handle_output_metadata(
     else:
         # Should only be reachable on failures
         model = {
+            -1: qcelemental.models.v1.FailedOperation,
             1: qcelemental.models.v1.FailedOperation,
             2: qcelemental.models.v2.FailedOperation,
         }[convert_version]
