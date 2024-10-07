@@ -3,7 +3,7 @@ Calls adcc
 """
 from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models import AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError, UnknownError
@@ -11,7 +11,7 @@ from .model import ProgramHarness
 from .qcvar_identities_resources import build_atomicproperties
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -113,7 +113,7 @@ class AdccHarness(ProgramHarness):
         except Exception as e:
             raise UnknownError(str(e))
 
-        input_data = input_model.dict(encoding="json")
+        input_data = input_model.model_dump(encoding="json")
         output_data = input_data.copy()
         output_data["success"] = compute_success
 

@@ -7,7 +7,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, ClassVar, Dict, Optional, Tuple
 
-from qcelemental.models import AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
 from ...exceptions import InputError

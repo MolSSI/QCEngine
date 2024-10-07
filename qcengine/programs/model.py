@@ -93,9 +93,9 @@ class ProgramHarness(BaseModel, abc.ABC):
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:
-            return mdl.convert_v(1), input_schema_version  # non-psi4 return_dict=False fail w/o this
+            return mdl.convert_v(2), input_schema_version
         else:
-            return mdl.convert_v(1)
+            return mdl.convert_v(2)
 
     def get_version(self) -> str:
         """Finds program, extracts version, returns normalized version string.

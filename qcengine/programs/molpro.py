@@ -6,7 +6,7 @@ import string
 from typing import Any, ClassVar, Dict, List, Optional, Set, Tuple
 from xml.etree import ElementTree as ET
 
-from qcelemental.models import AtomicResult
+from qcelemental.models.v2 import AtomicResult
 from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError

@@ -5,7 +5,7 @@ import pprint
 from decimal import Decimal
 from typing import Any, ClassVar, Dict, Optional, Tuple
 
-from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
 from ...exceptions import InputError, UnknownError

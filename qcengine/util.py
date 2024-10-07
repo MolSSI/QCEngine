@@ -225,11 +225,11 @@ def handle_output_metadata(
 
     if convert_version > 0:
         ret = ret.convert_v(convert_version)
+    returned_version = getattr(ret, "schema_version", "not a model")
 
     if return_dict:
-        return json.loads(
-            ret.model_dump_json()
-        )  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
+        # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
+        return json.loads(ret.model_dump_json())
     else:
         return ret
 
