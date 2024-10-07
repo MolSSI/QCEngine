@@ -17,6 +17,7 @@ qchem_forgive = [
     "root.provenance.creator",
     "root.extras",
     "root.molecule.extras",
+    "root.schema_version",  # TODO temp until rearrangement befuddles
 ]
 
 
@@ -25,18 +26,21 @@ def test_qchem_output_parser(test_case):
 
     # Get output file data
     data = qchem_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
     outfiles = qcel.util.deserialize(data["outfiles.msgpack"], "msgpack-ext")
     output = qcng.get_program("qchem", check=False).parse_output(outfiles, inp).dict()
     output.pop("provenance", None)
 
-    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
     output_ref.pop("provenance", None)
     output_ref.pop("extras", None)
     output.pop("extras", None)
 
-    check, message = compare_recursive(output_ref, output, return_message=True)
+    # Modify ref to trim down total data as a molecule is now sparse
+    output_ref["molecule"] = {k: v for k, v in output_ref["molecule"].items() if k in output["molecule"]}
+
+    check, message = compare_recursive(output_ref, output, return_message=True, forgive=qchem_forgive)
     assert check, message
 
 
@@ -45,7 +49,7 @@ def test_qchem_input_formatter(test_case):
 
     # Get input file data
     data = qchem_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program("qchem", check=False).build_input(inp, qcng.get_config())
@@ -57,7 +61,7 @@ def test_qchem_input_formatter_template(test_case):
 
     # Get input file data
     data = qchem_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program("qchem", check=False).build_input(inp, qcng.get_config(), template="Test template")
@@ -128,7 +132,7 @@ def test_qchem_logfile_parser(test_case):
         output = qcng.get_program("qchem", check=False).parse_logfile(outfiles).dict()
     output["stdout"] = None
 
-    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
     for key in list(output["provenance"].keys()):
         if key not in output_ref["provenance"]:
             output["provenance"].pop(key)
@@ -151,7 +155,7 @@ def test_qchem_logfile_parser_qcscr(test_case):
         output = qcng.get_program("qchem", check=False).parse_logfile(outfiles).dict()
     output["stdout"] = None
 
-    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
     for key in list(output["provenance"].keys()):
         if key not in output_ref["provenance"]:
             output["provenance"].pop(key)

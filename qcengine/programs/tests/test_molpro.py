@@ -13,13 +13,15 @@ def test_molpro_output_parser(test_case):
 
     # Get output file data
     data = molpro_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
     output = qcng.get_program("molpro", check=False).parse_output(data, inp).dict()
     output.pop("provenance", None)
+    output.pop("schema_version", None)
 
-    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
     output_ref.pop("provenance", None)
+    output_ref.pop("schema_version", None)
 
     # TODO add `skip` to compare_recursive
     check = compare_recursive(output_ref, output, forgive={"stdout"})

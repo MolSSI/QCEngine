@@ -305,7 +305,7 @@ $end
         output_data["stdout"] = outfiles["dispatch.out"]
         output_data["success"] = True
 
-        merged_data = {**input_model.dict(), **output_data}
+        merged_data = {**input_model.convert_v(2).model_dump(), **output_data}
         merged_data["extras"]["qcvars"] = qcvars
 
         return AtomicResult(**merged_data)
