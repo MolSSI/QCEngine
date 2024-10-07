@@ -373,6 +373,7 @@ def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
+    print("AA2")
     result = qcng.compute(resi, "nwchem", return_version=retver, raise_error=True)
     result = checkver_and_convert(result, request.node.name, "post")  # , excuse_as_v2=True)
 

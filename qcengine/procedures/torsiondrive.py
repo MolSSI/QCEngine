@@ -4,8 +4,13 @@ from contextlib import redirect_stderr, redirect_stdout
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Tuple, Union
 
 import numpy as np
-from qcelemental.models import FailedOperation, Molecule
-from qcelemental.models.procedures import OptimizationInput, OptimizationResult, TorsionDriveInput, TorsionDriveResult
+from qcelemental.models.v2 import FailedOperation, Molecule
+from qcelemental.models.v2.procedures import (
+    OptimizationInput,
+    OptimizationResult,
+    TorsionDriveInput,
+    TorsionDriveResult,
+)
 from qcelemental.util import which_import
 
 from .model import ProcedureHarness
