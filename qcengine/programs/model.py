@@ -184,8 +184,7 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
                 keyword_updates = e.create_keyword_update(local_input_data)
                 new_keywords = local_input_data.keywords.copy()
                 new_keywords.update(keyword_updates)
-                # TODO v2
-                local_input_data = qcelemental.models.v1.AtomicInput(
+                local_input_data = input_data.__class__(
                     **local_input_data.dict(exclude={"keywords"}), keywords=new_keywords
                 )
 
