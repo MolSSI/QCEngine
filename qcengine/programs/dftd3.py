@@ -29,6 +29,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class DFTD3Harness(ProgramHarness):
+    """Interface for DFTD3 executable project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "DFTD3",

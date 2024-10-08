@@ -20,6 +20,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class MP2DHarness(ProgramHarness):
+    """Interface for MP2D executable project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MP2D",

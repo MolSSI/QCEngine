@@ -15,6 +15,8 @@ from .model import ProgramHarness
 
 
 class MolproHarness(ProgramHarness):
+    """Interface for Molpro project."""
+
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Molpro",
         "scratch": True,

@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class MRChemHarness(ProgramHarness):
+    """Interface for MRChem project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MRChem",

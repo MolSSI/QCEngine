@@ -31,6 +31,8 @@ def qcore_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
 
 
 class QcoreHarness(ProgramHarness):
+    """Interface for Qcore/Entos project."""
+
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Qcore",
         "scratch": False,
@@ -247,6 +249,8 @@ class QcoreHarness(ProgramHarness):
 
 
 class EntosHarness(QcoreHarness):
+    """Interface for Qcore/Entos project."""
+
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Entos",
         "scratch": True,

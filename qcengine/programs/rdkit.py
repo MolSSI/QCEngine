@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 
 class RDKitHarness(ProgramHarness):
+    """Interface for RDKit project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "RDKit",

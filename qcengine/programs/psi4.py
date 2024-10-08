@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 
 class Psi4Harness(ProgramHarness):
+    """Interface for Psi4 project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Psi4",

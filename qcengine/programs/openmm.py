@@ -24,6 +24,7 @@ if TYPE_CHECKING:
 
 
 class OpenMMHarness(ProgramHarness):
+    """Interface for OpenMM project."""
 
     _CACHE: ClassVar[Dict] = {}
     _CACHE_MAX_SIZE: ClassVar[int] = 10

@@ -21,7 +21,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class GAMESSHarness(ProgramHarness):
-    """
+    """Interface for GAMESS-US project.
 
     Notes
     -----
