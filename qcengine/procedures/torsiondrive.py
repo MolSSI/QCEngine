@@ -178,7 +178,7 @@ class TorsionDriveProcedure(ProcedureHarness):
             object.
         """
 
-        from qcengine import compute_procedure
+        from qcengine import compute
 
         input_molecule = input_model.initial_molecule[0].copy(deep=True).dict()
         input_molecule["geometry"] = np.array(job).reshape(len(input_molecule["symbols"]), 3)
@@ -209,9 +209,7 @@ class TorsionDriveProcedure(ProcedureHarness):
             initial_molecule=input_molecule,
         )
 
-        return compute_procedure(
-            input_data, procedure=input_model.optimization_spec.procedure, task_config=config.dict()
-        )
+        return compute(input_data, program=input_model.optimization_spec.procedure, task_config=config.dict())
 
     @staticmethod
     def _find_final_results(
