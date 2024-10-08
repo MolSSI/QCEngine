@@ -242,16 +242,16 @@ jobs:
         conda remove qcelemental --force
         python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_warnings' --no-deps
 
-    - name: Environment Information
-      run: |
-        conda info
-        conda list --show-channel-urls
-
     - name: Build Documentation
       run: |
         python -m pip install . --no-deps
         cd docs
         make html
+
+    - name: Environment Information
+      run: |
+        conda info
+        conda list --show-channel-urls
 
     - name: GitHub Pages Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.1
