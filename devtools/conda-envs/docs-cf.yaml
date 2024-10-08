@@ -5,8 +5,9 @@ channels:
 dependencies:
   - python
   - networkx
-  - pydantic=2
-  - pydantic-settings
+  - pydantic=2.5.3
+  - pydantic-settings=2.2.1
+  - pydantic-core=2.14.6
   - numpy
   - pint
 
@@ -19,7 +20,7 @@ dependencies:
   - sphinx-autodoc-typehints
   - sphinx-automodapi
   - sphinx_rtd_theme
-  - autodoc-pydantic=2
+  - autodoc-pydantic=2.0.1
 
     # testing
   - pytest>=4.0.0
