@@ -91,12 +91,13 @@ def test_run_psi4(tmp_path, schema_versions2, request):
 
 @using("geometric")
 @using("psi4")
-def test_run_procedure(tmp_path):
+def test_run_procedure(tmp_path, schema_versions2, request):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
-    models = qcelemental.models.v1
+    models, _, _ = schema_versions2
 
     def check_result(stdout):
         output = json.loads(stdout)
+        output = checkver_and_convert(output, request.node.name, "post", cast_dict_as="OptimizationResult")
         assert output["provenance"]["creator"].lower() == "geometric"
         assert output["success"] is True
 
@@ -107,16 +108,17 @@ def test_run_procedure(tmp_path):
     }
     inp = models.OptimizationInput(**inp)
 
-    args = ["run-procedure", "geometric", inp.json()]
+    inp = checkver_and_convert(inp, request.node.name, "pre")
+    args = ["run-procedure", "geometric", inp.model_dump_json()]
     check_result(run_qcengine_cli(args))
 
     args = ["run-procedure", "geometric", os.path.join(tmp_path, "input.json")]
-    with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
+    with util.disk_files({"input.json": inp.model_dump_json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
 
-    args = ["run-procedure", "geometric", inp.json()]
-    check_result(run_qcengine_cli(args, stdin=inp.json()))
+    args = ["run-procedure", "geometric", inp.model_dump_json()]
+    check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))
 
     # try unified route
-    args = ["run", "geometric", inp.json()]
-    check_result(run_qcengine_cli(args, stdin=inp.json()))
+    args = ["run", "geometric", inp.model_dump_json()]
+    check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))
