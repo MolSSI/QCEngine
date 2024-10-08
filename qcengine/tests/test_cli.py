@@ -111,3 +111,7 @@ def test_run_procedure(tmp_path):
 
     args = ["run-procedure", "geometric", inp.json()]
     check_result(run_qcengine_cli(args, stdin=inp.json()))
+
+    # try unified route
+    args = ["run", "geometric", inp.json()]
+    check_result(run_qcengine_cli(args, stdin=inp.json()))
