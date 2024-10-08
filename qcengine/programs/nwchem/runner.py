@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
-from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class NWChemHarness(ErrorCorrectionProgramHarness):
-    """
+    """Interface for NWChem Classic project.
 
     Notes
     -----
@@ -343,4 +343,4 @@ task python
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**{**input_model.model_dump(), **output_data})

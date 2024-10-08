@@ -63,7 +63,7 @@ jobs:
           #  label: QCore
           #  runs-on: ubuntu-latest
           #  pytest: ""
-          #  Note: removed Sep 2024 b/c too hard to reconcile w/pyd v2
+          #  Note: removed Sep 2024 b/c too hard to reconcile w/pyd v2. Manby approves.
 
           - conda-env: nwchem
             python-version: 3.8
@@ -114,6 +114,12 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          #- conda-env: nwchem
+          #  python-version: "3.10"
+          #  label: TeraChem
+          #  runs-on: ubuntu-20.04
+          #  pytest: ""
+
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
 
@@ -144,11 +150,15 @@ jobs:
       run: |
         qcore --accept-license
 
+
+#docker.io/mtzgroup/terachem:latest
+#Usage:  docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
+
     - name: Special Config - QCElemental Dep
       #if: false
       run: |
         conda remove qcelemental --force
-        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_shimclasses' --no-deps
+        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_warnings' --no-deps
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
@@ -162,6 +172,12 @@ jobs:
       if: "((matrix.cfg.label == 'Psi4-1.6') || (matrix.cfg.label == 'optimization-dispersion')) && (runner.os != 'Windows')"
       run: |
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
+
+    - name: Special Config - Forced Interface Upgrade
+      if: "(matrix.cfg.label == 'Psi4-1.6')"
+      run: |
+        grep -r "local_options" ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/
+        sed -i "s/local_options/task_config/g" ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/procrouting/*py
 
     - name: Install QCEngine
       run: |
@@ -220,6 +236,12 @@ jobs:
         add-pip-as-python-dependency: true
         channels: conda-forge
 
+    - name: Special Config - QCElemental Dep
+      #if: false
+      run: |
+        conda remove qcelemental --force
+        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_warnings' --no-deps
+
     - name: Environment Information
       run: |
         conda info
@@ -228,6 +250,8 @@ jobs:
     - name: Build Documentation
       run: |
         python -m pip install . --no-deps
+        python -c "import qcelemental as q;print(q.__file__, q.__version__)"
+        python -c "import qcengine as q;print(q.__file__, q.__version__)"
         cd docs
         make html
 

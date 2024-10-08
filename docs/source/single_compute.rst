@@ -52,6 +52,11 @@ By default the job is given resources relating to the compute environment it is 
 
     >>> ret = qcng.compute(inp, "psi4", local_options={"memory": 2, "ncores": 3})
 
+By default, the job returns a QCSchema Result of the same ``schema_version`` as the Input (v1 if Input version can't be determined). To request a specific version back, use the ``return_version`` keyword:
+
+.. code:: python
+
+    >>> ret = qcng.compute(inp, "psi4", return_version=2)
 
 
 Results

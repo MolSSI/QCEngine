@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models import AtomicInput, OptimizationInput, OptimizationResult, Provenance
+from qcelemental.models.v2 import AtomicInput, OptimizationInput, OptimizationResult, Provenance
 
 from qcengine.config import TaskConfig
 from qcengine.exceptions import InputError, UnknownError
@@ -22,8 +22,10 @@ class NWChemDriverProcedure(ProcedureHarness):
         nwc_harness = NWChemHarness()
         return nwc_harness.get_version()
 
-    def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> OptimizationInput:
-        return self._build_model(data, OptimizationInput)
+    def build_input_model(
+        self, data: Union[Dict[str, Any], "OptimizationInput"], *, return_input_schema_version: bool = False
+    ) -> "OptimizationInput":
+        return self._build_model(data, "OptimizationInput", return_input_schema_version=return_input_schema_version)
 
     def compute(self, input_data: OptimizationInput, config: TaskConfig) -> "BaseModel":
         nwc_harness = NWChemHarness()

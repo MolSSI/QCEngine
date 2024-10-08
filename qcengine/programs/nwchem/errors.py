@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Dict
 
-from qcelemental.models import AtomicInput
+from qcelemental.models.v2 import AtomicInput
 
 from qcengine.exceptions import SimpleKnownErrorException
 from qcengine.programs.nwchem.germinate import xc_functionals

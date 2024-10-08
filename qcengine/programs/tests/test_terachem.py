@@ -3,7 +3,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
 import qcengine as qcng
-from qcengine.testing import qcengine_records, using
+from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, using
 
 # Prep globals
 terachem_info = qcengine_records("terachem")
@@ -13,20 +13,20 @@ terachem_info = qcengine_records("terachem")
 def test_terachem_output_parser(test_case):
     # Get output file data
     data = terachem_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
     output = qcng.get_program("terachem", check=False).parse_output(data, inp).dict()
-    output_ref = qcel.models.AtomicResult.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
 
     # Forgiving molecule since it is now sparse
-    assert compare_recursive(output_ref, output, forgive={"stdout", "provenance", "molecule"})
+    assert compare_recursive(output_ref, output, forgive={"stdout", "provenance", "molecule", "schema_version"})
 
 
 @pytest.mark.parametrize("test_case", terachem_info.list_test_cases())
 def test_terachem_input_formatter(test_case):
     # Get input file data
     data = terachem_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program("terachem", check=False).build_input(inp, qcng.get_config())
@@ -35,13 +35,18 @@ def test_terachem_input_formatter(test_case):
 
 @using("terachem")
 @pytest.mark.parametrize("test_case", terachem_info.list_test_cases())
-def test_terachem_executor(test_case):
+def test_terachem_executor(test_case, schema_versions, request):
+    models, retver, _ = schema_versions
+
     # Get input file data
     data = terachem_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = models.AtomicInput.parse_raw(data["input.json"])
 
     # Run Terachem
-    result = qcng.compute(inp, "terachem")
+    inp = checkver_and_convert(inp, request.node.name, "pre")
+    result = qcng.compute(inp, "terachem", return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post")
+
     # result = qcng.get_program('terachem').compute(inp, qcng.get_config())
     assert result.success is True
 

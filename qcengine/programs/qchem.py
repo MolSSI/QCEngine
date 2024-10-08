@@ -11,7 +11,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
 import numpy as np
 from qcelemental import constants
-from qcelemental.models import AtomicInput, AtomicResult, Molecule, Provenance
+from qcelemental.models.v2 import AtomicInput, AtomicResult, Molecule, Provenance
 from qcelemental.molparse import regex
 from qcelemental.util import parse_version, safe_version, which
 
@@ -25,6 +25,8 @@ NUMBER = r"(?x:" + regex.NUMBER + ")"
 
 
 class QChemHarness(ProgramHarness):
+    """Interface for Q-Chem project."""
+
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "QChem",
         "scratch": True,
@@ -305,7 +307,7 @@ $end
         output_data["stdout"] = outfiles["dispatch.out"]
         output_data["success"] = True
 
-        merged_data = {**input_model.dict(), **output_data}
+        merged_data = {**input_model.convert_v(2).model_dump(), **output_data}
         merged_data["extras"]["qcvars"] = qcvars
 
         return AtomicResult(**merged_data)

@@ -4,8 +4,6 @@ A small list of molecules used to validate and tests computation.
 
 import copy
 
-from qcelemental.models import Molecule
-
 _test_mols = {
     "hydrogen": {
         "symbols": ["H", "H"],
@@ -189,11 +187,16 @@ _test_mols = {
 }
 
 
-def get_molecule(name):
+def get_molecule(name, *, return_dict: bool = False):
     """
     Returns a QC JSON representation of a test molecule.
     """
+    import qcelemental
+
     if name not in _test_mols:
         raise KeyError("Molecule name '{}' not found".format(name))
 
-    return Molecule(**copy.deepcopy(_test_mols[name]))
+    if return_dict:
+        return copy.deepcopy(_test_mols[name])
+    else:
+        return qcelemental.models.v1.Molecule(**copy.deepcopy(_test_mols[name]))

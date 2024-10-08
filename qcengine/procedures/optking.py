@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models import OptimizationInput, OptimizationResult
+from qcelemental.models.v2 import OptimizationInput, OptimizationResult
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
@@ -20,8 +20,10 @@ class OptKingProcedure(ProcedureHarness):
             raise_msg="Please install via `conda install optking -c conda-forge`.",
         )
 
-    def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
-        return self._build_model(data, OptimizationInput)
+    def build_input_model(
+        self, data: Union[Dict[str, Any], "OptimizationInput"], *, return_input_schema_version: bool = False
+    ) -> "OptimizationInput":
+        return self._build_model(data, "OptimizationInput", return_input_schema_version=return_input_schema_version)
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -38,6 +40,7 @@ class OptKingProcedure(ProcedureHarness):
         if self.found(raise_error=True):
             import optking
 
+        input_data = input_model.convert_v(1)
         input_data = input_model.dict()
 
         # Set retries to two if zero while respecting local_config

@@ -5,7 +5,7 @@ The qcore QCEngine Harness
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Set
 
 import numpy as np
-from qcelemental.models import AtomicResult, BasisSet
+from qcelemental.models.v2 import AtomicResult, BasisSet
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError, UnknownError
@@ -18,7 +18,7 @@ from .util import (
 )
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -31,6 +31,8 @@ def qcore_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
 
 
 class QcoreHarness(ProgramHarness):
+    """Interface for Qcore/Entos project."""
+
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Qcore",
         "scratch": False,
@@ -247,6 +249,8 @@ class QcoreHarness(ProgramHarness):
 
 
 class EntosHarness(QcoreHarness):
+    """Interface for Qcore/Entos project."""
+
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Entos",
         "scratch": True,

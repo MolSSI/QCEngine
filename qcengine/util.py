@@ -19,8 +19,7 @@ from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 import pydantic
-from pydantic import BaseModel
-from qcelemental.models import AtomicResult, FailedOperation, OptimizationResult
+import qcelemental
 
 from qcengine.config import TaskConfig
 
@@ -55,7 +54,10 @@ def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]
     return command
 
 
-def model_wrapper(input_data: Dict[str, Any], model: BaseModel) -> BaseModel:
+# TODO v1.BaseModel
+def model_wrapper(
+    input_data: Dict[str, Any], model: Union[pydantic.BaseModel, pydantic.v1.BaseModel]
+) -> Union[pydantic.BaseModel, pydantic.v1.BaseModel]:
     """
     Wrap input data in the given model, or return a controlled error
     """
@@ -64,6 +66,7 @@ def model_wrapper(input_data: Dict[str, Any], model: BaseModel) -> BaseModel:
         try:
             input_data = model(**input_data)
         except (pydantic.v1.ValidationError) as exc:
+            # TODO except (pydantic.v1.ValidationError, pydantic.ValidationError) as exc:
             raise InputError(
                 f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}"
             ) from None
@@ -147,15 +150,23 @@ def handle_output_metadata(
     metadata: Dict[str, Any],
     raise_error: bool = False,
     return_dict: bool = True,
+    convert_version: int = -1,
 ) -> Union[Dict[str, Any], "AtomicResult", "OptimizationResult", "FailedOperation"]:
     """
     Fuses general metadata and output together.
 
-    Parameters:
-        output_data: The original output object to be fused with metadata
-        metadata: Metadata produced by the compute_wrapper context manager
-        raise_error: Raise an exception if errors exist (True) or return FailedOperation (False)
-        return_dict: Return dictionary or object representation of data
+    Parameters
+    ----------
+    output_data
+        The original output object to be fused with metadata
+    metadata
+        Metadata produced by the compute_wrapper context manager
+    raise_error
+        Raise an exception if errors exist (True) or return FailedOperation (False)
+    return_dict
+        Return dictionary or object representation of data
+    convert_version
+        The schema version to convert to before return. If -1, don't convert.
 
     Returns
     -------
@@ -208,12 +219,22 @@ def handle_output_metadata(
         ret = output_data.__class__(**output_fusion)
     else:
         # Should only be reachable on failures
-        ret = FailedOperation(
+        model = {
+            -1: qcelemental.models.v1.FailedOperation,
+            1: qcelemental.models.v1.FailedOperation,
+            2: qcelemental.models.v2.FailedOperation,
+        }[convert_version]
+        ret = model(
             success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion
         )
 
+    if convert_version > 0:
+        ret = ret.convert_v(convert_version)
+    returned_version = getattr(ret, "schema_version", "not a model")
+
     if return_dict:
-        return json.loads(ret.json())  # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
+        # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals
+        return json.loads(ret.model_dump_json())
     else:
         return ret
 

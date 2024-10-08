@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models.v2 import AtomicResult, Provenance
 from qcelemental.util import safe_version, which_import
 
 from qcengine.exceptions import InputError
 from qcengine.programs.model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from qcengine.config import TaskConfig
 

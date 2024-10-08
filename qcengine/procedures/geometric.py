@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models import OptimizationInput, OptimizationResult
+from qcelemental.models.v2 import OptimizationInput, OptimizationResult
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
@@ -31,8 +31,10 @@ class GeometricProcedure(ProcedureHarness):
 
         return self.version_cache[which_prog]
 
-    def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
-        return self._build_model(data, OptimizationInput)
+    def build_input_model(
+        self, data: Union[Dict[str, Any], "OptimizationInput"], *, return_input_schema_version: bool = False
+    ) -> "OptimizationInput":
+        return self._build_model(data, "OptimizationInput", return_input_schema_version=return_input_schema_version)
 
     def compute(self, input_model: "OptimizationInput", config: "TaskConfig") -> "OptimizationResult":
         try:
