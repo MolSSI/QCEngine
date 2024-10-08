@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProgramHarness(BaseModel, abc.ABC):
+    """Base class for analytic single-geometry capable harnesses."""
 
     _defaults: ClassVar[Dict[str, Any]] = {}
     name: str
@@ -65,8 +66,6 @@ class ProgramHarness(BaseModel, abc.ABC):
         """
 
     ## Utility
-
-    # def _build_model
 
     def build_input_model(
         self, data: Dict[str, Any], *, return_input_schema_version: bool = False

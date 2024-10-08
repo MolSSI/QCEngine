@@ -17,6 +17,7 @@ from .model import ProgramHarness
 
 
 class TeraChemHarness(ProgramHarness):
+    """Interface for TeraChem project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "TeraChem",

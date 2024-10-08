@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class NWChemHarness(ErrorCorrectionProgramHarness):
-    """
+    """Interface for NWChem Classic project.
 
     Notes
     -----

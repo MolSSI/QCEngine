@@ -25,6 +25,8 @@ NUMBER = r"(?x:" + regex.NUMBER + ")"
 
 
 class QChemHarness(ProgramHarness):
+    """Interface for Q-Chem project."""
+
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "QChem",
         "scratch": True,

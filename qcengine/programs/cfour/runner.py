@@ -23,7 +23,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class CFOURHarness(ProgramHarness):
-    """
+    """Interface for CFOUR project.
 
     Notes
     -----

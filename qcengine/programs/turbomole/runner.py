@@ -20,6 +20,7 @@ from .methods import KEYWORDS, METHODS
 
 
 class TurbomoleHarness(ProgramHarness):
+    """Interface for Turbomole project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Turbomole",

@@ -13,6 +13,7 @@ from .model import ProgramHarness
 
 
 class MopacHarness(ProgramHarness):
+    """Interface for MOPAC project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MOPAC",

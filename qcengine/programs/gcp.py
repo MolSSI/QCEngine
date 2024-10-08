@@ -28,6 +28,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class GCPHarness(ProgramHarness):
+    """Interface for the old gcp executable project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "GCP",
@@ -279,6 +280,7 @@ class GCPHarness(ProgramHarness):
 
 
 class MCTCGCPHarness(GCPHarness):
+    """Interface for the gcp project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MCTC-GCP",

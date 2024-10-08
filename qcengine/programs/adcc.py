@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
 
 class AdccHarness(ProgramHarness):
+    """Interface for adcc project."""
+
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "adcc",
         "scratch": False,

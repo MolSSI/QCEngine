@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 
 class TorchANIHarness(ProgramHarness):
+    """Interface for TorchANI project."""
 
     _CACHE = {}
 
