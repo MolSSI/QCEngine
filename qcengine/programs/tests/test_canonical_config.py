@@ -8,10 +8,9 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from qcelemental.models import AtomicInput
 
 import qcengine as qcng
-from qcengine.testing import has_program, using
+from qcengine.testing import checkver_and_convert, has_program, schema_versions, using
 
 _canonical_methods = [
     # needs attn ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
@@ -38,14 +37,15 @@ _canonical_methods = [
 ]
 
 
-def _get_molecule(program, method):
+def _get_molecule(program, method, molcls):
     if program in ["openmm", "terachem_pbs"]:
-        return qcng.get_molecule("water")
+        dmol = qcng.get_molecule("water", return_dict=True)
     elif program == "gamess" and method == "ccsd(t)":
-        return qcng.get_molecule("water")
+        dmol = qcng.get_molecule("water", return_dict=True)
     else:
-        return qcng.get_molecule("hydrogen")
+        dmol = qcng.get_molecule("hydrogen", return_dict=True)
 
+    return molcls(**dmol)
 
 @pytest.mark.parametrize(
     "memory_trickery",
@@ -64,7 +64,7 @@ def _get_molecule(program, method):
     ],
 )
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
-def test_local_options_memory_gib(program, model, keywords, memory_trickery, request):
+def test_local_options_memory_gib(program, model, keywords, memory_trickery, schema_versions, request):
     """Ensure memory handling implemented in harness (if applicable).
 
     For available harnesses, run minimal calc at specific total node memory, both through runtime
@@ -80,11 +80,13 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, req
     * If this test doesn't work, implement or adjust ``config.memory`` in your harness.
 
     """
+    models, _ = schema_versions
+
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
 
     harness = qcng.get_program(program)
-    molecule = _get_molecule(program, model["method"])
+    molecule = _get_molecule(program, model["method"], models.Molecule)
 
     addl_keywords = memory_trickery.get(program, memory_trickery)
     use_keywords = {**keywords, **addl_keywords}
@@ -102,8 +104,12 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, req
 
     #  <<  Run
 
-    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=use_keywords)
+    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=use_keywords)
+
+    inp = checkver_and_convert(inp, request.node.name, "pre")   
     ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
+    ret = checkver_and_convert(ret, request.node.name, "post")
+
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 
@@ -126,7 +132,7 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, req
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
-def test_local_options_scratch(program, model, keywords):
+def test_local_options_scratch(program, model, keywords, schema_versions, request):
     """Ensure scratch handling implemented in harness (if applicable).
 
     For available harnesses, run minimal calc at specific scratch directory name (randomly generated
@@ -146,11 +152,13 @@ def test_local_options_scratch(program, model, keywords):
       ``config.scratch_messy`` in your harness.
 
     """
+    models, _ = schema_versions
+
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
 
     harness = qcng.get_program(program)
-    molecule = _get_molecule(program, model["method"])
+    molecule = _get_molecule(program, model["method"], models.Molecule)
 
     #  <<  Config
 
@@ -166,8 +174,12 @@ def test_local_options_scratch(program, model, keywords):
 
     #  <<  Run
 
-    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
+    ret = checkver_and_convert(ret, request.node.name, "post")
+
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 
@@ -212,7 +224,7 @@ def test_local_options_scratch(program, model, keywords):
 
 @pytest.mark.parametrize("ncores", [1, 3])
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
-def test_local_options_ncores(program, model, keywords, ncores):
+def test_local_options_ncores(program, model, keywords, ncores, schema_versions, request):
     """Ensure multithreading implemented in harness (if applicable) or multithreaded runs don't
     break harness (if inapplicable).
 
@@ -228,11 +240,13 @@ def test_local_options_ncores(program, model, keywords, ncores):
     * If this test doesn't work, implement or adjust ``config.ncores`` in your harness.
 
     """
+    models, _ = schema_versions
+
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
 
     harness = qcng.get_program(program)
-    molecule = _get_molecule(program, model["method"])
+    molecule = _get_molecule(program, model["method"], models.Molecule)
 
     #  <<  Config
 
@@ -246,8 +260,12 @@ def test_local_options_ncores(program, model, keywords, ncores):
 
     #  <<  Run
 
-    inp = AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
+    ret = checkver_and_convert(ret, request.node.name, "post")
+    
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 

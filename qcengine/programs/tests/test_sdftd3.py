@@ -10,23 +10,26 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, schema_versions, using
 
 
 @using("s-dftd3")
-def test_dftd3_task_b97m_m01():
+def test_dftd3_task_b97m_m01(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
     return_result = -0.05879001214961249
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-01"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
         model={"method": "b97m"},
         driver="energy",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     print(atomic_result.return_result)
     assert atomic_result.success
@@ -45,28 +48,32 @@ def test_dftd3_task_b97m_m01():
     ],
     ids=["d3bj", "d3zero", "d3mbj", "d3mzero", "d3op"],
 )
-def test_dftd3_task_pbe_m02(inp):
+def test_dftd3_task_pbe_m02(inp, schema_versions, request):
+    models, _ = schema_versions
 
     # return to 1.0e-8 after https://github.com/MolSSI/QCEngine/issues/370
     thr = 1.0e-7
 
     return_result = inp["return_result"]
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-02"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
         model={"method": "pbe"},
         keywords={"level_hint": inp["level_hint"]},
         driver="energy",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("s-dftd3")
-def test_dftd3_task_tpss_m02():
+def test_dftd3_task_tpss_m02(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -91,8 +98,8 @@ def test_dftd3_task_tpss_m02():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-02"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
         model={"method": ""},
         keywords={
             "level_hint": "d3mbj",
@@ -105,14 +112,17 @@ def test_dftd3_task_tpss_m02():
         driver="gradient",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("s-dftd3")
-def test_dftd3_task_r2scan_m03():
+def test_dftd3_task_r2scan_m03(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -137,14 +147,16 @@ def test_dftd3_task_r2scan_m03():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-03"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
         keywords={"level_hint": "d3bj"},
         driver="gradient",
         model={"method": "r2scan"},
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(return_result, abs=thr) == atomic_result.return_result
@@ -152,19 +164,22 @@ def test_dftd3_task_r2scan_m03():
 
 
 @using("s-dftd3")
-def test_dftd3_task_unknown_method():
+def test_dftd3_task_unknown_method(schema_versions, request):
+    models, models_out = schema_versions
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("water"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
         keywords={"level_hint": "d3zero"},
         model={"method": "non-existent-method"},
         driver="energy",
     )
-    error = qcel.models.ComputeError(
+    error = models_out.ComputeError(
         error_type="input error", error_message="No entry for 'non-existent-method' present"
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False, cast_dict_as="FailedOperation")
 
     print(atomic_result.error)
     assert not atomic_result.success
@@ -172,9 +187,10 @@ def test_dftd3_task_unknown_method():
 
 
 @using("s-dftd3")
-def test_dftd3_task_cold_fusion():
+def test_dftd3_task_cold_fusion(schema_versions, request):
+    models, models_out = schema_versions
 
-    atomic_input = qcel.models.AtomicInput(
+    atomic_input = models.AtomicInput(
         molecule={
             "symbols": ["Li", "Li", "Li", "Li"],
             "geometry": [
@@ -189,12 +205,14 @@ def test_dftd3_task_cold_fusion():
         model={"method": "pbe"},
         driver="energy",
     )
-    error = qcel.models.ComputeError(
+    error = models_out.ComputeError(
         error_type="input error",
         error_message="Too close interatomic distances found",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     print(atomic_result.error)
     assert not atomic_result.success

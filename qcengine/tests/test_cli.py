@@ -4,7 +4,7 @@ import subprocess
 import sys
 from typing import List
 
-from qcelemental.models import AtomicInput, OptimizationInput
+import qcelemental
 
 from qcengine import cli, get_molecule, util
 from qcengine.testing import using
@@ -56,16 +56,22 @@ def test_info():
         assert output in default_output
 
 
+# TODO add schema_versions when psi4 can handle v2
 @using("psi4")
 def test_run_psi4(tmp_path):
     """Tests qcengine run with psi4 and JSON input"""
+    models = qcelemental.models.v1
 
     def check_result(stdout):
         output = json.loads(stdout)
         assert output["provenance"]["creator"].lower() == "psi4"
         assert output["success"] is True
 
-    inp = AtomicInput(molecule=get_molecule("hydrogen"), driver="energy", model={"method": "hf", "basis": "6-31G"})
+    inp = models.AtomicInput(
+        molecule=models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+        driver="energy",
+        model={"method": "hf", "basis": "6-31G"},
+    )
 
     args = ["run", "psi4", inp.json()]
     check_result(run_qcengine_cli(args))
@@ -82,6 +88,7 @@ def test_run_psi4(tmp_path):
 @using("psi4")
 def test_run_procedure(tmp_path):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
+    models = qcelemental.models.v1
 
     def check_result(stdout):
         output = json.loads(stdout)
@@ -91,9 +98,9 @@ def test_run_procedure(tmp_path):
     inp = {
         "keywords": {"coordsys": "tric", "maxiter": 100, "program": "psi4"},
         "input_specification": {"driver": "gradient", "model": {"method": "HF", "basis": "sto-3g"}, "keywords": {}},
-        "initial_molecule": get_molecule("hydrogen"),
+        "initial_molecule": models.Molecule(**get_molecule("hydrogen", return_dict=True)),
     }
-    inp = OptimizationInput(**inp)
+    inp = models.OptimizationInput(**inp)
 
     args = ["run-procedure", "geometric", inp.json()]
     check_result(run_qcengine_cli(args))

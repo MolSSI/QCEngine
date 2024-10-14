@@ -4,12 +4,12 @@ from typing import Any, Dict
 
 import numpy as np
 import pytest
-from qcelemental.models import AtomicInput
 from qcelemental.molutil import compute_scramble
 from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.programs.util import mill_qcvars
+from qcengine.testing import checkver_and_convert
 
 from .standard_suite_contracts import *
 from .standard_suite_ref import answer_hash, std_suite
@@ -17,7 +17,7 @@ from .standard_suite_ref import answer_hash, std_suite
 pp = pprint.PrettyPrinter(width=120)
 
 
-def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
+def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, models):
 
     qcprog = inp["call"]
     qc_module_in = inp["qc_module"]  # returns "<qcprog>"|"<qcprog>-<module>"  # input-specified routing
@@ -124,7 +124,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
 
     # <<<  Prepare Calculation and Call API  >>>
 
-    atin = AtomicInput(
+    atin = models.AtomicInput(
         **{
             "molecule": subject,
             "driver": driver,
@@ -142,13 +142,16 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
     if "error" in inp:
         errtype, errmatch, reason = inp["error"]
         with pytest.raises(errtype) as e:
+            atin = checkver_and_convert(atin, tnm, "pre")
             qcng.compute(atin, qcprog, raise_error=True, return_dict=True, task_config=local_options)
 
         assert re.search(errmatch, str(e.value)), f"Not found: {errtype} '{errmatch}' in {e.value}"
         # _recorder(qcprog, qc_module_in, driver, method, reference, fcae, scf_type, corl_type, "error", "nyi: " + reason)
         return
 
+    atin = checkver_and_convert(atin, tnm, "pre")
     wfn = qcng.compute(atin, qcprog, raise_error=True, task_config=local_options)
+    wfn = checkver_and_convert(wfn, tnm, "post")
 
     print("WFN")
     pp.pprint(wfn.dict())

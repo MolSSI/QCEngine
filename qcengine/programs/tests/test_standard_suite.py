@@ -38,7 +38,7 @@ import qcelemental as qcel
 
 import qcengine as qcng
 from qcengine.programs.tests.standard_suite_ref import std_molecules, std_refs
-from qcengine.testing import using
+from qcengine.testing import schema_versions, using
 
 from .standard_suite_runner import runner_asserter
 
@@ -46,9 +46,10 @@ _basis_keywords = ["cfour_basis", "basis"]
 
 
 @pytest.fixture
-def clsd_open_pmols():
+def clsd_open_pmols(schema_versions):
+    models, _ = schema_versions
     return {
-        name[:-4]: qcel.models.Molecule.from_data(smol, name=name[:-4])
+        name[:-4]: models.Molecule.from_data(smol, name=name[:-4])
         for name, smol in std_molecules.items()
         if name.endswith("-xyz")
     }
@@ -158,8 +159,10 @@ def _trans_key(qc, bas, key):
         # yapf: enable
     ],
 )
-def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request):
-    runner_asserter(*_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, "energy", "hf"))
+def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    runner_asserter(
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "energy", "hf")
+    )
 
 
 #
@@ -210,8 +213,10 @@ def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reques
         # yapf: enable
     ],
 )
-def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, request):
-    runner_asserter(*_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, "gradient", "hf"))
+def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    runner_asserter(
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "gradient", "hf")
+    )
 
 
 #
@@ -261,8 +266,10 @@ def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
         # yapf: enable
     ],
 )
-def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, request):
-    runner_asserter(*_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, "hessian", "hf"))
+def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    runner_asserter(
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "hessian", "hf")
+    )
 
 
 #
@@ -338,8 +345,10 @@ def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
         # yapf: enable
     ],
 )
-def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request):
-    runner_asserter(*_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, "energy", "mp2"))
+def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    runner_asserter(
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "energy", "mp2")
+    )
 
 
 #
@@ -424,8 +433,10 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
         # yapf: enable
     ],
 )
-def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request):
-    runner_asserter(*_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, "energy", "ccsd"))
+def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    runner_asserter(
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "energy", "ccsd")
+    )
 
 
 ###################
@@ -474,7 +485,9 @@ def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 #        atol = 2.e-5
 
 
-def _processor(inp, dertype, basis, subjects, clsd_open_pmols, request, driver, method, *, scramble=None, frame=""):
+def _processor(
+    inp, dertype, basis, subjects, clsd_open_pmols, request, models, driver, method, *, scramble=None, frame=""
+):
     method = method
     qcprog = inp["call"]
     tnm = request.node.name
@@ -506,4 +519,4 @@ def _processor(inp, dertype, basis, subjects, clsd_open_pmols, request, driver, 
         ]
     ).strip("-")
 
-    return inpcopy, subject, method, basis, tnm, scramble, frame
+    return inpcopy, subject, method, basis, tnm, scramble, frame, models

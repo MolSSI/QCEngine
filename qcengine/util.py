@@ -55,6 +55,7 @@ def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]
     return command
 
 
+# TODO v1.BaseModel
 def model_wrapper(input_data: Dict[str, Any], model: BaseModel) -> BaseModel:
     """
     Wrap input data in the given model, or return a controlled error
@@ -64,6 +65,7 @@ def model_wrapper(input_data: Dict[str, Any], model: BaseModel) -> BaseModel:
         try:
             input_data = model(**input_data)
         except (pydantic.v1.ValidationError) as exc:
+            # TODO except (pydantic.v1.ValidationError, pydantic.ValidationError) as exc:
             raise InputError(
                 f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}"
             ) from None

@@ -5,12 +5,12 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, schema_versions, using
 
 
 @pytest.fixture
-def h2o():
-    return qcel.models.Molecule(
+def h2o(schema_versions):
+    return schema_versions[0].Molecule(
         geometry=[[0, 0, -0.1250], [-1.4375, 0, 1.0250], [1.4375, 0, 1.0250]],
         symbols=["O", "H", "H"],
         connectivity=[[0, 1, 1], [0, 2, 1]],
@@ -18,8 +18,9 @@ def h2o():
 
 
 @pytest.fixture
-def fh():
-    return qcel.models.Molecule(
+def fh(schema_versions):
+    models, _ = schema_versions
+    return models.Molecule(
         geometry=[[0.000000000000, 0.000000000000, -1.642850273986], [0.000000000000, 0.000000000000, 0.087149726014]],
         symbols=["H", "F"],
         fix_com=True,
@@ -29,14 +30,16 @@ def fh():
 
 
 @using("mrchem")
-def test_energy(h2o):
+def test_energy(h2o, schema_versions, request):
+    models, _ = schema_versions
+
     mr_kws = {
         "world_prec": 1.0e-3,
         "world_size": 6,
         "world_unit": "bohr",
     }
 
-    inp = qcel.models.AtomicInput(
+    inp = models.AtomicInput(
         molecule=h2o,
         driver="energy",
         model={
@@ -45,7 +48,9 @@ def test_energy(h2o):
         keywords=mr_kws,
     )
 
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
     assert compare_values(-76.4546307, res["return_result"], atol=1e-3)
@@ -63,14 +68,16 @@ def test_energy(h2o):
 
 
 @using("mrchem")
-def test_dipole(h2o):
+def test_dipole(h2o, schema_versions, request):
+    models, _ = schema_versions
+
     mr_kws = {
         "world_prec": 1.0e-3,
         "world_size": 6,
         "world_unit": "bohr",
     }
 
-    inp = qcel.models.AtomicInput(
+    inp = models.AtomicInput(
         molecule=h2o,
         driver="properties",
         model={
@@ -79,7 +86,9 @@ def test_dipole(h2o):
         keywords=mr_kws,
     )
 
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
     assert compare_values([-3.766420e-07, 0.0, 0.720473], res["return_result"]["dipole_moment"]["dip-1"], atol=1e-3)
@@ -97,13 +106,15 @@ def test_dipole(h2o):
 
 
 @using("mrchem")
-def test_gradient(fh):
+def test_gradient(fh, schema_versions, request):
+    models, _ = schema_versions
+
     mr_kws = {
         "world_prec": 1.0e-3,
         "world_size": 6,
     }
 
-    inp = qcel.models.AtomicInput(
+    inp = models.AtomicInput(
         molecule=fh,
         driver="gradient",
         model={
@@ -112,7 +123,9 @@ def test_gradient(fh):
         keywords=mr_kws,
     )
 
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
     assert compare_values(
