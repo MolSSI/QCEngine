@@ -5,26 +5,29 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, schema_versions, using
 
 
 @pytest.fixture
-def h2o():
-    return qcel.models.Molecule.from_data(
-        """
+def h2o_data():
+    return """
       O  0.0  0.000  -0.129
       H  0.0 -1.494  1.027
       H  0.0  1.494  1.027
       """
-    )
 
 
 @using("adcc")
-def test_run(h2o):
-    inp = qcel.models.AtomicInput(
+def test_run(h2o_data, schema_versions, request):
+    models, _ = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+
+    inp = models.AtomicInput(
         molecule=h2o, driver="properties", model={"method": "adc2", "basis": "sto-3g"}, keywords={"n_singlets": 3}
     )
+    inp = checkver_and_convert(inp, request.node.name, "pre")   
     ret = qcng.compute(inp, "adcc", raise_error=True, local_options={"ncores": 1}, return_dict=True)
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     ref_excitations = np.array([0.0693704245883876, 0.09773854881340478, 0.21481589246935925])
     ref_hf_energy = -74.45975898670224

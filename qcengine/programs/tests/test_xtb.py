@@ -11,12 +11,12 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, schema_versions, using
 
 
 @using("xtb")
-def test_xtb_task_gfn1xtb_m01():
-
+def test_xtb_task_gfn1xtb_m01(schema_versions, request):
+    models, _ = schema_versions
     thr = 1.0e-7
 
     return_result = np.array(
@@ -40,20 +40,23 @@ def test_xtb_task_gfn1xtb_m01():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-01"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
         model={"method": "GFN1-xTB"},
         driver="gradient",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
-def test_xtb_task_gfn1xtb_m02():
+def test_xtb_task_gfn1xtb_m02(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -78,8 +81,8 @@ def test_xtb_task_gfn1xtb_m02():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-02"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
         model={"method": "GFN1-xTB"},
         driver="gradient",
         keywords={
@@ -88,14 +91,17 @@ def test_xtb_task_gfn1xtb_m02():
         },
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
-def test_xtb_task_gfn1xtb_m03():
+def test_xtb_task_gfn1xtb_m03(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -120,8 +126,8 @@ def test_xtb_task_gfn1xtb_m03():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-03"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
         model={"method": "GFN1-xTB"},
         driver="gradient",
         keywords={
@@ -129,14 +135,17 @@ def test_xtb_task_gfn1xtb_m03():
         },
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
-def test_xtb_task_gfn1xtb_m04():
+def test_xtb_task_gfn1xtb_m04(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-6
 
@@ -164,13 +173,15 @@ def test_xtb_task_gfn1xtb_m04():
         ),
     }
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-04"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-04", return_dict=True)),
         model={"method": "GFN1-xTB"},
         driver="properties",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result["dipole"], abs=thr) == return_result["dipole"]
@@ -179,19 +190,22 @@ def test_xtb_task_gfn1xtb_m04():
 
 
 @using("xtb")
-def test_xtb_task_gfn1xtb_m05():
+def test_xtb_task_gfn1xtb_m05(schema_versions, request):   
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
     return_result = -29.038403257613453
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-05"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-05", return_dict=True)),
         model={"method": "GFN1-xTB"},
         driver="energy",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
@@ -199,7 +213,8 @@ def test_xtb_task_gfn1xtb_m05():
 
 
 @using("xtb")
-def test_xtb_task_gfn2xtb_m01():
+def test_xtb_task_gfn2xtb_m01(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-7
 
@@ -224,20 +239,23 @@ def test_xtb_task_gfn2xtb_m01():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-01"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
         model={"method": "GFN2-xTB"},
         driver="gradient",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
-def test_xtb_task_gfn2xtb_m02():
+def test_xtb_task_gfn2xtb_m02(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -262,8 +280,8 @@ def test_xtb_task_gfn2xtb_m02():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-02"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
         model={"method": "GFN2-xTB"},
         driver="gradient",
         keywords={
@@ -272,14 +290,17 @@ def test_xtb_task_gfn2xtb_m02():
         },
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
-def test_xtb_task_gfn2xtb_m03():
+def test_xtb_task_gfn2xtb_m03(schema_versions, request):    
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -304,8 +325,8 @@ def test_xtb_task_gfn2xtb_m03():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-03"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-03",return_dict=True)),
         model={"method": "GFN2-xTB"},
         driver="gradient",
         keywords={
@@ -313,14 +334,17 @@ def test_xtb_task_gfn2xtb_m03():
         },
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
 @using("xtb")
-def test_xtb_task_gfn2xtb_m04():
+def test_xtb_task_gfn2xtb_m04(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-6
 
@@ -348,13 +372,15 @@ def test_xtb_task_gfn2xtb_m04():
         ),
     }
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-04"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-04", return_dict=True)),
         model={"method": "GFN2-xTB"},
         driver="properties",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result["dipole"], abs=thr) == return_result["dipole"]
@@ -363,19 +389,22 @@ def test_xtb_task_gfn2xtb_m04():
 
 
 @using("xtb")
-def test_xtb_task_gfn2xtb_m05():
+def test_xtb_task_gfn2xtb_m05(schema_versions, request):
+    models, _ = schema_versions
 
     thr = 1.0e-8
 
     return_result = -27.73598761779656
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-05"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("mindless-05", return_dict=True)),
         model={"method": "GFN2-xTB"},
         driver="energy",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
@@ -383,43 +412,50 @@ def test_xtb_task_gfn2xtb_m05():
 
 
 @using("xtb")
-def test_xtb_task_unknown_method():
+def test_xtb_task_unknown_method(schema_versions, request):
+    models, models_out = schema_versions
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("water"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
         model={"method": "GFN-xTB"},
         driver="energy",
     )
-    error = qcel.models.ComputeError(error_type="input_error", error_message="Invalid method GFN-xTB provided in model")
+    error = models_out.ComputeError(error_type="input_error", error_message="Invalid method GFN-xTB provided in model")
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     assert not atomic_result.success
     assert atomic_result.error == error
 
 
 @using("xtb")
-def test_xtb_task_unsupported_driver():
+def test_xtb_task_unsupported_driver(schema_versions, request):
+    models, models_out = schema_versions
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("water"),
+    atomic_input = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
         model={"method": "GFN2-xTB"},
         driver="hessian",
     )
-    error = qcel.models.ComputeError(
+    error = models_out.ComputeError(
         error_type="input_error", error_message="Calculation succeeded but invalid driver request provided"
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     assert not atomic_result.success
     assert atomic_result.error == error
 
 
 @using("xtb")
-def test_xtb_task_cold_fusion():
+def test_xtb_task_cold_fusion(schema_versions, request):
+    models, models_out = schema_versions
 
-    atomic_input = qcel.models.AtomicInput(
+    atomic_input = models.AtomicInput(
         molecule={
             "symbols": ["Li", "Li", "Li", "Li"],
             "geometry": [
@@ -433,12 +469,14 @@ def test_xtb_task_cold_fusion():
         model={"method": "GFN2-xTB"},
         driver="energy",
     )
-    error = qcel.models.ComputeError(
+    error = models_out.ComputeError(
         error_type="runtime_error",
         error_message="Setup of molecular structure failed:\n-1- xtb_api_newMolecule: Could not generate molecular structure",
     )
 
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     assert not atomic_result.success
     assert atomic_result.error == error

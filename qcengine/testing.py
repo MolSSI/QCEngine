@@ -78,7 +78,7 @@ def is_mdi_new_enough(version_feature_introduced):
 
 
 @pytest.fixture(scope="function")
-def failure_engine():
+def failure_engine(schema_versions):
     unique_name = "testing_random_name"
 
     class FailEngine(qcng.programs.ProgramHarness):
@@ -116,7 +116,8 @@ def failure_engine():
             grad = [0, 0, -grad_value, 0, 0, grad_value]
 
             if mode == "pass":
-                return qcel.models.AtomicResult(
+                # TODO return schema_versions[0].AtomicResult(
+                return qcel.models.v1.AtomicResult(
                     **{
                         **input_data.dict(),
                         **{
@@ -211,3 +212,84 @@ def using(program):
         _using_cache[program] = skip
 
     return _using_cache[program]
+
+
+@pytest.fixture(scope="function", params=[None, "as_v1", "as_v2", "to_v1", "to_v2"])
+def schema_versions(request):
+    if request.param == "as_v1":
+        return qcel.models.v1, qcel.models.v1
+    elif request.param == "to_v2":
+        return qcel.models.v1, qcel.models.v2
+    elif request.param == "as_v2":
+        return qcel.models.v2, qcel.models.v2
+    elif request.param == "to_v1":
+        return qcel.models.v2, qcel.models.v1
+    else:
+        return qcel.models, qcel.models
+
+
+def checkver_and_convert(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=None):
+    import json
+
+    import pydantic
+
+    def check_model_v1(m):
+        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.BaseModel"
+        assert isinstance(
+            m, qcel.models.v1.basemodels.ProtoModel
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.ProtoModel"
+        if vercheck:
+            assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
+
+    def check_model_v2(m):
+        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ BaseModel"
+        assert isinstance(
+            m, qcel.models.v2.basemodels.ProtoModel
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v2.ProtoModel"
+        if vercheck:
+            assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
+
+    if prepost == "pre":
+        dict_in = isinstance(mdl, dict)
+        if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
+            if dict_in:
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v1.AtomicInput(**mdl)
+            check_model_v1(mdl)
+        elif "as_v2" in tnm or "to_v1" in tnm:
+            if dict_in:
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v2.AtomicInput(**mdl)
+            check_model_v2(mdl)
+            mdl = mdl.convert_v(1)
+
+        if dict_in:
+            mdl = mdl.model_dump()
+
+    elif prepost == "post":
+        dict_in = isinstance(mdl, dict)
+        if "as_v1" in tnm or "to_v1" in tnm or "None" in tnm:
+            if dict_in:
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v1.AtomicResult(**mdl)
+            check_model_v1(mdl)
+        elif "as_v2" in tnm or "to_v2" in tnm:
+            if dict_in:
+                if cast_dict_as:
+                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
+                else:
+                    mdl = qcel.models.v2.AtomicResult(**mdl)
+            mdl = mdl.convert_v(2)
+            check_model_v2(mdl)
+
+        if dict_in:
+            # imitates compute(..., return_dict=True)
+            mdl = json.loads(mdl.model_dump_json())
+
+    return mdl

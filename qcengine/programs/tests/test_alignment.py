@@ -3,21 +3,22 @@ import pytest
 import qcelemental as qcel
 
 from qcengine.programs.tests.standard_suite_ref import std_molecules, std_refs
-from qcengine.testing import using
+from qcengine.testing import schema_versions, using
 
 from .standard_suite_runner import runner_asserter
 from .test_standard_suite import _processor
 
 
 @pytest.fixture
-def clsd_open_pmols():
+def clsd_open_pmols(schema_versions):
+    models, _ = schema_versions
     frame_not_important = {
-        name[:-4]: qcel.models.Molecule.from_data(smol, name=name[:-4])
+        name[:-4]: models.Molecule.from_data(smol, name=name[:-4])
         for name, smol in std_molecules.items()
         if name.endswith("-xyz")
     }
     frame_part_of_spec = {
-        name[:-4] + "-fixed": qcel.models.Molecule.from_data(smol + "\nno_com\nno_reorient\n", name=name[:-4])
+        name[:-4] + "-fixed": models.Molecule.from_data(smol + "\nno_com\nno_reorient\n", name=name[:-4])
         for name, smol in std_molecules.items()
         if name.endswith("-xyz")
     }
@@ -92,7 +93,19 @@ def clsd_open_pmols():
         # yapf: enable
     ],
 )
-def test_hf_alignment(inp, scramble, frame, driver, basis, subjects, clsd_open_pmols, request):
+def test_hf_alignment(inp, scramble, frame, driver, basis, subjects, clsd_open_pmols, request, schema_versions):
     runner_asserter(
-        *_processor(inp, "", basis, subjects, clsd_open_pmols, request, driver, "hf", scramble=scramble, frame=frame)
+        *_processor(
+            inp,
+            "",
+            basis,
+            subjects,
+            clsd_open_pmols,
+            request,
+            schema_versions[0],
+            driver,
+            "hf",
+            scramble=scramble,
+            frame=frame,
+        )
     )
