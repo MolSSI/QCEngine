@@ -69,7 +69,7 @@ jobs:
           #  label: QCore
           #  runs-on: ubuntu-latest
           #  pytest: ""
-          #  Note: removed Sep 2024 b/c too hard to reconcile w/pyd v2
+          #  Note: removed Sep 2024 b/c too hard to reconcile w/pyd v2. Manby approves.
 
           - conda-env: nwchem
             python-version: 3.8
@@ -120,11 +120,17 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: opt-disp-cf
-            python-version: 3.12
-            label: QCSk-next
-            runs-on: ubuntu-latest
-            pytest: ""
+          #- conda-env: opt-disp-cf
+          #  python-version: 3.12
+          #  label: QCSk-next
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
+
+          #- conda-env: nwchem
+          #  python-version: "3.10"
+          #  label: TeraChem
+          #  runs-on: ubuntu-20.04
+          #  pytest: ""
 
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
@@ -156,11 +162,15 @@ jobs:
       run: |
         qcore --accept-license
 
+
+#docker.io/mtzgroup/terachem:latest
+#Usage:  docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
+
     - name: Special Config - QCElemental Dep
       #if: false
       run: |
         conda remove qcelemental --force
-        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_shimclasses' --no-deps
+        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_converterclasses' --no-deps
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75

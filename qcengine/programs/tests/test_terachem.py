@@ -3,7 +3,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
 import qcengine as qcng
-from qcengine.testing import qcengine_records, using
+from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, using
 
 # Prep globals
 terachem_info = qcengine_records("terachem")
@@ -35,13 +35,18 @@ def test_terachem_input_formatter(test_case):
 
 @using("terachem")
 @pytest.mark.parametrize("test_case", terachem_info.list_test_cases())
-def test_terachem_executor(test_case):
+def test_terachem_executor(test_case, schema_versions, request):
+    models, _ = schema_versions
+
     # Get input file data
     data = terachem_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = models.AtomicInput.parse_raw(data["input.json"])
 
     # Run Terachem
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     result = qcng.compute(inp, "terachem")
+    result = checkver_and_convert(result, request.node.name, "post")
+
     # result = qcng.get_program('terachem').compute(inp, qcng.get_config())
     assert result.success is True
 
