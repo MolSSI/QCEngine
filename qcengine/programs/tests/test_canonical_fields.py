@@ -3,17 +3,16 @@ import re
 
 import pytest
 import qcelemental as qcel
-from qcelemental.models import AtomicInput
 
 import qcengine as qcng
-from qcengine.testing import has_program, using
+from qcengine.testing import checkver_and_convert, has_program, schema_versions, using
 
 from .test_canonical_config import _canonical_methods, _get_molecule
 
 
 @pytest.mark.parametrize("native", ["none", "input", "all"])
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
-def test_protocol_native(program, model, keywords, native):
+def test_protocol_native(program, model, keywords, native, schema_versions, request):
     """Ensure native_files protocol implemented in harness.
 
     For harnesses, run minimal gradient calc with different protocol settings; check expected
@@ -26,11 +25,13 @@ def test_protocol_native(program, model, keywords, native):
     * If this test doesn't work, implement or adjust ``native_files`` in your harness.
 
     """
+    models, _ = schema_versions
+
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
 
     harness = qcng.get_program(program)
-    molecule = _get_molecule(program, model["method"])
+    molecule = _get_molecule(program, model["method"], models.Molecule)
 
     #  <<  Config
 
@@ -47,8 +48,12 @@ def test_protocol_native(program, model, keywords, native):
 
     #  <<  Run
 
-    inp = AtomicInput(molecule=molecule, driver="gradient", model=model, keywords=keywords, protocols=protocols)
+    inp = models.AtomicInput(molecule=molecule, driver="gradient", model=model, keywords=keywords, protocols=protocols)
+
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True, local_options=config.dict())
+    ret = checkver_and_convert(ret, request.node.name, "post")
+    
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 
