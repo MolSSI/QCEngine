@@ -217,11 +217,14 @@ _test_mols = {
 }
 
 
-def get_molecule(name):
+def get_molecule(name, *, return_dict: bool = False):
     """
     Returns a QC JSON representation of a test molecule.
     """
     if name not in _test_mols:
         raise KeyError("Molecule name '{}' not found".format(name))
 
-    return Molecule(**copy.deepcopy(_test_mols[name]))
+    if return_dict:
+        return copy.deepcopy(_test_mols[name])
+    else:
+        return Molecule(**copy.deepcopy(_test_mols[name]))

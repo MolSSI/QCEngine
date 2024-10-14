@@ -3,24 +3,23 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, schema_versions, using
 
 
 @pytest.fixture
-def h2o():
-    smol = """
+def h2o_data():
+    return """
  # R=0.958 A=104.5
  H                  0.000000000000     1.431430901356     0.984293362719
  O                  0.000000000000     0.000000000000    -0.124038860300
  H                  0.000000000000    -1.431430901356     0.984293362719
  units au
 """
-    return qcel.models.Molecule.from_data(smol)
 
 
 @pytest.fixture
-def nh2():
-    smol = """
+def nh2_data():
+    return """
  # R=1.008 #A=105.0
  0 2
  N   0.000000000000000   0.000000000000000  -0.145912918634892
@@ -29,7 +28,6 @@ def nh2():
  units au
  symmetry c1
 """
-    return qcel.models.Molecule.from_data(smol)
 
 
 @pytest.mark.parametrize(
@@ -54,14 +52,19 @@ def nh2():
         pytest.param("terachem_pbs", "aug-cc-pvdz", {}, marks=using("terachem_pbs")),
     ],
 )
-def test_sp_hf_rhf(program, basis, keywords, h2o):
+def test_sp_hf_rhf(program, basis, keywords, h2o_data, schema_versions, request):
     """cfour/sp-rhf-hf/input.dat
     #! single point HF/adz on water
 
     """
+    models, models_out = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == "energy"
     assert "provenance" in res
@@ -107,10 +110,15 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
         pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=using("turbomole")),
     ],
 )
-def test_sp_hf_uhf(program, basis, keywords, nh2):
+def test_sp_hf_uhf(program, basis, keywords, nh2_data, schema_versions, request):
+    models, models_out = schema_versions
+
+    nh2 = models.Molecule.from_data(nh2_data)
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == "energy"
     assert "provenance" in res
@@ -146,10 +154,15 @@ def test_sp_hf_uhf(program, basis, keywords, nh2):
         pytest.param("qchem", "aug-cc-pvdz", {"UNRESTRICTED": False}, marks=using("qchem")),
     ],
 )
-def test_sp_hf_rohf(program, basis, keywords, nh2):
+def test_sp_hf_rohf(program, basis, keywords, nh2_data, schema_versions, request):
+    models, models_out = schema_versions
+
+    nh2 = models.Molecule.from_data(nh2_data)
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
+    resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == "energy"
     assert "provenance" in res

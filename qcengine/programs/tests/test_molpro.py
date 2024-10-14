@@ -3,7 +3,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
 import qcengine as qcng
-from qcengine.testing import qcengine_records, using
+from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, using
 
 molpro_info = qcengine_records("molpro")
 
@@ -40,13 +40,17 @@ def test_molpro_input_formatter(test_case):
 
 @using("molpro")
 @pytest.mark.parametrize("test_case", molpro_info.list_test_cases())
-def test_molpro_executor(test_case):
+def test_molpro_executor(test_case, schema_versions, request):
+    models, _ = schema_versions
+
     # Get input file data
     data = molpro_info.get_test_data(test_case)
-    inp = qcel.models.AtomicInput.parse_raw(data["input.json"])
+    inp = models.AtomicInput.parse_raw(data["input.json"])
 
     # Run Molpro
+    inp = checkver_and_convert(inp, request.node.name, "pre")
     result = qcng.compute(inp, "molpro", local_options={"ncores": 4})
+    result = checkver_and_convert(result, request.node.name, "post")
     assert result.success is True
 
     # Get output file data
