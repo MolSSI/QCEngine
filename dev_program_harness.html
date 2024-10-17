@@ -1,25 +1,23 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Adding a New Program Harness &mdash; QCEngine 0+untagged.1.g3b9ed2a documentation</title>
+  <title>Adding a New Program Harness &mdash; QCEngine 0+untagged.1.g76e8b2a documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
       <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=6a0f404e"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=fd4d88f3"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -52,9 +50,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <a href="index.html" class="icon icon-home">
             QCEngine
           </a>
-              <div class="version">
-                0+untagged.1.g3b9ed2a
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -126,31 +121,19 @@ harness may be created.</p>
 <li><p>Open up communication with the QCEngine maintainers. Post an issue
 to GitHub and join the Slack channel (link off GH README) so you can
 get advice.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Copy a similar harness. Choose a program that your code behaves
 roughly like (mostly consider parsed vs. API access) and copy that
 harness, renaming it as your own and commenting out all but the
 structure. Search for the (copied) harness name to register it.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Fill in the <code class="docutils literal notranslate"><span class="pre">_defaults</span></code> section with program name and characteristics.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Fill in the <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">found</span></code> function using <code class="docutils literal notranslate"><span class="pre">which</span></code> and
 <code class="docutils literal notranslate"><span class="pre">which_import</span></code> from QCElemental. See NWChem and OpenMM for examples
 of handling additional dependencies.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>If your code’s version can be extracted short of parsing an output
 file, fill in <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">get_version</span></code> next. After this, <code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">qcengine</span> <span class="pre">info</span></code>
 should show your code (provided it’s in path).</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>To get a string output of QCSchema Molecule in your code’s format,
 you may need to add a <code class="docutils literal notranslate"><span class="pre">dtype</span></code> at <code class="docutils literal notranslate"><span class="pre">qcelemental/molparse/to_string.py</span></code>.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>If your code’s of the common translate-QCSchema-to-input, run,
 translate-output-to-QCSchema variety, next work on the <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">execute</span></code>
 function. This is fairly simple because it calls the powerful
@@ -159,62 +142,40 @@ collection, etc. The harness function needs the names of input files
 (hard-code a string for now), the execution command, and the names
 of any scratch files to return for processing. Once ready, fill in
 <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">get_version</span></code> if not done above.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Now fill in the short <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">compute</span></code> entirely and <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">build_input</span></code>
 and <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">parse_output</span></code> skeletally. Set up a simple molecule-and-model
 <code class="docutils literal notranslate"><span class="pre">AtomicInput</span></code> dictionary and run it with <code class="docutils literal notranslate"><span class="pre">qcng.compute(atomicinput,</span>
 <span class="pre">&quot;yourcode&quot;)</span></code> to get something to iterate on.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Fill in <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">build_input</span></code> to form your code’s usual input format
 from the fields of <code class="docutils literal notranslate"><span class="pre">AtomicInput</span></code>.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Fill in <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">parse_output</span></code> to take results and put them
 into <code class="docutils literal notranslate"><span class="pre">AtomicResult</span></code>. Most important is the <code class="docutils literal notranslate"><span class="pre">return_result</span></code>
 field.  <code class="docutils literal notranslate"><span class="pre">AtomicResultProperties</span></code> can be populated when
 convenient. <code class="docutils literal notranslate"><span class="pre">WavefunctionProperties</span></code> is great but save for a later
 pass.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>At this point your harness can correctly run one or more QCSchema
 inputs of your devising. Time to put it through paces. Register your
 code in <code class="docutils literal notranslate"><span class="pre">_programs</span></code> in <code class="docutils literal notranslate"><span class="pre">testing.py</span></code>.  Most tests will then need a
 <code class="docutils literal notranslate"><span class="pre">&#64;using(&quot;yourcode&quot;)</span></code> decorator so that they don’t run (and fail the
 test suite) when your code isn’t available.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Add basic tests to qcengine/tests/test_harness_canonical.py
 * def test_compute_energy(program, model, keywords):
 * def test_compute_gradient(program, model, keywords):
 * def test_compute_energy_qcsk_basis(program, model, keywords):</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Add basic failure tests to qcengine/tests/test_harness_canonical.py
 * def test_compute_bad_models(program, model):</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Add tests for the runtime config and to qcengine/programs/tests/test_canonical_config.py</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>For QM codes, consider adding lines to the
 qcengine/programs/tests/test_standard_suite.py to check energies,
 gradients, and Hessians against other codes.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>For codes that can produce a Hartree–Fock, add lines to the
 qcengine/program/tests/test_alignment.py to check molecular and
 properties orientation handling.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>If your code is available as a visible binary (e.g., pip, conda,
 docker download with no or trivial build), create a testing lane by
 adding to <code class="docutils literal notranslate"><span class="pre">devtools/conda-envs/</span></code> and <code class="docutils literal notranslate"><span class="pre">.github/workflows/CI.yml</span></code>.
 This will check your code for every PR. We’re looking into private
 testing for codes that aren’t available.</p></li>
-</ol>
-<ol class="arabic simple">
 <li><p>Throughout, talk with the maintainers with questions. Error handling,
 especially, is intricate.</p></li>
 </ol>
