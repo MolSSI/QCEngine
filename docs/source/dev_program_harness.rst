@@ -15,29 +15,29 @@ harness may be created.
 
 This guide is a coarse path through adding a new program harness.
 
-1. Open up communication with the QCEngine maintainers. Post an issue
+#. Open up communication with the QCEngine maintainers. Post an issue
    to GitHub and join the Slack channel (link off GH README) so you can
    get advice.
 
-1. Copy a similar harness. Choose a program that your code behaves
+#. Copy a similar harness. Choose a program that your code behaves
    roughly like (mostly consider parsed vs. API access) and copy that
    harness, renaming it as your own and commenting out all but the
    structure. Search for the (copied) harness name to register it.
 
-1. Fill in the ``_defaults`` section with program name and characteristics.
+#. Fill in the ``_defaults`` section with program name and characteristics.
 
-1. Fill in the ``def found`` function using ``which`` and
+#. Fill in the ``def found`` function using ``which`` and
    ``which_import`` from QCElemental. See NWChem and OpenMM for examples
    of handling additional dependencies.
 
-1. If your code's version can be extracted short of parsing an output
+#. If your code's version can be extracted short of parsing an output
    file, fill in ``def get_version`` next. After this, ``> qcengine info``
    should show your code (provided it's in path).
 
-1. To get a string output of QCSchema Molecule in your code's format,
+#. To get a string output of QCSchema Molecule in your code's format,
    you may need to add a ``dtype`` at ``qcelemental/molparse/to_string.py``.
 
-1. If your code's of the common translate-QCSchema-to-input, run,
+#. If your code's of the common translate-QCSchema-to-input, run,
    translate-output-to-QCSchema variety, next work on the ``def execute``
    function. This is fairly simple because it calls the powerful
    qcengine.util.execute to handle scratch, timeout, file writing and
@@ -46,50 +46,50 @@ This guide is a coarse path through adding a new program harness.
    of any scratch files to return for processing. Once ready, fill in
    ``def get_version`` if not done above.
 
-1. Now fill in the short ``def compute`` entirely and ``def build_input``
+#. Now fill in the short ``def compute`` entirely and ``def build_input``
    and ``def parse_output`` skeletally. Set up a simple molecule-and-model
    ``AtomicInput`` dictionary and run it with ``qcng.compute(atomicinput,
    "yourcode")`` to get something to iterate on.
 
-1. Fill in ``def build_input`` to form your code's usual input format
+#. Fill in ``def build_input`` to form your code's usual input format
    from the fields of ``AtomicInput``.
 
-1. Fill in ``def parse_output`` to take results and put them
+#. Fill in ``def parse_output`` to take results and put them
    into ``AtomicResult``. Most important is the ``return_result``
    field.  ``AtomicResultProperties`` can be populated when
    convenient. ``WavefunctionProperties`` is great but save for a later
    pass.
 
-1. At this point your harness can correctly run one or more QCSchema
+#. At this point your harness can correctly run one or more QCSchema
    inputs of your devising. Time to put it through paces. Register your
    code in ``_programs`` in ``testing.py``.  Most tests will then need a
    ``@using("yourcode")`` decorator so that they don't run (and fail the
    test suite) when your code isn't available.
 
-1. Add basic tests to qcengine/tests/test_harness_canonical.py 
+#. Add basic tests to qcengine/tests/test_harness_canonical.py 
    * def test_compute_energy(program, model, keywords):
    * def test_compute_gradient(program, model, keywords):
    * def test_compute_energy_qcsk_basis(program, model, keywords):
 
-1. Add basic failure tests to qcengine/tests/test_harness_canonical.py 
+#. Add basic failure tests to qcengine/tests/test_harness_canonical.py 
    * def test_compute_bad_models(program, model):
 
-1. Add tests for the runtime config and to qcengine/programs/tests/test_canonical_config.py
+#. Add tests for the runtime config and to qcengine/programs/tests/test_canonical_config.py
 
-1. For QM codes, consider adding lines to the
+#. For QM codes, consider adding lines to the
    qcengine/programs/tests/test_standard_suite.py to check energies,
    gradients, and Hessians against other codes.
 
-1. For codes that can produce a Hartree--Fock, add lines to the
+#. For codes that can produce a Hartree--Fock, add lines to the
    qcengine/program/tests/test_alignment.py to check molecular and
    properties orientation handling.
 
-1. If your code is available as a visible binary (e.g., pip, conda,
+#. If your code is available as a visible binary (e.g., pip, conda,
    docker download with no or trivial build), create a testing lane by
    adding to ``devtools/conda-envs/`` and ``.github/workflows/CI.yml``.
    This will check your code for every PR. We're looking into private
    testing for codes that aren't available.
 
-1. Throughout, talk with the maintainers with questions. Error handling,
+#. Throughout, talk with the maintainers with questions. Error handling,
    especially, is intricate.
 
