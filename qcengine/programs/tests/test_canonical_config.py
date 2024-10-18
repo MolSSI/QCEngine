@@ -190,10 +190,13 @@ def test_local_options_scratch(program, model, keywords):
     # a scratch file (preferrably output) expected after job if scratch not cleaned up
     scratch_sample = {
         "cfour": "*/NEWFOCK",
-        "dftd3": "*/dftd3_geometry.xyz",  # no outfiles
+        # "dftd3": "*/dftd3_geometry.xyz",  # no outfiles
+        "dftd3": "*/dftd3_geometry.tmol",  # no outfiles
         "gamess": "*/gamess.dat",
-        "gcp": "*/gcp_geometry.xyz",  # no outfiles
-        "mctc-gcp": "*/gcp_geometry.xyz",  # no outfiles
+        # "gcp": "*/gcp_geometry.xyz",  # no outfiles
+        # "mctc-gcp": "*/gcp_geometry.xyz",  # no outfiles
+        "gcp": "*/gcp_geometry.tmol",  # no outfiles
+        "mctc-gcp": "*/gcp_geometry.tmol",  # no outfiles
         "mp2d": "*/mp2d_geometry",  # no outfiles
         "nwchem": "*/nwchem.db",
         "psi4": "*/psi.*.35",
