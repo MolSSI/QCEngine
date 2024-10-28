@@ -26,8 +26,10 @@ class TorsionDriveProcedure(ProcedureHarness):
             raise_msg="Please install via `conda install torsiondrive -c conda-forge`.",
         )
 
-    def build_input_model(self, data: Union[Dict[str, Any], "TorsionDriveInput"]) -> "TorsionDriveInput":
-        return self._build_model(data, TorsionDriveInput)
+    def build_input_model(
+        self, data: Union[Dict[str, Any], "TorsionDriveInput"], *, return_input_schema_version: bool = False
+    ) -> "TorsionDriveInput":
+        return self._build_model(data, "TorsionDriveInput", return_input_schema_version=return_input_schema_version)
 
     def _compute(self, input_model: "TorsionDriveInput", config: "TaskConfig"):
 

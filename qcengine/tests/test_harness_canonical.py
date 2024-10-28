@@ -61,9 +61,10 @@ def _get_molecule(program, molcls):
         dmol = qcng.get_molecule("hydrogen", return_dict=True)
     return molcls(**dmol)
 
+
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
 def test_compute_energy(program, model, keywords, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
@@ -73,7 +74,7 @@ def test_compute_energy(program, model, keywords, schema_versions, request):
     inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, program, raise_error=True)
+    ret = qcng.compute(inp, program, raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -82,7 +83,7 @@ def test_compute_energy(program, model, keywords, schema_versions, request):
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
 def test_compute_gradient(program, model, keywords, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
@@ -95,13 +96,13 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
     if program in ["adcc"]:
         inp = checkver_and_convert(inp, request.node.name, "pre")
         with pytest.raises(qcng.exceptions.InputError) as e:
-            qcng.compute(inp, program, raise_error=True)
+            qcng.compute(inp, program, raise_error=True, return_version=retver)
 
         assert "gradient not implemented" in str(e.value)
 
     else:
         inp = checkver_and_convert(inp, request.node.name, "pre")
-        ret = qcng.compute(inp, program, raise_error=True)
+        ret = qcng.compute(inp, program, raise_error=True, return_version=retver)
         ret = checkver_and_convert(ret, request.node.name, "post")
 
         assert ret.success is True
@@ -113,7 +114,7 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods_qcsk_basis)
 def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
@@ -123,7 +124,7 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
 
     with pytest.raises(qcng.exceptions.InputError) as e:
         inp = checkver_and_convert(inp, request.node.name, "pre")
-        res = qcng.compute(inp, program, raise_error=True)
+        res = qcng.compute(inp, program, raise_error=True, return_version=retver)
         checkver_and_convert(res, request.node.name, "post")
 
     assert "QCSchema BasisSet for model.basis not implemented" in str(e.value)
@@ -159,31 +160,37 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
     ],
 )
 def test_compute_bad_models(program, model, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     if not has_program(program):
         pytest.skip("Program '{}' not found.".format(program))
 
     amodel = copy.deepcopy(model)
     adriver = amodel.pop("driver", "energy")
-    inp = models.AtomicInput(molecule=models.Molecule(**qcng.get_molecule("hydrogen",return_dict=True)), driver=adriver, model=amodel)
+    inp = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)), driver=adriver, model=amodel
+    )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     with pytest.raises(qcng.exceptions.InputError) as exc:
-        ret = qcng.compute(inp, program, raise_error=True)
+        ret = qcng.compute(inp, program, raise_error=True, return_version=retver)
 
 
 def test_psi4_restarts(monkeypatch, schema_versions, request):
     """
     Make sure that a random error is raised which can be restarted if psi4 fails with no error message
     """
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     if not has_program("psi4"):
         pytest.skip("Program psi4 not found.")
 
     # create the psi4 task
-    inp = models.AtomicInput(molecule=models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)), driver="energy", model={"method": "hf", "basis": "6-31G"})
+    inp = models.AtomicInput(
+        molecule=models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+        driver="energy",
+        model={"method": "hf", "basis": "6-31G"},
+    )
 
     def mock_execute(*args, **kwargs):
         """
@@ -197,4 +204,6 @@ def test_psi4_restarts(monkeypatch, schema_versions, request):
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     with pytest.raises(qcng.exceptions.RandomError):
-        _ = qcng.compute(input_data=inp, program="psi4", raise_error=True, task_config={"retries": 0})
+        _ = qcng.compute(
+            input_data=inp, program="psi4", raise_error=True, task_config={"retries": 0}, return_version=retver
+        )

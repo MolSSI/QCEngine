@@ -36,6 +36,17 @@ Breaking Changes
 - (:pr:`453`) Deps - Require pydantic v2 dependency (don't worry, this isn't
   changing QCEngine's role as QCSchema I/O runner. Also require pydantic-settings
   for CLI. @loriab
+- (:pr:`455`) API - As promised 2 years ago for >=v0.30, `local_options` has
+  been removed in favor of `task_config` in `compute` and `compute_procedure`.
+  Note that Psi4 v1.6 will need an older qcel or a sed to work (see GHA). The
+  `qcengine.MDIEngine` is on notice (probably not user-facing. @loriab
+- (:pr:`455`) API - `qcengine.compute` and `qcengine.compute_procedure` have been
+  merged in favor of the former. Also, treat the second argument (e.g., "nwchem"
+  or "geometric") as a positional argument, rather than keyword argument with key
+  "program" or "procedure". @loriab
+- (:pr:`455`) API - `compute` learned an optional argument  `return_version` to
+  specify the schema_version of the returned model or dictionary. By default it'll
+  return the input schema_version. If not determinable, it will return v1. @loriab
 
 New Features
 ++++++++++++
@@ -45,6 +56,7 @@ Enhancements
 - (:pr:`453`) Maint - Convert internal (non-QCSchema) pydantic classes to
   pydantic v2 API, namely `NodeDescriptor`, `TaskConfig`, `ProgramHarness`,
   `ProcedureHarness`. @loriab
+- (:pr:`454`) Testing - Tests check QCSchema v1 and v2. @loriab
 
 Bug Fixes
 +++++++++

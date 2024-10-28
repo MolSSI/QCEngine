@@ -56,13 +56,13 @@ def test_sp_hf_rhf(program, basis, keywords, h2o_data, schema_versions, request)
     #! single point HF/adz on water
 
     """
-    models, models_out = schema_versions
+    models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == "energy"
@@ -107,15 +107,18 @@ def test_sp_hf_rhf(program, basis, keywords, h2o_data, schema_versions, request)
     ],
 )
 def test_sp_hf_uhf(program, basis, keywords, nh2_data, schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, _ = schema_versions
 
     nh2 = models.Molecule.from_data(nh2_data)
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
+    resi = models.AtomicInput(**resi)
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = qcng.compute(resi, program, raise_error=True, return_dict=False, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
+    assert res.success is True
+    res = res.model_dump()
     assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
@@ -151,13 +154,13 @@ def test_sp_hf_uhf(program, basis, keywords, nh2_data, schema_versions, request)
     ],
 )
 def test_sp_hf_rohf(program, basis, keywords, nh2_data, schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, models_out = schema_versions
 
     nh2 = models.Molecule.from_data(nh2_data)
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == "energy"

@@ -46,13 +46,13 @@ def h2o_ricc2_def2svp_data():
     ],
 )
 def test_turbomole_energy(method, keywords, ref_energy, h2o_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": method, "basis": "def2-SVP"}, "keywords": keywords}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "turbomole", raise_error=True, return_dict=True)
+    res = qcng.compute(resi, "turbomole", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == "energy"
@@ -71,7 +71,7 @@ def test_turbomole_energy(method, keywords, ref_energy, h2o_data, schema_version
     ],
 )
 def test_turbomole_gradient(method, keywords, ref_norm, h2o_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
     resi = {
@@ -82,7 +82,7 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o_data, schema_version
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "turbomole", raise_error=True)
+    res = qcng.compute(resi, "turbomole", raise_error=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     assert res.driver == "gradient"
@@ -96,7 +96,7 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o_data, schema_version
 
 @using("turbomole")
 def test_turbomole_ri_dsp(h2o_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
     resi = {
@@ -107,7 +107,7 @@ def test_turbomole_ri_dsp(h2o_data, schema_versions, request):
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "turbomole", raise_error=True)
+    res = qcng.compute(resi, "turbomole", raise_error=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     assert res.driver == "energy"
@@ -139,7 +139,7 @@ def assert_hessian(H, ref_eigvals, ref_size):
     ],
 )
 def test_turbomole_hessian(method, keywords, ref_eigvals, h2o_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
     resi = {
@@ -153,7 +153,7 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o_data, schema_versi
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "turbomole", raise_error=True)
+    res = qcng.compute(resi, "turbomole", raise_error=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     H = res.return_result
@@ -173,7 +173,7 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o_data, schema_versi
     ],
 )
 def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h2o_ricc2_def2svp = models.Molecule.from_data(h2o_ricc2_def2svp_data)
 
     resi = {
@@ -187,7 +187,7 @@ def test_turbomole_num_hessian(method, keywords, ref_eigvals, h2o_ricc2_def2svp_
     }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, "turbomole", raise_error=True)
+    res = qcng.compute(resi, "turbomole", raise_error=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     H = res.return_result

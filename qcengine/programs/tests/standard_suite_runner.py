@@ -17,7 +17,7 @@ from .standard_suite_ref import answer_hash, std_suite
 pp = pprint.PrettyPrinter(width=120)
 
 
-def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, models):
+def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, models, retver):
 
     qcprog = inp["call"]
     qc_module_in = inp["qc_module"]  # returns "<qcprog>"|"<qcprog>-<module>"  # input-specified routing
@@ -143,14 +143,16 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
         errtype, errmatch, reason = inp["error"]
         with pytest.raises(errtype) as e:
             atin = checkver_and_convert(atin, tnm, "pre")
-            qcng.compute(atin, qcprog, raise_error=True, return_dict=True, task_config=local_options)
+            qcng.compute(
+                atin, qcprog, raise_error=True, return_dict=True, task_config=local_options, return_version=retver
+            )
 
         assert re.search(errmatch, str(e.value)), f"Not found: {errtype} '{errmatch}' in {e.value}"
         # _recorder(qcprog, qc_module_in, driver, method, reference, fcae, scf_type, corl_type, "error", "nyi: " + reason)
         return
 
     atin = checkver_and_convert(atin, tnm, "pre")
-    wfn = qcng.compute(atin, qcprog, raise_error=True, task_config=local_options)
+    wfn = qcng.compute(atin, qcprog, raise_error=True, task_config=local_options, return_version=retver)
     wfn = checkver_and_convert(wfn, tnm, "post")
 
     print("WFN")
