@@ -187,12 +187,17 @@ jobs:
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
     - name: Special Config - QCSchema Next Deps
-      if: false
-      # if: "(startsWith(matrix.cfg.label, 'QCSk-next'))"
+      if: "(startsWith(matrix.cfg.label, 'QCSk-next'))"
       run: |
         conda install pydantic=2 -c conda-forge
         conda remove qcelemental --force
         python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2025' --no-deps
+
+    - name: Special Config - Forced Interface Upgrade
+      if: "(matrix.cfg.label == 'Psi4-1.6')"
+      run: |
+        grep -r "local_options" ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/
+        sed -i "s/local_options/task_config/g" ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/procrouting/*py
 
     - name: Install QCEngine
       run: |

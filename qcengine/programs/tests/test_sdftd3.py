@@ -15,7 +15,7 @@ from qcengine.testing import checkver_and_convert, schema_versions, using
 
 @using("s-dftd3")
 def test_dftd3_task_b97m_m01(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -28,7 +28,7 @@ def test_dftd3_task_b97m_m01(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     print(atomic_result.return_result)
@@ -49,7 +49,7 @@ def test_dftd3_task_b97m_m01(schema_versions, request):
     ids=["d3bj", "d3zero", "d3mbj", "d3mzero", "d3op"],
 )
 def test_dftd3_task_pbe_m02(inp, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     # return to 1.0e-8 after https://github.com/MolSSI/QCEngine/issues/370
     thr = 1.0e-7
@@ -64,7 +64,7 @@ def test_dftd3_task_pbe_m02(inp, schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -73,7 +73,7 @@ def test_dftd3_task_pbe_m02(inp, schema_versions, request):
 
 @using("s-dftd3")
 def test_dftd3_task_tpss_m02(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -113,7 +113,7 @@ def test_dftd3_task_tpss_m02(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -122,7 +122,7 @@ def test_dftd3_task_tpss_m02(schema_versions, request):
 
 @using("s-dftd3")
 def test_dftd3_task_r2scan_m03(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -155,7 +155,7 @@ def test_dftd3_task_r2scan_m03(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -165,7 +165,7 @@ def test_dftd3_task_r2scan_m03(schema_versions, request):
 
 @using("s-dftd3")
 def test_dftd3_task_unknown_method(schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, models_out = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -178,8 +178,10 @@ def test_dftd3_task_unknown_method(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "s-dftd3")
-    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False, cast_dict_as="FailedOperation")
+    atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
+    atomic_result = checkver_and_convert(
+        atomic_result, request.node.name, "post", vercheck=False, cast_dict_as="FailedOperation"
+    )
 
     print(atomic_result.error)
     assert not atomic_result.success
@@ -188,7 +190,7 @@ def test_dftd3_task_unknown_method(schema_versions, request):
 
 @using("s-dftd3")
 def test_dftd3_task_cold_fusion(schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, models_out = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule={
@@ -211,7 +213,7 @@ def test_dftd3_task_cold_fusion(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "s-dftd3")
+    atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     print(atomic_result.error)

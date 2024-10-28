@@ -14,12 +14,16 @@ from qcengine.testing import checkver_and_convert, is_program_new_enough, schema
 @using("dftd3")
 @pytest.mark.parametrize("method", ["b3lyp-d3", "b3lyp-d3m", "b3lyp-d3bj", "b3lyp-d3mbj"])
 def test_dftd3_task(method, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
-    json_data = {"molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)), "driver": "energy", "model": {"method": method}}
+    json_data = {
+        "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+        "driver": "energy",
+        "model": {"method": method},
+    }
 
     json_data = checkver_and_convert(json_data, request.node.name, "pre")
-    ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True)
+    ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret["driver"] == "energy"
@@ -34,7 +38,7 @@ def test_dftd3_task(method, schema_versions, request):
 
 @using("dftd3")
 def test_dftd3_error(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     json_data = {
         "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
@@ -49,7 +53,7 @@ def test_dftd3_error(schema_versions, request):
         input_data["driver"] = "properties"
 
         input_data = checkver_and_convert(input_data, request.node.name, "pre")
-        ret = qcng.compute(input_data, "dftd3", raise_error=True)
+        ret = qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
 
     assert "properties not implemented" in str(exc.value)
 
@@ -59,7 +63,7 @@ def test_dftd3_error(schema_versions, request):
         input_data["model"]["method"] = "b3lyp-quadD"
 
         input_data = checkver_and_convert(input_data, request.node.name, "pre")
-        ret = qcng.compute(input_data, "dftd3", raise_error=True)
+        ret = qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
 
     assert "correction level" in str(exc.value)
 
@@ -1524,7 +1528,7 @@ def test_dftd3__from_arrays__supplement():
 
 @using("dftd3")
 def test_3(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     sys = qcel.molparse.from_string(seneyne)["qm"]
 
@@ -1538,7 +1542,7 @@ def test_3(schema_versions, request):
     }
 
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
-    res = qcng.compute(resinp, "dftd3", raise_error=True)
+    res = qcng.compute(resinp, "dftd3", raise_error=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
     res = res.dict()
 
@@ -1649,7 +1653,7 @@ def test_qcdb__energy_d3():
     ],
 )
 def test_mp2d__run_mp2d__2body(inp, subjects, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1669,7 +1673,7 @@ def test_mp2d__run_mp2d__2body(inp, subjects, schema_versions, request):
         "keywords": {},
     }
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
-    jrec = qcng.compute(resinp, "mp2d", raise_error=True)
+    jrec = qcng.compute(resinp, "mp2d", raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
@@ -1745,7 +1749,7 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
     # fmt: on
 )
 def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1762,7 +1766,7 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
         **inp["qcsk"],
     )
     atin = checkver_and_convert(atin, request.node.name, "pre")
-    jrec = qcng.compute(atin, program, raise_error=True)
+    jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
     pprint.pprint(jrec)
@@ -1813,7 +1817,7 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
     # fmt: on
 )
 def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1832,7 +1836,7 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
         **inp["qcsk"],
     )
     atin = checkver_and_convert(atin, request.node.name, "pre")
-    jrec = qcng.compute(atin, program, raise_error=True)
+    jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
@@ -1864,7 +1868,7 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
     ],
 )
 def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1884,7 +1888,7 @@ def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
         "keywords": {},
     }
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
-    jrec = qcng.compute(resinp, "dftd3", raise_error=True)
+    jrec = qcng.compute(resinp, "dftd3", raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
@@ -1932,7 +1936,7 @@ def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
     ],
 )
 def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -1953,7 +1957,7 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request
         },
     )
     atin = checkver_and_convert(atin, request.node.name, "pre")
-    jrec = qcng.compute(atin, program, raise_error=True)
+    jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
@@ -1996,7 +2000,7 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request
     ],
 )
 def test_gcp(inp, subjects, program, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     subject = subjects()[inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
@@ -2016,7 +2020,7 @@ def test_gcp(inp, subjects, program, schema_versions, request):
         "keywords": {},
     }
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
-    jrec = qcng.compute(resinp, program, raise_error=True)
+    jrec = qcng.compute(resinp, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
     jrec = jrec.dict()
 
