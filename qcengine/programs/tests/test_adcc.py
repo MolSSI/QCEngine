@@ -19,15 +19,19 @@ def h2o_data():
 
 @using("adcc")
 def test_run(h2o_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
     inp = models.AtomicInput(
         molecule=h2o, driver="properties", model={"method": "adc2", "basis": "sto-3g"}, keywords={"n_singlets": 3}
     )
-    inp = checkver_and_convert(inp, request.node.name, "pre")   
-    ret = qcng.compute(inp, "adcc", raise_error=True, local_options={"ncores": 1}, return_dict=True)
+
+    inp = checkver_and_convert(inp, request.node.name, "pre")
+    ret = qcng.compute(
+        inp, "adcc", raise_error=True, task_config={"ncores": 1}, return_dict=True, return_version=retver
+    )
     ret = checkver_and_convert(ret, request.node.name, "post")
+    # note dict-out
 
     ref_excitations = np.array([0.0693704245883876, 0.09773854881340478, 0.21481589246935925])
     ref_hf_energy = -74.45975898670224

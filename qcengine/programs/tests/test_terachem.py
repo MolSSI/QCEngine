@@ -36,7 +36,7 @@ def test_terachem_input_formatter(test_case):
 @using("terachem")
 @pytest.mark.parametrize("test_case", terachem_info.list_test_cases())
 def test_terachem_executor(test_case, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     # Get input file data
     data = terachem_info.get_test_data(test_case)
@@ -44,7 +44,7 @@ def test_terachem_executor(test_case, schema_versions, request):
 
     # Run Terachem
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    result = qcng.compute(inp, "terachem")
+    result = qcng.compute(inp, "terachem", return_version=retver)
     result = checkver_and_convert(result, request.node.name, "post")
 
     # result = qcng.get_program('terachem').compute(inp, qcng.get_config())
