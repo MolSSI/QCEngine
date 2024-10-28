@@ -17,7 +17,7 @@ from qcengine.testing import checkver_and_convert, schema_versions, using
     ],
 )
 def test_qcore_methods(method, energy, gradient_norm, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -26,7 +26,7 @@ def test_qcore_methods(method, energy, gradient_norm, schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "qcore")
+    atomic_result = qcng.compute(atomic_input, "qcore", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success, atomic_result.error.error_message
@@ -37,7 +37,7 @@ def test_qcore_methods(method, energy, gradient_norm, schema_versions, request):
 
 @using("qcore")
 def test_qcore_wavefunction(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -47,9 +47,9 @@ def test_qcore_wavefunction(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "qcore")
+    atomic_result = qcng.compute(atomic_input, "qcore", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
-    
+
     assert atomic_result.success, atomic_result.error.error_message
     assert atomic_result.wavefunction is not None
     assert atomic_result.wavefunction.scf_orbitals_a is not None

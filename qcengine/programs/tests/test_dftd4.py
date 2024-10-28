@@ -15,7 +15,7 @@ from qcengine.testing import checkver_and_convert, schema_versions, using
 
 @using("dftd4")
 def test_dftd4_task_b97m_m01(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -27,8 +27,8 @@ def test_dftd4_task_b97m_m01(schema_versions, request):
         driver="energy",
     )
 
-    atomic_input  = checkver_and_convert(atomic_input, request.node.name, "pre")    
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     print(atomic_result.return_result)
@@ -38,7 +38,7 @@ def test_dftd4_task_b97m_m01(schema_versions, request):
 
 @using("dftd4")
 def test_dftd4_task_tpss_m02(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 2.0e-8
 
@@ -76,8 +76,8 @@ def test_dftd4_task_tpss_m02(schema_versions, request):
         driver="gradient",
     )
 
-    atomic_input  = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -86,7 +86,7 @@ def test_dftd4_task_tpss_m02(schema_versions, request):
 
 @using("dftd4")
 def test_dftd4_task_r2scan_m03(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -118,8 +118,8 @@ def test_dftd4_task_r2scan_m03(schema_versions, request):
         model={"method": "r2scan"},
     )
 
-    atomic_input  = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     print(atomic_result.return_result)
@@ -129,7 +129,7 @@ def test_dftd4_task_r2scan_m03(schema_versions, request):
 
 @using("dftd4")
 def test_dftd4_task_unknown_method(schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, models_out = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -141,8 +141,8 @@ def test_dftd4_task_unknown_method(schema_versions, request):
         error_type="input error", error_message="Functional 'non-existent-method' not known"
     )
 
-    atomic_input  = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     print(atomic_result.error)
@@ -152,7 +152,7 @@ def test_dftd4_task_unknown_method(schema_versions, request):
 
 @using("dftd4")
 def test_dftd4_task_cold_fusion(schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, models_out = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule={
@@ -174,8 +174,8 @@ def test_dftd4_task_cold_fusion(schema_versions, request):
         error_message="Too close interatomic distances found",
     )
 
-    atomic_input  = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     print(atomic_result.error)

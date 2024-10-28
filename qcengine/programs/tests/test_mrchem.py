@@ -19,7 +19,7 @@ def h2o(schema_versions):
 
 @pytest.fixture
 def fh(schema_versions):
-    models, _ = schema_versions
+    models, _, _ = schema_versions
     return models.Molecule(
         geometry=[[0.000000000000, 0.000000000000, -1.642850273986], [0.000000000000, 0.000000000000, 0.087149726014]],
         symbols=["H", "F"],
@@ -31,7 +31,7 @@ def fh(schema_versions):
 
 @using("mrchem")
 def test_energy(h2o, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     mr_kws = {
         "world_prec": 1.0e-3,
@@ -49,7 +49,7 @@ def test_energy(h2o, schema_versions, request):
     )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
+    res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
@@ -69,7 +69,7 @@ def test_energy(h2o, schema_versions, request):
 
 @using("mrchem")
 def test_dipole(h2o, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     mr_kws = {
         "world_prec": 1.0e-3,
@@ -87,7 +87,7 @@ def test_dipole(h2o, schema_versions, request):
     )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
+    res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully
@@ -107,7 +107,7 @@ def test_dipole(h2o, schema_versions, request):
 
 @using("mrchem")
 def test_gradient(fh, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     mr_kws = {
         "world_prec": 1.0e-3,
@@ -124,7 +124,7 @@ def test_gradient(fh, schema_versions, request):
     )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True)
+    res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     # Make sure the calculation completed successfully

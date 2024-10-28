@@ -47,7 +47,7 @@ _basis_keywords = ["cfour_basis", "basis"]
 
 @pytest.fixture
 def clsd_open_pmols(schema_versions):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     return {
         name[:-4]: models.Molecule.from_data(smol, name=name[:-4])
         for name, smol in std_molecules.items()
@@ -160,8 +160,9 @@ def _trans_key(qc, bas, key):
     ],
 )
 def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    models, retver, _ = schema_versions
     runner_asserter(
-        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "energy", "hf")
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "energy", "hf")
     )
 
 
@@ -214,8 +215,9 @@ def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reques
     ],
 )
 def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    models, retver, _ = schema_versions
     runner_asserter(
-        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "gradient", "hf")
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "gradient", "hf")
     )
 
 
@@ -267,8 +269,9 @@ def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
     ],
 )
 def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    models, retver, _ = schema_versions
     runner_asserter(
-        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "hessian", "hf")
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "hessian", "hf")
     )
 
 
@@ -346,8 +349,9 @@ def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
     ],
 )
 def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    models, retver, _ = schema_versions
     runner_asserter(
-        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "energy", "mp2")
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "energy", "mp2")
     )
 
 
@@ -434,8 +438,9 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
     ],
 )
 def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
+    models, retver, _ = schema_versions
     runner_asserter(
-        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions[0], "energy", "ccsd")
+        *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "energy", "ccsd")
     )
 
 
@@ -486,7 +491,7 @@ def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 
 
 def _processor(
-    inp, dertype, basis, subjects, clsd_open_pmols, request, models, driver, method, *, scramble=None, frame=""
+    inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, driver, method, *, scramble=None, frame=""
 ):
     method = method
     qcprog = inp["call"]
@@ -519,4 +524,4 @@ def _processor(
         ]
     ).strip("-")
 
-    return inpcopy, subject, method, basis, tnm, scramble, frame, models
+    return inpcopy, subject, method, basis, tnm, scramble, frame, models, retver

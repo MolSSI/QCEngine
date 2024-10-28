@@ -16,7 +16,7 @@ from qcengine.testing import checkver_and_convert, schema_versions, using
 
 @using("xtb")
 def test_xtb_task_gfn1xtb_m01(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     thr = 1.0e-7
 
     return_result = np.array(
@@ -47,7 +47,7 @@ def test_xtb_task_gfn1xtb_m01(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -56,7 +56,7 @@ def test_xtb_task_gfn1xtb_m01(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_gfn1xtb_m02(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -92,7 +92,7 @@ def test_xtb_task_gfn1xtb_m02(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -101,7 +101,7 @@ def test_xtb_task_gfn1xtb_m02(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_gfn1xtb_m03(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -136,7 +136,7 @@ def test_xtb_task_gfn1xtb_m03(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -145,7 +145,7 @@ def test_xtb_task_gfn1xtb_m03(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_gfn1xtb_m04(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-6
 
@@ -180,7 +180,7 @@ def test_xtb_task_gfn1xtb_m04(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -190,8 +190,8 @@ def test_xtb_task_gfn1xtb_m04(schema_versions, request):
 
 
 @using("xtb")
-def test_xtb_task_gfn1xtb_m05(schema_versions, request):   
-    models, _ = schema_versions
+def test_xtb_task_gfn1xtb_m05(schema_versions, request):
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -204,7 +204,7 @@ def test_xtb_task_gfn1xtb_m05(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -214,7 +214,7 @@ def test_xtb_task_gfn1xtb_m05(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_gfn2xtb_m01(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-7
 
@@ -246,7 +246,7 @@ def test_xtb_task_gfn2xtb_m01(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -255,7 +255,7 @@ def test_xtb_task_gfn2xtb_m01(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_gfn2xtb_m02(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -291,7 +291,7 @@ def test_xtb_task_gfn2xtb_m02(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -299,8 +299,8 @@ def test_xtb_task_gfn2xtb_m02(schema_versions, request):
 
 
 @using("xtb")
-def test_xtb_task_gfn2xtb_m03(schema_versions, request):    
-    models, _ = schema_versions
+def test_xtb_task_gfn2xtb_m03(schema_versions, request):
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -326,7 +326,7 @@ def test_xtb_task_gfn2xtb_m03(schema_versions, request):
     )
 
     atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-03",return_dict=True)),
+        molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
         model={"method": "GFN2-xTB"},
         driver="gradient",
         keywords={
@@ -335,7 +335,7 @@ def test_xtb_task_gfn2xtb_m03(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -344,7 +344,7 @@ def test_xtb_task_gfn2xtb_m03(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_gfn2xtb_m04(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-6
 
@@ -379,7 +379,7 @@ def test_xtb_task_gfn2xtb_m04(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -390,7 +390,7 @@ def test_xtb_task_gfn2xtb_m04(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_gfn2xtb_m05(schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -403,7 +403,7 @@ def test_xtb_task_gfn2xtb_m05(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
@@ -413,7 +413,7 @@ def test_xtb_task_gfn2xtb_m05(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_unknown_method(schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, models_out = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -423,7 +423,7 @@ def test_xtb_task_unknown_method(schema_versions, request):
     error = models_out.ComputeError(error_type="input_error", error_message="Invalid method GFN-xTB provided in model")
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     assert not atomic_result.success
@@ -432,7 +432,7 @@ def test_xtb_task_unknown_method(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_unsupported_driver(schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, models_out = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
@@ -444,7 +444,7 @@ def test_xtb_task_unsupported_driver(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     assert not atomic_result.success
@@ -453,7 +453,7 @@ def test_xtb_task_unsupported_driver(schema_versions, request):
 
 @using("xtb")
 def test_xtb_task_cold_fusion(schema_versions, request):
-    models, models_out = schema_versions
+    models, retver, models_out = schema_versions
 
     atomic_input = models.AtomicInput(
         molecule={
@@ -475,7 +475,7 @@ def test_xtb_task_cold_fusion(schema_versions, request):
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
-    atomic_result = qcng.compute(atomic_input, "xtb")
+    atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     assert not atomic_result.success

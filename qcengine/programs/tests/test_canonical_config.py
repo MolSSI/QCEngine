@@ -47,6 +47,7 @@ def _get_molecule(program, method, molcls):
 
     return molcls(**dmol)
 
+
 @pytest.mark.parametrize(
     "memory_trickery",
     [
@@ -80,7 +81,7 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, sch
     * If this test doesn't work, implement or adjust ``config.memory`` in your harness.
 
     """
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
@@ -106,8 +107,8 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, sch
 
     inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=use_keywords)
 
-    inp = checkver_and_convert(inp, request.node.name, "pre")   
-    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
+    inp = checkver_and_convert(inp, request.node.name, "pre")
+    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict(), return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     pprint.pprint(ret.dict(), width=200)
@@ -152,7 +153,7 @@ def test_local_options_scratch(program, model, keywords, schema_versions, reques
       ``config.scratch_messy`` in your harness.
 
     """
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
@@ -177,7 +178,7 @@ def test_local_options_scratch(program, model, keywords, schema_versions, reques
     inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
+    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict(), return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     pprint.pprint(ret.dict(), width=200)
@@ -240,7 +241,7 @@ def test_local_options_ncores(program, model, keywords, ncores, schema_versions,
     * If this test doesn't work, implement or adjust ``config.ncores`` in your harness.
 
     """
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
 
     if not has_program(program):
         pytest.skip(f"Program '{program}' not found.")
@@ -263,9 +264,9 @@ def test_local_options_ncores(program, model, keywords, ncores, schema_versions,
     inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict())
+    ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict(), return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
-    
+
     pprint.pprint(ret.dict(), width=200)
     assert ret.success is True
 

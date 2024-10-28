@@ -11,7 +11,7 @@ from .test_standard_suite import _processor
 
 @pytest.fixture
 def clsd_open_pmols(schema_versions):
-    models, _ = schema_versions
+    models, _, _ = schema_versions
     frame_not_important = {
         name[:-4]: models.Molecule.from_data(smol, name=name[:-4])
         for name, smol in std_molecules.items()
@@ -94,6 +94,7 @@ def clsd_open_pmols(schema_versions):
     ],
 )
 def test_hf_alignment(inp, scramble, frame, driver, basis, subjects, clsd_open_pmols, request, schema_versions):
+    models, retver, _ = schema_versions
     runner_asserter(
         *_processor(
             inp,
@@ -102,7 +103,8 @@ def test_hf_alignment(inp, scramble, frame, driver, basis, subjects, clsd_open_p
             subjects,
             clsd_open_pmols,
             request,
-            schema_versions[0],
+            models,
+            retver,
             driver,
             "hf",
             scramble=scramble,

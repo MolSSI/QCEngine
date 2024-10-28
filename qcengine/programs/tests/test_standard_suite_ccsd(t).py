@@ -45,13 +45,13 @@ def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o_data, schema_versions,
     #! single point CCSD(T)/adz on water
 
     """
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
     resi = {"molecule": h2o, "driver": "energy", "model": {"method": "ccsd(t)", "basis": basis}, "keywords": keywords}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
     assert res["driver"] == "energy"
@@ -85,14 +85,14 @@ def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o_data, schema_versions,
     ],
 )
 def test_sp_ccsd_t_uhf_fc_error(program, basis, keywords, nh2_data, errmsg, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "ccsd(t)", "basis": basis}, "keywords": keywords}
 
     with pytest.raises(qcng.exceptions.InputError) as e:
         resi = checkver_and_convert(resi, request.node.name, "pre")
-        qcng.compute(resi, program, raise_error=True, return_dict=True)
+        qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
 
     assert errmsg in str(e.value)
 
@@ -112,14 +112,15 @@ def test_sp_ccsd_t_uhf_fc_error(program, basis, keywords, nh2_data, errmsg, sche
     ],
 )
 def test_sp_ccsd_t_rohf_full(program, basis, keywords, nh2_data, schema_versions, request):
-    models, _ = schema_versions
+    models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
     resi = {"molecule": nh2, "driver": "energy", "model": {"method": "ccsd(t)", "basis": basis}, "keywords": keywords}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    res = qcng.compute(resi, program, raise_error=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
+    res = res.model_dump()
 
     assert res["driver"] == "energy"
     assert "provenance" in res
