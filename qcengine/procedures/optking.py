@@ -20,8 +20,10 @@ class OptKingProcedure(ProcedureHarness):
             raise_msg="Please install via `conda install optking -c conda-forge`.",
         )
 
-    def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
-        return self._build_model(data, OptimizationInput)
+    def build_input_model(
+        self, data: Union[Dict[str, Any], "OptimizationInput"], *, return_input_schema_version: bool = False
+    ) -> "OptimizationInput":
+        return self._build_model(data, "OptimizationInput", return_input_schema_version=return_input_schema_version)
 
     def get_version(self) -> str:
         self.found(raise_error=True)

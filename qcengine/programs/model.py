@@ -2,11 +2,13 @@ import abc
 import logging
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
 
+import qcelemental
 from pydantic import BaseModel, ConfigDict
-from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
 
 from qcengine.config import TaskConfig
 from qcengine.exceptions import KnownErrorException
+
+from ..util import model_wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +33,7 @@ class ProgramHarness(BaseModel, abc.ABC):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def compute(self, input_data: AtomicInput, config: TaskConfig) -> Union[AtomicResult, FailedOperation]:
+    def compute(self, input_data: "AtomicInput", config: TaskConfig) -> Union["AtomicResult", "FailedOperation"]:
         """Top-level compute method to be implemented for every ProgramHarness
 
         Note:
@@ -64,6 +66,37 @@ class ProgramHarness(BaseModel, abc.ABC):
 
     ## Utility
 
+    # def _build_model
+
+    def build_input_model(
+        self, data: Dict[str, Any], *, return_input_schema_version: bool = False
+    ) -> Union["AtomicInput", Tuple["AtomicInput", int]]:
+        """
+        Quick wrapper around util.model_wrapper for inherited classes
+        """
+        # Note: Someday when the multiple QCSchema versions QCEngine supports are all within the
+        #  Pydantic v2 API base class, this can use discriminated unions instead of logic.
+
+        if isinstance(data, qcelemental.models.v1.AtomicInput):
+            mdl = model_wrapper(data, qcelemental.models.v1.AtomicInput)
+        elif isinstance(data, qcelemental.models.v2.AtomicInput):
+            mdl = model_wrapper(data, qcelemental.models.v2.AtomicInput)
+        elif isinstance(data, dict):
+            # remember these are user-provided dictionaries, so they'll have the mandatory fields,
+            #   like driver, not the helpful discriminator fields like schema_version.
+
+            # for now, the two dictionaries look the same, so cast to the one we want
+            # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
+            mdl = model_wrapper(
+                data, qcelemental.models.v1.AtomicInput
+            )  # TODO v2  # TODO kill off excuse_as_v2, now fix 2->-1 in schema_versions
+
+        input_schema_version = mdl.schema_version
+        if return_input_schema_version:
+            return mdl.convert_v(1), input_schema_version  # non-psi4 return_dict=False fail w/o this
+        else:
+            return mdl.convert_v(1)
+
     def get_version(self) -> str:
         """Finds program, extracts version, returns normalized version string.
 
@@ -76,7 +109,7 @@ class ProgramHarness(BaseModel, abc.ABC):
     ## Computers
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+        self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
@@ -112,10 +145,10 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
     ``ErrorCorrectionProgramHarness`` and used to determine if/how to re-run the computation.
     """
 
-    def _compute(self, input_data: AtomicInput, config: TaskConfig) -> AtomicResult:
+    def _compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
         raise NotImplementedError()
 
-    def compute(self, input_data: AtomicInput, config: TaskConfig) -> AtomicResult:
+    def compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
         # Get the error correction configuration
         error_policy = input_data.protocols.error_correction
 
@@ -151,7 +184,10 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
                 keyword_updates = e.create_keyword_update(local_input_data)
                 new_keywords = local_input_data.keywords.copy()
                 new_keywords.update(keyword_updates)
-                local_input_data = AtomicInput(**local_input_data.dict(exclude={"keywords"}), keywords=new_keywords)
+                # TODO v2
+                local_input_data = qcelemental.models.v1.AtomicInput(
+                    **local_input_data.dict(exclude={"keywords"}), keywords=new_keywords
+                )
 
                 # Store the error details and mitigations employed
                 observed_errors[e.error_name] = {"details": e.details, "keyword_updates": keyword_updates}
