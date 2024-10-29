@@ -119,6 +119,8 @@ def compute(
                     else:
                         metadata["retries"] += 1
                 except:
+                    if return_version >= 2:
+                        output_data = input_data
                     raise
 
     return handle_output_metadata(

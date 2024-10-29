@@ -224,8 +224,12 @@ def handle_output_metadata(
             1: qcelemental.models.v1.FailedOperation,
             2: qcelemental.models.v2.FailedOperation,
         }[convert_version]
+
+        # for input_data, use object (not dict) if possible for >=v2
         ret = model(
-            success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion
+            success=output_fusion.pop("success", False),
+            error=output_fusion.pop("error"),
+            input_data=output_data if (convert_version >= 2) else output_fusion,
         )
 
     if convert_version > 0:
