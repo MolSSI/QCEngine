@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProgramHarness(BaseModel, abc.ABC):
+    """Base class for analytic single-geometry capable harnesses."""
 
     _defaults: ClassVar[Dict[str, Any]] = {}
     name: str
@@ -66,8 +67,6 @@ class ProgramHarness(BaseModel, abc.ABC):
 
     ## Utility
 
-    # def _build_model
-
     def build_input_model(
         self, data: Dict[str, Any], *, return_input_schema_version: bool = False
     ) -> Union["AtomicInput", Tuple["AtomicInput", int]]:
@@ -93,9 +92,9 @@ class ProgramHarness(BaseModel, abc.ABC):
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:
-            return mdl.convert_v(1), input_schema_version  # non-psi4 return_dict=False fail w/o this
+            return mdl.convert_v(2), input_schema_version
         else:
-            return mdl.convert_v(1)
+            return mdl.convert_v(2)
 
     def get_version(self) -> str:
         """Finds program, extracts version, returns normalized version string.
@@ -184,8 +183,7 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
                 keyword_updates = e.create_keyword_update(local_input_data)
                 new_keywords = local_input_data.keywords.copy()
                 new_keywords.update(keyword_updates)
-                # TODO v2
-                local_input_data = qcelemental.models.v1.AtomicInput(
+                local_input_data = input_data.__class__(
                     **local_input_data.dict(exclude={"keywords"}), keywords=new_keywords
                 )
 

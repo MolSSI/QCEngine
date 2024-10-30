@@ -2,7 +2,7 @@ import re
 from decimal import Decimal
 from typing import List, Tuple
 
-from qcelemental.models import AtomicResult, Molecule, OptimizationInput, Provenance
+from qcelemental.models.v2 import AtomicResult, Molecule, OptimizationInput, Provenance
 from qcelemental.util import unnp
 
 from qcengine.programs.nwchem.harvester import harvest_outfile_pass

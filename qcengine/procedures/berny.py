@@ -5,7 +5,7 @@ from io import StringIO
 from typing import Any, ClassVar, Dict, Union
 
 import numpy as np
-from qcelemental.models import FailedOperation, OptimizationInput, OptimizationResult
+from qcelemental.models.v2 import FailedOperation, OptimizationInput, OptimizationResult
 from qcelemental.util import which_import
 
 import qcengine

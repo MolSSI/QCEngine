@@ -7,7 +7,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, ClassVar, Dict, Optional, Tuple
 
-from qcelemental.models import AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
 from ...exceptions import InputError
@@ -20,6 +20,7 @@ from .methods import KEYWORDS, METHODS
 
 
 class TurbomoleHarness(ProgramHarness):
+    """Interface for Turbomole project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Turbomole",

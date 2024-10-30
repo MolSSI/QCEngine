@@ -5,7 +5,6 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import qcelemental
-from qcelemental.models import AtomicInput, AtomicResult, FailedOperation, OptimizationResult  # TODO
 
 from .config import get_config
 from .exceptions import InputError, RandomError
@@ -15,14 +14,13 @@ from .util import compute_wrapper, environ_context, handle_output_metadata, mode
 
 if TYPE_CHECKING:
     from pydantic.main import BaseModel
-    from qcelemental.models import AtomicResult
 
 
 __all__ = ["compute", "compute_procedure"]
 
 
 def _process_failure_and_return(model, return_dict, raise_error):
-    if isinstance(model, FailedOperation):
+    if isinstance(model, (qcelemental.models.v1.FailedOperation, qcelemental.models.v2.FailedOperation)):
         if raise_error:
             raise InputError(model.error.error_message)
         elif return_dict:
@@ -71,6 +69,12 @@ def compute(
     result
         AtomicResult, OptimizationResult, FailedOperation, etc., or Dict representation of any object type
         A QCSchema representation of the requested output, type depends on return_dict key.
+
+    .. versionadded:: 0.50.0
+       input_data can newly be QCSchema v2 as well as longstanding v1.
+       The compute_procedure is newly incorporated into compute.
+       The *return_version* parameter was added.
+
     """
 
     try:
@@ -123,11 +127,11 @@ def compute(
 
 
 def compute_procedure(*args, **kwargs):
-    vchanges = qcelemental.models.common_models._qcsk_v2_default_v1_importpathschange
+    from qcelemental.models.common_models import _qcsk_v2_default_v1_importpathschange
 
     warnings.warn(
-        f"Using the `compute_procedure` function is deprecated in favor of using `compute`, "
-        "and as soon as version {vchanges} it will stop working.",
+        "Using the `compute_procedure` function is deprecated in favor of using `compute`, "
+        f"and as soon as version {_qcsk_v2_default_v1_importpathschange} it will stop working.",
         category=FutureWarning,
         stacklevel=2,
     )

@@ -171,7 +171,7 @@ jobs:
       #if: false
       run: |
         conda remove qcelemental --force
-        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_converterclasses' --no-deps
+        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_warnings' --no-deps
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
@@ -256,6 +256,12 @@ jobs:
         add-pip-as-python-dependency: true
         channels: conda-forge
 
+    - name: Special Config - QCElemental Dep
+      #if: false
+      run: |
+        conda remove qcelemental --force
+        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_warnings' --no-deps
+
     - name: Environment Information
       run: |
         conda info
@@ -264,6 +270,8 @@ jobs:
     - name: Build Documentation
       run: |
         python -m pip install . --no-deps
+        python -c "import qcelemental as q;print(q.__file__, q.__version__)"
+        python -c "import qcengine as q;print(q.__file__, q.__version__)"
         cd docs
         make html
 

@@ -2,6 +2,8 @@
 Tests the DQM compute dispatch module
 """
 
+import warnings
+
 import pytest
 import qcelemental as qcel
 
@@ -43,9 +45,11 @@ def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request)
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(
-        input_data, optimizer, raise_error=True, task_config=task_config, return_version=retver
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", FutureWarning)
+        ret = qcng.compute_procedure(
+            input_data, optimizer, raise_error=True, task_config=task_config, return_version=retver
+        )
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert 10 > len(ret.trajectory) > 1
@@ -79,9 +83,7 @@ def test_geometric_local_options(input_data, schema_versions, request):
 
     # Set some extremely large number to test
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(
-        input_data, "geometric", raise_error=True, task_config={"memory": "5000"}, return_version=retver
-    )
+    ret = qcng.compute(input_data, "geometric", raise_error=True, task_config={"memory": "5000"}, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert pytest.approx(ret.trajectory[0].provenance.memory, 1) == 4900
@@ -103,7 +105,7 @@ def test_geometric_stdout(input_data, schema_versions, request):
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "geometric", raise_error=True, return_version=retver)
+    ret = qcng.compute(input_data, "geometric", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -122,7 +124,7 @@ def test_berny_stdout(input_data, schema_versions, request):
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "berny", raise_error=True, return_version=retver)
+    ret = qcng.compute(input_data, "berny", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -142,7 +144,7 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "berny", raise_error=False, return_version=retver)
+    ret = qcng.compute(input_data, "berny", raise_error=False, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
@@ -164,7 +166,7 @@ def test_geometric_rdkit_error(input_data, schema_versions, request):
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "geometric", return_version=retver)
+    ret = qcng.compute(input_data, "geometric", return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
@@ -184,7 +186,7 @@ def test_optimization_protocols(input_data, schema_versions, request):
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "geometric", raise_error=True, return_version=retver)
+    ret = qcng.compute(input_data, "geometric", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success, ret.error.error_message
@@ -211,9 +213,7 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(
-        input_data, "geometric", task_config={"ncores": 13}, raise_error=True, return_version=retver
-    )
+    ret = qcng.compute(input_data, "geometric", task_config={"ncores": 13}, raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -226,9 +226,7 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
     # Ensure we still fail
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2
 
-    ret = qcng.compute_procedure(
-        input_data, "geometric", task_config={"ncores": 13, "retries": 1}, return_version=retver
-    )
+    ret = qcng.compute(input_data, "geometric", task_config={"ncores": 13, "retries": 1}, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
@@ -304,7 +302,7 @@ def test_geometric_generic(input_data, program, model, bench, schema_versions, r
     }
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre", cast_dict_as="OptimizationInput")
-    ret = qcng.compute_procedure(input_data, "geometric", raise_error=True, return_version=retver)
+    ret = qcng.compute(input_data, "geometric", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
@@ -338,7 +336,7 @@ def test_nwchem_relax(linopt, schema_versions, request):
 
     # Run the relaxation
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "nwchemdriver", raise_error=True, return_version=retver)
+    ret = qcng.compute(input_data, "nwchemdriver", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert 10 > len(ret.trajectory) > 1
@@ -365,16 +363,12 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
     local_opts = {"scratch_messy": True, "scratch_directory": str(tmpdir)}
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(
-        input_data, "nwchemdriver", task_config=local_opts, raise_error=False, return_version=retver
-    )
+    ret = qcng.compute(input_data, "nwchemdriver", task_config=local_opts, raise_error=False, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
     assert not ret.success
 
     # Run it again, which should converge
-    new_ret = qcng.compute_procedure(
-        input_data, "nwchemdriver", task_config=local_opts, raise_error=True, return_version=retver
-    )
+    new_ret = qcng.compute(input_data, "nwchemdriver", task_config=local_opts, raise_error=True, return_version=retver)
     new_ret = checkver_and_convert(new_ret, request.node.name, "post")
     assert new_ret.success
 
@@ -406,7 +400,7 @@ def test_torsiondrive_generic(schema_versions, request):
     )
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, "torsiondrive", raise_error=True, return_version=retver)
+    ret = qcng.compute(input_data, "torsiondrive", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.error is None
@@ -506,7 +500,7 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
-    ret = qcng.compute_procedure(input_data, optimizer, raise_error=True, return_version=retver)
+    ret = qcng.compute(input_data, optimizer, raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert 10 > len(ret.trajectory) > 1
