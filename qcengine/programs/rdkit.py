@@ -4,7 +4,7 @@ Calls the RDKit package.
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models.v2 import AtomicResult, Provenance
 from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError
@@ -12,12 +12,13 @@ from ..units import ureg
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
 
 class RDKitHarness(ProgramHarness):
+    """Interface for RDKit project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "RDKit",

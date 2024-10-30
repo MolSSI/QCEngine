@@ -3,7 +3,7 @@ import traceback
 from typing import Any, Dict, List
 
 import numpy as np
-from qcelemental.models import BasisSet
+from qcelemental.models.v2 import BasisSet
 
 
 def cca_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:

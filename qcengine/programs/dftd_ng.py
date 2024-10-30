@@ -9,7 +9,8 @@ respective dispersion correction.
 
 from typing import Any, ClassVar, Dict
 
-from qcelemental.models import AtomicInput, AtomicResult
+import qcelemental
+from qcelemental.models.v2 import AtomicInput, AtomicResult
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..config import TaskConfig
@@ -103,10 +104,12 @@ class DFTD4Harness(ProgramHarness):
             level_hint = "d4"
             input_data["keywords"]["level_hint"] = level_hint
 
-        input_model = AtomicInput(**input_data)
+        # dftd4 speaks qcsk.v1
+        input_model = qcelemental.models.v1.AtomicInput(**input_data)
 
         # Run the Harness
         output = run_qcschema(input_model)
+        output = output.convert_v(2)
 
         if "info" in output.extras:
             qcvkey = output.extras["info"]["fctldash"].upper()
@@ -271,10 +274,11 @@ class SDFTD3Harness(ProgramHarness):
                     input_data["keywords"]["params_tweaks"] = {**planinfo["dashparams"], "s9": 0.0}
                 input_data["keywords"]["level_hint"] = level_hint
 
-        input_model = AtomicInput(**input_data)
+        input_model = qcelemental.models.v1.AtomicInput(**input_data)
 
         # Run the Harness
         output = run_qcschema(input_model)
+        output = output.convert_v(2)
 
         if "info" in output.extras:
             qcvkey = output.extras["info"]["fctldash"].upper()

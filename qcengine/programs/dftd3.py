@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, FailedOperation, Provenance
+from qcelemental.models.v2 import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, ResourceError, UnknownError
@@ -20,7 +20,7 @@ from . import empirical_dispersion_resources
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -29,6 +29,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class DFTD3Harness(ProgramHarness):
+    """Interface for DFTD3 executable project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "DFTD3",
