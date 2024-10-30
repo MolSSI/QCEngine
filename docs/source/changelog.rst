@@ -30,6 +30,12 @@ Changelog
 
 vX.Y.0 / 2025-MM-DD (Unreleased)
 --------------------
+
+Breaking Changes
+++++++++++++++++
+- (:pr:`453`) Deps - Require pydantic v2 dependency (don't worry, this isn't
+  changing QCEngine's role as QCSchema I/O runner. Also require pydantic-settings
+  for CLI. @loriab
 - (:pr:`455`) API - As promised 2 years ago for >=v0.30, `local_options` has
   been removed in favor of `task_config` in `compute` and `compute_procedure`.
   Note that Psi4 v1.6 will need an older qcel or a sed to work (see GHA). The
@@ -47,9 +53,6 @@ New Features
 
 Enhancements
 ++++++++++++
-- (:pr:`453`) Deps - Require pydantic v2 dependency (don't worry, this isn't
-  changing QCEngine's role as QCSchema I/O runner. Also require pydantic-settings
-  for CLI. @loriab
 - (:pr:`453`) Maint - Convert internal (non-QCSchema) pydantic classes to
   pydantic v2 API, namely `NodeDescriptor`, `TaskConfig`, `ProgramHarness`,
   `ProcedureHarness`. @loriab

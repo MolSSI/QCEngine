@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models import OptimizationInput, OptimizationResult
+from qcelemental.models.v2 import OptimizationInput, OptimizationResult
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness

@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import Molecule
+from qcelemental.models.v2 import Molecule
 from qcelemental.molparse import regex
 
 from ..util import PreservingDict, load_hessian

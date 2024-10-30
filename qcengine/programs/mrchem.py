@@ -11,7 +11,7 @@ from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 
-from qcelemental.models import AtomicResult
+from qcelemental.models.v2 import AtomicResult
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, RandomError, UnknownError
@@ -19,7 +19,7 @@ from ..util import create_mpi_invocation, execute, popen, temporary_directory
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class MRChemHarness(ProgramHarness):
+    """Interface for MRChem project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MRChem",

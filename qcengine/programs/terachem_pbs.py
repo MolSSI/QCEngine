@@ -6,13 +6,13 @@ from importlib import import_module
 from os import getenv
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Union
 
-from qcelemental.models import AtomicResult, FailedOperation
+from qcelemental.models.v2 import AtomicResult, FailedOperation
 from qcelemental.util import which_import
 
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -102,4 +102,7 @@ class TeraChemPBSHarness(ProgramHarness):
         tcpb = import_module(self._tcpb_package)
 
         with getattr(tcpb, self._tcpb_client)(**self._env_vars) as client:
-            return client.compute(input_model)
+            # presumably terachem speaks qcsk.v1
+            input_model = input_model.convert_v(1)
+            return_model = client.compute(input_model)
+            return return_model.convert_v(2)

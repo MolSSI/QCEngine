@@ -5,7 +5,7 @@ Calls the TeraChem executable.
 import re
 from typing import Any, ClassVar, Dict, Optional
 
-from qcelemental.models import AtomicResult, FailedOperation
+from qcelemental.models.v2 import AtomicResult, FailedOperation
 from qcelemental.molparse.regex import DECIMAL, NUMBER
 from qcelemental.util import parse_version, safe_version, which
 
@@ -17,6 +17,7 @@ from .model import ProgramHarness
 
 
 class TeraChemHarness(ProgramHarness):
+    """Interface for TeraChem project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "TeraChem",

@@ -73,13 +73,13 @@ class ProcedureHarness(BaseModel, abc.ABC):
 
             # for now, the two dictionaries look the same, so cast to the one we want
             # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
-            mdl = model_wrapper(data, v1_model)  # TODO v2
+            mdl = model_wrapper(data, v1_model)
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:
-            return mdl.convert_v(1), input_schema_version  # non-psi4 return_dict=False fail w/o this
+            return mdl.convert_v(2), input_schema_version
         else:
-            return mdl.convert_v(1)
+            return mdl.convert_v(2)
 
     def get_version(self) -> str:
         """Finds procedure, extracts version, returns normalized version string.
