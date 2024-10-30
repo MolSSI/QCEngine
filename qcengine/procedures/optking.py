@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models import OptimizationInput, OptimizationResult
+from qcelemental.models.v2 import OptimizationInput, OptimizationResult
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
@@ -40,6 +40,7 @@ class OptKingProcedure(ProcedureHarness):
         if self.found(raise_error=True):
             import optking
 
+        input_data = input_model.convert_v(1)
         input_data = input_model.dict()
 
         # Set retries to two if zero while respecting local_config

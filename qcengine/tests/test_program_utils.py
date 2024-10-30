@@ -52,6 +52,6 @@ def test_check_procedure_avail(procedure):
 def test_procedure_avail_bounce():
 
     with pytest.raises(qcng.exceptions.InputError) as exc:
-        qcng.compute_procedure({}, "bad_program", raise_error=True)
+        qcng.compute({}, "bad_program", raise_error=True)
 
     assert "not registered" in str(exc.value)

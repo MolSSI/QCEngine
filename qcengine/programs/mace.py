@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Union
 
-from qcelemental.models import AtomicResult, FailedOperation, Provenance
+from qcelemental.models.v2 import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which_import
 
 from qcengine.exceptions import InputError
@@ -8,7 +8,7 @@ from qcengine.programs.model import ProgramHarness
 from qcengine.units import ureg
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput, FailedOperation
+    from qcelemental.models.v2 import AtomicInput, FailedOperation
 
     from qcengine.config import TaskConfig
 
@@ -122,7 +122,7 @@ class MACEHarness(ProgramHarness):
         ret_data["properties"] = {"return_energy": mace_data["energy"] * ureg.conversion_factor("eV", "hartree")}
 
         if input_data.driver == "energy":
-            ret_data["return_result"] = ret_data["properties"]["return_energy"]
+            ret_data["return_result"] = ret_data["properties"]["return_energy"].detach().numpy().item()
         elif input_data.driver == "gradient":
             ret_data["return_result"] = (
                 np.asarray(-1.0 * mace_data["forces"] * ureg.conversion_factor("eV / angstrom", "hartree / bohr"))

@@ -93,15 +93,16 @@ class NodeDescriptor(BaseModel):
     # Cluster options
     is_batch_node: bool = Field(
         False,
-        description="""Whether the node running QCEngine is a batch node
-    
+        description=r"""Whether the node running QCEngine is a batch node
+
     Some clusters are configured such that tasks are launched from a special "batch" or "MOM" onto the compute nodes.
     The compute nodes on such clusters often have a different CPU architecture than the batch nodes and 
     often are unable to launch MPI tasks, which has two implications:
-        1) QCEngine must make *all* calls to an executable via ``mpirun`` because the executables might not
-        be able to run on the batch node. 
-        2) QCEngine must run on the batch node to be able to launch tasks on the more than one compute nodes  
-    
+
+    1. QCEngine must make *all* calls to an executable via ``mpirun`` because the executables might not
+       be able to run on the batch node. 
+    2. QCEngine must run on the batch node to be able to launch tasks on the more than one compute nodes
+
     ``is_batch_node`` is used when creating the task configuration as a means of determining whether
     ``mpiexec_command`` must always be used even for serial jobs (e.g., getting the version number)
     """,

@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models import AtomicInput, OptimizationInput, OptimizationResult, Provenance
+from qcelemental.models.v2 import AtomicInput, OptimizationInput, OptimizationResult, Provenance
 
 from qcengine.config import TaskConfig
 from qcengine.exceptions import InputError, UnknownError

@@ -1,8 +1,6 @@
 import traceback
 from typing import Any, Dict, Optional
 
-from qcelemental.models import AtomicInput
-
 
 class QCEngineException(Exception):
     """
@@ -106,7 +104,7 @@ class KnownErrorException(QCEngineException):
         """
         raise NotImplementedError()
 
-    def create_keyword_update(self, input_data: AtomicInput) -> Dict[str, Any]:
+    def create_keyword_update(self, input_data: "AtomicInput") -> Dict[str, Any]:
         """Create an keyword used to the update the dictionary given observed error
 
         Parameters

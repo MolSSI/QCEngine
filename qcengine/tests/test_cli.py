@@ -7,7 +7,7 @@ from typing import List
 import qcelemental
 
 from qcengine import cli, get_molecule, util
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, schema_versions2, using
 
 
 def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
@@ -56,14 +56,14 @@ def test_info():
         assert output in default_output
 
 
-# TODO add schema_versions when psi4 can handle v2
 @using("psi4")
-def test_run_psi4(tmp_path):
+def test_run_psi4(tmp_path, schema_versions2, request):
     """Tests qcengine run with psi4 and JSON input"""
-    models = qcelemental.models.v1
+    models, _, _ = schema_versions2
 
     def check_result(stdout):
         output = json.loads(stdout)
+        output = checkver_and_convert(output, request.node.name, "post")
         assert output["provenance"]["creator"].lower() == "psi4"
         assert output["success"] is True
 
@@ -73,25 +73,31 @@ def test_run_psi4(tmp_path):
         model={"method": "hf", "basis": "6-31G"},
     )
 
-    args = ["run", "psi4", inp.json()]
+    inp = checkver_and_convert(inp, request.node.name, "pre")
+    args = ["run", "psi4", inp.model_dump_json()]
     check_result(run_qcengine_cli(args))
 
     args = ["run", "psi4", os.path.join(tmp_path, "input.json")]
-    with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
+    with util.disk_files({"input.json": inp.model_dump_json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
 
     args = ["run", "psi4", "-"]
-    check_result(run_qcengine_cli(args, stdin=inp.json()))
+    # model_dump_json() works on v1 or v2 (see above). below tests that json() still works on v1.
+    if "as_v1" in request.node.name:
+        check_result(run_qcengine_cli(args, stdin=inp.json()))
+    else:
+        check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))
 
 
 @using("geometric")
 @using("psi4")
-def test_run_procedure(tmp_path):
+def test_run_procedure(tmp_path, schema_versions2, request):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
-    models = qcelemental.models.v1
+    models, _, _ = schema_versions2
 
     def check_result(stdout):
         output = json.loads(stdout)
+        output = checkver_and_convert(output, request.node.name, "post", cast_dict_as="OptimizationResult")
         assert output["provenance"]["creator"].lower() == "geometric"
         assert output["success"] is True
 
@@ -102,12 +108,17 @@ def test_run_procedure(tmp_path):
     }
     inp = models.OptimizationInput(**inp)
 
-    args = ["run-procedure", "geometric", inp.json()]
+    inp = checkver_and_convert(inp, request.node.name, "pre")
+    args = ["run-procedure", "geometric", inp.model_dump_json()]
     check_result(run_qcengine_cli(args))
 
     args = ["run-procedure", "geometric", os.path.join(tmp_path, "input.json")]
-    with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
+    with util.disk_files({"input.json": inp.model_dump_json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
 
-    args = ["run-procedure", "geometric", inp.json()]
-    check_result(run_qcengine_cli(args, stdin=inp.json()))
+    args = ["run-procedure", "geometric", inp.model_dump_json()]
+    check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))
+
+    # try unified route
+    args = ["run", "geometric", inp.model_dump_json()]
+    check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))

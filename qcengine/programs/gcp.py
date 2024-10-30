@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, FailedOperation, Provenance
+from qcelemental.models.v2 import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, UnknownError
@@ -19,7 +19,7 @@ from ..util import execute
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -28,6 +28,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class GCPHarness(ProgramHarness):
+    """Interface for the old gcp executable project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "GCP",
@@ -279,6 +280,7 @@ class GCPHarness(ProgramHarness):
 
 
 class MCTCGCPHarness(GCPHarness):
+    """Interface for the gcp project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MCTC-GCP",
