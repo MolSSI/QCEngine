@@ -4,8 +4,13 @@ from contextlib import redirect_stderr, redirect_stdout
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Tuple, Union
 
 import numpy as np
-from qcelemental.models import FailedOperation, Molecule
-from qcelemental.models.procedures import OptimizationInput, OptimizationResult, TorsionDriveInput, TorsionDriveResult
+from qcelemental.models.v2 import FailedOperation, Molecule
+from qcelemental.models.v2.procedures import (
+    OptimizationInput,
+    OptimizationResult,
+    TorsionDriveInput,
+    TorsionDriveResult,
+)
 from qcelemental.util import which_import
 
 from .model import ProcedureHarness
@@ -173,7 +178,7 @@ class TorsionDriveProcedure(ProcedureHarness):
             object.
         """
 
-        from qcengine import compute_procedure
+        from qcengine import compute
 
         input_molecule = input_model.initial_molecule[0].copy(deep=True).dict()
         input_molecule["geometry"] = np.array(job).reshape(len(input_molecule["symbols"]), 3)
@@ -204,9 +209,7 @@ class TorsionDriveProcedure(ProcedureHarness):
             initial_molecule=input_molecule,
         )
 
-        return compute_procedure(
-            input_data, procedure=input_model.optimization_spec.procedure, task_config=config.dict()
-        )
+        return compute(input_data, program=input_model.optimization_spec.procedure, task_config=config.dict())
 
     @staticmethod
     def _find_final_results(

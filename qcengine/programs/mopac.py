@@ -4,7 +4,7 @@ Calls the Psi4 executable.
 import os
 from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
-from qcelemental.models import AtomicResult
+from qcelemental.models.v2 import AtomicResult
 from qcelemental.util import which
 
 from ..exceptions import InputError, UnknownError
@@ -13,6 +13,7 @@ from .model import ProgramHarness
 
 
 class MopacHarness(ProgramHarness):
+    """Interface for MOPAC project."""
 
     _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MOPAC",
