@@ -1,6 +1,7 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models.v2 import OptimizationInput, OptimizationResult
+from qcelemental.models.v1 import OptimizationResult
+from qcelemental.models.v2 import OptimizationInput
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
@@ -55,5 +56,6 @@ class OptKingProcedure(ProcedureHarness):
         output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
         if output_data["success"]:
             output_data = OptimizationResult(**output_data)
+            output_data = output_data.convert_v(2)
 
         return output_data
