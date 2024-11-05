@@ -74,6 +74,7 @@ MUST (Unmerged)
 - When <executor>.compute() fails and collects the input for processing, with v2 it now uses the <>Input model passed to the executor, not the model-or-dict passed into compute().
 - The net result of the two above is that whereas fop.input_data in v1 was reliably a dict and its contents would reflect whether a model or dict was passed to qcengine.compute(), now in v2, fop.input_data is a model whenever possible (to mirror <>Result.input_data) regardless of model or dict passed to qcengine.compute(); the only case where it's a dict is if the error was in forming the model.
 - DFTD3 & DFTD4 (new intf) - intercept ``v1.AtomicResult`` with ``success=False`` and ``error`` fields set from QCSchema interfaces and return ``FailedOperation``s. Someday when upstream switches to v2, request packages return FaileOp directly and use ``input_error`` rather than ``input error``.
+- ``qcengine run`` learned new argument ``--return-version`` analogous to ``qcengine.compute(..., return_version=1|2)`` so CLI matches API capabilities. Note *not* ported to phasing-out ``qcengine run-procedure``.
 
 WIP (Unmerged)
 ++++++++++++++
