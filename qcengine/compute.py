@@ -113,6 +113,8 @@ def compute(
                     output_data = executor.compute(input_data, config)
                     break
                 except RandomError as e:
+                    if return_version >= 2:
+                        output_data = input_data
 
                     if x == config.retries:
                         raise e
