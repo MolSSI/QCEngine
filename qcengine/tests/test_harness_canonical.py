@@ -3,7 +3,6 @@ Tests the DQM compute dispatch module
 """
 import copy
 import pprint
-from typing import Union
 
 import msgpack
 import numpy as np
@@ -242,7 +241,7 @@ def test_compute_badder_models(program, model, schema_versions2, request, raiser
             assert ret["input_data"]["driver"] == "eighth", "input not copied over"
         else:
             assert ret.success is False, "wrongly successful"
-            assert isinstance(ret, Union[qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation]), "wrong class"
+            assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation)), "wrong class"
             assert ret.error.error_type == "input_error", f"wrong type: {ret.error.error_type=} != 'input_error'"
             # note that input_data *always* a dict in this test (even for v2)
             #   since the error is that the AtomicInput model can't be constructed
