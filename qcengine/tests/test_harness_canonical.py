@@ -195,15 +195,15 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
             assert (
                 ret["error"]["error_type"] == "input_error"
             ), f"wrong type: {ret['error']['error_type']=} != 'input_error'"
-            assert ret["input_data"]["model"]["method"] == "bad", "input not copied over"
+            assert ret["input_data"]["model"]["method"] == model["method"], "input not copied over"
         else:
             assert ret.success is False, "wrongly successful"
-            assert isinstance(ret, Union[qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation]), "wrong class"
+            assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation)), "wrong class"
             assert ret.error.error_type == "input_error", f"wrong type: {ret.error.error_type=} != 'input_error'"
             if "v2" in request.node.name:
-                assert ret.input_data.model.method == "bad", "input not copied over"
+                assert ret.input_data.model.method == model["method"], "input not copied over"
             else:
-                assert ret.input_data["model"]["method"] == "bad", "input not copied over"
+                assert ret.input_data["model"]["method"] == model["method"], "input not copied over"
 
 
 @pytest.mark.parametrize(
