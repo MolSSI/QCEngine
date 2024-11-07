@@ -8,7 +8,7 @@ dependencies:
   - mopac
 
     # Mixed Tests
-  - dftd3-python =1.2.0
+  - dftd3-python
   - dftd4-python
   - gcp-correction
   - geometric
