@@ -1011,14 +1011,6 @@ try:
         the data returned by dftd3 into the right shape to make qcng happy.
         """
 
-        from dftd3.parameters import get_data_file_name
-
-        ans = get_data_file_name()
-        print(f"{ans=}")
-        import os
-
-        print(f"{os.path.isfile(ans)=}")
-        # sys.exit(4)
         from dftd3.parameters import get_all_damping_params
 
         # The names here are the subset allowed by qcng with the names used in dftd3
