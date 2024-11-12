@@ -38,6 +38,8 @@ _canonical_methods = [
     ("mctc-gcp", {"method": "dft/sv"}, {}),
     ("mace", {"method": "small"}, {}),
     ("aimnet2", {"method": "b973c"}, {}),
+    ("s-dftd3", {"method": "b3lyp-d3"}, {}),
+    ("dftd4", {"method": "b3lyp-d4"}, {}),
     # add as programs available
     # ("terachem", {"method": "bad"}),
 ]

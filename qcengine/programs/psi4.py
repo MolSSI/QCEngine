@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models.v1 import AtomicResult as AtomicResult
+from qcelemental.models.v1 import AtomicResult
 from qcelemental.models.v2 import BasisSet
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
 

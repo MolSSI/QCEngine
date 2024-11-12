@@ -262,19 +262,14 @@ def checkver_and_convert(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=
 
     if prepost == "pre":
         dict_in = isinstance(mdl, dict)
+        cast_smodel = cast_dict_as or "AtomicInput"
         if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
             if dict_in:
-                if cast_dict_as:
-                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
-                else:
-                    mdl = qcel.models.v1.AtomicInput(**mdl)
+                mdl = getattr(qcel.models.v1, cast_smodel)(**mdl)
             check_model_v1(mdl)
         elif "as_v2" in tnm or "to_v1" in tnm:
             if dict_in:
-                if cast_dict_as:
-                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
-                else:
-                    mdl = qcel.models.v2.AtomicInput(**mdl)
+                mdl = getattr(qcel.models.v2, cast_smodel)(**mdl)
             check_model_v2(mdl)
             # NOW IN COMPUTE mdl = mdl.convert_v(1)
 
@@ -286,19 +281,14 @@ def checkver_and_convert(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=
         #   for now these always go to v1 in programs/model.py so as_v2 returns wrongly as v1
         # follow-up: there are too many ways this can happen, so now it's forestalled by the schema_versions fixture passing 2 to as_v2
         dict_in = isinstance(mdl, dict)
+        cast_smodel = cast_dict_as or "AtomicResult"
         if "as_v1" in tnm or "to_v1" in tnm or "None" in tnm:
             if dict_in:
-                if cast_dict_as:
-                    mdl = getattr(qcel.models.v1, cast_dict_as)(**mdl)
-                else:
-                    mdl = qcel.models.v1.AtomicResult(**mdl)
+                mdl = getattr(qcel.models.v1, cast_smodel)(**mdl)
             check_model_v1(mdl)
         elif "as_v2" in tnm or "to_v2" in tnm:
             if dict_in:
-                if cast_dict_as:
-                    mdl = getattr(qcel.models.v2, cast_dict_as)(**mdl)
-                else:
-                    mdl = qcel.models.v2.AtomicResult(**mdl)
+                mdl = getattr(qcel.models.v2, cast_smodel)(**mdl)
             # NOW IN COMPUTE mdl = mdl.convert_v(2)
             check_model_v2(mdl)
 
