@@ -214,10 +214,18 @@ class MP2DHarness(ProgramHarness):
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()
 
+        properties = {
+            "calcinfo_natom": len(input_model.molecule.symbols),
+            "return_energy": ene,
+            f"return_{input_model.driver.value}": retres,
+        }
+
         output_data = {
-            "extras": input_model.extras,
+            "input_data": input_model,
+            "molecule": input_model.molecule,
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
-            "properties": {},
+            "properties": properties,
             "provenance": Provenance(
                 creator="MP2D", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
@@ -229,4 +237,4 @@ class MP2DHarness(ProgramHarness):
         output_data["extras"]["qcvars"] = calcinfo
 
         output_data["success"] = True
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)
