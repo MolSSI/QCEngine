@@ -83,6 +83,7 @@ def test_compute_energy(program, model, keywords, schema_versions, request):
 
     assert ret.success is True
     assert isinstance(ret.return_result, float)
+    assert ret.return_result == ret.properties.return_energy
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)

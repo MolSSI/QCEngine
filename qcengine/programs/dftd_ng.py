@@ -14,7 +14,7 @@ from qcelemental.models.v2 import AtomicInput, AtomicResult, FailedOperation
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..config import TaskConfig
-from ..exceptions import InputError
+from ..exceptions import InputError, ResourceError
 from .empirical_dispersion_resources import from_arrays, get_dispersion_aliases
 from .model import ProgramHarness
 
@@ -279,16 +279,17 @@ class SDFTD3Harness(ProgramHarness):
                     input_data["keywords"]["params_tweaks"] = {**planinfo["dashparams"], "s9": 0.0}
                 input_data["keywords"]["level_hint"] = level_hint
 
-        input_model = qcelemental.models.v1.AtomicInput(**input_data)
+        # sdftd3 speaks qcsk.v1
+        input_model_v1 = qcelemental.models.v1.AtomicInput(**input_data)
 
         # Run the Harness
-        output = run_qcschema(input_model)
+        output_v1 = run_qcschema(input_model_v1)
 
         # d3 qcschema interface stores error in Result model
-        if not output.success:
-            return FailedOperation(input_data=input_data, error=output.error.model_dump())
+        if not output_v1.success:
+            return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
 
-        output = output.convert_v(2)
+        output = output_v1.convert_v(2, external_input_data=input_model)
 
         if "info" in output.extras:
             qcvkey = output.extras["info"]["fctldash"].upper()
@@ -300,14 +301,14 @@ class SDFTD3Harness(ProgramHarness):
         if qcvkey:
             calcinfo[f"{qcvkey} DISPERSION CORRECTION ENERGY"] = energy
 
-        if output.driver == "gradient":
+        if output.input_data.driver == "gradient":
             gradient = output.return_result
             calcinfo["CURRENT GRADIENT"] = gradient
             calcinfo["DISPERSION CORRECTION GRADIENT"] = gradient
             if qcvkey:
                 calcinfo[f"{qcvkey} DISPERSION CORRECTION GRADIENT"] = gradient
 
-        if output.keywords.get("pair_resolved", False):
+        if output.input_data.keywords.get("pair_resolved", False):
             pw2 = output.extras["dftd3"]["additive pairwise energy"]
             pw3 = output.extras["dftd3"]["non-additive pairwise energy"]
             assert abs(pw2.sum() + pw3.sum() - energy) < 1.0e-8, f"{pw2.sum()} + {pw3.sum()} != {energy}"
