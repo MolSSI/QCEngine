@@ -185,11 +185,9 @@ class Psi4Harness(ProgramHarness):
                     scratch_directory=tmpdir,
                 )
 
-                output_data = input_data.copy()
+                output_data = {"input_data": input_model, "extras": {}}
                 if success:
                     output_data = json.loads(output["outfiles"]["data.json"])
-                    if "extras" not in output_data:
-                        output_data["extras"] = {}
 
                     # Check QCVars
                     local_qcvars = output_data.pop("psi4:qcvars", None)
@@ -218,9 +216,9 @@ class Psi4Harness(ProgramHarness):
             else:
                 # psi4 QCSchema interface only speaks qcsk.v1
                 # * note that only psiapi=True calcs need this until rearrangement affects all
-                input_model = input_model.convert_v(1)
+                input_model_v1 = input_model.convert_v(1)
 
-                if input_model.extras.get("psiapi", False):
+                if input_model_v1.extras.get("psiapi", False):
                     import psi4
 
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()
@@ -230,13 +228,13 @@ class Psi4Harness(ProgramHarness):
                     if pversion < parse_version("1.6"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
-                        output_data = psi4.schema_wrapper.run_qcschema(input_model).dict()
+                        output_data_v1 = psi4.schema_wrapper.run_qcschema(input_model_v1).dict()
                     else:
-                        output_data = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
+                        output_data_v1 = psi4.schema_wrapper.run_qcschema(input_model_v1, postclean=False).dict()
                     # success here means execution returned. output_data may yet be qcel.models.AtomicResult or qcel.models.FailedOperation
                     success = True
-                    if output_data.get("success", False):
-                        output_data["extras"]["psiapi_evaluated"] = True
+                    if output_data_v1.get("success", False):
+                        output_data_v1["extras"]["psiapi_evaluated"] = True
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)
                 else:
                     run_cmd = [
@@ -252,18 +250,18 @@ class Psi4Harness(ProgramHarness):
                     ]
                     if config.scratch_messy:
                         run_cmd.append("--messy")
-                    input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
+                    input_files = {"data.msgpack": input_model_v1.serialize("msgpack-ext")}
                     success, output = execute(
                         run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
                     )
                     if success:
-                        output_data = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
+                        output_data_v1 = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
                     else:
-                        output_data = input_model.dict()
+                        output_data_v1 = input_model_v1
 
                 if success:
-                    if output_data.get("success", False) is False:
-                        error_message, error_type = self._handle_errors(output_data)
+                    if output_data_v1.get("success", False) is False:
+                        error_message, error_type = self._handle_errors(output_data_v1)
                     else:
                         compute_success = True
                 else:
@@ -294,18 +292,18 @@ class Psi4Harness(ProgramHarness):
                 raise UnknownError(error_message)
 
         # Reset basis
-        output_data["model"]["basis"] = old_basis
+        output_data_v1["model"]["basis"] = old_basis
 
         # Move several pieces up a level
-        output_data["provenance"]["memory"] = round(config.memory, 3)
-        output_data["provenance"]["nthreads"] = config.ncores
-        if output_data.get("native_files", None) is None:
-            output_data["native_files"] = {
-                "input": json.dumps(json.loads(input_model.json()), indent=1),
+        output_data_v1["provenance"]["memory"] = round(config.memory, 3)
+        output_data_v1["provenance"]["nthreads"] = config.ncores
+        if output_data_v1.get("native_files", None) is None:
+            output_data_v1["native_files"] = {
+                "input": json.dumps(json.loads(input_model_v1.json()), indent=1),
             }
 
         # Delete keys
-        output_data.pop("return_output", None)
+        output_data_v1.pop("return_output", None)
 
-        atres = AtomicResult(**output_data)
-        return atres.convert_v(2)
+        atres = AtomicResult(**output_data_v1)
+        return atres.convert_v(2, external_input_data=input_model)
