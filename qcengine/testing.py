@@ -116,16 +116,15 @@ def failure_engine(schema_versions):
             grad = [0, 0, -grad_value, 0, 0, grad_value]
 
             if mode == "pass":
-                return schema_versions[2].AtomicResult(
+                return qcel.models.v2.AtomicResult(
                     **{
-                        **input_data.dict(),
-                        **{
-                            "properties": {"return_energy": grad_value},
-                            "return_result": grad,
-                            "success": True,
-                            "extras": {"ncalls": self.ncalls},
-                            "provenance": {"creator": "failure_engine", "ncores": config.ncores},
-                        },
+                        "input_data": input_data,
+                        "molecule": input_data.molecule,
+                        "properties": {"return_energy": grad_value},
+                        "return_result": grad,
+                        "success": True,
+                        "extras": {"ncalls": self.ncalls},
+                        "provenance": {"creator": "failure_engine", "ncores": config.ncores},
                     }
                 )
             elif mode == "random_error":
