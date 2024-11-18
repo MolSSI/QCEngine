@@ -71,9 +71,10 @@ def test_psi4_hf3c_task(schema_versions, request):
 
     assert ret.success is True
     if "v2" in request.node.name:
-        assert ret.input_data.model.basis is None
+        # prior to 0.50, None, now ""
+        assert not ret.input_data.model.basis
     else:
-        assert ret.model.basis is None
+        assert not ret.model.basis
 
 
 @using("psi4_runqcsk")
