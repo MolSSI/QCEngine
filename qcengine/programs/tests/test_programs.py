@@ -70,7 +70,10 @@ def test_psi4_hf3c_task(schema_versions, request):
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
-    assert ret.model.basis is None
+    if "v2" in request.node.name:
+        assert ret.input_data.model.basis is None
+    else:
+        assert ret.model.basis is None
 
 
 @using("psi4_runqcsk")
