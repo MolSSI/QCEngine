@@ -296,3 +296,8 @@ def checkver_and_convert(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=
             mdl = json.loads(mdl.model_dump_json())
 
     return mdl
+
+
+def from_v2(tnm: str) -> bool:
+    """Convenience test for partitioning tests expecting QCSchema v2 input."""
+    return ("to_v1" in tnm) or ("as_v2" in tnm)
