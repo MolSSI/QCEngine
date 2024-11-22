@@ -150,7 +150,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         }
 
         # Prepare to write out the options
-        opts = copy.deepcopy(input_model.keywords)
+        opts = copy.deepcopy(input_model.specification.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
 
         # Determine the command to use to launch the code
@@ -182,17 +182,19 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             molcmd = re.sub(r"geometry ([^\n]*)", rf"geometry \1 autosym {val}", molcmd)
 
         # Handle calc type and quantum chemical method
-        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
+        mdccmd, mdcopts = muster_modelchem(
+            input_model.specification.model.method, input_model.specification.driver, opts.pop("qc_module", False)
+        )
         opts.update(mdcopts)
 
         # Handle basis set
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
 
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
-            opts[f"basis__{el}"] = f"library {input_model.model.basis}"
-            opts[f"basis__bq{el}"] = f"library {el} {input_model.model.basis}"
+            opts[f"basis__{el}"] = f"library {input_model.specification.model.basis}"
+            opts[f"basis__bq{el}"] = f"library {el} {input_model.specification.model.basis}"
 
         # Log the job settings
         logger.debug("JOB_OPTS")
@@ -232,7 +234,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         # For gradient methods, add a Python command to save the gradients in higher precision
         #  Note: The Hessian is already stored in high precision in a file named "*.hess"
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             # Get the name of the theory used for computing the gradients
             theory = re.search(r"^task\s+(.+)\s+grad", mdccmd, re.MULTILINE).group(1)
             if theory == "ccsd(t)":
@@ -280,7 +282,7 @@ task python
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
-        method = input_model.model.method.lower()
+        method = input_model.specification.model.method.lower()
         method = method[4:] if method.startswith("nwc-") else method
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
@@ -302,10 +304,10 @@ task python
                 qcvars["CURRENT HESSIAN"] = nwhess
 
             # Normalize the output as a float or list of floats
-            if input_model.driver.upper() == "PROPERTIES":
+            if input_model.specification.driver.upper() == "PROPERTIES":
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
-                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+                retres = qcvars[f"CURRENT {input_model.specification.driver.upper()}"]
         except KeyError:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 

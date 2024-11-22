@@ -5,7 +5,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 # Molecule where autoz fails
 _auto_z_problem = xyz = """C                    15.204188380000    -3.519180270000   -10.798726560000
@@ -66,7 +66,10 @@ def test_b3lyp(nh2_data, schema_versions, request):
     nh2 = models.Molecule.from_data(nh2_data)
 
     # Run NH2
-    resi = {"molecule": nh2, "driver": "energy", "model": {"method": "b3lyp", "basis": "3-21g"}}
+    if from_v2(request.node.name):
+        resi = {"molecule": nh2, "specification": {"driver": "energy", "model": {"method": "b3lyp", "basis": "3-21g"}}}
+    else:
+        resi = {"molecule": nh2, "driver": "energy", "model": {"method": "b3lyp", "basis": "3-21g"}}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
@@ -75,7 +78,7 @@ def test_b3lyp(nh2_data, schema_versions, request):
     # Make sure the calculation completed successfully
     assert compare_values(-55.554037, res["return_result"], atol=1e-3)
     if "v2" in request.node.name:
-        assert res["input_data"]["driver"] == "energy"
+        assert res["input_data"]["specification"]["driver"] == "energy"
     else:
         assert res["driver"] == "energy"
     assert "provenance" in res
@@ -98,7 +101,10 @@ def test_hess(nh2_data, schema_versions, request):
     models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
-    resi = {"molecule": nh2, "driver": "hessian", "model": {"method": "b3lyp", "basis": "3-21g"}}
+    if from_v2(request.node.name):
+        resi = {"molecule": nh2, "specification": {"driver": "hessian", "model": {"method": "b3lyp", "basis": "3-21g"}}}
+    else:
+        resi = {"molecule": nh2, "driver": "hessian", "model": {"method": "b3lyp", "basis": "3-21g"}}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False, return_version=retver)
@@ -127,12 +133,22 @@ def test_gradient(nh2_data, schema_versions, request):
     models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
-    resi = {
-        "molecule": nh2,
-        "driver": "gradient",
-        "model": {"method": "b3lyp", "basis": "3-21g"},
-        "keywords": {"dft__convergence__gradient": "1e-6"},
-    }
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": nh2,
+            "specification": {
+                "driver": "gradient",
+                "model": {"method": "b3lyp", "basis": "3-21g"},
+                "keywords": {"dft__convergence__gradient": "1e-6"},
+            },
+        }
+    else:
+        resi = {
+            "molecule": nh2,
+            "driver": "gradient",
+            "model": {"method": "b3lyp", "basis": "3-21g"},
+            "keywords": {"dft__convergence__gradient": "1e-6"},
+        }
     resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
@@ -183,12 +199,22 @@ def test_dipole(h20_data, schema_versions, request):
     h20 = models.Molecule.from_data(h20_data)
 
     # Run NH2
-    resi = {
-        "molecule": h20,
-        "driver": "properties",
-        "model": {"method": "dft", "basis": "3-21g"},
-        "keywords": {"dft__xc": "b3lyp", "property__dipole": True},
-    }
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": h20,
+            "specification": {
+                "driver": "properties",
+                "model": {"method": "dft", "basis": "3-21g"},
+                "keywords": {"dft__xc": "b3lyp", "property__dipole": True},
+            },
+        }
+    else:
+        resi = {
+            "molecule": h20,
+            "driver": "properties",
+            "model": {"method": "dft", "basis": "3-21g"},
+            "keywords": {"dft__xc": "b3lyp", "property__dipole": True},
+        }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
@@ -198,7 +224,7 @@ def test_dipole(h20_data, schema_versions, request):
     # Make sure the calculation completed successfully
     assert compare_values(-75.764944, res["return_result"], atol=1e-3)
     if "v2" in request.node.name:
-        assert res["input_data"]["driver"] == "properties"
+        assert res["input_data"]["specification"]["driver"] == "properties"
     else:
         assert res["driver"] == "properties"
     assert "provenance" in res
@@ -236,12 +262,22 @@ def test_homo_lumo(h20v2_data, schema_versions, request):
     h20v2 = models.Molecule.from_data(h20v2_data)
 
     # Run NH2
-    resi = {
-        "molecule": h20v2,
-        "driver": "energy",
-        "model": {"method": "dft", "basis": "3-21g"},
-        "keywords": {"dft__xc": "b3lyp"},
-    }
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": h20v2,
+            "specification": {
+                "driver": "energy",
+                "model": {"method": "dft", "basis": "3-21g"},
+                "keywords": {"dft__xc": "b3lyp"},
+            },
+        }
+    else:
+        resi = {
+            "molecule": h20v2,
+            "driver": "energy",
+            "model": {"method": "dft", "basis": "3-21g"},
+            "keywords": {"dft__xc": "b3lyp"},
+        }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=True, return_version=retver)
@@ -251,7 +287,7 @@ def test_homo_lumo(h20v2_data, schema_versions, request):
     # Make sure the calculation completed successfully
     assert compare_values(-75.968095, res["return_result"], atol=1e-3)
     if "v2" in request.node.name:
-        assert res["input_data"]["driver"] == "energy"
+        assert res["input_data"]["specification"]["driver"] == "energy"
     else:
         assert res["driver"] == "energy"
     assert "provenance" in res
@@ -287,7 +323,13 @@ H      -0.54657475       1.79916975      -0.87390126
 H      -0.52288871       1.72555240       0.89907326
 H       0.44142019      -0.33354425      -0.77152059"""
     mol = models.Molecule.from_data(xyz)
-    atin = {"molecule": mol, "model": {"method": "b3lyp", "basis": "6-31g"}, "driver": "gradient"}
+    if from_v2(request.node.name):
+        atin = {
+            "molecule": mol,
+            "specification": {"model": {"method": "b3lyp", "basis": "6-31g"}, "driver": "gradient"},
+        }
+    else:
+        atin = {"molecule": mol, "model": {"method": "b3lyp", "basis": "6-31g"}, "driver": "gradient"}
 
     atin = checkver_and_convert(atin, request.node.name, "pre")
     atres = qcng.compute(atin, "nwchem", raise_error=True, return_version=retver)
@@ -301,12 +343,22 @@ def test_autoz_error(schema_versions, request):
 
     # Large molecule that leads to an AutoZ error
     mol = models.Molecule.from_data(_auto_z_problem)
-    resi = {
-        "molecule": mol,
-        "model": {"method": "hf", "basis": "sto-3g"},
-        "driver": "energy",
-        "protocols": {"error_correction": {"default_policy": False}},
-    }  # Turn off error correction
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": mol,
+            "specification": {
+                "model": {"method": "hf", "basis": "sto-3g"},
+                "driver": "energy",
+                "protocols": {"error_correction": {"default_policy": False}},
+            },
+        }  # Turn off error correction
+    else:
+        resi = {
+            "molecule": mol,
+            "model": {"method": "hf", "basis": "sto-3g"},
+            "driver": "energy",
+            "protocols": {"error_correction": {"default_policy": False}},
+        }  # Turn off error correction
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=False, return_version=retver)
@@ -316,12 +368,22 @@ def test_autoz_error(schema_versions, request):
     assert "Error when generating redundant atomic coordinates" in result.error.error_message
 
     # Turn off autoz
-    resi = {
-        "molecule": mol,
-        "model": {"method": "hf", "basis": "sto-3g"},
-        "driver": "energy",
-        "keywords": {"geometry__noautoz": True},
-    }
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": mol,
+            "specification": {
+                "model": {"method": "hf", "basis": "sto-3g"},
+                "driver": "energy",
+                "keywords": {"geometry__noautoz": True},
+            },
+        }
+    else:
+        resi = {
+            "molecule": mol,
+            "model": {"method": "hf", "basis": "sto-3g"},
+            "driver": "energy",
+            "keywords": {"geometry__noautoz": True},
+        }
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=False, return_version=retver)
     result = checkver_and_convert(result, request.node.name, "post", vercheck=False)  # , excuse_as_v2=True)
@@ -337,12 +399,22 @@ def test_autoz_error_correction(schema_versions, request):
 
     # Large molecule that leads to an AutoZ error
     mol = models.Molecule.from_data(_auto_z_problem)
-    resi = {
-        "molecule": mol,
-        "model": {"method": "hf", "basis": "sto-3g"},
-        "driver": "energy",
-        "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-1},
-    }
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": mol,
+            "specification": {
+                "model": {"method": "hf", "basis": "sto-3g"},
+                "driver": "energy",
+                "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-1},
+            },
+        }
+    else:
+        resi = {
+            "molecule": mol,
+            "model": {"method": "hf", "basis": "sto-3g"},
+            "driver": "energy",
+            "keywords": {"scf__maxiter": 250, "scf__thresh": 1e-1},
+        }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=True, return_version=retver)
@@ -370,19 +442,32 @@ def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema
     models, retver, _ = schema_versions
     h20v2 = models.Molecule.from_data(h20v2_data)
 
-    resi = {
-        "molecule": h20v2,
-        "model": {"method": method, "basis": "sto-3g"},
-        "driver": "energy",
-        "keywords": {
-            keyword: init_iters,
-            "qc_module": use_tce,
-            "scf__uhf": True,
-        },  # UHF needed for SCF test
-    }
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": h20v2,
+            "specification": {
+                "model": {"method": method, "basis": "sto-3g"},
+                "driver": "energy",
+                "keywords": {
+                    keyword: init_iters,
+                    "qc_module": use_tce,
+                    "scf__uhf": True,
+                },
+            },  # UHF needed for SCF test
+        }
+    else:
+        resi = {
+            "molecule": h20v2,
+            "model": {"method": method, "basis": "sto-3g"},
+            "driver": "energy",
+            "keywords": {
+                keyword: init_iters,
+                "qc_module": use_tce,
+                "scf__uhf": True,
+            },  # UHF needed for SCF test
+        }
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
-    print("AA2")
     result = qcng.compute(resi, "nwchem", return_version=retver, raise_error=True)
     result = checkver_and_convert(result, request.node.name, "post")  # , excuse_as_v2=True)
 
@@ -398,14 +483,26 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
     models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
 
-    resi = {
-        "molecule": nh2,
-        "driver": "gradient",
-        "model": {"method": "b3lyp", "basis": "3-21g"},
-        "keywords": {"dft__convergence__gradient": "1e-6", "dft__iterations": 4},
-        "protocols": {"error_correction": {"default_policy": False}},
-        "extras": {"allow_restarts": True},
-    }
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": nh2,
+            "specification": {
+                "driver": "gradient",
+                "model": {"method": "b3lyp", "basis": "3-21g"},
+                "keywords": {"dft__convergence__gradient": "1e-6", "dft__iterations": 4},
+                "protocols": {"error_correction": {"default_policy": False}},
+            },
+            "extras": {"allow_restarts": True},
+        }
+    else:
+        resi = {
+            "molecule": nh2,
+            "driver": "gradient",
+            "model": {"method": "b3lyp", "basis": "3-21g"},
+            "keywords": {"dft__convergence__gradient": "1e-6", "dft__iterations": 4},
+            "protocols": {"error_correction": {"default_policy": False}},
+            "extras": {"allow_restarts": True},
+        }
 
     # Run once: It should fail to converge
     local_options = {"scratch_messy": True, "scratch_directory": str(tmpdir)}

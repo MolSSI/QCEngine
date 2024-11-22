@@ -157,7 +157,7 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
 
     def compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
         # Get the error correction configuration
-        error_policy = input_data.protocols.error_correction
+        error_policy = input_data.specification.protocols.error_correction
 
         # Create a local copy of the input data
         local_input_data = input_data
@@ -189,10 +189,11 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
 
                 # Generate and apply the updated keywords
                 keyword_updates = e.create_keyword_update(local_input_data)
-                new_keywords = local_input_data.keywords.copy()
+                new_keywords = local_input_data.specification.keywords.copy()
                 new_keywords.update(keyword_updates)
                 local_input_data = input_data.__class__(
-                    **local_input_data.dict(exclude={"keywords"}), keywords=new_keywords
+                    **local_input_data.model_dump(exclude={"specification"}),
+                    specification={**local_input_data.specification.model_dump(), "keywords": new_keywords},
                 )
 
                 # Store the error details and mitigations employed
