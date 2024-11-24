@@ -11,7 +11,7 @@ import qcelemental as qcel
 from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, has_program, schema_versions, schema_versions2, using
+from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions, schema_versions2, using
 
 qcsk_bs = {"name": "custom_basis", "center_data": center_data, "atom_map": ["bs_sto3g_h", "bs_sto3g_h"]}
 
@@ -75,7 +75,12 @@ def test_compute_energy(program, model, keywords, schema_versions, request):
 
     molecule = _get_molecule(program, models.Molecule)
 
-    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=molecule, specification=models.AtomicSpecification(driver="energy", model=model, keywords=keywords)
+        )
+    else:
+        inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True, return_version=retver)
@@ -95,9 +100,22 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
 
     molecule = _get_molecule(program, models.Molecule)
 
-    inp = models.AtomicInput(
-        molecule=molecule, driver="gradient", model=model, extras={"mytag": "something"}, keywords=keywords
-    )
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=molecule,
+            extras={"mytag": "something"},
+            specification=models.AtomicSpecification(
+                driver="gradient", model=model, extras={"myspectag": "somethingelse"}, keywords=keywords
+            ),
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=molecule,
+            driver="gradient",
+            model=model,
+            extras={"mytag": "something", "myspectag": "somethingelse"},
+            keywords=keywords,
+        )
     if program in ["adcc"]:
         inp = checkver_and_convert(inp, request.node.name, "pre")
         with pytest.raises(qcng.exceptions.InputError) as e:
@@ -119,6 +137,7 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
             assert "mytag" not in ret.extras, "input extras wrongly present in result"
         else:
             assert "mytag" in ret.extras, ret.extras
+            assert "myspectag" in ret.extras, ret.extras
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods_qcsk_basis)
@@ -129,7 +148,12 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
         pytest.skip("Program '{}' not found.".format(program))
 
     molecule = _get_molecule(program, models.Molecule)
-    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=molecule, specification=models.AtomicSpecification(driver="energy", model=model, keywords=keywords)
+        )
+    else:
+        inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
 
     with pytest.raises(qcng.exceptions.InputError) as e:
         inp = checkver_and_convert(inp, request.node.name, "pre")
@@ -179,11 +203,17 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
 
     amodel = copy.deepcopy(model)
     adriver = amodel.pop("driver", "energy")
-    inp = {
-        "molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
-        "model": amodel,
-        "driver": adriver,
-    }
+    if from_v2(request.node.name):
+        inp = {
+            "molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+            "specification": {"model": amodel, "driver": adriver},
+        }
+    else:
+        inp = {
+            "molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+            "model": amodel,
+            "driver": adriver,
+        }
     if not inpdict:
         inp = models.AtomicInput(**inp)
     inp = checkver_and_convert(inp, request.node.name, "pre")
@@ -228,11 +258,17 @@ def test_compute_badder_models(program, model, schema_versions2, request, raiser
 
     amodel = copy.deepcopy(model)
     adriver = amodel.pop("driver", "energy")
-    inp = {
-        "molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
-        "model": amodel,
-        "driver": adriver,
-    }
+    if from_v2(request.node.name):
+        inp = {
+            "molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+            "specification": {"model": amodel, "driver": adriver},
+        }
+    else:
+        inp = {
+            "molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+            "model": amodel,
+            "driver": adriver,
+        }
     # inp = checkver_and_convert(inp, request.node.name, "pre")
 
     if raiserr:
@@ -265,11 +301,17 @@ def test_psi4_restarts(monkeypatch, schema_versions, request):
         pytest.skip("Program psi4 not found.")
 
     # create the psi4 task
-    inp = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
-        driver="energy",
-        model={"method": "hf", "basis": "6-31G"},
-    )
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+            specification={"driver": "energy", "model": {"method": "hf", "basis": "6-31G"}},
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+            driver="energy",
+            model={"method": "hf", "basis": "6-31G"},
+        )
 
     def mock_execute(*args, **kwargs):
         """
