@@ -111,11 +111,11 @@ class RDKitHarness(ProgramHarness):
         jmol = input_data.molecule
         mol = self._process_molecule_rdkit(jmol)
 
-        if input_data.model.method.lower() == "uff":
+        if input_data.specification.model.method.lower() == "uff":
             ff = AllChem.UFFGetMoleculeForceField(mol)
             all_params = AllChem.UFFHasAllMoleculeParams(mol)
-        elif input_data.model.method.lower() in ["mmff94", "mmff94s"]:
-            props = AllChem.MMFFGetMoleculeProperties(mol, mmffVariant=input_data.model.method)
+        elif input_data.specification.model.method.lower() in ["mmff94", "mmff94s"]:
+            props = AllChem.MMFFGetMoleculeProperties(mol, mmffVariant=input_data.specification.model.method)
             ff = AllChem.MMFFGetMoleculeForceField(mol, props)
             all_params = AllChem.MMFFHasAllMoleculeParams(mol)
         else:
@@ -128,9 +128,9 @@ class RDKitHarness(ProgramHarness):
 
         ret_data["properties"] = {"return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")}
 
-        if input_data.driver == "energy":
+        if input_data.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
-        elif input_data.driver == "gradient":
+        elif input_data.specification.driver == "gradient":
             coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
             ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
         else:

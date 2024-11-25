@@ -98,19 +98,19 @@ class MP2DHarness(ProgramHarness):
     ) -> Dict[str, Any]:
 
         # strip engine hint
-        mtd = input_model.model.method
+        mtd = input_model.specification.model.method
         if mtd.startswith("mp2d-"):
             mtd = mtd[5:]
 
-        if input_model.driver.derivative_int() > 1:
-            raise InputError(f"Driver {input_model.driver} not implemented for MP2D.")
+        if input_model.specification.driver.derivative_int() > 1:
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for MP2D.")
 
         # temp until actual options object
         input_model.extras["info"] = empirical_dispersion_resources.from_arrays(
             name_hint=mtd,
-            level_hint=input_model.keywords.get("level_hint", None),
-            param_tweaks=input_model.keywords.get("params_tweaks", None),
-            dashcoeff_supplement=input_model.keywords.get("dashcoeff_supplement", None),
+            level_hint=input_model.specification.keywords.get("level_hint", None),
+            param_tweaks=input_model.specification.keywords.get("params_tweaks", None),
+            dashcoeff_supplement=input_model.specification.keywords.get("dashcoeff_supplement", None),
         )
 
         # Need 'real' field later and that's only guaranteed for molrec
@@ -133,7 +133,7 @@ class MP2DHarness(ProgramHarness):
                 **input_model.extras["info"]["dashparams"]
             ).split()
         )
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             command.append("--gradient")
 
         return {
@@ -165,7 +165,7 @@ class MP2DHarness(ProgramHarness):
             elif re.match("Atomic Coordinates in Angstroms", ln):
                 break
         else:
-            if not ((real_nat == 1) and (input_model.driver == "gradient")):
+            if not ((real_nat == 1) and (input_model.specification.driver == "gradient")):
                 raise UnknownError("Unknown issue occured.")
 
         # parse gradient output
@@ -173,7 +173,7 @@ class MP2DHarness(ProgramHarness):
             srealgrad = outfiles["mp2d_gradient"]
             realgrad = np.fromstring(srealgrad, count=3 * real_nat, sep=" ").reshape((-1, 3))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             ireal = np.argwhere(real).reshape((-1))
             fullgrad = np.zeros((full_nat, 3))
             try:
@@ -190,7 +190,7 @@ class MP2DHarness(ProgramHarness):
         if qcvkey:
             calcinfo.append(qcel.Datum(f"{qcvkey} DISPERSION CORRECTION ENERGY", "Eh", ene))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
             calcinfo.append(qcel.Datum("DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
             calcinfo.append(qcel.Datum("2-BODY DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
@@ -208,7 +208,7 @@ class MP2DHarness(ProgramHarness):
         # jobrec['properties'] = {"return_energy": ene}
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
 
-        retres = calcinfo[f"CURRENT {input_model.driver.upper()}"]
+        retres = calcinfo[f"CURRENT {input_model.specification.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
@@ -217,7 +217,7 @@ class MP2DHarness(ProgramHarness):
         properties = {
             "calcinfo_natom": len(input_model.molecule.symbols),
             "return_energy": ene,
-            f"return_{input_model.driver.value}": retres,
+            f"return_{input_model.specification.driver.value}": retres,
         }
 
         output_data = {
