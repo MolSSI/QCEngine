@@ -7,7 +7,7 @@ from typing import List
 import qcelemental
 
 from qcengine import cli, get_molecule, util
-from qcengine.testing import checkver_and_convert, schema_versions2, using
+from qcengine.testing import checkver_and_convert, schema_versions, using
 
 
 def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
@@ -57,9 +57,9 @@ def test_info():
 
 
 @using("psi4")
-def test_run_psi4(tmp_path, schema_versions2, request):
+def test_run_psi4(tmp_path, schema_versions, request):
     """Tests qcengine run with psi4 and JSON input"""
-    models, _, _ = schema_versions2
+    models, retver, _ = schema_versions
 
     def check_result(stdout):
         output = json.loads(stdout)
@@ -74,14 +74,14 @@ def test_run_psi4(tmp_path, schema_versions2, request):
     )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    args = ["run", "psi4", inp.model_dump_json()]
+    args = ["run", "psi4", f"--return-version={retver}", inp.model_dump_json()]
     check_result(run_qcengine_cli(args))
 
-    args = ["run", "psi4", os.path.join(tmp_path, "input.json")]
+    args = ["run", "psi4", os.path.join(tmp_path, "input.json"), f"--return-version={retver}"]
     with util.disk_files({"input.json": inp.model_dump_json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
 
-    args = ["run", "psi4", "-"]
+    args = ["run", "psi4", f"--return-version={retver}", "-"]
     # model_dump_json() works on v1 or v2 (see above). below tests that json() still works on v1.
     if "as_v1" in request.node.name:
         check_result(run_qcengine_cli(args, stdin=inp.json()))
@@ -91,9 +91,9 @@ def test_run_psi4(tmp_path, schema_versions2, request):
 
 @using("geometric")
 @using("psi4")
-def test_run_procedure(tmp_path, schema_versions2, request):
+def test_run_procedure(tmp_path, schema_versions, request):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
-    models, _, _ = schema_versions2
+    models, retver, _ = schema_versions
 
     def check_result(stdout):
         output = json.loads(stdout)
@@ -109,16 +109,19 @@ def test_run_procedure(tmp_path, schema_versions2, request):
     inp = models.OptimizationInput(**inp)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    args = ["run-procedure", "geometric", inp.model_dump_json()]
+    if "to_v" in request.node.name:
+        args = ["run", "geometric", inp.model_dump_json(), f"--return-version={retver}"]
+    else:
+        args = ["run-procedure", "geometric", inp.model_dump_json()]
     check_result(run_qcengine_cli(args))
 
-    args = ["run-procedure", "geometric", os.path.join(tmp_path, "input.json")]
+    if "to_v" in request.node.name:
+        args = ["run", "geometric", f"--return-version={retver}", os.path.join(tmp_path, "input.json")]
+    else:
+        args = ["run-procedure", "geometric", os.path.join(tmp_path, "input.json")]
     with util.disk_files({"input.json": inp.model_dump_json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
 
-    args = ["run-procedure", "geometric", inp.model_dump_json()]
-    check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))
-
     # try unified route
-    args = ["run", "geometric", inp.model_dump_json()]
+    args = ["run", "geometric", inp.model_dump_json(), f"--return-version={retver}"]
     check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))

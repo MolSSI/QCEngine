@@ -71,9 +71,15 @@ class ProcedureHarness(BaseModel, abc.ABC):
             # remember these are user-provided dictionaries, so they'll have the mandatory fields,
             #   like driver, not the helpful discriminator fields like schema_version.
 
-            # for now, the two dictionaries look the same, so cast to the one we want
-            # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
-            mdl = model_wrapper(data, v1_model)
+            schver = data.get("schema_version")
+            if schver == 1:
+                mdl = model_wrapper(data, v1_model)
+            elif schver == 2:
+                mdl = model_wrapper(data, v2_model)
+            else:
+                # for now, the two dictionaries look the same, so cast to the one we want
+                # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
+                mdl = model_wrapper(data, v1_model)
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:

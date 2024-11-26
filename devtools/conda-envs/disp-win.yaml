@@ -1,0 +1,26 @@
+name: test
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - dftd3-python =1.2.0
+  - gcp-correction
+  - geometric
+  - optking
+  - pymdi
+
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental
+  - pydantic=2
+  - pydantic-settings
+  - msgpack-python
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+

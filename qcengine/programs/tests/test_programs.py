@@ -255,7 +255,7 @@ def test_mopac_task(schema_versions, request):
     assert "== MOPAC DONE ==" in ret.stdout
 
 
-def test_random_failure_no_retries(failure_engine, schema_versions, request):
+def test_random_failure_no_retries_input(failure_engine, schema_versions, request):
     _, retver, _ = schema_versions
 
     failure_engine.iter_modes = ["input_error"]
@@ -263,14 +263,28 @@ def test_random_failure_no_retries(failure_engine, schema_versions, request):
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.error.error_type == "input_error"
-    assert "retries" not in ret.input_data["provenance"].keys()
+    provenance_keys = (
+        ret.input_data.provenance.model_dump().keys()
+        if ("_v2" in request.node.name)
+        else ret.input_data["provenance"].keys()
+    )
+    assert "retries" not in provenance_keys
+
+
+def test_random_failure_no_retries_random(failure_engine, schema_versions, request):
+    _, retver, _ = schema_versions
 
     failure_engine.iter_modes = ["random_error"]
     ret = qcng.compute(failure_engine.get_job(), failure_engine.name, raise_error=False, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.error.error_type == "random_error"
-    assert "retries" not in ret.input_data["provenance"].keys()
+    provenance_keys = (
+        ret.input_data.provenance.model_dump().keys()
+        if ("_v2" in request.node.name)
+        else ret.input_data["provenance"].keys()
+    )
+    assert "retries" not in provenance_keys
 
 
 def test_random_failure_with_retries(failure_engine, schema_versions, request):
@@ -286,7 +300,10 @@ def test_random_failure_with_retries(failure_engine, schema_versions, request):
     )
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
-    assert ret.input_data["provenance"]["retries"] == 2
+    retries = (
+        ret.input_data.provenance.retries if ("_v2" in request.node.name) else ret.input_data["provenance"]["retries"]
+    )
+    assert retries == 2
     assert ret.error.error_type == "random_error"
 
     failure_engine.iter_modes = ["random_error", "input_error"]
@@ -299,7 +316,10 @@ def test_random_failure_with_retries(failure_engine, schema_versions, request):
     )
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
-    assert ret.input_data["provenance"]["retries"] == 1
+    retries = (
+        ret.input_data.provenance.retries if ("_v2" in request.node.name) else ret.input_data["provenance"]["retries"]
+    )
+    assert retries == 1
     assert ret.error.error_type == "input_error"
 
 

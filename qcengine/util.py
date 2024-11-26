@@ -224,13 +224,22 @@ def handle_output_metadata(
             1: qcelemental.models.v1.FailedOperation,
             2: qcelemental.models.v2.FailedOperation,
         }[convert_version]
-        ret = model(
-            success=output_fusion.pop("success", False), error=output_fusion.pop("error"), input_data=output_fusion
-        )
+
+        # for input_data, use object (not dict) if possible for >=v2
+        success_ret = output_fusion.pop("success", False)
+        error_ret = output_fusion.pop("error")
+        if convert_version >= 2:
+            if isinstance(output_data, (qcelemental.models.v1.FailedOperation, qcelemental.models.v2.FailedOperation)):
+                # when harnesses return FailedOp object rather than raising error
+                inp_ret = output_data.input_data
+            else:
+                inp_ret = output_data.__class__(**output_fusion)
+        else:
+            inp_ret = output_fusion
+        ret = model(success=success_ret, error=error_ret, input_data=inp_ret)
 
     if convert_version > 0:
         ret = ret.convert_v(convert_version)
-    returned_version = getattr(ret, "schema_version", "not a model")
 
     if return_dict:
         # Use Pydantic to serialize, then reconstruct as Python dict of Python Primals

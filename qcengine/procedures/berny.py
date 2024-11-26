@@ -5,7 +5,8 @@ from io import StringIO
 from typing import Any, ClassVar, Dict, Union
 
 import numpy as np
-from qcelemental.models.v2 import FailedOperation, OptimizationInput, OptimizationResult
+from qcelemental.models.v1 import OptimizationResult
+from qcelemental.models.v2 import FailedOperation, OptimizationInput
 from qcelemental.util import which_import
 
 import qcengine
@@ -94,5 +95,6 @@ class BernyProcedure(ProcedureHarness):
                     "stdout": log_stream.getvalue(),  # collect logged messages
                 }
             )
-            return OptimizationResult(**output_data)
+            output_data = OptimizationResult(**output_data)
+            return output_data.convert_v(2)
         return FailedOperation(input_data=input_data, error=error)

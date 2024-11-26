@@ -73,6 +73,9 @@ def parse_args():
         "(ii) A file name, "
         "(iii) '-', indicating data will be read from STDIN.",
     )
+    run.add_argument(
+        "--return-version", default=-1, type=int, help="Schema version to return, if not the input version"
+    )
 
     run_procedure = subparsers.add_parser(
         "run-procedure",
@@ -234,7 +237,12 @@ def main(args=None):
     if command == "info":
         info_cli(args)
     elif command == "run":
-        ret = compute(data_arg_helper(args["data"]), args["program"], task_config=task_config)
+        ret = compute(
+            data_arg_helper(args["data"]),
+            args["program"],
+            task_config=task_config,
+            return_version=args["return_version"],
+        )
         print(ret.json())
     elif command == "run-procedure":
         ret = compute_procedure(data_arg_helper(args["data"]), args["procedure"], task_config=task_config)

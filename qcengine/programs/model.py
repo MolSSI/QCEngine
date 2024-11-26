@@ -76,19 +76,27 @@ class ProgramHarness(BaseModel, abc.ABC):
         # Note: Someday when the multiple QCSchema versions QCEngine supports are all within the
         #  Pydantic v2 API base class, this can use discriminated unions instead of logic.
 
-        if isinstance(data, qcelemental.models.v1.AtomicInput):
-            mdl = model_wrapper(data, qcelemental.models.v1.AtomicInput)
-        elif isinstance(data, qcelemental.models.v2.AtomicInput):
-            mdl = model_wrapper(data, qcelemental.models.v2.AtomicInput)
+        v1_model = getattr(qcelemental.models.v1, "AtomicInput")
+        v2_model = getattr(qcelemental.models.v2, "AtomicInput")
+
+        if isinstance(data, v1_model):
+            mdl = model_wrapper(data, v1_model)
+        elif isinstance(data, v2_model):
+            mdl = model_wrapper(data, v2_model)
         elif isinstance(data, dict):
             # remember these are user-provided dictionaries, so they'll have the mandatory fields,
             #   like driver, not the helpful discriminator fields like schema_version.
 
-            # for now, the two dictionaries look the same, so cast to the one we want
-            # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
-            mdl = model_wrapper(
-                data, qcelemental.models.v1.AtomicInput
-            )  # TODO v2  # TODO kill off excuse_as_v2, now fix 2->-1 in schema_versions
+            schver = data.get("schema_version")
+            if schver == 1:
+                mdl = model_wrapper(data, v1_model)
+            elif schver == 2:
+                mdl = model_wrapper(data, v2_model)
+            else:
+                # for now, the two dictionaries look the same, so cast to the one we want
+                # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
+                # TODO v2  # TODO kill off excuse_as_v2, now fix 2->-1 in schema_versions
+                mdl = model_wrapper(data, v1_model)
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:

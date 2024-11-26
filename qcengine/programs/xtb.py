@@ -11,7 +11,7 @@ visit `its documentation <https://xtb-python.readthedocs.io>`_.
 
 from typing import Any, ClassVar, Dict
 
-from qcelemental.models.v2 import AtomicInput, AtomicResult
+from qcelemental.models.v2 import AtomicInput, AtomicResult, FailedOperation
 from qcelemental.util import safe_version, which_import
 
 from ..config import TaskConfig
@@ -68,6 +68,11 @@ class XTBHarness(ProgramHarness):
         # Run the Harness
         input_data = input_data.convert_v(1)
         output = run_qcschema(input_data)
+
+        # xtb qcschema interface stores error in Result model
+        if not output.success:
+            return FailedOperation(input_data=input_data, error=output.error.model_dump())
+
         output = output.convert_v(2)
 
         # Make sure all keys from the initial input spec are sent along
