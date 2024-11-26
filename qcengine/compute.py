@@ -70,6 +70,28 @@ def compute(
         AtomicResult, OptimizationResult, FailedOperation, etc., or Dict representation of any object type
         A QCSchema representation of the requested output, type depends on return_dict key.
 
+        .. _`table:compute_result`:
+
+        +-----------+-------------+-------------+--------------------------------------------------+
+        | good_calc | raise_error | return_dict | output                                           |
+        +===========+=============+=============+==================================================+
+        | T         | F (def)     | F (def)     | ``AtomicResult`` object                          |
+        +-----------+-------------+-------------+--------------------------------------------------+
+        | T         | T           | F (def)     | ``AtomicResult`` object                          |
+        +-----------+-------------+-------------+--------------------------------------------------+
+        | T         | T           | T           | dict of ``AtomicResult``                         |
+        +-----------+-------------+-------------+--------------------------------------------------+
+        | T         | F (def)     | T           | dict of ``AtomicResult``                         |
+        +-----------+-------------+-------------+--------------------------------------------------+
+        | F         | F (def)     | F (def)     | ``FailedOperation`` object                       |
+        +-----------+-------------+-------------+--------------------------------------------------+
+        | F         | T           | F (def)     | raises ``InputError`` (type encoded in FailedOp) |
+        +-----------+-------------+-------------+--------------------------------------------------+
+        | F         | T           | T           | raises ``InputError`` (type encoded in FailedOp) |
+        +-----------+-------------+-------------+--------------------------------------------------+
+        | F         | F (def)     | T           | dict of ``FailedOperation``                      |
+        +-----------+-------------+-------------+--------------------------------------------------+
+
     .. versionadded:: 0.50.0
        input_data can newly be QCSchema v2 as well as longstanding v1.
        The compute_procedure is newly incorporated into compute.
@@ -113,12 +135,16 @@ def compute(
                     output_data = executor.compute(input_data, config)
                     break
                 except RandomError as e:
+                    if return_version >= 2:
+                        output_data = input_data
 
                     if x == config.retries:
                         raise e
                     else:
                         metadata["retries"] += 1
                 except:
+                    if return_version >= 2:
+                        output_data = input_data
                     raise
 
     return handle_output_metadata(

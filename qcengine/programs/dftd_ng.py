@@ -10,7 +10,7 @@ respective dispersion correction.
 from typing import Any, ClassVar, Dict
 
 import qcelemental
-from qcelemental.models.v2 import AtomicInput, AtomicResult
+from qcelemental.models.v2 import AtomicInput, AtomicResult, FailedOperation
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..config import TaskConfig
@@ -109,6 +109,11 @@ class DFTD4Harness(ProgramHarness):
 
         # Run the Harness
         output = run_qcschema(input_model)
+
+        # d4 qcschema interface stores error in Result model
+        if not output.success:
+            return FailedOperation(input_data=input_data, error=output.error.model_dump())
+
         output = output.convert_v(2)
 
         if "info" in output.extras:
@@ -278,6 +283,11 @@ class SDFTD3Harness(ProgramHarness):
 
         # Run the Harness
         output = run_qcschema(input_model)
+
+        # d3 qcschema interface stores error in Result model
+        if not output.success:
+            return FailedOperation(input_data=input_data, error=output.error.model_dump())
+
         output = output.convert_v(2)
 
         if "info" in output.extras:
