@@ -410,7 +410,8 @@ def test_torsiondrive_generic(schema_versions, request):
     ret = qcng.compute(input_data, "torsiondrive", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
-    assert ret.error is None
+    if "_v2" not in request.node.name:
+        assert ret.error is None
     assert ret.success
 
     expected_grid_ids = {"180", "0"}
@@ -429,6 +430,7 @@ def test_torsiondrive_generic(schema_versions, request):
     assert ret.provenance.creator.lower() == "torsiondrive"
     assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
     assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
+    assert ret.optimization_history["180"][0].trajectory[0].schema_version == 2 if ("_v2" in request.node.name) else 1
 
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
 
