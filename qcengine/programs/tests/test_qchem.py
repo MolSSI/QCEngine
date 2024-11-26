@@ -29,7 +29,9 @@ def test_qchem_output_parser(test_case):
     inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
     outfiles = qcel.util.deserialize(data["outfiles.msgpack"], "msgpack-ext")
-    output = qcng.get_program("qchem", check=False).parse_output(outfiles, inp).dict()
+    output = qcng.get_program("qchem", check=False).parse_output(outfiles, inp)
+    # only qcng.compute() handles schema versions. above returns v2, so need to convert
+    output = output.convert_v(1).dict()
     output.pop("provenance", None)
 
     output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
@@ -129,7 +131,9 @@ def test_qchem_logfile_parser(test_case):
     data = qchem_logonly_info.get_test_data(test_case)
     outfiles = {"dispatch.out": data["qchem.out"]}
     with pytest.warns(Warning):
-        output = qcng.get_program("qchem", check=False).parse_logfile(outfiles).dict()
+        output = qcng.get_program("qchem", check=False).parse_logfile(outfiles)
+    # only qcng.compute() handles schema versions. above returns v2, so need to convert
+    output = output.convert_v(1).dict()
     output["stdout"] = None
 
     output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
@@ -152,7 +156,9 @@ def test_qchem_logfile_parser_qcscr(test_case):
     outfiles = qcel.util.deserialize(data["outfiles.msgpack"], "msgpack-ext")
 
     with pytest.warns(Warning):
-        output = qcng.get_program("qchem", check=False).parse_logfile(outfiles).dict()
+        output = qcng.get_program("qchem", check=False).parse_logfile(outfiles)
+    # only qcng.compute() handles schema versions. above returns v2, so need to convert
+    output = output.convert_v(1).dict()
     output["stdout"] = None
 
     output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()

@@ -2,14 +2,16 @@
 Tests the DQM compute dispatch module
 """
 import copy
+import pprint
 
 import msgpack
 import numpy as np
 import pytest
+import qcelemental as qcel
 from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, has_program, schema_versions, using
+from qcengine.testing import checkver_and_convert, has_program, schema_versions, schema_versions2, using
 
 qcsk_bs = {"name": "custom_basis", "center_data": center_data, "atom_map": ["bs_sto3g_h", "bs_sto3g_h"]}
 
@@ -159,7 +161,10 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
         # ("xtb", {"method": "bad"}),
     ],
 )
-def test_compute_bad_models(program, model, schema_versions, request):
+@pytest.mark.parametrize("raiserr", [False, True])
+@pytest.mark.parametrize("retdict", [False, True])
+@pytest.mark.parametrize("inpdict", [False, True])
+def test_compute_bad_models(program, model, schema_versions, request, raiserr, retdict, inpdict):
     models, retver, _ = schema_versions
 
     if not has_program(program):
@@ -167,13 +172,80 @@ def test_compute_bad_models(program, model, schema_versions, request):
 
     amodel = copy.deepcopy(model)
     adriver = amodel.pop("driver", "energy")
-    inp = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)), driver=adriver, model=amodel
-    )
-
+    inp = {
+        "molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+        "model": amodel,
+        "driver": adriver,
+    }
+    if not inpdict:
+        inp = models.AtomicInput(**inp)
     inp = checkver_and_convert(inp, request.node.name, "pre")
-    with pytest.raises(qcng.exceptions.InputError) as exc:
-        ret = qcng.compute(inp, program, raise_error=True, return_version=retver)
+
+    if raiserr:
+        with pytest.raises(qcng.exceptions.InputError) as exc:
+            qcng.compute(inp, program, raise_error=raiserr, return_dict=retdict, return_version=retver)
+    else:
+        ret = qcng.compute(inp, program, raise_error=raiserr, return_dict=retdict, return_version=retver)
+        ret = checkver_and_convert(
+            ret, request.node.name, "post", vercheck=False, cast_dict_as="FailedOperation"
+        )  # TODO release vercheck=F?
+        if retdict:
+            assert ret["success"] is False, "wrongly successful"
+            assert (
+                ret["error"]["error_type"] == "input_error"
+            ), f"wrong type: {ret['error']['error_type']=} != 'input_error'"
+            assert ret["input_data"]["model"]["method"] == model["method"], "input not copied over"
+        else:
+            assert ret.success is False, "wrongly successful"
+            assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation)), "wrong class"
+            assert ret.error.error_type == "input_error", f"wrong type: {ret.error.error_type=} != 'input_error'"
+            if "v2" in request.node.name:
+                assert ret.input_data.model.method == model["method"], "input not copied over"
+            else:
+                assert ret.input_data["model"]["method"] == model["method"], "input not copied over"
+
+
+@pytest.mark.parametrize(
+    "program, model",
+    [
+        ("psi4", {"method": "hf", "driver": "eighth"}),
+    ],
+)
+@pytest.mark.parametrize("raiserr", [False, True])
+@pytest.mark.parametrize("retdict", [False, True])
+def test_compute_badder_models(program, model, schema_versions2, request, raiserr, retdict):
+    models, retver, _ = schema_versions2
+
+    if not has_program(program):
+        pytest.skip("Program '{}' not found.".format(program))
+
+    amodel = copy.deepcopy(model)
+    adriver = amodel.pop("driver", "energy")
+    inp = {
+        "molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
+        "model": amodel,
+        "driver": adriver,
+    }
+    # inp = checkver_and_convert(inp, request.node.name, "pre")
+
+    if raiserr:
+        with pytest.raises(qcng.exceptions.InputError) as exc:
+            qcng.compute(inp, program, raise_error=raiserr, return_dict=retdict, return_version=retver)
+    else:
+        ret = qcng.compute(inp, program, raise_error=raiserr, return_dict=retdict, return_version=retver)
+        if retdict:
+            assert ret["success"] is False, "wrongly successful"
+            assert (
+                ret["error"]["error_type"] == "input_error"
+            ), f"wrong type: {ret['error']['error_type']=} != 'input_error'"
+            assert ret["input_data"]["driver"] == "eighth", "input not copied over"
+        else:
+            assert ret.success is False, "wrongly successful"
+            assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation)), "wrong class"
+            assert ret.error.error_type == "input_error", f"wrong type: {ret.error.error_type=} != 'input_error'"
+            # note that input_data *always* a dict in this test (even for v2)
+            #   since the error is that the AtomicInput model can't be constructed
+            assert ret.input_data["driver"] == "eighth", "input not copied over"
 
 
 def test_psi4_restarts(monkeypatch, schema_versions, request):
