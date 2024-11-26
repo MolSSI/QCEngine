@@ -7,7 +7,8 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models.v2 import AtomicResult, BasisSet
+from qcelemental.models.v1 import AtomicResult as AtomicResult
+from qcelemental.models.v2 import BasisSet
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
@@ -306,4 +307,5 @@ class Psi4Harness(ProgramHarness):
         # Delete keys
         output_data.pop("return_output", None)
 
-        return AtomicResult(**output_data)
+        atres = AtomicResult(**output_data)
+        return atres.convert_v(2)
