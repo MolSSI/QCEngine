@@ -87,7 +87,7 @@ class TurbomoleHarness(ProgramHarness):
         # The 'define' wrapper can only handle normal string basis set input. If
         # a QCSchema basis set is given we break early, because this is not handled
         # right now.
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
 
         turbomolerec = {
@@ -101,16 +101,16 @@ class TurbomoleHarness(ProgramHarness):
         coord_str, moldata = input_model.molecule.to_string(dtype="turbomole", return_data=True)
 
         # Prepare stdin for define call
-        model = input_model.model
+        model = input_model.specification.model
         # geeopt will hold the for which to calculate the gradient.
         # 'x' corresponds to the ground state, 'a 1' would be the GS too.
         # 'a1 2' would be the 1st excited state of the irreducible group A1.
         # Right now only GS are supported, so this is hardcoded as 'x'.
-        geoopt = "x" if input_model.driver.derivative_int() > 0 else ""
+        geoopt = "x" if input_model.specification.driver.derivative_int() > 0 else ""
         stdin, subs = prepare_stdin(
             model.method,
             model.basis,
-            input_model.keywords,
+            input_model.specification.keywords,
             input_model.molecule.molecular_charge,
             input_model.molecule.molecular_multiplicity,
             geoopt,
@@ -138,7 +138,7 @@ class TurbomoleHarness(ProgramHarness):
         turbomolerec["environment"] = env
         # Memory is set in the control file
 
-        keywords = input_model.keywords
+        keywords = input_model.specification.keywords
 
         ########################
         # DETERMINE SOME FLAGS #
@@ -192,7 +192,7 @@ class TurbomoleHarness(ProgramHarness):
         # ------------------------#
 
         # Keep the gradient file for parsing
-        if input_model.driver.derivative_int() == 1:
+        if input_model.specification.driver.derivative_int() == 1:
             turbomolerec["outfiles"]["gradient"] = "gradient"
 
         # ricc2 will also calculate the gradient. But this requires setting
@@ -201,7 +201,7 @@ class TurbomoleHarness(ProgramHarness):
         if ricc2_calculation:
             commands.append("ricc2")
         # Gradient calculation for DFT/HF
-        elif input_model.driver.derivative_int() == 1:
+        elif input_model.specification.driver.derivative_int() == 1:
             grad_command = "rdgrad" if ri_calculation else "grad"
             commands.append(grad_command)
 
@@ -209,7 +209,7 @@ class TurbomoleHarness(ProgramHarness):
         # | Hessian calculations |
         # -----------------------#
 
-        if input_model.driver.derivative_int() == 2:
+        if input_model.specification.driver.derivative_int() == 2:
             freq_command = "NumForce -level cc2" if ricc2_calculation else "aoforce"
             # NumForce seems to ignore the nprhessian command and will always
             # write to unprojected and projected Hessian to "hessian".
@@ -262,7 +262,7 @@ class TurbomoleHarness(ProgramHarness):
         if hessian is not None:
             qcvars["CURRENT HESSIAN"] = hessian
 
-        retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+        retres = qcvars[f"CURRENT {input_model.specification.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
 

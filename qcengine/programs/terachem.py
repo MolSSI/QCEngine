@@ -94,14 +94,14 @@ class TeraChemHarness(ProgramHarness):
         input_file.append("coordinates geometry.xyz")
 
         input_file.append("\n# model")
-        input_file.append("basis " + str(input_model.model.basis))
-        input_file.append("method " + str(input_model.model.method))
+        input_file.append("basis " + str(input_model.specification.model.basis))
+        input_file.append("method " + str(input_model.specification.model.method))
 
         input_file.append("\n# driver")
-        input_file.append("run " + input_model.driver)
+        input_file.append("run " + input_model.specification.driver)
 
         input_file.append("\n# keywords")
-        for k, v in input_model.keywords.items():
+        for k, v in input_model.specification.keywords.items():
             input_file.append("{} {}".format(k, v))
 
         input_file = "\n".join(input_file)

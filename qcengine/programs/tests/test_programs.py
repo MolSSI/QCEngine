@@ -72,8 +72,11 @@ def test_psi4_hf3c_task(schema_versions, request):
     if from_v2(request.node.name):
         input_data = {
             "molecule": models.Molecule(**qcng.get_molecule("water", return_dict=True)),
-            "specification": {"driver": "energy", "model": {"method": "HF3c"}},
-            "keywords": {"scf_type": "df"},
+            "specification": {
+                "driver": "energy",
+                "model": {"method": "HF3c"},
+                "keywords": {"scf_type": "df"},
+            },
         }
     else:
         input_data = {

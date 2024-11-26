@@ -135,6 +135,8 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
         if "v2" in request.node.name:
             assert "mytag" in ret.input_data.extras, ret.input_data.extras
             assert "mytag" not in ret.extras, "input extras wrongly present in result"
+            # assert "myspectag" in ret.input_data.specification.extras, ret.input_data.specification.extras
+            # assert "myspectag" not in ret.extras, "input spec extras wrongly present in result"
         else:
             assert "mytag" in ret.extras, ret.extras
             assert "myspectag" in ret.extras, ret.extras
