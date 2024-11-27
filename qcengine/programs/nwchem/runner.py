@@ -208,10 +208,10 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         # Now that we know the computation, check if we want a restart
         #  TODO (wardlt): Store the restart information in the local_options configuration
-        if input_model.extras.get("allow_restarts", False):
+        if input_model.specification.extras.get("allow_restarts", False):
             # use the input file as a source for a hash that is used to set the directory name
             input_hash = hashlib.sha256(nwchemrec["infiles"]["nwchem.nw"].encode()).hexdigest()[:12]
-            scr_name = input_model.extras.get("scratch_name")
+            scr_name = input_model.specification.extras.get("scratch_name")
             if scr_name is None:
                 scr_name = "nwc_" + input_hash
             nwchemrec["scratch_name"] = scr_name
@@ -227,7 +227,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             #  This will ensure the computation will pick up from the last geometry
             if restart:
                 logger.info(f"Restarting from {tmpdir}")
-                if input_model.extras.get("is_driver", False):
+                if input_model.specification.extras.get("is_driver", False):
                     nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + optcmd + mdccmd
             else:
                 logger.warning(f"Existing files found in {tmpdir}. Your computation will restart")

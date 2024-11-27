@@ -86,16 +86,14 @@ class ProgramHarness(BaseModel, abc.ABC):
         elif isinstance(data, dict):
             # remember these are user-provided dictionaries, so they'll have the mandatory fields,
             #   like driver, not the helpful discriminator fields like schema_version.
+            # when dictionaries look the same, we can't correctly identify the user schema version
+            #   so have to default to one or the other. Note that can force paths for testing by
+            #   -1 -> 2 in schema_versions.
+            # so long as versions distinguishable by a *required* field, id by dict is reliable.
 
-            schver = data.get("schema_version")
-            if schver == 1:
-                mdl = model_wrapper(data, v1_model)
-            elif schver == 2:
+            if data.get("specification", False) or data.get("schema_version") == 2:
                 mdl = model_wrapper(data, v2_model)
             else:
-                # for now, the two dictionaries look the same, so cast to the one we want
-                # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
-                # TODO v2  # TODO kill off excuse_as_v2, now fix 2->-1 in schema_versions
                 mdl = model_wrapper(data, v1_model)
 
         input_schema_version = mdl.schema_version

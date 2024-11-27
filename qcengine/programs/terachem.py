@@ -64,7 +64,7 @@ class TeraChemHarness(ProgramHarness):
         # Setup the job
         job_inputs = self.build_input(input_data, config)
         # Run terachem
-        exe_outputs = self.execute(job_inputs, extra_outfiles=input_data.extras)
+        exe_outputs = self.execute(job_inputs, extra_outfiles=input_data.specification.extras)
         exe_success, proc = exe_outputs
         # Determine whether the calculation succeeded
         output_data = {}
@@ -188,8 +188,9 @@ class TeraChemHarness(ProgramHarness):
         output_data["success"] = True
 
         # return extra files requested by user as extras
-        for extra in input_model.extras.keys():
-            input_model.extras[extra] = outfiles[extra]
+        # TODO adjust this to use native_files
+        for extra in input_model.specification.extras.keys():
+            input_model.specification.extras[extra] = outfiles[extra]
 
         output_data["input_data"] = input_model
         output_data["molecule"] = input_model.molecule

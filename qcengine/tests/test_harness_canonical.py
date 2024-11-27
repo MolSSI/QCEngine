@@ -103,9 +103,11 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
     if from_v2(request.node.name):
         inp = models.AtomicInput(
             molecule=molecule,
-            extras={"mytag": "something"},
             specification=models.AtomicSpecification(
-                driver="gradient", model=model, extras={"myspectag": "somethingelse"}, keywords=keywords
+                driver="gradient",
+                model=model,
+                extras={"mytag": "something"},
+                keywords=keywords,
             ),
         )
     else:
@@ -113,7 +115,7 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
             molecule=molecule,
             driver="gradient",
             model=model,
-            extras={"mytag": "something", "myspectag": "somethingelse"},
+            extras={"mytag": "something"},
             keywords=keywords,
         )
     if program in ["adcc"]:
@@ -133,13 +135,10 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
         assert len(ret.return_result.shape) == 2
         assert ret.return_result.shape[1] == 3
         if "v2" in request.node.name:
-            assert "mytag" in ret.input_data.extras, ret.input_data.extras
+            assert "mytag" in ret.input_data.specification.extras, ret.input_data.specification.extras
             assert "mytag" not in ret.extras, "input extras wrongly present in result"
-            # assert "myspectag" in ret.input_data.specification.extras, ret.input_data.specification.extras
-            # assert "myspectag" not in ret.extras, "input spec extras wrongly present in result"
         else:
             assert "mytag" in ret.extras, ret.extras
-            assert "myspectag" in ret.extras, ret.extras
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods_qcsk_basis)

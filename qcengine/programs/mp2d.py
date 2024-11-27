@@ -106,7 +106,7 @@ class MP2DHarness(ProgramHarness):
             raise InputError(f"Driver {input_model.specification.driver} not implemented for MP2D.")
 
         # temp until actual options object
-        input_model.extras["info"] = empirical_dispersion_resources.from_arrays(
+        input_model.specification.extras["info"] = empirical_dispersion_resources.from_arrays(
             name_hint=mtd,
             level_hint=input_model.specification.keywords.get("level_hint", None),
             param_tweaks=input_model.specification.keywords.get("params_tweaks", None),
@@ -130,7 +130,7 @@ class MP2DHarness(ProgramHarness):
         command = ["mp2d", "mp2d_geometry"]
         command.extend(
             """--TT_a1={a1} --TT_a2={a2} --rcut={rcut} --w={w} --s8={s8}""".format(
-                **input_model.extras["info"]["dashparams"]
+                **input_model.specification.extras["info"]["dashparams"]
             ).split()
         )
         if input_model.specification.driver == "gradient":
@@ -181,7 +181,7 @@ class MP2DHarness(ProgramHarness):
             except NameError as exc:
                 raise UnknownError("Unsuccessful gradient collection.") from exc
 
-        qcvkey = input_model.extras["info"]["fctldash"].upper()
+        qcvkey = input_model.specification.extras["info"]["fctldash"].upper()
 
         calcinfo = []
         calcinfo.append(qcel.Datum("CURRENT ENERGY", "Eh", ene))
@@ -233,7 +233,7 @@ class MP2DHarness(ProgramHarness):
             "stderr": stderr,
             "stdout": stdout,
         }
-        output_data["extras"]["local_keywords"] = input_model.extras["info"]
+        output_data["extras"]["local_keywords"] = input_model.specification.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
 
         output_data["success"] = True

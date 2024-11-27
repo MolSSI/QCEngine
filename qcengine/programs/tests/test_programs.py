@@ -15,7 +15,9 @@ def test_missing_key(schema_versions, request):
     _, retver, _ = schema_versions
 
     ret = qcng.compute({"hello": "hi"}, "bleh", return_version=retver)
-    ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
+    if "as_v2" not in request.node.name:
+        # input provides no clue to v2/v1, so checkver fails
+        ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
     assert "hello" in ret.input_data

@@ -90,7 +90,7 @@ class DFTD4Harness(ProgramHarness):
         except InputError:
             pass
         else:
-            input_data["extras"]["info"] = planinfo
+            input_data["specification"]["extras"]["info"] = planinfo
 
         # strip dispersion level from method
         for alias, d4 in get_dispersion_aliases().items():
@@ -259,7 +259,7 @@ class SDFTD3Harness(ProgramHarness):
         except InputError:
             pass
         else:
-            input_data["extras"]["info"] = planinfo
+            input_data["specification"]["extras"]["info"] = planinfo
 
         # strip dispersion level from method
         for alias, d3 in get_dispersion_aliases().items():

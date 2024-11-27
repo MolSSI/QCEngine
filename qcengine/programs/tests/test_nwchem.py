@@ -108,7 +108,7 @@ def test_hess(nh2_data, schema_versions, request):
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     res = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False, return_version=retver)
-    res = checkver_and_convert(res, request.node.name, "post")  # , excuse_as_v2=True)
+    res = checkver_and_convert(res, request.node.name, "post")
 
     assert compare_values(-3.5980754370e-02, res.return_result[0, 0], atol=1e-3)
     assert compare_values(0, res.return_result[1, 0], atol=1e-3)
@@ -122,7 +122,7 @@ def test_hess(nh2_data, schema_versions, request):
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     res_shifted = qcng.compute(resi, "nwchem", raise_error=True, return_dict=False, return_version=retver)
-    res_shifted = checkver_and_convert(res_shifted, request.node.name, "post")  # , excuse_as_v2=True)
+    res_shifted = checkver_and_convert(res_shifted, request.node.name, "post")
 
     assert not np.allclose(res.return_result, res_shifted.return_result, atol=1e-8)
     assert np.isclose(np.linalg.det(res.return_result), np.linalg.det(res_shifted.return_result))
@@ -333,7 +333,7 @@ H       0.44142019      -0.33354425      -0.77152059"""
 
     atin = checkver_and_convert(atin, request.node.name, "pre")
     atres = qcng.compute(atin, "nwchem", raise_error=True, return_version=retver)
-    atres = checkver_and_convert(atres, request.node.name, "post")  # , excuse_as_v2=True)
+    atres = checkver_and_convert(atres, request.node.name, "post")
 
 
 @using("nwchem")
@@ -362,7 +362,7 @@ def test_autoz_error(schema_versions, request):
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=False, return_version=retver)
-    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)  # , excuse_as_v2=True)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
 
     assert not result.success
     assert "Error when generating redundant atomic coordinates" in result.error.error_message
@@ -386,7 +386,7 @@ def test_autoz_error(schema_versions, request):
         }
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=False, return_version=retver)
-    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)  # , excuse_as_v2=True)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
 
     # Ok if it crashes for other reasons
     assert "Error when generating redundant atomic coordinates" not in result.error.error_message
@@ -418,7 +418,7 @@ def test_autoz_error_correction(schema_versions, request):
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", raise_error=True, return_version=retver)
-    result = checkver_and_convert(result, request.node.name, "post")  # , excuse_as_v2=True)
+    result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success
     assert "geom_binvr" in result.extras["observed_errors"]
@@ -469,7 +469,7 @@ def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", return_version=retver, raise_error=True)
-    result = checkver_and_convert(result, request.node.name, "post")  # , excuse_as_v2=True)
+    result = checkver_and_convert(result, request.node.name, "post")
 
     assert result.success
     assert "convergence_failed" in result.extras["observed_errors"]
@@ -491,8 +491,8 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
                 "model": {"method": "b3lyp", "basis": "3-21g"},
                 "keywords": {"dft__convergence__gradient": "1e-6", "dft__iterations": 4},
                 "protocols": {"error_correction": {"default_policy": False}},
+                "extras": {"allow_restarts": True},
             },
-            "extras": {"allow_restarts": True},
         }
     else:
         resi = {
@@ -509,7 +509,7 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
     result = qcng.compute(resi, "nwchem", task_config=local_options, raise_error=False, return_version=retver)
-    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)  # , excuse_as_v2=True)
+    result = checkver_and_convert(result, request.node.name, "post", vercheck=False)
 
     assert not result.success
     assert "computation failed to converge" in str(result.error)
@@ -522,5 +522,5 @@ def test_restart(nh2_data, tmpdir, schema_versions, request):
         raise_error=False,
         return_version=retver,
     )
-    result = checkver_and_convert(result, request.node.name, "post")  # , excuse_as_v2=True)
+    result = checkver_and_convert(result, request.node.name, "post")
     assert result.success

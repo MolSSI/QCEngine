@@ -78,7 +78,7 @@ def is_mdi_new_enough(version_feature_introduced):
 
 
 @pytest.fixture(scope="function")
-def failure_engine(schema_versions):
+def failure_engine(schema_versions, request):
     unique_name = "testing_random_name"
 
     class FailEngine(qcng.programs.ProgramHarness):
@@ -135,11 +135,20 @@ def failure_engine(schema_versions):
                 raise KeyError("Testing error, should not arrive here.")
 
         def get_job(self):
-            json_data = {
-                "molecule": {"symbols": ["He", "He"], "geometry": [0, 0, 0, 0, 0, self.start_distance]},
-                "driver": "gradient",
-                "model": {"method": "something"},
-            }
+            if from_v2(request.node.name):
+                json_data = {
+                    "molecule": {"symbols": ["He", "He"], "geometry": [0, 0, 0, 0, 0, self.start_distance]},
+                    "specification": {
+                        "driver": "gradient",
+                        "model": {"method": "something"},
+                    },
+                }
+            else:
+                json_data = {
+                    "molecule": {"symbols": ["He", "He"], "geometry": [0, 0, 0, 0, 0, self.start_distance]},
+                    "driver": "gradient",
+                    "model": {"method": "something"},
+                }
 
             return json_data
 
@@ -219,9 +228,7 @@ def schema_versions(request):
     elif request.param == "to_v2":
         return qcel.models.v1, 2, qcel.models.v2
     elif request.param == "as_v2":
-        # TODO with dict-in and dict-out and models indiscriminable and defaulting to v1
-        #   the as_v2 is often not reliable, so paper over it with 2 for now. return to -1 when fixed.
-        return (qcel.models.v2, 2, qcel.models.v2)
+        return (qcel.models.v2, -1, qcel.models.v2)
     elif request.param == "to_v1":
         return qcel.models.v2, 1, qcel.models.v1
     else:

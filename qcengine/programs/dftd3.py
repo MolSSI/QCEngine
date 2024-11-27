@@ -117,7 +117,7 @@ class DFTD3Harness(ProgramHarness):
             raise InputError(f"Driver {input_model.specification.driver} not implemented for DFTD3.")
 
         # temp until actual options object
-        input_model.extras["info"] = empirical_dispersion_resources.from_arrays(
+        input_model.specification.extras["info"] = empirical_dispersion_resources.from_arrays(
             name_hint=mtd,
             level_hint=input_model.specification.keywords.get("level_hint", None),
             param_tweaks=input_model.specification.keywords.get("params_tweaks", None),
@@ -136,7 +136,7 @@ class DFTD3Harness(ProgramHarness):
         command = ["dftd3", "dftd3_geometry.xyz"]
         if input_model.specification.driver == "gradient":
             command.append("-grad")
-        if input_model.extras["info"]["dashlevel"] == "atmgr":
+        if input_model.specification.extras["info"]["dashlevel"] == "atmgr":
             command.append("-abc")
 
         # Append `-anal` for pairwise atomic analysis
@@ -145,7 +145,8 @@ class DFTD3Harness(ProgramHarness):
 
         infiles = {
             ".dftd3par.local": dftd3_coeff_formatter(
-                input_model.extras["info"]["dashlevel"], input_model.extras["info"]["dashparams"]
+                input_model.specification.extras["info"]["dashlevel"],
+                input_model.specification.extras["info"]["dashparams"],
             ),
             "dftd3_geometry.xyz": qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format=""),
         }
@@ -229,16 +230,16 @@ class DFTD3Harness(ProgramHarness):
         if input_model.specification.driver == "gradient":
             ireal = np.argwhere(real).reshape((-1))
             fullgrad = np.zeros((full_nat, 3))
-            rg = realgradabc if (input_model.extras["info"]["dashlevel"] == "atmgr") else realgrad
+            rg = realgradabc if (input_model.specification.extras["info"]["dashlevel"] == "atmgr") else realgrad
             try:
                 fullgrad[ireal, :] = rg
             except NameError as exc:
                 raise UnknownError("Unsuccessful gradient collection.") from exc
 
-        qcvkey = input_model.extras["info"]["fctldash"].upper()
+        qcvkey = input_model.specification.extras["info"]["fctldash"].upper()
 
         calcinfo = []
-        if input_model.extras["info"]["dashlevel"] == "atmgr":
+        if input_model.specification.extras["info"]["dashlevel"] == "atmgr":
             calcinfo.append(qcel.Datum("CURRENT ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
@@ -296,7 +297,8 @@ class DFTD3Harness(ProgramHarness):
             "stderr": stderr,
             "stdout": stdout,
         }
-        output_data["extras"]["local_keywords"] = input_model.extras["info"]
+        # TODO changing input_model through info is questionable, then its duplicated on output extras
+        output_data["extras"]["local_keywords"] = input_model.specification.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
         if input_model.specification.keywords.get("pair_resolved", False):
             assert (
