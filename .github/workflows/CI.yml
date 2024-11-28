@@ -247,7 +247,7 @@ jobs:
       #if: false
       run: |
         conda remove qcelemental --force
-        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_pyd2_warnings' --no-deps
+        python -m pip install 'git+https://github.com/loriab/QCElemental.git@csse_layout_536c' --no-deps
 
     - name: Environment Information
       run: |

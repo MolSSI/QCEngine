@@ -232,21 +232,21 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
             assert (
                 ret["error"]["error_type"] == "input_error"
             ), f"wrong type: {ret['error']['error_type']=} != 'input_error'"
-            # TODO if "v2" in request.node.name or "to_v1" in request.node.name:
-            # TODO     assert ret["input_data"]["specification"]["model"]["method"] == model["method"], "input not copied over"
-            # TODO else:
-            # TODO     assert ret["input_data"]["model"]["method"] == model["method"], "input not copied over"
+            if "v2" in request.node.name or "to_v1" in request.node.name:
+                assert ret["input_data"]["specification"]["model"]["method"] == model["method"], "input not copied over"
+            else:
+                assert ret["input_data"]["model"]["method"] == model["method"], "input not copied over"
         else:
             assert ret.success is False, "wrongly successful"
             assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation)), "wrong class"
             assert ret.error.error_type == "input_error", f"wrong type: {ret.error.error_type=} != 'input_error'"
-            # TODO if "v2" in request.node.name:
-            # TODO     ret_method = ret.input_data.specification.model.method
-            # TODO elif "to_v1" in request.node.name:
-            # TODO     ret_method = ret.input_data["specification"]["model"]["method"]
-            # TODO else:
-            # TODO     ret_method = ret.input_data["model"]["method"]
-            # TODO assert ret_method == model["method"], "input not copied over"
+            if "v2" in request.node.name:
+                ret_method = ret.input_data.specification.model.method
+            elif "to_v1" in request.node.name:
+                ret_method = ret.input_data["specification"]["model"]["method"]
+            else:
+                ret_method = ret.input_data["model"]["method"]
+            assert ret_method == model["method"], "input not copied over"
 
 
 @pytest.mark.parametrize(
