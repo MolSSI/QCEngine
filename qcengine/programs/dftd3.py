@@ -280,7 +280,9 @@ class DFTD3Harness(ProgramHarness):
             retres = retres.ravel().tolist()
 
         output_data = {
-            "extras": input_model.extras,
+            "input_data": input_model,
+            "molecule": input_model.molecule,
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": {
                 "return_energy": calcinfo[f"CURRENT ENERGY"],
@@ -301,7 +303,7 @@ class DFTD3Harness(ProgramHarness):
             output_data["extras"]["qcvars"]["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
         output_data["success"] = True
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)
 
 
 def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:

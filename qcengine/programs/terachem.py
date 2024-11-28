@@ -191,7 +191,11 @@ class TeraChemHarness(ProgramHarness):
         for extra in input_model.extras.keys():
             input_model.extras[extra] = outfiles[extra]
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        output_data["input_data"] = input_model
+        output_data["molecule"] = input_model.molecule
+        output_data["provenance"] = input_model.provenance  # TODO
+
+        return AtomicResult(**output_data)
 
     def execute(self, inputs, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None):
         binaries = []

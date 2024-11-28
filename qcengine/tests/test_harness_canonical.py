@@ -38,6 +38,8 @@ _canonical_methods = [
     ("mctc-gcp", {"method": "dft/sv"}, {}),
     ("mace", {"method": "small"}, {}),
     ("aimnet2", {"method": "b973c"}, {}),
+    ("s-dftd3", {"method": "b3lyp-d3"}, {}),
+    ("dftd4", {"method": "b3lyp-d4"}, {}),
     # add as programs available
     # ("terachem", {"method": "bad"}),
 ]
@@ -81,6 +83,7 @@ def test_compute_energy(program, model, keywords, schema_versions, request):
 
     assert ret.success is True
     assert isinstance(ret.return_result, float)
+    assert ret.return_result == ret.properties.return_energy
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
@@ -111,7 +114,11 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
         assert isinstance(ret.return_result, np.ndarray)
         assert len(ret.return_result.shape) == 2
         assert ret.return_result.shape[1] == 3
-        assert "mytag" in ret.extras, ret.extras
+        if "v2" in request.node.name:
+            assert "mytag" in ret.input_data.extras, ret.input_data.extras
+            assert "mytag" not in ret.extras, "input extras wrongly present in result"
+        else:
+            assert "mytag" in ret.extras, ret.extras
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods_qcsk_basis)

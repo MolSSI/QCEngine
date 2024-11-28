@@ -66,7 +66,10 @@ def test_sp_hf_rhf(program, basis, keywords, h2o_data, schema_versions, request)
     res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
-    assert res["driver"] == "energy"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "energy"
+    else:
+        assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
 
@@ -123,7 +126,10 @@ def test_sp_hf_uhf(program, basis, keywords, nh2_data, schema_versions, request)
 
     assert res.success is True
     res = res.model_dump()
-    assert res["driver"] == "energy"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "energy"
+    else:
+        assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
 
@@ -167,7 +173,10 @@ def test_sp_hf_rohf(program, basis, keywords, nh2_data, schema_versions, request
     res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
-    assert res["driver"] == "energy"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "energy"
+    else:
+        assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
 
