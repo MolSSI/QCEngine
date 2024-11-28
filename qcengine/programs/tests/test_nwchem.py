@@ -74,7 +74,10 @@ def test_b3lyp(nh2_data, schema_versions, request):
 
     # Make sure the calculation completed successfully
     assert compare_values(-55.554037, res["return_result"], atol=1e-3)
-    assert res["driver"] == "energy"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "energy"
+    else:
+        assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
 
@@ -194,7 +197,10 @@ def test_dipole(h20_data, schema_versions, request):
 
     # Make sure the calculation completed successfully
     assert compare_values(-75.764944, res["return_result"], atol=1e-3)
-    assert res["driver"] == "properties"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "properties"
+    else:
+        assert res["driver"] == "properties"
     assert "provenance" in res
     assert res["success"] is True
 
@@ -244,7 +250,10 @@ def test_homo_lumo(h20v2_data, schema_versions, request):
 
     # Make sure the calculation completed successfully
     assert compare_values(-75.968095, res["return_result"], atol=1e-3)
-    assert res["driver"] == "energy"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "energy"
+    else:
+        assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
 

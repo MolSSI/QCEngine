@@ -101,13 +101,11 @@ class MRChemHarness(ProgramHarness):
         input_data = copy.deepcopy(job_input["mrchem_json"])
 
         output_data = {
-            "keywords": input_data,
             "schema_name": "qcschema_output",
-            "schema_version": 1,
-            "model": input_model.model,
+            "schema_version": 2,
+            "input_data": input_model,
             "molecule": input_model.molecule,
-            "driver": input_model.driver,
-            "extras": input_model.extras,
+            "extras": {},
         }
 
         with temporary_directory(parent=parent, suffix="_mrchem_scratch") as tmpdir:

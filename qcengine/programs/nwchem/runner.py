@@ -324,9 +324,10 @@ task python
 
         # Format them inout an output
         output_data = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "input_data": input_model,
             "molecule": nwmol,  # overwrites with outfile Cartesians in case fix_*=F
-            "extras": {**input_model.extras},
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
             "provenance": provenance,
@@ -343,4 +344,4 @@ task python
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
-        return AtomicResult(**{**input_model.model_dump(), **output_data})
+        return AtomicResult(**output_data)
