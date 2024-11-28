@@ -53,7 +53,10 @@ def test_simple_ghost(driver, program, basis, keywords, hene_data, schema_versio
     res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
 
-    assert res["driver"] == driver
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == driver
+    else:
+        assert res["driver"] == driver
     assert "provenance" in res
     assert res["success"] is True
 

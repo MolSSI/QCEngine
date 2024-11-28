@@ -74,6 +74,7 @@ def test_dftd4_task_tpss_m02(schema_versions, request):
             },
         },
         driver="gradient",
+        extras={"mymsg": "will I pass through the calc?"},
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
@@ -82,6 +83,11 @@ def test_dftd4_task_tpss_m02(schema_versions, request):
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
+    if "v2" in request.node.name:
+        assert "will I pass" in atomic_result.input_data.extras.get("mymsg", "no key!"), "input extras roundtrip fail"
+        assert "mymsg" not in atomic_result.extras.get("mymsg", "no key!"), "input extras wrongly present in result"
+    else:
+        assert "will I pass" in atomic_result.extras.get("mymsg", "no key!"), "input extras roundtrip fail"
 
 
 @using("dftd4")
