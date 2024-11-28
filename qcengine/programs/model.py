@@ -76,8 +76,8 @@ class ProgramHarness(BaseModel, abc.ABC):
         # Note: Someday when the multiple QCSchema versions QCEngine supports are all within the
         #  Pydantic v2 API base class, this can use discriminated unions instead of logic.
 
-        v1_model = getattr(qcelemental.models.v1, "AtomicInput")
-        v2_model = getattr(qcelemental.models.v2, "AtomicInput")
+        v1_model = qcelemental.models.v1.AtomicInput
+        v2_model = qcelemental.models.v2.AtomicInput
 
         if isinstance(data, v1_model):
             mdl = model_wrapper(data, v1_model)

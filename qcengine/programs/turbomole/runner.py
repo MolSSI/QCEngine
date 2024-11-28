@@ -269,7 +269,8 @@ class TurbomoleHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        output_data = input_model.dict()
+        output_data = {"input_data": input_model}
+        output_data["molecule"] = input_model.molecule  # TODO better mol?
         output_data["extras"]["outfiles"] = outfiles
         output_data["properties"] = atprop
         output_data["provenance"] = Provenance(creator="Turbomole", version=self.get_version(), routine="turbomole")

@@ -26,7 +26,10 @@ def test_dftd3_task(method, schema_versions, request):
     ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
-    assert ret["driver"] == "energy"
+    if "v2" in request.node.name:
+        assert ret["input_data"]["driver"] == "energy"
+    else:
+        assert ret["driver"] == "energy"
     assert "provenance" in ret
     assert "normal termination of dftd3" in ret["stdout"]
 

@@ -168,15 +168,14 @@ class TorchANIHarness(ProgramHarness):
         #   the reliability of the models in an ensemble, and produce more data
         #   points in the regions where this quantity is below a certain
         #   threshold (inclusion criteria)
-        ret_data["extras"] = input_data.extras.copy()
-        ret_data["extras"].update(
-            {
-                "ensemble_energies": energy_array.cpu().detach().numpy(),
-                "ensemble_energy_avg": energy.item(),
-                "ensemble_energy_std": ensemble_std.item(),
-                "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item(),
-            }
-        )
+        ret_data["input_data"] = input_data
+        ret_data["molecule"] = input_data.molecule
+        ret_data["extras"] = {
+            "ensemble_energies": energy_array.cpu().detach().numpy(),
+            "ensemble_energy_avg": energy.item(),
+            "ensemble_energy_std": ensemble_std.item(),
+            "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item(),
+        }
 
         ret_data["provenance"] = Provenance(
             creator="torchani", version="unknown", routine="torchani.builtin.aev_computer"
@@ -186,4 +185,4 @@ class TorchANIHarness(ProgramHarness):
         ret_data["success"] = True
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**ret_data)

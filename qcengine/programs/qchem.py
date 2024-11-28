@@ -306,11 +306,12 @@ $end
         output_data["properties"].update(props)
         output_data["stdout"] = outfiles["dispatch.out"]
         output_data["success"] = True
+        output_data["input_data"] = input_model
+        output_data["molecule"] = input_model.molecule
 
-        merged_data = {**input_model.convert_v(2).model_dump(), **output_data}
-        merged_data["extras"]["qcvars"] = qcvars
+        output_data["extras"] = {"qcvars": qcvars}
 
-        return AtomicResult(**merged_data)
+        return AtomicResult(**output_data)
 
     def _parse_logfile_common(self, outtext: str, input_dict: Dict[str, Any]):
         """
@@ -449,7 +450,12 @@ $end
             qcscr_result = self.parse_output(outfiles, AtomicInput(**input_dict)).dict()
         except KeyError:
             props, prov = self._parse_logfile_common(outtext, input_dict)
-            qcscr_result = {"properties": props, "provenance": prov, **input_dict}
+            qcscr_result = {
+                "properties": props,
+                "provenance": prov,
+                "input_data": input_dict,
+                "molecule": input_dict["molecule"],
+            }
 
         mobj = re.search(r"\n\s*Total\s+energy in the final basis set =\s+" + NUMBER + r"\s*\n", outtext)
         if mobj and qcscr_result["properties"].get("scf_total_energy", None) is None:

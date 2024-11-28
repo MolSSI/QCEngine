@@ -324,13 +324,16 @@ class OpenMMHarness(ProgramHarness):
 
             # Force to gradient
             ret_data["return_result"] = -1 * q
+            ret_data["properties"]["return_gradient"] = -1 * q
+            ret_data["properties"]["calcinfo_natom"] = len(input_model.molecule.symbols)
         else:
             raise InputError(f"Driver {input_model.driver} not implemented for OpenMM.")
 
         ret_data["success"] = True
-        ret_data["extras"] = input_model.extras
+        ret_data["input_data"] = input_model
+        ret_data["molecule"] = input_model.molecule  # should connectivity be added from off_mol?
 
         # Move several pieces up a level
         ret_data["provenance"] = Provenance(creator="openmm", version=openmm.version.short_version, nthreads=nthreads)
 
-        return AtomicResult(**{**input_model.dict(), **ret_data})
+        return AtomicResult(**ret_data)

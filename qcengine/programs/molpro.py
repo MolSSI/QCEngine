@@ -432,7 +432,7 @@ class MolproHarness(ProgramHarness):
                 raise KeyError(f"Could not find {method} total energy")
 
         # Initialize output_data by copying over input_model.dict()
-        output_data = input_model.dict()
+        output_data = {"input_data": input_model, "molecule": input_model.molecule}  # TODO better mol?
 
         # Determining return_result
         if input_model.driver == "energy":
@@ -442,9 +442,10 @@ class MolproHarness(ProgramHarness):
 
         # Final output_data assignments needed for the AtomicResult object
         output_data["properties"] = properties
-        output_data["extras"].update(extras)
+        output_data["extras"] = extras
         output_data["schema_name"] = "qcschema_output"
         output_data["stdout"] = outfiles["dispatch.out"]
         output_data["success"] = True
+        output_data["provenance"] = input_model.provenance  # TODO better stamp?
 
         return AtomicResult(**output_data)

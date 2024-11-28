@@ -142,6 +142,8 @@ class RDKitHarness(ProgramHarness):
 
         ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True
+        ret_data["input_data"] = input_data
+        ret_data["molecule"] = jmol
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**ret_data)
