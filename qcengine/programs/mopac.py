@@ -278,13 +278,13 @@ class MopacHarness(ProgramHarness):
 
         gradient = data.pop("gradients")
 
-        output = input_model.dict()
+        output = {"input_data": input_model, "molecule": input_model.molecule}
         output["provenance"] = {"creator": "mopac", "version": data.pop("mopac_version")}
 
         output["properties"] = {}
         output["properties"]["return_energy"] = data["heat_of_formation"]
 
-        output["extras"].update(data)
+        output["extras"] = data
 
         if input_model.driver == "energy":
             output["return_result"] = data["heat_of_formation"]

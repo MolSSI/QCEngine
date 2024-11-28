@@ -116,7 +116,7 @@ class AdccHarness(ProgramHarness):
             raise UnknownError(str(e))
 
         input_data = input_model.model_dump(encoding="json")
-        output_data = input_data.copy()
+        output_data = {"input_data": input_data, "extras": {}, "molecule": mol}
         output_data["success"] = compute_success
 
         if compute_success:
@@ -124,6 +124,7 @@ class AdccHarness(ProgramHarness):
 
             extract_props = input_model.driver == "properties"
             qcvars = adcc_state.to_qcvars(recurse=True, properties=extract_props)
+            qcvars["CURRENT ENERGY"] = adcc_state.excitation_energy[0]
             atprop = build_atomicproperties(qcvars)
             output_data["extras"]["qcvars"] = qcvars
             output_data["properties"] = atprop

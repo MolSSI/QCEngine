@@ -54,7 +54,10 @@ def test_energy(h2o, schema_versions, request):
 
     # Make sure the calculation completed successfully
     assert compare_values(-76.4546307, res["return_result"], atol=1e-3)
-    assert res["driver"] == "energy"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "energy"
+    else:
+        assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
 
@@ -92,7 +95,10 @@ def test_dipole(h2o, schema_versions, request):
 
     # Make sure the calculation completed successfully
     assert compare_values([-3.766420e-07, 0.0, 0.720473], res["return_result"]["dipole_moment"]["dip-1"], atol=1e-3)
-    assert res["driver"] == "properties"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "properties"
+    else:
+        assert res["driver"] == "properties"
     assert "provenance" in res
     assert res["success"] is True
 
@@ -140,7 +146,10 @@ def test_gradient(fh, schema_versions, request):
         res["return_result"],
         atol=1e-3,
     )
-    assert res["driver"] == "gradient"
+    if "v2" in request.node.name:
+        assert res["input_data"]["driver"] == "gradient"
+    else:
+        assert res["driver"] == "gradient"
     assert "provenance" in res
     assert res["success"] is True
 

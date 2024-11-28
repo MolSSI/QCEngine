@@ -41,7 +41,10 @@ def test_psi4_task(schema_versions, request):
     ret = qcng.compute(input_data, "psi4", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
-    assert ret.driver == "energy"
+    if "v2" in request.node.name:
+        assert ret.input_data.driver == "energy"
+    else:
+        assert ret.driver == "energy"
     assert "Final Energy" in ret.stdout
 
     prov_keys = {"cpu", "hostname", "username", "wall_time"}
@@ -67,7 +70,11 @@ def test_psi4_hf3c_task(schema_versions, request):
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
-    assert ret.model.basis is None
+    if "v2" in request.node.name:
+        # prior to 0.50, None, now ""
+        assert not ret.input_data.model.basis
+    else:
+        assert not ret.model.basis
 
 
 @using("psi4_runqcsk")
@@ -215,7 +222,10 @@ def test_torchani_task(schema_versions, request):
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     assert ret.success is True
-    assert ret.driver == "gradient"
+    if "v2" in request.node.name:
+        assert ret.input_data.driver == "gradient"
+    else:
+        assert ret.driver == "gradient"
 
 
 @using("mopac")

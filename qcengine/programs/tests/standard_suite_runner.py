@@ -204,6 +204,15 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
         ref_block = mill_qcvars(ref2out_mill, ref_block)
         ref_block_conv = mill_qcvars(ref2out_mill, ref_block_conv)
 
+    # 3b. input mol in output: `wfn.input_data.molecule` should be exactly `subject` always. If frame=free fails, check
+    #     that the harness is copying AtomicInput bodily rather than duplicating AtomicResult.molecule as convert_v(2) does
+
+    if "v2" in tnm:
+        with np.printoptions(precision=3, suppress=True):
+            assert compare_values(
+                subject.geometry, wfn.input_data.molecule.geometry, atol=5.0e-8
+            ), f"coords: atres ({wfn.input_data.molecule.geometry}) != atin ({subject.geometry})"
+
     # <<<  Comparison Tests  >>>
 
     assert wfn.success is True

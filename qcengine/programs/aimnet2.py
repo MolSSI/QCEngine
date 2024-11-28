@@ -93,6 +93,8 @@ class AIMNET2Harness(ProgramHarness):
         out = model(aimnet_input)
 
         ret_data = {
+            "input_data": input_data,
+            "molecule": input_data.molecule,
             "success": False,
             "properties": {
                 "return_energy": out["energy"].item() * ureg.conversion_factor("eV", "hartree"),
@@ -101,7 +103,7 @@ class AIMNET2Harness(ProgramHarness):
                 ),
                 "calcinfo_natom": len(input_data.molecule.atomic_numbers),
             },
-            "extras": input_data.extras.copy(),
+            "extras": {},
         }
         # update with calculated extras
         ret_data["extras"]["aimnet2"] = {
@@ -123,4 +125,4 @@ class AIMNET2Harness(ProgramHarness):
 
         ret_data["success"] = True
 
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**ret_data)

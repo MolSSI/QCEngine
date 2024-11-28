@@ -75,18 +75,21 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
             provenance["module"] = module
 
         # Format them inout an output
+        input_data = input_model.input_specification.model_dump()
+        input_data["driver"] = "gradient"
+        input_data["molecule"] = out_mol
+
         output_data = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "input_data": input_data,
             "molecule": out_mol,
-            "driver": "gradient",
-            "extras": input_model.extras.copy(),
-            "model": input_model.input_specification.model,
-            "keywords": input_model.input_specification.keywords,
+            "extras": {},
             "properties": atprop,
             "provenance": provenance,
             "return_result": nwgrad,
             "success": True,
         }
+        # v2: perhaps lost the OptimizationInput.extras?
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision

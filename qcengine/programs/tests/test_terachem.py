@@ -15,8 +15,9 @@ def test_terachem_output_parser(test_case):
     data = terachem_info.get_test_data(test_case)
     inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
+    # only qcng.compute() handles schema versions. test_data returns v1 and parse_output returns v2, so need to convert
+    inp = inp.convert_v(2)
     output = qcng.get_program("terachem", check=False).parse_output(data, inp)
-    # only qcng.compute() handles schema versions. above returns v2, so need to convert
     output = output.convert_v(1).dict()
     output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
 

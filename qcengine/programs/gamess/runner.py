@@ -253,9 +253,10 @@ class GAMESSHarness(ProgramHarness):
             provenance["module"] = module
 
         output_data = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "input_data": input_model,
             "molecule": gamessmol,  # overwrites with outfile Cartesians in case fix_*=F
-            "extras": {**input_model.extras},
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
             "provenance": provenance,
@@ -271,7 +272,7 @@ class GAMESSHarness(ProgramHarness):
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)
 
     @staticmethod
     def _partition(total: float, fraction_replicated: float, ncores: int) -> Tuple[int, int]:

@@ -66,15 +66,12 @@ class XTBHarness(ProgramHarness):
         from xtb.qcschema.harness import run_qcschema
 
         # Run the Harness
-        input_data = input_data.convert_v(1)
-        output = run_qcschema(input_data)
+        input_data_v1 = input_data.convert_v(1)
+        output_v1 = run_qcschema(input_data_v1)
 
         # xtb qcschema interface stores error in Result model
-        if not output.success:
-            return FailedOperation(input_data=input_data, error=output.error.model_dump())
+        if not output_v1.success:
+            return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
 
-        output = output.convert_v(2)
-
-        # Make sure all keys from the initial input spec are sent along
-        output.extras.update(input_data.extras)
+        output = output_v1.convert_v(2, external_input_data=input_data)
         return output

@@ -29,8 +29,9 @@ def test_qchem_output_parser(test_case):
     inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
     outfiles = qcel.util.deserialize(data["outfiles.msgpack"], "msgpack-ext")
+    # only qcng.compute() handles schema versions. test_data returns v1 and parse_output returns v2, so need to convert
+    inp = inp.convert_v(2)
     output = qcng.get_program("qchem", check=False).parse_output(outfiles, inp)
-    # only qcng.compute() handles schema versions. above returns v2, so need to convert
     output = output.convert_v(1).dict()
     output.pop("provenance", None)
 
