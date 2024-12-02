@@ -71,9 +71,11 @@ class AIMNET2Harness(ProgramHarness):
 
         unknown_elements = target_elements - known_elements
         if unknown_elements:
-            raise InputError(f"AIMNET2 model {input_data.model.method} does not support elements {unknown_elements}.")
+            raise InputError(
+                f"AIMNET2 model {input_data.specification.model.method} does not support elements {unknown_elements}."
+            )
 
-        method = input_data.model.method
+        method = input_data.specification.model.method
         # load the model using the method as the file name
         model = self.load_model(name=method)
 
@@ -88,7 +90,7 @@ class AIMNET2Harness(ProgramHarness):
             "charge": torch.tensor([input_data.molecule.molecular_charge], dtype=torch.float64, device="cpu"),
         }
 
-        if input_data.driver == "gradient":
+        if input_data.specification.driver == "gradient":
             aimnet_input["coord"].requires_grad_(True)
         out = model(aimnet_input)
 
@@ -112,13 +114,13 @@ class AIMNET2Harness(ProgramHarness):
             "ensemble_energy_std": out["energy_std"].item(),
             "ensemble_forces_std": out["forces_std"].detach()[0].cpu().numpy(),
         }
-        if input_data.driver == "energy":
+        if input_data.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
-        elif input_data.driver == "gradient":
+        elif input_data.specification.driver == "gradient":
             ret_data["return_result"] = ret_data["properties"]["return_gradient"]
         else:
             raise InputError(
-                f"AIMNET2 can only compute energy and gradients driver methods. Requested {input_data.driver} not supported."
+                f"AIMNET2 can only compute energy and gradients driver methods. Requested {input_data.specification.driver} not supported."
             )
 
         ret_data["provenance"] = Provenance(creator="pyaimnet2", version=self.get_version(), routine="load_model")

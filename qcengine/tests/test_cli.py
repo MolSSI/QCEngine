@@ -7,7 +7,7 @@ from typing import List
 import qcelemental
 
 from qcengine import cli, get_molecule, util
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
@@ -67,11 +67,20 @@ def test_run_psi4(tmp_path, schema_versions, request):
         assert output["provenance"]["creator"].lower() == "psi4"
         assert output["success"] is True
 
-    inp = models.AtomicInput(
-        molecule=models.Molecule(**get_molecule("hydrogen", return_dict=True)),
-        driver="energy",
-        model={"method": "hf", "basis": "6-31G"},
-    )
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+            specification=models.AtomicSpecification(
+                driver="energy",
+                model={"method": "hf", "basis": "6-31G"},
+            ),
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+            driver="energy",
+            model={"method": "hf", "basis": "6-31G"},
+        )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     args = ["run", "psi4", f"--return-version={retver}", inp.model_dump_json()]
