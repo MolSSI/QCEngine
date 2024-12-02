@@ -75,9 +75,14 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
             provenance["module"] = module
 
         # Format them inout an output
-        input_data = input_model.input_specification.model_dump()
-        input_data["driver"] = "gradient"
-        input_data["molecule"] = out_mol
+        input_data = {
+            "molecule": out_mol,
+            "specification": input_model.input_specification.model_dump(),
+        }
+        input_data["specification"]["driver"] = "gradient"
+        input_data["specification"].pop("schema_name", None)
+        input_data["specification"].pop("schema_version", None)
+        # TODO v2 sync with __init__ and change when QCInputSpec and AtomicSpec are reconciled
 
         output_data = {
             "schema_version": 2,

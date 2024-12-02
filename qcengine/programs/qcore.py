@@ -122,20 +122,20 @@ class QcoreHarness(ProgramHarness):
 
         import qcore
 
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
 
-        method = input_model.model.method.upper()
+        method = input_model.specification.model.method.upper()
         if method in self._dft_functionals:
-            method = {"kind": "dft", "xc": method, "ao": input_model.model.basis}
+            method = {"kind": "dft", "xc": method, "ao": input_model.specification.model.basis}
         elif method == "HF":
-            method = {"kind": "hf", "ao": input_model.model.basis}
+            method = {"kind": "hf", "ao": input_model.specification.model.basis}
         elif method in self._xtb_models:
             method = {"kind": "xtb", "model": method}
         else:
             raise InputError(f"Method is not valid: {method}")
 
-        method["details"] = input_model.keywords
+        method["details"] = input_model.specification.keywords
 
         qcore_input = {
             # "schema_name": "single_input",
@@ -147,7 +147,7 @@ class QcoreHarness(ProgramHarness):
             },
             "method": method,
             "result_contract": {"wavefunction": "all"},
-            "result_type": input_model.driver,
+            "result_type": input_model.specification.driver,
         }
         try:
             result = qcore.run(qcore_input, ncores=config.ncores)
@@ -173,7 +173,7 @@ class QcoreHarness(ProgramHarness):
 
         output_data = input_model.dict()
 
-        output_data["return_result"] = output[input_model.driver.value]
+        output_data["return_result"] = output[input_model.specification.driver.value]
 
         # Always build a wavefunction, it will be stripped
         obas = output["wavefunction"]["ao_basis"]
@@ -191,7 +191,7 @@ class QcoreHarness(ProgramHarness):
                         shell[ecp_k] = shell[ecp_k].tolist()
 
         basis_set = BasisSet(
-            name=str(input_model.model.basis), center_data=obas["center_data"], atom_map=obas["atom_map"]
+            name=str(input_model.specification.model.basis), center_data=obas["center_data"], atom_map=obas["atom_map"]
         )
 
         wavefunction = {"basis": basis_set}

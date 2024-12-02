@@ -80,15 +80,15 @@ class AdccHarness(ProgramHarness):
         import psi4
 
         mol = input_model.molecule
-        model = input_model.model
-        conv_tol = input_model.keywords.get("conv_tol", 1e-6)
+        model = input_model.specification.model
+        conv_tol = input_model.specification.keywords.get("conv_tol", 1e-6)
 
-        if input_model.driver not in ["energy", "properties"]:
-            raise InputError(f"Driver {input_model.driver} not implemented for ADCC.")
+        if input_model.specification.driver not in ["energy", "properties"]:
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for ADCC.")
 
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
-        if not input_model.model.basis:
+        if not input_model.specification.model.basis:
             raise InputError("Model must contain a basis set.")
 
         psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.dict(), fix_symmetry="c1"))
@@ -108,7 +108,7 @@ class AdccHarness(ProgramHarness):
         adcc.set_n_threads(config.ncores)
         compute_success = False
         try:
-            adcc_state = adcc.run_adc(wfn, method=model.method, **input_model.keywords)
+            adcc_state = adcc.run_adc(wfn, method=model.method, **input_model.specification.keywords)
             compute_success = adcc_state.converged
         except adcc.InputError as e:
             raise InputError(str(e))
@@ -122,7 +122,7 @@ class AdccHarness(ProgramHarness):
         if compute_success:
             output_data["return_result"] = adcc_state.excitation_energy[0]
 
-            extract_props = input_model.driver == "properties"
+            extract_props = input_model.specification.driver == "properties"
             qcvars = adcc_state.to_qcvars(recurse=True, properties=extract_props)
             qcvars["CURRENT ENERGY"] = adcc_state.excitation_energy[0]
             atprop = build_atomicproperties(qcvars)

@@ -10,7 +10,7 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 @using("s-dftd3")
@@ -21,11 +21,17 @@ def test_dftd3_task_b97m_m01(schema_versions, request):
 
     return_result = -0.05879001214961249
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
-        model={"method": "b97m"},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
+            specification={"model": {"method": "b97m"}, "driver": "energy"},
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
+            model={"method": "b97m"},
+            driver="energy",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
@@ -56,12 +62,22 @@ def test_dftd3_task_pbe_m02(inp, schema_versions, request):
 
     return_result = inp["return_result"]
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
-        model={"method": "pbe"},
-        keywords={"level_hint": inp["level_hint"]},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            specification={
+                "model": {"method": "pbe"},
+                "keywords": {"level_hint": inp["level_hint"]},
+                "driver": "energy",
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            model={"method": "pbe"},
+            keywords={"level_hint": inp["level_hint"]},
+            driver="energy",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
@@ -98,19 +114,36 @@ def test_dftd3_task_tpss_m02(schema_versions, request):
         ]
     )
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
-        model={"method": ""},
-        keywords={
-            "level_hint": "d3mbj",
-            "params_tweaks": {
-                "s8": 1.76596355,
-                "a1": 0.42822303,
-                "a2": 4.54257102,
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            specification={
+                "model": {"method": ""},
+                "keywords": {
+                    "level_hint": "d3mbj",
+                    "params_tweaks": {
+                        "s8": 1.76596355,
+                        "a1": 0.42822303,
+                        "a2": 4.54257102,
+                    },
+                },
+                "driver": "gradient",
             },
-        },
-        driver="gradient",
-    )
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            model={"method": ""},
+            keywords={
+                "level_hint": "d3mbj",
+                "params_tweaks": {
+                    "s8": 1.76596355,
+                    "a1": 0.42822303,
+                    "a2": 4.54257102,
+                },
+            },
+            driver="gradient",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
@@ -147,12 +180,22 @@ def test_dftd3_task_r2scan_m03(schema_versions, request):
         ]
     )
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
-        keywords={"level_hint": "d3bj"},
-        driver="gradient",
-        model={"method": "r2scan"},
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
+            specification={
+                "keywords": {"level_hint": "d3bj"},
+                "driver": "gradient",
+                "model": {"method": "r2scan"},
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
+            keywords={"level_hint": "d3bj"},
+            driver="gradient",
+            model={"method": "r2scan"},
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
@@ -167,12 +210,22 @@ def test_dftd3_task_r2scan_m03(schema_versions, request):
 def test_dftd3_task_unknown_method(schema_versions, request):
     models, retver, models_out = schema_versions
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
-        keywords={"level_hint": "d3zero"},
-        model={"method": "non-existent-method"},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
+            specification={
+                "keywords": {"level_hint": "d3zero"},
+                "model": {"method": "non-existent-method"},
+                "driver": "energy",
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
+            keywords={"level_hint": "d3zero"},
+            model={"method": "non-existent-method"},
+            driver="energy",
+        )
     error = models_out.ComputeError(
         error_type="input error", error_message="No entry for 'non-existent-method' present"
     )
@@ -192,21 +245,40 @@ def test_dftd3_task_unknown_method(schema_versions, request):
 def test_dftd3_task_cold_fusion(schema_versions, request):
     models, retver, models_out = schema_versions
 
-    atomic_input = models.AtomicInput(
-        molecule={
-            "symbols": ["Li", "Li", "Li", "Li"],
-            "geometry": [
-                [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                [-1.58746019997201, -1.58746019997201, -1.58746019997201],
-                [+1.58746019997201, +1.58746019997201, -1.58746019997201],
-            ],
-            "validated": True,  # Force a nuclear fusion input, to make dftd3 fail
-        },
-        keywords={"level_hint": "d3zero"},
-        model={"method": "pbe"},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule={
+                "symbols": ["Li", "Li", "Li", "Li"],
+                "geometry": [
+                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+                    [-1.58746019997201, -1.58746019997201, -1.58746019997201],
+                    [+1.58746019997201, +1.58746019997201, -1.58746019997201],
+                ],
+                "validated": True,  # Force a nuclear fusion input, to make dftd3 fail
+            },
+            specification={
+                "keywords": {"level_hint": "d3zero"},
+                "model": {"method": "pbe"},
+                "driver": "energy",
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule={
+                "symbols": ["Li", "Li", "Li", "Li"],
+                "geometry": [
+                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+                    [-1.58746019997201, -1.58746019997201, -1.58746019997201],
+                    [+1.58746019997201, +1.58746019997201, -1.58746019997201],
+                ],
+                "validated": True,  # Force a nuclear fusion input, to make dftd3 fail
+            },
+            keywords={"level_hint": "d3zero"},
+            model={"method": "pbe"},
+            driver="energy",
+        )
     error = models_out.ComputeError(
         error_type="input error",
         error_message="Too close interatomic distances found",

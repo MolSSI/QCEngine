@@ -176,7 +176,7 @@ class MolproHarness(ProgramHarness):
             input_file = []
 
             # Resolving keywords
-            caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
+            caseless_keywords = {k.lower(): v for k, v in input_model.specification.keywords.items()}
             unrestricted = False
             # Following Molpro default that ROHF is done for open-shell calculations unless unrestricted is specified
             if "reference" in caseless_keywords and caseless_keywords["reference"] == "unrestricted":
@@ -193,7 +193,7 @@ class MolproHarness(ProgramHarness):
 
             # Write the basis set
             input_file.append("basis={")
-            input_file.append(f"default,{input_model.model.basis}")
+            input_file.append(f"default,{input_model.specification.model.basis}")
             input_file.append("}")
             input_file.append("")
 
@@ -207,27 +207,27 @@ class MolproHarness(ProgramHarness):
             # Write energy call
             energy_call = []
             # If post-hf method is called then make sure to write a HF call first
-            if input_model.model.method.upper() in self._post_hf_methods:  # post SCF case
+            if input_model.specification.model.method.upper() in self._post_hf_methods:  # post SCF case
                 energy_call.append(f"{{{hf_type}}}")
                 energy_call.append("")
-                energy_call.append(f"{{{input_model.model.method}}}")
+                energy_call.append(f"{{{input_model.specification.model.method}}}")
             # If DFT call make sure to write {rks,method}
-            elif input_model.model.method.upper() in self._dft_functionals:  # DFT case
-                energy_call.append(f"{{{dft_type},{input_model.model.method}}}")
-            elif input_model.model.method.upper() in self._hf_methods:  # HF case
+            elif input_model.specification.model.method.upper() in self._dft_functionals:  # DFT case
+                energy_call.append(f"{{{dft_type},{input_model.specification.model.method}}}")
+            elif input_model.specification.model.method.upper() in self._hf_methods:  # HF case
                 energy_call.append(f"{{{hf_type}}}")
             else:
-                raise InputError(f"Method {input_model.model.method} not implemented for Molpro.")
+                raise InputError(f"Method {input_model.specification.model.method} not implemented for Molpro.")
 
             # Write appropriate driver call
-            if input_model.driver == "energy":
+            if input_model.specification.driver == "energy":
                 input_file.extend(energy_call)
-            elif input_model.driver == "gradient":
+            elif input_model.specification.driver == "gradient":
                 input_file.extend(energy_call)
                 input_file.append("")
                 input_file.append("{force}")
             else:
-                raise InputError(f"Driver {input_model.driver} not implemented for Molpro.")
+                raise InputError(f"Driver {input_model.specification.driver} not implemented for Molpro.")
 
             input_file = "\n".join(input_file)
         else:
@@ -405,7 +405,7 @@ class MolproHarness(ProgramHarness):
         properties["calcinfo_nbasis"] = nbasis
 
         # Grab the method from input
-        method = input_model.model.method.upper()
+        method = input_model.specification.model.method.upper()
 
         # Determining the final energy
         # Throws an error if the energy isn't found for the method specified from the input_model.
@@ -435,9 +435,9 @@ class MolproHarness(ProgramHarness):
         output_data = {"input_data": input_model, "molecule": input_model.molecule}  # TODO better mol?
 
         # Determining return_result
-        if input_model.driver == "energy":
+        if input_model.specification.driver == "energy":
             output_data["return_result"] = final_energy
-        elif input_model.driver == "gradient":
+        elif input_model.specification.driver == "gradient":
             output_data["return_result"] = properties.pop("gradient")
 
         # Final output_data assignments needed for the AtomicResult object

@@ -92,7 +92,7 @@ class MACEHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # Build model
-        method = input_data.model.method
+        method = input_data.specification.model.method
 
         # load the torch model which can be a MACE-OFF23 or local model
         model, r_max, atomic_numbers = self.load_model(name=method)
@@ -121,9 +121,9 @@ class MACEHarness(ProgramHarness):
         mace_data = model(input_dict, compute_force=True)
         ret_data["properties"] = {"return_energy": mace_data["energy"] * ureg.conversion_factor("eV", "hartree")}
 
-        if input_data.driver == "energy":
+        if input_data.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"].detach().numpy().item()
-        elif input_data.driver == "gradient":
+        elif input_data.specification.driver == "gradient":
             ret_data["return_result"] = (
                 np.asarray(-1.0 * mace_data["forces"] * ureg.conversion_factor("eV / angstrom", "hartree / bohr"))
                 .ravel()
