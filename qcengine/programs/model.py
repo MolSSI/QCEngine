@@ -86,16 +86,14 @@ class ProgramHarness(BaseModel, abc.ABC):
         elif isinstance(data, dict):
             # remember these are user-provided dictionaries, so they'll have the mandatory fields,
             #   like driver, not the helpful discriminator fields like schema_version.
+            # when dictionaries look the same, we can't correctly identify the user schema version
+            #   so have to default to one or the other. Note that can force paths for testing by
+            #   -1 -> 2 in schema_versions.
+            # so long as versions distinguishable by a *required* field, id by dict is reliable.
 
-            schver = data.get("schema_version")
-            if schver == 1:
-                mdl = model_wrapper(data, v1_model)
-            elif schver == 2:
+            if data.get("specification", False) or data.get("schema_version") == 2:
                 mdl = model_wrapper(data, v2_model)
             else:
-                # for now, the two dictionaries look the same, so cast to the one we want
-                # note that this prevents correctly identifying the user schema version when dict passed in, so either as_v1/None or as_v2 will fail
-                # TODO v2  # TODO kill off excuse_as_v2, now fix 2->-1 in schema_versions
                 mdl = model_wrapper(data, v1_model)
 
         input_schema_version = mdl.schema_version
@@ -157,7 +155,7 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
 
     def compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
         # Get the error correction configuration
-        error_policy = input_data.protocols.error_correction
+        error_policy = input_data.specification.protocols.error_correction
 
         # Create a local copy of the input data
         local_input_data = input_data
@@ -189,10 +187,11 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
 
                 # Generate and apply the updated keywords
                 keyword_updates = e.create_keyword_update(local_input_data)
-                new_keywords = local_input_data.keywords.copy()
+                new_keywords = local_input_data.specification.keywords.copy()
                 new_keywords.update(keyword_updates)
                 local_input_data = input_data.__class__(
-                    **local_input_data.dict(exclude={"keywords"}), keywords=new_keywords
+                    **local_input_data.model_dump(exclude={"specification"}),
+                    specification={**local_input_data.specification.model_dump(), "keywords": new_keywords},
                 )
 
                 # Store the error details and mitigations employed

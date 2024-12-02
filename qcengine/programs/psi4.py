@@ -151,18 +151,18 @@ class Psi4Harness(ProgramHarness):
         error_message = None
         compute_success = False
 
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
 
         # Basis must not be None for HF3c
-        old_basis = input_model.model.basis
-        input_model.model.__dict__["basis"] = old_basis or ""
+        old_basis = input_model.specification.model.basis
+        input_model.specification.model.__dict__["basis"] = old_basis or ""
 
         with temporary_directory(parent=parent, suffix="_psi_scratch", messy=config.scratch_messy) as tmpdir:
 
-            caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
+            caseless_keywords = {k.lower(): v for k, v in input_model.specification.keywords.items()}
             if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in caseless_keywords):
-                input_model.keywords["reference"] = "uhf"
+                input_model.specification.keywords["reference"] = "uhf"
 
             # Old-style JSON-based command line
             if pversion < parse_version("1.4a2.dev160"):
@@ -218,7 +218,7 @@ class Psi4Harness(ProgramHarness):
                 # * note that only psiapi=True calcs need this until rearrangement affects all
                 input_model_v1 = input_model.convert_v(1)
 
-                if input_model_v1.extras.get("psiapi", False):
+                if input_model_v1.extras.get("psiapi", False):  # TODO specification?
                     import psi4
 
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()

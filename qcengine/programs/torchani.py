@@ -104,7 +104,7 @@ class TorchANIHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # Build model
-        method = input_data.model.method
+        method = input_data.specification.model.method
         model = self.get_model(method)
 
         # Build species
@@ -133,19 +133,19 @@ class TorchANIHarness(ProgramHarness):
 
         ret_data["properties"] = {"return_energy": energy.item()}
 
-        if input_data.driver == "energy":
+        if input_data.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
-        elif input_data.driver == "gradient":
+        elif input_data.specification.driver == "gradient":
             derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
             ret_data["return_result"] = (
                 np.asarray(derivative.cpu() * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
             )
-        elif input_data.driver == "hessian":
+        elif input_data.specification.driver == "hessian":
             hessian = torchani.utils.hessian(coordinates, energies=energy)
             ret_data["return_result"] = np.asarray(hessian.cpu())
         else:
             raise InputError(
-                f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.driver}."
+                f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.specification.driver}."
             )
 
         #######################################################################

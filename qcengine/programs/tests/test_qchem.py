@@ -54,6 +54,9 @@ def test_qchem_input_formatter(test_case):
     data = qchem_info.get_test_data(test_case)
     inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
+    # only qcng.compute() handles schema versions. test_data returns v1 and build_input takes v2, so need to convert
+    inp = inp.convert_v(2)
+
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program("qchem", check=False).build_input(inp, qcng.get_config())
     assert input_file.keys() >= {"commands", "infiles"}
@@ -65,6 +68,9 @@ def test_qchem_input_formatter_template(test_case):
     # Get input file data
     data = qchem_info.get_test_data(test_case)
     inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
+
+    # only qcng.compute() handles schema versions. test_data returns v1 and build_input takes v2, so need to convert
+    inp = inp.convert_v(2)
 
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program("qchem", check=False).build_input(inp, qcng.get_config(), template="Test template")

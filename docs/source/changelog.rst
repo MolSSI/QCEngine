@@ -70,8 +70,9 @@ Misc.
 
 MUST (Unmerged)
 +++++++++++++++
-several got properties.return_energy, retunr_gradient
-If you're missing something from AtomicResult.extras, check AtomicResult.input_data.extras in case it was passed in on input
+- (:pr:`460`) integrate ``AtomicInput.specification`` into harnesses and show what new inputs look like in tests
+- (:pr:`459`) gcp, mp2d several got properties.return_energy, retunr_gradient
+- (:pr:`460`) If you're missing something from AtomicResult.extras, check AtomicResult.input_data.extras in case it was passed in on input
 - (:pr:`459`) OpenMM gained AtomicResult.properties.return_gradient
 - (:pr:`458`) When qcengine.compute() fails and forms a fop = FailedOperation (raise_error=T), with v2, `fop.input_data` will be an <>Input model (when possible; if the error was in forming the model, it'll still be a dict), not always a dict like v1.
 - (:pr:`458`) When <executor>.compute() fails and collects the input for processing, with v2 it now uses the <>Input model passed to the executor, not the model-or-dict passed into compute().

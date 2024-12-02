@@ -113,7 +113,7 @@ class MopacHarness(ProgramHarness):
         if template is not None:
             raise KeyError("MOPAC does not currently support input templates.")
 
-        method = input_model.model.method.lower()
+        method = input_model.specification.model.method.lower()
         if method not in {
             "mndo",
             "am1",
@@ -132,13 +132,13 @@ class MopacHarness(ProgramHarness):
         }:
             raise InputError(f"MOPAC does not have method: {method.upper()}")
 
-        if input_model.driver not in ["energy", "gradient"]:
-            raise InputError(f"Driver {input_model.driver} not implemented for MOPAC.")
+        if input_model.specification.driver not in ["energy", "gradient"]:
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for MOPAC.")
 
         input_file = []
 
         keywords = {"ITER": 100, "PULAY": True}
-        keywords.update({k.upper(): v for k, v in input_model.keywords.items()})
+        keywords.update({k.upper(): v for k, v in input_model.specification.keywords.items()})
 
         if keywords["PULAY"]:
             pulay = " PULAY"
@@ -286,7 +286,7 @@ class MopacHarness(ProgramHarness):
 
         output["extras"] = data
 
-        if input_model.driver == "energy":
+        if input_model.specification.driver == "energy":
             output["return_result"] = data["heat_of_formation"]
         else:
             output["return_result"] = gradient

@@ -65,8 +65,7 @@ def model_wrapper(
     if isinstance(input_data, dict):
         try:
             input_data = model(**input_data)
-        except (pydantic.v1.ValidationError) as exc:
-            # TODO except (pydantic.v1.ValidationError, pydantic.ValidationError) as exc:
+        except (pydantic.v1.ValidationError, pydantic.ValidationError) as exc:
             raise InputError(
                 f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}"
             ) from None

@@ -234,14 +234,14 @@ class OpenMMHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # generate basis, not given
-        if not input_model.model.basis:
+        if not input_model.specification.model.basis:
             raise InputError("Method must contain a basis set.")
 
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented since not suitable for OpenMM.")
 
         # Make sure we are using smirnoff or antechamber
-        basis = input_model.model.basis.lower()
+        basis = input_model.specification.model.basis.lower()
         if basis in ["smirnoff", "antechamber"]:
 
             with capture_stdout():
@@ -268,7 +268,9 @@ class OpenMMHarness(ProgramHarness):
 
             # now we need to create the system
             openmm_system = self._generate_openmm_system(
-                molecule=off_mol, method=input_model.model.method, keywords=input_model.keywords
+                molecule=off_mol,
+                method=input_model.specification.model.method,
+                keywords=input_model.specification.keywords,
             )
         else:
             raise InputError("Accepted bases are: {'smirnoff', 'antechamber', }")
@@ -309,10 +311,10 @@ class OpenMMHarness(ProgramHarness):
         ret_data["properties"] = {"return_energy": q}
 
         # Execute driver
-        if input_model.driver == "energy":
+        if input_model.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
 
-        elif input_model.driver == "gradient":
+        elif input_model.specification.driver == "gradient":
             # Compute the forces
             state = context.getState(getForces=True)
 
@@ -327,7 +329,7 @@ class OpenMMHarness(ProgramHarness):
             ret_data["properties"]["return_gradient"] = -1 * q
             ret_data["properties"]["calcinfo_natom"] = len(input_model.molecule.symbols)
         else:
-            raise InputError(f"Driver {input_model.driver} not implemented for OpenMM.")
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for OpenMM.")
 
         ret_data["success"] = True
         ret_data["input_data"] = input_model

@@ -192,29 +192,32 @@ class QChemHarness(ProgramHarness):
     ) -> Dict[str, Any]:
 
         # Check some bounds on what cannot be parsed
-        if "ccsd" in input_model.model.method.lower() or "ccd" in input_model.model.method.lower():
+        if (
+            "ccsd" in input_model.specification.model.method.lower()
+            or "ccd" in input_model.specification.model.method.lower()
+        ):
             raise InputError("Cannot handle CC* methods currently.")
 
         # Build keywords
-        keywords = {k.upper(): v for k, v in input_model.keywords.items()}
+        keywords = {k.upper(): v for k, v in input_model.specification.keywords.items()}
         keywords["INPUT_BOHR"] = "TRUE"
         keywords["MEM_TOTAL"] = str(int(config.memory * 1024))  # In MB
 
-        if input_model.driver == "energy":
-            keywords["JOBTYPE"] = "sp"
-        elif input_model.driver == "gradient":
-            keywords["JOBTYPE"] = "force"
-        elif input_model.driver == "hessian":
-            keywords["JOBTYPE"] = "freq"
-        else:
-            raise InputError(f"Driver {input_model.driver} not implemented for Q-Chem.")
+        try:
+            keywords["JOBTYPE"] = {
+                "energy": "sp",
+                "gradient": "force",
+                "hessian": "freq",
+            }[input_model.specification.driver.value]
+        except KeyError:
+            raise InputError(f"Driver {input_model.specification.driver.value} not implemented for Q-Chem.")
 
         if input_model.molecule.fix_com or input_model.molecule.fix_orientation:
             keywords["SYM_IGNORE"] = "TRUE"
 
-        keywords["METHOD"] = input_model.model.method
-        if input_model.model.basis:
-            keywords["BASIS"] = input_model.model.basis
+        keywords["METHOD"] = input_model.specification.model.method
+        if input_model.specification.model.basis:
+            keywords["BASIS"] = input_model.specification.model.basis
 
         # Begin the input file
         input_file = []
@@ -265,14 +268,15 @@ $end
                 continue
             bdata[k] = np.frombuffer(v)
 
-        if input_model.driver == "energy":
+        driver = input_model.specification.driver.value
+        if driver == "energy":
             output_data["return_result"] = bdata["99.0"][-1]
-        elif input_model.driver == "gradient":
+        elif driver == "gradient":
             output_data["return_result"] = bdata["131.0"]
-        elif input_model.driver == "hessian":
+        elif driver == "hessian":
             output_data["return_result"] = bdata["132.0"]
         else:
-            raise ValueError(f"Could not parse driver of type {input_model.driver}.")
+            raise InputError(f"Could not parse driver of type {driver}.")
 
         properties = {
             "nuclear_repulsion_energy": bdata["99.0"][0],
@@ -282,7 +286,7 @@ $end
 
         qcvars = {}
         _mp2_methods = {"mp2", "rimp2"}
-        if input_model.model.method.lower() in _mp2_methods:
+        if input_model.specification.model.method.lower() in _mp2_methods:
             emp2 = bdata["99.0"][-1]
             properties["mp2_total_energy"] = emp2
             qcvars["MP2 TOTAL ENERGY"] = emp2
@@ -391,6 +395,7 @@ $end
                 raise InputError("Multi-job Q-Chem log files not supported.")
 
         input_dict = {}
+        input_dict["specification"] = {}
         mobj = re.search(r"\n-{20,}\nUser input:\n-{20,}\n(.+)\n-{20,}", outtext, re.DOTALL)
         if mobj:
             inputtext = mobj.group(1)
@@ -405,9 +410,9 @@ $end
                     if len(s) == 0:
                         continue
                     keywords[s[0].lower()] = s[1].lower()
-                input_dict["model"] = {}
-                input_dict["model"]["method"] = keywords.pop("method").lower()
-                input_dict["model"]["basis"] = keywords.pop("basis").lower()
+                input_dict["specification"]["model"] = {}
+                input_dict["specification"]["model"]["method"] = keywords.pop("method").lower()
+                input_dict["specification"]["model"]["basis"] = keywords.pop("basis").lower()
                 if "jobtype" in keywords:
                     jobtype = keywords.pop("jobtype")
                 else:
@@ -418,7 +423,7 @@ $end
                     "freq": "hessian",
                 }  # optimization intentionally not supported
                 try:
-                    input_dict["driver"] = _jobtype_to_driver[jobtype]
+                    input_dict["specification"]["driver"] = _jobtype_to_driver[jobtype]
                 except KeyError:
                     raise KeyError(f"Jobtype {jobtype} not supported in qchem log file parser.")
 
@@ -427,7 +432,7 @@ $end
                         keywords[key] = False
                     if keywords[key] == "true":
                         keywords[key] = True
-                input_dict["keywords"] = keywords
+                input_dict["specification"]["keywords"] = keywords
 
             molecule_match = re.search(r"\$molecule\s*\n([^\$]+)\n\s*\$end", inputtext, re.DOTALL | re.IGNORECASE)
             if molecule_match:
@@ -443,8 +448,8 @@ $end
                 "mem_static",
             }  # parts of the rem normally written by build_input, and which do not affect results
             for item in _excluded_rem:
-                if item in input_dict["keywords"]:
-                    input_dict["keywords"].pop(item)
+                if item in input_dict["specification"]["keywords"]:
+                    input_dict["specification"]["keywords"].pop(item)
 
         try:
             qcscr_result = self.parse_output(outfiles, AtomicInput(**input_dict)).dict()
@@ -623,7 +628,7 @@ $end
         }
         _mp2_methods = {"rimp2"}
 
-        method = input_dict["model"]["method"].lower()
+        method = input_dict["specification"]["model"]["method"].lower()
         if qcscr_result["properties"].get("return_energy", None) is None:
             if method in _mp2_methods:
                 qcscr_result["properties"]["return_energy"] = qcscr_result["properties"]["mp2_total_energy"]
@@ -632,7 +637,7 @@ $end
             else:
                 raise NotImplementedError(f"Method {method} not supported by logfile parser for energy driver.")
 
-        if input_dict["driver"] == "gradient" and qcscr_result.get("return_result", None) is None:
+        if input_dict["specification"]["driver"] == "gradient" and qcscr_result.get("return_result", None) is None:
 
             def read_matrix(text):
                 lines = text.split("\n")
@@ -683,7 +688,7 @@ $end
 
         qcscr_result["success"] = True  # XXX: have a nice day?
         qcscr_result["stdout"] = outtext
-        if input_dict["driver"] == "energy" and qcscr_result.get("return_result", None) is None:
+        if input_dict["specification"]["driver"] == "energy" and qcscr_result.get("return_result", None) is None:
             qcscr_result["return_result"] = qcscr_result["properties"]["return_energy"]
 
         return AtomicResult(**qcscr_result)

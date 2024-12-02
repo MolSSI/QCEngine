@@ -9,7 +9,7 @@ from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.programs.util import mill_qcvars
-from qcengine.testing import checkver_and_convert
+from qcengine.testing import checkver_and_convert, from_v2
 
 from .standard_suite_contracts import *
 from .standard_suite_ref import answer_hash, std_suite
@@ -124,17 +124,32 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
 
     # <<<  Prepare Calculation and Call API  >>>
 
-    atin = models.AtomicInput(
-        **{
-            "molecule": subject,
-            "driver": driver,
-            "model": {
-                "method": method,
-                "basis": inp.get("basis", "(auto)"),
-            },
-            "keywords": inp["keywords"],
-        }
-    )
+    if from_v2(tnm):
+        atin = models.AtomicInput(
+            **{
+                "molecule": subject,
+                "specification": {
+                    "driver": driver,
+                    "model": {
+                        "method": method,
+                        "basis": inp.get("basis", "(auto)"),
+                    },
+                    "keywords": inp["keywords"],
+                },
+            }
+        )
+    else:
+        atin = models.AtomicInput(
+            **{
+                "molecule": subject,
+                "driver": driver,
+                "model": {
+                    "method": method,
+                    "basis": inp.get("basis", "(auto)"),
+                },
+                "keywords": inp["keywords"],
+            }
+        )
 
     local_options = {}
     local_options = {"nnodes": 1, "ncores": 2}  # debug. temp fix low for testing to avoid too many files open w/gamess

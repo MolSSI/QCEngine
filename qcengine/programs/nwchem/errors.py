@@ -38,28 +38,28 @@ class ConvergenceFailedError(SimpleKnownErrorException):
 
     def create_keyword_update(self, input_data: AtomicInput) -> Dict[str, Any]:
         # Fit the correct keyword we are looking to update is different for different methods
-        method = input_data.model.method
-        use_tce = input_data.keywords.get("qc_module", False)
+        method = input_data.specification.model.method
+        use_tce = input_data.specification.keywords.get("qc_module", False)
 
         if method == "dft" or method.split()[0] in xc_functionals:
-            if "dft__iterations" in input_data.keywords:
+            if "dft__iterations" in input_data.specification.keywords:
                 kwd = "dft__iterations"
-                cur_iter = input_data.keywords["dft__iterations"]
-            elif "dft__maxiter" in input_data.keywords:
+                cur_iter = input_data.specification.keywords["dft__iterations"]
+            elif "dft__maxiter" in input_data.specification.keywords:
                 kwd = "dft__maxiter"
-                cur_iter = input_data.keywords["dft__maxiter"]
+                cur_iter = input_data.specification.keywords["dft__maxiter"]
             else:
                 kwd = "dft__maxiter"
                 cur_iter = 20  # The NWChem default
         elif method in ["scf", "hf", "mp2"]:
             kwd = "scf__maxiter"
-            cur_iter = input_data.keywords.get(kwd, 8)
+            cur_iter = input_data.specification.keywords.get(kwd, 8)
         elif method.startswith("ccsd") and not use_tce:
             kwd = "ccsd__maxiter"
-            cur_iter = input_data.keywords.get(kwd, 20)
+            cur_iter = input_data.specification.keywords.get(kwd, 20)
         elif method.startswith("ccsd") and use_tce:
             kwd = "tce__maxiter"
-            cur_iter = input_data.keywords.get(kwd, 100)
+            cur_iter = input_data.specification.keywords.get(kwd, 100)
         else:
             raise ValueError(f'Method "{method}" is not yet supported')
 

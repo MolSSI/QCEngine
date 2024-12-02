@@ -66,7 +66,7 @@ def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request)
     # Check keywords passing
     for single in ret.trajectory:
         if "v2" in request.node.name:
-            assert "scf_properties" in single.input_data.keywords
+            assert "scf_properties" in single.input_data.specification.keywords
         else:
             assert "scf_properties" in single.keywords
         assert "WIBERG_LOWDIN_INDICES" in single.extras["qcvars"] or "WIBERG LOWDIN INDICES" in single.extras["qcvars"]

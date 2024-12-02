@@ -8,7 +8,7 @@ from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
 from qcengine.programs import empirical_dispersion_resources
-from qcengine.testing import checkver_and_convert, is_program_new_enough, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, is_program_new_enough, schema_versions, using
 
 
 @using("dftd3")
@@ -16,18 +16,27 @@ from qcengine.testing import checkver_and_convert, is_program_new_enough, schema
 def test_dftd3_task(method, schema_versions, request):
     models, retver, _ = schema_versions
 
-    json_data = {
-        "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
-        "driver": "energy",
-        "model": {"method": method},
-    }
+    if from_v2(request.node.name):
+        json_data = {
+            "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+            "specification": {
+                "driver": "energy",
+                "model": {"method": method},
+            },
+        }
+    else:
+        json_data = {
+            "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+            "driver": "energy",
+            "model": {"method": method},
+        }
 
     json_data = checkver_and_convert(json_data, request.node.name, "pre")
     ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
     if "v2" in request.node.name:
-        assert ret["input_data"]["driver"] == "energy"
+        assert ret["input_data"]["specification"]["driver"] == "energy"
     else:
         assert ret["driver"] == "energy"
     assert "provenance" in ret
@@ -43,17 +52,30 @@ def test_dftd3_task(method, schema_versions, request):
 def test_dftd3_error(schema_versions, request):
     models, retver, _ = schema_versions
 
-    json_data = {
-        "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
-        "driver": "energy",
-        "model": {"method": "b3lyp-d3(bj)"},
-        "keywords": {},
-    }
+    if from_v2(request.node.name):
+        json_data = {
+            "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+            "specification": {
+                "driver": "energy",
+                "model": {"method": "b3lyp-d3(bj)"},
+                "keywords": {},
+            },
+        }
+    else:
+        json_data = {
+            "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+            "driver": "energy",
+            "model": {"method": "b3lyp-d3(bj)"},
+            "keywords": {},
+        }
 
     # Test driver
     with pytest.raises(qcng.exceptions.InputError) as exc:
-        input_data = json_data.copy()
-        input_data["driver"] = "properties"
+        input_data = copy.deepcopy(json_data)
+        if from_v2(request.node.name):
+            input_data["specification"]["driver"] = "properties"
+        else:
+            input_data["driver"] = "properties"
 
         input_data = checkver_and_convert(input_data, request.node.name, "pre")
         ret = qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
@@ -62,8 +84,11 @@ def test_dftd3_error(schema_versions, request):
 
     # Test extension
     with pytest.raises(qcng.exceptions.InputError) as exc:
-        input_data = json_data.copy()
-        input_data["model"]["method"] = "b3lyp-quadD"
+        input_data = copy.deepcopy(json_data)
+        if from_v2(request.node.name):
+            input_data["specification"]["model"]["method"] = "b3lyp-quadD"
+        else:
+            input_data["model"]["method"] = "b3lyp-quadD"
 
         input_data = checkver_and_convert(input_data, request.node.name, "pre")
         ret = qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
@@ -1535,14 +1560,26 @@ def test_3(schema_versions, request):
 
     sys = qcel.molparse.from_string(seneyne)["qm"]
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": qcel.molparse.to_schema(sys, dtype=2),
-        "driver": "energy",
-        "model": {"method": "b3lyp"},
-        "keywords": {"level_hint": "d3bj"},
-    }
+    if from_v2(request.node.name):
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 2,
+            "molecule": qcel.molparse.to_schema(sys, dtype=2),
+            "specification": {
+                "driver": "energy",
+                "model": {"method": "b3lyp"},
+                "keywords": {"level_hint": "d3bj"},
+            },
+        }
+    else:
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "molecule": qcel.molparse.to_schema(sys, dtype=2),
+            "driver": "energy",
+            "model": {"method": "b3lyp"},
+            "keywords": {"level_hint": "d3bj"},
+        }
 
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
     res = qcng.compute(resinp, "dftd3", raise_error=True, return_version=retver)
@@ -1667,14 +1704,22 @@ def test_mp2d__run_mp2d__2body(inp, subjects, schema_versions, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": mol,
-        "driver": "gradient",
-        "model": {"method": inp["name"]},
-        "keywords": {},
-    }
+    if from_v2(request.node.name):
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 2,
+            "molecule": mol,
+            "specification": {"driver": "gradient", "model": {"method": inp["name"]}, "keywords": {}},
+        }
+    else:
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "molecule": mol,
+            "driver": "gradient",
+            "model": {"method": inp["name"]},
+            "keywords": {},
+        }
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, "mp2d", raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
@@ -1763,11 +1808,17 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
     else:
         mol = subject.to_schema(dtype=2)
 
-    atin = models.AtomicInput(
-        molecule=mol,
-        driver="gradient",
-        **inp["qcsk"],
-    )
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            molecule=mol,
+            specification={"driver": "gradient", **inp["qcsk"]},
+        )
+    else:
+        atin = models.AtomicInput(
+            molecule=mol,
+            driver="gradient",
+            **inp["qcsk"],
+        )
     atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
@@ -1779,7 +1830,8 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
     assert compare_values(expected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
     if program == "dftd3":
         assert compare_values(expected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
-    if atin.model.method:
+    method = atin.specification.model.method if from_v2(request.node.name) else atin.model.method
+    if method:
         assert compare_values(
             expected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION ENERGY"], atol=1.0e-7
         )
@@ -1789,7 +1841,7 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
     assert compare_values(gexpected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
     if program == "dftd3":
         assert compare_values(gexpected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
-    if atin.model.method:
+    if method:
         assert compare_values(
             gexpected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION GRADIENT"], atol=1.0e-7
         )
@@ -1833,11 +1885,17 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
 
     program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
-    atin = models.AtomicInput(
-        molecule=mol,
-        driver="gradient",
-        **inp["qcsk"],
-    )
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            molecule=mol,
+            specification={"driver": "gradient", **inp["qcsk"]},
+        )
+    else:
+        atin = models.AtomicInput(
+            molecule=mol,
+            driver="gradient",
+            **inp["qcsk"],
+        )
     atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
@@ -1882,14 +1940,22 @@ def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": mol,
-        "driver": "gradient",
-        "model": {"method": inp["name"]},
-        "keywords": {},
-    }
+    if from_v2(request.node.name):
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 2,
+            "molecule": mol,
+            "specification": {"driver": "gradient", "model": {"method": inp["name"]}, "keywords": {}},
+        }
+    else:
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "molecule": mol,
+            "driver": "gradient",
+            "model": {"method": inp["name"]},
+            "keywords": {},
+        }
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, "dftd3", raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
@@ -1950,15 +2016,25 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request
     else:
         mol = subject.to_schema(dtype=2)
 
-    atin = models.AtomicInput(
-        molecule=mol,
-        driver="energy",
-        model={"method": inp["lbl"]},
-        keywords={
-            "pair_resolved": True,
-            **extrakw,
-        },
-    )
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            molecule=mol,
+            specification={
+                "driver": "energy",
+                "model": {"method": inp["lbl"]},
+                "keywords": {"pair_resolved": True, **extrakw},
+            },
+        )
+    else:
+        atin = models.AtomicInput(
+            molecule=mol,
+            driver="energy",
+            model={"method": inp["lbl"]},
+            keywords={
+                "pair_resolved": True,
+                **extrakw,
+            },
+        )
     atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
@@ -2014,14 +2090,26 @@ def test_gcp(inp, subjects, program, schema_versions, request):
     else:
         mol = subject.to_schema(dtype=2)
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": mol,
-        "driver": "gradient",
-        "model": {"method": inp["name"]},
-        "keywords": {},
-    }
+    if from_v2(request.node.name):
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 2,
+            "molecule": mol,
+            "specification": {
+                "driver": "gradient",
+                "model": {"method": inp["name"]},
+                "keywords": {},
+            },
+        }
+    else:
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "molecule": mol,
+            "driver": "gradient",
+            "model": {"method": inp["name"]},
+            "keywords": {},
+        }
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")

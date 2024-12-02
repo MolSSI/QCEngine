@@ -5,7 +5,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 @pytest.fixture
@@ -22,9 +22,19 @@ def test_run(h2o_data, schema_versions, request):
     models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
-    inp = models.AtomicInput(
-        molecule=h2o, driver="properties", model={"method": "adc2", "basis": "sto-3g"}, keywords={"n_singlets": 3}
-    )
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=h2o,
+            specification={
+                "driver": "properties",
+                "model": {"method": "adc2", "basis": "sto-3g"},
+                "keywords": {"n_singlets": 3},
+            },
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=h2o, driver="properties", model={"method": "adc2", "basis": "sto-3g"}, keywords={"n_singlets": 3}
+        )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(

@@ -8,7 +8,7 @@ from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.programs.tests.test_dftd3_mp2d import eneyne_ne_qcschemamols
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 @pytest.fixture
@@ -42,7 +42,13 @@ def test_simple_ghost(driver, program, basis, keywords, hene_data, schema_versio
     models, retver, _ = schema_versions
     hene = models.Molecule.from_data(hene_data)
 
-    resi = {"molecule": hene, "driver": driver, "model": {"method": "hf", "basis": basis}, "keywords": keywords}
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": hene,
+            "specification": {"driver": driver, "model": {"method": "hf", "basis": basis}, "keywords": keywords},
+        }
+    else:
+        resi = {"molecule": hene, "driver": driver, "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     if program == "gamess":
         with pytest.raises(qcng.exceptions.InputError) as e:
@@ -54,7 +60,7 @@ def test_simple_ghost(driver, program, basis, keywords, hene_data, schema_versio
     res = checkver_and_convert(res, request.node.name, "post")
 
     if "v2" in request.node.name:
-        assert res["input_data"]["driver"] == driver
+        assert res["input_data"]["specification"]["driver"] == driver
     else:
         assert res["driver"] == driver
     assert "provenance" in res
@@ -193,9 +199,17 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
     assert len(kmol.symbols) == ref["natom"][subject]
     assert sum([int(at) for at in kmol.real]) == ref["nreal"][subject]
 
-    atin = models.AtomicInput(
-        **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords}
-    )
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            **{
+                "molecule": kmol,
+                "specification": {"model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords},
+            }
+        )
+    else:
+        atin = models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords}
+        )
 
     if qcprog == "gamess" and subject in ["mAgB", "gAmB"]:
         with pytest.raises(qcng.exceptions.InputError) as e:
@@ -288,9 +302,17 @@ def test_atom_labels(qcprog, basis, keywords, schema_versions, request):
     assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
     assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
 
-    atin = models.AtomicInput(
-        **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": "energy", "keywords": keywords}
-    )
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            **{
+                "molecule": kmol,
+                "specification": {"model": {"method": "mp2", "basis": basis}, "driver": "energy", "keywords": keywords},
+            }
+        )
+    else:
+        atin = models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": "energy", "keywords": keywords}
+        )
 
     atin = checkver_and_convert(atin, request.node.name, "pre")
     atres = qcng.compute(atin, qcprog, return_version=retver)

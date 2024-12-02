@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models.v2 import AtomicInput, OptimizationInput, OptimizationResult, Provenance
+from qcelemental.models.v2 import AtomicInput, AtomicSpecification, OptimizationInput, OptimizationResult, Provenance
 
 from qcengine.config import TaskConfig
 from qcengine.exceptions import InputError, UnknownError
@@ -45,9 +45,13 @@ class NWChemDriverProcedure(ProcedureHarness):
         # Make an atomic input
         atomic_input = AtomicInput(
             molecule=input_data.initial_molecule,
-            driver="energy",
-            keywords=keywords,
-            **input_data.input_specification.dict(exclude={"driver", "keywords"}),
+            specification=AtomicSpecification(
+                driver="energy",
+                keywords=keywords,
+                **input_data.input_specification.model_dump(
+                    exclude={"driver", "keywords", "schema_name", "schema_version"}
+                ),  # TODO allow schema_ if added back
+            ),
         )
 
         # Build the inputs for the job

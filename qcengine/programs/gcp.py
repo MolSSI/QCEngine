@@ -114,8 +114,10 @@ class GCPHarness(ProgramHarness):
         self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
 
-        if (input_model.driver.derivative_int() > 1) or (input_model.driver == "properties"):
-            raise InputError(f"Driver {input_model.driver} not implemented for GCP.")
+        if (input_model.specification.driver.derivative_int() > 1) or (
+            input_model.specification.driver == "properties"
+        ):
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for GCP.")
 
         # live somewhere else?
         available_levels = [
@@ -167,7 +169,7 @@ class GCPHarness(ProgramHarness):
 
         available_levels = [f.upper() for f in available_levels]
         # temp until actual options object
-        method = input_model.model.method.upper()
+        method = input_model.specification.model.method.upper()
         if method not in available_levels:
             if method in mctc_gcp_levels and executable == "gcp":
                 raise InputError(f"GCP does not have method {method} but MCTC-GCP does.")
@@ -181,7 +183,7 @@ class GCPHarness(ProgramHarness):
 
         command = [executable, "gcp_geometry.xyz", calldash + "level", method]
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             command.append(calldash + "grad")
 
         infiles = {
@@ -215,9 +217,11 @@ class GCPHarness(ProgramHarness):
             elif re.match("     normal termination of gCP", ln):
                 break
         else:
-            if self._defaults["name"] == "GCP" and not ((real_nat == 1) and (input_model.driver == "gradient")):
+            if self._defaults["name"] == "GCP" and not (
+                (real_nat == 1) and (input_model.specification.driver == "gradient")
+            ):
                 raise UnknownError(
-                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.model}"
+                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.specification.model}"
                 )
 
         # parse gradient output
@@ -227,7 +231,7 @@ class GCPHarness(ProgramHarness):
         elif real_nat == 1:
             realgrad = np.zeros((1, 3))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             ireal = np.argwhere(real).reshape((-1))
             fullgrad = np.zeros((full_nat, 3))
             try:
@@ -235,7 +239,7 @@ class GCPHarness(ProgramHarness):
             except NameError as exc:
                 raise UnknownError("Unsuccessful gradient collection.") from exc
 
-        qcvkey = input_model.model.method.upper()
+        qcvkey = input_model.specification.model.method.upper()
 
         calcinfo = []
 
@@ -244,7 +248,7 @@ class GCPHarness(ProgramHarness):
         if qcvkey:
             calcinfo.append(qcel.Datum(f"{qcvkey} GCP CORRECTION ENERGY", "Eh", ene))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
             calcinfo.append(qcel.Datum("GCP CORRECTION GRADIENT", "Eh/a0", fullgrad))
             if qcvkey:
@@ -255,7 +259,7 @@ class GCPHarness(ProgramHarness):
         # Decimal --> str preserves precision
         calcinfo = {k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in calcinfo.items()}
 
-        retres = calcinfo[f"CURRENT {input_model.driver.upper()}"]
+        retres = calcinfo[f"CURRENT {input_model.specification.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
@@ -264,7 +268,7 @@ class GCPHarness(ProgramHarness):
         properties = {
             "calcinfo_natom": len(input_model.molecule.symbols),
             "return_energy": ene,
-            f"return_{input_model.driver.value}": retres,
+            f"return_{input_model.specification.driver.value}": retres,
         }
 
         output_data = {
