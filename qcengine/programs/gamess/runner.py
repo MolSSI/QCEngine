@@ -90,7 +90,7 @@ class GAMESSHarness(ProgramHarness):
             "scratch_messy": config.scratch_messy,
         }
 
-        opts = copy.deepcopy(input_model.keywords)
+        opts = copy.deepcopy(input_model.specification.keywords)
 
         # Handle molecule
         if not all(input_model.molecule.real):
@@ -100,16 +100,18 @@ class GAMESSHarness(ProgramHarness):
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
-        opts.update(muster_modelchem(input_model.model.method, input_model.driver.derivative_int()))
+        opts.update(
+            muster_modelchem(input_model.specification.model.method, input_model.specification.driver.derivative_int())
+        )
 
         # Handle basis set
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
-        if input_model.model.basis is None:
+        if input_model.specification.model.basis is None:
             raise InputError("None for model.basis is not useable.")
 
         # * for gamess, usually insufficient b/c either ngauss or ispher needed
-        opts["basis__gbasis"] = input_model.model.basis
+        opts["basis__gbasis"] = input_model.specification.model.basis
 
         # Handle memory
         # * [GiB] --> [M QW]
@@ -209,7 +211,7 @@ class GAMESSHarness(ProgramHarness):
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
-        method = input_model.model.method.lower()
+        method = input_model.specification.model.method.lower()
         method = method[4:] if method.startswith("gms-") else method
 
         # gamessmol, if it exists, is dinky, just a clue to geometry of gamess results
@@ -232,10 +234,10 @@ class GAMESSHarness(ProgramHarness):
                 qcvars[f"{method.upper()} TOTAL HESSIAN"] = gamesshess
                 qcvars["CURRENT HESSIAN"] = gamesshess
 
-            if input_model.driver.upper() == "PROPERTIES":
+            if input_model.specification.driver.upper() == "PROPERTIES":
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
-                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+                retres = qcvars[f"CURRENT {input_model.specification.driver.upper()}"]
         except KeyError:
             if "EXETYP=CHECK" in stdout and "EXECUTION OF GAMESS TERMINATED NORMALLY" in stdout:
                 # check run that completed normally
