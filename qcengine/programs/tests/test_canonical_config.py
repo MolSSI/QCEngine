@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, has_program, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions, using
 
 _canonical_methods = [
     # needs attn ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
@@ -105,7 +105,13 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, sch
 
     #  <<  Run
 
-    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=use_keywords)
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=molecule,
+            specification=models.AtomicSpecification(driver="energy", model=model, keywords=use_keywords),
+        )
+    else:
+        inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=use_keywords)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict(), return_version=retver)
@@ -175,7 +181,12 @@ def test_local_options_scratch(program, model, keywords, schema_versions, reques
 
     #  <<  Run
 
-    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=molecule, specification=models.AtomicSpecification(driver="energy", model=model, keywords=keywords)
+        )
+    else:
+        inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict(), return_version=retver)
@@ -261,7 +272,12 @@ def test_local_options_ncores(program, model, keywords, ncores, schema_versions,
 
     #  <<  Run
 
-    inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=molecule, specification=models.AtomicSpecification(driver="energy", model=model, keywords=keywords)
+        )
+    else:
+        inp = models.AtomicInput(molecule=molecule, driver="energy", model=model, keywords=keywords)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict(), return_version=retver)

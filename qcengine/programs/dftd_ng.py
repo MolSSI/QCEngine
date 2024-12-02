@@ -68,44 +68,44 @@ class DFTD4Harness(ProgramHarness):
         from dftd4.qcschema import run_qcschema
 
         # strip engine hint
-        input_data = input_model.dict()
-        method = input_model.model.method
+        input_data = input_model.model_dump()
+        method = input_model.specification.model.method
         if method.startswith("d4-"):
             method = method[3:]
-            input_data["model"]["method"] = method
+            input_data["specification"]["model"]["method"] = method
         qcvkey = method.upper() if method is not None else None
 
         # send `from_arrays` the dftd4 behavior of functional specification overrides explicit parameters specification
         # * differs from dftd4 harness behavior where parameters extend or override functional
         # * stash the resolved plan in extras or, if errored, leave it for the proper dftd4 api to reject
-        param_tweaks = None if method else input_model.keywords.get("params_tweaks", None)
+        param_tweaks = None if method else input_model.specification.keywords.get("params_tweaks", None)
         try:
             planinfo = from_arrays(
                 verbose=1,
                 name_hint=method,
-                level_hint=input_model.keywords.get("level_hint", None),
+                level_hint=input_model.specification.keywords.get("level_hint", None),
                 param_tweaks=param_tweaks,
-                dashcoeff_supplement=input_model.keywords.get("dashcoeff_supplement", None),
+                dashcoeff_supplement=input_model.specification.keywords.get("dashcoeff_supplement", None),
             )
         except InputError:
             pass
         else:
-            input_data["extras"]["info"] = planinfo
+            input_data["specification"]["extras"]["info"] = planinfo
 
         # strip dispersion level from method
         for alias, d4 in get_dispersion_aliases().items():
             if d4 in ["d4bjeeqatm", "d4bjeeqtwo"] and method.lower().endswith(alias):
                 method = method[: -(len(alias) + 1)]
-                input_data["model"]["method"] = method
+                input_data["specification"]["model"]["method"] = method
 
         # consolidate dispersion level aliases
-        level_hint = input_model.keywords.get("level_hint", None)
+        level_hint = input_model.specification.keywords.get("level_hint", None)
         if level_hint and get_dispersion_aliases()[level_hint.lower()] in ["d4bjeeqatm", "d4bjeeqtwo"]:
             level_hint = "d4"
-            input_data["keywords"]["level_hint"] = level_hint
+            input_data["specification"]["keywords"]["level_hint"] = level_hint
 
         # dftd4 speaks qcsk.v1
-        input_model_v1 = qcelemental.models.v1.AtomicInput(**input_data)
+        input_model_v1 = qcelemental.models.v2.AtomicInput(**input_data).convert_v(1)
 
         # Run the Harness
         output_v1 = run_qcschema(input_model_v1)
@@ -126,14 +126,14 @@ class DFTD4Harness(ProgramHarness):
         if qcvkey:
             calcinfo[f"{qcvkey} DISPERSION CORRECTION ENERGY"] = energy
 
-        if output.input_data.driver == "gradient":
+        if output.input_data.specification.driver == "gradient":
             gradient = output.return_result
             calcinfo["CURRENT GRADIENT"] = gradient
             calcinfo["DISPERSION CORRECTION GRADIENT"] = gradient
             if qcvkey:
                 calcinfo[f"{qcvkey} DISPERSION CORRECTION GRADIENT"] = gradient
 
-        if output.input_data.keywords.get("pair_resolved", False):
+        if output.input_data.specification.keywords.get("pair_resolved", False):
             pw2 = output.extras["dftd4"]["additive pairwise energy"]
             pw3 = output.extras["dftd4"]["non-additive pairwise energy"]
             assert abs(pw2.sum() + pw3.sum() - energy) < 1.0e-8, f"{pw2.sum()} + {pw3.sum()} != {energy}"
@@ -237,50 +237,50 @@ class SDFTD3Harness(ProgramHarness):
         from dftd3.qcschema import run_qcschema
 
         # strip engine hint
-        input_data = input_model.dict()
-        method = input_model.model.method
+        input_data = input_model.model_dump()
+        method = input_model.specification.model.method
         if method.startswith("d3-"):
             method = method[3:]
-            input_data["model"]["method"] = method
+            input_data["specification"]["model"]["method"] = method
         qcvkey = method.upper() if method is not None else None
 
         # send `from_arrays` the s-dftd3 behavior of functional specification overrides explicit parameters specification
         # * differs from dftd3 harness behavior where parameters extend or override functional
         # * stash the resolved plan in extras or, if errored, leave it for the proper dftd3 api to reject
-        param_tweaks = None if method else input_model.keywords.get("params_tweaks", None)
+        param_tweaks = None if method else input_model.specification.keywords.get("params_tweaks", None)
         try:
             planinfo = from_arrays(
                 verbose=1,
                 name_hint=method,
-                level_hint=input_model.keywords.get("level_hint", None),
+                level_hint=input_model.specification.keywords.get("level_hint", None),
                 param_tweaks=param_tweaks,
-                dashcoeff_supplement=input_model.keywords.get("dashcoeff_supplement", None),
+                dashcoeff_supplement=input_model.specification.keywords.get("dashcoeff_supplement", None),
             )
         except InputError:
             pass
         else:
-            input_data["extras"]["info"] = planinfo
+            input_data["specification"]["extras"]["info"] = planinfo
 
         # strip dispersion level from method
         for alias, d3 in get_dispersion_aliases().items():
             if d3.startswith("d3") and method.lower().endswith(alias):
                 method = method[: -(len(alias) + 1)]
-                input_data["model"]["method"] = method
+                input_data["specification"]["model"]["method"] = method
 
         # consolidate dispersion level aliases
-        if input_model.keywords.pop("apply_qcengine_aliases", False):
-            level_hint = input_model.keywords.get("level_hint", None)
+        if input_model.specification.keywords.pop("apply_qcengine_aliases", False):
+            level_hint = input_model.specification.keywords.get("level_hint", None)
             if level_hint:
                 level_hint = get_dispersion_aliases()[level_hint.lower()]
                 if level_hint.endswith("atm"):
                     level_hint = level_hint[:-3]
                 if level_hint.endswith("2b"):
                     level_hint = level_hint[:-2]
-                    input_data["keywords"]["params_tweaks"] = {**planinfo["dashparams"], "s9": 0.0}
-                input_data["keywords"]["level_hint"] = level_hint
+                    input_data["specification"]["keywords"]["params_tweaks"] = {**planinfo["dashparams"], "s9": 0.0}
+                input_data["specification"]["keywords"]["level_hint"] = level_hint
 
         # sdftd3 speaks qcsk.v1
-        input_model_v1 = qcelemental.models.v1.AtomicInput(**input_data)
+        input_model_v1 = qcelemental.models.v2.AtomicInput(**input_data).convert_v(1)
 
         # Run the Harness
         output_v1 = run_qcschema(input_model_v1)
@@ -301,14 +301,14 @@ class SDFTD3Harness(ProgramHarness):
         if qcvkey:
             calcinfo[f"{qcvkey} DISPERSION CORRECTION ENERGY"] = energy
 
-        if output.input_data.driver == "gradient":
+        if output.input_data.specification.driver == "gradient":
             gradient = output.return_result
             calcinfo["CURRENT GRADIENT"] = gradient
             calcinfo["DISPERSION CORRECTION GRADIENT"] = gradient
             if qcvkey:
                 calcinfo[f"{qcvkey} DISPERSION CORRECTION GRADIENT"] = gradient
 
-        if output.input_data.keywords.get("pair_resolved", False):
+        if output.input_data.specification.keywords.get("pair_resolved", False):
             pw2 = output.extras["dftd3"]["additive pairwise energy"]
             pw3 = output.extras["dftd3"]["non-additive pairwise energy"]
             assert abs(pw2.sum() + pw3.sum() - energy) < 1.0e-8, f"{pw2.sum()} + {pw3.sum()} != {energy}"

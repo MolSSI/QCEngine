@@ -31,6 +31,9 @@ def test_terachem_input_formatter(test_case):
     data = terachem_info.get_test_data(test_case)
     inp = qcel.models.v1.AtomicInput.parse_raw(data["input.json"])
 
+    # only qcng.compute() handles schema versions. test_data returns v1 and build_input takes v2, so need to convert
+    inp = inp.convert_v(2)
+
     # TODO add actual comparison of generated input file
     input_file = qcng.get_program("terachem", check=False).build_input(inp, qcng.get_config())
     assert input_file.keys() >= {"commands", "infiles"}

@@ -5,7 +5,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 @pytest.fixture
@@ -39,14 +39,26 @@ def test_energy(h2o, schema_versions, request):
         "world_unit": "bohr",
     }
 
-    inp = models.AtomicInput(
-        molecule=h2o,
-        driver="energy",
-        model={
-            "method": "BLYP",
-        },
-        keywords=mr_kws,
-    )
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=h2o,
+            specification={
+                "driver": "energy",
+                "model": {
+                    "method": "BLYP",
+                },
+                "keywords": mr_kws,
+            },
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=h2o,
+            driver="energy",
+            model={
+                "method": "BLYP",
+            },
+            keywords=mr_kws,
+        )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True, return_version=retver)
@@ -55,7 +67,7 @@ def test_energy(h2o, schema_versions, request):
     # Make sure the calculation completed successfully
     assert compare_values(-76.4546307, res["return_result"], atol=1e-3)
     if "v2" in request.node.name:
-        assert res["input_data"]["driver"] == "energy"
+        assert res["input_data"]["specification"]["driver"] == "energy"
     else:
         assert res["driver"] == "energy"
     assert "provenance" in res
@@ -80,14 +92,26 @@ def test_dipole(h2o, schema_versions, request):
         "world_unit": "bohr",
     }
 
-    inp = models.AtomicInput(
-        molecule=h2o,
-        driver="properties",
-        model={
-            "method": "BLYP",
-        },
-        keywords=mr_kws,
-    )
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=h2o,
+            specification={
+                "driver": "properties",
+                "model": {
+                    "method": "BLYP",
+                },
+                "keywords": mr_kws,
+            },
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=h2o,
+            driver="properties",
+            model={
+                "method": "BLYP",
+            },
+            keywords=mr_kws,
+        )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True, return_version=retver)
@@ -96,7 +120,7 @@ def test_dipole(h2o, schema_versions, request):
     # Make sure the calculation completed successfully
     assert compare_values([-3.766420e-07, 0.0, 0.720473], res["return_result"]["dipole_moment"]["dip-1"], atol=1e-3)
     if "v2" in request.node.name:
-        assert res["input_data"]["driver"] == "properties"
+        assert res["input_data"]["specification"]["driver"] == "properties"
     else:
         assert res["driver"] == "properties"
     assert "provenance" in res
@@ -120,14 +144,26 @@ def test_gradient(fh, schema_versions, request):
         "world_size": 6,
     }
 
-    inp = models.AtomicInput(
-        molecule=fh,
-        driver="gradient",
-        model={
-            "method": "BLYP",
-        },
-        keywords=mr_kws,
-    )
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=fh,
+            specification={
+                "driver": "gradient",
+                "model": {
+                    "method": "BLYP",
+                },
+                "keywords": mr_kws,
+            },
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=fh,
+            driver="gradient",
+            model={
+                "method": "BLYP",
+            },
+            keywords=mr_kws,
+        )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     res = qcng.compute(inp, "mrchem", raise_error=True, return_dict=True, return_version=retver)
@@ -147,7 +183,7 @@ def test_gradient(fh, schema_versions, request):
         atol=1e-3,
     )
     if "v2" in request.node.name:
-        assert res["input_data"]["driver"] == "gradient"
+        assert res["input_data"]["specification"]["driver"] == "gradient"
     else:
         assert res["driver"] == "gradient"
     assert "provenance" in res

@@ -5,7 +5,7 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, has_program, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions, using
 
 from .test_canonical_config import _canonical_methods, _get_molecule
 
@@ -48,7 +48,17 @@ def test_protocol_native(program, model, keywords, native, schema_versions, requ
 
     #  <<  Run
 
-    inp = models.AtomicInput(molecule=molecule, driver="gradient", model=model, keywords=keywords, protocols=protocols)
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=molecule,
+            specification=models.AtomicSpecification(
+                driver="gradient", model=model, keywords=keywords, protocols=protocols
+            ),
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=molecule, driver="gradient", model=model, keywords=keywords, protocols=protocols
+        )
 
     inp = checkver_and_convert(inp, request.node.name, "pre")
     ret = qcng.compute(inp, program, raise_error=True, task_config=config.dict(), return_version=retver)

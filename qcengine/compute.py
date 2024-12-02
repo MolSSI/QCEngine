@@ -122,7 +122,11 @@ def compute(
         # Build out task_config
         if task_config is None:
             task_config = {}
-        input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
+        # TODO generalize when procedures in layout in place
+        if isinstance(input_data, qcelemental.models.v2.AtomicInput):
+            input_engine_options = input_data.specification.extras.pop("_qcengine_local_config", {})
+        else:
+            input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
         task_config = {**task_config, **input_engine_options}
         config = get_config(task_config=task_config)
 

@@ -11,7 +11,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 @using("xtb")
@@ -40,11 +40,20 @@ def test_xtb_task_gfn1xtb_m01(schema_versions, request):
         ]
     )
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
-        model={"method": "GFN1-xTB"},
-        driver="gradient",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN1-xTB"},
+                driver="gradient",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
+            model={"method": "GFN1-xTB"},
+            driver="gradient",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -81,15 +90,28 @@ def test_xtb_task_gfn1xtb_m02(schema_versions, request):
         ]
     )
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
-        model={"method": "GFN1-xTB"},
-        driver="gradient",
-        keywords={
-            "accuracy": 0.1,
-            "electronic_temperature": 500.0,
-        },
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN1-xTB"},
+                driver="gradient",
+                keywords={
+                    "accuracy": 0.1,
+                    "electronic_temperature": 500.0,
+                },
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            model={"method": "GFN1-xTB"},
+            driver="gradient",
+            keywords={
+                "accuracy": 0.1,
+                "electronic_temperature": 500.0,
+            },
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -126,14 +148,26 @@ def test_xtb_task_gfn1xtb_m03(schema_versions, request):
         ]
     )
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
-        model={"method": "GFN1-xTB"},
-        driver="gradient",
-        keywords={
-            "solvent": "chcl3",
-        },
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN1-xTB"},
+                driver="gradient",
+                keywords={
+                    "solvent": "chcl3",
+                },
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
+            model={"method": "GFN1-xTB"},
+            driver="gradient",
+            keywords={
+                "solvent": "chcl3",
+            },
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -173,11 +207,20 @@ def test_xtb_task_gfn1xtb_m04(schema_versions, request):
         ),
     }
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-04", return_dict=True)),
-        model={"method": "GFN1-xTB"},
-        driver="properties",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-04", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN1-xTB"},
+                driver="properties",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-04", return_dict=True)),
+            model={"method": "GFN1-xTB"},
+            driver="properties",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -197,11 +240,20 @@ def test_xtb_task_gfn1xtb_m05(schema_versions, request):
 
     return_result = -29.038403257613453
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-05", return_dict=True)),
-        model={"method": "GFN1-xTB"},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-05", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN1-xTB"},
+                driver="energy",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-05", return_dict=True)),
+            model={"method": "GFN1-xTB"},
+            driver="energy",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -239,11 +291,20 @@ def test_xtb_task_gfn2xtb_m01(schema_versions, request):
         ]
     )
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
-        model={"method": "GFN2-xTB"},
-        driver="gradient",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN2-xTB"},
+                driver="gradient",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
+            model={"method": "GFN2-xTB"},
+            driver="gradient",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -280,15 +341,28 @@ def test_xtb_task_gfn2xtb_m02(schema_versions, request):
         ]
     )
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
-        model={"method": "GFN2-xTB"},
-        driver="gradient",
-        keywords={
-            "accuracy": 0.1,
-            "electronic_temperature": 500.0,
-        },
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN2-xTB"},
+                driver="gradient",
+                keywords={
+                    "accuracy": 0.1,
+                    "electronic_temperature": 500.0,
+                },
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            model={"method": "GFN2-xTB"},
+            driver="gradient",
+            keywords={
+                "accuracy": 0.1,
+                "electronic_temperature": 500.0,
+            },
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -325,14 +399,26 @@ def test_xtb_task_gfn2xtb_m03(schema_versions, request):
         ]
     )
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
-        model={"method": "GFN2-xTB"},
-        driver="gradient",
-        keywords={
-            "solvent": "chcl3",
-        },
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN2-xTB"},
+                driver="gradient",
+                keywords={
+                    "solvent": "chcl3",
+                },
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
+            model={"method": "GFN2-xTB"},
+            driver="gradient",
+            keywords={
+                "solvent": "chcl3",
+            },
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -372,11 +458,20 @@ def test_xtb_task_gfn2xtb_m04(schema_versions, request):
         ),
     }
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-04", return_dict=True)),
-        model={"method": "GFN2-xTB"},
-        driver="properties",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-04", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN2-xTB"},
+                driver="properties",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-04", return_dict=True)),
+            model={"method": "GFN2-xTB"},
+            driver="properties",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -396,11 +491,20 @@ def test_xtb_task_gfn2xtb_m05(schema_versions, request):
 
     return_result = -27.73598761779656
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("mindless-05", return_dict=True)),
-        model={"method": "GFN2-xTB"},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-05", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN2-xTB"},
+                driver="energy",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-05", return_dict=True)),
+            model={"method": "GFN2-xTB"},
+            driver="energy",
+        )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
     atomic_result = qcng.compute(atomic_input, "xtb", return_version=retver)
@@ -415,11 +519,20 @@ def test_xtb_task_gfn2xtb_m05(schema_versions, request):
 def test_xtb_task_unknown_method(schema_versions, request):
     models, retver, models_out = schema_versions
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
-        model={"method": "GFN-xTB"},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN-xTB"},
+                driver="energy",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
+            model={"method": "GFN-xTB"},
+            driver="energy",
+        )
     error = models_out.ComputeError(error_type="input_error", error_message="Invalid method GFN-xTB provided in model")
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
@@ -434,11 +547,20 @@ def test_xtb_task_unknown_method(schema_versions, request):
 def test_xtb_task_unsupported_driver(schema_versions, request):
     models, retver, models_out = schema_versions
 
-    atomic_input = models.AtomicInput(
-        molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
-        model={"method": "GFN2-xTB"},
-        driver="hessian",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
+            specification=models.AtomicSpecification(
+                model={"method": "GFN2-xTB"},
+                driver="hessian",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
+            model={"method": "GFN2-xTB"},
+            driver="hessian",
+        )
     error = models_out.ComputeError(
         error_type="input_error", error_message="Calculation succeeded but invalid driver request provided"
     )
@@ -455,20 +577,38 @@ def test_xtb_task_unsupported_driver(schema_versions, request):
 def test_xtb_task_cold_fusion(schema_versions, request):
     models, retver, models_out = schema_versions
 
-    atomic_input = models.AtomicInput(
-        molecule={
-            "symbols": ["Li", "Li", "Li", "Li"],
-            "geometry": [
-                [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                [-1.58746019997201, -1.58746019997201, -1.58746019997201],
-                [+1.58746019997201, +1.58746019997201, -1.58746019997201],
-            ],
-            "validated": True,  # Force a nuclear fusion input, to make xtb fail
-        },
-        model={"method": "GFN2-xTB"},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule={
+                "symbols": ["Li", "Li", "Li", "Li"],
+                "geometry": [
+                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+                    [-1.58746019997201, -1.58746019997201, -1.58746019997201],
+                    [+1.58746019997201, +1.58746019997201, -1.58746019997201],
+                ],
+                "validated": True,  # Force a nuclear fusion input, to make xtb fail
+            },
+            specification=models.AtomicSpecification(
+                model={"method": "GFN2-xTB"},
+                driver="energy",
+            ),
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule={
+                "symbols": ["Li", "Li", "Li", "Li"],
+                "geometry": [
+                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+                    [-1.58746019997201, -1.58746019997201, -1.58746019997201],
+                    [+1.58746019997201, +1.58746019997201, -1.58746019997201],
+                ],
+                "validated": True,  # Force a nuclear fusion input, to make xtb fail
+            },
+            model={"method": "GFN2-xTB"},
+            driver="energy",
+        )
     error = models_out.ComputeError(
         error_type="runtime_error",
         error_message="Setup of molecular structure failed:\n-1- xtb_api_newMolecule: Could not generate molecular structure",

@@ -83,7 +83,7 @@ class CFOURHarness(ProgramHarness):
             "scratch_messy": config.scratch_messy,
         }
 
-        opts = copy.deepcopy(input_model.keywords)
+        opts = copy.deepcopy(input_model.specification.keywords)
 
         # Handle memory
         # for cfour, [GiB] --> [QW]
@@ -95,20 +95,20 @@ class CFOURHarness(ProgramHarness):
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
-        mdcopts = muster_modelchem(input_model.model.method, input_model.driver)
+        mdcopts = muster_modelchem(input_model.specification.model.method, input_model.specification.driver)
         opts.update(mdcopts)
 
         # Handle basis set
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
-        if input_model.model.basis is None:
+        if input_model.specification.model.basis is None:
             raise InputError("None for model.basis is not useable.")
 
         # * why, yes, this is highly questionable
         #   * assuming relative file location between xcfour exe and GENBAS file
         #   * reading a multi MB file into the inputs dict
         if all(input_model.molecule.real):
-            opts["basis"] = input_model.model.basis
+            opts["basis"] = input_model.specification.model.basis
             bascmd = ""
         else:
             # * note not getting per-basis casing like if it passed through format_keywords
@@ -116,8 +116,8 @@ class CFOURHarness(ProgramHarness):
             text = [
                 (
                     f"""H:6-31G"""
-                    if (elem == "H" and input_model.model.basis.upper() == "6-31G*")
-                    else f"""{elem.upper()}:{input_model.model.basis.upper()}"""
+                    if (elem == "H" and input_model.specification.model.basis.upper() == "6-31G*")
+                    else f"""{elem.upper()}:{input_model.specification.model.basis.upper()}"""
                 )
                 for iat, elem in enumerate(input_model.molecule.symbols)
             ]
@@ -159,7 +159,7 @@ class CFOURHarness(ProgramHarness):
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
-        method = input_model.model.method.lower()
+        method = input_model.specification.model.method.lower()
         method = method[3:] if method.startswith("c4-") else method
 
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
@@ -183,10 +183,10 @@ class CFOURHarness(ProgramHarness):
                 qcvars[f"{method.upper()} TOTAL HESSIAN"] = c4hess
                 qcvars["CURRENT HESSIAN"] = c4hess
 
-            if input_model.driver.upper() == "PROPERTIES":
+            if input_model.specification.driver.upper() == "PROPERTIES":
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
-                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+                retres = qcvars[f"CURRENT {input_model.specification.driver.upper()}"]
         except KeyError:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
