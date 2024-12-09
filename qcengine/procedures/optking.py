@@ -1,3 +1,5 @@
+import logging
+from io import StringIO
 from typing import Any, ClassVar, Dict, Union
 
 from qcelemental.models.v1 import OptimizationResult
@@ -41,21 +43,28 @@ class OptKingProcedure(ProcedureHarness):
         if self.found(raise_error=True):
             import optking
 
-        input_data = input_model.convert_v(1)
-        input_data = input_model.dict()
+        log_stream = StringIO()
+        log = logging.getLogger(f"{__name__}.{id(self)}")
+        log = logging.getLogger("optking")
+        log.addHandler(logging.StreamHandler(log_stream))
+        log.setLevel("INFO")
+
+        input_data_v1 = input_model.convert_v(1).dict()
 
         # Set retries to two if zero while respecting local_config
         local_config = config.dict()
         local_config["retries"] = local_config.get("retries", 2) or 2
-        input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
+        input_data_v1["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
-        output_data = optking.optwrapper.optimize_qcengine(input_data)
+        output_v1 = optking.optwrapper.optimize_qcengine(input_data_v1)
+        output_v1["stdout"] = log_stream.getvalue()
 
-        output_data["schema_name"] = "qcschema_optimization_output"
-        output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
-        if output_data["success"]:
-            output_data = OptimizationResult(**output_data)
-            output_data = output_data.convert_v(2)
+        output_v1["input_specification"]["extras"].pop("_qcengine_local_config", None)
+        if output_v1["success"]:
+            output_v1 = OptimizationResult(**output_v1)
+            output = output_v1.convert_v(2, external_input_data=input_model)
+        else:
+            output = output_v1  # TODO almost certainly wrong -- need v2 conversion?
 
-        return output_data
+        return output

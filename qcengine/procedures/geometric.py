@@ -43,29 +43,31 @@ class GeometricProcedure(ProcedureHarness):
         except ModuleNotFoundError:
             raise ModuleNotFoundError("Could not find geomeTRIC in the Python path.")
 
-        input_data = input_model.dict()
+        input_data_v1 = input_model.convert_v(1).dict()
 
         # Temporary patch for geomeTRIC
-        input_data["initial_molecule"]["symbols"] = list(input_data["initial_molecule"]["symbols"])
+        input_data_v1["initial_molecule"]["symbols"] = list(input_data_v1["initial_molecule"]["symbols"])
 
         # Set retries to two if zero while respecting local_config
         local_config = config.dict()
         local_config["retries"] = local_config.get("retries", 2) or 2
-        input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
+        input_data_v1["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
-        output_data = geometric.run_json.geometric_run_json(input_data)
+        output_v1 = geometric.run_json.geometric_run_json(input_data_v1)
 
-        output_data["provenance"] = {
+        output_v1["provenance"] = {
             "creator": "geomeTRIC",
             "routine": "geometric.run_json.geometric_run_json",
             "version": geometric.__version__,
         }
 
-        output_data["schema_name"] = "qcschema_optimization_output"
-        output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
-        if output_data["success"]:
-            output_data = OptimizationResult(**output_data)
-            output_data = output_data.convert_v(2)
+        output_v1["schema_name"] = "qcschema_optimization_output"  # overwrites OptIn value
+        output_v1["input_specification"]["extras"].pop("_qcengine_local_config", None)
+        if output_v1["success"]:
+            output_v1 = OptimizationResult(**output_v1)
+            output = output_v1.convert_v(2, external_input_data=input_model)
+        else:
+            output = output_v1  # TODO almost certainly wrong, needs v2 conv
 
-        return output_data
+        return output

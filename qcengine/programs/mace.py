@@ -136,7 +136,7 @@ class MACEHarness(ProgramHarness):
         ret_data["input_data"] = input_data
         ret_data["molecule"] = input_data.molecule
         ret_data["provenance"] = Provenance(creator="mace", version=mace.__version__, routine="mace")
-        ret_data["schema_name"] = "qcschema_output"
+        ret_data["schema_name"] = "qcschema_atomic_output"
         ret_data["success"] = True
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other

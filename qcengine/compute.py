@@ -123,7 +123,7 @@ def compute(
         if task_config is None:
             task_config = {}
         # TODO generalize when procedures in layout in place
-        if isinstance(input_data, qcelemental.models.v2.AtomicInput):
+        if isinstance(input_data, (qcelemental.models.v2.AtomicInput, qcelemental.models.v2.OptimizationInput)):
             input_engine_options = input_data.specification.extras.pop("_qcengine_local_config", {})
         else:
             input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
