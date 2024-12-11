@@ -70,7 +70,7 @@ Misc.
 
 MUST (Unmerged)
 +++++++++++++++
-
+torsiondrive rewritten in v2.
 berny harness rewritten in v2. optking and geometric natively speak v1, so adapted as well as can be.
 allow nwchemdriver w/o driver=energy. provenance now nwchemdriver not nwchemrelax
  Optking now fills in ``v2.OptimizationResult.stdout``. Through v2, once can alter gradient protocols in an optimization.

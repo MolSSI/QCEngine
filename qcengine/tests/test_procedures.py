@@ -553,27 +553,40 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
 @using("torsiondrive")
 def test_torsiondrive_generic(schema_versions, request):
     models, retver, _ = schema_versions
-    TorsionDriveInput = models.TorsionDriveInput
-    TDKeywords = models.procedures.TDKeywords
-    OptimizationSpecification = models.procedures.OptimizationSpecification
-    QCInputSpecification = models.procedures.QCInputSpecification
-    DriverEnum = models.DriverEnum
-    Model = models.Model
-    Molecule = models.Molecule
 
-    input_data = TorsionDriveInput(
-        keywords=TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
-        input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="UFF", basis=None)),
-        initial_molecule=[Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
-        optimization_spec=OptimizationSpecification(
-            procedure="geomeTRIC",
-            keywords={
-                "coordsys": "hdlc",
-                "maxiter": 500,
-                "program": "rdkit",
-            },
-        ),
-    )
+    if from_v2(request.node.name):
+        input_data = models.TorsionDriveInput(
+            initial_molecules=[models.Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
+            specification=models.TorsionDriveSpecification(
+                keywords=models.TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
+                specification=models.OptimizationSpecification(
+                    program="geomeTRIC",
+                    keywords={
+                        "coordsys": "hdlc",
+                        "maxiter": 500,
+                    },
+                    specification=models.AtomicSpecification(
+                        program="rdkit", driver=models.DriverEnum.gradient, model=models.Model(method="UFF", basis=None)
+                    ),
+                ),
+            ),
+        )
+    else:
+        input_data = models.TorsionDriveInput(
+            keywords=models.TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
+            input_specification=models.QCInputSpecification(
+                driver=models.DriverEnum.gradient, model=models.Model(method="UFF", basis=None)
+            ),
+            initial_molecule=[models.Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
+            optimization_spec=models.OptimizationSpecification(
+                procedure="geomeTRIC",
+                keywords={
+                    "coordsys": "hdlc",
+                    "maxiter": 500,
+                    "program": "rdkit",
+                },
+            ),
+        )
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute(input_data, "torsiondrive", raise_error=True, return_version=retver)
@@ -598,8 +611,12 @@ def test_torsiondrive_generic(schema_versions, request):
 
     assert ret.provenance.creator.lower() == "torsiondrive"
     assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
-    assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
-    assert ret.optimization_history["180"][0].trajectory[0].schema_version == 2 if ("_v2" in request.node.name) else 1
+    if "v2" in request.node.name:
+        assert ret.optimization_history["180"][0].trajectory_results[0].provenance.creator.lower() == "rdkit"
+        assert ret.optimization_history["180"][0].trajectory_results[0].schema_version == 2
+    else:
+        assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
+        assert ret.optimization_history["180"][0].trajectory[0].schema_version == 1
 
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
 

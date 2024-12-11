@@ -4,8 +4,9 @@ from contextlib import redirect_stderr, redirect_stdout
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Tuple, Union
 
 import numpy as np
-from qcelemental.models.v2 import FailedOperation, Molecule
-from qcelemental.models.v2.procedures import (
+from qcelemental.models.v2 import (
+    FailedOperation,
+    Molecule,
     OptimizationInput,
     OptimizationResult,
     TorsionDriveInput,
@@ -42,19 +43,19 @@ class TorsionDriveProcedure(ProcedureHarness):
 
         import torsiondrive.td_api
 
-        dihedrals = input_model.keywords.dihedrals
-        grid_spacing = input_model.keywords.grid_spacing
+        dihedrals = input_model.specification.keywords.dihedrals
+        grid_spacing = input_model.specification.keywords.grid_spacing
 
-        dihedral_ranges = input_model.keywords.dihedral_ranges
+        dihedral_ranges = input_model.specification.keywords.dihedral_ranges
 
-        energy_decrease_thresh = input_model.keywords.energy_decrease_thresh
-        energy_upper_limit = input_model.keywords.energy_upper_limit
+        energy_decrease_thresh = input_model.specification.keywords.energy_decrease_thresh
+        energy_upper_limit = input_model.specification.keywords.energy_upper_limit
 
         state = torsiondrive.td_api.create_initial_state(
             dihedrals=dihedrals,
             grid_spacing=grid_spacing,
-            elements=input_model.initial_molecule[0].symbols,
-            init_coords=[molecule.geometry.flatten().tolist() for molecule in input_model.initial_molecule],
+            elements=input_model.initial_molecules[0].symbols,
+            init_coords=[molecule.geometry.flatten().tolist() for molecule in input_model.initial_molecules],
             dihedral_ranges=dihedral_ranges,
             energy_upper_limit=energy_upper_limit,
             energy_decrease_thresh=energy_decrease_thresh,
@@ -94,9 +95,9 @@ class TorsionDriveProcedure(ProcedureHarness):
             task_results = {
                 grid_point: [
                     (
-                        result.initial_molecule.geometry.flatten().tolist(),
+                        result.input_data.initial_molecule.geometry.flatten().tolist(),
                         result.final_molecule.geometry.flatten().tolist(),
-                        result.energies[-1],
+                        result.properties.return_energy,
                     )
                     for result in results
                 ]
@@ -105,13 +106,17 @@ class TorsionDriveProcedure(ProcedureHarness):
 
             torsiondrive.td_api.update_state(state, {**task_results})
 
-        output_data = input_model.dict()
-        output_data["provenance"] = {
+        provenance = {
             "creator": "TorsionDrive",
             "routine": "torsiondrive.td_api.next_jobs_from_state",
             "version": torsiondrive.__version__,
         }
-        output_data["success"] = error is None
+
+        output_data = {
+            "input_data": input_model,
+            "provenance": provenance,
+            "success": error is None,  # this will fail if ever False in v2
+        }
 
         # even if we hit an error during the torsiondrive, we output what we can
         output_data["final_energies"], output_data["final_molecules"] = {}, {}
@@ -180,36 +185,29 @@ class TorsionDriveProcedure(ProcedureHarness):
 
         from qcengine import compute
 
-        input_molecule = input_model.initial_molecule[0].copy(deep=True).dict()
+        input_molecule = input_model.initial_molecules[0].copy(deep=True).dict()
         input_molecule["geometry"] = np.array(job).reshape(len(input_molecule["symbols"]), 3)
         input_molecule = Molecule.from_data(input_molecule)
 
-        dihedrals = input_model.keywords.dihedrals
+        dihedrals = input_model.specification.keywords.dihedrals
         angles = grid_point.split()
 
-        keywords = {
-            **input_model.optimization_spec.keywords,
-            "constraints": {
-                "set": [
-                    {
-                        "type": "dihedral",
-                        "indices": dihedral,
-                        "value": int(angle),
-                    }
-                    for dihedral, angle in zip(dihedrals, angles)
-                ]
-            },
+        optspec_v2 = input_model.specification.specification.model_dump()
+        optspec_v2["keywords"]["constraints"] = {
+            "set": [
+                {
+                    "type": "dihedral",
+                    "indices": dihedral,
+                    "value": int(angle),
+                }
+                for dihedral, angle in zip(dihedrals, angles)
+            ]
         }
-
         input_data = OptimizationInput(
-            keywords=keywords,
-            extras={},
-            protocols=input_model.optimization_spec.protocols,
-            input_specification=input_model.input_specification,
             initial_molecule=input_molecule,
+            specification=optspec_v2,
         )
-
-        return compute(input_data, program=input_model.optimization_spec.procedure, task_config=config.dict())
+        return compute(input_data, program=input_model.specification.specification.program, task_config=config.dict())
 
     @staticmethod
     def _find_final_results(
@@ -218,7 +216,7 @@ class TorsionDriveProcedure(ProcedureHarness):
         """Returns the energy and final molecule of the lowest energy optimization
         in a set."""
 
-        final_energies = np.array([result.energies[-1] for result in optimization_results])
+        final_energies = np.array([result.properties.return_energy for result in optimization_results])
         lowest_energy_idx = final_energies.argmin()
 
         return float(final_energies[lowest_energy_idx]), optimization_results[lowest_energy_idx].final_molecule
