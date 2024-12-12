@@ -1,4 +1,5 @@
 import logging
+import sys
 from io import StringIO
 from typing import Any, ClassVar, Dict, Union
 
@@ -44,8 +45,8 @@ class OptKingProcedure(ProcedureHarness):
             import optking
 
         log_stream = StringIO()
-        log = logging.getLogger(f"{__name__}.{id(self)}")
-        log = logging.getLogger("optking")
+        logname = "psi4.optking" if "psi4" in sys.modules else "optking"
+        log = logging.getLogger(logname)
         log.addHandler(logging.StreamHandler(log_stream))
         log.setLevel("INFO")
 
