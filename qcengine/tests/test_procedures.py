@@ -86,11 +86,12 @@ def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request)
     assert ret.provenance.creator.lower() == optimizer
     assert trajs_tgt[0].provenance.creator.lower() == grad_program
 
-    if optimizer == "optking" and ncores != 1:
-        with pytest.raises(AssertionError):
-            # Optking not passing threads to psi4
-            assert trajs_tgt[0].provenance.nthreads == ncores
-    elif optimizer == "nwchemdriver":
+    # Note: thread passing is semi-implemented in optking and subject to other env factors
+    # if optimizer == "optking" and ncores != 1:
+    #     with pytest.raises(AssertionError):
+    #         # Optking not passing threads to psi4
+    #         assert trajs_tgt[0].provenance.nthreads == ncores
+    if optimizer in ["optking", "nwchemdriver"]:
         pass
         # threading not yet implemented in NWChemDriver
     else:
