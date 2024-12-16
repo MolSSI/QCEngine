@@ -140,7 +140,6 @@ class RDKitHarness(ProgramHarness):
             creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField"
         )
 
-        ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True
         ret_data["input_data"] = input_data
         ret_data["molecule"] = jmol

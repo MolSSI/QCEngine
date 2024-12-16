@@ -5,8 +5,7 @@ from io import StringIO
 from typing import Any, ClassVar, Dict, Union
 
 import numpy as np
-from qcelemental.models.v1 import OptimizationResult
-from qcelemental.models.v2 import FailedOperation, OptimizationInput
+from qcelemental.models.v2 import FailedOperation, OptimizationInput, OptimizationResult
 from qcelemental.util import which_import
 
 import qcengine
@@ -33,7 +32,7 @@ class BernyProcedure(ProcedureHarness):
         return self._build_model(data, "OptimizationInput", return_input_schema_version=return_input_schema_version)
 
     def compute(
-        self, input_data: "OptimizationInput", config: "TaskConfig"
+        self, input_model: "OptimizationInput", config: "TaskConfig"
     ) -> Union["OptimizationResult", "FailedOperation"]:
         try:
             import berny
@@ -56,11 +55,13 @@ class BernyProcedure(ProcedureHarness):
         log = logging.getLogger(f"{__name__}.{id(self)}")
         log.addHandler(logging.StreamHandler(log_stream))
         log.setLevel("INFO")
+        input_data = input_model.model_dump()
 
-        input_data = input_data.dict()
         geom_qcng = input_data["initial_molecule"]
-        comput = {**input_data["input_specification"], "molecule": geom_qcng}
-        program = input_data["keywords"].pop("program")
+        comput = {"specification": input_data["specification"]["specification"], "molecule": geom_qcng}
+        program = input_data["specification"]["specification"][
+            "program"
+        ]  # TODO don't need to collect when compute can work w/o 2nd arg
         task_config = config.dict()
         trajectory = []
         output_data = input_data.copy()
@@ -68,7 +69,7 @@ class BernyProcedure(ProcedureHarness):
             # Pyberny uses angstroms for the Cartesian geometry, but atomic
             # units for everything else, including the gradients (hartree/bohr).
             geom_berny = berny.Geometry(geom_qcng["symbols"], geom_qcng["geometry"] / berny.angstrom)
-            opt = berny.Berny(geom_berny, logger=log, **input_data["keywords"])
+            opt = berny.Berny(geom_berny, logger=log, **input_data["specification"]["keywords"])
             for geom_berny in opt:
                 geom_qcng["geometry"] = np.stack(geom_berny.coords * berny.angstrom)
                 ret = qcengine.compute(comput, program, task_config=task_config)
@@ -84,17 +85,20 @@ class BernyProcedure(ProcedureHarness):
         except Exception:
             error = {"error_type": "unknown", "error_message": f"Berny error:\n{traceback.format_exc()}"}
         else:
-            output_data["success"] = True
-            output_data.update(
-                {
-                    "schema_name": "qcschema_optimization_output",
-                    "final_molecule": trajectory[-1]["molecule"],
-                    "energies": [r["properties"]["return_energy"] for r in trajectory],
-                    "trajectory": trajectory,
-                    "provenance": {"creator": "Berny", "routine": "berny.Berny", "version": berny_version},
-                    "stdout": log_stream.getvalue(),  # collect logged messages
-                }
-            )
-            output_data = OptimizationResult(**output_data)
-            return output_data.convert_v(2)
-        return FailedOperation(input_data=input_data, error=error)
+            output = {
+                "input_data": input_model,
+                "final_molecule": trajectory[-1]["molecule"],
+                "properties": {
+                    "return_energy": trajectory[-1]["properties"]["return_energy"],
+                    "optimization_iterations": len(trajectory),
+                },
+                "trajectory_results": trajectory,
+                "trajectory_properties": [r["properties"] for r in trajectory],
+                "provenance": {"creator": "Berny", "routine": "berny.Berny", "version": berny_version},
+                "stdout": log_stream.getvalue(),  # collect logged messages
+                "success": True,
+            }
+
+            return OptimizationResult(**output)
+
+        return FailedOperation(input_data=input_model, error=error)

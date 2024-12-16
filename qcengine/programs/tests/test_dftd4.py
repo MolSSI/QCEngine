@@ -208,18 +208,20 @@ def test_dftd4_task_unknown_method(schema_versions, request):
 def test_dftd4_task_cold_fusion(schema_versions, request):
     models, retver, models_out = schema_versions
 
+    li4 = {
+        "symbols": ["Li", "Li", "Li", "Li"],
+        "geometry": [
+            [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+            [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+            [-1.58746019997201, -1.58746019997201, -1.58746019997201],
+            [+1.58746019997201, +1.58746019997201, -1.58746019997201],
+        ],
+        "validated": True,  # Force a nuclear fusion input, to make dftd4 fail
+    }
+
     if from_v2(request.node.name):
         atomic_input = models.AtomicInput(
-            molecule={
-                "symbols": ["Li", "Li", "Li", "Li"],
-                "geometry": [
-                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                    [-1.58746019997201, -1.58746019997201, -1.58746019997201],
-                    [+1.58746019997201, +1.58746019997201, -1.58746019997201],
-                ],
-                "validated": True,  # Force a nuclear fusion input, to make dftd4 fail
-            },
+            molecule=li4,
             specification={
                 "keywords": {"level_hint": "D4"},
                 "model": {"method": "pbe"},
@@ -228,16 +230,7 @@ def test_dftd4_task_cold_fusion(schema_versions, request):
         )
     else:
         atomic_input = models.AtomicInput(
-            molecule={
-                "symbols": ["Li", "Li", "Li", "Li"],
-                "geometry": [
-                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                    [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                    [-1.58746019997201, -1.58746019997201, -1.58746019997201],
-                    [+1.58746019997201, +1.58746019997201, -1.58746019997201],
-                ],
-                "validated": True,  # Force a nuclear fusion input, to make dftd4 fail
-            },
+            molecule=li4,
             keywords={"level_hint": "D4"},
             model={"method": "pbe"},
             driver="energy",

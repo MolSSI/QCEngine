@@ -183,10 +183,10 @@ class CFOURHarness(ProgramHarness):
                 qcvars[f"{method.upper()} TOTAL HESSIAN"] = c4hess
                 qcvars["CURRENT HESSIAN"] = c4hess
 
-            if input_model.specification.driver.upper() == "PROPERTIES":
+            if (udriver := input_model.specification.driver.upper()) == "PROPERTIES":
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
-                retres = qcvars[f"CURRENT {input_model.specification.driver.upper()}"]
+                retres = qcvars[f"CURRENT {udriver}"]
         except KeyError:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 

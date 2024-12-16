@@ -182,7 +182,7 @@ class TeraChemHarness(ProgramHarness):
 
         output_data["properties"] = properties
 
-        output_data["schema_name"] = "qcschema_output"
+        output_data["schema_name"] = "qcschema_atomic_output"
         output_data["stdout"] = outfiles["tc.out"]
         # TODO Should only return True if TeraChem calculation terminated properly
         output_data["success"] = True
