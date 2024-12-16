@@ -27,42 +27,37 @@ class NWChemDriverProcedure(ProcedureHarness):
     ) -> "OptimizationInput":
         return self._build_model(data, "OptimizationInput", return_input_schema_version=return_input_schema_version)
 
-    def compute(self, input_data: OptimizationInput, config: TaskConfig) -> "BaseModel":
+    def compute(self, input_model: OptimizationInput, config: TaskConfig) -> "BaseModel":
         nwc_harness = NWChemHarness()
         self.found(raise_error=True)
 
         # Unify the keywords from the OptimizationInput and QCInputSpecification
         #  Optimization input will override, but don't tell users this as it seems unnecessary
-        keywords = input_data.keywords.copy()
-        keywords.update(input_data.input_specification.keywords)
-        if keywords.get("program", "nwchem").lower() != "nwchem":
-            raise InputError("NWChemDriver procedure only works with NWChem")
+        keywords = input_model.specification.keywords.copy()
+        keywords.update(input_model.specification.specification.keywords)
+        if (uprog := input_model.specification.specification.program) and (uprog.lower() != "nwchem"):
+            raise InputError(f"NWChemDriver procedure only works with NWChem, not {uprog}")
 
         # Add a flag to the atomic input that tells the NWChemHarness we are calling it from driver
         #  This is needed for the NWCHarness to make some changes to the input file
-        input_data.input_specification.extras["is_driver"] = True
+        input_model.specification.specification.extras["is_driver"] = True
 
         # Make an atomic input
         atomic_input = AtomicInput(
-            molecule=input_data.initial_molecule,
-            specification=AtomicSpecification(
-                driver="energy",
-                keywords=keywords,
-                **input_data.input_specification.model_dump(
-                    exclude={"driver", "keywords", "schema_name", "schema_version"}
-                ),  # TODO allow schema_ if added back
-            ),
+            molecule=input_model.initial_molecule,
+            specification=input_model.specification.specification,
         )
 
         # Build the inputs for the job
         job_inputs = nwc_harness.build_input(atomic_input, config)
 
+        # As of v2, now use "is_driver" to signal task ... optimize in the first place. This allows driver=gradient to work even though task ... gradient not last in file
         # Replace the last line with a "task {} optimize"
-        input_file: str = job_inputs["infiles"]["nwchem.nw"].strip()
-        beginning, last_line = input_file.rsplit("\n", 1)
-        assert last_line.startswith("task")
-        last_line = f"task {last_line.split(' ')[1]} optimize"
-        job_inputs["infiles"]["nwchem.nw"] = f"{beginning}\n{last_line}"
+        # input_file: str = job_inputs["infiles"]["nwchem.nw"].strip()
+        # beginning, last_line = input_file.rsplit("\n", 1)
+        # assert last_line.startswith("task")
+        # last_line = f"task {last_line.split(' ')[1]} optimize"
+        # job_inputs["infiles"]["nwchem.nw"] = f"{beginning}\n{last_line}"
 
         # Run it!
         success, dexe = nwc_harness.execute(job_inputs)
@@ -78,11 +73,12 @@ class NWChemDriverProcedure(ProcedureHarness):
         if success:
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
-            return self.parse_output(dexe["outfiles"], input_data)
+            return self.parse_output(dexe["outfiles"], input_model)
         else:
             raise UnknownError(dexe["stdout"])
 
     def parse_output(self, outfiles: Dict[str, str], input_model: OptimizationInput) -> OptimizationResult:
+        optsubproperties = ["calcinfo_natom", "return_energy", "return_gradient"]
 
         # Get the stdout from the calculation (required)
         stdout = outfiles.pop("stdout")
@@ -94,14 +90,24 @@ class NWChemDriverProcedure(ProcedureHarness):
         # Isolate the converged result
         final_step = atomic_results[-1]
 
+        # input_data = input_model.model_dump()
+        # input_data["specification"]["specification"]["program"] = "nwchem"
+
         return OptimizationResult(
-            initial_molecule=input_model.initial_molecule,
-            input_specification=input_model.input_specification,
+            input_data=input_model,
             final_molecule=final_step.molecule,
-            trajectory=atomic_results,
-            energies=[float(r.extras["qcvars"]["CURRENT ENERGY"]) for r in atomic_results],
+            trajectory_results=atomic_results,
+            trajectory_properties=[
+                {k: v for k, v in grad.properties if k in optsubproperties} for grad in atomic_results
+            ],
+            properties={
+                "return_energy": atomic_results[-1].properties.return_energy,
+                "optimization_iterations": len(atomic_results),
+            },
             stdout=stdout,
             stderr=stderr,
             success=True,
-            provenance=Provenance(creator="NWChemRelax", version=self.get_version(), routine="nwchem_opt"),
+            provenance=Provenance(
+                creator="NWChemDriver", version=self.get_version(), routine="nwchem_opt"
+            ),  # was NWChemRelax which frankly is a better name
         )

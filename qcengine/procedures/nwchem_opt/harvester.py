@@ -63,7 +63,7 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
     results = []
     for qcvars, nwgrad, out_mol in zip(out_psivars, out_grads, out_mols):
         if nwgrad is not None:
-            qcvars[f"{input_model.input_specification.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
+            qcvars[f"{input_model.specification.specification.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
             qcvars["CURRENT GRADIENT"] = nwgrad
 
         # Get the formatted properties
@@ -77,7 +77,7 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
         # Format them inout an output
         input_data = {
             "molecule": out_mol,
-            "specification": input_model.input_specification.model_dump(),
+            "specification": input_model.specification.specification.model_dump(),
         }
         input_data["specification"]["driver"] = "gradient"
         input_data["specification"].pop("schema_name", None)

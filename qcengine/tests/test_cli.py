@@ -110,11 +110,25 @@ def test_run_procedure(tmp_path, schema_versions, request):
         assert output["provenance"]["creator"].lower() == "geometric"
         assert output["success"] is True
 
-    inp = {
-        "keywords": {"coordsys": "tric", "maxiter": 100, "program": "psi4"},
-        "input_specification": {"driver": "gradient", "model": {"method": "HF", "basis": "sto-3g"}, "keywords": {}},
-        "initial_molecule": models.Molecule(**get_molecule("hydrogen", return_dict=True)),
-    }
+    if from_v2(request.node.name):
+        inp = {
+            "specification": {
+                "keywords": {"coordsys": "tric", "maxiter": 100},
+                "specification": {
+                    "driver": "gradient",
+                    "model": {"method": "HF", "basis": "sto-3g"},
+                    "keywords": {},
+                    "program": "psi4",
+                },
+            },
+            "initial_molecule": models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+        }
+    else:
+        inp = {
+            "keywords": {"coordsys": "tric", "maxiter": 100, "program": "psi4"},
+            "input_specification": {"driver": "gradient", "model": {"method": "HF", "basis": "sto-3g"}, "keywords": {}},
+            "initial_molecule": models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+        }
     inp = models.OptimizationInput(**inp)
 
     inp = checkver_and_convert(inp, request.node.name, "pre")

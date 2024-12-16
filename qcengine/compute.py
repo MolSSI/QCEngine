@@ -115,18 +115,14 @@ def compute(
 
         # Build the model and validate
         # * calls model_wrapper with the (Atomic|Optimization|etc)Input for which the harness was designed
-        # * upon return, input_data is a model of the type (e.g., Atomic) and version (e.g., 1 or 2) the harness prefers. for now, v1.
+        # * upon return, input_data is a model of the type (e.g., Atomic) and version (e.g., 1 or 2) the harness prefers: all v2.
         input_data, input_schema_version = executor.build_input_model(input_data, return_input_schema_version=True)
         return_version = input_schema_version if return_version == -1 else return_version
 
         # Build out task_config
         if task_config is None:
             task_config = {}
-        # TODO generalize when procedures in layout in place
-        if isinstance(input_data, qcelemental.models.v2.AtomicInput):
-            input_engine_options = input_data.specification.extras.pop("_qcengine_local_config", {})
-        else:
-            input_engine_options = input_data.extras.pop("_qcengine_local_config", {})
+        input_engine_options = input_data.specification.extras.pop("_qcengine_local_config", {})
         task_config = {**task_config, **input_engine_options}
         config = get_config(task_config=task_config)
 
