@@ -1562,7 +1562,7 @@ def test_3(schema_versions, request):
 
     if from_v2(request.node.name):
         resinp = {
-            "schema_name": "qcschema_input",
+            "schema_name": "qcschema_atomic_input",
             "schema_version": 2,
             "molecule": qcel.molparse.to_schema(sys, dtype=2),
             "specification": {
@@ -1706,7 +1706,7 @@ def test_mp2d__run_mp2d__2body(inp, subjects, schema_versions, request):
 
     if from_v2(request.node.name):
         resinp = {
-            "schema_name": "qcschema_input",
+            "schema_name": "qcschema_atomic_input",
             "schema_version": 2,
             "molecule": mol,
             "specification": {"driver": "gradient", "model": {"method": inp["name"]}, "keywords": {}},
@@ -1942,7 +1942,7 @@ def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
 
     if from_v2(request.node.name):
         resinp = {
-            "schema_name": "qcschema_input",
+            "schema_name": "qcschema_atomic_input",
             "schema_version": 2,
             "molecule": mol,
             "specification": {"driver": "gradient", "model": {"method": inp["name"]}, "keywords": {}},
@@ -2092,7 +2092,7 @@ def test_gcp(inp, subjects, program, schema_versions, request):
 
     if from_v2(request.node.name):
         resinp = {
-            "schema_name": "qcschema_input",
+            "schema_name": "qcschema_atomic_input",
             "schema_version": 2,
             "molecule": mol,
             "specification": {
