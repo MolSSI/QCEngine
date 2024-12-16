@@ -816,6 +816,7 @@ def test_psi4_properties_driver(schema_versions, request):
         "keywords": {"scf_type": "df", "mp2_type": "df", "e_convergence": 9},
     }
     if from_v2(request.node.name):
+        json_data["schema_name"] = "qcschema_atomic_input"
         json_data["specification"] = {
             "driver": json_data.pop("driver"),
             "model": json_data.pop("model"),
@@ -876,7 +877,8 @@ def test_psi4_properties_driver(schema_versions, request):
     json_ret = checkver_and_convert(json_ret, request.node.name, "post")
 
     assert json_ret.success
-    assert "qcschema_output" == json_ret.schema_name
+    xptd_schema_name = "qcschema_atomic_output" if "v2" in request.node.name else "qcschema_output"
+    assert json_ret.schema_name == xptd_schema_name
     for k in expected_return_result.keys():
         assert compare_values(expected_return_result[k], json_ret.return_result[k], atol=1.0e-5)
     for k in expected_properties.keys():
