@@ -47,7 +47,7 @@ if __name__ == "__main__":
                 "numpydoc",
                 "autodoc-pydantic>=2.0",
             ],
-            "tests": ["pytest", "pytest-cov"],
+            "tests": ["pytest", "pytest-cov", "packaging"],
             "lint": ["black>=22.1.0,<23.0a0"],
         },
         tests_require=["pytest", "pytest-cov"],
