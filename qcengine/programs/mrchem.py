@@ -101,7 +101,7 @@ class MRChemHarness(ProgramHarness):
         input_data = copy.deepcopy(job_input["mrchem_json"])
 
         output_data = {
-            "schema_name": "qcschema_atomic_output",
+            "schema_name": "qcschema_atomic_result",
             "schema_version": 2,
             "input_data": input_model,
             "molecule": input_model.molecule,

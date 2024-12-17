@@ -70,10 +70,11 @@ Misc.
 
 MUST (Unmerged)
 +++++++++++++++
-torsiondrive rewritten in v2.
-berny harness rewritten in v2. optking and geometric natively speak v1, so adapted as well as can be.
-allow nwchemdriver w/o driver=energy. provenance now nwchemdriver not nwchemrelax
- Optking now fills in ``v2.OptimizationResult.stdout``. Through v2, once can alter gradient protocols in an optimization.
+torsiondrive now accepts protocols. use ``protocols={"scan_results": "all"}`` if going to be converted to v1.
+- (:pr:`461`) torsiondrive rewritten in v2.
+- (:pr:`461`) berny harness rewritten in v2. optking and geometric natively speak v1, so adapted as well as can be.
+- (:pr:`461`) allow nwchemdriver w/o driver=energy. provenance now nwchemdriver not nwchemrelax
+- (:pr:`461`)  Optking now fills in ``v2.OptimizationResult.stdout``. Through v2, once can alter gradient protocols in an optimization.
 - (:pr:`460`) integrate ``AtomicInput.specification`` into harnesses and show what new inputs look like in tests
 - (:pr:`459`) gcp, mp2d several got properties.return_energy, retunr_gradient
 - (:pr:`460`) If you're missing something from AtomicResult.extras, check AtomicResult.input_data.extras in case it was passed in on input

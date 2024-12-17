@@ -553,14 +553,16 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
 
 @using("rdkit")
 @using("torsiondrive")
-def test_torsiondrive_generic(schema_versions, request):
+@pytest.mark.parametrize("scan_ptcl", ["none", "all", "lowest"])
+def test_torsiondrive_generic(schema_versions, request, scan_ptcl):
     models, retver, _ = schema_versions
 
     if from_v2(request.node.name):
         input_data = models.TorsionDriveInput(
             initial_molecules=[models.Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
             specification=models.TorsionDriveSpecification(
-                keywords=models.TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
+                keywords=models.TorsionDriveKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
+                protocols=models.TorsionDriveProtocols(scan_results=scan_ptcl),
                 specification=models.OptimizationSpecification(
                     program="geomeTRIC",
                     keywords={
@@ -600,7 +602,8 @@ def test_torsiondrive_generic(schema_versions, request):
 
     expected_grid_ids = {"180", "0"}
 
-    assert {*ret.optimization_history} == expected_grid_ids
+    if not (from_v2(request.node.name) and scan_ptcl == "none"):
+        assert {*ret.optimization_history} == expected_grid_ids
 
     assert {*ret.final_energies} == expected_grid_ids
     assert {*ret.final_molecules} == expected_grid_ids
@@ -612,13 +615,26 @@ def test_torsiondrive_generic(schema_versions, request):
     assert pytest.approx(ret.final_molecules["0"].measure([2, 0, 1, 5]), abs=1.0e-2) == 0.0
 
     assert ret.provenance.creator.lower() == "torsiondrive"
-    assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
-    if "v2" in request.node.name:
-        assert ret.optimization_history["180"][0].trajectory_results[0].provenance.creator.lower() == "rdkit"
-        assert ret.optimization_history["180"][0].trajectory_results[0].schema_version == 2
+
+    if from_v2(request.node.name):
+        # properly "to_v1" should be always `== 4` but data lost in v2 by default
+        if scan_ptcl == "none":
+            assert not ret.optimization_history
+        else:
+            assert len(ret.optimization_history["180"]) == {"lowest": 1, "all": 4}[scan_ptcl]
     else:
-        assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
-        assert ret.optimization_history["180"][0].trajectory[0].schema_version == 1
+        assert len(ret.optimization_history["180"]) == 4
+
+    if not (from_v2(request.node.name) and scan_ptcl == "none"):
+        assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
+    if "v2" in request.node.name:
+        if scan_ptcl != "none":
+            assert ret.optimization_history["180"][0].trajectory_results[0].provenance.creator.lower() == "rdkit"
+            assert ret.optimization_history["180"][0].trajectory_results[0].schema_version == 2
+    else:
+        if not ("to_v1" in request.node.name and scan_ptcl == "none"):
+            assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
+            assert ret.optimization_history["180"][0].trajectory[0].schema_version == 1
 
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
 
