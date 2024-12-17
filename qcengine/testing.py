@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 import pytest
 import qcelemental as qcel
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
 from pydantic import ConfigDict
 from qcelemental.util import which, which_import
 
