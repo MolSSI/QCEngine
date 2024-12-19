@@ -70,7 +70,9 @@ Misc.
 
 MUST (Unmerged)
 +++++++++++++++
-torsiondrive now accepts protocols. use ``protocols={"scan_results": "all"}`` if going to be converted to v1.
+- (:pr:`462`) 
+- (:pr:`462`) Use packaging instead of setuptools to provide version parsing
+- (:pr:`462`) torsiondrive now accepts protocols. use ``protocols={"scan_results": "all"}`` if going to be converted to v1.
 - (:pr:`461`) torsiondrive rewritten in v2.
 - (:pr:`461`) berny harness rewritten in v2. optking and geometric natively speak v1, so adapted as well as can be.
 - (:pr:`461`) allow nwchemdriver w/o driver=energy. provenance now nwchemdriver not nwchemrelax

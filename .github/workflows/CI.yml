@@ -163,12 +163,12 @@ jobs:
         # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
 
     - name: Special Config - NWChem
-      if: "(matrix.cfg.label == 'NWChem70')"
+      if: matrix.cfg.label == 'NWChem70'
       run: |
         sudo apt-get -y install nwchem
 
     - name: Special Config - QCore
-      if: "(matrix.cfg.label == 'QCore')"
+      if: matrix.cfg.label == 'QCore'
       run: |
         qcore --accept-license
 
@@ -185,13 +185,13 @@ jobs:
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
-      if: "(startsWith(matrix.cfg.label, 'Psi4')) || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')"
+      if: (startsWith(matrix.cfg.label, 'Psi4')) || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')
       run: |
         conda remove qcengine --force
 
       # QCEngine CI and Psi4 are circularly dependent, so a hack is in order
     - name: Special Config - Faux Pydantic Upgrade
-      if: "((matrix.cfg.label == 'Psi4-1.6') || (matrix.cfg.label == 'optimization-dispersion')) && (runner.os != 'Windows')"
+      if: ((matrix.cfg.label == 'Psi4-1.6') || (matrix.cfg.label == 'optimization-dispersion')) && (runner.os != 'Windows')
       run: |
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
 
@@ -203,7 +203,7 @@ jobs:
         python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2025' --no-deps
 
     - name: Special Config - Forced Interface Upgrade
-      if: "(matrix.cfg.label == 'Psi4-1.6')"
+      if: matrix.cfg.label == 'Psi4-1.6'
       run: |
         grep -r "local_options" ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/
         sed -i "s/local_options/task_config/g" ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/procrouting/*py
@@ -221,7 +221,7 @@ jobs:
         git describe
 
     - name: QCEngineRecords
-      if: "(matrix.cfg.label != 'Psi4-1.6')"
+      if: matrix.cfg.label != 'Psi4-1.6'
       run: |
         qcengine info
         export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
