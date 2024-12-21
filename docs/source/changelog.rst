@@ -71,6 +71,9 @@ Misc.
 MUST (Unmerged)
 +++++++++++++++
 - (:pr:`462`) 
+- (:pr:`462`) 
+- (:pr:`462`) 
+- (:pr:`462`) lightly Adapt harnesses for Mol v3
 - (:pr:`462`) Use packaging instead of setuptools to provide version parsing
 - (:pr:`462`) torsiondrive now accepts protocols. use ``protocols={"scan_results": "all"}`` if going to be converted to v1.
 - (:pr:`461`) torsiondrive rewritten in v2.

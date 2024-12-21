@@ -817,6 +817,7 @@ def test_psi4_properties_driver(schema_versions, request):
     }
     if from_v2(request.node.name):
         json_data["schema_name"] = "qcschema_atomic_input"
+        json_data["schema_version"] = 2
         json_data["specification"] = {
             "driver": json_data.pop("driver"),
             "model": json_data.pop("model"),
