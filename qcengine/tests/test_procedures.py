@@ -237,11 +237,11 @@ def test_optimizer_stdout(optimizer, gradprog, gradmodel, converged, input_data,
 
 
 @pytest.mark.parametrize(
-    "optimizer,converged",
+    "optimizer",
     [
-        pytest.param("geometric", "Converged!", marks=using("geometric")),
-        pytest.param("optking", "Convergence check returned True", marks=using("optking")),
-        pytest.param("berny", "All criteria matched", marks=using("berny")),
+        pytest.param("geometric", marks=using("geometric")),
+        pytest.param("optking", marks=using("optking")),
+        pytest.param("berny", marks=using("berny")),
     ],
 )
 @pytest.mark.parametrize(
