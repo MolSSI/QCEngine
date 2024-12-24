@@ -126,13 +126,18 @@ class RDKitHarness(ProgramHarness):
 
         ff.Initialize()
 
-        ret_data["properties"] = {"return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")}
+        ret_data["properties"] = {
+            "return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree"),
+            "calcinfo_natom": len(jmol.symbols),
+        }
+        if input_data.specification.driver == "gradient":
+            coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
+            ret_data["properties"]["return_gradient"] = [x * coef for x in ff.CalcGrad()]
 
         if input_data.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
         elif input_data.specification.driver == "gradient":
-            coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
-            ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
+            ret_data["return_result"] = ret_data["properties"]["return_gradient"]
         else:
             raise InputError(f"Driver {input_data.specification.driver} not implemented for RDKit.")
 
