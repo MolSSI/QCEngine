@@ -104,6 +104,12 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          - conda-env: aimnet2
+            python-version: 3.11
+            label: AIMNET2
+            runs-on: ubuntu-latest
+            pytest: ""
+
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
 
@@ -113,15 +119,13 @@ jobs:
         fetch-depth: 0
 
     - name: Create Environment
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
         show-channel-urls: true
-        miniforge-variant: Mambaforge
-        use-mamba: true
         add-pip-as-python-dependency: true
         # note: conda-forge chnl req'd for Mambaforge, but we'll spec in file, not here `channels: conda-forge,...`
         # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
@@ -157,14 +161,15 @@ jobs:
 
     - name: Environment Information
       run: |
-        mamba info
-        mamba list
+        conda info
+        conda list
 
     - name: Install QCEngine
       run: |
         python -m pip install . --no-deps
 
     - name: QCEngineRecords
+      if: "(matrix.cfg.label != 'Psi4-1.6')"
       run: |
         qcengine info
         export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
@@ -199,21 +204,19 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Create Environment
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
         auto-activate-base: false
-        miniforge-variant: Mambaforge
-        use-mamba: true
         add-pip-as-python-dependency: true
         channels: conda-forge
 
     - name: Environment Information
       run: |
-        mamba info
-        mamba list --show-channel-urls
+        conda info
+        conda list --show-channel-urls
 
     - name: Build Documentation
       run: |
