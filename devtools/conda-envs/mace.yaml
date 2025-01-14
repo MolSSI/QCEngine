@@ -11,7 +11,7 @@ dependencies:
   - pydantic>=1.0.0
 
   # mace deps
-  - pymace
+  - pymace=0.3.6
   - numpy<2.0  # until conda package imposes
 
     # Testing
