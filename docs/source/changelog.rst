@@ -44,6 +44,7 @@ Enhancements
 
 Bug Fixes
 +++++++++
+- (:pr:`451`, :issue:`450`) Psi4 - Fixes bug in Psi4 detection when command `python` not available. @susilehtola, @topazus
 
 Misc.
 +++++
