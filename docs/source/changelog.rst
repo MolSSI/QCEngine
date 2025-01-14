@@ -28,6 +28,28 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.31.0 / 2025-MM-DD (Unreleased)
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`463`) Maint - Pin to QCElemental <0.70 since we now know QCSchema v2 release schedule.
+- (:pr:`463`) MACE - New v0.3.9 release yields a pytorch error, so recommend pymace=0.3.6 .
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+- (:pr:`457`) Docs - Fix auto-numbering on a documentation page. @mikemhenry
+
+
 v0.30.0 / 2024-06-25
 --------------------
 
