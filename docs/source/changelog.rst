@@ -37,7 +37,8 @@ Breaking Changes
 New Features
 ++++++++++++
 - (:pr:`466`) QCManyBody - new procedure for computing interaction energies or truncation or full
-  many-body expansions. @loriab
+  many-body expansions with no, counterpoise, or Valiron-Mayer function counterpoise correction
+  for basis set superposition error. @loriab
 
 Enhancements
 ++++++++++++

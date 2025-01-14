@@ -76,7 +76,6 @@ def test_nbody_he4_single(program, basis, keywords, mbe_keywords, anskey, calcin
     )
 
     ret = qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
-    print(f"SSSSSSS {request.node.name}")
     pprint.pprint(ret.dict(), width=200)
 
     assert ret.extras == {}, f"[w] extras wrongly present: {ret.extras.keys()}"
@@ -182,15 +181,12 @@ def test_bsse_ene_tu6_cp_ne2(qcprog):
     }
 
     for R in tu6_ie_scan:
-        # TODO fix_symmetry='c1' propagate
         nene = Molecule(
             symbols=["Ne", "Ne"], fragments=[[0], [1]], geometry=[0, 0, 0, 0, 0, R / constants.bohr2angstroms]
         )
         mbe_data["molecule"] = nene
 
         mbe_model = ManyBodyInput(**mbe_data)
-        print("IIIIIII")
-        pprint.pprint(mbe_model.dict(), width=200)
         if qcprog == "gamess":
             with pytest.raises(RuntimeError) as exe:
                 qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
@@ -198,8 +194,7 @@ def test_bsse_ene_tu6_cp_ne2(qcprog):
             pytest.xfail("GAMESS can't do ghosts")
 
         ret = qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
-        # print("SSSSSSS")
-        # pprint.pprint(ret.dict(), width=200)
+        pprint.pprint(ret.dict(), width=200)
 
         assert compare_values(
             tu6_ie_scan[R], ret.return_result * constants.hartree2kcalmol, atol=1.0e-4, label=f"CP-CCSD(T) [{R:3.1f}]"
@@ -364,6 +359,5 @@ units ang
         ), f"atomic protocol did not take"
 
 
-# TODO Add this back with genopt
+# TODO Add this back with genopt. test name in geomeTRIC is test_lif_bsse
 # def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywords):
-    # in geomeTRIC: test_lif_bsse
