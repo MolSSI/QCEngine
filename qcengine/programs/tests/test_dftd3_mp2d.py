@@ -44,7 +44,7 @@ def test_dftd3_error():
         input_data["driver"] = "properties"
         ret = qcng.compute(input_data, "dftd3", raise_error=True)
 
-    assert "Driver properties not implemented" in str(exc.value)
+    assert "properties not implemented" in str(exc.value)
 
     # Test extension
     with pytest.raises(qcng.exceptions.InputError) as exc:
