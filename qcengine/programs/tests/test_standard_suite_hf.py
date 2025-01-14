@@ -35,6 +35,7 @@ def nh2():
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [
+        pytest.param("cfour", "cC-pvdZ", {"scf_conv": 12}, marks=using("cfour")),  # test basis handling, not results
         pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=using("cfour")),
         pytest.param("cfour", "aug-pvdz", {}, marks=using("cfour")),
         pytest.param(
@@ -65,6 +66,9 @@ def test_sp_hf_rhf(program, basis, keywords, h2o):
     assert res["driver"] == "energy"
     assert "provenance" in res
     assert res["success"] is True
+
+    if basis == "cC-pvdZ":
+        return
 
     # aug-cc-pvdz
     scf_tot = -76.0413815332
