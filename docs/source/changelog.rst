@@ -36,6 +36,8 @@ Breaking Changes
 
 New Features
 ++++++++++++
+- (:pr:`466`) QCManyBody - new procedure for computing interaction energies or truncation or full
+  many-body expansions. @loriab
 
 Enhancements
 ++++++++++++
@@ -47,6 +49,7 @@ Enhancements
 Bug Fixes
 +++++++++
 - (:pr:`451`, :issue:`450`) Psi4 - Fixes bug in Psi4 detection when command `python` not available. @susilehtola, @topazus
+- (:pr:`466`) CFOUR - fix error collecting molecule when it's a single atom with two-letter symbol. @loriab
 
 Misc.
 +++++
