@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2024-MM-DD (Unreleased)
+.. vX.Y.0 / 2025-MM-DD (Unreleased)
 .. --------------------
 ..
 .. Breaking Changes
