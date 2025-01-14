@@ -63,14 +63,16 @@ def format_keyword(keyword: str, val: Any) -> Tuple[str, str]:
 
     # * manual: (keyword is cc-pVXZ or PVXZ, where X = D, T, Q, 5, and 6, respectively)
     elif keyword in ["CFOUR_BASIS", "BASIS"] and val.upper() in [
-        "CC-PVDZ", "CC-PVTZ", "CC-PVQZ", "CC-PV5Z", "CC-PV6Z",
+        "CC-PVDZ",
+        "CC-PVTZ",
+        "CC-PVQZ",
+        "CC-PV5Z",
+        "CC-PV6Z",
     ]:
         text = val[:4].lower() + val[4:].upper()
 
     # manual: (keyword is PwCVXZ, where X = D, T, and Q, respectively)
-    elif keyword in ["CFOUR_BASIS", "BASIS"] and val.upper() in [
-        "PWCVDZ", "PWCVTZ", "PWCVQZ"
-    ]:
+    elif keyword in ["CFOUR_BASIS", "BASIS"] and val.upper() in ["PWCVDZ", "PWCVTZ", "PWCVQZ"]:
         text = "Pw" + val[3:].upper()
 
     # Transform the methods that *must* be mixed case

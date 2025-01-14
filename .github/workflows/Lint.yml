@@ -30,7 +30,7 @@ jobs:
         python -m pip install -e '.[lint]'
 
     - name: Print code formatting with black (hints here if next step errors)
-      run: black --diff .
+      run: black qcengine --diff .
 
     - name: Lint
       shell: bash
