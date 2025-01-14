@@ -639,7 +639,7 @@ def test_torsiondrive_generic(schema_versions, request, scan_ptcl):
 
     if from_v2(request.node.name):
         input_data = models.TorsionDriveInput(
-            initial_molecules=[models.Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
+            initial_molecule=[models.Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
             specification=models.TorsionDriveSpecification(
                 keywords=models.TorsionDriveKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
                 protocols=models.TorsionDriveProtocols(scan_results=scan_ptcl),
@@ -682,9 +682,10 @@ def test_torsiondrive_generic(schema_versions, request, scan_ptcl):
     assert ret.success
 
     expected_grid_ids = {"180", "0"}
+    opthist_tgt = ret.scan_results if "v2" in request.node.name else ret.optimization_history
 
     if not (from_v2(request.node.name) and scan_ptcl == "none"):
-        assert {*ret.optimization_history} == expected_grid_ids
+        assert {*opthist_tgt} == expected_grid_ids
 
     assert {*ret.final_energies} == expected_grid_ids
     assert {*ret.final_molecules} == expected_grid_ids
@@ -700,22 +701,22 @@ def test_torsiondrive_generic(schema_versions, request, scan_ptcl):
     if from_v2(request.node.name):
         # properly "to_v1" should be always `== 4` but data lost in v2 by default
         if scan_ptcl == "none":
-            assert not ret.optimization_history
+            assert not opthist_tgt
         else:
-            assert len(ret.optimization_history["180"]) == {"lowest": 1, "all": 4}[scan_ptcl]
+            assert len(opthist_tgt["180"]) == {"lowest": 1, "all": 4}[scan_ptcl]
     else:
-        assert len(ret.optimization_history["180"]) == 4
+        assert len(opthist_tgt["180"]) == 4
 
     if not (from_v2(request.node.name) and scan_ptcl == "none"):
-        assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
+        assert opthist_tgt["180"][0].provenance.creator.lower() == "geometric"
     if "v2" in request.node.name:
         if scan_ptcl != "none":
-            assert ret.optimization_history["180"][0].trajectory_results[0].provenance.creator.lower() == "rdkit"
-            assert ret.optimization_history["180"][0].trajectory_results[0].schema_version == 2
+            assert opthist_tgt["180"][0].trajectory_results[0].provenance.creator.lower() == "rdkit"
+            assert opthist_tgt["180"][0].trajectory_results[0].schema_version == 2
     else:
         if not ("to_v1" in request.node.name and scan_ptcl == "none"):
-            assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
-            assert ret.optimization_history["180"][0].trajectory[0].schema_version == 1
+            assert opthist_tgt["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
+            assert opthist_tgt["180"][0].trajectory[0].schema_version == 1
 
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
 
@@ -737,6 +738,7 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
         input_data["specification"]["specification"]["model"] = {"method": "HF"}
         input_data["specification"]["specification"]["keywords"] = {"world_prec": 1.0e-4}
         input_data["specification"]["specification"]["program"] = "mrchem"
+        input_data["specification"]["protocols"] = {"trajectory_results": "final"}  # to test provenance
     else:
         input_data["input_specification"]["model"] = {"method": "HF"}
         input_data["input_specification"]["keywords"] = {"world_prec": 1.0e-4}
@@ -748,9 +750,13 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
     ret = qcng.compute(input_data, optimizer, raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
-    trajs_tgt = ret.trajectory_results if "v2" in request.node.name else ret.trajectory
+    trajs_tgt = ret.trajectory_results if "v2" in request.node.name else ret.trajectory  # for looking at grad jobs
+    props_tgt = ret.trajectory_properties if "v2" in request.node.name else ret.energies  # for counting opt iterations
 
-    assert 10 > len(trajs_tgt) > 1
+    assert 10 > len(props_tgt) > 1
+    if "v2" in request.node.name:
+        assert 10 > ret.properties.optimization_iterations > 1
+
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-3) == 1.3860734486984705
     assert ret.provenance.creator.lower() == optimizer
     assert trajs_tgt[0].provenance.creator.lower() == "mrchem"
