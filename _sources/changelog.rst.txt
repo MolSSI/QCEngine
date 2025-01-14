@@ -41,6 +41,8 @@ Enhancements
 ++++++++++++
 - (:pr:`463`) Maint - Pin to QCElemental <0.70 since we now know QCSchema v2 release schedule.
 - (:pr:`463`) MACE - New v0.3.9 release yields a pytorch error, so recommend pymace=0.3.6 .
+- (:pr:`464`, :issue:`447`) CFOUR - Allow CC-PVDZ alias basis specification. Also fix the PwCVXZ
+  basis keyword. @philipmnel
 
 Bug Fixes
 +++++++++
