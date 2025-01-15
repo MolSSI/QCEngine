@@ -46,10 +46,13 @@ Enhancements
 - (:pr:`463`) MACE - New v0.3.9 release yields a pytorch error, so recommend pymace=0.3.6 .
 - (:pr:`464`, :issue:`447`) CFOUR - Allow CC-PVDZ alias basis specification. Also fix the PwCVXZ
   basis keyword. @philipmnel
+- (:pr:`440`) TorsionDrive - Support other geometric-style constraints by not overwriting those
+  already present. @jthorton
 
 Bug Fixes
 +++++++++
-- (:pr:`451`, :issue:`450`) Psi4 - Fixes bug in Psi4 detection when command `python` not available. @susilehtola, @topazus
+- (:pr:`451`, :issue:`450`) Psi4 - Fixes bug in Psi4 detection when command `python` not available.
+  @susilehtola, @topazus
 - (:pr:`466`) CFOUR - fix error collecting molecule when it's a single atom with two-letter symbol. @loriab
 
 Misc.
