@@ -116,6 +116,12 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          - conda-env: opt-disp-cf
+            python-version: 3.12
+            label: QCSk-next
+            runs-on: ubuntu-latest
+            pytest: ""
+
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
 
@@ -164,6 +170,12 @@ jobs:
       if: "((matrix.cfg.label == 'Psi4-1.6') || (matrix.cfg.label == 'optimization-dispersion')) && (runner.os != 'Windows')"
       run: |
         sed -i s/from\ pydantic\ /from\ pydantic.v1\ /g ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/*py
+
+    - name: Special Config - QCSchema Next Deps
+      if: "(startsWith(matrix.cfg.label, 'QCSk-next'))"
+      run: |
+        conda remove qcelemental --force
+        python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2025' --no-deps
 
     - name: Environment Information
       run: |
