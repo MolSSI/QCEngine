@@ -6,22 +6,29 @@ import os
 import re
 import tempfile
 import warnings
+import pprint
+import copy
+
 from collections import defaultdict
+
 from typing import Any, Dict, List, Optional, Tuple
+
 import cclib
 from cclib.method import Nuclear
 
-import numpy as np
 from qcelemental import constants
 from qcelemental.models import AtomicInput, AtomicResult, Molecule, Provenance
+from qcelemental.models import OptimizationInput, OptimizationResult, BasisSet
 from qcelemental.molparse import regex
 from qcelemental.util import parse_version, safe_version, which, which_import
 
-from qcengine.config import TaskConfig, get_config
-
 from ..exceptions import InputError, UnknownError
 from ..util import disk_files, execute, temporary_directory
+from .util import error_stamp
 from .model import ProgramHarness
+
+from qcengine.config import TaskConfig, get_config
+from qcengine.procedures.model import ProcedureHarness
 
 class GaussianHarness(ProgramHarness):
 
