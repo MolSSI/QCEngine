@@ -92,69 +92,52 @@ class GaussianHarness(ProgramHarness):
         if which_prog is None:
             which_prog = which('g09')
         
-        v_input = '''%mem=20MW
-#P HF/sto-3g
-
-#test HF/sto-3g for H atom
-
-0 2
-H
-
-'''
-        if which_prog not in self.version_cache:
-            success, output = execute([which_prog, 'v.inp', 'v.log'],
-                                      {'v.inp': v_input},
-                                      ['v.log']
-                                     )
-            if success:
-                outtext = output['outfiles']['v.log']
-                outtext = outtext.splitlines()
-                for line in outtext:
-                    if 'Gaussian 09' in line:
-                        #version_line = line.split('Gaussian 09:')[-1]
-                        #version_line = version_line.split()[0]
-                        #self.version_cache[which_prog] = safe_version(version_line)
-                        self.version_cache[which_prog] = '2009'
-                    
-                    if "Gaussian 16" in line:
-                        self.version_cache[which_prog] = '2016'
-                        
+        self.version_cache[which_prog] = safe_version(which_prog.split('/')[-1])
+        
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: "AtomicInput", config: TaskConfig) -> "AtomicResult":
+    def compute(self, input_model: 'AtomicInput', config: 'TaskConfig') -> 'AtomicResult':
         """
-        Run Gaussian
+        Run Gaussian program
         """
+        
         # Check if Gaussian executable is found
         self.found(raise_error=True)
-
+        
         # Setup the job
         job_inputs = self.build_input(input_model, config)
-
+        
         # Run Gaussian
-        exe_success, proc = self.execute(job_inputs)
+        success, _exe = self.execute(job_inputs)
+
+        stdin = job_inputs['infiles']['input.inp']
+
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
 
         # Determine whether the calculation succeeded
-        if exe_success:
+        if success:
             # If execution succeeded, collect results
-            result = self.parse_output(proc, input_model)
-            
-            return result
- 
+            return self.parse_output(_exe, input_model)
         else:
-            proc['outfiles']['stderr'] = proc['outfiles']['output.log']
-            outfile = proc['outfiles']['output.log']
+            _exe['outfiles']['stderr'] = _exe['outfiles']['output.log']
+            outfile = _exe['outfiles']['output.log']
             
             if 'Error termination via ' in outfile:
-                raise InputError(proc['outfiles']['output.log'])
+                raise InputError(error_stamp(stdin, outfile))
          
             else:
                 # Return UnknownError for error propagation
-                raise UnknownError(proc['outfiles']['output.log'])
+                raise UnknownError(error_stamp(stdin, outfile))
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
-    ) -> Dict[str, Any]:
+            self, input_model: AtomicInput,
+            config: TaskConfig,
+            template: Optional[str] = None) -> Dict[str, Any]:
+
+        if template is None:
+            input_file = []
+            caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
 
         # Build keywords
         keywords = {k.upper(): v for k, v in input_model.keywords.items()}
@@ -188,20 +171,13 @@ H
 
         # Begin input file
         input_file = []
-        input_file.append('%mem={}MB'.format(int(config.memory * 1024)))
+        input_file.append('%mem={}MB'.format(int(config.memory * 1024))) # In MB
         input_file.append('#P {}/{}'.format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw) + '\n')
         input_file.append('write your comment here\n')
   
-        # Create a mol object
-        mol = input_model.molecule
-        input_file.append(f'{int(mol.molecular_charge)} {mol.molecular_multiplicity}')
-
-        # Write the geometry
-        for real, sym, geom in zip(mol.real, mol.symbols, mol.geometry):
-            if real is False:
-                raise InputError('Cannot handle ghost atoms yet.')
-            input_file.append(f'{sym} {geom[0]:14.8f} {geom[1]:14.8f} {geom[2]:14.8f}')
-        input_file.append("\n")
+        # Handle the geometry
+        molcmd, moldata = input_model.molecule.to_string(dtype = 'gaussian', units = 'Angstrom', return_data = True)
+        input_file.append(molcmd.lstrip())
 
 #        print ('*' * 100)
 #        print ('\n'.join(input_file))
@@ -209,15 +185,15 @@ H
 
         gaussian_ret = {
             'infiles': {'input.inp': '\n'.join(input_file)},
-            'commands': [which("g09"),  'input.inp', 'output.log']
-            #'scratch_directory': config.scratch_directory
-            }
-
+            'commands': [which("g09"),  'input.inp', 'output.log'],
+            'scratch_directory': config.scratch_directory,
+            'scratch_messy': config.scratch_messy
+        }
+        
         return gaussian_ret
 
     def execute(self,
                 inputs,
-                *,
                 extra_infiles: Optional[Dict[str, str]] = None,
                 extra_outfiles: Optional[Dict[str, str]] = None,
                 extra_commands: Optional[List[str]] = None,
@@ -229,39 +205,56 @@ H
             inputs['commands'],
             inputs['infiles'],
             outfiles = ['output.log'],
-            scratch_messy = True
+            scratch_directory = inputs['scratch_directory'],
+            scratch_messy = True #inputs['scratch_messy']
             )
-        
-        if (dexe['outfiles']['output.log'] is None) or (
-           'Error termination via' in dexe['outfiles']['output.log']):
-           print ('THERE IS AN ERROR!')
-           
-           success = False
         
         return success, dexe
  
-    def parse_output(self, outfiles: Dict[str, str], input_model: AtomicInput) -> AtomicResult:
-        
-        output_data = {}
-        properties = {}
-        cclib_vars = {}
-        
+    def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
+
         tmp_output_path = outfiles['scratch_directory']
+        print ('tmp_output_path=',tmp_output_path)
         tmp_output_file = os.path.join(tmp_output_path, 'output.log')
+        print ('tmp_output_file=',tmp_output_file)
         data = cclib.io.ccread(tmp_output_file)
-        cclib_vars = data.getattributes(True)
+        print ('DATA=', data)
+        scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
+        print ('SCF ENERGY: ', scf_energy)
         
-        last_occupied_energy = data.moenergies[0][data.homos[0]]
+        output_data = {
+        	"schema_version": 1,
+        	"molecule": input_model.molecule,
+        	'extras': input_model.extras,
+            "native_files": {k: v for k, v in outfiles.items() if v is not None},
+            'properties': '',
+            'provenance': Provenance(creator="gaussian", version=self.get_version(), routine='g09').dict(),
+            'return_result': '500',
+            "stderr": '100',
+            "stdout": outfiles['outfiles']['output.log'],
+            "success": True,
+        		}
+
+        #output_data = {}
+        #properties = {}
+        #cclib_vars = {}
+        
+        #tmp_output_path = outfiles['scratch_directory']
+        #tmp_output_file = os.path.join(tmp_output_path, 'output.log')
+        #data = cclib.io.ccread(tmp_output_file)
+        #cclib_vars = data.getattributes(True)
+        
+        #last_occupied_energy = data.moenergies[0][data.homos[0]]
         #output_data['HOMO ENERGY'] = last_occupied_energy
         
         #scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
         #output_data['SCF ENERGY'] = scf_energy
         
-        if input_model.driver == 'energy':
-            output_data['return_result'] = scf_energy
-        if input_model.driver == 'gradient':
-            output_data['return_result'] = data.grads
-            #output_data['return_gradient'] = data.grads
+        #if input_model.driver == 'energy':
+        #    output_data['return_result'] = scf_energy
+        #if input_model.driver == 'gradient':
+        #    output_data['return_result'] = data.grads
+        #    #output_data['return_gradient'] = data.grads
         
         #print (os.system('ccget --list ' + tmp_output_file)) #data available in the output for parsing
 
@@ -270,64 +263,65 @@ H
         #   print (output_data)
         #print (input_model)
 
-        properties = {
-            'nuclear_repulsion_energy': Nuclear(data).repulsion_energy()
-        }
+        #properties = {
+        #    'nuclear_repulsion_energy': Nuclear(data).repulsion_energy()
+        #}
 
-        if input_model.model.method.lower().startswith('mp'):
-            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
-            mp2_energy = data.mpenergies[0] / constants.conversion_factor("hartree", "eV")
-            properties['scf_total_energy'] = scf_energy
-            properties['mp2_total_energy'] = mp2_energy[0]
-            properties['return_energy'] = mp2_energy[0]
-            output_data['return_result'] = mp2_energy[0]
+        #if input_model.model.method.lower().startswith('mp'):
+        #    scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
+        #    mp2_energy = data.mpenergies[0] / constants.conversion_factor("hartree", "eV")
+        #    properties['scf_total_energy'] = scf_energy
+        #    properties['mp2_total_energy'] = mp2_energy[0]
+        #    properties['return_energy'] = mp2_energy[0]
+        #    output_data['return_result'] = mp2_energy[0]
 
-        elif input_model.model.method.lower().startswith('cc'):
-            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
-            cc_energy = data.ccenergies[0] / constants.conversion_factor("hartree", "eV")
-            properties['scf_total_energy'] = scf_energy
-            properties['ccsd_prt_pr_total_energy'] = cc_energy
-            properties['return_energy'] = cc_energy
-            output_data['return_result'] = cc_energy           
+        #elif input_model.model.method.lower().startswith('cc'):
+        #    scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
+        #    cc_energy = data.ccenergies[0] / constants.conversion_factor("hartree", "eV")
+        #    properties['scf_total_energy'] = scf_energy
+        #    properties['ccsd_prt_pr_total_energy'] = cc_energy
+        #    properties['return_energy'] = cc_energy
+        #    output_data['return_result'] = cc_energy           
 
-        else: # input_model.model.method.lower() in ['hf', 'scf']:
-            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
-            properties['scf_total_energy'] = scf_energy
-            properties['return_energy'] = scf_energy
-            output_data['return_result'] = scf_energy
+        #else: # input_model.model.method.lower() in ['hf', 'scf']:
+        #    scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
+        #    properties['scf_total_energy'] = scf_energy
+        #    properties['return_energy'] = scf_energy
+        #    output_data['return_result'] = scf_energy
         
-        output_data['properties'] = properties
-        output_data['stdout'] = outfiles['outfiles']['output.log']
-        output_data['success'] = True
-        #print ('output_data: ', output_data)
+        #output_data['properties'] = properties
+        #output_data['stdout'] = outfiles['outfiles']['output.log']
+        #output_data['success'] = True
+        ##print ('output_data: ', output_data)
 
-        provenance = Provenance(creator="gaussian", version=self.get_version(), routine='g09').dict()
+        #provenance = Provenance(creator="gaussian", version=self.get_version(), routine='g09').dict()
 
-        stdout = outfiles.pop('stdout')
-        stderr = outfiles.pop('stderr')
+        #stdout = outfiles.pop('stdout')
+        #stderr = outfiles.pop('stderr')
         #print("\nPRINT STDOUT: \n", stdout)
         
 
-        method = input_model.model.method.lower()
+        #method = input_model.model.method.lower()
         #method = method[4:] if method.startswith("") else method
 
         # filter unwanted data
-        to_remove = ['atomnos', 'atomcoords', 'natom']
-        output_data['extras'] = {'cclib': {k:v for k, v in cclib_vars.items() if k not in to_remove}}
+        #to_remove = ['atomnos', 'atomcoords', 'natom']
+        #output_data['extras'] = {'cclib': {k:v for k, v in cclib_vars.items() if k not in to_remove}}
 
         # HACK - scf_values can have NaN
         # remove for now
-        output_data['extras']['cclib'].pop('scfvalues')
+        #output_data['extras']['cclib'].pop('scfvalues')
 
         if (input_model.protocols.native_files == 'all'):
             output_data['native_files'] = {}
-            
             tmp_input_file = os.path.join(tmp_output_path, 'input.inp')
+            
             with open(tmp_input_file, 'rt') as f:
                 output_data['native_files']['input.inp'] = f.read()
                 
             # formcheck keyword always creates the Test.FChk file
             tmp_check_file = os.path.join(tmp_output_path, 'Test.FChk')
+            
             with open(tmp_check_file, 'rt') as f:
                 output_data['native_files']['gaussian.fchk'] = f.read()
                 
@@ -335,3 +329,16 @@ H
 
         return AtomicResult(**merged_data)
 
+class GaussianDriverProcedure(ProcedureHarness):
+    '''
+    Optimize a geometry
+    '''
+
+    _defaults = {'name': 'GaussianDriver', 'procedure': 'optimization'}
+
+    class Config(ProcedureHarness.Config):
+        pass
+
+    def found(self, raise_error: bool = False) -> bool:
+        gaussian_harness = GaussianHarness()
+        return gaussian_harness(raise_error)
