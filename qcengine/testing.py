@@ -57,9 +57,14 @@ def is_program_new_enough(program, version_feature_introduced):
     form is equal to or later than `version_feature_introduced`.
 
     """
-    if program not in qcng.list_available_programs():
-        return False
-    candidate_version = qcng.get_program(program).get_version()
+    if program in qcng.list_all_procedures():
+        if program not in qcng.list_available_procedures():
+            return False
+        candidate_version = qcng.get_procedure(program).get_version()
+    else:
+        if program not in qcng.list_available_programs():
+            return False
+        candidate_version = qcng.get_program(program).get_version()
 
     return parse_version(candidate_version) >= parse_version(version_feature_introduced)
 
@@ -177,6 +182,7 @@ _programs = {
     "psi4_derqcsk": is_program_new_enough("psi4", "1.5a1.dev117"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.1"),
+    "qcmanybody": which_import("qcmanybody", return_bool=True),
     "rdkit": which_import("rdkit", return_bool=True),
     "terachem": which("terachem", return_bool=True),
     "terachem_pbs": is_program_new_enough("terachem_pbs", "0.7.2"),
