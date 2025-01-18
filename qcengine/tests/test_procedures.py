@@ -632,34 +632,62 @@ def test_torsiondrive_generic(schema_versions, request):
 
 @using("mace")
 @using("torsiondrive")
-def test_torsiondrive_extra_constraints():
+def test_torsiondrive_extra_constraints(schema_versions, request):
+    models, retver, _ = schema_versions
 
-    input_data = TorsionDriveInput(
-        keywords=TDKeywords(dihedrals=[(3, 0, 1, 2)], grid_spacing=[180]),
-        input_specification=QCInputSpecification(driver=DriverEnum.gradient, model=Model(method="small", basis=None)),
-        initial_molecule=[qcng.get_molecule("propane")],
-        optimization_spec=OptimizationSpecification(
-            procedure="geomeTRIC",
-            keywords={
-                "coordsys": "dlc",
-                # use mace as it does not have convergence issues like UFF
-                "program": "mace",
-                "constraints": {
-                    "set": [
-                        {
-                            "type": "dihedral",  # hold a dihedral through the other C-C bond fixed
-                            "indices": (0, 1, 2, 10),
-                            "value": 0.0,
-                        }
-                    ]
+    keywords = {
+        "coordsys": "dlc",
+        "constraints": {
+            "set": [
+                {
+                    "type": "dihedral",  # hold a dihedral through the other C-C bond fixed
+                    "indices": (0, 1, 2, 10),
+                    "value": 0.0,
+                }
+            ]
+        },
+    }
+
+    if from_v2(request.node.name):
+        input_data = models.TorsionDriveInput(
+            initial_molecules=[models.Molecule(**qcng.get_molecule("propane", return_dict=True))],
+            specification=models.TorsionDriveSpecification(
+                keywords=models.TDKeywords(dihedrals=[(3, 0, 1, 2)], grid_spacing=[180]),
+                specification=models.OptimizationSpecification(
+                    program="geomeTRIC",
+                    keywords=keywords,
+                    specification=models.AtomicSpecification(
+                        # use mace as it does not have convergence issues like UFF
+                        program="mace",
+                        driver=models.DriverEnum.gradient,
+                        model=models.Model(method="small", basis=None),
+                    ),
+                ),
+            ),
+        )
+    else:
+        input_data = models.TorsionDriveInput(
+            keywords=models.TDKeywords(dihedrals=[(3, 0, 1, 2)], grid_spacing=[180]),
+            input_specification=models.QCInputSpecification(
+                driver=models.DriverEnum.gradient, model=models.Model(method="small", basis=None)
+            ),
+            initial_molecule=[models.Molecule(**qcng.get_molecule("propane", return_dict=True))],
+            optimization_spec=models.OptimizationSpecification(
+                procedure="geomeTRIC",
+                keywords={
+                    **keywords,
+                    # use mace as it does not have convergence issues like UFF
+                    "program": "mace",
                 },
-            },
-        ),
-    )
+            ),
+        )
 
-    ret = qcng.compute_procedure(input_data, "torsiondrive", raise_error=True)
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
+    ret = qcng.compute(input_data, "torsiondrive", raise_error=True, return_version=retver)
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
-    assert ret.error is None
+    if "_v2" not in request.node.name:
+        assert ret.error is None
     assert ret.success
 
     expected_grid_ids = {"180", "0"}
@@ -678,7 +706,10 @@ def test_torsiondrive_extra_constraints():
 
     assert ret.provenance.creator.lower() == "torsiondrive"
     assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
-    assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "mace"
+    if "v2" in request.node.name:
+        assert ret.optimization_history["180"][0].trajectory_results[0].provenance.creator.lower() == "mace"
+    else:
+        assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "mace"
 
     assert "Using MACE-OFF23 MODEL for MACECalculator" in ret.stdout
     assert "All optimizations converged at lowest energy. Job Finished!\n" in ret.stdout
