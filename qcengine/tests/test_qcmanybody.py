@@ -1,19 +1,23 @@
 import pprint
 
 import pytest
-
 from qcelemental import constants
-from qcelemental.models import Molecule
 from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
+from qcengine.testing import checkver_and_convert, from_v2
+from qcengine.testing import schema_versions0 as schema_versions
 from qcengine.testing import using
+
+# TODO full schema_versions when manybody v2 schema ready
 
 
 @pytest.fixture
-def he_tetramer():
+def he_tetramer(schema_versions, request):
+    models, _, _ = schema_versions
+
     a2 = 2 / constants.bohr2angstroms
-    return Molecule(
+    return models.Molecule(
         symbols=["He", "He", "He", "He"],
         fragments=[[0], [1], [2], [3]],
         geometry=[0, 0, 0, 0, 0, a2, 0, a2, 0, 0, a2, a2],
@@ -55,7 +59,11 @@ def he_tetramer():
         ),
     ],
 )
-def test_nbody_he4_single(program, basis, keywords, mbe_keywords, anskey, calcinfo_nmbe, he_tetramer, request):
+def test_nbody_he4_single(
+    schema_versions, program, basis, keywords, mbe_keywords, anskey, calcinfo_nmbe, he_tetramer, request
+):
+    models, retver, _ = schema_versions
+
     from qcmanybody.models import AtomicSpecification, ManyBodyInput
 
     atomic_spec = AtomicSpecification(
@@ -75,7 +83,9 @@ def test_nbody_he4_single(program, basis, keywords, mbe_keywords, anskey, calcin
         molecule=he_tetramer,
     )
 
-    ret = qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
+    mbe_model = checkver_and_convert(mbe_model, request.node.name, "pre")
+    ret = qcng.compute(mbe_model, "qcmanybody", raise_error=True, return_version=retver)
+    ret = checkver_and_convert(ret, request.node.name, "post")
     pprint.pprint(ret.dict(), width=200)
 
     assert ret.extras == {}, f"[w] extras wrongly present: {ret.extras.keys()}"
@@ -139,11 +149,13 @@ def test_nbody_he4_single(program, basis, keywords, mbe_keywords, anskey, calcin
         pytest.param("psi4", marks=using("psi4")),
     ],
 )
-def test_bsse_ene_tu6_cp_ne2(qcprog):
+def test_bsse_ene_tu6_cp_ne2(schema_versions, request, qcprog):
     """
     from https://github.com/psi4/psi4/blob/master/tests/tu6-cp-ne2/input.dat
     Example potential energy surface scan and CP-correction for Ne2
     """
+    models, retver, _ = schema_versions
+
     from qcmanybody.models import ManyBodyInput
 
     tu6_ie_scan = {2.5: 0.757717, 3.0: 0.015685, 4.0: -0.016266}  # Ang: kcal/mol IE
@@ -181,7 +193,7 @@ def test_bsse_ene_tu6_cp_ne2(qcprog):
     }
 
     for R in tu6_ie_scan:
-        nene = Molecule(
+        nene = models.Molecule(
             symbols=["Ne", "Ne"], fragments=[[0], [1]], geometry=[0, 0, 0, 0, 0, R / constants.bohr2angstroms]
         )
         mbe_data["molecule"] = nene
@@ -189,11 +201,13 @@ def test_bsse_ene_tu6_cp_ne2(qcprog):
         mbe_model = ManyBodyInput(**mbe_data)
         if qcprog == "gamess":
             with pytest.raises(RuntimeError) as exe:
-                qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
+                qcng.compute(mbe_model, "qcmanybody", raise_error=True, return_version=retver)
             assert "GAMESS+QCEngine can't handle ghost atoms yet" in str(exe.value)
             pytest.xfail("GAMESS can't do ghosts")
 
-        ret = qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
+        mbe_model = checkver_and_convert(mbe_model, request.node.name, "pre")
+        ret = qcng.compute(mbe_model, "qcmanybody", raise_error=True, return_version=retver)
+        ret = checkver_and_convert(ret, request.node.name, "post")
         pprint.pprint(ret.dict(), width=200)
 
         assert compare_values(
@@ -206,7 +220,9 @@ def test_bsse_ene_tu6_cp_ne2(qcprog):
 
 
 @using("qcmanybody")
-def test_mbe_error():
+def test_mbe_error(schema_versions, request):
+    models, retver, _ = schema_versions
+
     from qcmanybody.models import ManyBodyInput
 
     mbe_data = {
@@ -225,7 +241,7 @@ def test_mbe_error():
         "molecule": None,
     }
 
-    nene = Molecule(
+    nene = models.Molecule(
         symbols=["Ne", "Ne"], fragments=[[0], [1]], geometry=[0, 0, 0, 0, 0, 3.0 / constants.bohr2angstroms]
     )
     mbe_data["molecule"] = nene
@@ -234,12 +250,12 @@ def test_mbe_error():
 
     # test 1
     with pytest.raises(RuntimeError) as exc:
-        qcng.compute_procedure(mbe_model, "qcmanybody", raise_error=True)
+        qcng.compute(mbe_model, "qcmanybody", raise_error=True, return_version=retver)
 
     assert "Program cms is not registered to QCEngine" in str(exc.value)
 
     # test 2
-    ret = qcng.compute_procedure(mbe_model, "qcmanybody")
+    ret = qcng.compute(mbe_model, "qcmanybody", return_version=retver)
     assert ret.success is False
     assert "Program cms is not registered to QCEngine" in ret.error.error_message
 
@@ -259,9 +275,10 @@ def test_mbe_error():
         # pytest.param("gengeometric", "cp", True, marks=using("geometric_genopt")),
     ],
 )
-def test_bsse_opt_hf_trimer(optimizer, bsse_type, sio):
+def test_bsse_opt_hf_trimer(schema_versions, request, optimizer, bsse_type, sio):
+    models, retver, _ = schema_versions
 
-    initial_molecule = Molecule.from_data(
+    initial_molecule = models.Molecule.from_data(
         """
 F         -0.04288        2.78905        0.00000
 H          0.59079        2.03435        0.00000
@@ -329,7 +346,9 @@ units ang
     # from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
     # opt_data = GeneralizedOptimizationInput(**opt_data)
 
-    ret = qcng.compute_procedure(opt_data, optimizer, raise_error=True)
+    # opt_data = checkver_and_convert(opt_data, request.node.name, "pre")
+    ret = qcng.compute(opt_data, optimizer, raise_error=True, return_version=retver)
+    # ret = checkver_and_convert(ret, request.node.name, "post")
 
     print("FFFFFFFFFF")
     pprint.pprint(ret.dict(), width=200)

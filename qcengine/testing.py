@@ -251,6 +251,11 @@ def schema_versions2(request):
         return (qcel.models.v2, 2, qcel.models.v2)
 
 
+@pytest.fixture(scope="function", params=[None])
+def schema_versions0(request):
+    return qcel.models, -1, qcel.models
+
+
 def checkver_and_convert(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=None):
     import json
 
