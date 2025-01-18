@@ -237,6 +237,13 @@ def handle_output_metadata(
             inp_ret = output_fusion
         ret = model(success=success_ret, error=error_ret, input_data=inp_ret)
 
+    # temp while ManyBody has no v2. empty string for FailedOp
+    if getattr(ret, "schema_name", "") == "qcschema_manybodyresult":
+        if return_dict:
+            return json.loads(ret.json())
+        else:
+            return ret
+
     if convert_version > 0:
         ret = ret.convert_v(convert_version)
 
