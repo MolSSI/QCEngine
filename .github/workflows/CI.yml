@@ -5,10 +5,12 @@ on:
     branches:
       - master
       - next2024
+      - next2025
   pull_request:
     branches:
       - master
       - next2024
+      - next2025
   schedule:
     - cron: "9 16 * * 1"
 
