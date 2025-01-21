@@ -4,6 +4,7 @@ Tests the DQM compute dispatch module
 
 import warnings
 
+import numpy as np
 import pytest
 import qcelemental as qcel
 
@@ -57,6 +58,7 @@ def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request)
         input_data["specification"]["specification"]["program"] = grad_program
         input_data["specification"]["specification"]["extras"] = {"myqctag": "hello psi4"}
         input_data["specification"]["extras"] = {"myopttag": "hello qcengine"}
+        input_data["specification"]["protocols"] = {"trajectory_results": "all"}
 
     else:
         input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
@@ -142,6 +144,7 @@ def test_geometric_local_options(input_data, schema_versions, request, optimizer
     if from_v2(request.node.name):
         input_data["specification"]["specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
         input_data["specification"]["specification"]["program"] = "psi4"
+        input_data["specification"]["protocols"] = {"trajectory_results": "final"}
     else:
         input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
         input_data["keywords"]["program"] = "psi4"
@@ -194,6 +197,7 @@ def test_optimizer_stdout(optimizer, gradprog, gradmodel, converged, input_data,
         input_data["specification"]["specification"]["model"] = gradmodel
         input_data["specification"]["specification"]["program"] = gradprog
         input_data["specification"]["specification"]["protocols"] = {"stdout": False}
+        input_data["specification"]["protocols"] = {"trajectory_results": "all"}
     else:
         input_data["input_specification"]["model"] = gradmodel
         input_data["keywords"]["program"] = gradprog
@@ -216,6 +220,79 @@ def test_optimizer_stdout(optimizer, gradprog, gradmodel, converged, input_data,
         assert trajs_tgt[0].stdout is None
     else:
         assert trajs_tgt[0].stdout is not None
+
+    if "v2" in request.node.name:
+        assert ret.properties.optimization_iterations in [3, 4, 5]
+        assert len(ret.trajectory_properties) == ret.properties.optimization_iterations
+        assert np.allclose(ret.properties.return_gradient, ret.trajectory_results[-1].return_result)
+        assert ret.trajectory_results[-1].properties.return_energy == pytest.approx(
+            ret.properties.return_energy, 1.0e-4
+        )
+        if gradprog == "psi4":
+            assert ret.properties.nuclear_repulsion_energy == pytest.approx(8.906, 1.0e-3)
+            assert ret.properties.return_energy == pytest.approx(-74.96599, 1.0e-4)
+        elif gradprog == "rdkit":
+            assert ret.properties.nuclear_repulsion_energy == pytest.approx(8.888, 1.0e-3)
+            assert ret.properties.return_energy == pytest.approx(0, 1.0e-2)  # 0 seems wrong
+
+
+@pytest.mark.parametrize(
+    "optimizer",
+    [
+        pytest.param("geometric", marks=using("geometric")),
+        pytest.param("optking", marks=using("optking")),
+        pytest.param("berny", marks=using("berny")),
+    ],
+)
+@pytest.mark.parametrize(
+    "gradprog,gradmodel",
+    [
+        pytest.param("rdkit", {"method": "UFF", "basis": ""}, marks=using("rdkit")),
+        # pytest.param("psi4", {"method": "HF", "basis": "sto-3g"}, marks=using("psi4")),
+    ],
+)
+@pytest.mark.parametrize("traj_ptcl", ["none", "final", "all", "default"])
+def test_optimizer_protocols(optimizer, gradprog, gradmodel, input_data, schema_versions, request, traj_ptcl):
+    models, retver, _ = schema_versions
+
+    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True))
+
+    if from_v2(request.node.name):
+        input_data["specification"]["specification"]["model"] = gradmodel
+        input_data["specification"]["specification"]["program"] = gradprog
+        if traj_ptcl != "default":
+            input_data["specification"]["protocols"] = {"trajectory_results": traj_ptcl}
+    else:
+        input_data["input_specification"]["model"] = gradmodel
+        input_data["keywords"]["program"] = gradprog
+        if traj_ptcl != "default":
+            input_data["protocols"] = {"trajectory": traj_ptcl}
+
+    input_data = models.OptimizationInput(**input_data)
+
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
+    ret = qcng.compute(input_data, optimizer, raise_error=True, return_version=retver)
+    ret = checkver_and_convert(ret, request.node.name, "post")
+
+    assert ret.success is True
+
+    trajs_tgt = ret.trajectory_results if "v2" in request.node.name else ret.trajectory
+    assert ret.provenance.creator.lower() == optimizer
+
+    if "v2" in request.node.name:
+        assert len(ret.trajectory_properties) > 2
+
+    if traj_ptcl == "none":
+        assert len(trajs_tgt) == 0
+    elif traj_ptcl == "final":
+        assert len(trajs_tgt) == 1
+    elif traj_ptcl == "all":
+        assert len(trajs_tgt) > 2
+    elif traj_ptcl == "default":
+        if from_v2(request.node.name):
+            assert len(trajs_tgt) == 0
+        else:
+            assert len(trajs_tgt) > 2
 
 
 @using("psi4")
@@ -293,7 +370,7 @@ def test_optimization_protocols(optimizer, input_data, schema_versions, request)
     if from_v2(request.node.name):
         input_data["specification"]["specification"]["model"] = grad_model
         input_data["specification"]["specification"]["program"] = grad_program
-        input_data["specification"]["protocols"] = {"trajectory": "initial_and_final"}
+        input_data["specification"]["protocols"] = {"trajectory_results": "initial_and_final"}
     else:
         input_data["input_specification"]["model"] = grad_model
         input_data["keywords"]["program"] = grad_program
@@ -344,6 +421,7 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
         input_data["specification"]["keywords"][
             "coordsys"
         ] = "cart"  # needed by geometric v1.0 to play nicely with failure_engine
+        input_data["specification"]["protocols"] = {"trajectory_results": "all"}
     else:
         input_data["input_specification"]["model"] = {"method": "something"}
         input_data["keywords"]["program"] = failure_engine.name
@@ -442,6 +520,7 @@ def test_geometric_generic(input_data, program, model, bench, schema_versions, r
         input_data["specification"]["specification"]["extras"] = {
             "_secret_tags": {"mysecret_tag": "data1"}  # pragma: allowlist secret
         }
+        input_data["specification"]["protocols"] = {"trajectory_results": "final"}
     else:
         input_data["input_specification"]["model"] = model
         input_data["keywords"]["program"] = program
@@ -484,6 +563,7 @@ def test_nwchem_relax(linopt, schema_versions, request):
                     "keywords": {"set__driver:linopt": linopt},
                     "driver": "gradient",
                 },
+                "protocols": {"trajectory_results": "all"},
             },
             "initial_molecule": models.Molecule(**qcng.get_molecule("hydrogen", return_dict=True)),
         }
@@ -553,15 +633,18 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
 
 @using("rdkit")
 @using("torsiondrive")
-def test_torsiondrive_generic(schema_versions, request):
+@pytest.mark.parametrize("scan_ptcl", ["none", "all", "lowest"])
+def test_torsiondrive_generic(schema_versions, request, scan_ptcl):
     models, retver, _ = schema_versions
 
     if from_v2(request.node.name):
         input_data = models.TorsionDriveInput(
-            initial_molecules=[models.Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
+            initial_molecule=[models.Molecule(**qcng.get_molecule("ethane", return_dict=True))] * 2,
             specification=models.TorsionDriveSpecification(
-                keywords=models.TDKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
+                keywords=models.TorsionDriveKeywords(dihedrals=[(2, 0, 1, 5)], grid_spacing=[180]),
+                protocols=models.TorsionDriveProtocols(scan_results=scan_ptcl),
                 specification=models.OptimizationSpecification(
+                    protocols=models.OptimizationProtocols(trajectory_results="all"),
                     program="geomeTRIC",
                     keywords={
                         "coordsys": "hdlc",
@@ -599,8 +682,10 @@ def test_torsiondrive_generic(schema_versions, request):
     assert ret.success
 
     expected_grid_ids = {"180", "0"}
+    opthist_tgt = ret.scan_results if "v2" in request.node.name else ret.optimization_history
 
-    assert {*ret.optimization_history} == expected_grid_ids
+    if not (from_v2(request.node.name) and scan_ptcl == "none"):
+        assert {*opthist_tgt} == expected_grid_ids
 
     assert {*ret.final_energies} == expected_grid_ids
     assert {*ret.final_molecules} == expected_grid_ids
@@ -612,13 +697,26 @@ def test_torsiondrive_generic(schema_versions, request):
     assert pytest.approx(ret.final_molecules["0"].measure([2, 0, 1, 5]), abs=1.0e-2) == 0.0
 
     assert ret.provenance.creator.lower() == "torsiondrive"
-    assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
-    if "v2" in request.node.name:
-        assert ret.optimization_history["180"][0].trajectory_results[0].provenance.creator.lower() == "rdkit"
-        assert ret.optimization_history["180"][0].trajectory_results[0].schema_version == 2
+
+    if from_v2(request.node.name):
+        # properly "to_v1" should be always `== 4` but data lost in v2 by default
+        if scan_ptcl == "none":
+            assert not opthist_tgt
+        else:
+            assert len(opthist_tgt["180"]) == {"lowest": 1, "all": 4}[scan_ptcl]
     else:
-        assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
-        assert ret.optimization_history["180"][0].trajectory[0].schema_version == 1
+        assert len(opthist_tgt["180"]) == 4
+
+    if not (from_v2(request.node.name) and scan_ptcl == "none"):
+        assert opthist_tgt["180"][0].provenance.creator.lower() == "geometric"
+    if "v2" in request.node.name:
+        if scan_ptcl != "none":
+            assert opthist_tgt["180"][0].trajectory_results[0].provenance.creator.lower() == "rdkit"
+            assert opthist_tgt["180"][0].trajectory_results[0].schema_version == 2
+    else:
+        if not ("to_v1" in request.node.name and scan_ptcl == "none"):
+            assert opthist_tgt["180"][0].trajectory[0].provenance.creator.lower() == "rdkit"
+            assert opthist_tgt["180"][0].trajectory[0].schema_version == 1
 
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
 
@@ -725,6 +823,7 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
         input_data["specification"]["specification"]["model"] = {"method": "HF"}
         input_data["specification"]["specification"]["keywords"] = {"world_prec": 1.0e-4}
         input_data["specification"]["specification"]["program"] = "mrchem"
+        input_data["specification"]["protocols"] = {"trajectory_results": "final"}  # to test provenance
     else:
         input_data["input_specification"]["model"] = {"method": "HF"}
         input_data["input_specification"]["keywords"] = {"world_prec": 1.0e-4}
@@ -736,9 +835,13 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
     ret = qcng.compute(input_data, optimizer, raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
 
-    trajs_tgt = ret.trajectory_results if "v2" in request.node.name else ret.trajectory
+    trajs_tgt = ret.trajectory_results if "v2" in request.node.name else ret.trajectory  # for looking at grad jobs
+    props_tgt = ret.trajectory_properties if "v2" in request.node.name else ret.energies  # for counting opt iterations
 
-    assert 10 > len(trajs_tgt) > 1
+    assert 10 > len(props_tgt) > 1
+    if "v2" in request.node.name:
+        assert 10 > ret.properties.optimization_iterations > 1
+
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-3) == 1.3860734486984705
     assert ret.provenance.creator.lower() == optimizer
     assert trajs_tgt[0].provenance.creator.lower() == "mrchem"

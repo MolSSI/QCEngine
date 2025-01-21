@@ -5,7 +5,7 @@ from io import StringIO
 from typing import Any, ClassVar, Dict, Union
 
 import numpy as np
-from qcelemental.models.v2 import FailedOperation, OptimizationInput, OptimizationResult
+from qcelemental.models.v2 import FailedOperation, Molecule, OptimizationInput, OptimizationResult
 from qcelemental.util import which_import
 
 import qcengine
@@ -85,11 +85,14 @@ class BernyProcedure(ProcedureHarness):
         except Exception:
             error = {"error_type": "unknown", "error_message": f"Berny error:\n{traceback.format_exc()}"}
         else:
+            final_molecule = trajectory[-1]["molecule"]
             output = {
                 "input_data": input_model,
-                "final_molecule": trajectory[-1]["molecule"],
+                "final_molecule": final_molecule,
                 "properties": {
+                    "nuclear_repulsion_energy": Molecule(**final_molecule).nuclear_repulsion_energy(),
                     "return_energy": trajectory[-1]["properties"]["return_energy"],
+                    "return_gradient": trajectory[-1]["properties"]["return_gradient"],
                     "optimization_iterations": len(trajectory),
                 },
                 "trajectory_results": trajectory,
