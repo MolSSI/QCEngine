@@ -182,7 +182,8 @@ bimol_ref["eneyne"]["mp2_gradient"] = dict(zip(dmm, [
 def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions, request):
     models, retver, _ = schema_versions
 
-    dmol = eneyne_ne_qcschemamols()["eneyne"][subject]
+    vmol = 3 if from_v2(request.node.name) else 2
+    dmol = eneyne_ne_qcschemamols()[vmol]["eneyne"][subject]
     # Freeze the input orientation so that output arrays are aligned to input
     #   and all programs match gradient.
     dmol["fix_com"] = True

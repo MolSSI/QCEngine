@@ -544,7 +544,7 @@ def harvest_outfile_pass(outtext):
             qcvar_coord = Molecule(
                 validate=False,
                 **qcel.molparse.to_schema(
-                    qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=2
+                    qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=3
                 ),
             )
 

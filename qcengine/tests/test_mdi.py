@@ -3,6 +3,7 @@ Tests the MDI interface
 """
 
 
+import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
@@ -22,7 +23,7 @@ def test_mdi_water():
     engine = qcng.MDIServer(
         "-role DRIVER -name QCEngine -method TEST",
         "psi4",
-        qcng.get_molecule("water"),
+        qcel.models.v2.Molecule(**qcng.get_molecule("water", return_dict=True)),
         {"method": "SCF", "basis": "sto-3g"},
         {"scf_type": "df"},
     )

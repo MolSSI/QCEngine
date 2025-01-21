@@ -443,7 +443,7 @@ class MolproHarness(ProgramHarness):
         # Final output_data assignments needed for the AtomicResult object
         output_data["properties"] = properties
         output_data["extras"] = extras
-        output_data["schema_name"] = "qcschema_atomic_output"
+        output_data["schema_name"] = "qcschema_atomic_result"
         output_data["stdout"] = outfiles["dispatch.out"]
         output_data["success"] = True
         output_data["provenance"] = input_model.provenance  # TODO better stamp?

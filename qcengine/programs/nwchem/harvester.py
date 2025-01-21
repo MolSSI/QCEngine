@@ -2,13 +2,16 @@ import json
 import logging
 import re
 from decimal import Decimal
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
 from qcelemental.molparse import regex
 
 from ..util import PreservingDict
+
+if TYPE_CHECKING:
+    from qcelemental.models.v2 import Molecule
 
 logger = logging.getLogger(__name__)
 
@@ -845,7 +848,7 @@ def harvest_outfile_pass(outtext):
                     validate=False,
                     **qcel.molparse.to_schema(
                         qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"],
-                        dtype=2,
+                        dtype=3,
                     ),
                 )
 
@@ -867,7 +870,7 @@ def harvest_outfile_pass(outtext):
                     validate=False,
                     **qcel.molparse.to_schema(
                         qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"],
-                        dtype=2,
+                        dtype=3,
                     ),
                 )
 
@@ -921,6 +924,7 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched total dipole")
 
             # UNIT = DEBYE(S)
+            d2au = Decimal(qcel.constants.conversion_factor("debye", "e * bohr"))
             psivar[f"CURRENT DIPOLE"] = d2au * np.array([mobj.group(7), mobj.group(8), mobj.group(9)])
             # total?
 

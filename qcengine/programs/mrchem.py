@@ -101,7 +101,7 @@ class MRChemHarness(ProgramHarness):
         input_data = copy.deepcopy(job_input["mrchem_json"])
 
         output_data = {
-            "schema_name": "qcschema_atomic_output",
+            "schema_name": "qcschema_atomic_result",
             "schema_version": 2,
             "input_data": input_model,
             "molecule": input_model.molecule,
@@ -170,9 +170,9 @@ class MRChemHarness(ProgramHarness):
                 if input_model.specification.driver == "energy":
                     output_data["return_result"] = mrchem_output["properties"]["scf_energy"]["E_tot"]
                 elif input_model.specification.driver == "gradient":
-                    output_data["return_result"] = mrchem_output["properties"]["geometric_derivative"]["geom-1"][
-                        "total"
-                    ]
+                    grad = mrchem_output["properties"]["geometric_derivative"]["geom-1"]["total"]
+                    output_data["return_result"] = grad
+                    output_data["properties"]["return_gradient"] = grad
                 elif input_model.specification.driver == "properties":
                     output_data["return_result"] = {
                         f"{ks[1]}": {f"{ks[2]}": _nested_get(mrchem_output, ks)} for ks in computed_rsp_props
