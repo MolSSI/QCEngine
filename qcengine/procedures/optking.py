@@ -1,13 +1,16 @@
 import logging
 import sys
 from io import StringIO
-from typing import Any, ClassVar, Dict, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Union
 
 from qcelemental.models.v1 import OptimizationResult
 from qcelemental.models.v2 import OptimizationInput
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
+
+if TYPE_CHECKING:
+    from ..config import TaskConfig
 
 
 class OptKingProcedure(ProcedureHarness):

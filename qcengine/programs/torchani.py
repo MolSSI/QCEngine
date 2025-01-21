@@ -181,7 +181,7 @@ class TorchANIHarness(ProgramHarness):
             creator="torchani", version="unknown", routine="torchani.builtin.aev_computer"
         )
 
-        ret_data["schema_name"] = "qcschema_atomic_output"
+        ret_data["schema_name"] = "qcschema_atomic_result"
         ret_data["success"] = True
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other

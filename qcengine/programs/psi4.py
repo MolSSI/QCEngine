@@ -208,7 +208,7 @@ class Psi4Harness(ProgramHarness):
                     error_type = "execution_error"
 
                 # Reset the schema if required
-                output_data["schema_name"] = "qcschema_atomic_output"
+                output_data["schema_name"] = "qcschema_atomic_result"
                 output_data.pop("memory", None)
                 output_data.pop("nthreads", None)
                 output_data["stdout"] = output_data.pop("raw_output", None)

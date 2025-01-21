@@ -1394,7 +1394,7 @@ def eneyne_ne_qcdbmols():
         },
         "ne": {"atom": ne},
     }
-    return mols
+    return {2: mols, 3: mols}
 
 
 def eneyne_ne_psi4mols():
@@ -1414,27 +1414,29 @@ def eneyne_ne_psi4mols():
         },
         "ne": {"atom": ne},
     }
-    return mols
+    return {2: mols, 3: mols}
 
 
 def eneyne_ne_qcschemamols():
 
-    eneyne = qcel.molparse.to_schema(qcel.molparse.from_string(seneyne)["qm"], dtype=2)
-    mA = qcel.molparse.to_schema(qcel.molparse.from_string("\n".join(seneyne.splitlines()[:7]))["qm"], dtype=2)
-    mB = qcel.molparse.to_schema(qcel.molparse.from_string("\n".join(seneyne.splitlines()[-4:]))["qm"], dtype=2)
-    ne = qcel.molparse.to_schema(qcel.molparse.from_string(sne)["qm"], dtype=2)
+    mols = {}
+    for dtype in [2, 3]:
+        eneyne = qcel.molparse.to_schema(qcel.molparse.from_string(seneyne)["qm"], dtype=dtype)
+        mA = qcel.molparse.to_schema(qcel.molparse.from_string("\n".join(seneyne.splitlines()[:7]))["qm"], dtype=dtype)
+        mB = qcel.molparse.to_schema(qcel.molparse.from_string("\n".join(seneyne.splitlines()[-4:]))["qm"], dtype=dtype)
+        ne = qcel.molparse.to_schema(qcel.molparse.from_string(sne)["qm"], dtype=dtype)
 
-    mAgB = qcel.molparse.from_string(seneyne)["qm"]
-    mAgB["real"] = [
-        (iat < mAgB["fragment_separators"][0]) for iat in range(len(mAgB["elem"]))
-    ]  # works b/c chgmult doesn't need refiguring
-    mAgB = qcel.molparse.to_schema(mAgB, dtype=2)
+        mAgB = qcel.molparse.from_string(seneyne)["qm"]
+        mAgB["real"] = [
+            (iat < mAgB["fragment_separators"][0]) for iat in range(len(mAgB["elem"]))
+        ]  # works b/c chgmult doesn't need refiguring
+        mAgB = qcel.molparse.to_schema(mAgB, dtype=dtype)
 
-    gAmB = qcel.molparse.from_string(seneyne)["qm"]
-    gAmB["real"] = [(iat >= gAmB["fragment_separators"][0]) for iat in range(len(gAmB["elem"]))]
-    gAmB = qcel.molparse.to_schema(gAmB, dtype=2)
+        gAmB = qcel.molparse.from_string(seneyne)["qm"]
+        gAmB["real"] = [(iat >= gAmB["fragment_separators"][0]) for iat in range(len(gAmB["elem"]))]
+        gAmB = qcel.molparse.to_schema(gAmB, dtype=dtype)
 
-    mols = {"eneyne": {"dimer": eneyne, "mA": mA, "mB": mB, "mAgB": mAgB, "gAmB": gAmB}, "ne": {"atom": ne}}
+        mols[dtype] = {"eneyne": {"dimer": eneyne, "mA": mA, "mB": mB, "mAgB": mAgB, "gAmB": gAmB}, "ne": {"atom": ne}}
     return mols
 
 
@@ -1564,7 +1566,7 @@ def test_3(schema_versions, request):
         resinp = {
             "schema_name": "qcschema_atomic_input",
             "schema_version": 2,
-            "molecule": qcel.molparse.to_schema(sys, dtype=2),
+            "molecule": qcel.molparse.to_schema(sys, dtype=3),
             "specification": {
                 "driver": "energy",
                 "model": {"method": "b3lyp"},
@@ -1599,7 +1601,7 @@ def test_3(schema_versions, request):
             eneyne_ne_qcdbmols, marks=using("psi4")
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
     ],
-    ids=["qmol", "pmol"],
+    ids=["pmol", "qmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1625,8 +1627,9 @@ def test_3(schema_versions, request):
         ),
     ],
 )
-def test_molecule__run_dftd3__23body(inp, subjects):
-    subject = subjects()[inp["parent"]][inp["subject"]]
+def test_molecule__run_dftd3__23body(inp, subjects, request):
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
@@ -1679,7 +1682,7 @@ def test_qcdb__energy_d3():
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1695,14 +1698,15 @@ def test_qcdb__energy_d3():
 def test_mp2d__run_mp2d__2body(inp, subjects, schema_versions, request):
     models, retver, _ = schema_versions
 
-    subject = subjects()[inp["parent"]][inp["subject"]]
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
     if from_v2(request.node.name):
         resinp = {
@@ -1754,7 +1758,7 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "program, inp",
@@ -1799,14 +1803,15 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
 def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, request):
     models, retver, _ = schema_versions
 
-    subject = subjects()[inp["parent"]][inp["subject"]]
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
     if from_v2(request.node.name):
         atin = models.AtomicInput(
@@ -1856,7 +1861,7 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1874,14 +1879,15 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
 def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
     models, retver, _ = schema_versions
 
-    subject = subjects()[inp["parent"]][inp["subject"]]
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
     program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
@@ -1915,7 +1921,7 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1931,14 +1937,15 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
 def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
     models, retver, _ = schema_versions
 
-    subject = subjects()[inp["parent"]][inp["subject"]]
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
     if from_v2(request.node.name):
         resinp = {
@@ -1987,7 +1994,7 @@ def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp, extrakw, program",
@@ -2007,14 +2014,15 @@ def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
 def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request):
     models, retver, _ = schema_versions
 
-    subject = subjects()[inp["parent"]][inp["subject"]]
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     expected_pairwise = pref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
     if from_v2(request.node.name):
         atin = models.AtomicInput(
@@ -2065,7 +2073,7 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -2081,14 +2089,15 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request
 def test_gcp(inp, subjects, program, schema_versions, request):
     models, retver, _ = schema_versions
 
-    subject = subjects()[inp["parent"]][inp["subject"]]
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
     if from_v2(request.node.name):
         resinp = {

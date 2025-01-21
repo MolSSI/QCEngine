@@ -242,7 +242,7 @@ class QcoreHarness(ProgramHarness):
 
         output_data["properties"] = properties
 
-        output_data["schema_name"] = "qcschema_atomic_output"
+        output_data["schema_name"] = "qcschema_atomic_result"
         output_data["success"] = True
 
         return AtomicResult(**output_data)

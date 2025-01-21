@@ -3,7 +3,7 @@ from decimal import Decimal as Dm
 from typing import Any, Dict, List
 
 import numpy as np
-from qcelemental.models.v2 import AtomicResultProperties
+from qcelemental.models.v2 import AtomicProperties
 
 from .util import PreservingDict
 
@@ -427,7 +427,7 @@ qcvars_to_atomicproperties = {
 }
 
 
-def build_atomicproperties(qcvars: "PreservingDict") -> AtomicResultProperties:
+def build_atomicproperties(qcvars: "PreservingDict") -> AtomicProperties:
     """For results extracted from QC output in QCDB terminology, translate to QCSchema terminology.
 
     Parameters
@@ -437,8 +437,8 @@ def build_atomicproperties(qcvars: "PreservingDict") -> AtomicResultProperties:
 
     Returns
     -------
-    atprop : AtomicResultProperties
-        Object of calculation information in QCSchema AtomicResultProperties terminology.
+    atprop : AtomicProperties
+        Object of calculation information in QCSchema AtomicProperties terminology.
 
     """
     atprop = {}
@@ -446,4 +446,4 @@ def build_atomicproperties(qcvars: "PreservingDict") -> AtomicResultProperties:
         if pv in qcvars_to_atomicproperties:
             atprop[qcvars_to_atomicproperties[pv]] = dpv
 
-    return AtomicResultProperties(**atprop)
+    return AtomicProperties(**atprop)
