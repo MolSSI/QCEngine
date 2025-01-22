@@ -70,6 +70,8 @@ Misc.
 
 MUST (Unmerged)
 +++++++++++++++
+- (:pr:``) setup.py replaced by pyproject.toml with setuptools backend and replaced versioneer with setuptools-scm
+- (:pr:``) remove __git_revision__ and get_information("git_revision") removed with versioneer
 - (:pr:`468`) adapt harnesses for TD.initial_molecules -> TD.initial_molecule and TD.optimization_history -> TD.scan_results
 - (:pr:`468`) rdkit, store ``AtomicResult.properties.return_gradient`` and ``calcinfo_natom``. mrchem, store ``AtomicResult.properties.return_gradient``.
 - (:pr:`468`) lightly Adapt harnesses for Mol v3
