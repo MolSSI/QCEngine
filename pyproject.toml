@@ -83,10 +83,6 @@ target-version = ['py38']
 profile = "black"
 line_length = 120
 
-[tool.coverage.run]
-branch = true
-omit = ["*/tests/*", "*/migrations/*", "*site-packages*", "*__init__.py"]
-
 [tool.setuptools]
 packages = ["qcengine"]
 
