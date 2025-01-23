@@ -83,6 +83,8 @@ class GAMESSHarness(ProgramHarness):
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             dexe["outfiles"]["input"] = job_inputs["infiles"]["gamess.inp"]
             return self.parse_output(dexe["outfiles"], input_model)
+        else:
+            raise ValueError("QCEngine execution of GAMESS failed:\n\n" + str(dexe))
 
     def build_input(
         self, input_model: AtomicInput, config: "TaskConfig", template: Optional[str] = None
@@ -121,42 +123,43 @@ class GAMESSHarness(ProgramHarness):
         # * int() rounds down
         mwords_total = int(config.memory * (1024**3) / 8e6)
 
-        for mem_frac_replicated in (1, 0.5, 0.1, 0.75):
-            mwords, memddi = self._partition(mwords_total, mem_frac_replicated, config.ncores)
-            # DEBUG print(f"loop {mwords_total=} {mem_frac_replicated=} {config.ncores=} -> repl: {mwords=} dist: {memddi=} -> percore={memddi/config.ncores + mwords} tot={memddi + config.ncores * mwords}\n")
-            trial_opts = copy.deepcopy(opts)
-            trial_opts["contrl__exetyp"] = "check"
-            trial_opts["system__parall"] = not (config.ncores == 1)
-            trial_opts["system__mwords"] = mwords
-            trial_opts["system__memddi"] = memddi
-            trial_inp = format_keywords(trial_opts) + molcmd
-            trial_gamessrec = {
-                "infiles": {"trial_gamess.inp": trial_inp},
-                "command": [which("rungms"), "trial_gamess"],
-                "scratch_messy": False,
-                "scratch_directory": config.scratch_directory,
-            }
-            success, dexe = self.execute(trial_gamessrec)
+        if "system__mwords" not in opts:
+            for mem_frac_replicated in (1, 0.5, 0.1, 0.75):
+                mwords, memddi = self._partition(mwords_total, mem_frac_replicated, config.ncores)
+                # DEBUG print(f"loop {mwords_total=} {mem_frac_replicated=} {config.ncores=} -> repl: {mwords=} dist: {memddi=} -> percore={memddi/config.ncores + mwords} tot={memddi + config.ncores * mwords}\n")
+                trial_opts = copy.deepcopy(opts)
+                trial_opts["contrl__exetyp"] = "check"
+                trial_opts["system__parall"] = not (config.ncores == 1)
+                trial_opts["system__mwords"] = mwords
+                trial_opts["system__memddi"] = memddi
+                trial_inp = format_keywords(trial_opts) + molcmd
+                trial_gamessrec = {
+                    "infiles": {"trial_gamess.inp": trial_inp},
+                    "command": [which("rungms"), "trial_gamess"],
+                    "scratch_messy": False,
+                    "scratch_directory": config.scratch_directory,
+                }
+                success, dexe = self.execute(trial_gamessrec)
 
-            # TODO: switch to KnownError and better handle clobbering of user ncores
-            # when the "need serial exe" messages show up compared to mem messages isn't clear
-            # this would be a lot cleaner if there was a unique or list of memory error strings
-            # if (
-            #    ("ERROR: ONLY CCTYP=CCSD OR CCTYP=CCSD(T) CAN RUN IN PARALLEL." in dexe["stdout"])
-            #    or ("ERROR: ROHF'S CCTYP MUST BE CCSD OR CR-CCL, WITH SERIAL EXECUTION" in dexe["stdout"])
-            #    or ("CI PROGRAM CITYP=FSOCI    DOES NOT RUN IN PARALLEL." in dexe["stdout"])
-            # ):
-            #    print("RESTETTITNG TO 1")
-            #    config.ncores = 1
-            #    break
-            if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
-                raise InputError(error_stamp(trial_inp, dexe["stdout"], dexe["stderr"]))
-            elif "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
-                pass
-            else:
-                opts["system__mwords"] = mwords
-                opts["system__memddi"] = memddi
-                break
+                # TODO: switch to KnownError and better handle clobbering of user ncores
+                # when the "need serial exe" messages show up compared to mem messages isn't clear
+                # this would be a lot cleaner if there was a unique or list of memory error strings
+                # if (
+                #    ("ERROR: ONLY CCTYP=CCSD OR CCTYP=CCSD(T) CAN RUN IN PARALLEL." in dexe["stdout"])
+                #    or ("ERROR: ROHF'S CCTYP MUST BE CCSD OR CR-CCL, WITH SERIAL EXECUTION" in dexe["stdout"])
+                #    or ("CI PROGRAM CITYP=FSOCI    DOES NOT RUN IN PARALLEL." in dexe["stdout"])
+                # ):
+                #    print("RESTETTITNG TO 1")
+                #    config.ncores = 1
+                #    break
+                if "INPUT HAS AT LEAST ONE SPELLING OR LOGIC MISTAKE" in dexe["stdout"]:
+                    raise InputError(error_stamp(trial_inp, dexe["stdout"], dexe["stderr"]))
+                elif "EXECUTION OF GAMESS TERMINATED -ABNORMALLY-" in dexe["stdout"]:
+                    pass
+                else:
+                    opts["system__mwords"] = mwords
+                    opts["system__memddi"] = memddi
+                    break
 
         # TODO: "semget errno=ENOSPC -- check system limit for sysv semaphores." `ipcs -l`, can fix if too many gamess tests run at once by config.ncores = 4
 
