@@ -817,6 +817,55 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched multiplicity")
             out_mult = int(mobj.group(1))
 
+        mobj = re.search(
+            # fmt: off
+            r"^\s+" + "L   x y z        total         open         nuclear" + r"\s*" +
+            r"^\s+" + "-   - - -        -----         ----         -------" + r"\s*" +
+            r"^\s+" + r"0   0 0 0\s+" + r"(?P<chg>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r'(?:.*?)' +
+            r"^\s+" + r"1   1 0 0\s+" + r"(?P<x>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"1   0 1 0\s+" + r"(?P<y>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"1   0 0 1\s+" + r"(?P<z>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r'(?:.*?)' +
+            r"^\s+" + r"2   2 0 0\s+" + r"(?P<xx>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"2   1 1 0\s+" + r"(?P<xy>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"2   1 0 1\s+" + r"(?P<xz>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"2   0 2 0\s+" + r"(?P<yy>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"2   0 1 1\s+" + r"(?P<yz>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*" +
+            r"^\s+" + r"2   0 0 2\s+" + r"(?P<zz>" + NUMBER + r")" + r"\s+" + NUMBER + r"\s+" + NUMBER + r"\s*",
+            # fmt: off
+            outtext,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        if mobj:
+            print("matched scf multipole")
+            print(mobj.groupdict())
+            print(mobj.groups())
+            dip = np.array(
+                [
+                    float(mobj.group("x")) / qcel.constants.dipmom_au2debye,
+                    float(mobj.group("y")) / qcel.constants.dipmom_au2debye,
+                    float(mobj.group("z")) / qcel.constants.dipmom_au2debye,
+                ]
+            )
+            psivar["SCF DIPOLE"] = dip
+            print(dip)
+            quad = np.array(
+                [
+                    float(mobj.group("xx")),
+                    float(mobj.group("xy")),
+                    float(mobj.group("xz")),
+                    float(mobj.group("xy")),
+                    float(mobj.group("yy")),
+                    float(mobj.group("yz")),
+                    float(mobj.group("xz")),
+                    float(mobj.group("yz")),
+                    float(mobj.group("zz")),
+                ]
+            ).reshape((3, 3))
+            print(quad)
+            psivar["SCF QUADRUPOLE"] = quad
+
         # 3) Initial geometry
         mobj = re.search(
             # fmt: off
@@ -1038,6 +1087,8 @@ def harvest_outfile_pass(outtext):
     if mobj:
         psivar["DIPOLE MOMENT"] = np.array([mobj.group(1), mobj.group(2), mobj.group(3)])
         psivar["TOTAL DIPOLE MOMENT"] = mobj.group(4)
+        psivar["CURRENT DIPOLE"] = psivar["DIPOLE MOMENT"]
+
     # Process CURRENT energies (TODO: needs better way)
     if "HF TOTAL ENERGY" in psivar:
         psivar["SCF TOTAL ENERGY"] = psivar["HF TOTAL ENERGY"]
@@ -1120,6 +1171,9 @@ def harvest_outfile_pass(outtext):
         psivar["CURRENT EXCITATION ENERGY"] = psivar["%s EXCITATION ENERGY" % (cc_name)]
 
     psivar[f"N ATOMS"] = len(psivar_coord.symbols)
+
+    if "SCF DIPOLE" in psivar and psivar["CURRENT ENERGY"] == psivar["HF TOTAL ENERGY"]:
+        psivar["CURRENT DIPOLE"] = psivar["SCF DIPOLE"]
 
     return psivar, psivar_coord, psivar_grad, version, module, error
 
@@ -1228,5 +1282,10 @@ def harvest(
     return_hess = None
     if out_hess is not None:
         return_hess = mill.align_hessian(np.array(out_hess))
+
+    if "CURRENT DIPOLE" in qcvars:
+        # TODO scan qcvars for other vectors like SCF DIPOLE
+        return_dip = mill.align_vector(qcvars["CURRENT DIPOLE"])
+        qcvars["CURRENT DIPOLE"] = return_dip
 
     return qcvars, return_hess, return_grad, return_mol, version, module, error
