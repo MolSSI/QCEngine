@@ -72,7 +72,12 @@ def harvest(
             return_hess = mill.align_hessian(np.array(calc_hess))
 
     else:
-        raise ValueError("""No coordinate information extracted from gamess output.""")
+        if module == "fmo":
+            return_mol = in_mol
+            return_grad = None
+            return_hess = None
+        else:
+            raise ValueError("""No coordinate information extracted from gamess output.""")
 
     return qcvars, return_hess, return_grad, return_mol, module
 
@@ -114,6 +119,7 @@ def harvest_output(outtext):
         pass_grad.append(gamessgrad)
 
     retindx = -1 if pass_coord[-1] else -2
+    if module == "fmo": retindx = -1
     return pass_qcvar[retindx], pass_coord[retindx], pass_grad[retindx], module
 
 
@@ -625,6 +631,19 @@ def harvest_outfile_pass(outtext):
                 qcvar["SCF DIPOLE"] = d2au * np.array(
                     [Decimal(mobj_dipole.group(1)), Decimal(mobj_dipole.group(2)), Decimal(mobj_dipole.group(3))]
                 )
+
+        # Process EFMO
+        mobj_efmo = re.search(
+            # fmt: off
+            r'The best FMO energy is' + r'\s+' + NUMBER,
+            # fmt: on
+            outtext,
+            re.MULTILINE | re.DOTALL,
+        )
+        if mobj_efmo:
+            qcvar["CURRENT ENERGY"] = Decimal(mobj_efmo.group(1))
+            return qcvar, qcvar_coord, qcvar_grad, "fmo"
+
 
     # Process CURRENT Energies
     if "HF TOTAL ENERGY" in qcvar:
