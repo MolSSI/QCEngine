@@ -21,7 +21,16 @@ def format_keyword(keyword: str, val: Any, lop_off: bool = True, preserve_case: 
         return key, f"{val} double"
 
     elif isinstance(val, list):
-        text = " ".join([str(v) for v in val])
+        if type(val[0]).__name__ == "list":
+            if type(val[0][0]).__name__ == "list":
+                raise InputError("Option has level of array nesting inconsistent with NWChem.")
+            else:
+                # for bq__data
+                text = "\n".join([" ".join([str(inner_v) for inner_v in outer_v]) for outer_v in val])
+        else:
+            # option is plain 1D array
+            text = " ".join([str(v) for v in val])
+
     elif isinstance(val, dict):
         text = []
         for k, v in val.items():
@@ -31,6 +40,10 @@ def format_keyword(keyword: str, val: Any, lop_off: bool = True, preserve_case: 
         text = " ".join(text)
     else:
         text = str(val)
+
+    if key == "data" or (lop_off and key[7:] == "data"):
+        # data indicates "anonymous" kw to fill in block
+        return (text,)
 
     if lop_off:
         return key[7:], text
@@ -83,6 +96,8 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
                 if group.lower() == "basis" and any(
                     [word in line for word in ["spherical", "cartesian", "print", "noprint", "rel"]]
                 ):
+                    group_level_lines.append(line)
+                elif group.lower() == "bq" and any([word in line for word in ["units", "namespace"]]):
                     group_level_lines.append(line)
                 else:
                     lines.append(line)
