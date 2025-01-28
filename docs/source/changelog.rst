@@ -28,6 +28,26 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.32.0 / 2025-MM-DD (Unreleased)
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+- UNMERGED (:pr:``) Psi4, CFOUR, NWChem - Demonstrated running energies and gradients with addition point charges. @loriab
+
+Enhancements
+++++++++++++
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+
+
 v0.31.0 / 2025-01-17
 --------------------
 

@@ -41,14 +41,14 @@ ne2_extern_bohr_Nxyzq = [[len(ne2_extern_bohr_xyzq)], *ne2_extern_bohr_xyzq]
             "psi4",
             "6-31G*",
             {"function_kwargs": {"external_potentials": h2o_extern_bohr_qxyz}},
-            marks=using("psi4"),
+            marks=using("psi4_fnkwarg"),
         ),
         pytest.param(
             "h2o_ee_conv",
             "psi4",
             "6-31G*",
             {"scf_type": "direct", "function_kwargs": {"external_potentials": h2o_extern_bohr_qxyz}},
-            marks=using("psi4"),
+            marks=using("psi4_fnkwarg"),
         ),
         pytest.param("h2o_plain_conv", "nwchem", "6-31G*", {}, marks=using("nwchem")),
         pytest.param(
@@ -85,7 +85,7 @@ ne2_extern_bohr_Nxyzq = [[len(ne2_extern_bohr_xyzq)], *ne2_extern_bohr_xyzq]
             "psi4",
             "6-31G",
             {"scf_type": "direct", "function_kwargs": {"external_potentials": ne2_extern_bohr_qxyz}},
-            marks=using("psi4"),
+            marks=using("psi4_fnkwarg"),
         ),
         pytest.param("ne2_plain_conv", "nwchem", "6-31G", {}, marks=using("nwchem")),
         pytest.param(

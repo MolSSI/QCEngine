@@ -180,6 +180,7 @@ _programs = {
     "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
     "psi4_derqcsk": is_program_new_enough("psi4", "1.5a1.dev117"),
+    "psi4_fnkwarg": is_program_new_enough("psi4", "1.7"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.1"),
     "qcmanybody": which_import("qcmanybody", return_bool=True),
