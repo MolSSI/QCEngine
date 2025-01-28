@@ -1185,7 +1185,7 @@ def harvest(in_mol: Molecule, method: str, c4out, **largs):
     qcvars, out_mol, outGrad, version, module, error = harvest_output(c4out)
 
     if largs.get("GRD"):
-        grdMol, grdGrad = harvest_GRD(largs["GRD"])
+        grdMol, grdGrad = harvest_GRD(largs["GRD"], len(in_mol.symbols))
     else:
         grdMol, grdGrad = None, None
 
@@ -1348,7 +1348,7 @@ def harvest(in_mol: Molecule, method: str, c4out, **largs):
     return qcvars, return_hess, return_grad, return_mol, version, module, error
 
 
-def harvest_GRD(grd):
+def harvest_GRD(grd, expected_natom):
     """Parses the contents *grd* of the Cfour GRD file into the gradient
     array and coordinate information. The coordinate info is converted
     into a rather dinky Molecule (no charge, multiplicity, or fragment),
@@ -1360,8 +1360,13 @@ def harvest_GRD(grd):
     Nat = int(grd[0].split()[0])
     molxyz = f"{Nat} bohr\n\n"
 
+    # Mostly, the GRD file contains the atomic coordinates followed by the gradient.
+    #   When extern_pot is present, the file contains the atomic coordinates followed
+    #   by the point charges followed by the atomic gradient followed by the point
+    #   charge gradient. Hence the mixed indices: Nat and expected_natom.
+
     grad = []
-    for at in range(Nat):
+    for at in range(expected_natom):
         mline = grd[at + 1].split()
 
         # "@Xe" is potentially dangerous bypass for ghosts

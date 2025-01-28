@@ -7,7 +7,7 @@ dependencies:
   - openff-toolkit
   - openff-forcefields
   - openmmforcefields
-  - geometric
+  - geometric=1.0
   - torsiondrive
 
     # Core

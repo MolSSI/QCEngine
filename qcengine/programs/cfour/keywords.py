@@ -9,15 +9,46 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
 
     """
     text = []
+    percents = {}
 
     keywords = {k.upper(): v for k, v in keywords.items()}
     for key, val in sorted(keywords.items()):
-        text.append("=".join(format_keyword(key, val)))
+        if key.startswith("%"):
+            percents[key] = keywords.pop(key)
+        else:
+            text.append("=".join(format_keyword(key, val)))
 
     text = "\n".join(text)
     text = "\n\n*CFOUR(" + text + ")\n\n"
 
-    return text
+    # not yet tested with multiple % sections
+    percent_text = []
+    for key, val in percents.items():
+        percent_text.append("\n".join(format_percent(key, val)))
+    percent_text = "\n".join(percent_text)
+
+    return text, percent_text
+
+
+def format_percent(keyword: str, val: Any) -> Tuple[str, str]:
+    keyword = keyword.lower()
+
+    if isinstance(val, list):
+        if type(val[0]).__name__ == "list":
+            if type(val[0][0]).__name__ == "list":
+                raise InputError("Option has level of array nesting inconsistent with Cfour.")
+            else:
+                # for %extern_pot*
+                text = "\n".join([" ".join([str(inner_v) for inner_v in outer_v]) for outer_v in val])
+        else:
+            # option is plain 1D array
+            text = " ".join([str(v) for v in val])
+
+    # No Transform
+    else:
+        text = str(val).upper()
+
+    return keyword, text
 
 
 def format_keyword(keyword: str, val: Any) -> Tuple[str, str]:

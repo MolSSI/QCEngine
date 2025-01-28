@@ -129,11 +129,11 @@ class CFOURHarness(ProgramHarness):
             bascmd = "\n".join(text)
 
         # Handle conversion from schema (flat key/value) keywords into local format
-        optcmd = format_keywords(opts)
+        optcmd, percentcmd = format_keywords(opts)
 
         xcfour = which("xcfour")
         genbas = Path(xcfour).parent.parent / "basis" / "GENBAS"
-        cfourrec["infiles"]["ZMAT"] = molcmd + optcmd + bascmd
+        cfourrec["infiles"]["ZMAT"] = molcmd + optcmd + bascmd + percentcmd
         cfourrec["infiles"]["GENBAS"] = genbas.read_text()
         cfourrec["command"] = [xcfour]
 

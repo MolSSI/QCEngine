@@ -177,12 +177,17 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         molcmd, moldata = input_model.molecule.to_string(dtype="nwchem", units="Bohr", return_data=True)
         opts.update(moldata["keywords"])
 
-        if opts.pop("geometry__noautoz", False):
-            molcmd = re.sub(r"geometry ([^\n]*)", r"geometry \1 noautoz", molcmd)
-        # someday when minimum >=py38 `if val := opts.pop("geometry__autosym", False):`
-        if opts.get("geometry__autosym", False):
-            val = opts.pop("geometry__autosym")
-            molcmd = re.sub(r"geometry ([^\n]*)", rf"geometry \1 autosym {val}", molcmd)
+        # * top line kwds for geometry block handled here b/c block not processed through keywords.py
+        for word in ["autoz", "noautoz", "center", "nocenter", "autosym", "noautosym"]:
+            if f"geometry__{word}" in opts:
+                val = opts.pop(f"geometry__{word}")
+                if word == "autosym" and val not in [True, False]:
+                    replace = f"{word} {val}"
+                elif val is True:
+                    replace = word
+                elif val is False:
+                    replace = word[2:] if word.startswith("no") else f"no{word}"
+                molcmd = re.sub(r"geometry ([^\n]*)", rf"geometry \1 {replace}", molcmd)
 
         # Handle calc type and quantum chemical method
         mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
