@@ -36,10 +36,17 @@ Breaking Changes
 
 New Features
 ++++++++++++
-- UNMERGED (:pr:``) Psi4, CFOUR, NWChem - Demonstrated running energies and gradients with addition point charges. @loriab
+- UNMERGED (:pr:`470`) Psi4, CFOUR, NWChem - Demonstrated running energies and gradients with additional
+  point charges. @loriab
 
 Enhancements
 ++++++++++++
+- UNMERGED (:pr:`470`) CFOUR - Adapted gradient parsing to handle point charges. Adapted options parsing
+  to allow `%<something>*` sections. @loriab
+- UNMERGED (:pr:`470`) NWChem - Adapted options parsing for nested arrays, particularly for `bq` section.
+  Use "data", e.g., `bq__data` to fill in keywordless lines into blocks.
+- UNMERGED (:pr:`470`) NWChem - Broaden allowing autoz, noautoz, center, nocenter, autosym, noautosym
+  keywords for molecule.
 
 Bug Fixes
 +++++++++

@@ -1,6 +1,3 @@
-import pprint
-import re
-
 import numpy as np
 import pytest
 import qcelemental as qcel
@@ -120,9 +117,9 @@ ne2_extern_bohr_Nxyzq = [[len(ne2_extern_bohr_xyzq)], *ne2_extern_bohr_xyzq]
 def test_simple_external_charges(driver, variation, program, basis, keywords, request):
 
     h2o_bohr = [-1.47172438, 0.0, 2.14046066, -1.25984639, 1.44393784, 3.22442268, -1.25984639, -1.44393784, 3.22442079]
-    mol_ang = [-0.778803, 0.000000, 1.132683, -0.666682, 0.764099, 1.706291, -0.666682, -0.764099, 1.706290]
+    # h2o_ang = [-0.778803, 0.000000, 1.132683, -0.666682, 0.764099, 1.706291, -0.666682, -0.764099, 1.706290]
     ne2_bohr = [0.0, 0.0, 1.8897261254578281, 0.0, 0.0, 0.0]
-    ne2_ang = [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+    # ne2_ang = [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
 
     water = qcel.models.Molecule(geometry=h2o_bohr, symbols=["O", "H", "H"], fix_com=True, fix_orientation=True)
     ne2 = qcel.models.Molecule(
