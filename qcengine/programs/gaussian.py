@@ -11,7 +11,7 @@ import copy
 
 from collections import defaultdict
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import cclib
 from cclib.method import Nuclear
@@ -19,7 +19,6 @@ from cclib.method import Nuclear
 from qcelemental import constants
 from qcelemental.models import AtomicInput, AtomicResult, Molecule, Provenance
 from qcelemental.models import OptimizationInput, OptimizationResult, BasisSet
-from qcelemental.molparse import regex
 from qcelemental.util import parse_version, safe_version, which, which_import
 
 from ..exceptions import InputError, UnknownError
@@ -87,7 +86,9 @@ class GaussianHarness(ProgramHarness):
 
     def get_version(self) -> str:
         self.found(raise_error=True)
-
+        
+        config = get_config()
+        
         which_prog = which("g16")
         if which_prog is None:
             which_prog = which('g09')
@@ -96,7 +97,7 @@ class GaussianHarness(ProgramHarness):
         
         return self.version_cache[which_prog]
 
-    def compute(self, input_model: 'AtomicInput', config: 'TaskConfig') -> 'AtomicResult':
+    def compute(self, input_model: 'AtomicInput', config: 'TaskConfig') -> Union[AtomicResult, FailedOperation]:
         """
         Run Gaussian program
         """
@@ -104,16 +105,16 @@ class GaussianHarness(ProgramHarness):
         # Check if Gaussian executable is found
         self.found(raise_error=True)
         
+        if isinstance(input_model.model.basis, BasisSet):
+            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+
         # Setup the job
         job_inputs = self.build_input(input_model, config)
         
-        # Run Gaussian
-        success, _exe = self.execute(job_inputs)
-
         stdin = job_inputs['infiles']['input.inp']
 
-        if isinstance(input_model.model.basis, BasisSet):
-            raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
+        # Run Gaussian
+        success, _exe = self.execute(job_inputs)
 
         # Determine whether the calculation succeeded
         if success:
