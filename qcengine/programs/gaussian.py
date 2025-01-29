@@ -229,10 +229,10 @@ class GaussianHarness(ProgramHarness):
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             'properties': '',
             'provenance': Provenance(creator="gaussian", version=self.get_version(), routine='g09').dict(),
-            'return_result': '500',
-            "stderr": '100',
+            'return_result': scf_energy,
+            "stderr": outfiles['outfiles']['output.log'],,
             "stdout": outfiles['outfiles']['output.log'],
-            "success": True,
+            "success": True
         		}
 
         #output_data = {}
@@ -242,7 +242,7 @@ class GaussianHarness(ProgramHarness):
         #tmp_output_path = outfiles['scratch_directory']
         #tmp_output_file = os.path.join(tmp_output_path, 'output.log')
         #data = cclib.io.ccread(tmp_output_file)
-        #cclib_vars = data.getattributes(True)
+        cclib_vars = data.getattributes(True)
         
         #last_occupied_energy = data.moenergies[0][data.homos[0]]
         #output_data['HOMO ENERGY'] = last_occupied_energy
@@ -263,38 +263,41 @@ class GaussianHarness(ProgramHarness):
         #   print (output_data)
         #print (input_model)
 
-        #properties = {
-        #    'nuclear_repulsion_energy': Nuclear(data).repulsion_energy()
-        #}
+        properties = {
+            'nuclear_repulsion_energy': Nuclear(data).repulsion_energy()
+        }
 
-        #if input_model.model.method.lower().startswith('mp'):
-        #    scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
-        #    mp2_energy = data.mpenergies[0] / constants.conversion_factor("hartree", "eV")
-        #    properties['scf_total_energy'] = scf_energy
-        #    properties['mp2_total_energy'] = mp2_energy[0]
-        #    properties['return_energy'] = mp2_energy[0]
-        #    output_data['return_result'] = mp2_energy[0]
 
-        #elif input_model.model.method.lower().startswith('cc'):
-        #    scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
-        #    cc_energy = data.ccenergies[0] / constants.conversion_factor("hartree", "eV")
-        #    properties['scf_total_energy'] = scf_energy
-        #    properties['ccsd_prt_pr_total_energy'] = cc_energy
-        #    properties['return_energy'] = cc_energy
-        #    output_data['return_result'] = cc_energy           
-
-        #else: # input_model.model.method.lower() in ['hf', 'scf']:
-        #    scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
-        #    properties['scf_total_energy'] = scf_energy
-        #    properties['return_energy'] = scf_energy
-        #    output_data['return_result'] = scf_energy
+        if input_model.model.method.lower() in ['hf', 'scf']:
+            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
+            properties['scf_total_energy'] = scf_energy
+            properties['return_energy'] = scf_energy
+            output_data['return_result'] = scf_energy
         
-        #output_data['properties'] = properties
+        if input_model.model.method.lower().startswith('mp'):
+            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
+            mp2_energy = data.mpenergies[0] / constants.conversion_factor("hartree", "eV")
+            properties['scf_total_energy'] = scf_energy
+            properties['mp2_total_energy'] = mp2_energy[0]
+            properties['return_energy'] = mp2_energy[0]
+            output_data['return_result'] = mp2_energy[0]
+
+        if input_model.model.method.lower().startswith('cc'):
+            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
+            cc_energy = data.ccenergies[0] / constants.conversion_factor("hartree", "eV")
+            properties['scf_total_energy'] = scf_energy
+            properties['ccsd_prt_pr_total_energy'] = cc_energy
+            properties['return_energy'] = cc_energy
+            output_data['return_result'] = cc_energy           
+
+        properties['calcinfo_nbasis'] = data.nbasis
+        properties['calcinfo_nmo'] = data.nmo
+        properties['calcinfo_natom'] = data.natom
+        
+        output_data['properties'] = properties
         #output_data['stdout'] = outfiles['outfiles']['output.log']
         #output_data['success'] = True
         ##print ('output_data: ', output_data)
-
-        #provenance = Provenance(creator="gaussian", version=self.get_version(), routine='g09').dict()
 
         #stdout = outfiles.pop('stdout')
         #stderr = outfiles.pop('stderr')
