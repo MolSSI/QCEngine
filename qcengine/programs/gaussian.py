@@ -191,13 +191,12 @@ class GaussianHarness(ProgramHarness):
         return gaussian_ret
 
     def execute(self,
-                inputs,
-                extra_infiles: Optional[Dict[str, str]] = None,
-                extra_outfiles: Optional[Dict[str, str]] = None,
+                inputs: Dict[str, Any],
+                extra_outfiles: Optional[List[str]] = None,
                 extra_commands: Optional[List[str]] = None,
-                scratch_name = None,
+                scratch_name: Optional[str] = None,
                 timeout: Optional[int] = None
-               ):
+               ) -> Tuple[boll, Dict[str, Any]]:
 
         success, dexe = execute(
             inputs['commands'],
