@@ -138,55 +138,52 @@ class GaussianHarness(ProgramHarness):
 
         if template is None:
             input_file = []
+            gaussian_kw = []
+            
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
 
-        # Build keywords
-        keywords = {k.upper(): v for k, v in input_model.keywords.items()}
+            if input_model.driver == "energy":
+                gaussian_kw.append("sp")
+            elif input_model.driver == "gradient":
+                gaussian_kw.append("force")
+            elif input_model.driver == "hessian":
+                gaussian_kw.append("freq")
+            else:
+                raise InputError(f"Driver {input_model.driver} not implemented for Gaussian.")
 
-        gaussian_kw = []
+            if 'scf_convergence' in caseless_keywords:
+                gaussian_kw.append('scf=' + caseless_keywords["scf_convergence"])
+            if 'population' in caseless_keywords:
+                gaussian_kw.append('pop=' + caseless_keywords['population'])
 
-        if input_model.driver == "energy":
-            gaussian_kw.append("sp")
-        elif input_model.driver == "gradient":
-            gaussian_kw.append("force")
-        elif input_model.driver == "hessian":
-            gaussian_kw.append("freq")
+            keywords = {'scf_damp': 'true',
+                        'scf_diis': 'false'}
+            
+            save_fchk = False
+
+            if input_model.protocols.native_files == 'all':
+                save_fchk = True
+                gaussian_kw.append('formcheck')
+
+            # Begin input file
+            input_file.append('%mem={}MB'.format(int(config.memory * 1024))) # In MB
+            input_file.append('#P {}/{}'.format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw) + '\n')
+            iput_file.append('write your comment here\n')
+
+            # Handle the geometry
+            molcmd, moldata = input_model.molecule.to_string(dtype = 'gaussian', units = 'Angstrom', return_data = True)
+            input_file.append(molcmd.lstrip())
+
+            #        print ('*' * 100)
+            #        print ('\n'.join(input_file))
+            #        print ('*' * 100)
         else:
-            raise InputError(f"Driver {input_model.driver} not implemented for Gaussian.")
-
-        #if input_model.molecule.fix_com or input_model.molecule.fix_orientation:
-        #    keywords["SYM_IGNORE"] = "TRUE"
-        if 'SCF_CONVERGENCE' in keywords:
-           gaussian_kw.append('SCF=' + keywords["SCF_CONVERGENCE"])
-        if 'POPULATION' in keywords:
-           gaussian_kw.append('Pop=' + keywords['POPULATION'])   
-           
-        keywords = {'scf_damp': 'true',
-                    'scf_diis': 'false'}
-
-        save_fchk = False
-
-        if input_model.protocols.native_files == 'all':
-            save_fchk = True
-            gaussian_kw.append('formcheck')
-
-        # Begin input file
-        input_file = []
-        input_file.append('%mem={}MB'.format(int(config.memory * 1024))) # In MB
-        input_file.append('#P {}/{}'.format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw) + '\n')
-        input_file.append('write your comment here\n')
-  
-        # Handle the geometry
-        molcmd, moldata = input_model.molecule.to_string(dtype = 'gaussian', units = 'Angstrom', return_data = True)
-        input_file.append(molcmd.lstrip())
-
-#        print ('*' * 100)
-#        print ('\n'.join(input_file))
-#        print ('*' * 100)
+            str_template = string.Template(template)
+            input_file = str_template.substitute()
 
         gaussian_ret = {
-            'infiles': {'input.inp': '\n'.join(input_file)},
             'commands': [which("g09"),  'input.inp', 'output.log'],
+            'infiles': {'input.inp': '\n'.join(input_file)},
             'scratch_directory': config.scratch_directory,
             'scratch_messy': config.scratch_messy
         }
