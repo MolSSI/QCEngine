@@ -211,13 +211,15 @@ class GaussianHarness(ProgramHarness):
     def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
 
         tmp_output_path = outfiles['scratch_directory']
-        print ('tmp_output_path=',tmp_output_path)
+        #print ('tmp_output_path=',tmp_output_path)
         tmp_output_file = os.path.join(tmp_output_path, 'output.log')
-        print ('tmp_output_file=',tmp_output_file)
+        #print ('tmp_output_file=',tmp_output_file)
         data = cclib.io.ccread(tmp_output_file)
-        print ('DATA=', data)
+        #print ('DATA=', data)
         scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
-        print ('SCF ENERGY: ', scf_energy)
+        #print ('SCF ENERGY: ', scf_energy)
+        grad = data.grads
+        grad_list = grad.ravel().tolist() # Stores gradient as a single list where the ordering is [a1, b1, c1, a2, b2, c2, ...]
         
         output_data = {
         	"schema_version": 1,
@@ -232,26 +234,18 @@ class GaussianHarness(ProgramHarness):
             "success": True
         		}
 
-        #output_data = {}
-        #properties = {}
-        #cclib_vars = {}
+        if input_model.driver == 'energy':
+            output_data['return_result'] = scf_energy
+        if input_model.driver == 'gradient':
+            output_data['return_result'] = grad_list
         
         #tmp_output_path = outfiles['scratch_directory']
         #tmp_output_file = os.path.join(tmp_output_path, 'output.log')
         #data = cclib.io.ccread(tmp_output_file)
-        cclib_vars = data.getattributes(True)
+        #cclib_vars = data.getattributes(True)
         
         #last_occupied_energy = data.moenergies[0][data.homos[0]]
         #output_data['HOMO ENERGY'] = last_occupied_energy
-        
-        #scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
-        #output_data['SCF ENERGY'] = scf_energy
-        
-        #if input_model.driver == 'energy':
-        #    output_data['return_result'] = scf_energy
-        #if input_model.driver == 'gradient':
-        #    output_data['return_result'] = data.grads
-        #    #output_data['return_gradient'] = data.grads
         
         #print (os.system('ccget --list ' + tmp_output_file)) #data available in the output for parsing
 
@@ -265,11 +259,11 @@ class GaussianHarness(ProgramHarness):
         }
 
 
-        if input_model.model.method.lower() in ['hf', 'scf']:
-            scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
-            properties['scf_total_energy'] = scf_energy
-            properties['return_energy'] = scf_energy
-            output_data['return_result'] = scf_energy
+        #if input_model.model.method.lower() in ['hf', 'scf']:
+        #    scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
+        #    properties['scf_total_energy'] = scf_energy
+        #    properties['return_energy'] = scf_energy
+        #    output_data['return_result'] = scf_energy
         
         if input_model.model.method.lower().startswith('mp'):
             scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
@@ -290,11 +284,12 @@ class GaussianHarness(ProgramHarness):
         properties['calcinfo_nbasis'] = data.nbasis
         properties['calcinfo_nmo'] = data.nmo
         properties['calcinfo_natom'] = data.natom
+        properties['return_energy'] = scf_energy
         
         output_data['properties'] = properties
         #output_data['stdout'] = outfiles['outfiles']['output.log']
         #output_data['success'] = True
-        ##print ('output_data: ', output_data)
+        #print ('output_data: ', output_data)
 
         #stdout = outfiles.pop('stdout')
         #stderr = outfiles.pop('stderr')
