@@ -16,7 +16,7 @@ dependencies:
   - dftd4-python=3.3.0
   - mp2d >=1.1
   - gcp
-  - geometric
+  - geometric=1.0
   - optking
   - pymdi
 
