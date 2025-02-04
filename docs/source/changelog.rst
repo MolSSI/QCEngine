@@ -70,12 +70,13 @@ Misc.
 
 MUST (Unmerged)
 +++++++++++++++
-- (:pr:`462`) 
-- (:pr:`462`) adapt harnesses for TD.initial_molecules -> TD.initial_molecule and TD.optimization_history -> TD.scan_results
-- (:pr:`462`) rdkit, store ``AtomicResult.properties.return_gradient`` and ``calcinfo_natom``. mrchem, store ``AtomicResult.properties.return_gradient``.
-- (:pr:`462`) lightly Adapt harnesses for Mol v3
-- (:pr:`462`) Use packaging instead of setuptools to provide version parsing
-- (:pr:`462`) torsiondrive now accepts protocols. use ``protocols={"scan_results": "all"}`` if going to be converted to v1.
+- (:pr:`469`) setup.py replaced by pyproject.toml with setuptools backend and replaced versioneer with setuptools-scm
+- (:pr:`469`) remove __git_revision__ and get_information("git_revision") removed with versioneer
+- (:pr:`468`) adapt harnesses for TD.initial_molecules -> TD.initial_molecule and TD.optimization_history -> TD.scan_results
+- (:pr:`468`) rdkit, store ``AtomicResult.properties.return_gradient`` and ``calcinfo_natom``. mrchem, store ``AtomicResult.properties.return_gradient``.
+- (:pr:`468`) lightly Adapt harnesses for Mol v3
+- (:pr:`468`) Use packaging instead of setuptools to provide version parsing
+- (:pr:`468`) torsiondrive now accepts protocols. use ``protocols={"scan_results": "all"}`` if going to be converted to v1.
 - (:pr:`461`) torsiondrive rewritten in v2.
 - (:pr:`461`) berny harness rewritten in v2. optking and geometric natively speak v1, so adapted as well as can be.
 - (:pr:`461`) allow nwchemdriver w/o driver=energy. provenance now nwchemdriver not nwchemrelax

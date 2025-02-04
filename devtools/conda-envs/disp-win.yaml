@@ -5,7 +5,7 @@ channels:
 dependencies:
   - dftd3-python =1.2.0
   - gcp-correction
-  - geometric
+  - geometric=1.0
   - optking
   - pymdi
 
