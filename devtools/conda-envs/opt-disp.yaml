@@ -17,7 +17,7 @@ dependencies:
   - dftd4-python>=3.7
   - mp2d >=1.1
   - gcp
-  - geometric
+  - geometric=1.0
   - optking
   - pymdi
   - setuptools <82.0  # for berny
