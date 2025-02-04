@@ -12,7 +12,7 @@ dependencies:
   - dftd3-python
   - dftd4-python
   - gcp-correction
-  - geometric
+  - geometric=1.0
   - optking
   - pymdi
   - qcmanybody
