@@ -99,9 +99,8 @@ class GaussianHarness(ProgramHarness):
 
     def compute(self, input_model: 'AtomicInput', config: 'TaskConfig') -> Union[AtomicResult, FailedOperation]:
         """
-        Run Gaussian program
+        Runs Gaussian program and returns the output file if everything goes well. Otherwise, it raises an error.
         """
-        
         # Check if Gaussian executable is found
         self.found(raise_error=True)
         
@@ -118,6 +117,7 @@ class GaussianHarness(ProgramHarness):
 
         # Determine whether the calculation succeeded
         if success:
+            _exe['outfiles']['input'] = stdin
             # If execution succeeded, collect results
             return self.parse_output(_exe, input_model)
         else:
@@ -134,16 +134,18 @@ class GaussianHarness(ProgramHarness):
     def build_input(
             self, input_model: AtomicInput,
             config: TaskConfig,
+            keys: Optional[str] = None,
             template: Optional[str] = None) -> Dict[str, Any]:
 
         if template is None:
             input_file = []
             gaussian_kw = []
-            
+
+            # Build keywords
             caseless_keywords = {k.lower(): v for k, v in input_model.keywords.items()}
 
             if input_model.driver == "energy":
-                gaussian_kw.append("sp")
+                gaussian_kw.append(" ")
             elif input_model.driver == "gradient":
                 gaussian_kw.append("force")
             elif input_model.driver == "hessian":
@@ -174,18 +176,26 @@ class GaussianHarness(ProgramHarness):
             molcmd, moldata = input_model.molecule.to_string(dtype = 'gaussian', units = 'Angstrom', return_data = True)
             input_file.append(molcmd.lstrip())
 
-            #        print ('*' * 100)
-            #        print ('\n'.join(input_file))
-            #        print ('*' * 100)
+            #print ('*' * 100)
+            #print ('\n'.join(input_file))
+            #print ('*' * 100)
+                
         else:
             str_template = string.Template(template)
             input_file = str_template.substitute()
 
+        if keys is not None:
+            for i in range(len(input_file)):
+                if (input_file[i].startswith('#P ')):
+                    input_file[i] = '#P {}/{}'.format(input_model.model.method, input_model.model.basis) + \
+                          ' ' + ' '.join(gaussian_kw) + ' ' + keys + '\n'
+        
         gaussian_ret = {
             'commands': [which("g09"),  'input.inp', 'output.log'],
             'infiles': {'input.inp': '\n'.join(input_file)},
             'scratch_directory': config.scratch_directory,
-            'scratch_messy': config.scratch_messy
+            'scratch_messy': config.scratch_messy,
+            #"input_result": input_model.copy(deep=True),
         }
         
         return gaussian_ret
@@ -323,17 +333,3 @@ class GaussianHarness(ProgramHarness):
         merged_data = {**input_model.dict(), **output_data}
 
         return AtomicResult(**merged_data)
-
-class GaussianDriverProcedure(ProcedureHarness):
-    '''
-    Optimize a geometry
-    '''
-
-    _defaults = {'name': 'GaussianDriver', 'procedure': 'optimization'}
-
-    class Config(ProcedureHarness.Config):
-        pass
-
-    def found(self, raise_error: bool = False) -> bool:
-        gaussian_harness = GaussianHarness()
-        return gaussian_harness(raise_error)
