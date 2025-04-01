@@ -219,6 +219,9 @@ class GaussianHarness(ProgramHarness):
         return success, dexe
  
     def parse_output(self, outfiles: Dict[str, str], input_model: 'AtomicInput') -> 'AtomicResult':
+        '''
+        Reads the output file and extracts the information from it.
+        '''
 
         tmp_output_path = outfiles['scratch_directory']
         #print ('tmp_output_path=',tmp_output_path)
@@ -228,31 +231,30 @@ class GaussianHarness(ProgramHarness):
         #print ('DATA=', data)
         scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV") # Change from the eV unit to the Hartree unit
         #print ('SCF ENERGY: ', scf_energy)
-        grad = data.grads
-        grad_list = grad.ravel().tolist() # Stores gradient as a single list where the ordering is [a1, b1, c1, a2, b2, c2, ...]
-        
+
         output_data = {
         	"schema_version": 1,
         	"molecule": input_model.molecule,
-        	'extras': input_model.extras,
+        	'extras': {**input_model.extras},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             'properties': '',
-            'provenance': Provenance(creator="gaussian", version=self.get_version(), routine='g09').dict(),
-            'return_result': scf_energy,
+            'provenance': Provenance(creator="gaussian", version=self.get_version(), routine=self.get_version()).dict(),
             "stderr": outfiles['outfiles']['output.log'],,
             "stdout": outfiles['outfiles']['output.log'],
-            "success": True
+            "success": True,
         		}
 
         if input_model.driver == 'energy':
             output_data['return_result'] = scf_energy
         if input_model.driver == 'gradient':
+            grad = data.grads
+            grad_list = grad.ravel().tolist() # Stores gradient as a single list where the ordering is [a1, b1, c1, a2, b2, c2, ...]
             output_data['return_result'] = grad_list
         
         #tmp_output_path = outfiles['scratch_directory']
         #tmp_output_file = os.path.join(tmp_output_path, 'output.log')
         #data = cclib.io.ccread(tmp_output_file)
-        #cclib_vars = data.getattributes(True)
+        cclib_vars = data.getattributes(True)
         
         #last_occupied_energy = data.moenergies[0][data.homos[0]]
         #output_data['HOMO ENERGY'] = last_occupied_energy
@@ -265,9 +267,8 @@ class GaussianHarness(ProgramHarness):
         #print (input_model)
 
         properties = {
-            'nuclear_repulsion_energy': Nuclear(data).repulsion_energy()
+            'nuclear_repulsion_energy': Nuclear(data).repulsion_energy() / constants.conversion_factor("hartree", "eV")
         }
-
 
         #if input_model.model.method.lower() in ['hf', 'scf']:
         #    scf_energy = data.scfenergies[0] / constants.conversion_factor("hartree", "eV")
@@ -294,7 +295,7 @@ class GaussianHarness(ProgramHarness):
         properties['calcinfo_nbasis'] = data.nbasis
         properties['calcinfo_nmo'] = data.nmo
         properties['calcinfo_natom'] = data.natom
-        properties['return_energy'] = scf_energy
+        #properties['return_energy'] = scf_energy
         
         output_data['properties'] = properties
         #output_data['stdout'] = outfiles['outfiles']['output.log']
