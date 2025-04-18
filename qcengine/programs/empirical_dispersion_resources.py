@@ -906,8 +906,11 @@ try:
     from dftd4 import __version__ as d4_version
 
     new_d4_api = parse_version(d4_version) >= parse_version("3.5.0")
+    print(f"{d4_version=} {parse_version(d4_version)=} {parse_version('3.5.0')=}")
 except (ModuleNotFoundError, ImportError):
     new_d4_api = False
+print(f"{new_d4_api=}")
+sys.exit(4)
 
 # different defaults for dftd4 versions < 3.5.0
 if not new_d4_api:
