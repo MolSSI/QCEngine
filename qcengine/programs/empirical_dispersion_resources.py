@@ -910,7 +910,6 @@ try:
 except (ModuleNotFoundError, ImportError):
     new_d4_api = False
 print(f"{new_d4_api=}")
-sys.exit(4)
 
 # different defaults for dftd4 versions < 3.5.0
 if not new_d4_api:
