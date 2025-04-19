@@ -937,14 +937,13 @@ def _get_d4bj_definitions() -> dict:
     This method is upstreamed in dftd4 >3.3.0 and could be replaced in the future.
     """
 
-    from dftd4.parameters import get_data_file_name, load_data_base
+    try:
+        from dftd4.parameters import get_data_file_name, load_data_base
+    except ModuleNotFoundError:
+        return {}
     print("_get_d4bj_definitions")
     print(f"{get_data_file_name()=}")
     print(f"{dftd4.__file__=}")
-    #try:
-    #    from dftd4.parameters import get_data_file_name, load_data_base
-    #except ModuleNotFoundError:
-    #    return {}
 
     def get_params(entry: dict, base: dict, defaults: list) -> dict:
         """Retrive the parameters from the data base, make sure the default
@@ -963,15 +962,15 @@ def _get_d4bj_definitions() -> dict:
 
         raise KeyError("No entry for " + method + " in parameter data base")
 
-    _data_base = load_data_base(get_data_file_name())
-    #try:
-    #    _data_base = load_data_base(get_data_file_name())
-    #except FileNotFoundError:
-    #    return {}
+    try:
+        # some dftd4 releases have d3 in this path
+        _data_base = load_data_base(get_data_file_name().replace("s-dftd3", "dftd4"))
+    except FileNotFoundError:
+        return {}
 
     import pprint
     print("IN GET_PA")
-    pprint.pprint(_data_base, width=200)
+    #pprint.pprint(_data_base, width=200)
     try:
         _defaults = _data_base["default"]["d4"]
         _base = _data_base["default"]["parameter"]["d4"]
