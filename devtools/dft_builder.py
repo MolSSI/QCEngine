@@ -153,11 +153,11 @@ for functional_name in dict_functionals:
                 alias += "-" + nominal_dispersion_level.lower()
                 if alias not in functionals:
                     functionals[alias] = dict_functionals[formal]
-                    if resolved_dispersion_level == "d4bjeeqatm":
+#                    if resolved_dispersion_level == "d4bjeeqatm":
 #                        print(f"BB {alias=} {dict_functionals[formal]}")
         # if not, build it from dashparam logic if possible
         else:
-            if resolved_dispersion_level == "d4bjeeqatm" and functional_name == "b3ylp":
+#            if resolved_dispersion_level == "d4bjeeqatm" and functional_name == "b3ylp":
 #                print(f"CC", dashcoeff[resolved_dispersion_level]['definitions'])
             
             for dispersion_functional in dashcoeff[resolved_dispersion_level]['definitions']:
