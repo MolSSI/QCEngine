@@ -938,6 +938,9 @@ def _get_d4bj_definitions() -> dict:
     """
 
     from dftd4.parameters import get_data_file_name, load_data_base
+    print("_get_d4bj_definitions")
+    print(f"{get_data_file_name()=}")
+    print(f"{dftd4.__file__=}")
     #try:
     #    from dftd4.parameters import get_data_file_name, load_data_base
     #except ModuleNotFoundError:
