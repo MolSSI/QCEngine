@@ -173,9 +173,15 @@ jobs:
       run: |
         conda remove qcengine --force
 
-    - name: Special Config - Copy from psi
+    - name: Special Config - Copy from psi win
+      if: "(runner.os == 'Windows')"
       run: |
-        cp devtools/dft_builder.py ${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/procrouting/dft/
+        cp devtools/dft_builder.py "${CONDA_PREFIX}\Lib\site-packages\psi4\driver\procrouting\dft\"
+
+    - name: Special Config - Copy from psi linux
+      if: "(runner.os != 'Windows')"
+      run: |
+        cp devtools/dft_builder.py "${CONDA_PREFIX}/lib/python${{ matrix.cfg.python-version }}/site-packages/psi4/driver/procrouting/dft/"
 
       # QCEngine CI and Psi4 are circularly dependent, so a hack is in order
     - name: Special Config - Faux Pydantic Upgrade
