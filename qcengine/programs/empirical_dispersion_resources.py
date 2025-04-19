@@ -943,7 +943,6 @@ def _get_d4bj_definitions() -> dict:
         return {}
     print("_get_d4bj_definitions")
     print(f"{get_data_file_name()=}")
-    print(f"{dftd4.__file__=}")
 
     def get_params(entry: dict, base: dict, defaults: list) -> dict:
         """Retrive the parameters from the data base, make sure the default
