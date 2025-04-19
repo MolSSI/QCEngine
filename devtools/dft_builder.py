@@ -144,6 +144,7 @@ for functional_name in dict_functionals:
     # else loop through dispersion types in empirical_dispersion_resources.dashcoeff (also considering aliases)
     #   and build dispersion corrected version (applies also for aliases)
     for nominal_dispersion_level, resolved_dispersion_level in _dispersion_aliases.items():
+        print(f"AA {functional_name=} {nominal_dispersion_level=} {resolved_dispersion_level=}")
         # first check whether there is a pre-defined dispersion corrected functional
         # of the same resolved_dispersion_level type
         if functional_name + "-" + resolved_dispersion_level in dict_functionals:
@@ -167,7 +168,7 @@ for functional_name in dict_functionals:
                     for alias in functional_aliases:
                         alias += "-" + nominal_dispersion_level.lower()
                         functionals[alias] = func
-print(functionals)
+print(functionals.keys())
 
 
 def check_consistency(func_dictionary):
