@@ -906,10 +906,8 @@ try:
     from dftd4 import __version__ as d4_version
 
     new_d4_api = parse_version(d4_version) >= parse_version("3.5.0")
-#    print(f"{d4_version=} {parse_version(d4_version)=} {parse_version('3.5.0')=}")
 except (ModuleNotFoundError, ImportError):
     new_d4_api = False
-#print(f"{new_d4_api=}")
 
 # different defaults for dftd4 versions < 3.5.0
 if not new_d4_api:
@@ -941,8 +939,6 @@ def _get_d4bj_definitions() -> dict:
         from dftd4.parameters import get_data_file_name, load_data_base
     except ModuleNotFoundError:
         return {}
-    print("_get_d4bj_definitions")
-    print(f"{get_data_file_name()=}")
 
     def get_params(entry: dict, base: dict, defaults: list) -> dict:
         """Retrive the parameters from the data base, make sure the default
@@ -967,9 +963,6 @@ def _get_d4bj_definitions() -> dict:
     except FileNotFoundError:
         return {}
 
-    import pprint
-    print("IN GET_PA")
-    #pprint.pprint(_data_base, width=200)
     try:
         _defaults = _data_base["default"]["d4"]
         _base = _data_base["default"]["parameter"]["d4"]
