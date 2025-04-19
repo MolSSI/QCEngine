@@ -144,7 +144,7 @@ for functional_name in dict_functionals:
     # else loop through dispersion types in empirical_dispersion_resources.dashcoeff (also considering aliases)
     #   and build dispersion corrected version (applies also for aliases)
     for nominal_dispersion_level, resolved_dispersion_level in _dispersion_aliases.items():
-        print(f"AA {functional_name=} {nominal_dispersion_level=} {resolved_dispersion_level=}")
+#        print(f"AA {functional_name=} {nominal_dispersion_level=} {resolved_dispersion_level=}")
         # first check whether there is a pre-defined dispersion corrected functional
         # of the same resolved_dispersion_level type
         if functional_name + "-" + resolved_dispersion_level in dict_functionals:
@@ -154,11 +154,11 @@ for functional_name in dict_functionals:
                 if alias not in functionals:
                     functionals[alias] = dict_functionals[formal]
                     if resolved_dispersion_level == "d4bjeeqatm":
-                        print(f"BB {alias=} {dict_functionals[formal]}")
+#                        print(f"BB {alias=} {dict_functionals[formal]}")
         # if not, build it from dashparam logic if possible
         else:
             if resolved_dispersion_level == "d4bjeeqatm" and functional_name == "b3ylp":
-                print(f"CC", dashcoeff[resolved_dispersion_level]['definitions'])
+#                print(f"CC", dashcoeff[resolved_dispersion_level]['definitions'])
             
             for dispersion_functional in dashcoeff[resolved_dispersion_level]['definitions']:
                 if dispersion_functional.lower() in functional_aliases:
@@ -173,10 +173,10 @@ for functional_name in dict_functionals:
                     for alias in functional_aliases:
                         alias += "-" + nominal_dispersion_level.lower()
                         functionals[alias] = func
-print(functionals.keys())
-print("DASHCOEFF")
-import pprint
-pprint.pprint(dashcoeff, width=200)
+#print(functionals.keys())
+#print("DASHCOEFF")
+#import pprint
+#pprint.pprint(dashcoeff, width=200)
 
 
 def check_consistency(func_dictionary):
