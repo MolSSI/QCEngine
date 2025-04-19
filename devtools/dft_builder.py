@@ -157,7 +157,7 @@ for functional_name in dict_functionals:
                         print(f"BB {alias=} {dict_functionals[formal]}")
         # if not, build it from dashparam logic if possible
         else:
-            if resolved_dispersion_level == "d4bjeeqatm":
+            if resolved_dispersion_level == "d4bjeeqatm" and functional_name == "b3ylp":
                 print(f"CC", dashcoeff[resolved_dispersion_level]['definitions'])
             
             for dispersion_functional in dashcoeff[resolved_dispersion_level]['definitions']:
@@ -174,6 +174,9 @@ for functional_name in dict_functionals:
                         alias += "-" + nominal_dispersion_level.lower()
                         functionals[alias] = func
 print(functionals.keys())
+print("DASHCOEFF")
+import pprint
+pprint.pprint(dashcoeff, width=200)
 
 
 def check_consistency(func_dictionary):
