@@ -28,6 +28,33 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.32.0 / 2025-MM-DD (Unreleased)
+--------------------
+
+Breaking Changes
+++++++++++++++++
+- UNMERGED (:pr:`472`) Maint - dftd3/gcp/entos/qcore harnesses are all deprecated. See `qcengine info` for details. @loriab
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- UNMERGED (:pr:`472`) CLI - Add a `qcengine info bulletin` subcommand (also runs with `qcengine info`)
+  for notices about additions and deprecations. @loriab
+
+Bug Fixes
++++++++++
+- UNMERGED (:pr:`472`) DFTD4 - New Windows builds of the latest version have a bug with the QCSchema interface
+  (https://github.com/dftd4/dftd4/pull/292). QCEngine now compensates so v3.7.0 can be used as-is. @loriab
+- UNMERGED (:pr:`472`) geomeTRIC - New v1.1 has been failing one of the mocked "retries" tests here. QCEngine
+  now excuses it until upstream fix available (https://github.com/leeping/geomeTRIC/pull/222). @loriab
+
+Misc.
++++++
+- UNMERGED (:pr:`472`) Testing - Drop an unsolvable py38 environment and start testing py313. @loriab
+
+
 v0.31.0 / 2025-01-17
 --------------------
 
