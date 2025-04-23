@@ -15,6 +15,7 @@ dependencies:
   - optking
   - pymdi
   - qcmanybody
+  - pyberny
 
     # Core
   - python
@@ -30,6 +31,3 @@ dependencies:
   - pytest-cov
   - codecov
 
-  - pip
-  - pip:
-    - pyberny

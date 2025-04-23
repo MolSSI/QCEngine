@@ -93,7 +93,7 @@ jobs:
             pytest: ""
 
           - conda-env: opt-disp
-            python-version: 3.8
+            python-version: 3.13
             label: optimization-dispersion
             runs-on: ubuntu-latest
             pytest: ""
