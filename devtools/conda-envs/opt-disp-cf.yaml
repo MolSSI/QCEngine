@@ -4,6 +4,7 @@ channels:
   - nodefaults
 dependencies:
   - psi4=1.9.1
+  - mkl=2023
   - rdkit
   - mopac
 
