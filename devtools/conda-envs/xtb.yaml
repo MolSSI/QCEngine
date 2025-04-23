@@ -1,6 +1,7 @@
 name: test
 channels:
   - conda-forge
+  - nodefaults
 dependencies:
   - xtb
   - xtb-python

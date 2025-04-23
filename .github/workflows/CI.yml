@@ -70,7 +70,7 @@ jobs:
           - conda-env: nwchem
             python-version: 3.8
             label: NWChem70
-            runs-on: ubuntu-20.04
+            runs-on: ubuntu-latest
             pytest: ""
             # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
 
