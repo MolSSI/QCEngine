@@ -152,12 +152,18 @@ def info_cli(args):
     def info_bulletin():
         print(">>> Bulletin")
         bull_items = []
-        bull_items.append("""  * [Apr 2025; v0.32.0] Program Harness 'qcore'/'entos' is deprecated with Prof. Manby's approval.
-     It will cease to be tested as soon as Python minimum bumps >3.7. It may be removed as soon as 2026.""")
-        bull_items.append("""  * [Apr 2025; v0.32.0] Program Harness 'dftd3' is deprecated in favor of the maintained 's-dftd3'.
-     Its testing will become narrower (w/o Psi4). It may be removed as soon as 2026.""")
-        bull_items.append("""  * [Apr 2025; v0.32.0] Program Harness 'gcp' is deprecated in favor of the maintained 'mctc-gcp'.
-     Its testing will become narrower (w/o Psi4). It may be removed as soon as 2026.""")
+        bull_items.append(
+            """  * [Apr 2025; v0.32.0] Program Harness 'qcore'/'entos' is deprecated with Prof. Manby's approval.
+     It will cease to be tested as soon as Python minimum bumps >3.7. It may be removed as soon as 2026."""
+        )
+        bull_items.append(
+            """  * [Apr 2025; v0.32.0] Program Harness 'dftd3' is deprecated in favor of the maintained 's-dftd3'.
+     Its testing will become narrower (w/o Psi4). It may be removed as soon as 2026."""
+        )
+        bull_items.append(
+            """  * [Apr 2025; v0.32.0] Program Harness 'gcp' is deprecated in favor of the maintained 'mctc-gcp'.
+     Its testing will become narrower (w/o Psi4). It may be removed as soon as 2026."""
+        )
         print("\n".join(bull_items))
         print()
 
