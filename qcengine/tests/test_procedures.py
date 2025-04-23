@@ -165,6 +165,7 @@ def test_optimization_protocols(input_data):
 @using("geometric")
 def test_geometric_retries(failure_engine, input_data):
     import geometric
+
     tric_ver = geometric.__version__
 
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2

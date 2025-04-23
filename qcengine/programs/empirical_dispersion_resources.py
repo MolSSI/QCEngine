@@ -958,7 +958,7 @@ def _get_d4bj_definitions() -> dict:
         raise KeyError("No entry for " + method + " in parameter data base")
 
     try:
-        # some dftd4 releases have d3 in this path
+        # some dftd4 releases have d3 in this path. see https://github.com/dftd4/dftd4/pull/292
         _data_base = load_data_base(get_data_file_name().replace("s-dftd3", "dftd4"))
     except FileNotFoundError:
         return {}
