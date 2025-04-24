@@ -3,10 +3,10 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - psi4=1.9.1
+  - psi4=1.9.1=*_9
   - mkl=2023
-  - rdkit
-  - mopac
+#  - rdkit
+#  - mopac
 
     # Mixed Tests
   - dftd3-python
@@ -23,7 +23,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.26.0
+  - qcelemental
   - pydantic
   - msgpack-python
 
