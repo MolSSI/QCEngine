@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 import pytest
 import qcelemental as qcel
-from pkg_resources import parse_version
+from packaging.version import parse
 from qcelemental.util import which, which_import
 
 import qcengine as qcng
@@ -66,7 +66,7 @@ def is_program_new_enough(program, version_feature_introduced):
             return False
         candidate_version = qcng.get_program(program).get_version()
 
-    return parse_version(candidate_version) >= parse_version(version_feature_introduced)
+    return parse(candidate_version) >= parse(version_feature_introduced)
 
 
 def is_mdi_new_enough(version_feature_introduced):
@@ -76,7 +76,7 @@ def is_mdi_new_enough(version_feature_introduced):
         candidate_version = ".".join(
             [str(mdi.MDI_MAJOR_VERSION), str(mdi.MDI_MINOR_VERSION), str(mdi.MDI_PATCH_VERSION)]
         )
-        return parse_version(candidate_version) >= parse_version(version_feature_introduced)
+        return parse(candidate_version) >= parse(version_feature_introduced)
     else:
         return False
 
