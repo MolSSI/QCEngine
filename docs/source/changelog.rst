@@ -49,6 +49,8 @@ Bug Fixes
   (https://github.com/dftd4/dftd4/pull/292). QCEngine now compensates so v3.7.0 can be used as-is. @loriab
 - UNMERGED (:pr:`472`) geomeTRIC - New v1.1 has been failing one of the mocked "retries" tests here. QCEngine
   now excuses it until upstream fix available (https://github.com/leeping/geomeTRIC/pull/222). @loriab
+- UNMERGED (:pr:`472`) Config - Fixed some tests of Config.scratch_directory so they can run cleanly
+  on Windows when HOME envvar isn't set. No change to Config itself. @loriab
 
 Misc.
 +++++
