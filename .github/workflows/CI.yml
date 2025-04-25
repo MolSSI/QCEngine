@@ -228,7 +228,6 @@ jobs:
 
     - name: PyTest
       run: |
-        unset HOME
         MKL_CBWR=AVX pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
