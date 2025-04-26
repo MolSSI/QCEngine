@@ -228,7 +228,7 @@ jobs:
 
     - name: PyTest
       run: |
-        pytest -rws -v --durations=20 --color yes -n auto psi4 -m "quick and not d2ints" -k "not pe_ecp"
+        pytest -rws -v --durations=20 --color yes -n auto $CONDA_PREFIX/lib/python3.12/site-packages/psi4 -m "quick and not d2ints" -k "not pe_ecp"
         MKL_CBWR=AVX pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
