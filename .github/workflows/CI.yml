@@ -226,6 +226,18 @@ jobs:
         pip install git+https://github.com/MolSSI/QCEngineRecords.git@${QCER_VER}#egg=qcenginerecords
         python -c "import qcengine; print(qcengine.config.global_repr())"
 
+    - name: Configure QCEngine
+      #if: "(matrix.cfg.label != 'Py-min')"
+      run: |
+        cat > qcengine.yaml <<EOF
+        all:
+          hostname_pattern: "*"
+          memory: 1
+          ncores: 1
+        EOF
+        cat qcengine.yaml
+        qcengine info
+
     - name: PyTest
       if: "runner.os == 'Windows'"
       run: |
