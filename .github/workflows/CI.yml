@@ -241,14 +241,14 @@ jobs:
     - name: PyTest
       if: "runner.os == 'Windows'"
       run: |
-        pytest -rws -v --durations=20 --color yes -n auto $CONDA_PREFIX/Lib/site-packages/psi4 -m "quick and not d2ints" -k "not pe_ecp"
         MKL_CBWR=AVX pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
+        MKL_CBWR=AVX pytest -rws -v --durations=20 --color yes -n auto $CONDA_PREFIX/Lib/site-packages/psi4 -m "quick and not d2ints" -k "not pe_ecp"
 
     - name: PyTest
       if: "runner.os != 'Windows'"
       run: |
-        pytest -rws -v --durations=20 --color yes -n auto $CONDA_PREFIX/lib/python3.12/site-packages/psi4 -m "quick and not d2ints" -k "not pe_ecp"
         MKL_CBWR=AVX pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v --durations=20 --color yes -n auto $CONDA_PREFIX/lib/python3.12/site-packages/psi4 -m "quick and not d2ints" -k "not pe_ecp"
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
