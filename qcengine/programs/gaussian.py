@@ -3,31 +3,22 @@ Calls the GAUSSIAN executable
 """
 
 import os
-import re
-import tempfile
-import warnings
-import pprint
-import copy
-
-from collections import defaultdict
-
+import string
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import cclib
 from cclib.method import Nuclear
-
 from qcelemental import constants
-from qcelemental.models import AtomicInput, AtomicResult, Molecule, Provenance
-from qcelemental.models import OptimizationInput, OptimizationResult, BasisSet
-from qcelemental.util import parse_version, safe_version, which, which_import
-
-from ..exceptions import InputError, UnknownError
-from ..util import disk_files, execute, temporary_directory
-from .util import error_stamp
-from .model import ProgramHarness
+from qcelemental.models import AtomicInput, AtomicResult, Provenance, FailedOperation
+from qcelemental.models import BasisSet
+from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
-from qcengine.procedures.model import ProcedureHarness
+from .model import ProgramHarness
+from .util import error_stamp
+from ..exceptions import InputError, UnknownError
+from ..util import execute
+
 
 class GaussianHarness(ProgramHarness):
 
@@ -157,6 +148,10 @@ class GaussianHarness(ProgramHarness):
                 gaussian_kw.append('scf=' + caseless_keywords["scf_convergence"])
             if 'population' in caseless_keywords:
                 gaussian_kw.append('pop=' + caseless_keywords['population'])
+            if 'extra_route' in caseless_keywords:
+                extra_route = caseless_keywords['extra_route']
+            else:
+                extra_route = ''
 
             keywords = {'scf_damp': 'true',
                         'scf_diis': 'false'}
@@ -169,8 +164,8 @@ class GaussianHarness(ProgramHarness):
 
             # Begin input file
             input_file.append('%mem={}MB'.format(int(config.memory * 1024))) # In MB
-            input_file.append('#P {}/{}'.format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw) + '\n')
-            iput_file.append('write your comment here\n')
+            input_file.append('#P {}/{}'.format(input_model.model.method, input_model.model.basis) + ' ' + ' '.join(gaussian_kw) + " " + extra_route + '\n')
+            input_file.append('write your comment here\n')
 
             # Handle the geometry
             molcmd, moldata = input_model.molecule.to_string(dtype = 'gaussian', units = 'Angstrom', return_data = True)
@@ -206,7 +201,7 @@ class GaussianHarness(ProgramHarness):
                 extra_commands: Optional[List[str]] = None,
                 scratch_name: Optional[str] = None,
                 timeout: Optional[int] = None
-               ) -> Tuple[boll, Dict[str, Any]]:
+               ) -> Tuple[bool, Dict[str, Any]]:
 
         success, dexe = execute(
             inputs['commands'],
@@ -239,7 +234,7 @@ class GaussianHarness(ProgramHarness):
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             'properties': '',
             'provenance': Provenance(creator="gaussian", version=self.get_version(), routine=self.get_version()).dict(),
-            "stderr": outfiles['outfiles']['output.log'],,
+            "stderr": outfiles['outfiles']['output.log'],
             "stdout": outfiles['outfiles']['output.log'],
             "success": True,
         		}
