@@ -245,17 +245,19 @@ jobs:
         cat qcengine.yaml
         qcengine info
 
-    - name: PyTest
+
+    - name: Test OpenMP
+      run: python -c "from psi4 import core; core.set_num_threads(42); assert core.get_num_threads() == 42"
+
+    - name: Test Run, Spot, Run
       if: "runner.os == 'Windows'"
       run: |
-        MKL_CBWR=AVX pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
-        MKL_CBWR=AVX pytest -rws -v --durations=20 --color yes -n auto $CONDA_PREFIX/Lib/site-packages/psi4 -m "quick and not d2ints" -k "not pe_ecp"
+        psi4 $CONDA_PREFIX/Lib/site-packages/psi4/tests/tu1-h2o-energy/input.dat -o stdout
 
     - name: PyTest
-      if: "runner.os != 'Windows'"
       run: |
         MKL_CBWR=AVX pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
-        pytest -rws -v --durations=20 --color yes -n auto $CONDA_PREFIX/lib/python3.12/site-packages/psi4 -m "quick and not d2ints" -k "not pe_ecp"
+        MKL_CBWR=AVX pytest -rws -v --durations=20 --color yes -n auto $CONDA_PREFIX/lib/python3.12/site-packages/psi4 -m "quick and not d2ints" -k "not pe_ecp"
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
