@@ -3,7 +3,8 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - psi4/label/test::psi4=1.9.1=py312heaf7388_9
+  #- psi4/label/test::psi4=1.9.1=py312heaf7388_9  # 26 Apr
+  - psi4/label/test::psi4=1.9.1=py312h0210b11_9  # 30 Apr
 
     # Core
   - python
