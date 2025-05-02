@@ -209,14 +209,14 @@ jobs:
         python -c "import qcengine; print(qcengine.config.global_repr())"
 
     - name: Test Run, Spot, Run
-      if: false "runner.os == 'Windows'"
+      if: false  # "runner.os == 'Windows'"
       run: |
         python -c "from psi4 import core; core.set_num_threads(42); assert core.get_num_threads() == 42"
         psi4 $CONDA_PREFIX/Lib/site-packages/psi4/tests/tu1-h2o-energy/input.dat -o stdout
 
     - name: PyTest
       run: |
-        MKL_CBWR=AVX pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3

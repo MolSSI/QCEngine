@@ -28,33 +28,34 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.32.0 / 2025-MM-DD (Unreleased)
+v0.32.0 / 2025-05-02
 --------------------
 
 Breaking Changes
 ++++++++++++++++
-- UNMERGED (:pr:`472`) Maint - dftd3/gcp/entos/qcore harnesses are all deprecated. See `qcengine info` for details. @loriab
+- (:pr:`472`) Maint - dftd3/gcp/entos/qcore harnesses are all deprecated. See `qcengine info` for details. @loriab
 
 New Features
 ++++++++++++
 
 Enhancements
 ++++++++++++
-- UNMERGED (:pr:`472`) CLI - Add a `qcengine info bulletin` subcommand (also runs with `qcengine info`)
+- (:pr:`472`) CLI - Add a `qcengine info bulletin` subcommand (also runs with `qcengine info`)
   for notices about additions and deprecations. @loriab
 
 Bug Fixes
 +++++++++
-- UNMERGED (:pr:`472`) DFTD4 - New Windows builds of the latest version have a bug with the QCSchema interface
+- (:pr:`472`) DFTD4 - New Windows builds of the latest version have a bug with the QCSchema interface
   (https://github.com/dftd4/dftd4/pull/292). QCEngine now compensates so v3.7.0 can be used as-is. @loriab
-- UNMERGED (:pr:`472`) geomeTRIC - New v1.1 has been failing one of the mocked "retries" tests here. QCEngine
+- (:pr:`472`) geomeTRIC - New v1.1 has been failing one of the mocked "retries" tests here. QCEngine
   now excuses it until upstream fix available (https://github.com/leeping/geomeTRIC/pull/222). @loriab
-- UNMERGED (:pr:`472`) Config - Fixed some tests of Config.scratch_directory so they can run cleanly
+- (:pr:`472`) Config - Fixed some tests of Config.scratch_directory so they can run cleanly
   on Windows when HOME envvar isn't set. No change to Config itself. @loriab
 
 Misc.
 +++++
-- UNMERGED (:pr:`472`) Testing - Drop an unsolvable py38 environment and start testing py313. @loriab
+- (:pr:`472`) Maint - Use new ``packaging`` dependency instead of deprecated ``pkg_resources``. @loriab
+- (:pr:`472`) Testing - Drop an unsolvable py38 environment and start testing py313. @loriab
 
 
 v0.31.0 / 2025-01-17
