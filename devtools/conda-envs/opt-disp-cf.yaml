@@ -3,10 +3,9 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - psi4=1.9.1=py311h7a31544_9
-  - mkl=2023
-#  - rdkit
-#  - mopac
+  - psi4=1.9.1=*_8  # until Window BLAS fixed
+  - rdkit
+  - mopac
 
     # Mixed Tests
   - dftd3-python
