@@ -28,7 +28,7 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.32.0 / 2025-05-02
+v0.32.0 / 2025-05-03
 --------------------
 
 Breaking Changes
