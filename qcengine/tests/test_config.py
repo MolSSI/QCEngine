@@ -72,9 +72,13 @@ def test_node_skip_environ():
             "/cluster/scr/job/psi_scratch/12345",
         ),
         ({"QCSCR": "qcscr", "USER": "johndoe"}, "/scratch/${USER}/$QCSCR", "/scratch/johndoe/qcscr"),
-        ({}, "~", f"{os.environ.get('HOME')}"),
-        ({"QCSCR": "qcscr"}, "~/scratch/$QCSCR", f"{os.environ.get('HOME')}/scratch/qcscr"),
-        ({}, "$HOME", f"{os.environ.get('HOME')}"),
+        ({}, "~", f"{os.environ.get('HOME', os.environ.get('USERPROFILE'))}"),
+        (
+            {"QCSCR": "qcscr"},
+            "~/scratch/$QCSCR",
+            f"{os.environ.get('HOME', os.environ.get('USERPROFILE'))}/scratch/qcscr",
+        ),
+        ({}, "$HOME", os.environ.get("HOME")),  # may be None on Windows
         # ({}, "$RANDOM_NOVAR", "$RANDOM_NOVAR"),  # new behavior?
         ({}, "$RANDOM_NOVAR", None),  # longstanding behavior
     ],

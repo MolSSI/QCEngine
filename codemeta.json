@@ -6,7 +6,7 @@
     "codeRepository": "https://github.com/MolSSI/QCEngine",
     "issueTracker": "https://github.com/MolSSI/QCEngine/issues",
     "license": "https://opensource.org/licenses/BSD-3-Clause",
-    "version": "0.15",
+    "version": "0.32",
     "author": [
         {
             "@type": "Person",

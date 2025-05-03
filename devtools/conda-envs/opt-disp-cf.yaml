@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - psi4=1.9.1
+  - psi4=1.9.1=*_8  # until Window BLAS fixed
   - rdkit
   - mopac
 
@@ -15,14 +15,15 @@ dependencies:
   - optking
   - pymdi
   - qcmanybody
+  - pyberny
 
     # Core
   - python
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.26.0
-  - pydantic=1.10.13
+  - qcelemental
+  - pydantic
   - msgpack-python
 
     # Testing
@@ -30,6 +31,3 @@ dependencies:
   - pytest-cov
   - codecov
 
-  - pip
-  - pip:
-    - pyberny
