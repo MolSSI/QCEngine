@@ -1,0 +1,22 @@
+name: test
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - psi4=1.9.1=py312hfb090ce_9
+
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - qcelemental
+  - pydantic
+  - msgpack-python
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - codecov
+

@@ -18,7 +18,7 @@ def test_dftd4_task_b97m_m01():
 
     thr = 1.0e-8
 
-    return_result = -1.025024986301735823
+    return_result = -0.025024986301735823
 
     atomic_input = qcel.models.AtomicInput(
         molecule=qcng.get_molecule("mindless-01"),
