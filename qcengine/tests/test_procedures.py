@@ -687,7 +687,10 @@ def test_torsiondrive_generic(schema_versions, request, scan_ptcl):
     if not (from_v2(request.node.name) and scan_ptcl == "none"):
         assert {*opthist_tgt} == expected_grid_ids
 
-    assert {*ret.final_energies} == expected_grid_ids
+    if "v2" in request.node.name:
+        assert {*ret.scan_properties} == expected_grid_ids
+    else:
+        assert {*ret.final_energies} == expected_grid_ids
     assert {*ret.final_molecules} == expected_grid_ids
 
     assert (
@@ -741,9 +744,9 @@ def test_torsiondrive_extra_constraints(schema_versions, request):
 
     if from_v2(request.node.name):
         input_data = models.TorsionDriveInput(
-            initial_molecules=[models.Molecule(**qcng.get_molecule("propane", return_dict=True))],
+            initial_molecule=[models.Molecule(**qcng.get_molecule("propane", return_dict=True))],
             specification=models.TorsionDriveSpecification(
-                keywords=models.TDKeywords(dihedrals=[(3, 0, 1, 2)], grid_spacing=[180]),
+                keywords=models.TorsionDriveKeywords(dihedrals=[(3, 0, 1, 2)], grid_spacing=[180]),
                 specification=models.OptimizationSpecification(
                     program="geomeTRIC",
                     keywords=keywords,
@@ -753,7 +756,9 @@ def test_torsiondrive_extra_constraints(schema_versions, request):
                         driver=models.DriverEnum.gradient,
                         model=models.Model(method="small", basis=None),
                     ),
+                    protocols=models.OptimizationProtocols(trajectory_results="all"),
                 ),
+                protocols=models.TorsionDriveProtocols(scan_results="all"),
             ),
         )
     else:
@@ -782,11 +787,16 @@ def test_torsiondrive_extra_constraints(schema_versions, request):
     assert ret.success
 
     expected_grid_ids = {"180", "0"}
+    opthist_tgt = ret.scan_results if "v2" in request.node.name else ret.optimization_history
 
-    assert {*ret.optimization_history} == expected_grid_ids
-
-    assert {*ret.final_energies} == expected_grid_ids
+    assert {*opthist_tgt} == expected_grid_ids
+    if "v2" in request.node.name:
+        assert {*ret.scan_properties} == expected_grid_ids
+    else:
+        assert {*ret.final_energies} == expected_grid_ids
     assert {*ret.final_molecules} == expected_grid_ids
+    if "v2" in request.node.name:
+        assert ret.properties.calcinfo_ngrid == 2
 
     assert (
         pytest.approx(ret.final_molecules["180"].measure([3, 0, 1, 2]), abs=1.0e-2) == 180.0
@@ -796,11 +806,11 @@ def test_torsiondrive_extra_constraints(schema_versions, request):
     assert pytest.approx(ret.final_molecules["0"].measure([3, 0, 1, 2]), abs=1.0e-2) == 0.0
 
     assert ret.provenance.creator.lower() == "torsiondrive"
-    assert ret.optimization_history["180"][0].provenance.creator.lower() == "geometric"
+    assert opthist_tgt["180"][0].provenance.creator.lower() == "geometric"
     if "v2" in request.node.name:
-        assert ret.optimization_history["180"][0].trajectory_results[0].provenance.creator.lower() == "mace"
+        assert opthist_tgt["180"][0].trajectory_results[0].provenance.creator.lower() == "mace"
     else:
-        assert ret.optimization_history["180"][0].trajectory[0].provenance.creator.lower() == "mace"
+        assert opthist_tgt["180"][0].trajectory[0].provenance.creator.lower() == "mace"
 
     assert "Using MACE-OFF23 MODEL for MACECalculator" in ret.stdout
     assert "All optimizations converged at lowest energy. Job Finished!\n" in ret.stdout
