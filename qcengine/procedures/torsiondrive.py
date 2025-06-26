@@ -8,6 +8,7 @@ from qcelemental.models.v2 import (
     FailedOperation,
     Molecule,
     OptimizationInput,
+    OptimizationProperties,
     OptimizationResult,
     TorsionDriveInput,
     TorsionDriveResult,
@@ -119,16 +120,20 @@ class TorsionDriveProcedure(ProcedureHarness):
         }
 
         # even if we hit an error during the torsiondrive, we output what we can
-        output_data["final_energies"], output_data["final_molecules"] = {}, {}
+        output_data["scan_properties"], output_data["final_molecules"] = {}, {}
 
         for grid_point, results in optimization_results.items():
 
-            final_energy, final_molecule = self._find_final_results(results)
+            final_energy, final_properties, final_molecule = self._find_final_results(results)
 
-            output_data["final_energies"][grid_point] = final_energy
+            # v1: output_data["final_energies"][grid_point] = final_energy
+            output_data["scan_properties"][grid_point] = final_properties
             output_data["final_molecules"][grid_point] = final_molecule
 
         output_data["scan_results"] = optimization_results
+        output_data["properties"] = {
+            "calcinfo_ngrid": len(optimization_results),
+        }
 
         if error is not None:
             output_data["error"] = error
@@ -211,14 +216,18 @@ class TorsionDriveProcedure(ProcedureHarness):
     @staticmethod
     def _find_final_results(
         optimization_results: List[OptimizationResult],
-    ) -> Tuple[float, Molecule]:
+    ) -> Tuple[float, OptimizationProperties, Molecule]:
         """Returns the energy and final molecule of the lowest energy optimization
         in a set."""
 
         final_energies = np.array([result.properties.return_energy for result in optimization_results])
         lowest_energy_idx = final_energies.argmin()
 
-        return float(final_energies[lowest_energy_idx]), optimization_results[lowest_energy_idx].final_molecule
+        return (
+            float(final_energies[lowest_energy_idx]),
+            optimization_results[lowest_energy_idx].properties,
+            optimization_results[lowest_energy_idx].final_molecule,
+        )
 
     def _spawn_optimizations(
         self, next_jobs: Dict[str, List[float]], input_model: "TorsionDriveInput", config: "TaskConfig"
