@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - psi4=1.9.1=*_8  # until Window BLAS fixed
+  - psi4=1.9.1
   - rdkit
   - mopac
 
