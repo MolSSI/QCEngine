@@ -28,6 +28,26 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.33.0 / 2025-MM-DD (Unreleased)
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+- (:pr:`476`) Maint - repair some CI lanes that needed extra specs to operate correctly
+
+
 v0.32.0 / 2025-05-03
 --------------------
 
