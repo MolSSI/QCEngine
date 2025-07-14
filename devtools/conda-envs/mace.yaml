@@ -12,7 +12,7 @@ dependencies:
 
   # mace deps
   - pymace=0.3
-  - pytorch<2.6  # until pickling issue resolved
+  #- pytorch<2.6  # until pickling issue resolved
 
     # Testing
   - pytest
