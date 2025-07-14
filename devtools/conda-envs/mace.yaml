@@ -11,7 +11,7 @@ dependencies:
   - pydantic>=1.0.0
 
   # mace deps
-  - pymace=0.3.8
+  - pymace=0.3.6
   - pytorch<2.6  # until pickling issue resolved
 
     # Testing
