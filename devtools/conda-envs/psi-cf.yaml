@@ -5,7 +5,7 @@ channels:
 dependencies:
   - psi4=1.8
   - numpy<2
-  - libgcc<14.3
+  - libgcc<14.3  # until psi4 package itself conveys this
 
     # Core
   - python
