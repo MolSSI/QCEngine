@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - psi4=1.9.1
+  - psi4=1.9.1=*_8
   - libgcc<14.3  # until psi4 package itself conveys this
   - rdkit
   - mopac
