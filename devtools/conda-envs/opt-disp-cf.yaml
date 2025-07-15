@@ -4,6 +4,7 @@ channels:
   - nodefaults
 dependencies:
   - psi4=1.9.1=*_8  # until Window BLAS fixed
+  - libgcc<14.3  # until psi4 package itself conveys this
   - rdkit
   - mopac
 
