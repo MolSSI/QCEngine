@@ -951,20 +951,20 @@ dashcoeff = {
                 },
                 "citation": "    Wallace, A. M.; Sherrill, C. D., J. Chem. Phys., 161, 114115, 2024\n",
             },  # AMW 7/25
-            "sapt(pbe0)": {
-                "params": {
-                    "s6": 1.00000000e00,
-                    "s8": 1.20417708e00,
-                    "a1": 9.09018333e-01,
-                    "a2": 3.24886637e-10,
-                    "s9": 0.00000000e00,
-                    "alp": 16.0,
-                    "ga": 3.0,
-                    "gc": 2.0,
-                    "wf": 6.0,
-                },
-                # "citation": '    Wallace, A. M.; Sherrill, C. D.',
-            },  # AMW 7/25, SAPT(PBE0)(S)
+            # "sapt(pbe0)": {
+            #     "params": {
+            #         "s6": 1.0,
+            #         "s8": 1.20417708e00,
+            #         "a1": 9.09018333e-01,
+            #         "a2": 3.24886637e-10, # change to 0.0?
+            #         "s9": 0.0,
+            #         "alp": 16.0,
+            #         "ga": 3.0,
+            #         "gc": 2.0,
+            #         "wf": 6.0,
+            #     },
+            #     # "citation": '    Wallace, A. M.; Sherrill, C. D.',
+            # },  # AMW 7/25, SAPT(PBE0)(S)
             # "sapt(pbe0)(i)": {"params": { "s6": 1.0, "s8": 0.89529649, "a1": -0.82043591, "a2": 0.03264695, "s9": 0.00000000e00, "alp": 16.0, "ga": 3.0, "gc": 2.0, "wf": 6.0, }, "citation": '    Wallace, A. M.; Sherrill, C. D.', }, # AMW 7/25
         },
     },
