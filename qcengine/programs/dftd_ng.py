@@ -96,13 +96,13 @@ class DFTD4Harness(ProgramHarness):
 
         # strip dispersion level from method
         for alias, d4 in get_dispersion_aliases().items():
-            if d4 == "d4bjeeqatm" and method.lower().endswith(alias):
+            if d4 in ["d4bjeeqatm", "d4bjeeqtwo"] and method.lower().endswith(alias):
                 method = method[: -(len(alias) + 1)]
                 input_data["model"]["method"] = method
 
         # consolidate dispersion level aliases
         level_hint = input_model.keywords.get("level_hint", None)
-        if level_hint and get_dispersion_aliases()[level_hint.lower()] == "d4bjeeqatm":
+        if level_hint and get_dispersion_aliases()[level_hint.lower()] in ["d4bjeeqatm", "d4bjeeqtwo"]:
             level_hint = "d4"
             input_data["keywords"]["level_hint"] = level_hint
 

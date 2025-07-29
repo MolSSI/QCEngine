@@ -900,6 +900,41 @@ dashcoeff = {
             # "pbe":   {"params": {"a1": 0.38574991, "a2": 4.80688534, "alp": 16.0, "s6": 1.0, "s8": 0.95948085, "s9": 1.0}},
         },
     },
+    "d4bjeeqtwo": {
+        "formal": "D4(BJ,EEQ)",
+        "alias": ["d42b", "d4bj2b", "d4(bj)2b"],
+        "description": "    Grimme's -D4 (BJ-damping) Dispersion Correction Two-Body Only",
+        "citation": "    Caldeweyher, E.; Ehlert, S.; Hansen, A.; Neugebauer, H.; Spicher, S.; Bannwarth, C.; Grimmme, S., J. Chem. Phys. 150, 154122 (2019)\n",
+        "bibtex": "Caldeweyher:2019:154122",
+        "doi": "10.1063/1.5090222150",
+        "default": collections.OrderedDict(
+            [
+                ("a1", 1.0),
+                ("a2", 1.0),
+                ("alp", 16.0),
+                ("s6", 1.0),
+                ("s8", 1.0),
+                ("s9", 0.0),
+                ("ga", 3.0),
+                ("gc", 2.0),
+                ("wf", 6.0),
+            ]
+        ),
+        "definitions": {
+            # D4 parameters loaded below from authoritative source below. Keep a couple for reference
+            # "default": {"params": {"alp": 16.0, "s6": 1.0, "s9": 0.0}},
+            "sapt0": {"params": { "a1": 0.095, "a2": 3.637, "s6": 1.000, "s8": 0.738, "s9": 0.0, "alp": 16.0, "ga": 3.0, "gc": 2.0, "wf": 6.0, },
+                    "citation": '    Wallace, A. M.; Sherrill, C. D., J. Chem. Phys., 161, 114115, 2024\n',
+                      },     # AMW 7/25
+            "hf": {"params": { "a1": 0.095, "a2": 3.637, "s6": 1.000, "s8": 0.738, "s9": 0.0, "alp": 16.0, "ga": 3.0, "gc": 2.0, "wf": 6.0, },
+                    "citation": '    Wallace, A. M.; Sherrill, C. D., J. Chem. Phys., 161, 114115, 2024\n',
+                   },        # AMW 7/25
+            "sapt(pbe0)": {"params": { "s6": 1.00000000e00, "s8": 1.20417708e00, "a1": 9.09018333e-01, "a2": 3.24886637e-10, "s9": 0.00000000e00, "alp": 16.0, "ga": 3.0, "gc": 2.0, "wf": 6.0}, 
+                    # "citation": '    Wallace, A. M.; Sherrill, C. D.',
+            }, # AMW 7/25, SAPT(PBE0)(S)
+            # "sapt(pbe0)(i)": {"params": { "s6": 1.0, "s8": 0.89529649, "a1": -0.82043591, "a2": 0.03264695, "s9": 0.00000000e00, "alp": 16.0, "ga": 3.0, "gc": 2.0, "wf": 6.0, }, "citation": '    Wallace, A. M.; Sherrill, C. D.', }, # AMW 7/25
+        },
+    },
 }
 
 try:
@@ -1118,7 +1153,7 @@ def from_arrays(
     dict
         Metadata defining dispersion calculation.
 
-        dashlevel : {'d1', 'd2', 'd3zero2b', 'd3bj2b', 'd3mzero2b', 'd3mbj2b', 'd3op2b', 'd3zeroatm', 'd3bjatm', 'd3mzeroatm', 'd3mbjatm', 'd3opatm', 'chg', 'das2009', 'das2010', 'nl', "d4bjeeqatm"}
+        dashlevel : {'d1', 'd2', 'd3zero2b', 'd3bj2b', 'd3mzero2b', 'd3mbj2b', 'd3op2b', 'd3zeroatm', 'd3bjatm', 'd3mzeroatm', 'd3mbjatm', 'd3opatm', 'chg', 'das2009', 'das2010', 'nl', "d4bjeeqatm", "d4bjeeqtwo"}
             Name (de-aliased, de-formalized, lowercase) of dispersion
             correction -- atom data, dispersion model, damping functional
             form -- to be applied. Resolved from `name_hint` and/or
