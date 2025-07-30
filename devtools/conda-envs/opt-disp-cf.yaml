@@ -5,8 +5,8 @@ channels:
 dependencies:
   - psi4=1.9.1=*_10  # until Window BLAS fixed
   - libgcc<14.3  # until psi4 package itself conveys this
-  #- numpy=2.0.2
-  - rdkit<=2025.03.4  # Windows+psi4 error with 03.5
+  #- rdkit<=2025.03.4  # Windows+psi4 error with 03.5
+  - rdkit
   - mopac
 
     # Mixed Tests
