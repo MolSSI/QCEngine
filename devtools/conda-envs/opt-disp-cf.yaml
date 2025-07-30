@@ -5,9 +5,9 @@ channels:
 dependencies:
   - psi4=1.9.1=*_10  # until Window BLAS fixed
   - libgcc<14.3  # until psi4 package itself conveys this
-  - numpy=2.0.2
+  #- numpy=2.0.2
   #- rdkit
-  #- mopac
+  - mopac
 
     # Mixed Tests
   - dftd3-python
@@ -15,9 +15,9 @@ dependencies:
   - gcp-correction
   - geometric
   - optking
-  #- pymdi
+  - pymdi
   - qcmanybody
-  #- pyberny
+  - pyberny
 
     # Core
   - python
