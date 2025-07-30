@@ -921,8 +921,7 @@ dashcoeff = {
             ]
         ),
         "definitions": {
-            # D4 parameters loaded below from authoritative source below. Keep a couple for reference
-            # "default": {"params": {"alp": 16.0, "s6": 1.0, "s9": 0.0}},
+            # Unlike d4bjeeqatm, d4bjeeqtwo parameters are _not_ loaded below from authoritative source below as very few are defined.
             "sapt0": {
                 "params": {
                     "a1": 0.095,
