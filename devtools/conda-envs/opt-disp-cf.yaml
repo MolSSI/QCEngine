@@ -6,17 +6,17 @@ dependencies:
   - psi4=1.9.1=*_10  # until Window BLAS fixed
   - libgcc<14.3  # until psi4 package itself conveys this
   - numpy=2.0.2
-  - rdkit
-  - mopac
+  #- rdkit
+  #- mopac
 
     # Mixed Tests
-  #- dftd3-python
-  #- dftd4-python
-  #- gcp-correction
-  #- geometric
-  #- optking
+  - dftd3-python
+  - dftd4-python
+  - gcp-correction
+  - geometric
+  - optking
   #- pymdi
-  #- qcmanybody
+  - qcmanybody
   #- pyberny
 
     # Core
