@@ -30,6 +30,6 @@ dependencies:
 
     # Testing
   - pytest
-  #- pytest-cov
-  #- codecov
+  - pytest-cov
+  - codecov
 
