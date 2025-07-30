@@ -37,7 +37,7 @@ Breaking Changes
 New Features
 ++++++++++++
 - (:pr:`477`) DFTD4 - added a new dispersion type d4bjeeqtwo so parameters can be defined
-  for fittings without 3-body dispersion, as for SAPT0-D4 in Psi4. @Awallace
+  for fittings without 3-body dispersion, as for SAPT0-D4 in Psi4. @Awallace3
 
 Enhancements
 ++++++++++++
@@ -47,7 +47,7 @@ Bug Fixes
 
 Misc.
 +++++
-- (:pr:`476`) Maint - repair some CI lanes that needed extra specs to operate correctly
+- (:pr:`476`, :pr:`478`) Maint - repair some CI lanes that needed extra specs to operate correctly. @loriab
 
 
 v0.32.0 / 2025-05-03
