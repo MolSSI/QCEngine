@@ -338,7 +338,7 @@ class MolproHarness(ProgramHarness):
         molpro_variable_map = {
             "_ENUC": "nuclear_repulsion_energy",
             "_DFTFUN": "scf_xc_energy",
-            "_NELEC": ["calcinfo_nalpha", "calcinfo_nbeta"]
+            "_NELEC": ["calcinfo_nalpha", "calcinfo_nbeta"],
             # "_EMP2_SCS": "scs_mp2_total_energy"
         }
 
