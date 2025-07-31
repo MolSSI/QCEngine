@@ -28,22 +28,13 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.33.0 / 2025-MM-DD (Unreleased)
+v0.33.0 / 2025-07-31
 --------------------
-
-Breaking Changes
-++++++++++++++++
 
 New Features
 ++++++++++++
 - (:pr:`477`) DFTD4 - added a new dispersion type d4bjeeqtwo so parameters can be defined
   for fittings without 3-body dispersion, as for SAPT0-D4 in Psi4. @Awallace3
-
-Enhancements
-++++++++++++
-
-Bug Fixes
-+++++++++
 
 Misc.
 +++++
