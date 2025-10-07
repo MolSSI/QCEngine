@@ -155,7 +155,7 @@ def test_psi4_properties_origin_nuclear_charge():
     inp = AtomicInput(
         **{
             "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
-            "driver": "energy", 
+            "driver": "energy",
             "model": {"method": "SCF", "basis": "sto-3g"},
             "keywords": {"scf_type": "df", "properties_origin": ["NUCLEAR_CHARGE"]},
         }
@@ -173,7 +173,7 @@ def test_psi4_properties_origin_origin():
     inp = AtomicInput(
         **{
             "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
-            "driver": "energy", 
+            "driver": "energy",
             "model": {"method": "SCF", "basis": "sto-3g"},
             "keywords": {"scf_type": "df", "properties_origin": [0, 0, 0]},
         }
