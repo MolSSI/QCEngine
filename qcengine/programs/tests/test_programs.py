@@ -130,6 +130,61 @@ def test_psi4_ref_switch():
     assert ret.properties.calcinfo_nbeta == 1
 
 
+@using("psi4")
+def test_psi4_properties_origin_com_default():
+    """Test that properties_origin defaults to ['COM'] when not specified"""
+    inp = AtomicInput(
+        **{
+            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
+            "driver": "energy",
+            "model": {"method": "SCF", "basis": "sto-3g"},
+            "keywords": {"scf_type": "df"},  # No properties_origin specified
+        }
+    )
+
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+
+    assert ret.success is True
+    assert "properties_origin" in ret.input_data["keywords"]
+    assert ret.input_data["keywords"]["properties_origin"] == ["COM"]
+
+
+@using("psi4")
+def test_psi4_properties_origin_nuclear_charge():
+    """Test that explicit properties_origin setting is preserved"""
+    inp = AtomicInput(
+        **{
+            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
+            "driver": "energy", 
+            "model": {"method": "SCF", "basis": "sto-3g"},
+            "keywords": {"scf_type": "df", "properties_origin": ["NUCLEAR_CHARGE"]},
+        }
+    )
+
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+
+    assert ret.success is True
+    assert ret.input_data["keywords"]["properties_origin"] == ["NUCLEAR_CHARGE"]
+
+
+@using("psi4")
+def test_psi4_properties_origin_origin():
+    """Test that explicit properties_origin setting is preserved"""
+    inp = AtomicInput(
+        **{
+            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
+            "driver": "energy", 
+            "model": {"method": "SCF", "basis": "sto-3g"},
+            "keywords": {"scf_type": "df", "properties_origin": [0, 0, 0]},
+        }
+    )
+
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+
+    assert ret.success is True
+    assert ret.input_data["keywords"]["properties_origin"] == [0, 0, 0]
+
+
 @using("rdkit")
 @pytest.mark.parametrize("method", ["UFF", "MMFF94", "MMFF94s"])
 def test_rdkit_task(method):
