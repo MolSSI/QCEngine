@@ -131,14 +131,32 @@ def test_psi4_ref_switch():
 
 
 @using("psi4")
-def test_psi4_properties_origin_com_default():
+def test_psi4_properties_origin_com():
     """Test that properties_origin defaults to ['COM'] when not specified"""
     inp = AtomicInput(
         **{
             "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
             "driver": "energy",
             "model": {"method": "SCF", "basis": "sto-3g"},
-            "keywords": {"scf_type": "df"},  # No properties_origin specified
+            "keywords": {"scf_type": "df", "properties_origin": ["COM"]},  # No properties_origin specified
+        }
+    )
+
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+
+    assert ret.success is True
+    assert ret.input_data["keywords"]["properties_origin"] == ["COM"]
+
+
+@using("psi4")
+def test_psi4_properties_origin_default_nuclear_charge():
+    """Test that explicit properties_origin setting is preserved"""
+    inp = AtomicInput(
+        **{
+            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
+            "driver": "energy",
+            "model": {"method": "SCF", "basis": "sto-3g"},
+            "keywords": {"scf_type": "df"},
         }
     )
 
@@ -146,24 +164,6 @@ def test_psi4_properties_origin_com_default():
 
     assert ret.success is True
     assert "properties_origin" in ret.input_data["keywords"]
-    assert ret.input_data["keywords"]["properties_origin"] == ["COM"]
-
-
-@using("psi4")
-def test_psi4_properties_origin_nuclear_charge():
-    """Test that explicit properties_origin setting is preserved"""
-    inp = AtomicInput(
-        **{
-            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
-            "driver": "energy",
-            "model": {"method": "SCF", "basis": "sto-3g"},
-            "keywords": {"scf_type": "df", "properties_origin": ["NUCLEAR_CHARGE"]},
-        }
-    )
-
-    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
-
-    assert ret.success is True
     assert ret.input_data["keywords"]["properties_origin"] == ["NUCLEAR_CHARGE"]
 
 
