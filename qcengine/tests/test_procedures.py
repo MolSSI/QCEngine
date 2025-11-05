@@ -260,6 +260,9 @@ def test_geometric_retries(failure_engine, input_data):
 )
 def test_geometric_generic(input_data, program, model, bench):
 
+    from openff.toolkit.typing.engines.smirnoff.forcefield import get_available_force_fields
+    print(get_available_force_fields())
+
     input_data["initial_molecule"] = qcng.get_molecule("water")
     input_data["input_specification"]["model"] = model
     input_data["keywords"]["program"] = program
