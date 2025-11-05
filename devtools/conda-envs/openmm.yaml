@@ -7,7 +7,7 @@ dependencies:
   - openff-toolkit
   - openff-forcefields
   - openmmforcefields
-  - geometric
+  - geometric <1.1
   - torsiondrive
   - numpy <2.3  # https://github.com/openmm/openmmforcefields/issues/382
 
