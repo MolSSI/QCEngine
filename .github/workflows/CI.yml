@@ -200,8 +200,9 @@ jobs:
       run: |
         python -m pip install . --no-deps
 
-    - name: Special Config - safd
+    - name: Special Config - Windows Psi4
       if: "((matrix.cfg.label == 'optimization-dispersion') && (matrix.cfg.runs-on == 'windows-latest'))"
+      # DPD memory errors without reining in resources
       run: |
         cat > qcengine.yaml <<EOF
         all:
@@ -231,7 +232,7 @@ jobs:
         # export MKL_CBWR=AVX
         pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
 
-    - name: PyTest - Config
+    - name: PyTest - Task_Config
       run: |
         rm -f qcengine.yaml
         pytest -rws -v -k "test_config" --cov=qcengine --color=yes --cov-report=xml qcengine/
