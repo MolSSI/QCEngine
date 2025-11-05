@@ -4,7 +4,7 @@ channels:
   - conda-forge/label/libint_dev
 dependencies:
   - psi4=1.8
-  - pkg_resources
+  - setuptools <=0.60
   - numpy<2
   - libgcc<14.3  # until psi4 package itself conveys this
 
