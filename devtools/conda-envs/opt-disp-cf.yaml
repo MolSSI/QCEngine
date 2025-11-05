@@ -3,8 +3,9 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - psi4=1.9.1=*_10
-  - libgcc<14.3  # until psi4 package itself conveys this
+  - psi4=1.10
+  #- psi4=1.9.1=*_10
+  #- libgcc<14.3  # until psi4 package itself conveys this
   # - rdkit<=2025.03.4  # Windows+psi4 error with 03.5  # sometimes fine, sometimes flaky even w/exactly same packages in env
   - mopac
 
