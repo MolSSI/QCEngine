@@ -28,6 +28,26 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.34.0 / 2025-MM-DD (Unreleased)
+--------------------
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+- (:pr:`483`) Maint - update CI lanes for smirnoff-Frosst and pkg_resources import changes and Windows challenges. @loriab
+
+
 v0.33.0 / 2025-07-31
 --------------------
 
