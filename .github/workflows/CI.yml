@@ -200,6 +200,18 @@ jobs:
       run: |
         python -m pip install . --no-deps
 
+    - name: Special Config - safd
+      if: "((matrix.cfg.label == 'optimization-dispersion') && (matrix.cfg.runs-on == 'windows-latest'))"
+      run: |
+        cat > qcengine.yaml <<EOF
+        all:
+          hostname_pattern: "*"
+          memory: 2
+          ncores: 2
+        EOF
+        cat qcengine.yaml
+        qcengine info
+
     - name: QCEngineRecords
       if: "(matrix.cfg.label != 'Psi4-1.6')"
       run: |
