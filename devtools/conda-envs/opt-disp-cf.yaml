@@ -4,6 +4,7 @@ channels:
   - nodefaults
 dependencies:
   - psi4 >=1.10
+  - rdkit
   # - rdkit<=2025.03.4  # Windows+psi4 error with 03.5  # sometimes fine, sometimes flaky even w/exactly same packages in env
   - mopac
 
