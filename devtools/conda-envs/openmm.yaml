@@ -5,8 +5,9 @@ dependencies:
   - rdkit
   - openmm
   - openff-toolkit
-  - openff-forcefields <2025
+  - openff-forcefields
   - openmmforcefields
+  - smirnoff99Frosst  # https://github.com/openforcefield/openff-toolkit/pull/2109
   - geometric
   - torsiondrive
   - numpy <2.3  # https://github.com/openmm/openmmforcefields/issues/382
