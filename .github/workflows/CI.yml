@@ -35,7 +35,7 @@ jobs:
             python-version: "3.12"
             label: Psi4-1.8
             runs-on: windows-latest
-            pytest: "-k 'not (hes2 or qchem)'"
+            pytest: "-k 'not (hes2 or qchem or test_config)'"
 
           - conda-env: torchani
             python-version: 3.8
@@ -200,7 +200,7 @@ jobs:
         python -m pip install . --no-deps
 
     - name: Special Config - Windows Psi4
-      if: "((matrix.cfg.label == 'optimization-dispersion') && (matrix.cfg.runs-on == 'windows-latest'))"
+      if: "(((matrix.cfg.label == 'optimization-dispersion') || (matrix.cfg.label == 'Psi4-1.8')) && (matrix.cfg.runs-on == 'windows-latest'))"
       # DPD memory errors without reining in resources
       run: |
         cat > qcengine.yaml <<EOF
