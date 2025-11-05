@@ -136,10 +136,9 @@ jobs:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
-        auto-activate-base: false
         show-channel-urls: true
         add-pip-as-python-dependency: true
-        conda-remove-defaults: true
+        conda-remove-defaults: "true"
         # note: conda-forge chnl req'd for Mambaforge, but we'll spec in file, not here `channels: conda-forge,...`
         # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
 
