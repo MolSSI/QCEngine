@@ -35,7 +35,7 @@ jobs:
             python-version: "3.12"
             label: Psi4-1.8
             runs-on: windows-latest
-            pytest: "-k 'not (hes2 or qchem)'"
+            pytest: "-k 'not (hes2 or qchem or test_config)'"
 
           - conda-env: torchani
             python-version: 3.8
@@ -102,7 +102,7 @@ jobs:
             python-version: 3.11
             label: optimization-dispersion
             runs-on: windows-latest
-            pytest: "-k 'not (hes2 or qchem)'"
+            pytest: "-k 'not (hes2 or qchem or test_config)'"
 
           - conda-env: mace
             python-version: "3.10"
@@ -136,10 +136,9 @@ jobs:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
-        auto-activate-base: false
         show-channel-urls: true
         add-pip-as-python-dependency: true
-        conda-remove-defaults: true
+        conda-remove-defaults: "true"
         # note: conda-forge chnl req'd for Mambaforge, but we'll spec in file, not here `channels: conda-forge,...`
         # note: any activate/deactivate use the conda cmd. other cmds use mamba cmd.
 
@@ -200,6 +199,19 @@ jobs:
       run: |
         python -m pip install . --no-deps
 
+    - name: Special Config - Windows Psi4
+      if: "(((matrix.cfg.label == 'optimization-dispersion') || (matrix.cfg.label == 'Psi4-1.8')) && (matrix.cfg.runs-on == 'windows-latest'))"
+      # DPD memory errors without reining in resources
+      run: |
+        cat > qcengine.yaml <<EOF
+        all:
+          hostname_pattern: "*"
+          memory: 2
+          ncores: 2
+        EOF
+        cat qcengine.yaml
+        qcengine info
+
     - name: QCEngineRecords
       if: "(matrix.cfg.label != 'Psi4-1.6')"
       run: |
@@ -218,6 +230,11 @@ jobs:
       run: |
         # export MKL_CBWR=AVX
         pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
+
+    - name: PyTest - Task_Config
+      run: |
+        rm -f qcengine.yaml
+        pytest -rws -v -k "test_config" --cov=qcengine --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v3
@@ -248,8 +265,8 @@ jobs:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
-        auto-activate-base: false
         add-pip-as-python-dependency: true
+        conda-remove-defaults: "true"
         channels: conda-forge
 
     - name: Environment Information
