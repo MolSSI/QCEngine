@@ -265,8 +265,8 @@ jobs:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
         python-version: ${{ matrix.cfg.python-version }}
-        auto-activate-base: false
         add-pip-as-python-dependency: true
+        conda-remove-defaults: "true"
         channels: conda-forge
 
     - name: Environment Information
