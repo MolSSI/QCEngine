@@ -33,6 +33,7 @@ vX.Y.0 / 2025-MM-DD (Unreleased)
 
 Breaking Changes
 ++++++++++++++++
+- Deps - Require >=py39
 - (:pr:`453`) Deps - Require pydantic v2 dependency (don't worry, this isn't
   changing QCEngine's role as QCSchema I/O runner. Also require pydantic-settings
   for CLI. @loriab
