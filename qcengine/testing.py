@@ -2,6 +2,7 @@
 Utilities for the testing suite.
 """
 
+import sys
 from typing import List
 
 import numpy as np
@@ -229,6 +230,9 @@ def using(program):
 
 @pytest.fixture(scope="function", params=[None, "as_v1", "as_v2", "to_v1", "to_v2"])
 def schema_versions(request):
+    if sys.version_info >= (3, 14) and request.param != "as_v2":
+        pytest.skip("Only QCSchema v2-to-v2 available for Py >=3.14")
+
     if request.param == "as_v1":
         return qcel.models.v1, -1, qcel.models.v1
     elif request.param == "to_v2":
@@ -243,6 +247,9 @@ def schema_versions(request):
 
 @pytest.fixture(scope="function", params=["as_v1", "as_v2"])
 def schema_versions2(request):
+    if sys.version_info >= (3, 14) and request.param != "as_v2":
+        pytest.skip("Only QCSchema v2-to-v2 available for Py >=3.14")
+
     if request.param == "as_v1":
         return qcel.models.v1, -1, qcel.models.v1
     elif request.param == "as_v2":

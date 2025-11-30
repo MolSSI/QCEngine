@@ -76,8 +76,8 @@ class ProgramHarness(BaseModel, abc.ABC):
         # Note: Someday when the multiple QCSchema versions QCEngine supports are all within the
         #  Pydantic v2 API base class, this can use discriminated unions instead of logic.
 
-        v1_model = qcelemental.models.v1.AtomicInput
-        v2_model = qcelemental.models.v2.AtomicInput
+        from qcelemental.models.v1 import AtomicInput as v1_model
+        from qcelemental.models.v2 import AtomicInput as v2_model
 
         if isinstance(data, v1_model):
             mdl = model_wrapper(data, v1_model)
@@ -94,7 +94,14 @@ class ProgramHarness(BaseModel, abc.ABC):
             if data.get("specification", False) or data.get("schema_version") == 2:
                 mdl = model_wrapper(data, v2_model)
             else:
-                mdl = model_wrapper(data, v1_model)
+                try:
+                    mdl = model_wrapper(data, v1_model)
+                except RuntimeError:
+                    # form a QCSchema v1 layout model with Pydantic v2 API
+                    # this is for py314 and only safe b/c immediately converted to v2 next
+                    from qcelemental.models._v1v2 import AtomicInput as v1v2_model
+
+                    mdl = model_wrapper(data, v1v2_model)
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:

@@ -94,6 +94,7 @@ def compute(
 
     .. versionadded:: 0.50.0
        input_data can newly be QCSchema v2 as well as longstanding v1.
+       Note that the QCSchema v2 layout will not be official until v0.60.0 .
        The compute_procedure is newly incorporated into compute.
        The *return_version* parameter was added.
 

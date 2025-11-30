@@ -7,8 +7,8 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models.v1 import AtomicResult
-from qcelemental.models.v2 import BasisSet
+import qcelemental
+from qcelemental.models.v2 import AtomicResult, BasisSet
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
@@ -216,11 +216,15 @@ class Psi4Harness(ProgramHarness):
                 output_data["stdout"] = output_data.pop("raw_output", None)
 
             else:
-                # psi4 QCSchema interface only speaks qcsk.v1
-                # * note that only psiapi=True calcs need this until rearrangement affects all
-                input_model_v1 = input_model.convert_v(1)
+                use_psiapi_mode = input_model.specification.extras.get("psiapi", False)
 
-                if input_model_v1.extras.get("psiapi", False):  # TODO specification?
+                # psi4 QCSchema interface before ~v1.11 only speaks qcsk.v1
+                # * note that only psiapi=True calcs need this until rearrangement affects all
+                if pversion < parse_version("1.11a1.dev1"):  # TODO adjust for v2-compat merge
+                    input_model_v1or2 = input_model.convert_v(1)
+                    # TODO check what this does with py314
+
+                if use_psiapi_mode:
                     import psi4
 
                     orig_scr = psi4.core.IOManager.shared_object().get_default_path()
@@ -230,13 +234,13 @@ class Psi4Harness(ProgramHarness):
                     if pversion < parse_version("1.6"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
-                        output_data_v1 = psi4.schema_wrapper.run_qcschema(input_model_v1).dict()
+                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model).dict()
                     else:
-                        output_data_v1 = psi4.schema_wrapper.run_qcschema(input_model_v1, postclean=False).dict()
+                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
                     # success here means execution returned. output_data may yet be qcel.models.AtomicResult or qcel.models.FailedOperation
                     success = True
-                    if output_data_v1.get("success", False):
-                        output_data_v1["extras"]["psiapi_evaluated"] = True
+                    if output_data_v1or2.get("success", False):  # uhoh, v2 can't be False? or maybe ok b/c assume false
+                        output_data_v1or2["extras"]["psiapi_evaluated"] = True
                     psi4.core.IOManager.shared_object().set_default_path(orig_scr)
                 else:
                     run_cmd = [
@@ -252,18 +256,18 @@ class Psi4Harness(ProgramHarness):
                     ]
                     if config.scratch_messy:
                         run_cmd.append("--messy")
-                    input_files = {"data.msgpack": input_model_v1.serialize("msgpack-ext")}
+                    input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
                     success, output = execute(
                         run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
                     )
                     if success:
-                        output_data_v1 = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
+                        output_data_v1or2 = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
                     else:
-                        output_data_v1 = input_model_v1
+                        output_data_v1or2 = input_model
 
                 if success:
-                    if output_data_v1.get("success", False) is False:
-                        error_message, error_type = self._handle_errors(output_data_v1)
+                    if output_data_v1or2.get("success", False) is False:
+                        error_message, error_type = self._handle_errors(output_data_v1or2)
                     else:
                         compute_success = True
                 else:
@@ -294,18 +298,23 @@ class Psi4Harness(ProgramHarness):
                 raise UnknownError(error_message)
 
         # Reset basis
-        output_data_v1["model"]["basis"] = old_basis
+        # output_data_v1v2["model"]["basis"] = old_basis
 
         # Move several pieces up a level
-        output_data_v1["provenance"]["memory"] = round(config.memory, 3)
-        output_data_v1["provenance"]["nthreads"] = config.ncores
-        if output_data_v1.get("native_files", None) is None:
-            output_data_v1["native_files"] = {
-                "input": json.dumps(json.loads(input_model_v1.json()), indent=1),
+        output_data_v1or2["provenance"]["memory"] = round(config.memory, 3)
+        output_data_v1or2["provenance"]["nthreads"] = config.ncores
+        if output_data_v1or2.get("native_files", None) is None:
+            output_data_v1or2["native_files"] = {
+                "input": json.dumps(json.loads(input_model.json()), indent=1),
             }
 
         # Delete keys
-        output_data_v1.pop("return_output", None)
+        output_data_v1or2.pop("return_output", None)
 
-        atres = AtomicResult(**output_data_v1)
-        return atres.convert_v(2, external_input_data=input_model)
+        if pversion < parse_version("1.11a1.dev1"):  # TODO adjust for v2-compat merge
+            atres = qcelemental.models.v1.AtomicResult(**output_data_v1or2)
+            output_model_v2 = atres.convert_v(2, external_input_data=input_model)
+        else:
+            output_model_v2 = qcelemental.models.v2.AtomicResult(**output_data_v1or2)
+
+        return output_model_v2
