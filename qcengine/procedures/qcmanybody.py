@@ -41,7 +41,15 @@ class QCManyBodyProcedure(ProcedureHarness):
         """
         import qcmanybody
 
-        v1_model = getattr(qcmanybody.models, model)
+        # new
+        module_v1 = importlib.import_module("qcmanybody.models.v1")
+        module_v2 = importlib.import_module("qcmanybody.models.v2")
+        v1_model = getattr(module_v1, model)
+        v2_model = getattr(module_v2, model)
+
+        # old
+        module_v1 = importlib.import_module("qcmanybody.models")
+        v1_model = getattr(module_v1, model)
         v2_model = None
 
         if isinstance(data, v1_model):
