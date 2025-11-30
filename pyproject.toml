@@ -12,7 +12,7 @@ issues = "https://github.com/MolSSI/QCEngine/issues"
 name = "qcengine"
 #version = "0.31.0"
 dynamic = ["version"]
-requires-python = ">=3.8,<3.14.0"
+requires-python = ">=3.9"
 description = "A compute wrapper for Quantum Chemistry, ingesting and producing QCSchema for a variety of QC programs."
 authors = [
   { name="The QCArchive Development Team", email="qcarchive@molssi.org" },
@@ -24,12 +24,12 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Framework :: Pydantic",
     "Framework :: Pydantic :: 2",
 ]
@@ -41,7 +41,7 @@ dependencies = [
     "qcelemental>=0.50a1,<0.70.0",
     "pydantic >=2.1",
     "pydantic-settings",
-    # "typing_extensions; python_version<'3.9'",
+    "packaging",
 ]
 
 [project.optional-dependencies]
@@ -49,7 +49,6 @@ test = [
     "pytest",
     "pytest-cov",
     "codecov",
-    "packaging",
 ]
 lint = [
     "pre-commit",
