@@ -234,9 +234,9 @@ class Psi4Harness(ProgramHarness):
                     if pversion < parse_version("1.6"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
-                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model).dict()
+                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model_v1or2).dict()
                     else:
-                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model, postclean=False).dict()
+                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model_v1or2, postclean=False).dict()
                     # success here means execution returned. output_data may yet be qcel.models.AtomicResult or qcel.models.FailedOperation
                     success = True
                     if output_data_v1or2.get("success", False):  # uhoh, v2 can't be False? or maybe ok b/c assume false
@@ -256,14 +256,14 @@ class Psi4Harness(ProgramHarness):
                     ]
                     if config.scratch_messy:
                         run_cmd.append("--messy")
-                    input_files = {"data.msgpack": input_model.serialize("msgpack-ext")}
+                    input_files = {"data.msgpack": input_model_v1or2.serialize("msgpack-ext")}
                     success, output = execute(
                         run_cmd, input_files, ["data.msgpack"], as_binary=["data.msgpack"], scratch_directory=tmpdir
                     )
                     if success:
                         output_data_v1or2 = deserialize(output["outfiles"]["data.msgpack"], "msgpack-ext")
                     else:
-                        output_data_v1or2 = input_model
+                        output_data_v1or2 = input_model  # TODO _v1or2?
 
                 if success:
                     if output_data_v1or2.get("success", False) is False:
