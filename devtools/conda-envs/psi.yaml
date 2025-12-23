@@ -2,6 +2,7 @@ name: test
 channels:
   - psi4
   - conda-forge
+  - defaults
 dependencies:
   - psi4=1.5
   - libint2=*=hc9558a2_9
