@@ -1,39 +1,39 @@
 import abc
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
 
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
-from qcelemental.models import AtomicInput, AtomicResult, FailedOperation
+from pydantic import BaseModel, ConfigDict
 
-from qcengine.exceptions import KnownErrorException
 from qcengine.config import TaskConfig
+from qcengine.exceptions import KnownErrorException
+
+from ..util import model_wrapper
 
 logger = logging.getLogger(__name__)
 
 
 class ProgramHarness(BaseModel, abc.ABC):
+    """Base class for analytic single-geometry capable harnesses."""
 
-    _defaults: Dict[str, Any] = {}
+    _defaults: ClassVar[Dict[str, Any]] = {}
     name: str
     scratch: bool
     thread_safe: bool
     thread_parallel: bool
     node_parallel: bool
     managed_memory: bool
-    extras: Optional[Dict[str, Any]]
+    extras: Optional[Dict[str, Any]] = None
 
-    class Config:
-        allow_mutation: False
-        extra: "forbid"
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
 
     @abc.abstractmethod
-    def compute(self, input_data: AtomicInput, config: TaskConfig) -> Union[AtomicResult, FailedOperation]:
+    def compute(self, input_data: "AtomicInput", config: TaskConfig) -> Union["AtomicResult", "FailedOperation"]:
         """Top-level compute method to be implemented for every ProgramHarness
 
         Note:
@@ -66,6 +66,48 @@ class ProgramHarness(BaseModel, abc.ABC):
 
     ## Utility
 
+    def build_input_model(
+        self, data: Dict[str, Any], *, return_input_schema_version: bool = False
+    ) -> Union["AtomicInput", Tuple["AtomicInput", int]]:
+        """
+        Quick wrapper around util.model_wrapper for inherited classes
+        """
+        # Note: Someday when the multiple QCSchema versions QCEngine supports are all within the
+        #  Pydantic v2 API base class, this can use discriminated unions instead of logic.
+
+        from qcelemental.models.v1 import AtomicInput as v1_model
+        from qcelemental.models.v2 import AtomicInput as v2_model
+
+        if isinstance(data, v1_model):
+            mdl = model_wrapper(data, v1_model)
+        elif isinstance(data, v2_model):
+            mdl = model_wrapper(data, v2_model)
+        elif isinstance(data, dict):
+            # remember these are user-provided dictionaries, so they'll have the mandatory fields,
+            #   like driver, not the helpful discriminator fields like schema_version.
+            # when dictionaries look the same, we can't correctly identify the user schema version
+            #   so have to default to one or the other. Note that can force paths for testing by
+            #   -1 -> 2 in schema_versions.
+            # so long as versions distinguishable by a *required* field, id by dict is reliable.
+
+            if data.get("specification", False) or data.get("schema_version") == 2:
+                mdl = model_wrapper(data, v2_model)
+            else:
+                try:
+                    mdl = model_wrapper(data, v1_model)
+                except RuntimeError:
+                    # form a QCSchema v1 layout model with Pydantic v2 API
+                    # this is for py314 and only safe b/c immediately converted to v2 next
+                    from qcelemental.models._v1v2 import AtomicInput as v1v2_model
+
+                    mdl = model_wrapper(data, v1v2_model)
+
+        input_schema_version = mdl.schema_version
+        if return_input_schema_version:
+            return mdl.convert_v(2), input_schema_version
+        else:
+            return mdl.convert_v(2)
+
     def get_version(self) -> str:
         """Finds program, extracts version, returns normalized version string.
 
@@ -78,7 +120,7 @@ class ProgramHarness(BaseModel, abc.ABC):
     ## Computers
 
     def build_input(
-        self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None
+        self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
         raise ValueError("build_input is not implemented for {}.", self.__class__)
 
@@ -114,12 +156,12 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
     ``ErrorCorrectionProgramHarness`` and used to determine if/how to re-run the computation.
     """
 
-    def _compute(self, input_data: AtomicInput, config: TaskConfig) -> AtomicResult:
+    def _compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
         raise NotImplementedError()
 
-    def compute(self, input_data: AtomicInput, config: TaskConfig) -> AtomicResult:
+    def compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
         # Get the error correction configuration
-        error_policy = input_data.protocols.error_correction
+        error_policy = input_data.specification.protocols.error_correction
 
         # Create a local copy of the input data
         local_input_data = input_data
@@ -151,9 +193,12 @@ class ErrorCorrectionProgramHarness(ProgramHarness, abc.ABC):
 
                 # Generate and apply the updated keywords
                 keyword_updates = e.create_keyword_update(local_input_data)
-                new_keywords = local_input_data.keywords.copy()
+                new_keywords = local_input_data.specification.keywords.copy()
                 new_keywords.update(keyword_updates)
-                local_input_data = AtomicInput(**local_input_data.dict(exclude={"keywords"}), keywords=new_keywords)
+                local_input_data = input_data.__class__(
+                    **local_input_data.model_dump(exclude={"specification"}),
+                    specification={**local_input_data.specification.model_dump(), "keywords": new_keywords},
+                )
 
                 # Store the error details and mitigations employed
                 observed_errors[e.error_name] = {"details": e.details, "keyword_updates": keyword_updates}

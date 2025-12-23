@@ -2,7 +2,7 @@ import re
 from decimal import Decimal
 from typing import List, Tuple
 
-from qcelemental.models import AtomicResult, Molecule, OptimizationInput, Provenance
+from qcelemental.models.v2 import AtomicResult, Molecule, OptimizationInput, Provenance
 from qcelemental.util import unnp
 
 from qcengine.programs.nwchem.harvester import harvest_outfile_pass
@@ -32,7 +32,7 @@ def harvest_output(outtext: str) -> Tuple[List[PreservingDict], List[Molecule], 
     pass_coord = []
     pass_grad = []
     version = error = None
-    for outpass in re.split(r"Step +\d", outtext, re.MULTILINE)[1:]:
+    for outpass in re.split(r"Step +\d", outtext, flags=re.MULTILINE)[1:]:
         psivar, nwcoord, nwgrad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
@@ -63,30 +63,38 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
     results = []
     for qcvars, nwgrad, out_mol in zip(out_psivars, out_grads, out_mols):
         if nwgrad is not None:
-            qcvars[f"{input_model.input_specification.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
+            qcvars[f"{input_model.specification.specification.model.method.upper()[4:]} TOTAL GRADIENT"] = nwgrad
             qcvars["CURRENT GRADIENT"] = nwgrad
 
         # Get the formatted properties
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="NWChem", version=version, routine="nwchem_opt").dict()
+        provenance = Provenance(creator="NWChem", version=version, routine="nwchem_opt").model_dump()
         if module is not None:
             provenance["module"] = module
 
         # Format them inout an output
-        output_data = {
-            "schema_version": 1,
+        input_data = {
             "molecule": out_mol,
-            "driver": "gradient",
-            "extras": input_model.extras.copy(),
-            "model": input_model.input_specification.model,
-            "keywords": input_model.input_specification.keywords,
+            "specification": input_model.specification.specification.model_dump(),
+        }
+        input_data["specification"]["driver"] = "gradient"
+        input_data["specification"].pop("schema_name", None)
+        input_data["specification"].pop("schema_version", None)
+        # TODO v2 sync with __init__ and change when QCInputSpec and AtomicSpec are reconciled
+
+        output_data = {
+            "schema_version": 2,
+            "input_data": input_data,
+            "molecule": out_mol,
+            "extras": {},
             "properties": atprop,
             "provenance": provenance,
             "return_result": nwgrad,
             "success": True,
         }
+        # v2: perhaps lost the OptimizationInput.extras?
 
         # got to even out who needs plump/flat/Decimal/float/ndarray/list
         # Decimal --> str preserves precision

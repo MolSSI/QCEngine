@@ -2,12 +2,14 @@
 Utilities for the testing suite.
 """
 
+import sys
 from typing import List
 
 import numpy as np
 import pytest
 import qcelemental as qcel
 from packaging.version import parse
+from pydantic import ConfigDict
 from qcelemental.util import which, which_import
 
 import qcengine as qcng
@@ -82,7 +84,7 @@ def is_mdi_new_enough(version_feature_introduced):
 
 
 @pytest.fixture(scope="function")
-def failure_engine():
+def failure_engine(schema_versions, request):
     unique_name = "testing_random_name"
 
     class FailEngine(qcng.programs.ProgramHarness):
@@ -100,8 +102,9 @@ def failure_engine():
             "managed_memory": False,
         }
 
-        class Config(qcng.programs.ProgramHarness.Config):
-            allow_mutation: True
+        model_config = ConfigDict(
+            frozen=False,
+        )
 
         @staticmethod
         def found(raise_error: bool = False) -> bool:
@@ -119,16 +122,15 @@ def failure_engine():
             grad = [0, 0, -grad_value, 0, 0, grad_value]
 
             if mode == "pass":
-                return qcel.models.AtomicResult(
+                return qcel.models.v2.AtomicResult(
                     **{
-                        **input_data.dict(),
-                        **{
-                            "properties": {"return_energy": grad_value},
-                            "return_result": grad,
-                            "success": True,
-                            "extras": {"ncalls": self.ncalls},
-                            "provenance": {"creator": "failure_engine", "ncores": config.ncores},
-                        },
+                        "input_data": input_data,
+                        "molecule": input_data.molecule,
+                        "properties": {"return_energy": grad_value},
+                        "return_result": grad,
+                        "success": True,
+                        "extras": {"ncalls": self.ncalls},
+                        "provenance": {"creator": "failure_engine", "ncores": config.ncores},
                     }
                 )
             elif mode == "random_error":
@@ -139,11 +141,20 @@ def failure_engine():
                 raise KeyError("Testing error, should not arrive here.")
 
         def get_job(self):
-            json_data = {
-                "molecule": {"symbols": ["He", "He"], "geometry": [0, 0, 0, 0, 0, self.start_distance]},
-                "driver": "gradient",
-                "model": {"method": "something"},
-            }
+            if from_v2(request.node.name):
+                json_data = {
+                    "molecule": {"symbols": ["He", "He"], "geometry": [0, 0, 0, 0, 0, self.start_distance]},
+                    "specification": {
+                        "driver": "gradient",
+                        "model": {"method": "something"},
+                    },
+                }
+            else:
+                json_data = {
+                    "molecule": {"symbols": ["He", "He"], "geometry": [0, 0, 0, 0, 0, self.start_distance]},
+                    "driver": "gradient",
+                    "model": {"method": "something"},
+                }
 
             return json_data
 
@@ -215,3 +226,132 @@ def using(program):
         _using_cache[program] = skip
 
     return _using_cache[program]
+
+
+@pytest.fixture(scope="function", params=[None, "as_v1", "as_v2", "to_v1", "to_v2"])
+def schema_versions(request):
+    # V1V2TEST uncomment below
+    if sys.version_info >= (3, 14) and request.param != "as_v2":
+        pytest.skip("Only QCSchema v2-to-v2 available for Py >=3.14")
+
+    if request.param == "as_v1":
+        return qcel.models.v1, -1, qcel.models.v1
+    elif request.param == "to_v2":
+        return qcel.models.v1, 2, qcel.models.v2
+    elif request.param == "as_v2":
+        return (qcel.models.v2, -1, qcel.models.v2)
+    elif request.param == "to_v1":
+        return qcel.models.v2, 1, qcel.models.v1
+    else:
+        return qcel.models, -1, qcel.models
+
+
+@pytest.fixture(scope="function", params=["as_v1", "as_v2"])
+def schema_versions2(request):
+    if sys.version_info >= (3, 14) and request.param != "as_v2":
+        pytest.skip("Only QCSchema v2-to-v2 available for Py >=3.14")
+
+    if request.param == "as_v1":
+        return qcel.models.v1, -1, qcel.models.v1
+    elif request.param == "as_v2":
+        # TODO with dict-in and dict-out and models indiscriminable and defaulting to v1
+        #   the as_v2 is often not reliable, so paper over it with 2 for now. return to -1 when fixed.
+        return (qcel.models.v2, 2, qcel.models.v2)
+
+
+@pytest.fixture(scope="function", params=[None])
+def schema_versions0(request):
+    return qcel.models, -1, qcel.models
+
+
+@pytest.fixture(scope="function", params=[None, "as_v1", "as_v2", "to_v1", "to_v2"])
+def schema_versions5(request):
+    # like schema_versions except not avoiding QCSchema v1 for Py 3.14
+
+    if request.param == "as_v1":
+        return qcel.models.v1, -1, qcel.models.v1
+    elif request.param == "to_v2":
+        return qcel.models.v1, 2, qcel.models.v2
+    elif request.param == "as_v2":
+        return (qcel.models.v2, -1, qcel.models.v2)
+    elif request.param == "to_v1":
+        return qcel.models.v2, 1, qcel.models.v1
+    else:
+        return qcel.models, -1, qcel.models
+
+
+def checkver_and_convert(mdl, tnm, prepost, vercheck: bool = True, cast_dict_as=None):
+    import json
+
+    import pydantic
+
+    def check_model_v1(m):
+        assert isinstance(m, pydantic.v1.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.BaseModel (Pyd v1)"
+        assert isinstance(
+            m, qcel.models.v1.basemodels.ProtoModel
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.ProtoModel"
+        if vercheck:
+            assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
+
+    def check_model__v1v2(m):
+        assert isinstance(
+            m, (pydantic.v1.BaseModel, pydantic.BaseModel)
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.BaseModel (Pyd v1)"
+        assert isinstance(
+            m, (qcel.models.v1.basemodels.ProtoModel, qcel.models.v2.basemodels.ProtoModel)
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v1.ProtoModel"
+        if vercheck:
+            assert m.schema_version == 1, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 1"
+
+    def check_model_v2(m):
+        assert isinstance(m, pydantic.BaseModel), f"type({m.__class__.__name__}) = {type(m)} ⊄ BaseModel (Pyd v2)"
+        assert isinstance(
+            m, qcel.models.v2.basemodels.ProtoModel
+        ), f"type({m.__class__.__name__}) = {type(m)} ⊄ v2.ProtoModel"
+        if vercheck:
+            assert m.schema_version == 2, f"{m.__class__.__name__}.schema_version = {m.schema_version} != 2"
+
+    if prepost == "pre":
+        dict_in = isinstance(mdl, dict)
+        cast_smodel = cast_dict_as or "AtomicInput"
+        if "as_v1" in tnm or "to_v2" in tnm or "None" in tnm:
+            if dict_in:
+                mdl = getattr(qcel.models.v1, cast_smodel)(**mdl)
+            # V1V2TEST check_model__v1v2(mdl)
+            check_model_v1(mdl)
+        elif "as_v2" in tnm or "to_v1" in tnm:
+            if dict_in:
+                mdl = getattr(qcel.models.v2, cast_smodel)(**mdl)
+            check_model_v2(mdl)
+            # NOW IN COMPUTE mdl = mdl.convert_v(1)
+
+        if dict_in:
+            mdl = mdl.model_dump()
+
+    elif prepost == "post":
+        # excuse_as_v2 is only for "post" when the compute input was a dict and while dicts are not discriminable.
+        #   for now these always go to v1 in programs/model.py so as_v2 returns wrongly as v1
+        # follow-up: there are too many ways this can happen, so now it's forestalled by the schema_versions fixture passing 2 to as_v2
+        dict_in = isinstance(mdl, dict)
+        cast_smodel = cast_dict_as or "AtomicResult"
+        if "as_v1" in tnm or "to_v1" in tnm or "None" in tnm:
+            if dict_in:
+                mdl = getattr(qcel.models.v1, cast_smodel)(**mdl)
+            # V1V2TEST check_model__v1v2(mdl)
+            check_model_v1(mdl)
+        elif "as_v2" in tnm or "to_v2" in tnm:
+            if dict_in:
+                mdl = getattr(qcel.models.v2, cast_smodel)(**mdl)
+            # NOW IN COMPUTE mdl = mdl.convert_v(2)
+            check_model_v2(mdl)
+
+        if dict_in:
+            # imitates compute(..., return_dict=True)
+            mdl = json.loads(mdl.model_dump_json())
+
+    return mdl
+
+
+def from_v2(tnm: str) -> bool:
+    """Convenience test for partitioning tests expecting QCSchema v2 input."""
+    return ("to_v1" in tnm) or ("as_v2" in tnm)

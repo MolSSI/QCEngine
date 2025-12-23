@@ -1,9 +1,9 @@
 """
 Calls adcc
 """
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models import AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError, UnknownError
@@ -11,7 +11,7 @@ from .model import ProgramHarness
 from .qcvar_identities_resources import build_atomicproperties
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -19,7 +19,9 @@ if TYPE_CHECKING:
 
 
 class AdccHarness(ProgramHarness):
-    _defaults = {
+    """Interface for adcc project."""
+
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "adcc",
         "scratch": False,
         "thread_safe": False,
@@ -28,9 +30,6 @@ class AdccHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -81,18 +80,18 @@ class AdccHarness(ProgramHarness):
         import psi4
 
         mol = input_model.molecule
-        model = input_model.model
-        conv_tol = input_model.keywords.get("conv_tol", 1e-6)
+        model = input_model.specification.model
+        conv_tol = input_model.specification.keywords.get("conv_tol", 1e-6)
 
-        if input_model.driver not in ["energy", "properties"]:
-            raise InputError(f"Driver {input_model.driver} not implemented for ADCC.")
+        if input_model.specification.driver not in ["energy", "properties"]:
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for ADCC.")
 
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
-        if not input_model.model.basis:
+        if not input_model.specification.model.basis:
             raise InputError("Model must contain a basis set.")
 
-        psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.dict(), fix_symmetry="c1"))
+        psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.model_dump(), fix_symmetry="c1"))
         psi4.core.clean()
         psi4.core.be_quiet()
         psi4.set_options(
@@ -109,27 +108,28 @@ class AdccHarness(ProgramHarness):
         adcc.set_n_threads(config.ncores)
         compute_success = False
         try:
-            adcc_state = adcc.run_adc(wfn, method=model.method, **input_model.keywords)
+            adcc_state = adcc.run_adc(wfn, method=model.method, **input_model.specification.keywords)
             compute_success = adcc_state.converged
         except adcc.InputError as e:
             raise InputError(str(e))
         except Exception as e:
             raise UnknownError(str(e))
 
-        input_data = input_model.dict(encoding="json")
-        output_data = input_data.copy()
+        input_data = input_model.model_dump(encoding="json")
+        output_data = {"input_data": input_data, "extras": {}, "molecule": mol}
         output_data["success"] = compute_success
 
         if compute_success:
             output_data["return_result"] = adcc_state.excitation_energy[0]
 
-            extract_props = input_model.driver == "properties"
+            extract_props = input_model.specification.driver == "properties"
             qcvars = adcc_state.to_qcvars(recurse=True, properties=extract_props)
+            qcvars["CURRENT ENERGY"] = adcc_state.excitation_energy[0]
             atprop = build_atomicproperties(qcvars)
             output_data["extras"]["qcvars"] = qcvars
             output_data["properties"] = atprop
 
-        provenance = Provenance(creator="adcc", version=self.get_version(), routine="adcc").dict()
+        provenance = Provenance(creator="adcc", version=self.get_version(), routine="adcc").model_dump()
         provenance["nthreads"] = adcc.get_n_threads()
         output_data["provenance"] = provenance
 

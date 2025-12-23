@@ -2,9 +2,9 @@
 Calls the RDKit package.
 """
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models.v2 import AtomicResult, Provenance
 from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError
@@ -12,14 +12,15 @@ from ..units import ureg
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
 
 class RDKitHarness(ProgramHarness):
+    """Interface for RDKit project."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "RDKit",
         "scratch": False,
         "thread_safe": True,
@@ -29,9 +30,6 @@ class RDKitHarness(ProgramHarness):
     }
 
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def _process_molecule_rdkit(jmol):
@@ -113,11 +111,11 @@ class RDKitHarness(ProgramHarness):
         jmol = input_data.molecule
         mol = self._process_molecule_rdkit(jmol)
 
-        if input_data.model.method.lower() == "uff":
+        if input_data.specification.model.method.lower() == "uff":
             ff = AllChem.UFFGetMoleculeForceField(mol)
             all_params = AllChem.UFFHasAllMoleculeParams(mol)
-        elif input_data.model.method.lower() in ["mmff94", "mmff94s"]:
-            props = AllChem.MMFFGetMoleculeProperties(mol, mmffVariant=input_data.model.method)
+        elif input_data.specification.model.method.lower() in ["mmff94", "mmff94s"]:
+            props = AllChem.MMFFGetMoleculeProperties(mol, mmffVariant=input_data.specification.model.method)
             ff = AllChem.MMFFGetMoleculeForceField(mol, props)
             all_params = AllChem.MMFFHasAllMoleculeParams(mol)
         else:
@@ -128,22 +126,28 @@ class RDKitHarness(ProgramHarness):
 
         ff.Initialize()
 
-        ret_data["properties"] = {"return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree")}
-
-        if input_data.driver == "energy":
-            ret_data["return_result"] = ret_data["properties"]["return_energy"]
-        elif input_data.driver == "gradient":
+        ret_data["properties"] = {
+            "return_energy": ff.CalcEnergy() * ureg.conversion_factor("kJ / mol", "hartree"),
+            "calcinfo_natom": len(jmol.symbols),
+        }
+        if input_data.specification.driver == "gradient":
             coef = ureg.conversion_factor("kJ / mol", "hartree") * ureg.conversion_factor("angstrom", "bohr")
-            ret_data["return_result"] = [x * coef for x in ff.CalcGrad()]
+            ret_data["properties"]["return_gradient"] = [x * coef for x in ff.CalcGrad()]
+
+        if input_data.specification.driver == "energy":
+            ret_data["return_result"] = ret_data["properties"]["return_energy"]
+        elif input_data.specification.driver == "gradient":
+            ret_data["return_result"] = ret_data["properties"]["return_gradient"]
         else:
-            raise InputError(f"Driver {input_model.driver} not implemented for RDKit.")
+            raise InputError(f"Driver {input_data.specification.driver} not implemented for RDKit.")
 
         ret_data["provenance"] = Provenance(
             creator="rdkit", version=rdkit.__version__, routine="rdkit.Chem.AllChem.UFFGetMoleculeForceField"
         )
 
-        ret_data["schema_name"] = "qcschema_output"
         ret_data["success"] = True
+        ret_data["input_data"] = input_data
+        ret_data["molecule"] = jmol
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**ret_data)

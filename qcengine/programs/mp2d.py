@@ -4,11 +4,11 @@ import pprint
 import re
 import sys
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models.v2 import AtomicResult, Provenance
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, ResourceError, UnknownError
@@ -20,8 +20,9 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class MP2DHarness(ProgramHarness):
+    """Interface for MP2D executable project."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MP2D",
         "scratch": True,
         "thread_safe": True,
@@ -30,9 +31,6 @@ class MP2DHarness(ProgramHarness):
         "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -100,23 +98,23 @@ class MP2DHarness(ProgramHarness):
     ) -> Dict[str, Any]:
 
         # strip engine hint
-        mtd = input_model.model.method
+        mtd = input_model.specification.model.method
         if mtd.startswith("mp2d-"):
             mtd = mtd[5:]
 
-        if input_model.driver.derivative_int() > 1:
-            raise InputError(f"Driver {input_model.driver} not implemented for MP2D.")
+        if input_model.specification.driver.derivative_int() > 1:
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for MP2D.")
 
         # temp until actual options object
-        input_model.extras["info"] = empirical_dispersion_resources.from_arrays(
+        input_model.specification.extras["info"] = empirical_dispersion_resources.from_arrays(
             name_hint=mtd,
-            level_hint=input_model.keywords.get("level_hint", None),
-            param_tweaks=input_model.keywords.get("params_tweaks", None),
-            dashcoeff_supplement=input_model.keywords.get("dashcoeff_supplement", None),
+            level_hint=input_model.specification.keywords.get("level_hint", None),
+            param_tweaks=input_model.specification.keywords.get("params_tweaks", None),
+            dashcoeff_supplement=input_model.specification.keywords.get("dashcoeff_supplement", None),
         )
 
         # Need 'real' field later and that's only guaranteed for molrec
-        molrec = qcel.molparse.from_schema(input_model.molecule.dict())
+        molrec = qcel.molparse.from_schema(input_model.molecule.model_dump())
         xyz = qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format="")
         infiles = {"mp2d_geometry": xyz}
         # jobrec['molecule']['real'] = molrec['real']
@@ -132,10 +130,10 @@ class MP2DHarness(ProgramHarness):
         command = ["mp2d", "mp2d_geometry"]
         command.extend(
             """--TT_a1={a1} --TT_a2={a2} --rcut={rcut} --w={w} --s8={s8}""".format(
-                **input_model.extras["info"]["dashparams"]
+                **input_model.specification.extras["info"]["dashparams"]
             ).split()
         )
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             command.append("--gradient")
 
         return {
@@ -167,7 +165,7 @@ class MP2DHarness(ProgramHarness):
             elif re.match("Atomic Coordinates in Angstroms", ln):
                 break
         else:
-            if not ((real_nat == 1) and (input_model.driver == "gradient")):
+            if not ((real_nat == 1) and (input_model.specification.driver == "gradient")):
                 raise UnknownError("Unknown issue occured.")
 
         # parse gradient output
@@ -175,7 +173,7 @@ class MP2DHarness(ProgramHarness):
             srealgrad = outfiles["mp2d_gradient"]
             realgrad = np.fromstring(srealgrad, count=3 * real_nat, sep=" ").reshape((-1, 3))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             ireal = np.argwhere(real).reshape((-1))
             fullgrad = np.zeros((full_nat, 3))
             try:
@@ -183,7 +181,7 @@ class MP2DHarness(ProgramHarness):
             except NameError as exc:
                 raise UnknownError("Unsuccessful gradient collection.") from exc
 
-        qcvkey = input_model.extras["info"]["fctldash"].upper()
+        qcvkey = input_model.specification.extras["info"]["fctldash"].upper()
 
         calcinfo = []
         calcinfo.append(qcel.Datum("CURRENT ENERGY", "Eh", ene))
@@ -192,7 +190,7 @@ class MP2DHarness(ProgramHarness):
         if qcvkey:
             calcinfo.append(qcel.Datum(f"{qcvkey} DISPERSION CORRECTION ENERGY", "Eh", ene))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
             calcinfo.append(qcel.Datum("DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
             calcinfo.append(qcel.Datum("2-BODY DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
@@ -210,16 +208,24 @@ class MP2DHarness(ProgramHarness):
         # jobrec['properties'] = {"return_energy": ene}
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
 
-        retres = calcinfo[f"CURRENT {input_model.driver.upper()}"]
+        retres = calcinfo[f"CURRENT {input_model.specification.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()
 
+        properties = {
+            "calcinfo_natom": len(input_model.molecule.symbols),
+            "return_energy": ene,
+            f"return_{input_model.specification.driver.value}": retres,
+        }
+
         output_data = {
-            "extras": input_model.extras,
+            "input_data": input_model,
+            "molecule": input_model.molecule,
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
-            "properties": {},
+            "properties": properties,
             "provenance": Provenance(
                 creator="MP2D", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
@@ -227,8 +233,8 @@ class MP2DHarness(ProgramHarness):
             "stderr": stderr,
             "stdout": stdout,
         }
-        output_data["extras"]["local_keywords"] = input_model.extras["info"]
+        output_data["extras"]["local_keywords"] = input_model.specification.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
 
         output_data["success"] = True
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)

@@ -2,9 +2,9 @@
 Calls the TorchANI package.
 """
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
-from qcelemental.models import AtomicResult, Provenance
+from qcelemental.models.v2 import AtomicResult, Provenance
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError, ResourceError
@@ -12,16 +12,17 @@ from ..units import ureg
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
 
 class TorchANIHarness(ProgramHarness):
+    """Interface for TorchANI project."""
 
     _CACHE = {}
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "TorchANI",
         "scratch": False,
         "thread_safe": True,
@@ -30,9 +31,6 @@ class TorchANIHarness(ProgramHarness):
         "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -106,7 +104,7 @@ class TorchANIHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # Build model
-        method = input_data.model.method
+        method = input_data.specification.model.method
         model = self.get_model(method)
 
         # Build species
@@ -135,19 +133,19 @@ class TorchANIHarness(ProgramHarness):
 
         ret_data["properties"] = {"return_energy": energy.item()}
 
-        if input_data.driver == "energy":
+        if input_data.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
-        elif input_data.driver == "gradient":
+        elif input_data.specification.driver == "gradient":
             derivative = torch.autograd.grad(energy.sum(), coordinates)[0].squeeze()
             ret_data["return_result"] = (
                 np.asarray(derivative.cpu() * ureg.conversion_factor("angstrom", "bohr")).ravel().tolist()
             )
-        elif input_data.driver == "hessian":
+        elif input_data.specification.driver == "hessian":
             hessian = torchani.utils.hessian(coordinates, energies=energy)
             ret_data["return_result"] = np.asarray(hessian.cpu())
         else:
             raise InputError(
-                f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.driver}."
+                f"TorchANI can only compute energy, gradient, and hessian driver methods. Found {input_data.specification.driver}."
             )
 
         #######################################################################
@@ -170,22 +168,21 @@ class TorchANIHarness(ProgramHarness):
         #   the reliability of the models in an ensemble, and produce more data
         #   points in the regions where this quantity is below a certain
         #   threshold (inclusion criteria)
-        ret_data["extras"] = input_data.extras.copy()
-        ret_data["extras"].update(
-            {
-                "ensemble_energies": energy_array.cpu().detach().numpy(),
-                "ensemble_energy_avg": energy.item(),
-                "ensemble_energy_std": ensemble_std.item(),
-                "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item(),
-            }
-        )
+        ret_data["input_data"] = input_data
+        ret_data["molecule"] = input_data.molecule
+        ret_data["extras"] = {
+            "ensemble_energies": energy_array.cpu().detach().numpy(),
+            "ensemble_energy_avg": energy.item(),
+            "ensemble_energy_std": ensemble_std.item(),
+            "ensemble_per_root_atom_disagreement": ensemble_scaled_std.item(),
+        }
 
         ret_data["provenance"] = Provenance(
             creator="torchani", version="unknown", routine="torchani.builtin.aev_computer"
         )
 
-        ret_data["schema_name"] = "qcschema_output"
+        ret_data["schema_name"] = "qcschema_atomic_result"
         ret_data["success"] = True
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**ret_data)

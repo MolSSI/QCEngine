@@ -9,9 +9,9 @@ import sys
 from collections import Counter
 from functools import reduce
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 
-from qcelemental.models import AtomicResult
+from qcelemental.models.v2 import AtomicResult
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, RandomError, UnknownError
@@ -19,7 +19,7 @@ from ..util import create_mpi_invocation, execute, popen, temporary_directory
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -28,8 +28,9 @@ logger = logging.getLogger(__name__)
 
 
 class MRChemHarness(ProgramHarness):
+    """Interface for MRChem project."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MRChem",
         "scratch": False,
         "thread_safe": False,
@@ -38,9 +39,6 @@ class MRChemHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -103,13 +101,11 @@ class MRChemHarness(ProgramHarness):
         input_data = copy.deepcopy(job_input["mrchem_json"])
 
         output_data = {
-            "keywords": input_data,
-            "schema_name": "qcschema_output",
-            "schema_version": 1,
-            "model": input_model.model,
+            "schema_name": "qcschema_atomic_result",
+            "schema_version": 2,
+            "input_data": input_model,
             "molecule": input_model.molecule,
-            "driver": input_model.driver,
-            "extras": input_model.extras,
+            "extras": {},
         }
 
         with temporary_directory(parent=parent, suffix="_mrchem_scratch") as tmpdir:
@@ -171,18 +167,18 @@ class MRChemHarness(ProgramHarness):
                 )
 
                 # fill up return_result
-                if input_model.driver == "energy":
+                if input_model.specification.driver == "energy":
                     output_data["return_result"] = mrchem_output["properties"]["scf_energy"]["E_tot"]
-                elif input_model.driver == "gradient":
-                    output_data["return_result"] = mrchem_output["properties"]["geometric_derivative"]["geom-1"][
-                        "total"
-                    ]
-                elif input_model.driver == "properties":
+                elif input_model.specification.driver == "gradient":
+                    grad = mrchem_output["properties"]["geometric_derivative"]["geom-1"]["total"]
+                    output_data["return_result"] = grad
+                    output_data["properties"]["return_gradient"] = grad
+                elif input_model.specification.driver == "properties":
                     output_data["return_result"] = {
                         f"{ks[1]}": {f"{ks[2]}": _nested_get(mrchem_output, ks)} for ks in computed_rsp_props
                     }
                 else:
-                    raise InputError(f"Driver {input_model.driver} not implemented for MRChem.")
+                    raise InputError(f"Driver {input_model.specification.driver} not implemented for MRChem.")
 
                 compute_success = mrchem_output["success"]
 
@@ -223,7 +219,7 @@ class MRChemHarness(ProgramHarness):
             },
         }
 
-        opts = copy.deepcopy(input_model.keywords)
+        opts = copy.deepcopy(input_model.specification.keywords)
 
         # Handle molecule
         _, moldict = input_model.molecule.to_string(
@@ -232,12 +228,12 @@ class MRChemHarness(ProgramHarness):
         opts["Molecule"] = moldict["keywords"]
 
         if "WaveFunction" in opts.keys():
-            opts["WaveFunction"]["method"] = input_model.model.method
+            opts["WaveFunction"]["method"] = input_model.specification.model.method
         else:
-            opts["WaveFunction"] = {"method": input_model.model.method}
+            opts["WaveFunction"] = {"method": input_model.specification.model.method}
 
         # The molecular gradient is just a first-order property for MRChem
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             opts.update({"Properties": {"geometric_derivative": True}})
 
         # Log the job settings as constructed from the input model

@@ -8,7 +8,7 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import Molecule
+from qcelemental.models.v2 import Molecule
 from qcelemental.molparse import regex
 
 from ..util import PreservingDict, load_hessian
@@ -106,7 +106,7 @@ def harvest_output(outtext):
         r"^\s+" + r"--------",
         # fmt: on
         outtext,
-        re.MULTILINE,
+        flags=re.MULTILINE,
     ):
         qcvar, gamesscoord, gamessgrad, module = harvest_outfile_pass(outpass)
         pass_qcvar.append(qcvar)
@@ -544,7 +544,7 @@ def harvest_outfile_pass(outtext):
             qcvar_coord = Molecule(
                 validate=False,
                 **qcel.molparse.to_schema(
-                    qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=2
+                    qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=3
                 ),
             )
 

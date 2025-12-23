@@ -1,11 +1,14 @@
-from typing import TYPE_CHECKING, Dict
-from qcengine.programs.model import ProgramHarness
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
+
+from qcelemental.models.v2 import AtomicResult, Provenance
 from qcelemental.util import safe_version, which_import
-from qcelemental.models import AtomicResult, Provenance
+
 from qcengine.exceptions import InputError
+from qcengine.programs.model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
+
     from qcengine.config import TaskConfig
 
 
@@ -14,7 +17,7 @@ class AIMNET2Harness(ProgramHarness):
 
     _CACHE = {}
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "AIMNET2",
         "scratch": False,
         "thread_safe": True,
@@ -59,6 +62,7 @@ class AIMNET2Harness(ProgramHarness):
     def compute(self, input_data: "AtomicInput", config: "TaskConfig"):
         self.found(raise_error=True)
         import torch
+
         from qcengine.units import ureg
 
         # check we can run on the set of elements
@@ -67,9 +71,11 @@ class AIMNET2Harness(ProgramHarness):
 
         unknown_elements = target_elements - known_elements
         if unknown_elements:
-            raise InputError(f"AIMNET2 model {input_data.model.method} does not support elements {unknown_elements}.")
+            raise InputError(
+                f"AIMNET2 model {input_data.specification.model.method} does not support elements {unknown_elements}."
+            )
 
-        method = input_data.model.method
+        method = input_data.specification.model.method
         # load the model using the method as the file name
         model = self.load_model(name=method)
 
@@ -84,11 +90,13 @@ class AIMNET2Harness(ProgramHarness):
             "charge": torch.tensor([input_data.molecule.molecular_charge], dtype=torch.float64, device="cpu"),
         }
 
-        if input_data.driver == "gradient":
+        if input_data.specification.driver == "gradient":
             aimnet_input["coord"].requires_grad_(True)
         out = model(aimnet_input)
 
         ret_data = {
+            "input_data": input_data,
+            "molecule": input_data.molecule,
             "success": False,
             "properties": {
                 "return_energy": out["energy"].item() * ureg.conversion_factor("eV", "hartree"),
@@ -97,7 +105,7 @@ class AIMNET2Harness(ProgramHarness):
                 ),
                 "calcinfo_natom": len(input_data.molecule.atomic_numbers),
             },
-            "extras": input_data.extras.copy(),
+            "extras": {},
         }
         # update with calculated extras
         ret_data["extras"]["aimnet2"] = {
@@ -106,17 +114,17 @@ class AIMNET2Harness(ProgramHarness):
             "ensemble_energy_std": out["energy_std"].item(),
             "ensemble_forces_std": out["forces_std"].detach()[0].cpu().numpy(),
         }
-        if input_data.driver == "energy":
+        if input_data.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
-        elif input_data.driver == "gradient":
+        elif input_data.specification.driver == "gradient":
             ret_data["return_result"] = ret_data["properties"]["return_gradient"]
         else:
             raise InputError(
-                f"AIMNET2 can only compute energy and gradients driver methods. Requested {input_data.driver} not supported."
+                f"AIMNET2 can only compute energy and gradients driver methods. Requested {input_data.specification.driver} not supported."
             )
 
         ret_data["provenance"] = Provenance(creator="pyaimnet2", version=self.get_version(), routine="load_model")
 
         ret_data["success"] = True
 
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**ret_data)

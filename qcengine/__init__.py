@@ -1,7 +1,13 @@
 """
 Base file for the dqm_compute module.
 """
+from importlib.metadata import version
 
+__version__ = version("qcengine")
+__git_revision__ = "(no longer provided)"
+del version
+
+# isort: off
 from . import config, exceptions
 from .compute import compute, compute_procedure
 from .config import get_config
@@ -11,7 +17,4 @@ from .procedures import get_procedure, list_all_procedures, list_available_proce
 from .programs import get_program, list_all_programs, list_available_programs, register_program, unregister_program
 from .stock_mols import get_molecule
 
-# Handle versioneer
-__version__ = get_information("version")
-__git_revision__ = get_information("git_revision")
-del get_information
+# isort: on

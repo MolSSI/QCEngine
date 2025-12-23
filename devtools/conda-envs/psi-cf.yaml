@@ -8,6 +8,7 @@ dependencies:
   - packaging
   - numpy<2
   - libgcc<14.3  # until psi4 package itself conveys this
+  - pydantic-settings
 
     # Core
   - python

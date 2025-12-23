@@ -4,10 +4,10 @@ import copy
 import pprint
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
-from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
 from ...exceptions import InputError, UnknownError
@@ -23,7 +23,7 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class CFOURHarness(ProgramHarness):
-    """
+    """Interface for CFOUR project.
 
     Notes
     -----
@@ -31,7 +31,7 @@ class CFOURHarness(ProgramHarness):
 
     """
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "CFOUR",
         "scratch": True,
         "thread_safe": False,
@@ -40,9 +40,6 @@ class CFOURHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -86,7 +83,7 @@ class CFOURHarness(ProgramHarness):
             "scratch_messy": config.scratch_messy,
         }
 
-        opts = copy.deepcopy(input_model.keywords)
+        opts = copy.deepcopy(input_model.specification.keywords)
 
         # Handle memory
         # for cfour, [GiB] --> [QW]
@@ -98,20 +95,20 @@ class CFOURHarness(ProgramHarness):
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
-        mdcopts = muster_modelchem(input_model.model.method, input_model.driver)
+        mdcopts = muster_modelchem(input_model.specification.model.method, input_model.specification.driver)
         opts.update(mdcopts)
 
         # Handle basis set
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
-        if input_model.model.basis is None:
+        if input_model.specification.model.basis is None:
             raise InputError("None for model.basis is not useable.")
 
         # * why, yes, this is highly questionable
         #   * assuming relative file location between xcfour exe and GENBAS file
         #   * reading a multi MB file into the inputs dict
         if all(input_model.molecule.real):
-            opts["basis"] = input_model.model.basis
+            opts["basis"] = input_model.specification.model.basis
             bascmd = ""
         else:
             # * note not getting per-basis casing like if it passed through format_keywords
@@ -119,8 +116,8 @@ class CFOURHarness(ProgramHarness):
             text = [
                 (
                     f"""H:6-31G"""
-                    if (elem == "H" and input_model.model.basis.upper() == "6-31G*")
-                    else f"""{elem.upper()}:{input_model.model.basis.upper()}"""
+                    if (elem == "H" and input_model.specification.model.basis.upper() == "6-31G*")
+                    else f"""{elem.upper()}:{input_model.specification.model.basis.upper()}"""
                 )
                 for iat, elem in enumerate(input_model.molecule.symbols)
             ]
@@ -162,7 +159,7 @@ class CFOURHarness(ProgramHarness):
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
-        method = input_model.model.method.lower()
+        method = input_model.specification.model.method.lower()
         method = method[3:] if method.startswith("c4-") else method
 
         # c4mol, if it exists, is dinky, just a clue to geometry of cfour results
@@ -186,10 +183,10 @@ class CFOURHarness(ProgramHarness):
                 qcvars[f"{method.upper()} TOTAL HESSIAN"] = c4hess
                 qcvars["CURRENT HESSIAN"] = c4hess
 
-            if input_model.driver.upper() == "PROPERTIES":
+            if (udriver := input_model.specification.driver.upper()) == "PROPERTIES":
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
-                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+                retres = qcvars[f"CURRENT {udriver}"]
         except KeyError:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
@@ -203,14 +200,15 @@ class CFOURHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").dict()
+        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").model_dump()
         if module is not None:
             provenance["module"] = module
 
         output_data = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "input_data": input_model,
             "molecule": c4mol,  # overwrites with outfile Cartesians in case fix_*=F
-            "extras": {**input_model.extras},
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
             "provenance": provenance,
@@ -227,4 +225,4 @@ class CFOURHarness(ProgramHarness):
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)

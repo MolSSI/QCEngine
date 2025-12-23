@@ -1,26 +1,25 @@
 import pprint
 import re
 
-import pytest
 import numpy as np
+import pytest
 import qcelemental as qcel
 from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.programs.tests.test_dftd3_mp2d import eneyne_ne_qcschemamols
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 @pytest.fixture
-def hene():
-    smol = """
+def hene_data():
+    return """
  0 1
  He 0 0 0
  @Ne 2.5 0 0
  nocom
  noreorient
 """
-    return qcel.models.Molecule.from_data(smol)
 
 
 @pytest.mark.parametrize("driver", ["energy", "gradient"])
@@ -39,17 +38,31 @@ def hene():
         pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "direct"}, marks=using("psi4")),
     ],
 )
-def test_simple_ghost(driver, program, basis, keywords, hene):
-    resi = {"molecule": hene, "driver": driver, "model": {"method": "hf", "basis": basis}, "keywords": keywords}
+def test_simple_ghost(driver, program, basis, keywords, hene_data, schema_versions, request):
+    models, retver, _ = schema_versions
+    hene = models.Molecule.from_data(hene_data)
+
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": hene,
+            "specification": {"driver": driver, "model": {"method": "hf", "basis": basis}, "keywords": keywords},
+        }
+    else:
+        resi = {"molecule": hene, "driver": driver, "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     if program == "gamess":
         with pytest.raises(qcng.exceptions.InputError) as e:
-            qcng.compute(resi, program, raise_error=True, return_dict=True)
+            qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
         pytest.xfail("no ghosts with gamess")
 
-    res = qcng.compute(resi, program, raise_error=True, return_dict=True)
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
+    res = checkver_and_convert(res, request.node.name, "post")
 
-    assert res["driver"] == driver
+    if "v2" in request.node.name:
+        assert res["input_data"]["specification"]["driver"] == driver
+    else:
+        assert res["driver"] == driver
     assert "provenance" in res
     assert res["success"] is True
 
@@ -166,8 +179,11 @@ bimol_ref["eneyne"]["mp2_gradient"] = dict(zip(dmm, [
         ),
     ],
 )
-def test_tricky_ghost(driver, qcprog, subject, basis, keywords):
-    dmol = eneyne_ne_qcschemamols()["eneyne"][subject]
+def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    vmol = 3 if from_v2(request.node.name) else 2
+    dmol = eneyne_ne_qcschemamols()[vmol]["eneyne"][subject]
     # Freeze the input orientation so that output arrays are aligned to input
     #   and all programs match gradient.
     dmol["fix_com"] = True
@@ -178,23 +194,33 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords):
         #   to the in_mol vs. calc_mol aligner. Gradients don't change much
         #   w/symm geometry but enough that the symmetrizer must be defeated.
         keywords["geometry__autosym"] = "1d-4"
-    kmol = qcel.models.Molecule(**dmol)
+    kmol = models.Molecule(**dmol)
     ref = bimol_ref["eneyne"]
 
     assert len(kmol.symbols) == ref["natom"][subject]
     assert sum([int(at) for at in kmol.real]) == ref["nreal"][subject]
 
-    atin = qcel.models.AtomicInput(
-        **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords}
-    )
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            **{
+                "molecule": kmol,
+                "specification": {"model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords},
+            }
+        )
+    else:
+        atin = models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords}
+        )
 
     if qcprog == "gamess" and subject in ["mAgB", "gAmB"]:
         with pytest.raises(qcng.exceptions.InputError) as e:
-            res = qcng.compute(atin, qcprog, raise_error=True)
+            qcng.compute(atin, qcprog, raise_error=True, return_version=retver)
         pytest.xfail("no ghosts with gamess")
 
-    atres = qcng.compute(atin, qcprog)
-    pprint.pprint(atres.dict(), width=200)
+    atin = checkver_and_convert(atin, request.node.name, "pre")
+    atres = qcng.compute(atin, qcprog, return_version=retver)
+    atres = checkver_and_convert(atres, request.node.name, "post")
+    pprint.pprint(atres.model_dump(), width=200)
 
     assert compare_values(
         ref["nre"][subject], atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
@@ -261,8 +287,10 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords):
         ),
     ],
 )
-def test_atom_labels(qcprog, basis, keywords):
-    kmol = qcel.models.Molecule.from_data(
+def test_atom_labels(qcprog, basis, keywords, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    kmol = models.Molecule.from_data(
         """
       H       0 0 0
       H5      5 0 0
@@ -275,12 +303,22 @@ def test_atom_labels(qcprog, basis, keywords):
     assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
     assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")
 
-    atin = qcel.models.AtomicInput(
-        **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": "energy", "keywords": keywords}
-    )
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            **{
+                "molecule": kmol,
+                "specification": {"model": {"method": "mp2", "basis": basis}, "driver": "energy", "keywords": keywords},
+            }
+        )
+    else:
+        atin = models.AtomicInput(
+            **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": "energy", "keywords": keywords}
+        )
 
-    atres = qcng.compute(atin, qcprog)
-    pprint.pprint(atres.dict(), width=200)
+    atin = checkver_and_convert(atin, request.node.name, "pre")
+    atres = qcng.compute(atin, qcprog, return_version=retver)
+    atres = checkver_and_convert(atres, request.node.name, "post")
+    pprint.pprint(atres.model_dump(), width=200)
 
     nre = 1.0828427
     assert compare_values(

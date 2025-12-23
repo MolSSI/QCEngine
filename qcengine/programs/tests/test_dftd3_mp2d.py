@@ -4,22 +4,41 @@ import pprint
 import numpy as np
 import pytest
 import qcelemental as qcel
-from qcelemental.models import AtomicInput
 from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
 from qcengine.programs import empirical_dispersion_resources
-from qcengine.testing import is_program_new_enough, using
+from qcengine.testing import checkver_and_convert, from_v2, is_program_new_enough, schema_versions, using
 
 
 @using("dftd3")
 @pytest.mark.parametrize("method", ["b3lyp-d3", "b3lyp-d3m", "b3lyp-d3bj", "b3lyp-d3mbj"])
-def test_dftd3_task(method):
-    json_data = {"molecule": qcng.get_molecule("eneyne"), "driver": "energy", "model": {"method": method}}
+def test_dftd3_task(method, schema_versions, request):
+    models, retver, _ = schema_versions
 
-    ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True)
+    if from_v2(request.node.name):
+        json_data = {
+            "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+            "specification": {
+                "driver": "energy",
+                "model": {"method": method},
+            },
+        }
+    else:
+        json_data = {
+            "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+            "driver": "energy",
+            "model": {"method": method},
+        }
 
-    assert ret["driver"] == "energy"
+    json_data = checkver_and_convert(json_data, request.node.name, "pre")
+    ret = qcng.compute(json_data, "dftd3", raise_error=True, return_dict=True, return_version=retver)
+    ret = checkver_and_convert(ret, request.node.name, "post")
+
+    if "v2" in request.node.name:
+        assert ret["input_data"]["specification"]["driver"] == "energy"
+    else:
+        assert ret["driver"] == "energy"
     assert "provenance" in ret
     assert "normal termination of dftd3" in ret["stdout"]
 
@@ -30,27 +49,49 @@ def test_dftd3_task(method):
 
 
 @using("dftd3")
-def test_dftd3_error():
-    json_data = {
-        "molecule": qcng.get_molecule("eneyne"),
-        "driver": "energy",
-        "model": {"method": "b3lyp-d3(bj)"},
-        "keywords": {},
-    }
+def test_dftd3_error(schema_versions, request):
+    models, retver, _ = schema_versions
+
+    if from_v2(request.node.name):
+        json_data = {
+            "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+            "specification": {
+                "driver": "energy",
+                "model": {"method": "b3lyp-d3(bj)"},
+                "keywords": {},
+            },
+        }
+    else:
+        json_data = {
+            "molecule": models.Molecule(**qcng.get_molecule("eneyne", return_dict=True)),
+            "driver": "energy",
+            "model": {"method": "b3lyp-d3(bj)"},
+            "keywords": {},
+        }
 
     # Test driver
     with pytest.raises(qcng.exceptions.InputError) as exc:
-        input_data = json_data.copy()
-        input_data["driver"] = "properties"
-        ret = qcng.compute(input_data, "dftd3", raise_error=True)
+        input_data = copy.deepcopy(json_data)
+        if from_v2(request.node.name):
+            input_data["specification"]["driver"] = "properties"
+        else:
+            input_data["driver"] = "properties"
+
+        input_data = checkver_and_convert(input_data, request.node.name, "pre")
+        ret = qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
 
     assert "properties not implemented" in str(exc.value)
 
     # Test extension
     with pytest.raises(qcng.exceptions.InputError) as exc:
-        input_data = json_data.copy()
-        input_data["model"]["method"] = "b3lyp-quadD"
-        ret = qcng.compute(input_data, "dftd3", raise_error=True)
+        input_data = copy.deepcopy(json_data)
+        if from_v2(request.node.name):
+            input_data["specification"]["model"]["method"] = "b3lyp-quadD"
+        else:
+            input_data["model"]["method"] = "b3lyp-quadD"
+
+        input_data = checkver_and_convert(input_data, request.node.name, "pre")
+        ret = qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
 
     assert "correction level" in str(exc.value)
 
@@ -1353,7 +1394,7 @@ def eneyne_ne_qcdbmols():
         },
         "ne": {"atom": ne},
     }
-    return mols
+    return {2: mols, 3: mols}
 
 
 def eneyne_ne_psi4mols():
@@ -1373,27 +1414,29 @@ def eneyne_ne_psi4mols():
         },
         "ne": {"atom": ne},
     }
-    return mols
+    return {2: mols, 3: mols}
 
 
 def eneyne_ne_qcschemamols():
 
-    eneyne = qcel.molparse.to_schema(qcel.molparse.from_string(seneyne)["qm"], dtype=2)
-    mA = qcel.molparse.to_schema(qcel.molparse.from_string("\n".join(seneyne.splitlines()[:7]))["qm"], dtype=2)
-    mB = qcel.molparse.to_schema(qcel.molparse.from_string("\n".join(seneyne.splitlines()[-4:]))["qm"], dtype=2)
-    ne = qcel.molparse.to_schema(qcel.molparse.from_string(sne)["qm"], dtype=2)
+    mols = {}
+    for dtype in [2, 3]:
+        eneyne = qcel.molparse.to_schema(qcel.molparse.from_string(seneyne)["qm"], dtype=dtype)
+        mA = qcel.molparse.to_schema(qcel.molparse.from_string("\n".join(seneyne.splitlines()[:7]))["qm"], dtype=dtype)
+        mB = qcel.molparse.to_schema(qcel.molparse.from_string("\n".join(seneyne.splitlines()[-4:]))["qm"], dtype=dtype)
+        ne = qcel.molparse.to_schema(qcel.molparse.from_string(sne)["qm"], dtype=dtype)
 
-    mAgB = qcel.molparse.from_string(seneyne)["qm"]
-    mAgB["real"] = [
-        (iat < mAgB["fragment_separators"][0]) for iat in range(len(mAgB["elem"]))
-    ]  # works b/c chgmult doesn't need refiguring
-    mAgB = qcel.molparse.to_schema(mAgB, dtype=2)
+        mAgB = qcel.molparse.from_string(seneyne)["qm"]
+        mAgB["real"] = [
+            (iat < mAgB["fragment_separators"][0]) for iat in range(len(mAgB["elem"]))
+        ]  # works b/c chgmult doesn't need refiguring
+        mAgB = qcel.molparse.to_schema(mAgB, dtype=dtype)
 
-    gAmB = qcel.molparse.from_string(seneyne)["qm"]
-    gAmB["real"] = [(iat >= gAmB["fragment_separators"][0]) for iat in range(len(gAmB["elem"]))]
-    gAmB = qcel.molparse.to_schema(gAmB, dtype=2)
+        gAmB = qcel.molparse.from_string(seneyne)["qm"]
+        gAmB["real"] = [(iat >= gAmB["fragment_separators"][0]) for iat in range(len(gAmB["elem"]))]
+        gAmB = qcel.molparse.to_schema(gAmB, dtype=dtype)
 
-    mols = {"eneyne": {"dimer": eneyne, "mA": mA, "mB": mB, "mAgB": mAgB, "gAmB": gAmB}, "ne": {"atom": ne}}
+        mols[dtype] = {"eneyne": {"dimer": eneyne, "mA": mA, "mB": mB, "mAgB": mAgB, "gAmB": gAmB}, "ne": {"atom": ne}}
     return mols
 
 
@@ -1514,19 +1557,36 @@ def test_dftd3__from_arrays__supplement():
 
 
 @using("dftd3")
-def test_3():
+def test_3(schema_versions, request):
+    models, retver, _ = schema_versions
+
     sys = qcel.molparse.from_string(seneyne)["qm"]
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": qcel.molparse.to_schema(sys, dtype=2),
-        "driver": "energy",
-        "model": {"method": "b3lyp"},
-        "keywords": {"level_hint": "d3bj"},
-    }
-    res = qcng.compute(resinp, "dftd3", raise_error=True)
-    res = res.dict()
+    if from_v2(request.node.name):
+        resinp = {
+            "schema_name": "qcschema_atomic_input",
+            "schema_version": 2,
+            "molecule": qcel.molparse.to_schema(sys, dtype=3),
+            "specification": {
+                "driver": "energy",
+                "model": {"method": "b3lyp"},
+                "keywords": {"level_hint": "d3bj"},
+            },
+        }
+    else:
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "molecule": qcel.molparse.to_schema(sys, dtype=2),
+            "driver": "energy",
+            "model": {"method": "b3lyp"},
+            "keywords": {"level_hint": "d3bj"},
+        }
+
+    resinp = checkver_and_convert(resinp, request.node.name, "pre")
+    res = qcng.compute(resinp, "dftd3", raise_error=True, return_version=retver)
+    res = checkver_and_convert(res, request.node.name, "post")
+    res = res.model_dump()
 
     # res = dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
     assert compare("B3LYP-D3(BJ)", _compute_key(res["extras"]["local_keywords"]), "key")
@@ -1541,7 +1601,7 @@ def test_3():
             eneyne_ne_qcdbmols, marks=using("psi4")
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
     ],
-    ids=["qmol", "pmol"],
+    ids=["pmol", "qmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1567,8 +1627,9 @@ def test_3():
         ),
     ],
 )
-def test_molecule__run_dftd3__23body(inp, subjects):
-    subject = subjects()[inp["parent"]][inp["subject"]]
+def test_molecule__run_dftd3__23body(inp, subjects, request):
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
@@ -1621,7 +1682,7 @@ def test_qcdb__energy_d3():
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1634,26 +1695,39 @@ def test_qcdb__energy_d3():
         ({"parent": "ne", "name": "mp2d-mp2-dmp2", "subject": "atom", "lbl": "MP2-DMP2"}),
     ],
 )
-def test_mp2d__run_mp2d__2body(inp, subjects, request):
-    subject = subjects()[inp["parent"]][inp["subject"]]
+def test_mp2d__run_mp2d__2body(inp, subjects, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": mol,
-        "driver": "gradient",
-        "model": {"method": inp["name"]},
-        "keywords": {},
-    }
-    jrec = qcng.compute(resinp, "mp2d", raise_error=True)
-    jrec = jrec.dict()
+    if from_v2(request.node.name):
+        resinp = {
+            "schema_name": "qcschema_atomic_input",
+            "schema_version": 2,
+            "molecule": mol,
+            "specification": {"driver": "gradient", "model": {"method": inp["name"]}, "keywords": {}},
+        }
+    else:
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "molecule": mol,
+            "driver": "gradient",
+            "model": {"method": inp["name"]},
+            "keywords": {},
+        }
+    resinp = checkver_and_convert(resinp, request.node.name, "pre")
+    jrec = qcng.compute(resinp, "mp2d", raise_error=True, return_version=retver)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
+    jrec = jrec.model_dump()
 
     # assert len(jrec['extras']['qcvars']) == 8
 
@@ -1684,7 +1758,7 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "program, inp",
@@ -1726,23 +1800,34 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
     ],
     # fmt: on
 )
-def test_dftd3__run_dftd3__2body(inp, program, subjects, request):
-    subject = subjects()[inp["parent"]][inp["subject"]]
+def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
-    atin = AtomicInput(
-        molecule=mol,
-        driver="gradient",
-        **inp["qcsk"],
-    )
-    jrec = qcng.compute(atin, program, raise_error=True)
-    jrec = jrec.dict()
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            molecule=mol,
+            specification={"driver": "gradient", **inp["qcsk"]},
+        )
+    else:
+        atin = models.AtomicInput(
+            molecule=mol,
+            driver="gradient",
+            **inp["qcsk"],
+        )
+    atin = checkver_and_convert(atin, request.node.name, "pre")
+    jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
+    jrec = jrec.model_dump()
     pprint.pprint(jrec)
 
     assert compare_values(expected, jrec["properties"]["return_energy"], atol=1.0e-7)
@@ -1750,7 +1835,8 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, request):
     assert compare_values(expected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
     if program == "dftd3":
         assert compare_values(expected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
-    if atin.model.method:
+    method = atin.specification.model.method if from_v2(request.node.name) else atin.model.method
+    if method:
         assert compare_values(
             expected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION ENERGY"], atol=1.0e-7
         )
@@ -1760,7 +1846,7 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, request):
     assert compare_values(gexpected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
     if program == "dftd3":
         assert compare_values(gexpected, jrec["extras"]["qcvars"]["2-BODY DISPERSION CORRECTION GRADIENT"], atol=1.0e-7)
-    if atin.model.method:
+    if method:
         assert compare_values(
             gexpected, jrec["extras"]["qcvars"][inp["lbl"] + " DISPERSION CORRECTION GRADIENT"], atol=1.0e-7
         )
@@ -1775,7 +1861,7 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, request):
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1790,25 +1876,36 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, request):
     ],
     # fmt: on
 )
-def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
-    subject = subjects()[inp["parent"]][inp["subject"]]
+def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
     program = "dftd4" if ("D4(BJ" in inp["lbl"]) else "dftd3"
 
-    atin = AtomicInput(
-        molecule=mol,
-        driver="gradient",
-        **inp["qcsk"],
-    )
-    jrec = qcng.compute(atin, program, raise_error=True)
-    jrec = jrec.dict()
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            molecule=mol,
+            specification={"driver": "gradient", **inp["qcsk"]},
+        )
+    else:
+        atin = models.AtomicInput(
+            molecule=mol,
+            driver="gradient",
+            **inp["qcsk"],
+        )
+    atin = checkver_and_convert(atin, request.node.name, "pre")
+    jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
+    jrec = jrec.model_dump()
 
     with pytest.raises(AssertionError) as exc:
         assert compare_values(expected, jrec["properties"]["return_energy"], atol=1.0e-7)
@@ -1824,7 +1921,7 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1837,26 +1934,39 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, request):
         ({"parent": "ne", "name": "d3-atmgr", "subject": "atom", "lbl": "ATM"}),
     ],
 )
-def test_dftd3__run_dftd3__3body(inp, subjects, request):
-    subject = subjects()[inp["parent"]][inp["subject"]]
+def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": mol,
-        "driver": "gradient",
-        "model": {"method": inp["name"]},
-        "keywords": {},
-    }
-    jrec = qcng.compute(resinp, "dftd3", raise_error=True)
-    jrec = jrec.dict()
+    if from_v2(request.node.name):
+        resinp = {
+            "schema_name": "qcschema_atomic_input",
+            "schema_version": 2,
+            "molecule": mol,
+            "specification": {"driver": "gradient", "model": {"method": inp["name"]}, "keywords": {}},
+        }
+    else:
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "molecule": mol,
+            "driver": "gradient",
+            "model": {"method": inp["name"]},
+            "keywords": {},
+        }
+    resinp = checkver_and_convert(resinp, request.node.name, "pre")
+    jrec = qcng.compute(resinp, "dftd3", raise_error=True, return_version=retver)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
+    jrec = jrec.model_dump()
 
     assert len(jrec["extras"]["qcvars"]) == 8
 
@@ -1884,7 +1994,7 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp, extrakw, program",
@@ -1901,27 +2011,42 @@ def test_dftd3__run_dftd3__3body(inp, subjects, request):
         ),
     ],
 )
-def test_sapt_pairwise(inp, program, extrakw, subjects, request):
-    subject = subjects()[inp["parent"]][inp["subject"]]
+def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     expected_pairwise = pref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
-    atin = AtomicInput(
-        molecule=mol,
-        driver="energy",
-        model={"method": inp["lbl"]},
-        keywords={
-            "pair_resolved": True,
-            **extrakw,
-        },
-    )
-    jrec = qcng.compute(atin, program, raise_error=True)
-    jrec = jrec.dict()
+    if from_v2(request.node.name):
+        atin = models.AtomicInput(
+            molecule=mol,
+            specification={
+                "driver": "energy",
+                "model": {"method": inp["lbl"]},
+                "keywords": {"pair_resolved": True, **extrakw},
+            },
+        )
+    else:
+        atin = models.AtomicInput(
+            molecule=mol,
+            driver="energy",
+            model={"method": inp["lbl"]},
+            keywords={
+                "pair_resolved": True,
+                **extrakw,
+            },
+        )
+    atin = checkver_and_convert(atin, request.node.name, "pre")
+    jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
+    jrec = jrec.model_dump()
 
     assert compare_values(expected, jrec["extras"]["qcvars"]["CURRENT ENERGY"], atol=1.0e-7)
     assert compare_values(expected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
@@ -1948,7 +2073,7 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, request):
         ),  # needs qcdb.Molecule, presently more common in psi4 than in qcdb
         pytest.param(eneyne_ne_qcschemamols),
     ],
-    ids=["qmol", "pmol", "qcmol"],
+    ids=["pmol", "qmol", "qcmol"],
 )
 @pytest.mark.parametrize(
     "inp",
@@ -1961,26 +2086,43 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, request):
         ({"parent": "ne", "name": "hf/minis", "subject": "atom", "lbl": "GCP"}),
     ],
 )
-def test_gcp(inp, subjects, program, request):
-    subject = subjects()[inp["parent"]][inp["subject"]]
+def test_gcp(inp, subjects, program, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    vmol = 3 if from_v2(request.node.name) else 2
+    subject = subjects()[vmol][inp["parent"]][inp["subject"]]
     expected = ref[inp["parent"]][inp["lbl"]][inp["subject"]]
     gexpected = gref[inp["parent"]][inp["lbl"]][inp["subject"]]
 
     if "qcmol" in request.node.name:
         mol = subject
     else:
-        mol = subject.to_schema(dtype=2)
+        mol = subject.to_schema(dtype=vmol)
 
-    resinp = {
-        "schema_name": "qcschema_input",
-        "schema_version": 1,
-        "molecule": mol,
-        "driver": "gradient",
-        "model": {"method": inp["name"]},
-        "keywords": {},
-    }
-    jrec = qcng.compute(resinp, program, raise_error=True)
-    jrec = jrec.dict()
+    if from_v2(request.node.name):
+        resinp = {
+            "schema_name": "qcschema_atomic_input",
+            "schema_version": 2,
+            "molecule": mol,
+            "specification": {
+                "driver": "gradient",
+                "model": {"method": inp["name"]},
+                "keywords": {},
+            },
+        }
+    else:
+        resinp = {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "molecule": mol,
+            "driver": "gradient",
+            "model": {"method": inp["name"]},
+            "keywords": {},
+        }
+    resinp = checkver_and_convert(resinp, request.node.name, "pre")
+    jrec = qcng.compute(resinp, program, raise_error=True, return_version=retver)
+    jrec = checkver_and_convert(jrec, request.node.name, "post")
+    jrec = jrec.model_dump()
 
     # assert len(jrec["extras"]["qcvars"]) == 8
     print(jrec["extras"]["qcvars"])

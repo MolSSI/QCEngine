@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import Molecule
+from qcelemental.models.v2 import Molecule
 from qcelemental.molparse import regex
 
 from ..util import PreservingDict, load_hessian
@@ -22,7 +22,7 @@ def harvest_output(outtext):
     pass_grad = []
 
     # for outpass in re.split(r'--invoking executable xjoda', outtext, re.MULTILINE):
-    for outpass in re.split(r"JODA beginning optimization cycle", outtext, re.MULTILINE):
+    for outpass in re.split(r"JODA beginning optimization cycle", outtext, flags=re.MULTILINE):
         psivar, c4coord, c4grad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(c4coord)
@@ -997,7 +997,7 @@ def harvest_outfile_pass(outtext):
         psivar_coord = Molecule(
             validate=False,
             **qcel.molparse.to_schema(
-                qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=2
+                qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=3
             ),
         )
 
@@ -1015,7 +1015,7 @@ def harvest_outfile_pass(outtext):
         psivar_coord = Molecule(
             validate=False,
             **qcel.molparse.to_schema(
-                qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=2
+                qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=3
             ),
         )
 
@@ -1034,7 +1034,7 @@ def harvest_outfile_pass(outtext):
         psivar_coord = Molecule(
             validate=False,
             **qcel.molparse.to_schema(
-                qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=2
+                qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=3
             ),
         )
 
@@ -1374,7 +1374,7 @@ def harvest_GRD(grd):
     mol = Molecule(
         validate=False,
         **qcel.molparse.to_schema(
-            qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=2
+            qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"], dtype=3
         ),
     )
 

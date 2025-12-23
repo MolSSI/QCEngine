@@ -9,13 +9,14 @@ dependencies:
   #- intel-openmp!=2019.5
   - rdkit
   - mopac
+  - pydantic-settings
 
     # Mixed Tests
   - dftd3 3.2.1
   - dftd4-python>=3.7
   - mp2d >=1.1
   - gcp
-  - geometric
+  - geometric=1.0
   - optking
   - pymdi
 

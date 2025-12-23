@@ -7,10 +7,10 @@ import logging
 import pprint
 import re
 from decimal import Decimal
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
-from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which, which_import
 
 from qcengine.config import TaskConfig, get_config
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class NWChemHarness(ErrorCorrectionProgramHarness):
-    """
+    """Interface for NWChem Classic project.
 
     Notes
     -----
@@ -39,7 +39,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
     """
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "NWChem",
         "scratch": True,
         "thread_safe": False,
@@ -49,9 +49,6 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
     }
     # ATL: OpenMP only >=6.6 and only for Phi; potential for Mac using MKL and Intel compilers
     version_cache: Dict[str, str] = {}
-
-    class Config(ErrorCorrectionProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -153,7 +150,7 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
         }
 
         # Prepare to write out the options
-        opts = copy.deepcopy(input_model.keywords)
+        opts = copy.deepcopy(input_model.specification.keywords)
         opts = {k.lower(): v for k, v in opts.items()}
 
         # Determine the command to use to launch the code
@@ -185,17 +182,21 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             molcmd = re.sub(r"geometry ([^\n]*)", rf"geometry \1 autosym {val}", molcmd)
 
         # Handle calc type and quantum chemical method
-        mdccmd, mdcopts = muster_modelchem(input_model.model.method, input_model.driver, opts.pop("qc_module", False))
+        if input_model.specification.extras.get("is_driver", False):
+            runtyp = "optimize"
+        else:
+            runtyp = input_model.specification.driver
+        mdccmd, mdcopts = muster_modelchem(input_model.specification.model.method, runtyp, opts.pop("qc_module", False))
         opts.update(mdcopts)
 
         # Handle basis set
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
 
         # * for nwchem, still needs sph and ghost
         for el in set(input_model.molecule.symbols):
-            opts[f"basis__{el}"] = f"library {input_model.model.basis}"
-            opts[f"basis__bq{el}"] = f"library {el} {input_model.model.basis}"
+            opts[f"basis__{el}"] = f"library {input_model.specification.model.basis}"
+            opts[f"basis__bq{el}"] = f"library {el} {input_model.specification.model.basis}"
 
         # Log the job settings
         logger.debug("JOB_OPTS")
@@ -209,10 +210,10 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
 
         # Now that we know the computation, check if we want a restart
         #  TODO (wardlt): Store the restart information in the local_options configuration
-        if input_model.extras.get("allow_restarts", False):
+        if input_model.specification.extras.get("allow_restarts", False):
             # use the input file as a source for a hash that is used to set the directory name
             input_hash = hashlib.sha256(nwchemrec["infiles"]["nwchem.nw"].encode()).hexdigest()[:12]
-            scr_name = input_model.extras.get("scratch_name")
+            scr_name = input_model.specification.extras.get("scratch_name")
             if scr_name is None:
                 scr_name = "nwc_" + input_hash
             nwchemrec["scratch_name"] = scr_name
@@ -228,16 +229,19 @@ class NWChemHarness(ErrorCorrectionProgramHarness):
             #  This will ensure the computation will pick up from the last geometry
             if restart:
                 logger.info(f"Restarting from {tmpdir}")
-                if input_model.extras.get("is_driver", False):
+                if input_model.specification.extras.get("is_driver", False):
                     nwchemrec["infiles"]["nwchem.nw"] = "echo\n" + optcmd + mdccmd
             else:
                 logger.warning(f"Existing files found in {tmpdir}. Your computation will restart")
 
         # For gradient methods, add a Python command to save the gradients in higher precision
         #  Note: The Hessian is already stored in high precision in a file named "*.hess"
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             # Get the name of the theory used for computing the gradients
-            theory = re.search(r"^task\s+(.+)\s+grad", mdccmd, re.MULTILINE).group(1)
+            try:
+                theory = re.search(r"^task\s+(.+)\s+opt", mdccmd, re.MULTILINE).group(1)
+            except AttributeError:
+                theory = re.search(r"^task\s+(.+)\s+grad", mdccmd, re.MULTILINE).group(1)
             if theory == "ccsd(t)":
                 theory = "ccsd"
             logger.debug(f"Adding a Python task to retrieve gradients. Theory: {theory}")
@@ -283,7 +287,7 @@ task python
         stdout = outfiles.pop("stdout")
         stderr = outfiles.pop("stderr")
 
-        method = input_model.model.method.lower()
+        method = input_model.specification.model.method.lower()
         method = method[4:] if method.startswith("nwc-") else method
 
         # Read the NWChem stdout file and, if needed, the hess or grad files
@@ -305,10 +309,10 @@ task python
                 qcvars["CURRENT HESSIAN"] = nwhess
 
             # Normalize the output as a float or list of floats
-            if input_model.driver.upper() == "PROPERTIES":
+            if input_model.specification.driver.upper() == "PROPERTIES":
                 retres = qcvars[f"CURRENT ENERGY"]
             else:
-                retres = qcvars[f"CURRENT {input_model.driver.upper()}"]
+                retres = qcvars[f"CURRENT {input_model.specification.driver.upper()}"]
         except KeyError:
             raise UnknownError(error_stamp(outfiles["input"], stdout, stderr))
 
@@ -321,15 +325,16 @@ task python
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="NWChem", version=self.get_version(), routine="nwchem").dict()
+        provenance = Provenance(creator="NWChem", version=self.get_version(), routine="nwchem").model_dump()
         if module is not None:
             provenance["module"] = module
 
         # Format them inout an output
         output_data = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "input_data": input_model,
             "molecule": nwmol,  # overwrites with outfile Cartesians in case fix_*=F
-            "extras": {**input_model.extras},
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": atprop,
             "provenance": provenance,
@@ -346,4 +351,4 @@ task python
             k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in qcvars.items()
         }
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)

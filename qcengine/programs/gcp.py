@@ -7,11 +7,11 @@ import re
 import socket
 import sys
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, FailedOperation, Provenance
+from qcelemental.models.v2 import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, UnknownError
@@ -19,7 +19,7 @@ from ..util import execute
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -28,8 +28,9 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class GCPHarness(ProgramHarness):
+    """Interface for the old gcp executable project."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "GCP",
         "scratch": True,
         "thread_safe": True,
@@ -38,9 +39,6 @@ class GCPHarness(ProgramHarness):
         "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -93,7 +91,7 @@ class GCPHarness(ProgramHarness):
             output_model = FailedOperation(
                 success=False,
                 error={"error_type": "execution_error", "error_message": dexe["stderr"]},
-                input_data=input_model.dict(),
+                input_data=input_model.model_dump(),
             )
 
         return output_model
@@ -116,8 +114,10 @@ class GCPHarness(ProgramHarness):
         self, input_model: "AtomicInput", config: "TaskConfig", template: Optional[str] = None
     ) -> Dict[str, Any]:
 
-        if (input_model.driver.derivative_int() > 1) or (input_model.driver == "properties"):
-            raise InputError(f"Driver {input_model.driver} not implemented for GCP.")
+        if (input_model.specification.driver.derivative_int() > 1) or (
+            input_model.specification.driver == "properties"
+        ):
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for GCP.")
 
         # live somewhere else?
         available_levels = [
@@ -169,7 +169,7 @@ class GCPHarness(ProgramHarness):
 
         available_levels = [f.upper() for f in available_levels]
         # temp until actual options object
-        method = input_model.model.method.upper()
+        method = input_model.specification.model.method.upper()
         if method not in available_levels:
             if method in mctc_gcp_levels and executable == "gcp":
                 raise InputError(f"GCP does not have method {method} but MCTC-GCP does.")
@@ -177,13 +177,13 @@ class GCPHarness(ProgramHarness):
                 raise InputError(f"GCP does not have method: {method}")
 
         # Need 'real' field later and that's only guaranteed for molrec
-        molrec = qcel.molparse.from_schema(input_model.molecule.dict())
+        molrec = qcel.molparse.from_schema(input_model.molecule.model_dump())
 
         calldash = {"gcp": "-", "mctc-gcp": "--"}[executable]
 
         command = [executable, "gcp_geometry.xyz", calldash + "level", method]
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             command.append(calldash + "grad")
 
         infiles = {
@@ -217,9 +217,11 @@ class GCPHarness(ProgramHarness):
             elif re.match("     normal termination of gCP", ln):
                 break
         else:
-            if self._defaults["name"] == "GCP" and not ((real_nat == 1) and (input_model.driver == "gradient")):
+            if self._defaults["name"] == "GCP" and not (
+                (real_nat == 1) and (input_model.specification.driver == "gradient")
+            ):
                 raise UnknownError(
-                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.model}"
+                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.specification.model}"
                 )
 
         # parse gradient output
@@ -229,7 +231,7 @@ class GCPHarness(ProgramHarness):
         elif real_nat == 1:
             realgrad = np.zeros((1, 3))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             ireal = np.argwhere(real).reshape((-1))
             fullgrad = np.zeros((full_nat, 3))
             try:
@@ -237,7 +239,7 @@ class GCPHarness(ProgramHarness):
             except NameError as exc:
                 raise UnknownError("Unsuccessful gradient collection.") from exc
 
-        qcvkey = input_model.model.method.upper()
+        qcvkey = input_model.specification.model.method.upper()
 
         calcinfo = []
 
@@ -246,7 +248,7 @@ class GCPHarness(ProgramHarness):
         if qcvkey:
             calcinfo.append(qcel.Datum(f"{qcvkey} GCP CORRECTION ENERGY", "Eh", ene))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
             calcinfo.append(qcel.Datum("GCP CORRECTION GRADIENT", "Eh/a0", fullgrad))
             if qcvkey:
@@ -257,16 +259,24 @@ class GCPHarness(ProgramHarness):
         # Decimal --> str preserves precision
         calcinfo = {k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in calcinfo.items()}
 
-        retres = calcinfo[f"CURRENT {input_model.driver.upper()}"]
+        retres = calcinfo[f"CURRENT {input_model.specification.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()
 
+        properties = {
+            "calcinfo_natom": len(input_model.molecule.symbols),
+            "return_energy": ene,
+            f"return_{input_model.specification.driver.value}": retres,
+        }
+
         output_data = {
-            "extras": input_model.extras,
+            "input_data": input_model,
+            "molecule": input_model.molecule,
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
-            "properties": {},
+            "properties": properties,
             "provenance": Provenance(
                 creator="GCP", version=self.get_version(), routine=__name__ + "." + sys._getframe().f_code.co_name
             ),
@@ -278,12 +288,13 @@ class GCPHarness(ProgramHarness):
         output_data["extras"]["qcvars"] = calcinfo
 
         output_data["success"] = True
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)
 
 
 class MCTCGCPHarness(GCPHarness):
+    """Interface for the gcp project."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MCTC-GCP",
         "scratch": True,
         "thread_safe": True,

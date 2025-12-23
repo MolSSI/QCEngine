@@ -1,12 +1,15 @@
-from typing import TYPE_CHECKING, Dict, Union
-from qcelemental.models import AtomicResult, Provenance, FailedOperation
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Union
+
+from qcelemental.models.v2 import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which_import
+
 from qcengine.exceptions import InputError
 from qcengine.programs.model import ProgramHarness
 from qcengine.units import ureg
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput, FailedOperation
+    from qcelemental.models.v2 import AtomicInput, FailedOperation
+
     from qcengine.config import TaskConfig
 
 
@@ -18,7 +21,7 @@ class MACEHarness(ProgramHarness):
 
     _CACHE = {}
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MACE",
         "scratch": False,
         "thread_safe": True,
@@ -89,7 +92,7 @@ class MACEHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # Build model
-        method = input_data.model.method
+        method = input_data.specification.model.method
 
         # load the torch model which can be a MACE-OFF23 or local model
         model, r_max, atomic_numbers = self.load_model(name=method)
@@ -118,9 +121,9 @@ class MACEHarness(ProgramHarness):
         mace_data = model(input_dict, compute_force=True)
         ret_data["properties"] = {"return_energy": mace_data["energy"] * ureg.conversion_factor("eV", "hartree")}
 
-        if input_data.driver == "energy":
-            ret_data["return_result"] = ret_data["properties"]["return_energy"]
-        elif input_data.driver == "gradient":
+        if input_data.specification.driver == "energy":
+            ret_data["return_result"] = ret_data["properties"]["return_energy"].detach().numpy().item()
+        elif input_data.specification.driver == "gradient":
             ret_data["return_result"] = (
                 np.asarray(-1.0 * mace_data["forces"] * ureg.conversion_factor("eV / angstrom", "hartree / bohr"))
                 .ravel()
@@ -130,10 +133,11 @@ class MACEHarness(ProgramHarness):
         else:
             raise InputError("MACE only supports the energy and gradient driver methods.")
 
-        ret_data["extras"] = input_data.extras.copy()
+        ret_data["input_data"] = input_data
+        ret_data["molecule"] = input_data.molecule
         ret_data["provenance"] = Provenance(creator="mace", version=mace.__version__, routine="mace")
-        ret_data["schema_name"] = "qcschema_output"
+        ret_data["schema_name"] = "qcschema_atomic_result"
         ret_data["success"] = True
 
         # Form up a dict first, then sent to BaseModel to avoid repeat kwargs which don't override each other
-        return AtomicResult(**{**input_data.dict(), **ret_data})
+        return AtomicResult(**ret_data)

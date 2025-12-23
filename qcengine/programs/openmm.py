@@ -6,10 +6,10 @@ Requires RDKit
 import datetime
 import hashlib
 import os
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, ClassVar, Dict
 
 import numpy as np
-from qcelemental.models import AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which_import
 
 from ..exceptions import InputError
@@ -18,17 +18,18 @@ from .model import ProgramHarness
 from .rdkit import RDKitHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
 
 class OpenMMHarness(ProgramHarness):
+    """Interface for OpenMM project."""
 
-    _CACHE = {}
-    _CACHE_MAX_SIZE = 10
+    _CACHE: ClassVar[Dict] = {}
+    _CACHE_MAX_SIZE: ClassVar[int] = 10
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "OpenMM",
         "scratch": True,
         "thread_safe": True,  # true if we use separate `openmm.Context` objects per thread
@@ -38,9 +39,6 @@ class OpenMMHarness(ProgramHarness):
     }
 
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     # def _get_off_forcefield(self, hashstring, offxml):
     #
@@ -236,14 +234,14 @@ class OpenMMHarness(ProgramHarness):
         ret_data = {"success": False}
 
         # generate basis, not given
-        if not input_model.model.basis:
+        if not input_model.specification.model.basis:
             raise InputError("Method must contain a basis set.")
 
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented since not suitable for OpenMM.")
 
         # Make sure we are using smirnoff or antechamber
-        basis = input_model.model.basis.lower()
+        basis = input_model.specification.model.basis.lower()
         if basis in ["smirnoff", "antechamber"]:
 
             with capture_stdout():
@@ -270,7 +268,9 @@ class OpenMMHarness(ProgramHarness):
 
             # now we need to create the system
             openmm_system = self._generate_openmm_system(
-                molecule=off_mol, method=input_model.model.method, keywords=input_model.keywords
+                molecule=off_mol,
+                method=input_model.specification.model.method,
+                keywords=input_model.specification.keywords,
             )
         else:
             raise InputError("Accepted bases are: {'smirnoff', 'antechamber', }")
@@ -311,10 +311,10 @@ class OpenMMHarness(ProgramHarness):
         ret_data["properties"] = {"return_energy": q}
 
         # Execute driver
-        if input_model.driver == "energy":
+        if input_model.specification.driver == "energy":
             ret_data["return_result"] = ret_data["properties"]["return_energy"]
 
-        elif input_model.driver == "gradient":
+        elif input_model.specification.driver == "gradient":
             # Compute the forces
             state = context.getState(getForces=True)
 
@@ -326,13 +326,16 @@ class OpenMMHarness(ProgramHarness):
 
             # Force to gradient
             ret_data["return_result"] = -1 * q
+            ret_data["properties"]["return_gradient"] = -1 * q
+            ret_data["properties"]["calcinfo_natom"] = len(input_model.molecule.symbols)
         else:
-            raise InputError(f"Driver {input_model.driver} not implemented for OpenMM.")
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for OpenMM.")
 
         ret_data["success"] = True
-        ret_data["extras"] = input_model.extras
+        ret_data["input_data"] = input_model
+        ret_data["molecule"] = input_model.molecule  # should connectivity be added from off_mol?
 
         # Move several pieces up a level
         ret_data["provenance"] = Provenance(creator="openmm", version=openmm.version.short_version, nthreads=nthreads)
 
-        return AtomicResult(**{**input_model.dict(), **ret_data})
+        return AtomicResult(**ret_data)

@@ -2,19 +2,21 @@ import json
 import logging
 import re
 from decimal import Decimal
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import Molecule
 from qcelemental.molparse import regex
 
 from ..util import PreservingDict
 
+if TYPE_CHECKING:
+    from qcelemental.models.v2 import Molecule
+
 logger = logging.getLogger(__name__)
 
 
-def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, str]:
+def harvest_output(outtext: str) -> Tuple[PreservingDict, "Molecule", list, str, str]:
     """Function to read an entire NWChem output file.
 
     Reads all of the different "line search" segments of a file and returns
@@ -35,7 +37,7 @@ def harvest_output(outtext: str) -> Tuple[PreservingDict, Molecule, list, str, s
     pass_psivar = []
     pass_coord = []
     pass_grad = []
-    for outpass in re.split(r" Line search:", outtext, re.MULTILINE):
+    for outpass in re.split(r" Line search:", outtext, flags=re.MULTILINE):
         psivar, nwcoord, nwgrad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)
@@ -842,11 +844,11 @@ def harvest_outfile_pass(outtext):
                     molxyz += "%s %16s %16s %16s\n" % (lline[-5], lline[-3], lline[-2], lline[-1])
                     # Jiyoung was collecting charge (-4)? see if this is ok for ghosts
                     # Tag    ,    X,        Y,        Z
-                psivar_coord = Molecule(
+                psivar_coord = qcel.models.v2.Molecule(
                     validate=False,
                     **qcel.molparse.to_schema(
                         qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"],
-                        dtype=2,
+                        dtype=3,
                     ),
                 )
 
@@ -864,11 +866,11 @@ def harvest_outfile_pass(outtext):
                         tag = f"@{tag}"
                     molxyz += "%s %16s %16s %16s\n" % (tag, lline[-3], lline[-2], lline[-1])
                     # Tag    ,    X,        Y,        Z
-                psivar_coord = Molecule(
+                psivar_coord = qcel.models.v2.Molecule(
                     validate=False,
                     **qcel.molparse.to_schema(
                         qcel.molparse.from_string(molxyz, dtype="xyz+", fix_com=True, fix_orientation=True)["qm"],
-                        dtype=2,
+                        dtype=3,
                     ),
                 )
 
@@ -922,6 +924,7 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched total dipole")
 
             # UNIT = DEBYE(S)
+            d2au = Decimal(qcel.constants.conversion_factor("debye", "e * bohr"))
             psivar[f"CURRENT DIPOLE"] = d2au * np.array([mobj.group(7), mobj.group(8), mobj.group(9)])
             # total?
 
@@ -1154,8 +1157,8 @@ def harvest_hessian(hess: str) -> np.ndarray:
 
 
 def harvest(
-    in_mol: Molecule, method: str, nwout: str, **outfiles
-) -> Tuple[PreservingDict, Optional[np.ndarray], list, Molecule, str, str]:
+    in_mol: "Molecule", method: str, nwout: str, **outfiles
+) -> Tuple[PreservingDict, Optional[np.ndarray], list, "Molecule", str, str]:
     """Parses all the pieces of output from NWChem: the stdout in
     *nwout* Scratch files are not yet considered at this moment.
 

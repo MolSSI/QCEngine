@@ -1,6 +1,7 @@
-from typing import Any, Dict, Union
+from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models import OptimizationInput, OptimizationResult
+from qcelemental.models.v1 import OptimizationResult
+from qcelemental.models.v2 import OptimizationInput
 from qcelemental.util import safe_version, which_import
 
 from .model import ProcedureHarness
@@ -8,12 +9,9 @@ from .model import ProcedureHarness
 
 class GeometricProcedure(ProcedureHarness):
 
-    _defaults = {"name": "geomeTRIC", "procedure": "optimization"}
+    _defaults: ClassVar[Dict[str, Any]] = {"name": "geomeTRIC", "procedure": "optimization"}
 
     version_cache: Dict[str, str] = {}
-
-    class Config(ProcedureHarness.Config):
-        pass
 
     def found(self, raise_error: bool = False) -> bool:
         return which_import(
@@ -34,8 +32,10 @@ class GeometricProcedure(ProcedureHarness):
 
         return self.version_cache[which_prog]
 
-    def build_input_model(self, data: Union[Dict[str, Any], "OptimizationInput"]) -> "OptimizationInput":
-        return self._build_model(data, OptimizationInput)
+    def build_input_model(
+        self, data: Union[Dict[str, Any], "OptimizationInput"], *, return_input_schema_version: bool = False
+    ) -> "OptimizationInput":
+        return self._build_model(data, "OptimizationInput", return_input_schema_version=return_input_schema_version)
 
     def compute(self, input_model: "OptimizationInput", config: "TaskConfig") -> "OptimizationResult":
         try:
@@ -43,28 +43,31 @@ class GeometricProcedure(ProcedureHarness):
         except ModuleNotFoundError:
             raise ModuleNotFoundError("Could not find geomeTRIC in the Python path.")
 
-        input_data = input_model.dict()
+        input_data_v1 = input_model.convert_v(1).dict()
 
         # Temporary patch for geomeTRIC
-        input_data["initial_molecule"]["symbols"] = list(input_data["initial_molecule"]["symbols"])
+        input_data_v1["initial_molecule"]["symbols"] = list(input_data_v1["initial_molecule"]["symbols"])
 
         # Set retries to two if zero while respecting local_config
         local_config = config.dict()
         local_config["retries"] = local_config.get("retries", 2) or 2
-        input_data["input_specification"]["extras"]["_qcengine_local_config"] = local_config
+        input_data_v1["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
-        output_data = geometric.run_json.geometric_run_json(input_data)
+        output_v1 = geometric.run_json.geometric_run_json(input_data_v1)
 
-        output_data["provenance"] = {
+        output_v1["provenance"] = {
             "creator": "geomeTRIC",
             "routine": "geometric.run_json.geometric_run_json",
             "version": geometric.__version__,
         }
 
-        output_data["schema_name"] = "qcschema_optimization_output"
-        output_data["input_specification"]["extras"].pop("_qcengine_local_config", None)
-        if output_data["success"]:
-            output_data = OptimizationResult(**output_data)
+        output_v1["schema_name"] = "qcschema_optimization_output"  # overwrites OptIn value
+        output_v1["input_specification"]["extras"].pop("_qcengine_local_config", None)
+        if output_v1["success"]:
+            output_v1 = OptimizationResult(**output_v1)
+            output = output_v1.convert_v(2, external_input_data=input_model)
+        else:
+            output = output_v1  # TODO almost certainly wrong, needs v2 conv
 
-        return output_data
+        return output

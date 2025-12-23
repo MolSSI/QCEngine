@@ -3,16 +3,18 @@ import sys
 import time
 
 import pytest
-from qcelemental.models import AtomicInput
+import qcelemental
 
 from qcengine import util
 from qcengine.exceptions import InputError
+from qcengine.testing import schema_versions2
 
 
-def test_model_wrapper():
+def test_model_wrapper(schema_versions2):
+    models, _, _ = schema_versions2
 
     with pytest.raises(InputError):
-        util.model_wrapper({"bad": "yup"}, AtomicInput)
+        util.model_wrapper({"bad": "yup"}, models.AtomicInput)
 
 
 def test_compute_wrapper_capture():

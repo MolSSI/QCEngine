@@ -4,20 +4,20 @@ from typing import Any, Dict
 
 import numpy as np
 import pytest
-from qcelemental.models import AtomicInput
 from qcelemental.molutil import compute_scramble
 from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.programs.util import mill_qcvars
+from qcengine.testing import checkver_and_convert, from_v2
 
-from .standard_suite_ref import answer_hash, std_suite
 from .standard_suite_contracts import *
+from .standard_suite_ref import answer_hash, std_suite
 
 pp = pprint.PrettyPrinter(width=120)
 
 
-def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
+def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, models, retver):
 
     qcprog = inp["call"]
     qc_module_in = inp["qc_module"]  # returns "<qcprog>"|"<qcprog>-<module>"  # input-specified routing
@@ -124,17 +124,32 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
 
     # <<<  Prepare Calculation and Call API  >>>
 
-    atin = AtomicInput(
-        **{
-            "molecule": subject,
-            "driver": driver,
-            "model": {
-                "method": method,
-                "basis": inp.get("basis", "(auto)"),
-            },
-            "keywords": inp["keywords"],
-        }
-    )
+    if from_v2(tnm):
+        atin = models.AtomicInput(
+            **{
+                "molecule": subject,
+                "specification": {
+                    "driver": driver,
+                    "model": {
+                        "method": method,
+                        "basis": inp.get("basis", "(auto)"),
+                    },
+                    "keywords": inp["keywords"],
+                },
+            }
+        )
+    else:
+        atin = models.AtomicInput(
+            **{
+                "molecule": subject,
+                "driver": driver,
+                "model": {
+                    "method": method,
+                    "basis": inp.get("basis", "(auto)"),
+                },
+                "keywords": inp["keywords"],
+            }
+        )
 
     local_options = {}
     local_options = {"nnodes": 1, "ncores": 2}  # debug. temp fix low for testing to avoid too many files open w/gamess
@@ -142,16 +157,21 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
     if "error" in inp:
         errtype, errmatch, reason = inp["error"]
         with pytest.raises(errtype) as e:
-            qcng.compute(atin, qcprog, raise_error=True, return_dict=True, task_config=local_options)
+            atin = checkver_and_convert(atin, tnm, "pre")
+            qcng.compute(
+                atin, qcprog, raise_error=True, return_dict=True, task_config=local_options, return_version=retver
+            )
 
         assert re.search(errmatch, str(e.value)), f"Not found: {errtype} '{errmatch}' in {e.value}"
         # _recorder(qcprog, qc_module_in, driver, method, reference, fcae, scf_type, corl_type, "error", "nyi: " + reason)
         return
 
-    wfn = qcng.compute(atin, qcprog, raise_error=True, task_config=local_options)
+    atin = checkver_and_convert(atin, tnm, "pre")
+    wfn = qcng.compute(atin, qcprog, raise_error=True, task_config=local_options, return_version=retver)
+    wfn = checkver_and_convert(wfn, tnm, "post")
 
     print("WFN")
-    pp.pprint(wfn.dict())
+    pp.pprint(wfn.model_dump())
 
     qc_module_out = wfn.provenance.creator.lower()
     if hasattr(wfn.provenance, "module"):
@@ -198,6 +218,15 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame):
 
         ref_block = mill_qcvars(ref2out_mill, ref_block)
         ref_block_conv = mill_qcvars(ref2out_mill, ref_block_conv)
+
+    # 3b. input mol in output: `wfn.input_data.molecule` should be exactly `subject` always. If frame=free fails, check
+    #     that the harness is copying AtomicInput bodily rather than duplicating AtomicResult.molecule as convert_v(2) does
+
+    if "v2" in tnm:
+        with np.printoptions(precision=3, suppress=True):
+            assert compare_values(
+                subject.geometry, wfn.input_data.molecule.geometry, atol=5.0e-8
+            ), f"coords: atres ({wfn.input_data.molecule.geometry}) != atin ({subject.geometry})"
 
     # <<<  Comparison Tests  >>>
 

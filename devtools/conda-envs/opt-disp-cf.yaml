@@ -12,7 +12,7 @@ dependencies:
   - dftd3-python
   - dftd4-python
   - gcp-correction
-  - geometric
+  - geometric=1.0
   - optking
   - pymdi
   - qcmanybody
@@ -23,8 +23,9 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental
-  - pydantic
+  - qcelemental >=0.26.0
+  - pydantic=2
+  - pydantic-settings
   - msgpack-python
 
     # Testing

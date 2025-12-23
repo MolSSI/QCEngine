@@ -2,10 +2,10 @@
 The qcore QCEngine Harness
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List, Set
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Set
 
 import numpy as np
-from qcelemental.models import AtomicResult, BasisSet
+from qcelemental.models.v2 import AtomicResult, BasisSet
 from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError, UnknownError
@@ -18,7 +18,7 @@ from .util import (
 )
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -31,7 +31,9 @@ def qcore_ao_order_spherical(max_angular_momentum: int) -> Dict[int, List[int]]:
 
 
 class QcoreHarness(ProgramHarness):
-    _defaults: Dict[str, Any] = {
+    """Interface for Qcore/Entos project."""
+
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Qcore",
         "scratch": False,
         "thread_safe": False,
@@ -88,9 +90,6 @@ class QcoreHarness(ProgramHarness):
     # Entos spherical basis ordering for each angular momentum. Follows reverse order of CCA.
     _qcore_to_cca_ao_order = {"spherical": get_ao_conversion(cca_ao_order_spherical(10), qcore_ao_order_spherical(10))}
 
-    class Config(ProgramHarness.Config):
-        pass
-
     def found(self, raise_error: bool = False) -> bool:
         return which_import(
             "qcore",
@@ -123,20 +122,20 @@ class QcoreHarness(ProgramHarness):
 
         import qcore
 
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use string basis name.")
 
-        method = input_model.model.method.upper()
+        method = input_model.specification.model.method.upper()
         if method in self._dft_functionals:
-            method = {"kind": "dft", "xc": method, "ao": input_model.model.basis}
+            method = {"kind": "dft", "xc": method, "ao": input_model.specification.model.basis}
         elif method == "HF":
-            method = {"kind": "hf", "ao": input_model.model.basis}
+            method = {"kind": "hf", "ao": input_model.specification.model.basis}
         elif method in self._xtb_models:
             method = {"kind": "xtb", "model": method}
         else:
             raise InputError(f"Method is not valid: {method}")
 
-        method["details"] = input_model.keywords
+        method["details"] = input_model.specification.keywords
 
         qcore_input = {
             # "schema_name": "single_input",
@@ -148,7 +147,7 @@ class QcoreHarness(ProgramHarness):
             },
             "method": method,
             "result_contract": {"wavefunction": "all"},
-            "result_type": input_model.driver,
+            "result_type": input_model.specification.driver,
         }
         try:
             result = qcore.run(qcore_input, ncores=config.ncores)
@@ -174,7 +173,7 @@ class QcoreHarness(ProgramHarness):
 
         output_data = input_model.dict()
 
-        output_data["return_result"] = output[input_model.driver.value]
+        output_data["return_result"] = output[input_model.specification.driver.value]
 
         # Always build a wavefunction, it will be stripped
         obas = output["wavefunction"]["ao_basis"]
@@ -192,7 +191,7 @@ class QcoreHarness(ProgramHarness):
                         shell[ecp_k] = shell[ecp_k].tolist()
 
         basis_set = BasisSet(
-            name=str(input_model.model.basis), center_data=obas["center_data"], atom_map=obas["atom_map"]
+            name=str(input_model.specification.model.basis), center_data=obas["center_data"], atom_map=obas["atom_map"]
         )
 
         wavefunction = {"basis": basis_set}
@@ -243,14 +242,16 @@ class QcoreHarness(ProgramHarness):
 
         output_data["properties"] = properties
 
-        output_data["schema_name"] = "qcschema_output"
+        output_data["schema_name"] = "qcschema_atomic_result"
         output_data["success"] = True
 
         return AtomicResult(**output_data)
 
 
 class EntosHarness(QcoreHarness):
-    _defaults: Dict[str, Any] = {
+    """Interface for Qcore/Entos project."""
+
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "Entos",
         "scratch": True,
         "thread_safe": False,

@@ -41,6 +41,7 @@ class MDIServer:
         model,
         keywords,
         raise_error: bool = False,
+        task_config: Optional[Dict[str, Any]] = None,
         local_options: Optional[Dict[str, Any]] = None,
     ):
         """Initialize an MDIServer object for communication with MDI
@@ -59,8 +60,9 @@ class MDIServer:
             Program-specific keywords.
         raise_error : bool, optional
             Determines if compute should raise an error or not.
-        local_options : Optional[Dict[str, Any]], optional
+        task_config : Optional[Dict[str, Any]], optional
             A dictionary of local configuration options
+            Can be passed as `local_options`, but `task_config` preferred.
         """
 
         if not use_mdi:
@@ -81,7 +83,17 @@ class MDIServer:
         self.keywords = keywords
         self.program = program
         self.raise_error = raise_error
-        self.local_options = local_options
+        if task_config is None:
+            task_config = {}
+        if local_options:
+            warnings.warn(
+                "Using the `local_options` keyword argument is deprecated in favor of using `task_config`, "
+                "and as soon as version 0.70.0 it will stop working.",
+                category=FutureWarning,
+                stacklevel=2,
+            )
+            task_config = {**local_options, **task_config}
+        self.local_options = task_config
 
         # The MDI interface does not currently support multiple fragments
         if len(self.molecule.fragments) != 1:
@@ -154,9 +166,9 @@ class MDIServer:
         if key == "molecular_charge" or key == "molecular_multiplicity":
             # In order to validate correctly, the charges and multiplicities must be set simultaneously
             try:
-                self.molecule = qcel.models.Molecule(
+                self.molecule = qcel.models.v2.Molecule(
                     **{
-                        **self.molecule.dict(),
+                        **self.molecule.model_dump(),
                         **{
                             "molecular_charge": self.total_charge,
                             "fragment_charges": [self.total_charge],
@@ -171,7 +183,7 @@ class MDIServer:
                 self.molecule_validated = False
         else:
             try:
-                self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{key: value}})
+                self.molecule = qcel.models.v2.Molecule(**{**self.molecule.model_dump(), **{key: value}})
                 self.molecule_validated = True
             except qcel.exceptions.ValidationError:
                 if self.molecule_validated:
@@ -220,7 +232,7 @@ class MDIServer:
         mol_string = ""
         for iatom in range(natoms):
             mol_string += "He " + str(1.0 * iatom) + " 0.0 0.0\n"
-        self.molecule = qcel.models.Molecule.from_data(mol_string)
+        self.molecule = qcel.models.v2.Molecule.from_data(mol_string)
 
         self.energy_is_current = False
 
@@ -254,7 +266,7 @@ class MDIServer:
             coords = np.zeros(3 * natom)
             MDI_Recv(3 * natom, MDI_DOUBLE, self.comm, buf=coords)
         new_geometry = np.reshape(coords, (-1, 3))
-        self.molecule = qcel.models.Molecule(**{**self.molecule.dict(), **{"geometry": new_geometry}})
+        self.molecule = qcel.models.v2.Molecule(**{**self.molecule.model_dump(), **{"geometry": new_geometry}})
         self.energy_is_current = False
 
     # Respond to the <ENERGY command
@@ -275,7 +287,7 @@ class MDIServer:
         if not hasattr(self.compute_return, "properties"):
             raise Exception("MDI Calculation failed: \n\n" + str(self.compute_return.error.error_message))
 
-        properties = self.compute_return.properties.dict()
+        properties = self.compute_return.properties.model_dump()
         energy = properties["return_energy"]
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
         return energy
@@ -293,7 +305,7 @@ class MDIServer:
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute gradients on an unvalidated molecule")
         self.run_energy()
-        properties = self.compute_return.properties.dict()
+        properties = self.compute_return.properties.model_dump()
 
         forces = np.reshape(-1.0 * properties["return_gradient"], (-1,))
 
@@ -316,11 +328,14 @@ class MDIServer:
             self.update_molecule("fix_orientation", True)
 
             """Run an energy calculation"""
-            input = qcel.models.AtomicInput(
-                molecule=self.molecule, driver="gradient", model=self.model, keywords=self.keywords
+            input = qcel.models.v2.AtomicInput(
+                molecule=self.molecule,
+                specification=qcel.models.v2.AtomicSpecification(
+                    driver="gradient", model=self.model, keywords=self.keywords
+                ),
             )
             self.compute_return = compute(
-                input_data=input, program=self.program, raise_error=self.raise_error, local_options=self.local_options
+                input_data=input, program=self.program, raise_error=self.raise_error, task_config=self.local_options
             )
 
             # If there is an error message, print it out

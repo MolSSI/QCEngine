@@ -2,9 +2,9 @@
 Calls the Psi4 executable.
 """
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, ClassVar, Dict, List, Optional, Tuple
 
-from qcelemental.models import AtomicResult
+from qcelemental.models.v2 import AtomicResult
 from qcelemental.util import which
 
 from ..exceptions import InputError, UnknownError
@@ -13,8 +13,9 @@ from .model import ProgramHarness
 
 
 class MopacHarness(ProgramHarness):
+    """Interface for MOPAC project."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "MOPAC",
         "scratch": True,  # Input/output file
         "thread_safe": True,
@@ -23,9 +24,6 @@ class MopacHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     def __init__(self, **kwargs):
         extras = {  # All units taken from within MOPAC
@@ -115,7 +113,7 @@ class MopacHarness(ProgramHarness):
         if template is not None:
             raise KeyError("MOPAC does not currently support input templates.")
 
-        method = input_model.model.method.lower()
+        method = input_model.specification.model.method.lower()
         if method not in {
             "mndo",
             "am1",
@@ -134,13 +132,13 @@ class MopacHarness(ProgramHarness):
         }:
             raise InputError(f"MOPAC does not have method: {method.upper()}")
 
-        if input_model.driver not in ["energy", "gradient"]:
-            raise InputError(f"Driver {input_model.driver} not implemented for MOPAC.")
+        if input_model.specification.driver not in ["energy", "gradient"]:
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for MOPAC.")
 
         input_file = []
 
         keywords = {"ITER": 100, "PULAY": True}
-        keywords.update({k.upper(): v for k, v in input_model.keywords.items()})
+        keywords.update({k.upper(): v for k, v in input_model.specification.keywords.items()})
 
         if keywords["PULAY"]:
             pulay = " PULAY"
@@ -280,15 +278,15 @@ class MopacHarness(ProgramHarness):
 
         gradient = data.pop("gradients")
 
-        output = input_model.dict()
+        output = {"input_data": input_model, "molecule": input_model.molecule}
         output["provenance"] = {"creator": "mopac", "version": data.pop("mopac_version")}
 
         output["properties"] = {}
         output["properties"]["return_energy"] = data["heat_of_formation"]
 
-        output["extras"].update(data)
+        output["extras"] = data
 
-        if input_model.driver == "energy":
+        if input_model.specification.driver == "energy":
             output["return_result"] = data["heat_of_formation"]
         else:
             output["return_result"] = gradient

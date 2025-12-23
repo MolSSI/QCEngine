@@ -1,10 +1,8 @@
 import abc
-from typing import Any, Dict, Union
+import importlib
+from typing import Any, Dict, Tuple, Union
 
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from ..util import model_wrapper
 
@@ -14,9 +12,10 @@ class ProcedureHarness(BaseModel, abc.ABC):
     name: str
     procedure: str
 
-    class Config:
-        allow_mutation: False
-        extra: "forbid"
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**{**self._defaults, **kwargs})
@@ -54,12 +53,37 @@ class ProcedureHarness(BaseModel, abc.ABC):
             If the proceudre was found or not.
         """
 
-    def _build_model(self, data: Dict[str, Any], model: "BaseModel") -> "BaseModel":
+    def _build_model(
+        self, data: Dict[str, Any], model: "BaseModel", /, *, return_input_schema_version: bool = False
+    ) -> Union["BaseModel", Tuple["BaseModel", int]]:
         """
         Quick wrapper around util.model_wrapper for inherited classes
         """
 
-        return model_wrapper(data, model)
+        module_v1 = importlib.import_module("qcelemental.models.v1")
+        module_v2 = importlib.import_module("qcelemental.models.v2")
+        v1_model = getattr(module_v1, model)
+        v2_model = getattr(module_v2, model)
+
+        if isinstance(data, v1_model):
+            mdl = model_wrapper(data, v1_model)
+        elif isinstance(data, v2_model):
+            mdl = model_wrapper(data, v2_model)
+        elif isinstance(data, dict):
+            # remember these are user-provided dictionaries, so they'll have the mandatory fields,
+            #   like driver, not the helpful discriminator fields like schema_version.
+            # so long as versions distinguishable by a *required* field, id by dict is reliable.
+
+            if data.get("specification", False) or data.get("schema_version") == 2:
+                mdl = model_wrapper(data, v2_model)
+            else:
+                mdl = model_wrapper(data, v1_model)
+
+        input_schema_version = mdl.schema_version
+        if return_input_schema_version:
+            return mdl.convert_v(2), input_schema_version
+        else:
+            return mdl.convert_v(2)
 
     def get_version(self) -> str:
         """Finds procedure, extracts version, returns normalized version string.

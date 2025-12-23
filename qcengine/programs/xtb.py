@@ -9,9 +9,9 @@ For more information on xtb-python and the actual QCSchema integration,
 visit `its documentation <https://xtb-python.readthedocs.io>`_.
 """
 
-from typing import Dict
+from typing import Any, ClassVar, Dict
 
-from qcelemental.models import AtomicInput, AtomicResult
+from qcelemental.models.v2 import AtomicInput, AtomicResult, FailedOperation
 from qcelemental.util import safe_version, which_import
 
 from ..config import TaskConfig
@@ -21,7 +21,7 @@ from .model import ProgramHarness
 class XTBHarness(ProgramHarness):
     """Calculation harness for the extended tight binding (xtb) package."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "xtb",
         "scratch": False,
         "thread_safe": True,
@@ -30,9 +30,6 @@ class XTBHarness(ProgramHarness):
         "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -69,8 +66,12 @@ class XTBHarness(ProgramHarness):
         from xtb.qcschema.harness import run_qcschema
 
         # Run the Harness
-        output = run_qcschema(input_data)
+        input_data_v1 = input_data.convert_v(1)
+        output_v1 = run_qcschema(input_data_v1)
 
-        # Make sure all keys from the initial input spec are sent along
-        output.extras.update(input_data.extras)
+        # xtb qcschema interface stores error in Result model
+        if not output_v1.success:
+            return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
+
+        output = output_v1.convert_v(2, external_input_data=input_data)
         return output

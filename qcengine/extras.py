@@ -4,13 +4,11 @@ Misc information and runtime information.
 
 import re
 
-from . import _version
+from qcengine import __version__
 
 __all__ = ["get_information", "provenance_stamp"]
 
-versions = _version.get_versions()
-
-__info = {"version": versions["version"], "git_revision": versions["full-revisionid"]}
+__info = {"version": __version__, "git_revision": "(no longer provided)"}
 
 
 def get_information(key):

@@ -4,10 +4,8 @@ import subprocess
 import sys
 from typing import List
 
-from qcelemental.models import AtomicInput, OptimizationInput
-
 from qcengine import cli, get_molecule, util
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
@@ -57,50 +55,94 @@ def test_info():
 
 
 @using("psi4")
-def test_run_psi4(tmp_path):
+def test_run_psi4(tmp_path, schema_versions, request):
     """Tests qcengine run with psi4 and JSON input"""
+    models, retver, _ = schema_versions
 
     def check_result(stdout):
         output = json.loads(stdout)
+        output = checkver_and_convert(output, request.node.name, "post")
         assert output["provenance"]["creator"].lower() == "psi4"
         assert output["success"] is True
 
-    inp = AtomicInput(molecule=get_molecule("hydrogen"), driver="energy", model={"method": "hf", "basis": "6-31G"})
+    if from_v2(request.node.name):
+        inp = models.AtomicInput(
+            molecule=models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+            specification=models.AtomicSpecification(
+                driver="energy",
+                model={"method": "hf", "basis": "6-31G"},
+            ),
+        )
+    else:
+        inp = models.AtomicInput(
+            molecule=models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+            driver="energy",
+            model={"method": "hf", "basis": "6-31G"},
+        )
 
-    args = ["run", "psi4", inp.json()]
+    inp = checkver_and_convert(inp, request.node.name, "pre")
+    args = ["run", "psi4", f"--return-version={retver}", inp.model_dump_json()]
     check_result(run_qcengine_cli(args))
 
-    args = ["run", "psi4", os.path.join(tmp_path, "input.json")]
-    with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
+    args = ["run", "psi4", os.path.join(tmp_path, "input.json"), f"--return-version={retver}"]
+    with util.disk_files({"input.json": inp.model_dump_json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
 
-    args = ["run", "psi4", "-"]
-    check_result(run_qcengine_cli(args, stdin=inp.json()))
+    args = ["run", "psi4", f"--return-version={retver}", "-"]
+    # model_dump_json() works on v1 or v2 (see above). below tests that json() still works on v1.
+    if "as_v1" in request.node.name:
+        check_result(run_qcengine_cli(args, stdin=inp.json()))
+    else:
+        check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))
 
 
 @using("geometric")
 @using("psi4")
-def test_run_procedure(tmp_path):
+def test_run_procedure(tmp_path, schema_versions, request):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
+    models, retver, _ = schema_versions
 
     def check_result(stdout):
         output = json.loads(stdout)
+        output = checkver_and_convert(output, request.node.name, "post", cast_dict_as="OptimizationResult")
         assert output["provenance"]["creator"].lower() == "geometric"
         assert output["success"] is True
 
-    inp = {
-        "keywords": {"coordsys": "tric", "maxiter": 100, "program": "psi4"},
-        "input_specification": {"driver": "gradient", "model": {"method": "HF", "basis": "sto-3g"}, "keywords": {}},
-        "initial_molecule": get_molecule("hydrogen"),
-    }
-    inp = OptimizationInput(**inp)
+    if from_v2(request.node.name):
+        inp = {
+            "specification": {
+                "keywords": {"coordsys": "tric", "maxiter": 100},
+                "specification": {
+                    "driver": "gradient",
+                    "model": {"method": "HF", "basis": "sto-3g"},
+                    "keywords": {},
+                    "program": "psi4",
+                },
+            },
+            "initial_molecule": models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+        }
+    else:
+        inp = {
+            "keywords": {"coordsys": "tric", "maxiter": 100, "program": "psi4"},
+            "input_specification": {"driver": "gradient", "model": {"method": "HF", "basis": "sto-3g"}, "keywords": {}},
+            "initial_molecule": models.Molecule(**get_molecule("hydrogen", return_dict=True)),
+        }
+    inp = models.OptimizationInput(**inp)
 
-    args = ["run-procedure", "geometric", inp.json()]
+    inp = checkver_and_convert(inp, request.node.name, "pre")
+    if "to_v" in request.node.name:
+        args = ["run", "geometric", inp.model_dump_json(), f"--return-version={retver}"]
+    else:
+        args = ["run-procedure", "geometric", inp.model_dump_json()]
     check_result(run_qcengine_cli(args))
 
-    args = ["run-procedure", "geometric", os.path.join(tmp_path, "input.json")]
-    with util.disk_files({"input.json": inp.json()}, {}, cwd=tmp_path):
+    if "to_v" in request.node.name:
+        args = ["run", "geometric", f"--return-version={retver}", os.path.join(tmp_path, "input.json")]
+    else:
+        args = ["run-procedure", "geometric", os.path.join(tmp_path, "input.json")]
+    with util.disk_files({"input.json": inp.model_dump_json()}, {}, cwd=tmp_path):
         check_result(run_qcengine_cli(args))
 
-    args = ["run-procedure", "geometric", inp.json()]
-    check_result(run_qcengine_cli(args, stdin=inp.json()))
+    # try unified route
+    args = ["run", "geometric", inp.model_dump_json(), f"--return-version={retver}"]
+    check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))

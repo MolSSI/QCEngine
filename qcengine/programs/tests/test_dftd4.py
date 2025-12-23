@@ -10,23 +10,35 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
 
 @using("dftd4")
-def test_dftd4_task_b97m_m01():
+def test_dftd4_task_b97m_m01(schema_versions, request):
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
     return_result = -0.025024986301735823
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-01"),
-        model={"method": "b97m"},
-        driver="energy",
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
+            specification={
+                "model": {"method": "b97m"},
+                "driver": "energy",
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-01", return_dict=True)),
+            model={"method": "b97m"},
+            driver="energy",
+        )
 
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     print(atomic_result.return_result)
     assert atomic_result.success
@@ -34,7 +46,8 @@ def test_dftd4_task_b97m_m01():
 
 
 @using("dftd4")
-def test_dftd4_task_tpss_m02():
+def test_dftd4_task_tpss_m02(schema_versions, request):
+    models, retver, _ = schema_versions
 
     thr = 2.0e-8
 
@@ -59,27 +72,55 @@ def test_dftd4_task_tpss_m02():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-02"),
-        model={"method": ""},
-        keywords={
-            "params_tweaks": {
-                "s8": 1.76596355,
-                "a1": 0.42822303,
-                "a2": 4.54257102,
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            specification={
+                "model": {"method": ""},
+                "keywords": {
+                    "params_tweaks": {
+                        "s8": 1.76596355,
+                        "a1": 0.42822303,
+                        "a2": 4.54257102,
+                    }
+                },
+                "driver": "gradient",
+                "extras": {"mymsg": "will I pass through the calc?"},
             },
-        },
-        driver="gradient",
-    )
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-02", return_dict=True)),
+            model={"method": ""},
+            keywords={
+                "params_tweaks": {
+                    "s8": 1.76596355,
+                    "a1": 0.42822303,
+                    "a2": 4.54257102,
+                },
+            },
+            driver="gradient",
+            extras={"mymsg": "will I pass through the calc?"},
+        )
 
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     assert atomic_result.success
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
+    if "v2" in request.node.name:
+        assert "will I pass" in atomic_result.input_data.specification.extras.get(
+            "mymsg", "no key!"
+        ), "input extras roundtrip fail"
+        assert "mymsg" not in atomic_result.extras.get("mymsg", "no key!"), "input extras wrongly present in result"
+    else:
+        assert "will I pass" in atomic_result.extras.get("mymsg", "no key!"), "input extras roundtrip fail"
 
 
 @using("dftd4")
-def test_dftd4_task_r2scan_m03():
+def test_dftd4_task_r2scan_m03(schema_versions, request):
+    models, retver, _ = schema_versions
 
     thr = 1.0e-8
 
@@ -104,14 +145,26 @@ def test_dftd4_task_r2scan_m03():
         ]
     )
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("mindless-03"),
-        keywords={"level_hint": "D4"},
-        driver="gradient",
-        model={"method": "r2scan"},
-    )
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
+            specification={
+                "keywords": {"level_hint": "D4"},
+                "driver": "gradient",
+                "model": {"method": "r2scan"},
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("mindless-03", return_dict=True)),
+            keywords={"level_hint": "D4"},
+            driver="gradient",
+            model={"method": "r2scan"},
+        )
 
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
 
     print(atomic_result.return_result)
     assert atomic_result.success
@@ -119,19 +172,32 @@ def test_dftd4_task_r2scan_m03():
 
 
 @using("dftd4")
-def test_dftd4_task_unknown_method():
+def test_dftd4_task_unknown_method(schema_versions, request):
+    models, retver, models_out = schema_versions
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule=qcng.get_molecule("water"),
-        keywords={"level_hint": "D4"},
-        model={"method": "non-existent-method"},
-        driver="energy",
-    )
-    error = qcel.models.ComputeError(
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
+            specification={
+                "keywords": {"level_hint": "D4"},
+                "model": {"method": "non-existent-method"},
+                "driver": "energy",
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=models.Molecule(**qcng.get_molecule("water", return_dict=True)),
+            keywords={"level_hint": "D4"},
+            model={"method": "non-existent-method"},
+            driver="energy",
+        )
+    error = models_out.ComputeError(
         error_type="input error", error_message="Functional 'non-existent-method' not known"
     )
 
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     print(atomic_result.error)
     assert not atomic_result.success
@@ -139,29 +205,44 @@ def test_dftd4_task_unknown_method():
 
 
 @using("dftd4")
-def test_dftd4_task_cold_fusion():
+def test_dftd4_task_cold_fusion(schema_versions, request):
+    models, retver, models_out = schema_versions
 
-    atomic_input = qcel.models.AtomicInput(
-        molecule={
-            "symbols": ["Li", "Li", "Li", "Li"],
-            "geometry": [
-                [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                [-1.58746019997201, +1.58746019997201, +1.58746019997201],
-                [-1.58746019997201, -1.58746019997201, -1.58746019997201],
-                [+1.58746019997201, +1.58746019997201, -1.58746019997201],
-            ],
-            "validated": True,  # Force a nuclear fusion input, to make dftd4 fail
-        },
-        keywords={"level_hint": "D4"},
-        model={"method": "pbe"},
-        driver="energy",
-    )
-    error = qcel.models.ComputeError(
+    li4 = {
+        "symbols": ["Li", "Li", "Li", "Li"],
+        "geometry": [
+            [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+            [-1.58746019997201, +1.58746019997201, +1.58746019997201],
+            [-1.58746019997201, -1.58746019997201, -1.58746019997201],
+            [+1.58746019997201, +1.58746019997201, -1.58746019997201],
+        ],
+        "validated": True,  # Force a nuclear fusion input, to make dftd4 fail
+    }
+
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=li4,
+            specification={
+                "keywords": {"level_hint": "D4"},
+                "model": {"method": "pbe"},
+                "driver": "energy",
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=li4,
+            keywords={"level_hint": "D4"},
+            model={"method": "pbe"},
+            driver="energy",
+        )
+    error = models_out.ComputeError(
         error_type="input error",
         error_message="Too close interatomic distances found",
     )
 
-    atomic_result = qcng.compute(atomic_input, "dftd4")
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "dftd4", return_version=retver)
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
     print(atomic_result.error)
     assert not atomic_result.success

@@ -7,11 +7,11 @@ import re
 import socket
 import sys
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicResult, FailedOperation, Provenance
+from qcelemental.models.v2 import AtomicResult, FailedOperation, Provenance
 from qcelemental.util import safe_version, which
 
 from ..exceptions import InputError, ResourceError, UnknownError
@@ -20,7 +20,7 @@ from . import empirical_dispersion_resources
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
-    from qcelemental.models import AtomicInput
+    from qcelemental.models.v2 import AtomicInput
 
     from ..config import TaskConfig
 
@@ -29,8 +29,9 @@ pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
 
 
 class DFTD3Harness(ProgramHarness):
+    """Interface for DFTD3 executable project."""
 
-    _defaults = {
+    _defaults: ClassVar[Dict[str, Any]] = {
         "name": "DFTD3",
         "scratch": True,
         "thread_safe": True,
@@ -39,9 +40,6 @@ class DFTD3Harness(ProgramHarness):
         "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     @staticmethod
     def found(raise_error: bool = False) -> bool:
@@ -84,7 +82,7 @@ class DFTD3Harness(ProgramHarness):
             output_model = FailedOperation(
                 success=False,
                 error={"error_type": "execution_error", "error_message": dexe["stderr"]},
-                input_data=input_model.dict(),
+                input_data=input_model.model_dump(),
             )
 
         return output_model
@@ -109,19 +107,21 @@ class DFTD3Harness(ProgramHarness):
     ) -> Dict[str, Any]:
 
         # strip engine hint
-        mtd = input_model.model.method
+        mtd = input_model.specification.model.method
         if mtd.startswith("d3-"):
             mtd = mtd[3:]
 
-        if (input_model.driver.derivative_int() > 1) or (input_model.driver == "properties"):
-            raise InputError(f"Driver {input_model.driver} not implemented for DFTD3.")
+        if (input_model.specification.driver.derivative_int() > 1) or (
+            input_model.specification.driver == "properties"
+        ):
+            raise InputError(f"Driver {input_model.specification.driver} not implemented for DFTD3.")
 
         # temp until actual options object
-        input_model.extras["info"] = empirical_dispersion_resources.from_arrays(
+        input_model.specification.extras["info"] = empirical_dispersion_resources.from_arrays(
             name_hint=mtd,
-            level_hint=input_model.keywords.get("level_hint", None),
-            param_tweaks=input_model.keywords.get("params_tweaks", None),
-            dashcoeff_supplement=input_model.keywords.get("dashcoeff_supplement", None),
+            level_hint=input_model.specification.keywords.get("level_hint", None),
+            param_tweaks=input_model.specification.keywords.get("params_tweaks", None),
+            dashcoeff_supplement=input_model.specification.keywords.get("dashcoeff_supplement", None),
         )
 
         # this is what the dftd3 program needs, not what the job needs
@@ -130,22 +130,23 @@ class DFTD3Harness(ProgramHarness):
         # * form command and arguments
 
         # Need 'real' field later and that's only guaranteed for molrec
-        molrec = qcel.molparse.from_schema(input_model.molecule.dict())
+        molrec = qcel.molparse.from_schema(input_model.molecule.model_dump())
         # jobrec['molecule']['real'] = molrec['real']
 
         command = ["dftd3", "dftd3_geometry.xyz"]
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             command.append("-grad")
-        if input_model.extras["info"]["dashlevel"] == "atmgr":
+        if input_model.specification.extras["info"]["dashlevel"] == "atmgr":
             command.append("-abc")
 
         # Append `-anal` for pairwise atomic analysis
-        if input_model.keywords.get("pair_resolved", False):
+        if input_model.specification.keywords.get("pair_resolved", False):
             command.append("-anal")
 
         infiles = {
             ".dftd3par.local": dftd3_coeff_formatter(
-                input_model.extras["info"]["dashlevel"], input_model.extras["info"]["dashparams"]
+                input_model.specification.extras["info"]["dashlevel"],
+                input_model.specification.extras["info"]["dashparams"],
             ),
             "dftd3_geometry.xyz": qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format=""),
         }
@@ -207,9 +208,9 @@ class DFTD3Harness(ProgramHarness):
             elif re.match(" normal termination of dftd3", ln):
                 break
         else:
-            if not ((real_nat == 1) and (input_model.driver == "gradient")):
+            if not ((real_nat == 1) and (input_model.specification.driver == "gradient")):
                 raise UnknownError(
-                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.model}"
+                    f"Unsuccessful run. Check input, particularly geometry in [a0]. Model: {input_model.specification.model}"
                 )
 
         # parse gradient output
@@ -226,25 +227,25 @@ class DFTD3Harness(ProgramHarness):
         elif real_nat == 1:
             realgradabc = np.zeros((1, 3))
 
-        if input_model.driver == "gradient":
+        if input_model.specification.driver == "gradient":
             ireal = np.argwhere(real).reshape((-1))
             fullgrad = np.zeros((full_nat, 3))
-            rg = realgradabc if (input_model.extras["info"]["dashlevel"] == "atmgr") else realgrad
+            rg = realgradabc if (input_model.specification.extras["info"]["dashlevel"] == "atmgr") else realgrad
             try:
                 fullgrad[ireal, :] = rg
             except NameError as exc:
                 raise UnknownError("Unsuccessful gradient collection.") from exc
 
-        qcvkey = input_model.extras["info"]["fctldash"].upper()
+        qcvkey = input_model.specification.extras["info"]["fctldash"].upper()
 
         calcinfo = []
-        if input_model.extras["info"]["dashlevel"] == "atmgr":
+        if input_model.specification.extras["info"]["dashlevel"] == "atmgr":
             calcinfo.append(qcel.Datum("CURRENT ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
             calcinfo.append(qcel.Datum("AXILROD-TELLER-MUTO 3-BODY DISPERSION CORRECTION ENERGY", "Eh", atm))
 
-            if input_model.driver == "gradient":
+            if input_model.specification.driver == "gradient":
                 calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
                 calcinfo.append(qcel.Datum("DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
                 calcinfo.append(qcel.Datum("3-BODY DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
@@ -259,7 +260,7 @@ class DFTD3Harness(ProgramHarness):
             if qcvkey:
                 calcinfo.append(qcel.Datum(f"{qcvkey} DISPERSION CORRECTION ENERGY", "Eh", ene))
 
-            if input_model.driver == "gradient":
+            if input_model.specification.driver == "gradient":
                 calcinfo.append(qcel.Datum("CURRENT GRADIENT", "Eh/a0", fullgrad))
                 calcinfo.append(qcel.Datum("DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
                 calcinfo.append(qcel.Datum("2-BODY DISPERSION CORRECTION GRADIENT", "Eh/a0", fullgrad))
@@ -275,14 +276,16 @@ class DFTD3Harness(ProgramHarness):
         # jobrec['properties'] = {"return_energy": ene}
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
 
-        retres = calcinfo[f"CURRENT {input_model.driver.upper()}"]
+        retres = calcinfo[f"CURRENT {input_model.specification.driver.upper()}"]
         if isinstance(retres, Decimal):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()
 
         output_data = {
-            "extras": input_model.extras,
+            "input_data": input_model,
+            "molecule": input_model.molecule,
+            "extras": {},
             "native_files": {k: v for k, v in outfiles.items() if v is not None},
             "properties": {
                 "return_energy": calcinfo[f"CURRENT ENERGY"],
@@ -294,16 +297,17 @@ class DFTD3Harness(ProgramHarness):
             "stderr": stderr,
             "stdout": stdout,
         }
-        output_data["extras"]["local_keywords"] = input_model.extras["info"]
+        # TODO changing input_model through info is questionable, then its duplicated on output extras
+        output_data["extras"]["local_keywords"] = input_model.specification.extras["info"]
         output_data["extras"]["qcvars"] = calcinfo
-        if input_model.keywords.get("pair_resolved", False):
+        if input_model.specification.keywords.get("pair_resolved", False):
             assert (
                 abs(D3pairs.sum() - float(retres)) < 1.0e-6
             ), f"pairwise sum {D3pairs.sum()} != energy {float(retres)}"
             output_data["extras"]["qcvars"]["2-BODY PAIRWISE DISPERSION CORRECTION ANALYSIS"] = D3pairs
         output_data["success"] = True
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)
 
 
 def dftd3_coeff_formatter(dashlvl: str, dashcoeff: Dict) -> str:
