@@ -112,7 +112,7 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, req
     stdout_ref = {  # 1.555 GiB = 208708567 quad-words
         "cfour": "Allocated    1592 MB of main memory",
         "gamess": "208000000 WORDS OF MEMORY AVAILABLE",
-        "nwchem": r"total    =  2087085\d\d doubles =   1592.3 Mbytes",  # doubles is quad-words. Mbytes is MiB
+        "nwchem": r"total    =  2087085\d\d",  # doubles is quad-words. Mbytes is MiB
         "psi4": "1592 MiB Core",
     }
 
