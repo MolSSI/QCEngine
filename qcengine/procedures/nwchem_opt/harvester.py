@@ -32,7 +32,7 @@ def harvest_output(outtext: str) -> Tuple[List[PreservingDict], List[Molecule], 
     pass_coord = []
     pass_grad = []
     version = error = None
-    for outpass in re.split(r"Step +\d", outtext, re.MULTILINE)[1:]:
+    for outpass in re.split(r"Step +\d", outtext, flags=re.MULTILINE)[1:]:
         psivar, nwcoord, nwgrad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(nwcoord)

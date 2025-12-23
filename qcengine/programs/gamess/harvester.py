@@ -106,7 +106,7 @@ def harvest_output(outtext):
         r"^\s+" + r"--------",
         # fmt: on
         outtext,
-        re.MULTILINE,
+        flags=re.MULTILINE,
     ):
         qcvar, gamesscoord, gamessgrad, module = harvest_outfile_pass(outpass)
         pass_qcvar.append(qcvar)

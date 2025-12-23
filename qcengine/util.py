@@ -70,7 +70,7 @@ def model_wrapper(
                 f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}"
             ) from None
     elif isinstance(input_data, model):
-        input_data = input_data.copy()
+        input_data = input_data.model_copy()
     else:
         raise InputError("Input type of {} not understood.".format(type(model)))
 
