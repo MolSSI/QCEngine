@@ -46,6 +46,7 @@ Bug Fixes
 Misc.
 +++++
 - (:pr:`483`) Maint - update CI lanes for smirnoff-Frosst and pkg_resources import changes and Windows challenges. @loriab
+- (:pr:`487`) Maint - update CI lanes for spacing and old Psi4 needing defaults channel. @loriab
 
 
 v0.33.0 / 2025-07-31
