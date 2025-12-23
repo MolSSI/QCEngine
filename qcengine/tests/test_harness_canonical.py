@@ -2,7 +2,6 @@
 Tests the DQM compute dispatch module
 """
 import copy
-import pprint
 import warnings
 
 import msgpack

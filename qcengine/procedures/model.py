@@ -2,7 +2,6 @@ import abc
 import importlib
 from typing import Any, Dict, Tuple, Union
 
-import qcelemental
 from pydantic import BaseModel, ConfigDict
 
 from ..util import model_wrapper

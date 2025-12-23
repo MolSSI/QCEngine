@@ -2,7 +2,6 @@ import abc
 import logging
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
 
-import qcelemental
 from pydantic import BaseModel, ConfigDict
 
 from qcengine.config import TaskConfig
