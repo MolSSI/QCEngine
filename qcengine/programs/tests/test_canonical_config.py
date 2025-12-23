@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions
 
 _canonical_methods = [
     # needs attn ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),

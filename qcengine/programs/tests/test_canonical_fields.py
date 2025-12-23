@@ -5,7 +5,7 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions
 
 from .test_canonical_config import _canonical_methods, _get_molecule
 

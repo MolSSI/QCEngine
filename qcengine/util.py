@@ -19,7 +19,6 @@ from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 import pydantic
-import qcelemental
 
 from qcengine.config import TaskConfig
 
