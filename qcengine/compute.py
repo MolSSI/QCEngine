@@ -1,6 +1,8 @@
 """
 Integrates the computes together
 """
+import os
+import sys
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
@@ -24,7 +26,7 @@ def _process_failure_and_return(model, return_dict, raise_error):
         if raise_error:
             raise InputError(model.error.error_message)
         elif return_dict:
-            return model.dict()
+            return model.model_dump()
         else:
             return model
     else:
@@ -119,6 +121,35 @@ def compute(
         # * upon return, input_data is a model of the type (e.g., Atomic) and version (e.g., 1 or 2) the harness prefers: all v2.
         input_data, input_schema_version = executor.build_input_model(input_data, return_input_schema_version=True)
         return_version = input_schema_version if return_version == -1 else return_version
+
+        # V1V2TEST if return_version == 1:
+        if sys.version_info >= (3, 14) and return_version == 1:  # forbidden by pydantic ...
+
+            _MSG314 = (
+                f"QCSchema v1 models (this: {input_data.schema_name}) cannot be instantiated in this environment. "
+                + "Reason: pydantic.v1 is unavailable on Python 3.14+. You can: "
+                + "(a) use Python <3.14, "
+                + "(b) use QCSchema v2 (either input or ask for output with `return_version=2`; "
+                + " note that QCSchema v2 not finalized until QCElemental v0.60), "
+                + "or (c) ask for a QCSchema v1 dictionary back rather than the model with `return_dict=True` "
+                + " while setting envvar `QCNG_USE_V1V2_SHIM=1` to acknowledge this is brittle."
+            )
+
+            # V1V2TEST if input_data.schema_name == "qcschema_atomic_input":
+            if (
+                return_dict is True and input_data.schema_name == "qcschema_atomic_input"
+            ):  # ... but we have a workaround ...
+
+                if bool(os.environ.get("QCNG_USE_V1V2_SHIM", False)):  # ... if choose to use it
+                    # return_version = -12 signals to use the shim classes that represent certain
+                    #   QCSchema v1 layouts (QCSk v1 only exist in pydantic.v1 API) in pydantic v2 API.
+                    #   We never want to release these into the wild so only available if returning
+                    #   dict and only for Atomic models (i.e., shims not avail for Opt, TD, MBE).
+                    return_version = -12
+                else:
+                    raise RuntimeError(_MSG314)
+            else:
+                raise RuntimeError(_MSG314)
 
         # Build out task_config
         if task_config is None:

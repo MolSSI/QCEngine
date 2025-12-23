@@ -220,7 +220,7 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
     atin = checkver_and_convert(atin, request.node.name, "pre")
     atres = qcng.compute(atin, qcprog, return_version=retver)
     atres = checkver_and_convert(atres, request.node.name, "post")
-    pprint.pprint(atres.dict(), width=200)
+    pprint.pprint(atres.model_dump(), width=200)
 
     assert compare_values(
         ref["nre"][subject], atres.properties.nuclear_repulsion_energy, atol=1.0e-4, label="nre"
@@ -318,7 +318,7 @@ def test_atom_labels(qcprog, basis, keywords, schema_versions, request):
     atin = checkver_and_convert(atin, request.node.name, "pre")
     atres = qcng.compute(atin, qcprog, return_version=retver)
     atres = checkver_and_convert(atres, request.node.name, "post")
-    pprint.pprint(atres.dict(), width=200)
+    pprint.pprint(atres.model_dump(), width=200)
 
     nre = 1.0828427
     assert compare_values(

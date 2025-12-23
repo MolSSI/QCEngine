@@ -1586,7 +1586,7 @@ def test_3(schema_versions, request):
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
     res = qcng.compute(resinp, "dftd3", raise_error=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
-    res = res.dict()
+    res = res.model_dump()
 
     # res = dftd3.run_dftd3_from_arrays(molrec=sys, name_hint='b3lyp', level_hint='d3bj')
     assert compare("B3LYP-D3(BJ)", _compute_key(res["extras"]["local_keywords"]), "key")
@@ -1727,7 +1727,7 @@ def test_mp2d__run_mp2d__2body(inp, subjects, schema_versions, request):
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, "mp2d", raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
-    jrec = jrec.dict()
+    jrec = jrec.model_dump()
 
     # assert len(jrec['extras']['qcvars']) == 8
 
@@ -1827,7 +1827,7 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
     atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
-    jrec = jrec.dict()
+    jrec = jrec.model_dump()
     pprint.pprint(jrec)
 
     assert compare_values(expected, jrec["properties"]["return_energy"], atol=1.0e-7)
@@ -1905,7 +1905,7 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
     atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
-    jrec = jrec.dict()
+    jrec = jrec.model_dump()
 
     with pytest.raises(AssertionError) as exc:
         assert compare_values(expected, jrec["properties"]["return_energy"], atol=1.0e-7)
@@ -1966,7 +1966,7 @@ def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, "dftd3", raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
-    jrec = jrec.dict()
+    jrec = jrec.model_dump()
 
     assert len(jrec["extras"]["qcvars"]) == 8
 
@@ -2046,7 +2046,7 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request
     atin = checkver_and_convert(atin, request.node.name, "pre")
     jrec = qcng.compute(atin, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
-    jrec = jrec.dict()
+    jrec = jrec.model_dump()
 
     assert compare_values(expected, jrec["extras"]["qcvars"]["CURRENT ENERGY"], atol=1.0e-7)
     assert compare_values(expected, jrec["extras"]["qcvars"]["DISPERSION CORRECTION ENERGY"], atol=1.0e-7)
@@ -2122,7 +2122,7 @@ def test_gcp(inp, subjects, program, schema_versions, request):
     resinp = checkver_and_convert(resinp, request.node.name, "pre")
     jrec = qcng.compute(resinp, program, raise_error=True, return_version=retver)
     jrec = checkver_and_convert(jrec, request.node.name, "post")
-    jrec = jrec.dict()
+    jrec = jrec.model_dump()
 
     # assert len(jrec["extras"]["qcvars"]) == 8
     print(jrec["extras"]["qcvars"])

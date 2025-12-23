@@ -200,7 +200,7 @@ class CFOURHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").dict()
+        provenance = Provenance(creator="CFOUR", version=self.get_version(), routine="xcfour").model_dump()
         if module is not None:
             provenance["module"] = module
 

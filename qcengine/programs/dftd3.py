@@ -82,7 +82,7 @@ class DFTD3Harness(ProgramHarness):
             output_model = FailedOperation(
                 success=False,
                 error={"error_type": "execution_error", "error_message": dexe["stderr"]},
-                input_data=input_model.dict(),
+                input_data=input_model.model_dump(),
             )
 
         return output_model
@@ -130,7 +130,7 @@ class DFTD3Harness(ProgramHarness):
         # * form command and arguments
 
         # Need 'real' field later and that's only guaranteed for molrec
-        molrec = qcel.molparse.from_schema(input_model.molecule.dict())
+        molrec = qcel.molparse.from_schema(input_model.molecule.model_dump())
         # jobrec['molecule']['real'] = molrec['real']
 
         command = ["dftd3", "dftd3_geometry.xyz"]

@@ -3,6 +3,7 @@ Tests the DQM compute dispatch module
 """
 import copy
 import pprint
+import warnings
 
 import msgpack
 import numpy as np
@@ -89,6 +90,12 @@ def test_compute_energy(program, model, keywords, schema_versions, request):
     assert ret.success is True
     assert isinstance(ret.return_result, float)
     assert ret.return_result == ret.properties.return_energy
+
+    # official leave this as dict(), not model_dump(), to ensure remains operational
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        dret = ret.dict()
+    assert dret["return_result"] == dret["properties"]["return_energy"]
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
@@ -238,7 +245,9 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
                 assert ret["input_data"]["model"]["method"] == model["method"], "input not copied over"
         else:
             assert ret.success is False, "wrongly successful"
-            assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation)), "wrong class"
+            assert isinstance(
+                ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation, qcel.models._v1v2.FailedOperation)
+            ), "wrong class"
             assert ret.error.error_type == "input_error", f"wrong type: {ret.error.error_type=} != 'input_error'"
             if "v2" in request.node.name:
                 ret_method = ret.input_data.specification.model.method

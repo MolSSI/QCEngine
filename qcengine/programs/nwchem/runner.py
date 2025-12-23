@@ -325,7 +325,7 @@ task python
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="NWChem", version=self.get_version(), routine="nwchem").dict()
+        provenance = Provenance(creator="NWChem", version=self.get_version(), routine="nwchem").model_dump()
         if module is not None:
             provenance["module"] = module
 

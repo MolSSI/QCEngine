@@ -170,7 +170,7 @@ class Psi4Harness(ProgramHarness):
             if pversion < parse_version("1.4a2.dev160"):
 
                 # Setup the job
-                input_data = input_model.dict(encoding="json")
+                input_data = input_model.model_dump(encoding="json")
                 input_data["nthreads"] = config.ncores
                 input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
                 input_data["success"] = False
@@ -223,6 +223,8 @@ class Psi4Harness(ProgramHarness):
                 if pversion < parse_version("1.11a1.dev1"):  # TODO adjust for v2-compat merge
                     input_model_v1or2 = input_model.convert_v(1)
                     # TODO check what this does with py314
+                else:
+                    input_model_v1or2 = input_model
 
                 if use_psiapi_mode:
                     import psi4
@@ -234,9 +236,11 @@ class Psi4Harness(ProgramHarness):
                     if pversion < parse_version("1.6"):  # adjust to where DDD merged
                         # slightly dangerous in that if `qcng.compute({..., psiapi=True}, "psi4")` called *from psi4
                         #   session*, session could unexpectedly get its own files cleaned away.
-                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model_v1or2).dict()
+                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model_v1or2).model_dump()
                     else:
-                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(input_model_v1or2, postclean=False).dict()
+                        output_data_v1or2 = psi4.schema_wrapper.run_qcschema(
+                            input_model_v1or2, postclean=False
+                        ).model_dump()
                     # success here means execution returned. output_data may yet be qcel.models.AtomicResult or qcel.models.FailedOperation
                     success = True
                     if output_data_v1or2.get("success", False):  # uhoh, v2 can't be False? or maybe ok b/c assume false
