@@ -70,7 +70,7 @@ def harvest_as_atomic_result(input_model: OptimizationInput, nwout: str) -> List
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="NWChem", version=version, routine="nwchem_opt").dict()
+        provenance = Provenance(creator="NWChem", version=version, routine="nwchem_opt").model_dump()
         if module is not None:
             provenance["module"] = module
 

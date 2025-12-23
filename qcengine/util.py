@@ -177,7 +177,7 @@ def handle_output_metadata(
     if isinstance(output_data, dict):
         output_fusion = output_data  # Error handling
     else:
-        output_fusion = output_data.dict()
+        output_fusion = output_data.model_dump()
 
     # Do not override if computer generates
     output_fusion["stdout"] = output_fusion.get("stdout", None) or metadata["stdout"]
@@ -218,6 +218,7 @@ def handle_output_metadata(
         # This will only execute if everything went well
         ret = output_data.__class__(**output_fusion)
     else:
+        from qcelemental.models._v1v2 import FailedOperation as FOp__v1v2
         from qcelemental.models.v1 import FailedOperation as FOp_v1
         from qcelemental.models.v1 import ProtoModel as PrMdl_v1
         from qcelemental.models.v2 import FailedOperation as FOp_v2
@@ -231,11 +232,13 @@ def handle_output_metadata(
                 -1: FOp_v2 if isinstance(output_data.__class__, PrMdl_v2) else FOp_v1,
                 1: FOp_v1,
                 2: FOp_v2,
+                -12: FOp__v1v2,
             }[convert_version]
         else:
             model = {
                 -1: FOp_v1 if isinstance(output_data.__class__, PrMdl_v1) else FOp_v2,
                 2: FOp_v2,
+                -12: FOp__v1v2,
             }[convert_version]
 
         # for input_data, use object (not dict) if possible for >=v2
@@ -259,6 +262,10 @@ def handle_output_metadata(
             return ret
 
     if convert_version > 0:
+        ret = ret.convert_v(convert_version)
+
+    # frail emergency plumbing to allow some normal operation with v1.Atomic & py314
+    if convert_version == -12:
         ret = ret.convert_v(convert_version)
 
     if return_dict:

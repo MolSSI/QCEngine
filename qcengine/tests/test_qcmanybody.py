@@ -78,7 +78,7 @@ def test_nbody_he4_single(
             "specification": atomic_spec,
             "keywords": mbe_keywords,
             "driver": "energy",
-            "protocols": {"component_results": "all"},
+            "protocols": {subptcl: "all"},
         },
         molecule=he_tetramer,
     )
@@ -86,7 +86,7 @@ def test_nbody_he4_single(
     mbe_model = checkver_and_convert(mbe_model, request.node.name, "pre")
     ret = qcng.compute(mbe_model, "qcmanybody", raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
-    pprint.pprint(ret.dict(), width=200)
+    pprint.pprint(ret.model_dump(), width=200)
 
     assert ret.extras == {}, f"[w] extras wrongly present: {ret.extras.keys()}"
 
@@ -131,11 +131,10 @@ def test_nbody_he4_single(
     assert compare_values(ans, ret.return_result, atol=atol, label=f"[g] ret")
 
     assert ret.properties.calcinfo_nmbe == ref_nmbe, f"[i] {ret.properties.calcinfo_nmbe} != {ref_nmbe}"
-    assert (
-        len(ret.component_results) == ref_nmbe
-    ), f"[k] {len(ret.component_results)} != {ref_nmbe}; mbe protocol did not take"
+    ret_subres = getattr(ret, subres)
+    assert len(ret_subres) == ref_nmbe, f"[k] {len(ret_subres)} != {ref_nmbe}; mbe protocol did not take"
     if ref_nmbe > 0:
-        an_atres = next(iter(ret.component_results.values()))
+        an_atres = next(iter(ret_subres.values()))
         assert an_atres.stdout is None, f"[l] atomic protocol did not take"
 
 
@@ -208,7 +207,7 @@ def test_bsse_ene_tu6_cp_ne2(schema_versions, request, qcprog):
         mbe_model = checkver_and_convert(mbe_model, request.node.name, "pre")
         ret = qcng.compute(mbe_model, "qcmanybody", raise_error=True, return_version=retver)
         ret = checkver_and_convert(ret, request.node.name, "post")
-        pprint.pprint(ret.dict(), width=200)
+        pprint.pprint(ret.model_dump(), width=200)
 
         assert compare_values(
             tu6_ie_scan[R], ret.return_result * constants.hartree2kcalmol, atol=1.0e-4, label=f"CP-CCSD(T) [{R:3.1f}]"
@@ -328,7 +327,7 @@ units ang
         },
         "driver": "energy",
         "protocols": {
-            "component_results": "all",
+            subptcl: "all",
         },
     }
 
@@ -351,7 +350,7 @@ units ang
     # ret = checkver_and_convert(ret, request.node.name, "post")
 
     print("FFFFFFFFFF")
-    pprint.pprint(ret.dict(), width=200)
+    pprint.pprint(ret.model_dump(), width=200)
 
     r_fh_hb_xptd = {
         "none": 2.18 / constants.bohr2angstroms,
@@ -372,10 +371,9 @@ units ang
             ("cp", False): 10,
             ("cp", True): 7,
         }[(bsse_type, sio)]
-        assert xptd_nmbe == len(ret.trajectory[-1].component_results), f"mbe protocol did not take"
-        assert (
-            ret.trajectory[-1].component_results['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None
-        ), f"atomic protocol did not take"
+        ret_last_subres = getattr(ret.trajectory[-1], subres)
+        assert xptd_nmbe == len(ret_last_subres), f"mbe protocol did not take"
+        assert ret_last_subres['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None, f"atomic protocol did not take"
 
 
 # TODO Add this back with genopt. test name in geomeTRIC is test_lif_bsse
