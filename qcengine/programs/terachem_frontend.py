@@ -1,4 +1,5 @@
 """Harness for TeraChem Frontend"""
+
 import logging
 from os import getenv
 from typing import Any, Dict
