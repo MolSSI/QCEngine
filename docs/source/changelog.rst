@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2025-MM-DD (Unreleased)
+.. vX.Y.0 / 2026-MM-DD (Unreleased)
 .. --------------------
 ..
 .. Breaking Changes
@@ -28,7 +28,7 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.34.0 / 2025-MM-DD (Unreleased)
+v0.34.0 / 2026-MM-DD (Unreleased)
 --------------------
 
 Breaking Changes
