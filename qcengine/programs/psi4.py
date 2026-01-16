@@ -166,6 +166,7 @@ class Psi4Harness(ProgramHarness):
                 input_model.keywords["reference"] = "uhf"
 
             # Set default properties_origin to COM if not already specified
+            #   TODO also only if fix_com+fix_orientation
             if "properties_origin" not in caseless_keywords:
                 input_model.keywords["properties_origin"] = ["NUCLEAR_CHARGE"]
 

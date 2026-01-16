@@ -39,6 +39,7 @@ New Features
 
 Enhancements
 ++++++++++++
+- (:pr:`483`) Psi4 - impose origin_properties=["nuclear_charge"] on all calcs. @jaclark5
 
 Bug Fixes
 +++++++++
