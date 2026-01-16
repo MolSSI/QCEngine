@@ -1,7 +1,7 @@
 Changelog
 =========
 
-.. vX.Y.0 / 2025-MM-DD (Unreleased)
+.. vX.Y.0 / 2026-MM-DD (Unreleased)
 .. --------------------
 ..
 .. Breaking Changes
@@ -28,25 +28,14 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.34.0 / 2025-MM-DD (Unreleased)
+v0.34.0 / 2026-01-16
 --------------------
-
-Breaking Changes
-++++++++++++++++
-
-New Features
-++++++++++++
-
-Enhancements
-++++++++++++
-
-Bug Fixes
-+++++++++
 
 Misc.
 +++++
 - (:pr:`483`) Maint - update CI lanes for smirnoff-Frosst and pkg_resources import changes and Windows challenges. @loriab
 - (:pr:`487`) Maint - update CI lanes for spacing and old Psi4 needing defaults channel. @loriab
+- (:pr:`489`) Maint - encode in setup.py that QCEngine cannot work with Python 3.14. @loriab
 
 
 v0.33.0 / 2025-07-31
