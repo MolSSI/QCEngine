@@ -130,6 +130,90 @@ def test_psi4_ref_switch():
     assert ret.properties.calcinfo_nbeta == 1
 
 
+@using("psi4")
+def test_psi4_properties_origin_com():
+    """Test that properties_origin defaults to ['COM'] when not specified"""
+    inp = AtomicInput(
+        **{
+            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
+            "driver": "energy",
+            "model": {"method": "SCF", "basis": "sto-3g"},
+            "keywords": {"scf_type": "df", "properties_origin": ["COM"]},  # No properties_origin specified
+        }
+    )
+
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+
+    assert ret.success is True
+    assert ret.keywords["properties_origin"] == ["COM"]
+
+
+@using("psi4")
+def test_psi4_properties_origin_default_nuclear_charge():
+    """Test that explicit properties_origin setting is preserved"""
+    inp = AtomicInput(
+        **{
+            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
+            "driver": "energy",
+            "model": {"method": "SCF", "basis": "sto-3g"},
+            "keywords": {"scf_type": "df"},
+        }
+    )
+
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+
+    assert ret.success is True
+    assert "properties_origin" in ret.keywords
+    assert ret.keywords["properties_origin"] == ["NUCLEAR_CHARGE"]
+
+
+@using("psi4")
+def test_psi4_properties_origin_origin():
+    """Test that explicit properties_origin setting is preserved"""
+    inp = AtomicInput(
+        **{
+            "molecule": {"symbols": ["Li"], "geometry": [0, 0, 0]},
+            "driver": "energy",
+            "model": {"method": "SCF", "basis": "sto-3g"},
+            "keywords": {"scf_type": "df", "properties_origin": [0, 0, 0]},
+        }
+    )
+
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+
+    assert ret.success is True
+    assert ret.keywords["properties_origin"] == [0, 0, 0]
+
+
+@using("psi4")
+@pytest.mark.parametrize("propori", [
+[0, 0, 0], [1, 1, 1], ["com"], ["COM"], ["NUCLEAR_CHARGE"], None])
+def test_psi4_properties_origin(propori):
+    mol = Molecule.from_data("""
+H 0 0 0
+F 0 0 0.917
+""")
+    kw = {}
+    if propori is not None:
+        kw["properties_origin"] = propori
+    inp = AtomicInput(
+        **{
+            "molecule": mol,
+            "driver": "energy",
+            "model": {"method": "SCF", "basis": "sto-3g"},
+            "keywords": kw,
+        }
+    )
+
+    ret = qcng.compute(inp, "psi4", raise_error=True, return_dict=False)
+
+    assert ret.success is True
+    if propori is None:
+        assert ret.keywords["properties_origin"] == ["NUCLEAR_CHARGE"]
+    else:
+        assert ret.keywords["properties_origin"] == propori
+
+
 @using("rdkit")
 @pytest.mark.parametrize("method", ["UFF", "MMFF94", "MMFF94s"])
 def test_rdkit_task(method):

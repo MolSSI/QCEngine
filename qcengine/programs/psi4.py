@@ -165,6 +165,11 @@ class Psi4Harness(ProgramHarness):
             if (input_model.molecule.molecular_multiplicity != 1) and ("reference" not in caseless_keywords):
                 input_model.keywords["reference"] = "uhf"
 
+            # Set default properties_origin to COM if not already specified
+            #   TODO also only if fix_com+fix_orientation
+            if "properties_origin" not in caseless_keywords:
+                input_model.keywords["properties_origin"] = ["NUCLEAR_CHARGE"]
+
             # Old-style JSON-based command line
             if pversion < parse_version("1.4a2.dev160"):
 
