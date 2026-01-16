@@ -28,6 +28,7 @@ if __name__ == "__main__":
         cmdclass=versioneer.get_cmdclass(),
         packages=setuptools.find_packages(),
         setup_requires=[] + pytest_runner,
+        python_requires='>=3.7.0,<3.14.0',
         install_requires=["pyyaml", "py-cpuinfo", "psutil", "qcelemental>=0.24.0,<0.70.0", "pydantic>=1.8.2", "packaging"],
         entry_points={"console_scripts": ["qcengine=qcengine.cli:main"]},
         extras_require={
