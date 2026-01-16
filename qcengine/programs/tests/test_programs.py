@@ -185,6 +185,7 @@ def test_psi4_properties_origin_origin():
     assert ret.keywords["properties_origin"] == [0, 0, 0]
 
 
+@using("psi4")
 @pytest.mark.parametrize("propori", [
 [0, 0, 0], [1, 1, 1], ["com"], ["COM"], ["NUCLEAR_CHARGE"], None])
 def test_psi4_properties_origin(propori):
