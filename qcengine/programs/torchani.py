@@ -119,7 +119,7 @@ class TorchANIHarness(ProgramHarness):
             raise InputError(f"TorchANI model '{method}' does not support symbols: {unknown_sym}.")
 
         num_atoms = len(species)
-        species = model.species_to_tensor(species).to(device).unsqueeze(0)
+        species = model.species_converter(species).to(device).unsqueeze(0)
 
         # Build coord array
         geom_array = input_data.molecule.geometry.reshape(1, -1, 3) * ureg.conversion_factor("bohr", "angstrom")
