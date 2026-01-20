@@ -67,10 +67,13 @@ def test_protocol_native(program, model, keywords, native):
 
     all_ref = {
         "cfour": ("GRD", rf"1.0+\s+0.0+\s+0.0+\s+0.03"),
-        "dftd3": ("dftd3_geometry.xyz", rf"H\s+0.0+\s+0.0+\s+0.34"),
+        # "dftd3": ("dftd3_geometry.xyz", rf"H\s+0.0+\s+0.0+\s+0.34"),
+        "dftd3": ("dftd3_geometry.tmol", rf"\s+0.0+\s+0.0+\s+0.650+\s+h"),
         "gamess": ("gamess.dat", rf"CLOSED SHELL ORBITALS --- GENERATED AT"),
-        "gcp": ("gcp_geometry.xyz", rf"H\s+0.0+\s+0.0+\s+0.34"),
-        "mctc-gcp": ("gcp_geometry.xyz", rf"H\s+0.0+\s+0.0+\s+0.34"),
+        # "gcp": ("gcp_geometry.tmol", rf"H\s+0.0+\s+0.0+\s+0.34"),
+        # "mctc-gcp": ("gcp_geometry.tmol", rf"H\s+0.0+\s+0.0+\s+0.34"),
+        "gcp": ("gcp_geometry.tmol", rf"\s+0.0+\s+0.0+\s+0.650+\s+h"),
+        "mctc-gcp": ("gcp_geometry.tmol", rf"\s+0.0+\s+0.0+\s+0.650+\s+h"),
         "mp2d": ("mp2d_geometry", rf"H\s+0.0+\s+0.0+\s+0.34"),
         "nwchem": ("nwchem.grad", rf"0.0, 0.0, 0.03"),
         "psi4": ("psi4.grad", rf"1.0+\s+(-?)0.0+\s+(-?)0.0+\s+0.03"),
