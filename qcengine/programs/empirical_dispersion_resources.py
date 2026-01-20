@@ -1227,9 +1227,9 @@ def from_arrays(
                 "d3mbj2b",
             ]
             for d in ["d3zero", "d3bj", "d3mzero", "d3mbj"]:
-                psi4.procrouting.empirical_dispersion._capable_engines_for_disp[
-                    d + "2b"
-                ] = psi4.procrouting.empirical_dispersion._capable_engines_for_disp.pop(d)
+                psi4.procrouting.empirical_dispersion._capable_engines_for_disp[d + "2b"] = (
+                    psi4.procrouting.empirical_dispersion._capable_engines_for_disp.pop(d)
+                )
     except ImportError:
         pass
 
