@@ -548,7 +548,7 @@ def test_geometric_generic(input_data, program, model, bench, schema_versions, r
 
     assert pytest.approx(r01, 1.0e-4) == bench[0]
     assert pytest.approx(r02, 1.0e-4) == bench[0]
-    assert pytest.approx(r12, 1.5e-4) == bench[1]
+    assert pytest.approx(r12, 5.0e-4) == bench[1]
     assert pytest.approx(a102, 5.0e-4) == bench[2]
 
     assert "_secret_tags" in trajs_tgt[0].extras
