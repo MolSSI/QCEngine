@@ -53,6 +53,7 @@ New Features
 
 Enhancements
 ++++++++++++
+- (:pr:`490`) TorchANI - Updated species handling for newer Pythons, ANI syntax. @loriab
 - (:pr:`453`) Maint - Convert internal (non-QCSchema) pydantic classes to
   pydantic v2 API, namely `NodeDescriptor`, `TaskConfig`, `ProgramHarness`,
   `ProcedureHarness`. @loriab

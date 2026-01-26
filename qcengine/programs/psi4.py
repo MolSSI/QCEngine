@@ -103,6 +103,8 @@ class Psi4Harness(ProgramHarness):
             with popen([which_prog, "--version"]) as exc:
                 exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
+            if "active but incompatible with Python 3.14+" in se:
+                se = None
             if (so) and (not se) and (rc == 0):
                 # Windows echos the command, so split stdout to collect response
                 self.version_cache[which_prog] = safe_version(so.split()[-1])
