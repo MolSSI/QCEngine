@@ -15,6 +15,7 @@ dependencies:
   - pydantic-settings
 
   - pytorch
+  - geometric
 
     # Testing
   - pytest
