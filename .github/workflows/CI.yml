@@ -201,8 +201,9 @@ jobs:
     - name: Special Config - QCElemental Dep
       #if: false
       run: |
-        conda remove qcelemental --force
-        python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
+        # conda remove qcelemental --force
+        # python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
+        conda install qcelemental=0.50rc1 -c conda-forge/label/qcelemental_dev
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75

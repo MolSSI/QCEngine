@@ -72,6 +72,12 @@ Misc.
 
 MUST (Unmerged)
 +++++++++++++++
+- (:pr:`486`) min to py39, drop packaging
+- (:pr:`486`) psi4 py314?
+- (:pr:`486`) with :envvar:`QCNG_USE_V1V2_SHIM=1` in Python 3.14, QCSchema v1 inputs and outputs (atomic flavor) can be used as dictionaries (never models)
+- (:pr:`486`) adapt QCManyBody harness to work with QCSchema v1 and v2 and to work with QCManyBody v0.50 as well as current v0.5.1
+- (:pr:`486`) adapt to allow Py 3.14, incl. small syntax changes
+- (:pr:`486`) adapt more harnesses to ``model_dump`` from ``dict`` to clear away warnings
 - (:pr:`469`) setup.py replaced by pyproject.toml with setuptools backend and replaced versioneer with setuptools-scm
 - (:pr:`469`) remove __git_revision__ and get_information("git_revision") removed with versioneer
 - (:pr:`468`) adapt harnesses for TD.initial_molecules -> TD.initial_molecule and TD.optimization_history -> TD.scan_results
