@@ -50,11 +50,12 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: torchani
-            python-version: "3.14"
-            label: ANI314
-            runs-on: ubuntu-latest
-            pytest: ""
+          # needs py314 for pytorch
+          #- conda-env: torchani
+          #  python-version: "3.14"
+          #  label: ANI314
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
 
           - conda-env: openmm
             python-version: 3.9
@@ -75,11 +76,12 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: xtb
-            python-version: "3.14"
-            label: xTB314
-            runs-on: ubuntu-latest
-            pytest: ""
+          # needs py314 for xtb
+          #- conda-env: xtb
+          #  python-version: "3.14"
+          #  label: xTB314
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
 
           #- conda-env: qcore
           #  python-version: 3.7
@@ -96,7 +98,7 @@ jobs:
             # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
 
           - conda-env: nwchem-cf
-            python-version: 3.10
+            python-version: "3.10"
             label: NWChem
             runs-on: ubuntu-latest
             pytest: ""
@@ -266,7 +268,7 @@ jobs:
         qcengine info
 
     - name: QCEngineRecords
-      if: matrix.cfg.label != 'Psi4-1.6'
+      if: ((matrix.cfg.label != 'Psi4-1.6') && (matrix.cfg.python-version != '3.14'))
       run: |
         qcengine info
         export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
