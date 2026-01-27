@@ -56,7 +56,7 @@ class QCManyBodyProcedure(ProcedureHarness):
             v2_model = None
             qcmb_v1v2 = False
 
-        if self.get_version() < parse_version("0.50a0"):
+        if parse_version(self.get_version()) < parse_version("0.50a0"):
             qcmb_v1v2 = False
         else:
             qcmb_v1v2 = True

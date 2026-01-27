@@ -50,21 +50,34 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          - conda-env: torchani
+            python-version: "3.14"
+            label: ANI314
+            runs-on: ubuntu-latest
+            pytest: ""
+
           - conda-env: openmm
             python-version: 3.9
             label: OpenMM
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: openmm314
-            python-version: 3.14
-            label: OpenMM
-            runs-on: ubuntu-latest
-            pytest: ""
+          # needs py314 for openff
+          #- conda-env: openmm314
+          #  python-version: 3.14
+          #  label: OpenMM314
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
 
           - conda-env: xtb
             python-version: "3.10"
             label: xTB
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: xtb
+            python-version: "3.14"
+            label: xTB314
             runs-on: ubuntu-latest
             pytest: ""
 
@@ -83,8 +96,14 @@ jobs:
             # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
 
           - conda-env: nwchem-cf
-            python-version: 3.12
+            python-version: 3.10
             label: NWChem
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: nwchem-cf
+            python-version: 3.14
+            label: NWChem314
             runs-on: ubuntu-latest
             pytest: ""
 

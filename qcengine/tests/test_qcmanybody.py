@@ -6,7 +6,7 @@ from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.testing import checkver_and_convert, from_v2
-from qcengine.testing import schema_versions0, schema_versions as schema_versions5, using
+from qcengine.testing import schema_versions0, schema_versions as schema_versionsALL5, using
 
 # TODO full schema_versions when manybody v2 schema ready
 
@@ -18,7 +18,7 @@ else:
     if qcmb.__version__.startswith("0.5."):
         schema_versions = schema_versions0
     else:
-        schema_versions = schema_versions5
+        schema_versions = schema_versionsALL5
 
 
 @pytest.fixture
