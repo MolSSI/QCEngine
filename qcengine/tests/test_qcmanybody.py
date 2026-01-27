@@ -6,10 +6,19 @@ from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.testing import checkver_and_convert, from_v2
-from qcengine.testing import schema_versions0 as schema_versions
-from qcengine.testing import using
+from qcengine.testing import schema_versions0, schema_versions as schema_versions5, using
 
 # TODO full schema_versions when manybody v2 schema ready
+
+try:
+    import qcmanybody as qcmb
+except ModuleNotFoundError:
+    schema_versions = schema_versions0
+else:
+    if qcmb.__version__.startswith("0.5."):
+        schema_versions = schema_versions0
+    else:
+        schema_versions = schema_versions5
 
 
 @pytest.fixture
@@ -64,7 +73,19 @@ def test_nbody_he4_single(
 ):
     models, retver, _ = schema_versions
 
-    from qcmanybody.models import AtomicSpecification, ManyBodyInput
+    if from_v2(request.node.name):
+        from qcmanybody.models.v2 import ManyBodyInput
+        AtomicSpecification = models.AtomicSpecification
+        subptcl = "cluster_results"
+    else:
+        from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
+        subptcl = "component_results"
+
+    # "to_v2"
+    subres = "cluster_results" if ("v2" in request.node.name) else "component_results"
+    import qcmanybody as qcmb
+    if qcmb.__version__.startswith("0.5."):
+        subres = "component_results"
 
     atomic_spec = AtomicSpecification(
         model={"method": "mp2", "basis": basis},
@@ -155,7 +176,11 @@ def test_bsse_ene_tu6_cp_ne2(schema_versions, request, qcprog):
     """
     models, retver, _ = schema_versions
 
-    from qcmanybody.models import ManyBodyInput
+    if from_v2(request.node.name):
+        from qcmanybody.models.v2 import ManyBodyInput
+        AtomicSpecification = models.AtomicSpecification
+    else:
+        from qcmanybody.models.v1 import ManyBodyInput
 
     tu6_ie_scan = {2.5: 0.757717, 3.0: 0.015685, 4.0: -0.016266}  # Ang: kcal/mol IE
 
@@ -222,7 +247,11 @@ def test_bsse_ene_tu6_cp_ne2(schema_versions, request, qcprog):
 def test_mbe_error(schema_versions, request):
     models, retver, _ = schema_versions
 
-    from qcmanybody.models import ManyBodyInput
+    if from_v2(request.node.name):
+        from qcmanybody.models.v2 import ManyBodyInput
+        AtomicSpecification = models.AtomicSpecification
+    else:
+        from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
 
     mbe_data = {
         "specification": {
@@ -274,10 +303,28 @@ def test_mbe_error(schema_versions, request):
         # pytest.param("gengeometric", "cp", True, marks=using("geometric_genopt")),
     ],
 )
-def test_bsse_opt_hf_trimer(schema_versions, request, optimizer, bsse_type, sio):
-    models, retver, _ = schema_versions
+def test_bsse_opt_hf_trimer(schema_versions0, request, optimizer, bsse_type, sio):
+    models, retver, _ = schema_versions0
 
-    initial_molecule = models.Molecule.from_data(
+    if from_v2(request.node.name):
+        Molecule = models.Molecule
+        from qcmanybody.models.v2 import ManyBodyInput
+        AtomicSpecification = models.AtomicSpecification
+        subptcl = "cluster_results"
+    elif "[None" in request.node.name:
+        Molecule = models.Molecule
+        #from qcmanybody.models import AtomicSpecification, ManyBodyInput
+        from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
+        subptcl = "component_results"
+    else:
+        Molecule = models.v1.Molecule
+        from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
+        subptcl = "component_results"
+
+    # to_v2
+    subres = "cluster_results" if ("v2" in request.node.name) else "component_results"
+
+    initial_molecule = Molecule.from_data(
         """
 F         -0.04288        2.78905        0.00000
 H          0.59079        2.03435        0.00000

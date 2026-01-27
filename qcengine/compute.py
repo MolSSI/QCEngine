@@ -128,10 +128,10 @@ def compute(
             _MSG314 = (
                 f"QCSchema v1 models (this: {input_data.schema_name}) cannot be instantiated in this environment. "
                 + "Reason: pydantic.v1 is unavailable on Python 3.14+. You can: "
-                + "(a) use Python <3.14, "
+                + "(a) use Python <3.14; or "
                 + "(b) use QCSchema v2 (either input or ask for output with `return_version=2`; "
-                + " note that QCSchema v2 not finalized until QCElemental v0.60), "
-                + "or (c) ask for a QCSchema v1 dictionary back rather than the model with `return_dict=True` "
+                + " note that QCSchema v2 not finalized until QCElemental v0.60); or "
+                + "(c) ask for a QCSchema v1 dictionary back rather than the model with `return_dict=True` "
                 + " while setting envvar `QCNG_USE_V1V2_SHIM=1` to acknowledge this is brittle."
             )
 

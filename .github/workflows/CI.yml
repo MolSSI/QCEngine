@@ -56,7 +56,7 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: openmm
+          - conda-env: openmm314
             python-version: 3.14
             label: OpenMM
             runs-on: ubuntu-latest
