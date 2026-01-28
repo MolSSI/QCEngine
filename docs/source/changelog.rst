@@ -57,7 +57,9 @@ New Features
   be lock-step advancements of the QCArchive stack.
 - Python 3.14 is now useable. Use of QCSchema v1 with 3.14 is limited (by Pydantic).
   Generally, input (as dict or json) will work. v1 output is technically forbidden
-  but see envvar below for returning as dict.
+  but see envvar below for returning as dict. Note that when CMS community codes
+  aren't 3.14-ready, their presence may interfere with normal QCEngine functionality
+  (like `qcengine info`).
 - See QCElemental for a map of QCSchema v1 and v2, a schema changelog, and a migration guide.
 
 Enhancements (General)

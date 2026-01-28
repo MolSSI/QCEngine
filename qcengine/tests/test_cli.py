@@ -4,6 +4,8 @@ import subprocess
 import sys
 from typing import List
 
+import pytest
+
 from qcengine import cli, get_molecule, util
 from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
 
@@ -41,6 +43,9 @@ def test_no_args():
         assert e.returncode == 1
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14), reason="too many programs throw errors on import with Py >=3.14. revisit soon!"
+)
 def test_info():
     """Test for qcengine info"""
     outputs = []
