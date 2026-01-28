@@ -443,7 +443,7 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
     assert trajs_tgt[0].provenance.ncores == 13
     assert trajs_tgt[1].provenance.retries == 2
     assert trajs_tgt[1].provenance.ncores == 13
-    assert "retries" not in trajs_tgt[2].provenance.dict()
+    assert "retries" not in trajs_tgt[2].provenance.model_dump()
 
     # Ensure we still fail
     failure_engine.iter_modes = ["random_error", "pass", "random_error", "random_error", "pass"]  # Iter 1  # Iter 2

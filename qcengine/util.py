@@ -19,7 +19,6 @@ from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 import pydantic
-import qcelemental
 
 from qcengine.config import TaskConfig
 
@@ -70,7 +69,7 @@ def model_wrapper(
                 f"Error creating '{model.__name__}', data could not be correctly parsed:\n{str(exc)}"
             ) from None
     elif isinstance(input_data, model):
-        input_data = input_data.copy()
+        input_data = input_data.model_copy()
     else:
         raise InputError("Input type of {} not understood.".format(type(model)))
 
@@ -78,7 +77,8 @@ def model_wrapper(
     try:
         input_data.extras
     except AttributeError:
-        input_data = input_data.copy(update={"extras": {}})
+        if input_data.schema_version == 1:
+            input_data = input_data.copy(update={"extras": {}})
 
     return input_data
 
@@ -176,7 +176,7 @@ def handle_output_metadata(
     if isinstance(output_data, dict):
         output_fusion = output_data  # Error handling
     else:
-        output_fusion = output_data.dict()
+        output_fusion = output_data.model_dump()
 
     # Do not override if computer generates
     output_fusion["stdout"] = output_fusion.get("stdout", None) or metadata["stdout"]
@@ -217,18 +217,34 @@ def handle_output_metadata(
         # This will only execute if everything went well
         ret = output_data.__class__(**output_fusion)
     else:
+        from qcelemental.models._v1v2 import FailedOperation as FOp__v1v2
+        from qcelemental.models.v1 import FailedOperation as FOp_v1
+        from qcelemental.models.v1 import ProtoModel as PrMdl_v1
+        from qcelemental.models.v2 import FailedOperation as FOp_v2
+        from qcelemental.models.v2 import ProtoModel as PrMdl_v2
+
         # Should only be reachable on failures
-        model = {
-            -1: qcelemental.models.v1.FailedOperation,
-            1: qcelemental.models.v1.FailedOperation,
-            2: qcelemental.models.v2.FailedOperation,
-        }[convert_version]
+        # * might not know the v1- or v2-ness of output_data if it's a dict, so use the safest
+        #   unless proven otherwise. (also, FOp doesn't change layout btwn v1/v2.)
+        if sys.version_info < (3, 14):
+            model = {
+                -1: FOp_v2 if issubclass(output_data.__class__, PrMdl_v2) else FOp_v1,
+                1: FOp_v1,
+                2: FOp_v2,
+                -12: FOp__v1v2,
+            }[convert_version]
+        else:
+            model = {
+                -1: FOp_v1 if issubclass(output_data.__class__, PrMdl_v1) else FOp_v2,
+                2: FOp_v2,
+                -12: FOp__v1v2,
+            }[convert_version]
 
         # for input_data, use object (not dict) if possible for >=v2
         success_ret = output_fusion.pop("success", False)
         error_ret = output_fusion.pop("error")
         if convert_version >= 2:
-            if isinstance(output_data, (qcelemental.models.v1.FailedOperation, qcelemental.models.v2.FailedOperation)):
+            if isinstance(output_data, (FOp_v1, FOp_v2)):
                 # when harnesses return FailedOp object rather than raising error
                 inp_ret = output_data.input_data
             else:
@@ -245,6 +261,10 @@ def handle_output_metadata(
             return ret
 
     if convert_version > 0:
+        ret = ret.convert_v(convert_version)
+
+    # frail emergency plumbing to allow some normal operation with v1.Atomic & py314
+    if convert_version == -12:
         ret = ret.convert_v(convert_version)
 
     if return_dict:
