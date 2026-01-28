@@ -14,6 +14,9 @@ try:
     import qcmanybody as qcmb
 except ModuleNotFoundError:
     schema_versions = schema_versions0
+except RuntimeError:
+    # py314 + qcmanybody 0.5.1
+    schema_versions = schema_versions0
 else:
     if qcmb.__version__.startswith("0.5."):
         schema_versions = schema_versions0

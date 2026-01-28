@@ -105,7 +105,7 @@ jobs:
 
           - conda-env: nwchem-cf
             python-version: 3.14
-            label: NWChem314
+            label: NWChem
             runs-on: ubuntu-latest
             pytest: ""
 
