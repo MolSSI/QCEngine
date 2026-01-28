@@ -65,7 +65,7 @@ jobs:
 
           # needs py314 for openff
           #- conda-env: openmm314
-          #  python-version: 3.14
+          #  python-version: "3.14"
           #  label: OpenMM314
           #  runs-on: ubuntu-latest
           #  pytest: ""
@@ -104,7 +104,7 @@ jobs:
             pytest: ""
 
           - conda-env: nwchem-cf
-            python-version: 3.14
+            python-version: "3.14"
             label: NWChem
             runs-on: ubuntu-latest
             pytest: ""

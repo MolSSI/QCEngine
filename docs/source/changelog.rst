@@ -33,7 +33,7 @@ v0.50.0rc1 / 2026-MM-DD (Unreleased)
 
 Breaking Changes
 ++++++++++++++++
-- (:or:`486`) Deps - Require Python >=3.9. Practically for conda, >=3.10.
+- (:pr:`486`) Deps - Require Python >=3.9. Practically for conda, >=3.10.
 - (:pr:`453`) Deps - Require Pydantic v2 dependency (don't worry, this isn't
   changing QCEngine's role as QCSchema I/O runner. Also require pydantic-settings
   for CLI. @loriab
@@ -126,7 +126,7 @@ Enhancements (Harnesses)
 - (:pr:`486`) QCManyBody — Adapt harness to work with QCSchema v1 and v2 and to
   work with QCManyBody v0.50 as well as current v0.5.1.
 - (:pr:`486`) Psi4 — Add another generation to the Psi4 harness (to become active
-  ~v1.11) to pass/recieve QCSchema v2 to/from Psi4.
+  ~v1.11) to pass/receive QCSchema v2 to/from Psi4.
 
 Bug Fixes
 +++++++++

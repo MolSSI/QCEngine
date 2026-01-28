@@ -261,7 +261,7 @@ def schema_versions2(request):
 
 @pytest.fixture(scope="function", params=[None])
 def schema_versions0(request):
-    if sys.version_info >= (3, 14) and request.param != "as_v2":
+    if sys.version_info >= (3, 14):
         pytest.skip("Only QCSchema v2-to-v2 available for Py >=3.14")
 
     return qcel.models, -1, qcel.models

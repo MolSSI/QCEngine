@@ -6,7 +6,8 @@ from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.testing import checkver_and_convert, from_v2
-from qcengine.testing import schema_versions0, schema_versions as schema_versionsALL5, using
+from qcengine.testing import schema_versions as schema_versionsALL5
+from qcengine.testing import schema_versions0, using
 
 # TODO full schema_versions when manybody v2 schema ready
 
@@ -78,15 +79,18 @@ def test_nbody_he4_single(
 
     if from_v2(request.node.name):
         from qcmanybody.models.v2 import ManyBodyInput
+
         AtomicSpecification = models.AtomicSpecification
         subptcl = "cluster_results"
     else:
         from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
+
         subptcl = "component_results"
 
     # "to_v2"
     subres = "cluster_results" if ("v2" in request.node.name) else "component_results"
     import qcmanybody as qcmb
+
     if qcmb.__version__.startswith("0.5."):
         subres = "component_results"
 
@@ -181,7 +185,6 @@ def test_bsse_ene_tu6_cp_ne2(schema_versions, request, qcprog):
 
     if from_v2(request.node.name):
         from qcmanybody.models.v2 import ManyBodyInput
-        AtomicSpecification = models.AtomicSpecification
     else:
         from qcmanybody.models.v1 import ManyBodyInput
 
@@ -252,20 +255,23 @@ def test_mbe_error(schema_versions, request):
 
     if from_v2(request.node.name):
         from qcmanybody.models.v2 import ManyBodyInput
+
         AtomicSpecification = models.AtomicSpecification
     else:
         from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
 
     mbe_data = {
         "specification": {
-            "specification": {
-                "model": {
-                    "method": "nonsense",
-                    "basis": "nonsense",
-                },
-                "driver": "energy",
-                "program": "cms",
-            },
+            "specification": AtomicSpecification(
+                **{
+                    "model": {
+                        "method": "nonsense",
+                        "basis": "nonsense",
+                    },
+                    "driver": "energy",
+                    "program": "cms",
+                }
+            ),
             "keywords": {},
             "driver": "energy",
         },
@@ -312,16 +318,19 @@ def test_bsse_opt_hf_trimer(schema_versions0, request, optimizer, bsse_type, sio
     if from_v2(request.node.name):
         Molecule = models.Molecule
         from qcmanybody.models.v2 import ManyBodyInput
+
         AtomicSpecification = models.AtomicSpecification
         subptcl = "cluster_results"
     elif "[None" in request.node.name:
         Molecule = models.Molecule
-        #from qcmanybody.models import AtomicSpecification, ManyBodyInput
+        # from qcmanybody.models import AtomicSpecification, ManyBodyInput
         from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
+
         subptcl = "component_results"
     else:
         Molecule = models.v1.Molecule
         from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
+
         subptcl = "component_results"
 
     # to_v2
@@ -352,6 +361,7 @@ units ang
             "scf_type": "df",
         },
     }
+    at_spec = AtomicSpecification(**at_spec)
 
     mbe_spec = {
         # schema_name needed for differentiation in genopt
@@ -399,7 +409,6 @@ units ang
     ret = qcng.compute(opt_data, optimizer, raise_error=True, return_version=retver)
     # ret = checkver_and_convert(ret, request.node.name, "post")
 
-    print("FFFFFFFFFF")
     pprint.pprint(ret.model_dump(), width=200)
 
     r_fh_hb_xptd = {

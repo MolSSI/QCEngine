@@ -228,14 +228,14 @@ def handle_output_metadata(
         #   unless proven otherwise. (also, FOp doesn't change layout btwn v1/v2.)
         if sys.version_info < (3, 14):
             model = {
-                -1: FOp_v2 if isinstance(output_data.__class__, PrMdl_v2) else FOp_v1,
+                -1: FOp_v2 if issubclass(output_data.__class__, PrMdl_v2) else FOp_v1,
                 1: FOp_v1,
                 2: FOp_v2,
                 -12: FOp__v1v2,
             }[convert_version]
         else:
             model = {
-                -1: FOp_v1 if isinstance(output_data.__class__, PrMdl_v1) else FOp_v2,
+                -1: FOp_v1 if issubclass(output_data.__class__, PrMdl_v1) else FOp_v2,
                 2: FOp_v2,
                 -12: FOp__v1v2,
             }[convert_version]
