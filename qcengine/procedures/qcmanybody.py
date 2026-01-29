@@ -1,7 +1,7 @@
 import importlib
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Tuple, Union
 
-from qcelemental.util import safe_version, which_import, parse_version
+from qcelemental.util import parse_version, safe_version, which_import
 
 from ..exceptions import InputError
 from ..util import model_wrapper
@@ -48,18 +48,13 @@ class QCManyBodyProcedure(ProcedureHarness):
             module_v2 = importlib.import_module("qcmanybody.models.v2")
             v1_model = getattr(module_v1, model)
             v2_model = getattr(module_v2, model)
-            qcmb_v1v2 = True
 
         except ModuleNotFoundError:
             module_v1 = importlib.import_module("qcmanybody.models")
             v1_model = getattr(module_v1, model)
             v2_model = None
-            qcmb_v1v2 = False
 
-        if parse_version(self.get_version()) < parse_version("0.50a0"):
-            qcmb_v1v2 = False
-        else:
-            qcmb_v1v2 = True
+        qcmb_v1v2 = parse_version(self.get_version()) >= parse_version("0.50a0")
 
         if isinstance(data, v1_model):
             mdl = model_wrapper(data, v1_model)

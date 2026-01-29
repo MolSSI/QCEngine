@@ -12,7 +12,7 @@ from .config import get_config
 from .exceptions import InputError, RandomError
 from .procedures import get_procedure
 from .programs import get_program
-from .util import compute_wrapper, environ_context, handle_output_metadata, model_wrapper
+from .util import V1V2_SHIM_CODE, compute_wrapper, environ_context, handle_output_metadata, model_wrapper
 
 if TYPE_CHECKING:
     from pydantic.main import BaseModel
@@ -141,11 +141,11 @@ def compute(
             ):  # ... but we have a workaround ...
 
                 if bool(os.environ.get("QCNG_USE_V1V2_SHIM", False)):  # ... if choose to use it
-                    # return_version = -12 signals to use the shim classes that represent certain
+                    # return_version = -12 = V1V2_SHIM_CODE signals to use the shim classes that represent certain
                     #   QCSchema v1 layouts (QCSk v1 only exist in pydantic.v1 API) in pydantic v2 API.
                     #   We never want to release these into the wild so only available if returning
                     #   dict and only for Atomic models (i.e., shims not avail for Opt, TD, MBE).
-                    return_version = -12
+                    return_version = V1V2_SHIM_CODE
                 else:
                     raise RuntimeError(_MSG314)
             else:

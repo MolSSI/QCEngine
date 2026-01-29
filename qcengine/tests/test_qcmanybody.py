@@ -321,12 +321,6 @@ def test_bsse_opt_hf_trimer(schema_versions0, request, optimizer, bsse_type, sio
 
         AtomicSpecification = models.AtomicSpecification
         subptcl = "cluster_results"
-    elif "[None" in request.node.name:
-        Molecule = models.Molecule
-        # from qcmanybody.models import AtomicSpecification, ManyBodyInput
-        from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
-
-        subptcl = "component_results"
     else:
         Molecule = models.v1.Molecule
         from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
@@ -361,7 +355,6 @@ units ang
             "scf_type": "df",
         },
     }
-    at_spec = AtomicSpecification(**at_spec)
 
     mbe_spec = {
         # schema_name needed for differentiation in genopt

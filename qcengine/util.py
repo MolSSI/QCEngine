@@ -28,6 +28,9 @@ from .exceptions import InputError, QCEngineException
 __all__ = ["compute_wrapper", "model_wrapper", "handle_output_metadata", "create_mpi_invocation", "execute"]
 
 
+V1V2_SHIM_CODE = -12
+
+
 def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]:
     """Create the launch command for an MPI-parallel task
 
@@ -231,13 +234,13 @@ def handle_output_metadata(
                 -1: FOp_v2 if issubclass(output_data.__class__, PrMdl_v2) else FOp_v1,
                 1: FOp_v1,
                 2: FOp_v2,
-                -12: FOp__v1v2,
+                V1V2_SHIM_CODE: FOp__v1v2,
             }[convert_version]
         else:
             model = {
                 -1: FOp_v1 if issubclass(output_data.__class__, PrMdl_v1) else FOp_v2,
                 2: FOp_v2,
-                -12: FOp__v1v2,
+                V1V2_SHIM_CODE: FOp__v1v2,
             }[convert_version]
 
         # for input_data, use object (not dict) if possible for >=v2
@@ -264,7 +267,7 @@ def handle_output_metadata(
         ret = ret.convert_v(convert_version)
 
     # frail emergency plumbing to allow some normal operation with v1.Atomic & py314
-    if convert_version == -12:
+    if convert_version == V1V2_SHIM_CODE:
         ret = ret.convert_v(convert_version)
 
     if return_dict:
