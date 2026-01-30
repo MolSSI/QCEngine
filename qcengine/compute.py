@@ -12,7 +12,7 @@ from .config import get_config
 from .exceptions import InputError, RandomError
 from .procedures import get_procedure
 from .programs import get_program
-from .util import V1V2_SHIM_CODE, compute_wrapper, environ_context, handle_output_metadata, model_wrapper
+from .util import QCNG_V1V2_SHIM_CODE, compute_wrapper, environ_context, handle_output_metadata, model_wrapper
 
 if TYPE_CHECKING:
     from pydantic.main import BaseModel
@@ -55,14 +55,16 @@ def compute(
     program
         The CMS program or procedure with which to execute the input. E.g., "psi4", "rdkit", "geometric".
     raise_error
-        Determines if compute should raise an error or not.
+        If computation doesn't succeed, should compute raise an error (`True`) or encode in a
+        `FailedOperation` (`False`). See also: `return_dict`.
     retries : int, optional
         The number of random tries to retry for.
     task_config
         A dictionary of local configuration options corresponding to a TaskConfig object.
         Formerly local_options.
     return_dict
-        Returns a dict instead of qcelemental.models.AtomicResult  # TODO base Result class
+        Returns a dictionary serialization instead of a Result or FailedOperation model from
+        QCElemental.models. Note that `raise_error` take precedence.
     return_version
         The schema version to return. If -1, the input schema_version is used.
 
@@ -141,14 +143,18 @@ def compute(
             ):  # ... but we have a workaround ...
 
                 if bool(os.environ.get("QCNG_USE_V1V2_SHIM", False)):  # ... if choose to use it
-                    # return_version = -12 = V1V2_SHIM_CODE signals to use the shim classes that represent certain
+                    # return_version = -12 = QCNG_V1V2_SHIM_CODE signals to use the shim classes that represent certain
                     #   QCSchema v1 layouts (QCSk v1 only exist in pydantic.v1 API) in pydantic v2 API.
                     #   We never want to release these into the wild so only available if returning
                     #   dict and only for Atomic models (i.e., shims not avail for Opt, TD, MBE).
-                    return_version = V1V2_SHIM_CODE
+                    return_version = QCNG_V1V2_SHIM_CODE
                 else:
+                    # reset retver so that FailedOp w/_MSG314 can be constructed
+                    return_version = 2
                     raise RuntimeError(_MSG314)
             else:
+                # reset retver so that FailedOp w/_MSG314 can be constructed
+                return_version = 2
                 raise RuntimeError(_MSG314)
 
         # Build out task_config
