@@ -32,10 +32,10 @@ def test_qchem_output_parser(test_case):
     # only qcng.compute() handles schema versions. test_data returns v1 and parse_output returns v2, so need to convert
     inp = inp.convert_v(2)
     output = qcng.get_program("qchem", check=False).parse_output(outfiles, inp)
-    output = output.convert_v(1).dict()
+    output = output.convert_v(1).model_dump()
     output.pop("provenance", None)
 
-    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).model_dump()
     output_ref.pop("provenance", None)
     output_ref.pop("extras", None)
     output.pop("extras", None)
@@ -140,10 +140,10 @@ def test_qchem_logfile_parser(test_case):
     with pytest.warns(Warning):
         output = qcng.get_program("qchem", check=False).parse_logfile(outfiles)
     # only qcng.compute() handles schema versions. above returns v2, so need to convert
-    output = output.convert_v(1).dict()
+    output = output.convert_v(1).model_dump()
     output["stdout"] = None
 
-    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).model_dump()
     for key in list(output["provenance"].keys()):
         if key not in output_ref["provenance"]:
             output["provenance"].pop(key)
@@ -165,10 +165,10 @@ def test_qchem_logfile_parser_qcscr(test_case):
     with pytest.warns(Warning):
         output = qcng.get_program("qchem", check=False).parse_logfile(outfiles)
     # only qcng.compute() handles schema versions. above returns v2, so need to convert
-    output = output.convert_v(1).dict()
+    output = output.convert_v(1).model_dump()
     output["stdout"] = None
 
-    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).dict()
+    output_ref = qcel.models.v1.AtomicResult.parse_raw(data["output.json"]).model_dump()
     for key in list(output["provenance"].keys()):
         if key not in output_ref["provenance"]:
             output["provenance"].pop(key)

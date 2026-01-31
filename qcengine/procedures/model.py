@@ -1,7 +1,7 @@
 import abc
+import importlib
 from typing import Any, Dict, Tuple, Union
 
-import qcelemental
 from pydantic import BaseModel, ConfigDict
 
 from ..util import model_wrapper
@@ -60,8 +60,10 @@ class ProcedureHarness(BaseModel, abc.ABC):
         Quick wrapper around util.model_wrapper for inherited classes
         """
 
-        v1_model = getattr(qcelemental.models.v1, model)
-        v2_model = getattr(qcelemental.models.v2, model)
+        module_v1 = importlib.import_module("qcelemental.models.v1")
+        module_v2 = importlib.import_module("qcelemental.models.v2")
+        v1_model = getattr(module_v1, model)
+        v2_model = getattr(module_v2, model)
 
         if isinstance(data, v1_model):
             mdl = model_wrapper(data, v1_model)

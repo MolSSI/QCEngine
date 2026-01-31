@@ -28,12 +28,13 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-vX.Y.0 / 2025-MM-DD (Unreleased)
---------------------------------
+v0.50.0rc1 / 2026-01-31 (aka "next" aka "QCSchema v2 available") (Prerelease)
+-----------------------------------------------------------------------------
 
 Breaking Changes
 ++++++++++++++++
-- (:pr:`453`) Deps - Require pydantic v2 dependency (don't worry, this isn't
+- (:pr:`486`) Deps - Require Python >=3.9. Practically for conda, >=3.10.
+- (:pr:`453`) Deps - Require Pydantic v2 dependency (don't worry, this isn't
   changing QCEngine's role as QCSchema I/O runner. Also require pydantic-settings
   for CLI. @loriab
 - (:pr:`455`) API - As promised 2 years ago for >=v0.30, `local_options` has
@@ -44,20 +45,92 @@ Breaking Changes
   merged in favor of the former. Also, treat the second argument (e.g., "nwchem"
   or "geometric") as a positional argument, rather than keyword argument with key
   "program" or "procedure". @loriab
-- (:pr:`455`) API - `compute` learned an optional argument  `return_version` to
+- (:pr:`455`) API - `compute` learned an optional argument `return_version` to
   specify the schema_version of the returned model or dictionary. By default it'll
   return the input schema_version. If not determinable, it will return v1. @loriab
 
 New Features
 ++++++++++++
+- QCSchema v2 implemented and used internally for harnesses.
+- Both QCSchema v1 and v2 may be used for input and requested as output.
+- Note that QCSchema v2 field layout isn't finalized until v0.60, so there may
+  be lock-step advancements of the QCArchive stack.
+- Python 3.14 is now useable. Use of QCSchema v1 with 3.14 is limited (by Pydantic).
+  Generally, input (as dict or json) will work. v1 output is technically forbidden
+  but see envvar below for returning as dict. See table:compute_result_schver in
+  compute.py for details. Note that when CMS community codes aren't 3.14-ready,
+  their presence may interfere with normal QCEngine functionality (like `qcengine info`).
+- See QCElemental for a map of QCSchema v1 and v2, a schema changelog, and a migration guide.
 
-Enhancements
-++++++++++++
-- (:pr:`490`) TorchANI - Updated species handling for newer Pythons, ANI syntax. @loriab
+Enhancements (General)
+++++++++++++++++++++++
+- (:pr:`458`) ``qcengine run`` learned new argument ``--return-version`` analogous
+  to ``qcengine.compute(..., return_version=1|2)`` so CLI matches API capabilities.
+  Note *not* ported to phasing-out ``qcengine run-procedure``.
+- API — Standardize failed job handling toward models for QCSchema v2.
+  - (:pr:`458`) When qcengine.compute() fails and forms a fop = FailedOperation
+    (raise_error=T), with v2, `fop.input_data` will be an <>Input model (when
+    possible; if the error was in forming the model, it'll still be a dict), not
+    always a dict like v1.
+  - (:pr:`458`) When <executor>.compute() fails and collects the input for
+    processing, with v2 it now uses the <>Input model passed to the executor,
+    not the model-or-dict passed into compute().
+  - (:pr:`458`) The net result of the two above is that whereas fop.input_data
+    in v1 was reliably a dict and its contents would reflect whether a model or
+    dict was passed to qcengine.compute(), now in v2, fop.input_data is a model
+    whenever possible (to mirror <>Result.input_data) regardless of model or dict
+    passed to qcengine.compute(); the only case where it's a dict is if the error
+    was in forming the model.
+  - (:pr:`486`) When the requested type of return can't be formed for Python 3.14,
+    it will form the nearest approximation in QCSchema v2.FailedOperation. See
+    table:compute_result_schver in compute.py for details.
+- (:pr:`454`) Testing - Tests check QCSchema v1 and v2. @loriab
 - (:pr:`453`) Maint - Convert internal (non-QCSchema) pydantic classes to
   pydantic v2 API, namely `NodeDescriptor`, `TaskConfig`, `ProgramHarness`,
   `ProcedureHarness`. @loriab
-- (:pr:`454`) Testing - Tests check QCSchema v1 and v2. @loriab
+- (:pr:`460`) Testing — Integrate ``AtomicInput.specification`` into harnesses
+  (as part of migrating Program harnesses to use QCSchema v2 internally) and
+  show what new inputs look like in tests.
+- (:pr:`460`) Schema — If you're missing something from AtomicResult.extras (or
+  any <>Result.extras), check AtomicResult.input_data.extras in case it was passed
+  in on input. Result extras are no longer merged with Input extras.
+- (:pr:`468`) Schema — lightly adapt harnesses for Molecule v3 (remember, Molecule
+  schema_version is one greater than general QCSchema schema_version. This doesn't
+  change the layout, just the version field. Layout not finalized until v0.60.
+- (:pr:`486`) Schema — Adapt more harnesses to use ``model_dump`` instead of ``dict``
+  when serializing Pydantic models to clear away warnings. Pydantic v1 models use
+  the latter and v2 the former but QCSchema aliases each.
+- (:pr:`486`) Deps — Adapt harnesses to allow Py 3.14 through small syntax changes.
+- (:pr:`486`) API — With :envvar:`QCNG_USE_V1V2_SHIM=1` in Python 3.14, QCSchema
+  v1 inputs and outputs (atomic flavor) can be used as dictionaries (never models).
+  See the table:compute_result_schver in compute.py for details.
+
+Enhancements (Harnesses)
+++++++++++++++++++++++++
+- (:pr:`458`) DFTD3 & DFTD4 (new intf) - intercept ``v1.AtomicResult`` with
+  ``success=False`` and ``error`` fields set from QCSchema interfaces and return
+  ``FailedOperation``s. Someday when upstream switches to v2, request packages
+  return FaileOp directly and use ``input_error`` rather than ``input error``.
+- (:pr:`459`) OpenMM — Gained AtomicResult.properties.return_gradient
+- (:pr:`459`) GCP, MP2D — several got properties.return_energy, retunr_gradient
+- (:pr:`461`) Optking — now fills in ``v2.OptimizationResult.stdout``. Through
+  QCSchema v2, one can alter gradient protocols in an optimization.
+- (:pr:`461`) nwchemdriver — allow nwchemdriver w/o driver=energy. provenance now
+  "nwchemdriver" not "nwchemrelax".
+- (:pr:`461`) Pyberny — berny harness rewritten in v2. optking and geometric
+  natively speak v1, so adapted as well as can be.
+- (:pr:`461`) TorsionDrive — torsiondrive rewritten in QCSchema v2.
+- (:pr:`468`) Torsiondrive — now accepts protocols. use ``protocols={"scan_results": "all"}``
+  if going to be converted to v1.
+- (:pr:`468`) RDKIT, MRChem — RDKit, store ``AtomicResult.properties.return_gradient`` and
+  ``calcinfo_natom``. MRChem, store ``AtomicResult.properties.return_gradient``.
+- (:pr:`468`) TorsionDrive — Adapt harnesses for TD.initial_molecules -> TD.initial_molecule
+  and TD.optimization_history -> TD.scan_results
+- (:pr:`490`) TorchANI - Updated species handling for newer Pythons, ANI syntax. @loriab
+- (:pr:`486`) QCManyBody — Adapt harness to work with QCSchema v1 and v2 and to
+  work with QCManyBody v0.50 (in preparation) as well as current v0.5.1.
+- (:pr:`486`) Psi4 — Add another generation to the Psi4 harness (to become active
+  ~v1.11) to pass/receive QCSchema v2 to/from Psi4.
 
 Bug Fixes
 +++++++++
@@ -68,38 +141,10 @@ Misc.
 - (:pr:`452`) Maint - Set up pre-commit and run over repository. @loriab
 - (:pr:`453`) CI - Dropped Entos/QCore and Psi4 v1.5 as too hard to solve with
   pydantic v2 and modern python versions. @loriab
-
-MUST (Unmerged)
-+++++++++++++++
-- (:pr:`469`) setup.py replaced by pyproject.toml with setuptools backend and replaced versioneer with setuptools-scm
-- (:pr:`469`) remove __git_revision__ and get_information("git_revision") removed with versioneer
-- (:pr:`468`) adapt harnesses for TD.initial_molecules -> TD.initial_molecule and TD.optimization_history -> TD.scan_results
-- (:pr:`468`) rdkit, store ``AtomicResult.properties.return_gradient`` and ``calcinfo_natom``. mrchem, store ``AtomicResult.properties.return_gradient``.
-- (:pr:`468`) lightly Adapt harnesses for Mol v3
-- (:pr:`468`) Use packaging instead of setuptools to provide version parsing
-- (:pr:`468`) torsiondrive now accepts protocols. use ``protocols={"scan_results": "all"}`` if going to be converted to v1.
-- (:pr:`462`) 
-- (:pr:`462`) adapt harnesses for TD.initial_molecules -> TD.initial_molecule and TD.optimization_history -> TD.scan_results
-- (:pr:`462`) rdkit, store ``AtomicResult.properties.return_gradient`` and ``calcinfo_natom``. mrchem, store ``AtomicResult.properties.return_gradient``.
-- (:pr:`462`) lightly Adapt harnesses for Mol v3
-- (:pr:`462`) Use packaging instead of setuptools to provide version parsing
-- (:pr:`462`) torsiondrive now accepts protocols. use ``protocols={"scan_results": "all"}`` if going to be converted to v1.
-- (:pr:`461`) torsiondrive rewritten in v2.
-- (:pr:`461`) berny harness rewritten in v2. optking and geometric natively speak v1, so adapted as well as can be.
-- (:pr:`461`) allow nwchemdriver w/o driver=energy. provenance now nwchemdriver not nwchemrelax
-- (:pr:`461`)  Optking now fills in ``v2.OptimizationResult.stdout``. Through v2, once can alter gradient protocols in an optimization.
-- (:pr:`460`) integrate ``AtomicInput.specification`` into harnesses and show what new inputs look like in tests
-- (:pr:`459`) gcp, mp2d several got properties.return_energy, retunr_gradient
-- (:pr:`460`) If you're missing something from AtomicResult.extras, check AtomicResult.input_data.extras in case it was passed in on input
-- (:pr:`459`) OpenMM gained AtomicResult.properties.return_gradient
-- (:pr:`458`) When qcengine.compute() fails and forms a fop = FailedOperation (raise_error=T), with v2, `fop.input_data` will be an <>Input model (when possible; if the error was in forming the model, it'll still be a dict), not always a dict like v1.
-- (:pr:`458`) When <executor>.compute() fails and collects the input for processing, with v2 it now uses the <>Input model passed to the executor, not the model-or-dict passed into compute().
-- (:pr:`458`) The net result of the two above is that whereas fop.input_data in v1 was reliably a dict and its contents would reflect whether a model or dict was passed to qcengine.compute(), now in v2, fop.input_data is a model whenever possible (to mirror <>Result.input_data) regardless of model or dict passed to qcengine.compute(); the only case where it's a dict is if the error was in forming the model.
-- (:pr:`458`) DFTD3 & DFTD4 (new intf) - intercept ``v1.AtomicResult`` with ``success=False`` and ``error`` fields set from QCSchema interfaces and return ``FailedOperation``s. Someday when upstream switches to v2, request packages return FaileOp directly and use ``input_error`` rather than ``input error``.
-- (:pr:`458`) ``qcengine run`` learned new argument ``--return-version`` analogous to ``qcengine.compute(..., return_version=1|2)`` so CLI matches API capabilities. Note *not* ported to phasing-out ``qcengine run-procedure``.
-
-WIP (Unmerged)
-++++++++++++++
+- (:pr:`468`) Deps — use packaging instead of setuptools to provide version parsing.
+- (:pr:`469`) Maint — setup.py replaced by pyproject.toml with setuptools backend
+  and replaced versioneer with setuptools-scm. With removal of versioneer, remove
+  __git_revision__ and get_information("git_revision").
 
 
 v0.34.0 / 2026-01-16

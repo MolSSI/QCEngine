@@ -22,7 +22,7 @@ def harvest_output(outtext):
     pass_grad = []
 
     # for outpass in re.split(r'--invoking executable xjoda', outtext, re.MULTILINE):
-    for outpass in re.split(r"JODA beginning optimization cycle", outtext, re.MULTILINE):
+    for outpass in re.split(r"JODA beginning optimization cycle", outtext, flags=re.MULTILINE):
         psivar, c4coord, c4grad, version, module, error = harvest_outfile_pass(outpass)
         pass_psivar.append(psivar)
         pass_coord.append(c4coord)

@@ -2,7 +2,8 @@
 Tests the DQM compute dispatch module
 """
 import copy
-import pprint
+import sys
+import warnings
 
 import msgpack
 import numpy as np
@@ -89,6 +90,12 @@ def test_compute_energy(program, model, keywords, schema_versions, request):
     assert ret.success is True
     assert isinstance(ret.return_result, float)
     assert ret.return_result == ret.properties.return_energy
+
+    # official leave this as dict(), not model_dump(), to ensure remains operational
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        dret = ret.dict()
+    assert dret["return_result"] == dret["properties"]["return_energy"]
 
 
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
@@ -238,7 +245,9 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
                 assert ret["input_data"]["model"]["method"] == model["method"], "input not copied over"
         else:
             assert ret.success is False, "wrongly successful"
-            assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation)), "wrong class"
+            assert isinstance(
+                ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation, qcel.models._v1v2.FailedOperation)
+            ), "wrong class"
             assert ret.error.error_type == "input_error", f"wrong type: {ret.error.error_type=} != 'input_error'"
             if "v2" in request.node.name:
                 ret_method = ret.input_data.specification.model.method
@@ -247,6 +256,111 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
             else:
                 ret_method = ret.input_data["model"]["method"]
             assert ret_method == model["method"], "input not copied over"
+
+
+@using("nwchem")
+@pytest.mark.parametrize("envshim", [True, False])
+@pytest.mark.parametrize("model", ["Atomic"])
+@pytest.mark.parametrize(
+    "goodcalc,input_data,return_version,return_dict,xptd",
+    [
+        # fmt: off
+    #           good? in ret  dict?    py313                      py314                      py314+V1V2_SHIM
+    pytest.param(True, 1, -1, False,  ("v1.Result",               "v2.FailedOp pyd",         "v2.FailedOp pyd")),          # xptd0
+    pytest.param(True, 1,  2, False,  ("v2.Result",               "v2.Result",               "v2.Result")),                # xptd1
+    pytest.param(True, 1, -1, True,   ("dict of v1.Result",       "dict of v2.FailedOp pyd", "dict of v1.Result")),        # xptd2
+    pytest.param(True, 1,  2, True,   ("dict of v2.Result",       "dict of v2.Result",       "dict of v2.Result")),        # xptd3
+
+    pytest.param(True, 2, -1, False,  ("v2.Result",               "v2.Result",               "v2.Result")),                # xptd4
+    pytest.param(True, 2,  1, False , ("v1.Result",               "v2.FailedOp pyd",         "v2.FailedOp pyd")),          # xptd5
+    pytest.param(True, 2, -1, True,   ("dict of v2.Result",       "dict of v2.Result",       "dict of v2.Result")),        # xptd6
+    pytest.param(True, 2,  1, True,   ("dict of v1.Result",       "dict of v2.FailedOp pyd", "dict of v1.Result")),        # xptd7
+
+    pytest.param(False, 1, -1, False, ("v1.FailedOp mtd",         "v2.FailedOp pyd",         "v2.FailedOp pyd")),          # xptd8
+    pytest.param(False, 1,  2, False, ("v2.FailedOp mtd",         "v2.FailedOp mtd",         "v2.FailedOp mtd")),          # xptd9
+    pytest.param(False, 1, -1, True,  ("dict of v1.FailedOp mtd", "dict of v2.FailedOp pyd", "dict of v1.FailedOp mtd")),  # xptd10
+    pytest.param(False, 1,  2, True,  ("dict of v2.FailedOp mtd", "dict of v2.FailedOp mtd", "dict of v2.FailedOp mtd")),  # xptd11
+
+    pytest.param(False, 2, -1, False, ("v2.FailedOp mtd",         "v2.FailedOp mtd",         "v2.FailedOp mtd")),          # xptd12
+    pytest.param(False, 2,  1, False, ("v1.FailedOp mtd",         "v2.FailedOp pyd",         "v2.FailedOp pyd")),          # xptd13
+    pytest.param(False, 2, -1, True,  ("dict of v2.FailedOp mtd", "dict of v2.FailedOp mtd", "dict of v2.FailedOp mtd")),  # xptd14
+    pytest.param(False, 2,  1, True,  ("dict of v1.FailedOp mtd", "dict of v2.FailedOp pyd", "dict of v1.FailedOp mtd")),
+        # xptd15
+        # fmt: on
+    ],
+)
+def test_compute_output_table(goodcalc, input_data, return_version, return_dict, xptd, model, envshim, monkeypatch):
+    h2 = qcng.get_molecule("hydrogen", return_dict=True)
+    method = "hf" if goodcalc else "standard_model_of_particle_physics"
+
+    if model == "Atomic":
+        if input_data == 1:
+            inp = {"molecule": h2, "driver": "energy", "model": {"method": method, "basis": "sto-3g"}}
+        elif input_data == 2:
+            inp = {
+                "molecule": h2,
+                "specification": {"driver": "energy", "model": {"method": method, "basis": "sto-3g"}},
+            }
+
+    if sys.version_info >= (3, 14):
+        if envshim:
+            monkeypatch.setenv("QCNG_USE_V1V2_SHIM", "1")
+            result_this_job = xptd[2]
+        else:
+            result_this_job = xptd[1]
+    else:
+        result_this_job = xptd[0]
+
+    ret = qcng.compute(inp, "nwchem", raise_error=False, return_dict=return_dict, return_version=return_version)
+
+    if model == "Atomic":
+        # pyd_phrase covers _MSG314 from qcng/compute.py and _MSG2 from qcel/models/v1/__init__.py
+        # Append ". You can (a)" to catch the former. use ". Use qcel" to catch the latter
+        pyd_phrase = "Reason: pydantic.v1 is unavailable on Python 3.14+"
+        mtd_phrase = "Method not recognized"
+
+        if result_this_job == "v2.Result":
+            assert isinstance(ret, qcel.models.v2.AtomicResult)
+
+        elif result_this_job == "dict of v2.Result":
+            assert isinstance(ret, dict)
+            assert ret["schema_name"] == "qcschema_atomic_result"
+            assert ret["schema_version"] == 2
+
+        elif result_this_job == "v1.Result":
+            assert isinstance(ret, qcel.models.v1.AtomicResult)
+
+        elif result_this_job == "dict of v1.Result":
+            assert isinstance(ret, dict)
+            assert ret["schema_name"] == "qcschema_output"
+            assert ret["schema_version"] == 1
+
+        elif result_this_job.startswith("v2.FailedOp"):
+            assert isinstance(ret, qcel.models.v2.FailedOperation)
+            errmsg = {"v2.FailedOp mtd": mtd_phrase, "v2.FailedOp pyd": pyd_phrase}[result_this_job]
+            assert errmsg in ret.error.error_message
+
+        elif result_this_job.startswith("dict of v2.FailedOp"):
+            assert isinstance(ret, dict)
+            assert ret["schema_name"] == "qcschema_failed_operation"
+            assert ret["schema_version"] == 2
+            errmsg = {"dict of v2.FailedOp mtd": mtd_phrase, "dict of v2.FailedOp pyd": pyd_phrase}[result_this_job]
+            assert errmsg in ret["error"]["error_message"]
+
+        elif result_this_job.startswith("v1.FailedOp"):
+            assert isinstance(ret, qcel.models.v1.FailedOperation)
+            errmsg = {"v1.FailedOp mtd": mtd_phrase}[result_this_job]
+            assert errmsg in ret.error.error_message
+
+        elif result_this_job.startswith("dict of v1.FailedOp"):
+            assert isinstance(ret, dict)
+            assert "schema_name" not in ret
+            assert "schema_version" not in ret
+            errmsg = {"dict of v1.FailedOp mtd": mtd_phrase}[result_this_job]
+            assert errmsg in ret["error"]["error_message"]
+
+        else:
+            assert 0
 
 
 @pytest.mark.parametrize(

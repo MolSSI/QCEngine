@@ -250,7 +250,7 @@ class GAMESSHarness(ProgramHarness):
         build_out(qcvars)
         atprop = build_atomicproperties(qcvars)
 
-        provenance = Provenance(creator="GAMESS", version=self.get_version(), routine="rungms").dict()
+        provenance = Provenance(creator="GAMESS", version=self.get_version(), routine="rungms").model_dump()
         if module is not None:
             provenance["module"] = module
 

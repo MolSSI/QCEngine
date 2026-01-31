@@ -114,7 +114,7 @@ class MP2DHarness(ProgramHarness):
         )
 
         # Need 'real' field later and that's only guaranteed for molrec
-        molrec = qcel.molparse.from_schema(input_model.molecule.dict())
+        molrec = qcel.molparse.from_schema(input_model.molecule.model_dump())
         xyz = qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format="")
         infiles = {"mp2d_geometry": xyz}
         # jobrec['molecule']['real'] = molrec['real']

@@ -304,7 +304,7 @@ $end
         #     m1 = re.findall(" CCSD correlation energy.+=.+\d+\.\d+", outfiles["dispatch.out"])
         #     m2 = re.findall(" CCSD total energy.+=.+\d+\.\d+", outfiles["dispatch.out"])
 
-        props, prov = self._parse_logfile_common(outtext, input_model.dict())
+        props, prov = self._parse_logfile_common(outtext, input_model.model_dump())
         output_data["provenance"] = prov
         output_data["properties"] = properties
         output_data["properties"].update(props)
@@ -323,7 +323,7 @@ $end
         """
 
         properties = {}
-        provenance = Provenance(creator="QChem", version=self.get_version(), routine="qchem").dict()
+        provenance = Provenance(creator="QChem", version=self.get_version(), routine="qchem").model_dump()
         mobj = re.search(r"This is a multi-thread run using ([0-9]+) threads", outtext)
         if mobj:
             provenance["nthreads"] = int(mobj.group(1))
@@ -440,7 +440,7 @@ $end
                 if keywords.get("input_bohr", False):
                     molecule_text += "\nunits au"
                 molecule = Molecule.from_data(molecule_text, dtype="psi4")
-                input_dict["molecule"] = molecule.dict()
+                input_dict["molecule"] = molecule.model_dump()
 
             _excluded_rem = {
                 "input_bohr",
@@ -452,7 +452,7 @@ $end
                     input_dict["specification"]["keywords"].pop(item)
 
         try:
-            qcscr_result = self.parse_output(outfiles, AtomicInput(**input_dict)).dict()
+            qcscr_result = self.parse_output(outfiles, AtomicInput(**input_dict)).model_dump()
         except KeyError:
             props, prov = self._parse_logfile_common(outtext, input_dict)
             qcscr_result = {

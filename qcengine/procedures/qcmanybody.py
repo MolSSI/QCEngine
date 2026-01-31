@@ -1,7 +1,9 @@
+import importlib
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Tuple, Union
 
-from qcelemental.util import safe_version, which_import
+from qcelemental.util import parse_version, safe_version, which_import
 
+from ..exceptions import InputError
 from ..util import model_wrapper
 from .model import ProcedureHarness
 
@@ -41,8 +43,18 @@ class QCManyBodyProcedure(ProcedureHarness):
         """
         import qcmanybody
 
-        v1_model = getattr(qcmanybody.models, model)
-        v2_model = None
+        try:
+            module_v1 = importlib.import_module("qcmanybody.models.v1")
+            module_v2 = importlib.import_module("qcmanybody.models.v2")
+            v1_model = getattr(module_v1, model)
+            v2_model = getattr(module_v2, model)
+
+        except ModuleNotFoundError:
+            module_v1 = importlib.import_module("qcmanybody.models")
+            v1_model = getattr(module_v1, model)
+            v2_model = None
+
+        qcmb_v1v2 = parse_version(self.get_version()) >= parse_version("0.50a0")
 
         if isinstance(data, v1_model):
             mdl = model_wrapper(data, v1_model)
@@ -59,15 +71,19 @@ class QCManyBodyProcedure(ProcedureHarness):
             mdl = model_wrapper(data, v1_model)
 
         input_schema_version = mdl.schema_version
-        if input_schema_version != 1:
+        if input_schema_version != 1 and qcmb_v1v2 is False:
             raise InputError("Can't use v2 ManyBody")
 
-        if return_input_schema_version:
-            return mdl, input_schema_version
-            # return mdl.convert_v(2), input_schema_version
+        if qcmb_v1v2:
+            if return_input_schema_version:
+                return mdl.convert_v(2), input_schema_version
+            else:
+                return mdl.convert_v(2)
         else:
-            return mdl
-            # return mdl.convert_v(2)
+            if return_input_schema_version:
+                return mdl, input_schema_version
+            else:
+                return mdl
 
     def get_version(self) -> str:
         self.found(raise_error=True)
@@ -81,7 +97,10 @@ class QCManyBodyProcedure(ProcedureHarness):
         return self.version_cache[which_prog]
 
     def compute(self, input_model: "ManyBodyInput", config: "TaskConfig") -> "ManyBodyResult":
-        from qcmanybody import ManyBodyComputer
+        if input_model.schema_version == 2:
+            from qcmanybody.v2 import ManyBodyComputer
+        else:
+            from qcmanybody import ManyBodyComputer
 
         output_model = ManyBodyComputer.from_manybodyinput(input_model)
 

@@ -3,7 +3,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, schema_versions5, using
 
 
 @pytest.fixture
@@ -28,6 +28,73 @@ def nh2_data():
  units au
  symmetry c1
 """
+
+
+@pytest.mark.parametrize(
+    "program,basis,keywords",
+    [
+        pytest.param("cfour", "cC-pvdZ", {"scf_conv": 12}, marks=using("cfour")),  # test basis handling, not results
+        pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=using("cfour")),
+        pytest.param("cfour", "aug-pvdz", {}, marks=using("cfour")),
+        pytest.param(
+            "qcore",
+            "aug-cc-pVDZ",
+            {"coulomb_method": "direct_4idx", "exchange_method": "direct_4idx"},
+            marks=using("qcore"),
+        ),
+        pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=using("gamess")),
+        pytest.param("molpro", "aug-cc-pvdz", {}, marks=using("molpro")),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=using("nwchem")),
+        pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=using("nwchem")),
+        pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "direct"}, marks=using("psi4")),
+        pytest.param("qchem", "aug-cc-pvdz", {}, marks=using("qchem")),
+        pytest.param("turbomole", "aug-cc-pVDZ", {}, marks=using("turbomole")),
+        pytest.param("terachem_pbs", "aug-cc-pvdz", {}, marks=using("terachem_pbs")),
+    ],
+)
+def test_sp_hf_rhf_v1v2shim(program, basis, keywords, h2o_data, schema_versions5, request, monkeypatch):
+    """cfour/sp-rhf-hf/input.dat
+    #! single point HF/adz on water
+
+    """
+    models, retver, _ = schema_versions5
+    h2o = qcel.models.v2.Molecule.from_data(h2o_data).model_dump()
+    if not from_v2(request.node.name):
+        h2o["schema_version"] = 2
+
+    # Note that this test is identical to test_sp_hf_rhf for <py314 (but with fewer checks)
+
+    if from_v2(request.node.name):
+        resi = {
+            "molecule": h2o,
+            "specification": {"driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords},
+        }
+    else:
+        resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
+
+    monkeypatch.setenv("QCNG_USE_V1V2_SHIM", "1")
+    # resi = checkver_and_convert(resi, request.node.name, "pre")
+    res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
+    import pprint
+
+    pprint.pprint(res, width=200)
+    # res = checkver_and_convert(res, request.node.name, "post")
+
+    if "_v2" in request.node.name:
+        assert res["input_data"]["specification"]["driver"] == "energy"
+    else:
+        assert res["driver"] == "energy"
+    assert "provenance" in res
+    assert res["success"] is True
+
+    if basis == "cC-pvdZ":
+        return
+
+    # aug-cc-pvdz
+    scf_tot = -76.0413815332
+
+    atol = 1.0e-6
+    assert compare_values(scf_tot, res["return_result"], atol=atol)
 
 
 @pytest.mark.parametrize(

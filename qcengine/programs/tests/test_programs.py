@@ -60,8 +60,8 @@ def test_psi4_task(schema_versions, request):
     assert "Final Energy" in ret.stdout
 
     prov_keys = {"cpu", "hostname", "username", "wall_time"}
-    assert ret.provenance.dict().keys() >= prov_keys
-    assert "retries" not in ret.provenance.dict()
+    assert ret.provenance.model_dump().keys() >= prov_keys
+    assert "retries" not in ret.provenance.model_dump()
 
     assert ret.success is True
 
@@ -548,7 +548,7 @@ def test_openmm_cmiles_gradient(schema_versions, request):
 
     water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
 
-    water_dict = water.dict()
+    water_dict = water.model_dump()
     # add water cmiles to the molecule
     water_dict["extras"] = {"cmiles": {"canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:2][O:1][H:3]"}}
 
@@ -576,7 +576,7 @@ def test_openmm_cmiles_gradient_nomatch(schema_versions, request):
 
     water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
 
-    water_dict = water.dict()
+    water_dict = water.model_dump()
     # add ethane cmiles to the molecule
     water_dict["extras"] = {
         "cmiles": {
@@ -629,7 +629,7 @@ def test_openmm_gaff_keywords(gaff_settings, schema_versions, request):
     program = "openmm"
     water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
 
-    water_dict = water.dict()
+    water_dict = water.model_dump()
     # add water cmiles to the molecule
     water_dict["extras"] = {"cmiles": {"canonical_isomeric_explicit_hydrogen_mapped_smiles": "[H:2][O:1][H:3]"}}
 

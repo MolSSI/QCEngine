@@ -171,7 +171,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
     wfn = checkver_and_convert(wfn, tnm, "post")
 
     print("WFN")
-    pp.pprint(wfn.dict())
+    pp.pprint(wfn.model_dump())
 
     qc_module_out = wfn.provenance.creator.lower()
     if hasattr(wfn.provenance, "module"):
