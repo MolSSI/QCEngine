@@ -1,8 +1,8 @@
 """
 Tests the DQM compute dispatch module
 """
-import sys
 import copy
+import sys
 import warnings
 
 import msgpack
@@ -261,8 +261,10 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
 @using("nwchem")
 @pytest.mark.parametrize("envshim", [True, False])
 @pytest.mark.parametrize("model", ["Atomic"])
-@pytest.mark.parametrize("goodcalc,input_data,return_version,return_dict,xptd", [
-# fmt: off
+@pytest.mark.parametrize(
+    "goodcalc,input_data,return_version,return_dict,xptd",
+    [
+        # fmt: off
     #           good? in ret  dict?    py313                      py314                      py314+V1V2_SHIM
     pytest.param(True, 1, -1, False,  ("v1.Result",               "v2.FailedOp pyd",         "v2.FailedOp pyd")),          # xptd0
     pytest.param(True, 1,  2, False,  ("v2.Result",               "v2.Result",               "v2.Result")),                # xptd1
@@ -282,9 +284,11 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
     pytest.param(False, 2, -1, False, ("v2.FailedOp mtd",         "v2.FailedOp mtd",         "v2.FailedOp mtd")),          # xptd12
     pytest.param(False, 2,  1, False, ("v1.FailedOp mtd",         "v2.FailedOp pyd",         "v2.FailedOp pyd")),          # xptd13
     pytest.param(False, 2, -1, True,  ("dict of v2.FailedOp mtd", "dict of v2.FailedOp mtd", "dict of v2.FailedOp mtd")),  # xptd14
-    pytest.param(False, 2,  1, True,  ("dict of v1.FailedOp mtd", "dict of v2.FailedOp pyd", "dict of v1.FailedOp mtd")),  # xptd15
-# fmt: on
-])
+    pytest.param(False, 2,  1, True,  ("dict of v1.FailedOp mtd", "dict of v2.FailedOp pyd", "dict of v1.FailedOp mtd")),
+        # xptd15
+        # fmt: on
+    ],
+)
 def test_compute_output_table(goodcalc, input_data, return_version, return_dict, xptd, model, envshim, monkeypatch):
     h2 = qcng.get_molecule("hydrogen", return_dict=True)
     method = "hf" if goodcalc else "standard_model_of_particle_physics"
@@ -293,7 +297,10 @@ def test_compute_output_table(goodcalc, input_data, return_version, return_dict,
         if input_data == 1:
             inp = {"molecule": h2, "driver": "energy", "model": {"method": method, "basis": "sto-3g"}}
         elif input_data == 2:
-            inp = {"molecule": h2, "specification": {"driver": "energy", "model": {"method": method, "basis": "sto-3g"}}}
+            inp = {
+                "molecule": h2,
+                "specification": {"driver": "energy", "model": {"method": method, "basis": "sto-3g"}},
+            }
 
     if sys.version_info >= (3, 14):
         if envshim:
@@ -308,7 +315,7 @@ def test_compute_output_table(goodcalc, input_data, return_version, return_dict,
 
     if model == "Atomic":
         # pyd_phrase covers _MSG314 from qcng/compute.py and _MSG2 from qcel/models/v1/__init__.py
-        # * use ". You can (a)" to catch the former. use ". Use qcel" to catch the latter
+        # Append ". You can (a)" to catch the former. use ". Use qcel" to catch the latter
         pyd_phrase = "Reason: pydantic.v1 is unavailable on Python 3.14+"
         mtd_phrase = "Method not recognized"
 

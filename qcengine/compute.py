@@ -12,7 +12,7 @@ from .config import get_config
 from .exceptions import InputError, RandomError
 from .procedures import get_procedure
 from .programs import get_program
-from .util import QCNG_V1V2_SHIM_CODE, compute_wrapper, environ_context, handle_output_metadata, model_wrapper
+from .util import QCEL_V1V2_SHIM_CODE, compute_wrapper, environ_context, handle_output_metadata, model_wrapper
 
 if TYPE_CHECKING:
     from pydantic.main import BaseModel
@@ -96,6 +96,52 @@ def compute(
         | F         | F (def)     | T           | dict of ``FailedOperation``                      |
         +-----------+-------------+-------------+--------------------------------------------------+
 
+        .. _`table:compute_result_schver`:
+
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | good_calc? | input_data ver | return_version | return_dict | output                                                                 |
+        +============+================+================+=============+========================================================================+
+        | T          | 1              | -1 (def) or 1  | F (def)     | ``v1.AtomicResult`` object (not avail. Py 3.14+ ^^)                    |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | T          | 1              |  2             | F (def)     | ``v2.AtomicResult`` object                                             |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | T          | 1              | -1 (def) or 1  | T           | dict of ``v1.AtomicResult`` @@                                         |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | T          | 1              |  2             | T           | dict of ``v2.AtomicResult``                                            |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | T          | 2              | -1 (def) or 2  | F (def)     | ``v2.AtomicResult`` object                                             |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | T          | 2              |  1             | F (def)     | ``v1.AtomicResult`` object (not avail. Py 3.14+ ^^)                    |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | T          | 2              | -1 (def) or 2  | T           | dict of ``v2.AtomicResult``                                            |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | T          | 2              |  1             | T           | dict of ``v1.AtomicResult`` @@                                         |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | F          | 1              | -1 (def) or 1  | F (def)     | ``v1.FailedOperation`` object (not avail. Py 3.14+ ^^) **              |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | F          | 1              |  2             | F (def)     | ``v2.FailedOperation`` object                                          |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | F          | 1              | -1 (def) or 1  | T           | dict of ``v1.FailedOperation`` @@ **                                   |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | F          | 1              |  2             | T           | dict of ``v2.FailedOperation``                                         |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | F          | 2              | -1 (def) or 2  | F (def)     | ``v2.FailedOperation`` object **                                       |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | F          | 2              |  1             | F (def)     | ``v1.FailedOperation`` object (not avail. Py 3.14+ ^^)                 |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | F          | 2              | -1 (def) or 2  | T           | dict of ``v2.FailedOperation`` **                                      |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | F          | 2              |  1             | T           | dict of ``v1.FailedOperation`` @@                                      |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        | ** F       |                | ** -1          |             | for errors *before* input ver detected, returns v2 if Py 3.14+ else v1 |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        |            |                | ^^ 1           | ^^ F        | for Py 3.14+, returns v2.FailedOp for minimal API surprise             |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+        |            |                | @@ 1           | @@ T        | for Py 3.14+, returns dict of v1 (like all other Py) with brittle      |
+        +            +                +                +             +                                                                        +
+        |            |                |                |             |   :envvar:`QCNG_USE_V1V2_SHIM=1`, otherwise dict of v2.FailedOp        |
+        +------------+----------------+----------------+-------------+------------------------------------------------------------------------+
+
     .. versionadded:: 0.50.0
        input_data can newly be QCSchema v2 as well as longstanding v1.
        Note that the QCSchema v2 layout will not be official until v0.60.0 .
@@ -143,11 +189,11 @@ def compute(
             ):  # ... but we have a workaround ...
 
                 if bool(os.environ.get("QCNG_USE_V1V2_SHIM", False)):  # ... if choose to use it
-                    # return_version = -12 = QCNG_V1V2_SHIM_CODE signals to use the shim classes that represent certain
+                    # return_version = -12 = QCEL_V1V2_SHIM_CODE signals to use the shim classes that represent certain
                     #   QCSchema v1 layouts (QCSk v1 only exist in pydantic.v1 API) in pydantic v2 API.
                     #   We never want to release these into the wild so only available if returning
                     #   dict and only for Atomic models (i.e., shims not avail for Opt, TD, MBE).
-                    return_version = QCNG_V1V2_SHIM_CODE
+                    return_version = QCEL_V1V2_SHIM_CODE
                 else:
                     # reset retver so that FailedOp w/_MSG314 can be constructed
                     return_version = 2

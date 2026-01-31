@@ -28,8 +28,8 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.50.0rc1 / 2026-MM-DD (Unreleased)
-------------------------------------
+v0.50.0rc1 / 2026-01-31 (aka "next" aka "QCSchema v2 available") (Prerelease)
+-----------------------------------------------------------------------------
 
 Breaking Changes
 ++++++++++++++++
@@ -57,9 +57,9 @@ New Features
   be lock-step advancements of the QCArchive stack.
 - Python 3.14 is now useable. Use of QCSchema v1 with 3.14 is limited (by Pydantic).
   Generally, input (as dict or json) will work. v1 output is technically forbidden
-  but see envvar below for returning as dict. Note that when CMS community codes
-  aren't 3.14-ready, their presence may interfere with normal QCEngine functionality
-  (like `qcengine info`).
+  but see envvar below for returning as dict. See table:compute_result_schver in
+  compute.py for details. Note that when CMS community codes aren't 3.14-ready,
+  their presence may interfere with normal QCEngine functionality (like `qcengine info`).
 - See QCElemental for a map of QCSchema v1 and v2, a schema changelog, and a migration guide.
 
 Enhancements (General)
@@ -81,6 +81,9 @@ Enhancements (General)
     whenever possible (to mirror <>Result.input_data) regardless of model or dict
     passed to qcengine.compute(); the only case where it's a dict is if the error
     was in forming the model.
+  - (:pr:`486`) When the requested type of return can't be formed for Python 3.14,
+    it will form the nearest approximation in QCSchema v2.FailedOperation. See
+    table:compute_result_schver in compute.py for details.
 - (:pr:`454`) Testing - Tests check QCSchema v1 and v2. @loriab
 - (:pr:`453`) Maint - Convert internal (non-QCSchema) pydantic classes to
   pydantic v2 API, namely `NodeDescriptor`, `TaskConfig`, `ProgramHarness`,
@@ -100,6 +103,7 @@ Enhancements (General)
 - (:pr:`486`) Deps — Adapt harnesses to allow Py 3.14 through small syntax changes.
 - (:pr:`486`) API — With :envvar:`QCNG_USE_V1V2_SHIM=1` in Python 3.14, QCSchema
   v1 inputs and outputs (atomic flavor) can be used as dictionaries (never models).
+  See the table:compute_result_schver in compute.py for details.
 
 Enhancements (Harnesses)
 ++++++++++++++++++++++++
@@ -124,7 +128,7 @@ Enhancements (Harnesses)
   and TD.optimization_history -> TD.scan_results
 - (:pr:`490`) TorchANI - Updated species handling for newer Pythons, ANI syntax. @loriab
 - (:pr:`486`) QCManyBody — Adapt harness to work with QCSchema v1 and v2 and to
-  work with QCManyBody v0.50 as well as current v0.5.1.
+  work with QCManyBody v0.50 (in preparation) as well as current v0.5.1.
 - (:pr:`486`) Psi4 — Add another generation to the Psi4 harness (to become active
   ~v1.11) to pass/receive QCSchema v2 to/from Psi4.
 
