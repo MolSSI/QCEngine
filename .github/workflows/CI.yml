@@ -50,23 +50,38 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          # needs py314 for pytorch
+          #- conda-env: torchani
+          #  python-version: "3.14"
+          #  label: ANI314
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
+
           - conda-env: openmm
-            python-version: 3.9
+            python-version: "3.10"
             label: OpenMM
             runs-on: ubuntu-latest
             pytest: ""
 
-          - conda-env: openmm
-            python-version: 3.12
-            label: OpenMM
-            runs-on: ubuntu-latest
-            pytest: ""
+          # needs py314 for openff
+          #- conda-env: openmm314
+          #  python-version: "3.14"
+          #  label: OpenMM314
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
 
           - conda-env: xtb
             python-version: "3.10"
             label: xTB
             runs-on: ubuntu-latest
             pytest: ""
+
+          # needs py314 for xtb
+          #- conda-env: xtb
+          #  python-version: "3.14"
+          #  label: xTB314
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
 
           #- conda-env: qcore
           #  python-version: 3.7
@@ -76,26 +91,32 @@ jobs:
           #  Note: removed Sep 2024 b/c too hard to reconcile w/pyd v2. Manby approves.
 
           - conda-env: nwchem
-            python-version: 3.9
+            python-version: "3.10"
             label: NWChem70
             runs-on: ubuntu-latest
             pytest: ""
             # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
 
           - conda-env: nwchem-cf
-            python-version: 3.12
+            python-version: "3.10"
+            label: NWChem
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: nwchem-cf
+            python-version: "3.14"
             label: NWChem
             runs-on: ubuntu-latest
             pytest: ""
 
           - conda-env: mrchem
-            python-version: 3.9
+            python-version: "3.10"
             label: MRChem
             runs-on: ubuntu-latest
             pytest: ""
 
           - conda-env: adcc
-            python-version: 3.9
+            python-version: "3.10"
             label: ADCC
             runs-on: ubuntu-latest
             pytest: ""
@@ -180,8 +201,9 @@ jobs:
     - name: Special Config - QCElemental Dep
       #if: false
       run: |
-        conda remove qcelemental --force
-        python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
+        # conda remove qcelemental --force
+        # python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
+        conda install "conda-forge/label/qcelemental_dev::qcelemental=0.50.0rc1"
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
@@ -247,7 +269,7 @@ jobs:
         qcengine info
 
     - name: QCEngineRecords
-      if: matrix.cfg.label != 'Psi4-1.6'
+      if: ((matrix.cfg.label != 'Psi4-1.6') && (matrix.cfg.python-version != '3.14'))
       run: |
         qcengine info
         export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`

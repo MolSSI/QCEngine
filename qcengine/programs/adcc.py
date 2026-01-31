@@ -91,7 +91,7 @@ class AdccHarness(ProgramHarness):
         if not input_model.specification.model.basis:
             raise InputError("Model must contain a basis set.")
 
-        psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.dict(), fix_symmetry="c1"))
+        psi4_molecule = psi4.core.Molecule.from_schema(dict(mol.model_dump(), fix_symmetry="c1"))
         psi4.core.clean()
         psi4.core.be_quiet()
         psi4.set_options(
@@ -129,7 +129,7 @@ class AdccHarness(ProgramHarness):
             output_data["extras"]["qcvars"] = qcvars
             output_data["properties"] = atprop
 
-        provenance = Provenance(creator="adcc", version=self.get_version(), routine="adcc").dict()
+        provenance = Provenance(creator="adcc", version=self.get_version(), routine="adcc").model_dump()
         provenance["nthreads"] = adcc.get_n_threads()
         output_data["provenance"] = provenance
 

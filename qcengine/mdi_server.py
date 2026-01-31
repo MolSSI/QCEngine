@@ -168,7 +168,7 @@ class MDIServer:
             try:
                 self.molecule = qcel.models.v2.Molecule(
                     **{
-                        **self.molecule.dict(),
+                        **self.molecule.model_dump(),
                         **{
                             "molecular_charge": self.total_charge,
                             "fragment_charges": [self.total_charge],
@@ -183,7 +183,7 @@ class MDIServer:
                 self.molecule_validated = False
         else:
             try:
-                self.molecule = qcel.models.v2.Molecule(**{**self.molecule.dict(), **{key: value}})
+                self.molecule = qcel.models.v2.Molecule(**{**self.molecule.model_dump(), **{key: value}})
                 self.molecule_validated = True
             except qcel.exceptions.ValidationError:
                 if self.molecule_validated:
@@ -266,7 +266,7 @@ class MDIServer:
             coords = np.zeros(3 * natom)
             MDI_Recv(3 * natom, MDI_DOUBLE, self.comm, buf=coords)
         new_geometry = np.reshape(coords, (-1, 3))
-        self.molecule = qcel.models.v2.Molecule(**{**self.molecule.dict(), **{"geometry": new_geometry}})
+        self.molecule = qcel.models.v2.Molecule(**{**self.molecule.model_dump(), **{"geometry": new_geometry}})
         self.energy_is_current = False
 
     # Respond to the <ENERGY command
@@ -287,7 +287,7 @@ class MDIServer:
         if not hasattr(self.compute_return, "properties"):
             raise Exception("MDI Calculation failed: \n\n" + str(self.compute_return.error.error_message))
 
-        properties = self.compute_return.properties.dict()
+        properties = self.compute_return.properties.model_dump()
         energy = properties["return_energy"]
         MDI_Send(energy, 1, MDI_DOUBLE, self.comm)
         return energy
@@ -305,7 +305,7 @@ class MDIServer:
         if not self.molecule_validated:
             raise Exception("MDI attempting to compute gradients on an unvalidated molecule")
         self.run_energy()
-        properties = self.compute_return.properties.dict()
+        properties = self.compute_return.properties.model_dump()
 
         forces = np.reshape(-1.0 * properties["return_gradient"], (-1,))
 
