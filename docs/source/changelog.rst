@@ -28,6 +28,14 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+v0.35.0 / 2026-MM-DD (Unreleased)
+--------------------
+
+Misc.
++++++
+- (:pr:`491`) Maint - update CI lanes for setuptools dropping pkg_resources and psi4 not pinned to right libmints. @loriab
+
+
 v0.34.0 / 2026-01-16
 --------------------
 
