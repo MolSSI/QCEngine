@@ -1,6 +1,7 @@
 """
 Calls TeraChem in its "server mode" via a protobuf interface.
 """
+
 import logging
 from importlib import import_module
 from os import getenv

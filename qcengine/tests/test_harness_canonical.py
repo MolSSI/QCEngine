@@ -1,6 +1,7 @@
 """
 Tests the DQM compute dispatch module
 """
+
 import msgpack
 import numpy as np
 import pytest
@@ -30,6 +31,7 @@ _canonical_methods = [
     ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
     ("gcp", {"method": "hf3c"}, {}),
     ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
+    ("madness", {"method": "hf"}, {"eprec": 1.0e-3}),
     ("cfour", {"method": "hf", "basis": "6-31G"}, {}),
     ("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}),
     ("mctc-gcp", {"method": "dft/sv"}, {}),

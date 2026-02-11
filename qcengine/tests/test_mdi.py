@@ -2,7 +2,6 @@
 Tests the MDI interface
 """
 
-
 from qcelemental.testing import compare_values
 
 import qcengine as qcng

@@ -1,6 +1,7 @@
 """
 Calls adcc
 """
+
 from typing import TYPE_CHECKING, Dict
 
 from qcelemental.models import AtomicResult, BasisSet, Provenance

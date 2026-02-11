@@ -1,4 +1,5 @@
 """Tests for NWChem functionality"""
+
 import numpy as np
 import pytest
 import qcelemental as qcel
@@ -8,7 +9,9 @@ import qcengine as qcng
 from qcengine.testing import using
 
 # Molecule where autoz fails
-_auto_z_problem = xyz = """C                    15.204188380000    -3.519180270000   -10.798726560000
+_auto_z_problem = (
+    xyz
+) = """C                    15.204188380000    -3.519180270000   -10.798726560000
 C                    15.097645630000    -2.650246400000    -8.505033680000
 C                    14.976892130000    -1.867030510000    -6.378827230000
 C                    14.827093540000    -1.105281910000    -4.239222620000

@@ -1,6 +1,7 @@
 """
 Calls the MRChem executable.
 """
+
 import copy
 import json
 import logging
