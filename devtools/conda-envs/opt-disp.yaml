@@ -5,6 +5,7 @@ channels:
   - psi4/label/dev  # for old dftd3 and mp2d
 dependencies:
   - psi4=1.9.1
+  - libint=2.9.0=*_4
   - blas=*=mkl  # not needed but an example of disuading solver from openblas and old psi
   #- intel-openmp!=2019.5
   - rdkit
@@ -18,6 +19,7 @@ dependencies:
   - geometric
   - optking
   - pymdi
+  - setuptools <82.0  # for berny
 
     # Core
   - python

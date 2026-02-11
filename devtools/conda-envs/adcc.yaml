@@ -6,6 +6,7 @@ channels:
 dependencies:
   - adcc>=0.15.7
   - psi4>=1.8.1
+  - libint=2.9.0=*_4
 
   # Core
   - python
