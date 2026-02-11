@@ -188,7 +188,7 @@ jobs:
       run: |
         conda install pydantic=2 -c conda-forge
         conda remove qcelemental --force
-        python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2025' --no-deps
+        python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
 
     - name: Environment Information
       run: |
