@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QCEngine &mdash; QCEngine v0.34.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e38cef6b"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="_static/version-switcher.js?v=313414bb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Install QCEngine" href="install.html" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WJHQJQF');</script>
+<!-- End Google Tag Manager -->
+ 
+
+</head>
+
+<body class="wy-body-for-nav">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            QCEngine
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install QCEngine</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="single_compute.html">Single Compute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="environment.html">Environment Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Programs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="program_overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_semiempirical.html">Semiempirical Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_molecular_mechanics.html">Molecular Mechanics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">QCEngine API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_program_harness.html">Adding a New Program Harness</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">QCEngine</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">QCEngine</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qcengine">
+<h1>QCEngine<a class="headerlink" href="#qcengine" title="Permalink to this heading"></a></h1>
+<p><em>Quantum chemistry program executor and IO standardizer (QCSchema) for quantum chemistry.</em></p>
+<section id="program-execution">
+<h2>Program Execution<a class="headerlink" href="#program-execution" title="Permalink to this heading"></a></h2>
+<p>A simple example of QCEngine’s capabilities is as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">qcengine</span> <span class="k">as</span> <span class="nn">qcng</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">qcelemental</span> <span class="k">as</span> <span class="nn">qcel</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">    O  0.0  0.000  -0.129</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">    H  0.0 -1.494  1.027</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">    H  0.0  1.494  1.027</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">AtomicInput</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">molecule</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;energy&quot;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;SCF&quot;</span><span class="p">,</span> <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="s2">&quot;sto-3g&quot;</span><span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scf_type&quot;</span><span class="p">:</span> <span class="s2">&quot;df&quot;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These input specifications can be executed with the <code class="docutils literal notranslate"><span class="pre">compute</span></code> syntax along with a program specifier:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span> <span class="o">=</span> <span class="n">qcng</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;psi4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The results contain a complete record of the computation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">return_result</span>
+<span class="go">-74.45994963230625</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">scf_dipole_moment</span>
+<span class="go">[0.0, 0.0, 0.6635967188869244]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">provenance</span><span class="o">.</span><span class="n">cpu</span>
+<span class="go">Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz</span>
+</pre></div>
+</div>
+</section>
+<section id="backends">
+<h2>Backends<a class="headerlink" href="#backends" title="Permalink to this heading"></a></h2>
+<p>Currently available compute backends for single results are as follow:</p>
+<ul class="simple">
+<li><p>Quantum Chemistry:</p>
+<ul>
+<li><p><a class="reference external" href="https://adc-connect.org">adcc</a></p></li>
+<li><p><a class="reference external" href="https://www.entos.info">Entos</a></p></li>
+<li><p><a class="reference external" href="https://www.molpro.net">Molpro</a></p></li>
+<li><p><a class="reference external" href="http://www.psicode.org">Psi4</a></p></li>
+<li><p><a class="reference external" href="http://www.petachem.com">Terachem</a></p></li>
+</ul>
+</li>
+<li><p>Semi-Emperical:</p>
+<ul>
+<li><p><a class="reference external" href="http://www.petachem.com">MOPAC</a></p></li>
+<li><p><a class="reference external" href="https://xtb-docs.readthedocs.io">xtb</a></p></li>
+</ul>
+</li>
+<li><p>AI Potential:</p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/aiqm/torchani">TorchANI</a></p></li>
+</ul>
+</li>
+<li><p>Molecular Mechanics:</p>
+<ul>
+<li><p><a class="reference external" href="http://rdkit.org">RDKit</a></p></li>
+</ul>
+</li>
+<li><p>Analytical Corrections:</p>
+<ul>
+<li><p><a class="reference external" href="https://www.chemie.uni-bonn.de/pctc/mulliken-center/software/dft-d3/">DFTD3</a></p></li>
+</ul>
+</li>
+</ul>
+<p>In addition, several procedures are available:</p>
+<ul class="simple">
+<li><p>Geometry Optimization:</p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/leeping/geomeTRIC">geomeTRIC</a></p></li>
+<li><p><a class="reference external" href="https://github.com/jhrmnn/pyberny">Pyberny</a></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="configuration-determination">
+<h2>Configuration Determination<a class="headerlink" href="#configuration-determination" title="Permalink to this heading"></a></h2>
+<p>In addition, QCEngine can automatically determine the following quantites:</p>
+<ul class="simple">
+<li><p>The number of physical cores on the system and to use.</p></li>
+<li><p>The amount of physical memory on the system and the amount to use.</p></li>
+<li><p>The provenance of a computation (hardware, software versions, and compute resources).</p></li>
+<li><p>Location of scratch disk space.</p></li>
+<li><p>Location of quantum chemistry programs binaries or Python modules.</p></li>
+</ul>
+<p>Each of these options can be specified by the user as well.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=None&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">:</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">})</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=&#39;/tmp&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/my_scratch&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">:</span> <span class="s2">&quot;$SCRATCH&quot;</span><span class="p">})</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=&#39;/my_scratch&#39;&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="program-and-procedure-information">
+<h2>Program and Procedure Information<a class="headerlink" href="#program-and-procedure-information" title="Permalink to this heading"></a></h2>
+<p>Available programs and procedures may be printed using the <a class="reference internal" href="cli.html"><span class="doc">CLI</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcengine</span> <span class="n">info</span>
+<span class="go">&gt;&gt; Version information</span>
+<span class="go">QCEngine version:    v0.11.0</span>
+<span class="go">QCElemental version: v0.11.0</span>
+
+<span class="go">&gt;&gt; Program information</span>
+<span class="go">Available programs:</span>
+<span class="go">mopac v2016</span>
+<span class="go">psi4 v1.3.2</span>
+<span class="go">rdkit v2019.03.4</span>
+
+<span class="go">Other supported programs:</span>
+<span class="go">cfour dftd3 entos gamess molpro mp2d nwchem terachem torchani</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<hr class="docutils" />
+<section id="index">
+<h2>Index<a class="headerlink" href="#index" title="Permalink to this heading"></a></h2>
+<p><strong>Getting Started</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="install.html"><span class="doc">Install QCEngine</span></a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
+<p><strong>User Interface</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="single_compute.html"><span class="doc">Single Compute</span></a></p></li>
+<li><p><a class="reference internal" href="environment.html"><span class="doc">Environment Detection</span></a></p></li>
+<li><p><a class="reference internal" href="cli.html"><span class="doc">Command Line Interface</span></a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
+<p><strong>Programs</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="program_overview.html"><span class="doc">Program Overview</span></a></p></li>
+<li><p><a class="reference internal" href="programs_molecular_mechanics.html"><span class="doc">Molecular Mechanics</span></a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
+<p><strong>Developer Documentation</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api.html"><span class="doc">QCEngine API</span></a></p></li>
+<li><p><a class="reference internal" href="changelog.html"><span class="doc">Changelog</span></a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">QCEngine API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_program_harness.html">Adding a New Program Harness</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="install.html" class="btn btn-neutral float-right" title="Install QCEngine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2026, The Molecular Sciences Software Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

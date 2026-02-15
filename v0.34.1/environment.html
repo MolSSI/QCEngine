@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Environment Detection &mdash; QCEngine v0.34.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e38cef6b"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="_static/version-switcher.js?v=313414bb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Command Line Interface" href="cli.html" />
+    <link rel="prev" title="Single Compute" href="single_compute.html" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WJHQJQF');</script>
+<!-- End Google Tag Manager -->
+ 
+
+</head>
+
+<body class="wy-body-for-nav">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            QCEngine
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install QCEngine</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Interface</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="single_compute.html">Single Compute</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Environment Detection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#node-description">Node Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config">Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#global-environment">Global Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-files">Configuration Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cluster-configuration">Cluster Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Programs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="program_overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_semiempirical.html">Semiempirical Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_molecular_mechanics.html">Molecular Mechanics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">QCEngine API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_program_harness.html">Adding a New Program Harness</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QCEngine</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Environment Detection</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/environment.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="environment-detection">
+<h1>Environment Detection<a class="headerlink" href="#environment-detection" title="Permalink to this heading"></a></h1>
+<p>QCEngine can inspect the current compute environment to determine the resources available to it.</p>
+<section id="node-description">
+<h2>Node Description<a class="headerlink" href="#node-description" title="Permalink to this heading"></a></h2>
+<p>QCEngine can detect node descriptions to obtain general information about the current node.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get_node_descriptor</span><span class="p">()</span>
+<span class="go">&lt;NodeDescriptor hostname_pattern=&#39;*&#39; name=&#39;default&#39; scratch_directory=None</span>
+<span class="go">                memory=5.568 memory_safety_factor=10 ncores=4 jobs_per_node=2&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="config">
+<h2>Config<a class="headerlink" href="#config" title="Permalink to this heading"></a></h2>
+<p>The configuration file operated based on the current node descriptor and can be overridden:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=None&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">:</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">})</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=&#39;/tmp&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/my_scratch&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">:</span> <span class="s2">&quot;$SCRATCH&quot;</span><span class="p">})</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=&#39;/my_scratch&#39;&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="global-environment">
+<h2>Global Environment<a class="headerlink" href="#global-environment" title="Permalink to this heading"></a></h2>
+<p>The global environment can also be inspected directly.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get_global</span><span class="p">()</span>
+<span class="go">{</span>
+<span class="go">    &#39;hostname&#39;: &#39;qcarchive.molssi.org&#39;,</span>
+<span class="go">    &#39;memory&#39;: 5.568,</span>
+<span class="go">    &#39;username&#39;: &#39;user&#39;,</span>
+<span class="go">    &#39;ncores&#39;: 4,</span>
+<span class="go">    &#39;cpuinfo&#39;: {</span>
+<span class="go">        &#39;python_version&#39;: &#39;3.6.7.final.0 (64 bit)&#39;,</span>
+<span class="go">        &#39;brand&#39;: &#39;Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz&#39;,</span>
+<span class="go">        &#39;hz_advertised&#39;: &#39;2.9000 GHz&#39;,</span>
+<span class="go">        ...</span>
+<span class="go">    },</span>
+<span class="go">    &#39;cpu_brand&#39;: &#39;Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz&#39;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-files">
+<h2>Configuration Files<a class="headerlink" href="#configuration-files" title="Permalink to this heading"></a></h2>
+<p>The computational environment defaults can be overridden by configuration files.</p>
+<p>Configuration files must be named <code class="docutils literal notranslate"><span class="pre">qcengine.yaml</span></code> and stored either in the directory
+from which you run QCEngine, a folder named <code class="docutils literal notranslate"><span class="pre">.qcarchive</span></code> in your home directory,
+or in a folder specified by the <code class="docutils literal notranslate"><span class="pre">DQM_CONFIG_PATH</span></code> environmental variable.
+Only one configuration file will be used if multiple are available.
+The <code class="docutils literal notranslate"><span class="pre">DQM_CONFIG_PATH</span></code> configuration file takes precedence over the current directory,
+which takes precedence over the <code class="docutils literal notranslate"><span class="pre">.qcarchive</span></code> folder.</p>
+<p>The configuration file is a YAML file that contains a dictionary of different node configurations.
+The keys in the YAML file are human-friendly names for the configurations.
+The values are dictionaries that define configurations for different nodes,
+following the <code class="docutils literal notranslate"><span class="pre">NodeDescription</span></code> schema:</p>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qcengine.config.</span></span><span class="sig-name descname"><span class="pre">NodeDescriptor</span></span><a class="reference internal" href="_modules/qcengine/config.html#NodeDescriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Description of an individual node</p>
+<p><details  class="autodoc_pydantic_collapsable_json">
+<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NodeDescriptor&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Description of an individual node&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;hostname_pattern&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hostname Pattern&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;scratch_directory&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Scratch Directory&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;memory&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Memory&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;memory_safety_factor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Memory Safety Factor&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;ncores&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ncores&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Number of cores accessible to each task on this node\n    \n    The default value, ``None``, will allow QCEngine to autodetect the number of cores.&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;jobs_per_node&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jobs Per Node&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;retries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Retries&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;is_batch_node&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Is Batch Node&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;help&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Whether the node running QCEngine is a batch node\n    \n    Some clusters are configured such that tasks are launched from a special \&quot;batch\&quot; or \&quot;MOM\&quot; onto the compute nodes.\n    The compute nodes on such clusters often have a different CPU architecture than the batch nodes and \n    often are unable to launch MPI tasks, which has two implications:\n        1) QCEngine must make *all* calls to an executable via ``mpirun`` because the executables might not\n        be able to run on the batch node. \n        2) QCEngine must run on the batch node to be able to launch tasks on the more than one compute nodes  \n    \n    ``is_batch_node`` is used when creating the task configuration as a means of determining whether\n    ``mpiexec_command`` must always be used even for serial jobs (e.g., getting the version number)\n    &quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;boolean&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;mpiexec_command&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mpiexec Command&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Invocation for launching node-parallel tasks with MPI\n        \n        The invocation need not specify the number of nodes, tasks, or cores per node.\n        Information about the task configuration will be added to the command by use of\n        Python&#39;s string formatting. The configuration will be supplied as the following variables:\n        \n            {nnodes} - Number of nodes\n            {ranks_per_node} - Number of MPI ranks per node\n            {cores_per_rank} - Number of cores to use for each MPI rank\n            {total_ranks} - Total number of MPI ranks\n            \n        As examples, the ``aprun`` command on Cray systems should be similar to \n        ``aprun -n {total_ranks} -N {ranks_per_node}`` and ``mpirun`` from OpenMPI should\n        be similar to ``mpirun -np {total_ranks} -N {ranks_per_node}``.\n        \n        Programs where each MPI rank can use multiple threads (e.g., QC programs with MPI+OpenMP) can \n        use the {cores_per_rank} option to control the hybrid parallelism. \n        As an example, the Cray ``aprun`` command using this figure could be:\n        ``aprun -n {total_ranks} -N {ranks_per_node} -d {cores_per_rank} -j 1``.\n        The appropriate number of ranks per node will be determined based on the number of\n        cores per node and the number of cores per rank.\n        &quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;hostname_pattern&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;name&quot;</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;additionalProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details></p><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.hostname_pattern" title="qcengine.config.NodeDescriptor.hostname_pattern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hostname_pattern</span> <span class="pre">(str)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.is_batch_node" title="qcengine.config.NodeDescriptor.is_batch_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_batch_node</span> <span class="pre">(bool)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.jobs_per_node" title="qcengine.config.NodeDescriptor.jobs_per_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jobs_per_node</span> <span class="pre">(int)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.memory" title="qcengine.config.NodeDescriptor.memory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">memory</span> <span class="pre">(float</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.memory_safety_factor" title="qcengine.config.NodeDescriptor.memory_safety_factor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">memory_safety_factor</span> <span class="pre">(int)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.mpiexec_command" title="qcengine.config.NodeDescriptor.mpiexec_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mpiexec_command</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.name" title="qcengine.config.NodeDescriptor.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.ncores" title="qcengine.config.NodeDescriptor.ncores"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ncores</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.retries" title="qcengine.config.NodeDescriptor.retries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">retries</span> <span class="pre">(int)</span></code></a></p></li>
+<li><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor.scratch_directory" title="qcengine.config.NodeDescriptor.scratch_directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scratch_directory</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hostname_pattern</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_batch_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">jobs_per_node</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">memory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">memory_safety_factor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mpiexec_command</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd><p>Invocation for launching node-parallel tasks with MPI</p>
+<p>The invocation need not specify the number of nodes, tasks, or cores per node.
+Information about the task configuration will be added to the command by use of
+Python’s string formatting. The configuration will be supplied as the following variables:</p>
+<blockquote>
+<div><p>{nnodes} - Number of nodes
+{ranks_per_node} - Number of MPI ranks per node
+{cores_per_rank} - Number of cores to use for each MPI rank
+{total_ranks} - Total number of MPI ranks</p>
+</div></blockquote>
+<p>As examples, the <code class="docutils literal notranslate"><span class="pre">aprun</span></code> command on Cray systems should be similar to 
+<code class="docutils literal notranslate"><span class="pre">aprun</span> <span class="pre">-n</span> <span class="pre">{total_ranks}</span> <span class="pre">-N</span> <span class="pre">{ranks_per_node}</span></code> and <code class="docutils literal notranslate"><span class="pre">mpirun</span></code> from OpenMPI should
+be similar to <code class="docutils literal notranslate"><span class="pre">mpirun</span> <span class="pre">-np</span> <span class="pre">{total_ranks}</span> <span class="pre">-N</span> <span class="pre">{ranks_per_node}</span></code>.</p>
+<p>Programs where each MPI rank can use multiple threads (e.g., QC programs with MPI+OpenMP) can 
+use the {cores_per_rank} option to control the hybrid parallelism. 
+As an example, the Cray <code class="docutils literal notranslate"><span class="pre">aprun</span></code> command using this figure could be:
+<code class="docutils literal notranslate"><span class="pre">aprun</span> <span class="pre">-n</span> <span class="pre">{total_ranks}</span> <span class="pre">-N</span> <span class="pre">{ranks_per_node}</span> <span class="pre">-d</span> <span class="pre">{cores_per_rank}</span> <span class="pre">-j</span> <span class="pre">1</span></code>.
+The appropriate number of ranks per node will be determined based on the number of
+cores per node and the number of cores per rank.</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ncores</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd><p>Number of cores accessible to each task on this node</p>
+<p>The default value, <code class="docutils literal notranslate"><span class="pre">None</span></code>, will allow QCEngine to autodetect the number of cores.</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retries</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scratch_directory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p>When running QCEngine, the proper configuration for a node is determined based on the hostname of the node
+and matching the <code class="docutils literal notranslate"><span class="pre">hostname_pattern</span></code> to each of the configurations defined in <code class="docutils literal notranslate"><span class="pre">qcengine.yaml</span></code>.</p>
+<p>An example <code class="docutils literal notranslate"><span class="pre">qcengine.yaml</span></code> file that sets the scratch directory for all nodes is as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">all</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hostname_pattern</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">  </span><span class="nt">scratch_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./scratch</span>
+</pre></div>
+</div>
+</section>
+<section id="cluster-configuration">
+<h2>Cluster Configuration<a class="headerlink" href="#cluster-configuration" title="Permalink to this heading"></a></h2>
+<p>A node configuration file is required when using node-parallel tasks on a compute cluster.
+The configuration file must contain a description of the command used to launch MPI tasks and,
+in some cases, the designation that a certain node is a compute node.
+See the descriptions for <code class="docutils literal notranslate"><span class="pre">mpiexec_command</span></code> and <code class="docutils literal notranslate"><span class="pre">is_batch_node</span></code> in the <code class="docutils literal notranslate"><span class="pre">NodeDescriptor</span></code>
+documentation for further details.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="single_compute.html" class="btn btn-neutral float-left" title="Single Compute" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cli.html" class="btn btn-neutral float-right" title="Command Line Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2026, The Molecular Sciences Software Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

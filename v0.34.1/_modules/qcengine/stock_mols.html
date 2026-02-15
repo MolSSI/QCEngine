@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qcengine.stock_mols &mdash; QCEngine v0.34.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=e38cef6b"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../_static/version-switcher.js?v=313414bb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WJHQJQF');</script>
+<!-- End Google Tag Manager -->
+ 
+
+</head>
+
+<body class="wy-body-for-nav">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QCEngine
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install QCEngine</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../single_compute.html">Single Compute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../environment.html">Environment Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command Line Interface</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Programs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../program_overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programs_semiempirical.html">Semiempirical Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programs_molecular_mechanics.html">Molecular Mechanics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">QCEngine API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev_program_harness.html">Adding a New Program Harness</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QCEngine</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qcengine.stock_mols</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qcengine.stock_mols</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A small list of molecules used to validate and tests computation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">qcelemental.models</span> <span class="kn">import</span> <span class="n">Molecule</span>
+
+<span class="n">_test_mols</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;hydrogen&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">],</span>
+        <span class="s2">&quot;molecular_multiplicity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;connectivity&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;lithium&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Li&quot;</span><span class="p">],</span> <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;molecular_multiplicity&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;connectivity&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
+    <span class="s2">&quot;water&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">0.1294769411935893</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">1.494187339479985</span><span class="p">,</span>
+            <span class="mf">1.0274465079245698</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="mf">1.494187339479985</span><span class="p">,</span>
+            <span class="mf">1.0274465079245698</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;connectivity&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;eneyne&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;fragments&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">]],</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">0.667578</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.124659</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">0.667578</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.124659</span><span class="p">,</span>
+            <span class="mf">0.923621</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">1.232253</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.126185</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">0.923621</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">1.232253</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.126185</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">0.923621</span><span class="p">,</span>
+            <span class="mf">1.232253</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.126185</span><span class="p">,</span>
+            <span class="mf">0.923621</span><span class="p">,</span>
+            <span class="mf">1.232253</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.126185</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">2.900503</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">1.693240</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">0.627352</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">0.000000</span><span class="p">,</span>
+            <span class="mf">3.963929</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;ethane&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.54034068369141</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.01730823913235</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.93128102073425</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.07197633001232</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.09756825926424</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02203578938791</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.00025636057017</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.00139534039687</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.00111211603233</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.30983130616505</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.03614919350581</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.54918567185649</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.38003941036405</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.71812565437083</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.97078783593882</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">5.61209917480096</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.11612498901607</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.90799157528946</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.30241880148479</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.92102238874847</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.36057345099335</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.23222331256867</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.39619160402976</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.06158817835790</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;connectivity&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;mindless-01&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Na&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;Cl&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;Al&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.85528263484662</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.58670515364616</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.41763729306344</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.40178023537845</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.02338844412653</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.95457749372945</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.98706033463438</span><span class="p">,</span> <span class="o">+</span><span class="mf">4.76252065456814</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.27043301573532</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.79980886075526</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.41103455609189</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.04655321620119</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">4.20647469409936</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.84275767548460</span><span class="p">,</span> <span class="o">+</span><span class="mf">4.55038084858449</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.54356121843970</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.18835665176557</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.46240021785588</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">2.70032160109941</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.06818452504054</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.73234650374438</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">3.73114088824361</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.07001543363453</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.23160937604731</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.75306819230397</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.35951417150421</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.05323406177129</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">5.41755788583825</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.57881830078929</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.75394002750038</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.23462868255966</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.13856505054269</span><span class="p">,</span> <span class="o">+</span><span class="mf">4.10922285746451</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.01565866207568</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.21952154552768</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.36050963020778</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">2.42119255723593</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.26626435093114</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.91862474360560</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.02526098819107</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.53667889095925</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.31664984740423</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.00438948664892</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.29235136977220</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.19782807357059</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.12226554109716</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.36942007032045</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.48455055461782</span><span class="p">],</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;mindless-02&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;Mg&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;Li&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.79537625851198</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.77866422935275</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.07883558363403</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.68278833302782</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.38892666265890</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.66214865238427</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.11484649791305</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.48857933226955</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.65660396510375</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.07998879593946</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.16259121615748</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.55703065871422</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.60302832999383</span><span class="p">,</span> <span class="o">+</span><span class="mf">4.08816149622342</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02589373148029</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.22534089315880</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.79981382478068</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.70773173318592</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.33460982049866</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.24819082475503</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.72791902701083</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.16278082578516</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.41267994179303</span><span class="p">,</span> <span class="o">+</span><span class="mf">5.69030695190570</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">2.87802444057103</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.33120525058830</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.88311373530297</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.68489327931487</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.32790204044961</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.20547693710673</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.20919773588330</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.87253762561437</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.94064204223101</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.25572604597922</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.21241092990940</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.86715549314771</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.83147468262373</span><span class="p">,</span> <span class="o">+</span><span class="mf">5.20527293771933</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.26976270603341</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.90885865772880</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.92576561961811</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.99069919443735</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.26806242248758</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.60409341782411</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.55162805282247</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.11956976339902</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.59892866766766</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.39117477789609</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;molecular_multiplicity&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;mindless-03&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;Li&quot;</span><span class="p">,</span> <span class="s2">&quot;Mg&quot;</span><span class="p">,</span> <span class="s2">&quot;Al&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;Na&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.02148551327524</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.67161751504297</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.75078512817560</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.37792545875526</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.24818416423144</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.83896600631495</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.23986953822894</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.64550402751694</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.42773272178522</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.87622711432790</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.74068400827752</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.43723692979592</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.29492470653815</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.86470311043681</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.04536500695239</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.65768365013010</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.45437052179208</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.41566056087159</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.23245910487384</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.83274112101585</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.43395808606122</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.30373451850419</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.84228931776777</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.44882782867802</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.36159503902161</span><span class="p">,</span> <span class="o">+</span><span class="mf">4.20056392581975</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.63352684198071</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.49372989648081</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.56245253044952</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.53610501083288</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.38566058812996</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.86127331114460</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.56178822055152</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.17545963764009</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.49456345795141</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.90195191215762</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.86623614216854</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.76329843590746</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.71572598870213</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.02361259176985</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.24377370348987</span><span class="p">,</span> <span class="o">+</span><span class="mf">5.32418288889440</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.71194535010347</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.03648125005561</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.35573062118779</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.16051737061546</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.89394681976155</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.23776331451663</span><span class="p">],</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;mindless-04&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;Al&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.34544890768411</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.85946545334720</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.11183388215396</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.36293929605305</span><span class="p">,</span> <span class="o">+</span><span class="mf">4.15983774640545</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.36413101934678</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.36268280924844</span><span class="p">,</span> <span class="o">+</span><span class="mf">4.92951597114402</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.59085684882314</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">3.78143178536443</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.97181356229699</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.59003443639387</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">3.44227417874042</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.46504338606415</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.62082644591507</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.88917586252014</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.42088101960529</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.28872629783483</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.32747529934233</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.29711514977711</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.55330460209973</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.58768360829779</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.39509759062952</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.10396714572410</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.39440896193088</span><span class="p">,</span> <span class="o">+</span><span class="mf">6.31837673143592</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.99105318714945</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.34376903295874</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.12502353873667</span><span class="p">,</span> <span class="o">+</span><span class="mf">5.57829602371555</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.39570266622309</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.60410756418652</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.03149806979915</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.21788515354592</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.28610741675369</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.29731097788136</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.00000183598828</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.04473467156937</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.00578147078785</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">2.12833842504876</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.30141517432227</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.38069910888504</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.48411958079522</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.81581487156584</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.76829803496286</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.54241147261516</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.04348817268188</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.16920520707912</span><span class="p">],</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;mindless-05&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;Cl&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.68391902268453</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.21679405065309</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.81441127558071</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.67199537993843</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.97743927106200</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.03497540139192</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">2.02325266152397</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.16048070975416</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.41980608052722</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">4.26224346168617</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.65384961705338</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.81836810458488</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.80378310343644</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.84796600006216</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.15107304476153</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.58317082705122</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.77079801391042</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.86230158107979</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">2.63670178694113</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.13142099211650</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.24139937019049</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">6.27112533979613</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.92471014080274</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.62562669834852</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">0.92594349239390</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.94451283088352</span><span class="p">,</span> <span class="o">+</span><span class="mf">2.60616476876177</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.79532342290201</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.56841672860834</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.65515689388732</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.01460634915379</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.47748181717446</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.44834110183776</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">2.18249449208515</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.23505035804805</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.77725119258081</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">3.26068149442689</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.54078259646428</span><span class="p">,</span> <span class="o">+</span><span class="mf">0.57204329987377</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">1.73744972267909</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.18654391698320</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.24063427353503</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">+</span><span class="mf">0.94405328902426</span><span class="p">,</span> <span class="o">+</span><span class="mf">4.99525793054843</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.18501287451328</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.83118967048165</span><span class="p">,</span> <span class="o">+</span><span class="mf">3.39933176543682</span><span class="p">,</span> <span class="o">+</span><span class="mf">1.75515887283605</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;molecular_multiplicity&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;propane&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;symbols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">1.04538535e00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.26451580e-01</span><span class="p">,</span> <span class="mf">1.70615765e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">7.27312570e-01</span><span class="p">,</span> <span class="o">-</span><span class="mf">8.36259840e-01</span><span class="p">,</span> <span class="mf">3.94379109e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">2.13664641e00</span><span class="p">,</span> <span class="mf">1.54796144e00</span><span class="p">,</span> <span class="mf">4.51430690e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.06001307e00</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.28648849e00</span><span class="p">,</span> <span class="mf">1.31543249e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">2.45194896e00</span><span class="p">,</span> <span class="mf">9.45839060e-01</span><span class="p">,</span> <span class="mf">2.07343776e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">1.59997800e-02</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.00690000e-04</span><span class="p">,</span> <span class="mf">1.13012700e-02</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="mf">3.60389010e-01</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.40265264e00</span><span class="p">,</span> <span class="mf">5.61211494e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">2.08128086e00</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.35136798e00</span><span class="p">,</span> <span class="mf">3.54633241e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">3.39307317e00</span><span class="p">,</span> <span class="mf">1.25279930e00</span><span class="p">,</span> <span class="mf">6.13498553e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">8.27431450e-01</span><span class="p">,</span> <span class="mf">3.07919479e00</span><span class="p">,</span> <span class="mf">4.98806078e00</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">3.29667371e00</span><span class="p">,</span> <span class="mf">2.11896834e00</span><span class="p">,</span> <span class="mf">2.89840427e00</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;connectivity&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="get_molecule"><a class="viewcode-back" href="../../api/qcengine.get_molecule.html#qcengine.get_molecule">[docs]</a><span class="k">def</span> <span class="nf">get_molecule</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a QC JSON representation of a test molecule.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_test_mols</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Molecule name &#39;</span><span class="si">{}</span><span class="s2">&#39; not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">Molecule</span><span class="p">(</span><span class="o">**</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">_test_mols</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2026, The Molecular Sciences Software Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
