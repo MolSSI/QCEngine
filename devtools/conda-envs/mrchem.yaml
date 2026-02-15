@@ -15,6 +15,7 @@ dependencies:
   - qcelemental>=0.24
   - pydantic=2
   - pydantic-settings
+  - setuptools <82.0  # for berny
 
     # Testing
   - pytest
