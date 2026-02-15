@@ -1,6 +1,0 @@
-model_wrapper
-=============
-
-.. currentmodule:: qcengine.util
-
-.. autofunction:: model_wrapper

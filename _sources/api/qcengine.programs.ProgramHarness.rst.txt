@@ -1,6 +1,0 @@
-ProgramHarness
-==============
-
-.. currentmodule:: qcengine.programs
-
-.. autopydantic_model:: ProgramHarness

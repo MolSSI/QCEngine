@@ -1,6 +1,0 @@
-get_provenance_augments
-=======================
-
-.. currentmodule:: qcengine.config
-
-.. autofunction:: get_provenance_augments

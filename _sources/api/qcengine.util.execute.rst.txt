@@ -1,6 +1,0 @@
-execute
-=======
-
-.. currentmodule:: qcengine.util
-
-.. autofunction:: execute

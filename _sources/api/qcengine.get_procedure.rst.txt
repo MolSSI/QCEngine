@@ -1,6 +1,0 @@
-get_procedure
-=============
-
-.. currentmodule:: qcengine
-
-.. autofunction:: get_procedure

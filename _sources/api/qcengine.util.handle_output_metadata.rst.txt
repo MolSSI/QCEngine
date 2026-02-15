@@ -1,6 +1,0 @@
-handle_output_metadata
-======================
-
-.. currentmodule:: qcengine.util
-
-.. autofunction:: handle_output_metadata

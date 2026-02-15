@@ -1,6 +1,0 @@
-list_available_programs
-=======================
-
-.. currentmodule:: qcengine
-
-.. autofunction:: list_available_programs

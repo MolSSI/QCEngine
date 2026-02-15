@@ -1,6 +1,0 @@
-create_mpi_invocation
-=====================
-
-.. currentmodule:: qcengine.util
-
-.. autofunction:: create_mpi_invocation
