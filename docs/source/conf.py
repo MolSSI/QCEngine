@@ -210,9 +210,8 @@ intersphinx_mapping = {'python': ('https://docs.python.org/3.10', None),
                        "numpy": ("https://numpy.org/doc/stable/", None),
                        'scipy': ('https://docs.scipy.org/doc/scipy/', None),
                        'matplotlib': ('https://matplotlib.org/stable/', None),
-                       "qcelemental": ("http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/", None),
-                       "qcportal": ("http://docs.qcarchive.molssi.org/projects/QCPortal/en/latest/", None),
-                       "qcfractal": ("http://docs.qcarchive.molssi.org/projects/QCFractal/en/latest/", None),
+                       "qcelemental": ("https://molssi.github.io/QCElemental/dev/", None),
+                       "qcfractal": ("https://molssi.github.io/QCFractal/", None),
                       }
 
 # -- Options for todo extension ----------------------------------------------
