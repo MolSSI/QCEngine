@@ -4,10 +4,6 @@
     "path": "dev/"
   },
   {
-    "label": "v0.34.1",
-    "path": "v0.34.1/"
-  },
-  {
     "label": "next",
     "path": "next/"
   }
