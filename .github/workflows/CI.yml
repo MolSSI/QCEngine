@@ -10,12 +10,10 @@ on:
     branches:
       - master
       - next2026
-      - verdocs
   pull_request:
     branches:
       - master
       - next2026
-      - verdocs
   schedule:
     - cron: "9 16 * * 1"
 
@@ -28,6 +26,41 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
+          - conda-env: psi
+            python-version: 3.7
+            label: Psi4-1.5
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: psi-nightly
+            python-version: "3.10"
+            label: Psi4-1.6
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: psi-cf
+            python-version: "3.12"
+            label: Psi4-1.8
+            runs-on: windows-latest
+            pytest: "-k 'not (hes2 or qchem or test_config)'"
+
+          - conda-env: torchani
+            python-version: 3.8
+            label: ANI
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: openmm
+            python-version: 3.8
+            label: OpenMM
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: openmm
+            python-version: 3.12
+            label: OpenMM
+            runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: xtb
             python-version: "3.10"
@@ -35,6 +68,66 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          - conda-env: qcore
+            python-version: 3.7
+            label: QCore
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: nwchem
+            python-version: 3.8
+            label: NWChem70
+            runs-on: ubuntu-latest
+            pytest: ""
+            # formerly NWChem v6.6 with python-version: 3.6 & runs-on: ubuntu-16.04 but ubuntu env retired by GH Sep 2021
+
+          - conda-env: nwchem-cf
+            python-version: 3.12
+            label: NWChem
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: mrchem
+            python-version: 3.8
+            label: MRChem
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: adcc
+            python-version: 3.8
+            label: ADCC
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: opt-disp
+            python-version: 3.13
+            label: optimization-dispersion
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: opt-disp-cf
+            python-version: 3.11
+            label: optimization-dispersion
+            runs-on: windows-latest
+            pytest: "-k 'not (hes2 or qchem or test_config)'"
+
+          - conda-env: mace
+            python-version: "3.10"
+            label: MACE
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: aimnet2
+            python-version: 3.11
+            label: AIMNET2
+            runs-on: ubuntu-latest
+            pytest: ""
+
+          - conda-env: opt-disp-cf
+            python-version: 3.12
+            label: QCSk-next
+            runs-on: ubuntu-latest
+            pytest: ""
 
     name: "🐍 ${{ matrix.cfg.python-version }} • ${{ matrix.cfg.label }} • ${{ matrix.cfg.runs-on }}"
     runs-on: ${{ matrix.cfg.runs-on }}
@@ -207,7 +300,7 @@ jobs:
           echo "target_folder=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           echo "version_label=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
 
-        elif [[ "${GITHUB_REF_NAME}" == "master" || "${GITHUB_REF_NAME}" == "verdocs" ]]; then
+        elif [[ "${GITHUB_REF_NAME}" == "master" ]]; then
           echo "target_folder=dev" >> "$GITHUB_OUTPUT"
           echo "version_label=dev" >> "$GITHUB_OUTPUT"
 
@@ -223,7 +316,7 @@ jobs:
 
     - name: GitHub Pages Deploy
       uses: JamesIves/github-pages-deploy-action@v4
-      if: github.event_name == 'push' && github.repository == 'MolSSI/QCEngine' && ( startsWith( github.ref, 'refs/tags/' ) || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/verdocs' )
+      if: github.event_name == 'push' && github.repository == 'MolSSI/QCEngine' && ( startsWith( github.ref, 'refs/tags/' ) || github.ref == 'refs/heads/master' )
       with:
         branch: gh-pages
         folder: docs/build/html
@@ -231,7 +324,7 @@ jobs:
         clean: false
 
     - name: Update versions.json
-      if: github.event_name == 'push' && github.repository == 'MolSSI/QCEngine' && ( startsWith( github.ref, 'refs/tags/' ) || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/verdocs' )
+      if: github.event_name == 'push' && github.repository == 'MolSSI/QCEngine' && ( startsWith( github.ref, 'refs/tags/' ) || github.ref == 'refs/heads/master' )
       shell: bash
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

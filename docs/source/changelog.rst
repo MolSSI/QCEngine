@@ -30,14 +30,21 @@ Changelog
 
 .. _`sec:cl0341`:
 
-0.34.1 / 2026-02-14
+0.34.1 / 2026-02-15
 -------------------
 
 `Docs <https://MolSSI.github.io/QCEngine/v0.34.1/>`_
 
 Enhancements
 ++++++++++++
-- (:pr:`???`) Set up documentation build to store versions of documentation for each tag plus dev.
+- (:pr:`492`) Docs - Set up documentation build to store versions of documentation for each tag plus dev.
+  Note that this changes intersphinx links. Below is current.
+
+.. code:: python
+
+    "qcelemental": ("https://molssi.github.io/QCElemental/dev/", None),
+    "qcengine": ("https://molssi.github.io/QCEngine/dev/", None),
+    "qcfractal": ("https://molssi.github.io/QCFractal/", None),
 
 Misc.
 +++++
