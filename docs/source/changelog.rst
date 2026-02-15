@@ -28,6 +28,9 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+`Docs <https://MolSSI.github.io/QCEngine/next/>`_
+`Docs for QCSchema v1<https://MolSSI.github.io/QCEngine/v0.34.1/>`_
+
 v0.50.0rc1 / 2026-01-31 (aka "next" aka "QCSchema v2 available") (Prerelease)
 -----------------------------------------------------------------------------
 
