@@ -17,6 +17,7 @@ dependencies:
   - pymdi
   - qcmanybody
   - pyberny
+  - setuptools <82.0  # for berny
 
     # Core
   - python
