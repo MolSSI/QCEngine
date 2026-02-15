@@ -1,0 +1,6 @@
+get_information
+===============
+
+.. currentmodule:: qcengine
+
+.. autofunction:: get_information

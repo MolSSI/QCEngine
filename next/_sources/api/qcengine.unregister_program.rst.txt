@@ -1,0 +1,6 @@
+unregister_program
+==================
+
+.. currentmodule:: qcengine
+
+.. autofunction:: unregister_program

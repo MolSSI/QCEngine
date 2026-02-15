@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QCEngine API &mdash; QCEngine 0.1.dev1+g1d6d8c8df documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0c6d4f5d"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/version-switcher.js?v=313414bb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="compute" href="api/qcengine.compute.html" />
+    <link rel="prev" title="Molecular Mechanics" href="programs_molecular_mechanics.html" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WJHQJQF');</script>
+<!-- End Google Tag Manager -->
+ 
+
+</head>
+
+<body class="wy-body-for-nav">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            QCEngine
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install QCEngine</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="single_compute.html">Single Compute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="environment.html">Environment Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Programs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="program_overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_semiempirical.html">Semiempirical Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="programs_molecular_mechanics.html">Molecular Mechanics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">QCEngine API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-qcengine">qcengine Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.compute.html">compute</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.compute_procedure.html">compute_procedure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_config.html">get_config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_information.html">get_information</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_molecule.html">get_molecule</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_procedure.html">get_procedure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_program.html">get_program</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.list_all_procedures.html">list_all_procedures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.list_all_programs.html">list_all_programs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.list_available_procedures.html">list_available_procedures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.list_available_programs.html">list_available_programs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.register_program.html">register_program</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.unregister_program.html">unregister_program</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#classes">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.MDIServer.html">MDIServer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-qcengine.config">qcengine.config Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.config.get_config.html">get_config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.config.get_provenance_augments.html">get_provenance_augments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.config.global_repr.html">global_repr</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html">NodeDescriptor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-qcengine.util">qcengine.util Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.util.compute_wrapper.html">compute_wrapper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.util.model_wrapper.html">model_wrapper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.util.handle_output_metadata.html">handle_output_metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.util.create_mpi_invocation.html">create_mpi_invocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.util.execute.html">execute</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-qcengine.programs">qcengine.programs Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.get_program.html">get_program</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.list_all_programs.html">list_all_programs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.list_available_programs.html">list_available_programs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.register_program.html">register_program</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.unregister_program.html">unregister_program</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.programs.ProgramHarness.html">ProgramHarness</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_program_harness.html">Adding a New Program Harness</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QCEngine</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">QCEngine API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qcengine-api">
+<h1>QCEngine API<a class="headerlink" href="#qcengine-api" title="Link to this heading"></a></h1>
+<section id="module-qcengine">
+<span id="qcengine-package"></span><h2>qcengine Package<a class="headerlink" href="#module-qcengine" title="Link to this heading"></a></h2>
+<p>Base file for the dqm_compute module.</p>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.compute.html#qcengine.compute" title="qcengine.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(input_data, program[, raise_error, ...])</p></td>
+<td><p>Executes a single CMS program given a QCSchema input.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.compute_procedure.html#qcengine.compute_procedure" title="qcengine.compute_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_procedure</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.get_config.html#qcengine.get_config" title="qcengine.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config</span></code></a>(*[, hostname, task_config])</p></td>
+<td><p>Returns the configuration key for qcengine.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.get_information.html#qcengine.get_information" title="qcengine.get_information"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_information</span></code></a>(key)</p></td>
+<td><p>Obtains a variety of runtime information about QCEngine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.get_molecule.html#qcengine.get_molecule" title="qcengine.get_molecule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_molecule</span></code></a>(name, *[, return_dict])</p></td>
+<td><p>Returns a QC JSON representation of a test molecule.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.get_procedure.html#qcengine.get_procedure" title="qcengine.get_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_procedure</span></code></a>(name)</p></td>
+<td><p>Returns a procedures executor class</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.get_program.html#qcengine.get_program" title="qcengine.get_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_program</span></code></a>(name[, check])</p></td>
+<td><p>Returns a program's executor class</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.list_all_procedures.html#qcengine.list_all_procedures" title="qcengine.list_all_procedures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_procedures</span></code></a>()</p></td>
+<td><p>List all procedures registered by QCEngine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.list_all_programs.html#qcengine.list_all_programs" title="qcengine.list_all_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_programs</span></code></a>()</p></td>
+<td><p>List all programs registered by QCEngine.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.list_available_procedures.html#qcengine.list_available_procedures" title="qcengine.list_available_procedures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_available_procedures</span></code></a>()</p></td>
+<td><p>List all procedures that can be exectued (found) by QCEngine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.list_available_programs.html#qcengine.list_available_programs" title="qcengine.list_available_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_available_programs</span></code></a>()</p></td>
+<td><p>List all programs that can be exectued (found) by QCEngine.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.register_program.html#qcengine.register_program" title="qcengine.register_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_program</span></code></a>(entry_point)</p></td>
+<td><p>Register a new ProgramHarness with QCEngine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.unregister_program.html#qcengine.unregister_program" title="qcengine.unregister_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unregister_program</span></code></a>(name)</p></td>
+<td><p>Unregisters a given program.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.MDIServer.html#qcengine.MDIServer" title="qcengine.MDIServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MDIServer</span></code></a>(mdi_options, program, molecule, ...)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="class-inheritance-diagram">
+<h3>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Link to this heading"></a></h3>
+<div class="graphviz"><img src="_images/inheritance-f0f36dbf79b2a1e42b9c6cc34fa47d5a4e33766c.png" alt="Inheritance diagram of qcengine.mdi_server.MDIServer" usemap="#inheritance3313e95587" class="inheritance graphviz" /></div>
+<map id="inheritance3313e95587" name="inheritance3313e95587">
+<area shape="rect" id="node1" href="api/qcengine.MDIServer.html#qcengine.MDIServer" target="_top" title="MDIServer" alt="" coords="5,5,95,33"/>
+</map></section>
+</section>
+<section id="module-qcengine.config">
+<span id="qcengine-config-module"></span><h2>qcengine.config Module<a class="headerlink" href="#module-qcengine.config" title="Link to this heading"></a></h2>
+<p>Creates globals for the qcengine module</p>
+<section id="id1">
+<h3>Functions<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.config.get_config.html#qcengine.config.get_config" title="qcengine.config.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config</span></code></a>(*[, hostname, task_config])</p></td>
+<td><p>Returns the configuration key for qcengine.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.config.get_provenance_augments.html#qcengine.config.get_provenance_augments" title="qcengine.config.get_provenance_augments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_provenance_augments</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.config.global_repr.html#qcengine.config.global_repr" title="qcengine.config.global_repr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">global_repr</span></code></a>()</p></td>
+<td><p>A representation of the current global configuration.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id2">
+<h3>Classes<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor" title="qcengine.config.NodeDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeDescriptor</span></code></a></p></td>
+<td><p>Description of an individual node</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id3">
+<h3>Class Inheritance Diagram<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<div class="graphviz"><img src="_images/inheritance-c3fd7a08b30b75e6e8a05665398e6398a214b4dd.png" alt="Inheritance diagram of qcengine.config.NodeDescriptor" usemap="#inheritance6d8ac8d9b4" class="inheritance graphviz" /></div>
+<map id="inheritance6d8ac8d9b4" name="inheritance6d8ac8d9b4">
+<area shape="rect" id="node2" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor" target="_top" title="Description of an individual node" alt="" coords="147,5,269,33"/>
+</map></section>
+</section>
+<section id="module-qcengine.util">
+<span id="qcengine-util-module"></span><h2>qcengine.util Module<a class="headerlink" href="#module-qcengine.util" title="Link to this heading"></a></h2>
+<p>Several import utilities</p>
+<section id="id4">
+<h3>Functions<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.util.compute_wrapper.html#qcengine.util.compute_wrapper" title="qcengine.util.compute_wrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_wrapper</span></code></a>([capture_output, raise_error])</p></td>
+<td><p>Wraps compute for timing, output capturing, and raise protection</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.util.model_wrapper.html#qcengine.util.model_wrapper" title="qcengine.util.model_wrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model_wrapper</span></code></a>(input_data, model)</p></td>
+<td><p>Wrap input data in the given model, or return a controlled error</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.util.handle_output_metadata.html#qcengine.util.handle_output_metadata" title="qcengine.util.handle_output_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">handle_output_metadata</span></code></a>(output_data, metadata)</p></td>
+<td><p>Fuses general metadata and output together.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.util.create_mpi_invocation.html#qcengine.util.create_mpi_invocation" title="qcengine.util.create_mpi_invocation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_mpi_invocation</span></code></a>(executable, task_config)</p></td>
+<td><p>Create the launch command for an MPI-parallel task</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.util.execute.html#qcengine.util.execute" title="qcengine.util.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(command[, infiles, outfiles, ...])</p></td>
+<td><p>Runs a process in the background until complete.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="module-qcengine.programs">
+<span id="qcengine-programs-package"></span><h2>qcengine.programs Package<a class="headerlink" href="#module-qcengine.programs" title="Link to this heading"></a></h2>
+<section id="id5">
+<h3>Functions<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.get_program.html#qcengine.programs.get_program" title="qcengine.programs.get_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_program</span></code></a>(name[, check])</p></td>
+<td><p>Returns a program's executor class</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.programs.list_all_programs.html#qcengine.programs.list_all_programs" title="qcengine.programs.list_all_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_programs</span></code></a>()</p></td>
+<td><p>List all programs registered by QCEngine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.list_available_programs.html#qcengine.programs.list_available_programs" title="qcengine.programs.list_available_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_available_programs</span></code></a>()</p></td>
+<td><p>List all programs that can be exectued (found) by QCEngine.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.programs.register_program.html#qcengine.programs.register_program" title="qcengine.programs.register_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_program</span></code></a>(entry_point)</p></td>
+<td><p>Register a new ProgramHarness with QCEngine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.unregister_program.html#qcengine.programs.unregister_program" title="qcengine.programs.unregister_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unregister_program</span></code></a>(name)</p></td>
+<td><p>Unregisters a given program.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id6">
+<h3>Classes<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" title="qcengine.programs.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProgramHarness</span></code></a></p></td>
+<td><p>Base class for analytic single-geometry capable harnesses.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id7">
+<h3>Class Inheritance Diagram<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<div class="graphviz"><img src="_images/inheritance-094fec5fd2c003c3d14803907783745c4ea4d44d.png" alt="Inheritance diagram of qcengine.programs.model.ProgramHarness" usemap="#inheritance27cf6b60bd" class="inheritance graphviz" /></div>
+<map id="inheritance27cf6b60bd" name="inheritance27cf6b60bd">
+<area shape="rect" id="node1" href="https://docs.python.org/3.10/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="16,5,88,33"/>
+<area shape="rect" id="node3" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" target="_top" title="Base class for analytic single&#45;geometry capable harnesses." alt="" coords="147,32,276,60"/>
+</map></section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="programs_molecular_mechanics.html" class="btn btn-neutral float-left" title="Molecular Mechanics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/qcengine.compute.html" class="btn btn-neutral float-right" title="compute" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2026, The Molecular Sciences Software Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
