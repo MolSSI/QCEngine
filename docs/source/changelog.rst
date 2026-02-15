@@ -28,8 +28,16 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-v0.35.0 / 2026-MM-DD (Unreleased)
---------------------
+.. _`sec:cl0341`:
+
+0.34.1 / 2026-02-14
+-------------------
+
+`Docs <https://MolSSI.github.io/QCEngine/v0.34.1/>`_
+
+Enhancements
+++++++++++++
+- (:pr:`???`) Set up documentation build to store versions of documentation for each tag plus dev.
 
 Misc.
 +++++
