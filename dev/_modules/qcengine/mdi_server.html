@@ -1,0 +1,624 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qcengine.mdi_server &mdash; QCEngine 0+untagged.1.ga816525 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=43f57eaa"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../_static/version-switcher.js?v=313414bb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WJHQJQF');</script>
+<!-- End Google Tag Manager -->
+ 
+
+</head>
+
+<body class="wy-body-for-nav">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHQJQF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+ 
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QCEngine
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install QCEngine</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Interface</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../single_compute.html">Single Compute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../environment.html">Environment Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command Line Interface</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Programs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../program_overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programs_semiempirical.html">Semiempirical Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../programs_molecular_mechanics.html">Molecular Mechanics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">QCEngine API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev_program_harness.html">Adding a New Program Harness</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QCEngine</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qcengine.mdi_server</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qcengine.mdi_server</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Support for using QCEngine as an MDI engine.</span>
+<span class="sd">For details regarding MDI, see https://molssi.github.io/MDI_Library/html/index.html.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">qcelemental</span> <span class="k">as</span> <span class="nn">qcel</span>
+<span class="kn">from</span> <span class="nn">qcelemental.util</span> <span class="kn">import</span> <span class="n">which_import</span>
+
+<span class="kn">from</span> <span class="nn">.compute</span> <span class="kn">import</span> <span class="n">compute</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">mdi</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">MDI_CHAR</span><span class="p">,</span>
+        <span class="n">MDI_COMMAND_LENGTH</span><span class="p">,</span>
+        <span class="n">MDI_DOUBLE</span><span class="p">,</span>
+        <span class="n">MDI_INT</span><span class="p">,</span>
+        <span class="n">MDI_MAJOR_VERSION</span><span class="p">,</span>
+        <span class="n">MDI_Accept_Communicator</span><span class="p">,</span>
+        <span class="n">MDI_Init</span><span class="p">,</span>
+        <span class="n">MDI_MPI_get_world_comm</span><span class="p">,</span>
+        <span class="n">MDI_Recv</span><span class="p">,</span>
+        <span class="n">MDI_Recv_Command</span><span class="p">,</span>
+        <span class="n">MDI_Register_Command</span><span class="p">,</span>
+        <span class="n">MDI_Register_Node</span><span class="p">,</span>
+        <span class="n">MDI_Send</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">use_mdi</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">use_mdi</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="MDIServer"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer">[docs]</a><span class="k">class</span> <span class="nc">MDIServer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mdi_options</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">program</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">molecule</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">keywords</span><span class="p">,</span>
+        <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">local_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an MDIServer object for communication with MDI</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mdi_options: str</span>
+<span class="sd">            Options used during MDI initialization.</span>
+<span class="sd">        program : str</span>
+<span class="sd">            The program to execute the input with.</span>
+<span class="sd">        molecule</span>
+<span class="sd">            The initial state of the molecule.</span>
+<span class="sd">        model</span>
+<span class="sd">            The simulation model to use.</span>
+<span class="sd">        keywords</span>
+<span class="sd">            Program-specific keywords.</span>
+<span class="sd">        raise_error : bool, optional</span>
+<span class="sd">            Determines if compute should raise an error or not.</span>
+<span class="sd">        local_options : Optional[Dict[str, Any]], optional</span>
+<span class="sd">            A dictionary of local configuration options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_mdi</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Trying to run as an MDI engine, but the MDI Library was not found&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">MDI_MAJOR_VERSION</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;QCEngine requires version 1.0.0 or higher of the MDI Library&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Confirm that the MDI library has been located</span>
+        <span class="n">which_import</span><span class="p">(</span><span class="s2">&quot;mdi&quot;</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">raise_msg</span><span class="o">=</span><span class="s2">&quot;Please install via &#39;conda install pymdi -c conda-forge&#39;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Initialize MDI</span>
+        <span class="n">MDI_Init</span><span class="p">(</span><span class="n">mdi_options</span><span class="p">)</span>
+
+        <span class="c1"># Input variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="n">molecule</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span> <span class="o">=</span> <span class="n">keywords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raise_error</span> <span class="o">=</span> <span class="n">raise_error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_options</span> <span class="o">=</span> <span class="n">local_options</span>
+
+        <span class="c1"># The MDI interface does not currently support multiple fragments</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">fragments</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The MDI interface does not support multiple fragments&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Molecule charge and multiplicity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">molecular_charge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multiplicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">molecular_multiplicity</span>
+
+        <span class="c1"># Flag to track whether the latest molecule specification has been validated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecule_validated</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Output of most recent compute call</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Set whether the current energy is valid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_is_current</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># MPI variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mpi_world</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">world_rank</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Flag to stop listening for MDI commands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_listening</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Dictionary of all supported MDI commands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;&lt;@&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_node</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;NATOMS&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_natoms</span><span class="p">,</span>
+            <span class="s2">&quot;&gt;NATOMS&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">recv_natoms</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;COORDS&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_coords</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;ENERGY&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_energy</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;FORCES&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_forces</span><span class="p">,</span>
+            <span class="s2">&quot;&gt;COORDS&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">recv_coords</span><span class="p">,</span>
+            <span class="s2">&quot;SCF&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_energy</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;ELEMENTS&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_elements</span><span class="p">,</span>
+            <span class="s2">&quot;&gt;ELEMENTS&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">recv_elements</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;MASSES&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_masses</span><span class="p">,</span>
+            <span class="s2">&quot;&gt;MASSES&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">recv_masses</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;TOTCHARGE&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_total_charge</span><span class="p">,</span>
+            <span class="s2">&quot;&gt;TOTCHARGE&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">recv_total_charge</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;ELEC_MULT&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_multiplicity</span><span class="p">,</span>
+            <span class="s2">&quot;&gt;ELEC_MULT&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">recv_multiplicity</span><span class="p">,</span>
+            <span class="s2">&quot;EXIT&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Register the @DEFAULT node</span>
+        <span class="n">MDI_Register_Node</span><span class="p">(</span><span class="s2">&quot;@DEFAULT&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Register all supported commands</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">MDI_Register_Command</span><span class="p">(</span><span class="s2">&quot;@DEFAULT&quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+
+        <span class="c1"># Set the current node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_node</span> <span class="o">=</span> <span class="s2">&quot;@DEFAULT&quot;</span>
+
+        <span class="c1"># Accept a communicator to the driver code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm</span> <span class="o">=</span> <span class="n">MDI_Accept_Communicator</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MDIServer.update_molecule"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.update_molecule">[docs]</a>    <span class="k">def</span> <span class="nf">update_molecule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the molecule</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : str</span>
+<span class="sd">            Key of the molecular element to update</span>
+<span class="sd">        value</span>
+<span class="sd">            Update value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;molecular_charge&quot;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;molecular_multiplicity&quot;</span><span class="p">:</span>
+            <span class="c1"># In order to validate correctly, the charges and multiplicities must be set simultaneously</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span>
+                    <span class="o">**</span><span class="p">{</span>
+                        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">dict</span><span class="p">(),</span>
+                        <span class="o">**</span><span class="p">{</span>
+                            <span class="s2">&quot;molecular_charge&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_charge</span><span class="p">,</span>
+                            <span class="s2">&quot;fragment_charges&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">total_charge</span><span class="p">],</span>
+                            <span class="s2">&quot;molecular_multiplicity&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiplicity</span><span class="p">,</span>
+                            <span class="s2">&quot;fragment_multiplicities&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">multiplicity</span><span class="p">],</span>
+                        <span class="p">},</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">molecule_validated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="n">qcel</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">:</span>
+                <span class="c1"># The molecule didn&#39;t validate correctly, but a future &gt;TOTCHARGE or &gt;ELEC_MULT command might fix it</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">molecule_validated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">dict</span><span class="p">(),</span> <span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span><span class="p">}})</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">molecule_validated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="n">qcel</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule_validated</span><span class="p">:</span>
+                    <span class="c1"># This update caused the validation error</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;MDI command caused a validation error&quot;</span><span class="p">)</span></div>
+
+    <span class="c1"># Respond to the &lt;@ command</span>
+<div class="viewcode-block" id="MDIServer.send_node"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_node">[docs]</a>    <span class="k">def</span> <span class="nf">send_node</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the name of the current node through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        node : str</span>
+<span class="sd">            Name of the current node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_node</span>
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">MDI_COMMAND_LENGTH</span><span class="p">,</span> <span class="n">MDI_CHAR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node</span></div>
+
+    <span class="c1"># Respond to the &lt;NATOMS command</span>
+<div class="viewcode-block" id="MDIServer.send_natoms"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_natoms">[docs]</a>    <span class="k">def</span> <span class="nf">send_natoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the number of atoms through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        natom : int</span>
+<span class="sd">            Number of atoms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">natom</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MDI_INT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">natom</span></div>
+
+    <span class="c1"># Respond to the &gt;NATOMS command</span>
+<div class="viewcode-block" id="MDIServer.recv_natoms"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_natoms">[docs]</a>    <span class="k">def</span> <span class="nf">recv_natoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">natoms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive the number of atoms in the system through MDI and create a new molecule with them</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        natoms : int, optional</span>
+<span class="sd">            New number of atoms. If None, receive through MDI.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">natoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">natoms</span> <span class="o">=</span> <span class="n">MDI_Recv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">MDI_INT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+
+        <span class="n">mol_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">natoms</span><span class="p">):</span>
+            <span class="n">mol_string</span> <span class="o">+=</span> <span class="s2">&quot;He &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">iatom</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; 0.0 0.0</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">mol_string</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_is_current</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="c1"># Respond to the &lt;COORDS command</span>
+<div class="viewcode-block" id="MDIServer.send_coords"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_coords">[docs]</a>    <span class="k">def</span> <span class="nf">send_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the nuclear coordinates through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        coords : np.ndarray</span>
+<span class="sd">            Nuclear coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">natom</span><span class="p">))</span>
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">natom</span><span class="p">,</span> <span class="n">MDI_DOUBLE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">coords</span></div>
+
+    <span class="c1"># Respond to the &gt;COORDS command</span>
+<div class="viewcode-block" id="MDIServer.recv_coords"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_coords">[docs]</a>    <span class="k">def</span> <span class="nf">recv_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a set of nuclear coordinates through MDI and assign them to the atoms in the current molecule</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coords : np.ndarray, optional</span>
+<span class="sd">            New nuclear coordinates. If None, receive through MDI.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">natom</span><span class="p">)</span>
+            <span class="n">MDI_Recv</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">natom</span><span class="p">,</span> <span class="n">MDI_DOUBLE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">,</span> <span class="n">buf</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">new_geometry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">dict</span><span class="p">(),</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">new_geometry</span><span class="p">}})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_is_current</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="c1"># Respond to the &lt;ENERGY command</span>
+<div class="viewcode-block" id="MDIServer.send_energy"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_energy">[docs]</a>    <span class="k">def</span> <span class="nf">send_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the total energy through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        energy : float</span>
+<span class="sd">            Energy of the system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure that the molecule currently passes validation</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule_validated</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;MDI attempting to compute energy on an unvalidated molecule&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_energy</span><span class="p">()</span>
+
+        <span class="c1"># Confirm that the calculation completed successfully</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;MDI Calculation failed: </span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">error_message</span><span class="p">))</span>
+
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;return_energy&quot;</span><span class="p">]</span>
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MDI_DOUBLE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">energy</span></div>
+
+    <span class="c1"># Respond to the &lt;FORCES command</span>
+<div class="viewcode-block" id="MDIServer.send_forces"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_forces">[docs]</a>    <span class="k">def</span> <span class="nf">send_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the nuclear forces through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        forces : np.ndarray</span>
+<span class="sd">            Forces on the nuclei</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure that the molecule currently passes validation</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule_validated</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;MDI attempting to compute gradients on an unvalidated molecule&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_energy</span><span class="p">()</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+
+        <span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;return_gradient&quot;</span><span class="p">],</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">forces</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;MDI: The length of the forces is not what was expected.  Expected: &quot;</span>
+                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">))</span>
+                <span class="o">+</span> <span class="s2">&quot;   Actual: &quot;</span>
+                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">forces</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">forces</span><span class="p">),</span> <span class="n">MDI_DOUBLE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">forces</span></div>
+
+    <span class="c1"># Respond to the SCF command</span>
+<div class="viewcode-block" id="MDIServer.run_energy"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.run_energy">[docs]</a>    <span class="k">def</span> <span class="nf">run_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_is_current</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Ensure that the orientation of the molecule remains fixed&quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_molecule</span><span class="p">(</span><span class="s2">&quot;fix_com&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_molecule</span><span class="p">(</span><span class="s2">&quot;fix_orientation&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Run an energy calculation&quot;&quot;&quot;</span>
+            <span class="nb">input</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">AtomicInput</span><span class="p">(</span>
+                <span class="n">molecule</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;gradient&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span> <span class="o">=</span> <span class="n">compute</span><span class="p">(</span>
+                <span class="n">input_data</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span> <span class="n">program</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">raise_error</span><span class="p">,</span> <span class="n">local_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">local_options</span>
+            <span class="p">)</span>
+
+            <span class="c1"># If there is an error message, print it out</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---------------- QCEngine Compute Error ----------------</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_return</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">error_message</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">-------------- End QCEngine Compute Error --------------&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">energy_is_current</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="c1"># Respond to the &lt;ELEMENTS command</span>
+<div class="viewcode-block" id="MDIServer.send_elements"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_elements">[docs]</a>    <span class="k">def</span> <span class="nf">send_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the atomic number of each nucleus through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        elements : :obj:`list` of :obj:`int`</span>
+<span class="sd">            Element of each atom</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">qcel</span><span class="o">.</span><span class="n">periodictable</span><span class="o">.</span><span class="n">to_atomic_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">iatom</span><span class="p">])</span> <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">natom</span><span class="p">)]</span>
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">natom</span><span class="p">,</span> <span class="n">MDI_INT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">elements</span></div>
+
+    <span class="c1"># Respond to the &gt;ELEMENTS command</span>
+<div class="viewcode-block" id="MDIServer.recv_elements"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_elements">[docs]</a>    <span class="k">def</span> <span class="nf">recv_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a set of atomic numbers through MDI and assign them to the atoms in the current molecule</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        elements : :obj:`list` of :obj:`int`, optional</span>
+<span class="sd">            New element numbers. If None, receive through MDI.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">elements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="n">MDI_Recv</span><span class="p">(</span><span class="n">natom</span><span class="p">,</span> <span class="n">MDI_INT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">natom</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">iatom</span><span class="p">]</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">periodictable</span><span class="o">.</span><span class="n">to_symbol</span><span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">iatom</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">elements</span></div>
+
+    <span class="c1"># Respond to the &lt;MASSES command</span>
+<div class="viewcode-block" id="MDIServer.send_masses"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_masses">[docs]</a>    <span class="k">def</span> <span class="nf">send_masses</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the nuclear masses through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        masses : np.ndarray</span>
+<span class="sd">            Atomic masses</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="n">masses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">masses</span>
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">masses</span><span class="p">,</span> <span class="n">natom</span><span class="p">,</span> <span class="n">MDI_DOUBLE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">masses</span></div>
+
+    <span class="c1"># Respond to the &gt;MASSES command</span>
+<div class="viewcode-block" id="MDIServer.recv_masses"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_masses">[docs]</a>    <span class="k">def</span> <span class="nf">recv_masses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masses</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive a set of nuclear masses through MDI and assign them to the atoms in the current molecule</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        masses : :obj:`list` of :obj:`float`, optional</span>
+<span class="sd">            New nuclear masses. If None, receive through MDI.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">masses</span> <span class="o">=</span> <span class="n">MDI_Recv</span><span class="p">(</span><span class="n">natom</span><span class="p">,</span> <span class="n">MDI_DOUBLE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_molecule</span><span class="p">(</span><span class="s2">&quot;masses&quot;</span><span class="p">,</span> <span class="n">masses</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_is_current</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="c1"># Respond to the &lt;TOTCHARGE command</span>
+<div class="viewcode-block" id="MDIServer.send_total_charge"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_total_charge">[docs]</a>    <span class="k">def</span> <span class="nf">send_total_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the total system charge through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        charge : float</span>
+<span class="sd">            Total charge of the system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">molecular_charge</span>
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">charge</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MDI_DOUBLE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">charge</span></div>
+
+    <span class="c1"># Respond to the &gt;TOTCHARGE command</span>
+<div class="viewcode-block" id="MDIServer.recv_total_charge"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_total_charge">[docs]</a>    <span class="k">def</span> <span class="nf">recv_total_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charge</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive the total system charge through MDI</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        charge : float, optional</span>
+<span class="sd">            New charge of the system. If None, receive through MDI.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">charge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">charge</span> <span class="o">=</span> <span class="n">MDI_Recv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">MDI_DOUBLE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_charge</span> <span class="o">=</span> <span class="n">charge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_is_current</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Allow a validation error here, because a future &gt;ELEC_MULT command might resolve it</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_molecule</span><span class="p">(</span><span class="s2">&quot;molecular_charge&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_charge</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">qcel</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+    <span class="c1"># Respond to the &lt;ELEC_MULT command</span>
+<div class="viewcode-block" id="MDIServer.send_multiplicity"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.send_multiplicity">[docs]</a>    <span class="k">def</span> <span class="nf">send_multiplicity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send the electronic multiplicity through MDI</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        multiplicity : int</span>
+<span class="sd">            Multiplicity of the system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">multiplicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">molecular_multiplicity</span>
+        <span class="n">MDI_Send</span><span class="p">(</span><span class="n">multiplicity</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MDI_INT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">multiplicity</span></div>
+
+    <span class="c1"># Respond to the &gt;ELEC_MULT command</span>
+<div class="viewcode-block" id="MDIServer.recv_multiplicity"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.recv_multiplicity">[docs]</a>    <span class="k">def</span> <span class="nf">recv_multiplicity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multiplicity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive the electronic multiplicity through MDI</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        multiplicity : int, optional</span>
+<span class="sd">            New multiplicity of the system. If None, receive through MDI.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">multiplicity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">multiplicity</span> <span class="o">=</span> <span class="n">MDI_Recv</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">MDI_INT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multiplicity</span> <span class="o">=</span> <span class="n">multiplicity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_is_current</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Allow a validation error here, because a future &gt;TOTCHARGE command might resolve it</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_molecule</span><span class="p">(</span><span class="s2">&quot;molecular_multiplicity&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiplicity</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">qcel</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+    <span class="c1"># Respond to the EXIT command</span>
+<div class="viewcode-block" id="MDIServer.stop"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop listening for MDI commands&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_listening</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="c1"># Enter server mode, listening for commands from the driver</span>
+<div class="viewcode-block" id="MDIServer.start"><a class="viewcode-back" href="../../api/qcengine.MDIServer.html#qcengine.MDIServer.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive commands through MDI and respond to them as defined by the MDI Standard&quot;&quot;&quot;</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_listening</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">world_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="n">MDI_Recv_Command</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">command</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">world_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MDI command received: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">command</span><span class="p">))</span>
+
+            <span class="c1"># Search for this command in self.commands</span>
+            <span class="n">found_command</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">supported_command</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">found_command</span> <span class="ow">and</span> <span class="n">command</span> <span class="o">==</span> <span class="n">supported_command</span><span class="p">:</span>
+                    <span class="c1"># Run the function corresponding to this command</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">[</span><span class="n">supported_command</span><span class="p">]()</span>
+                    <span class="n">found_command</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">found_command</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unrecognized command: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">command</span><span class="p">))</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018-2026, The Molecular Sciences Software Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
