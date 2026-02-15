@@ -2,16 +2,17 @@ name: CI
 
 on:
   push:
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*a[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*b[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*rc[0-9]*'
     branches:
       - master
-      - next2024
-      - next2025
       - next2026
   pull_request:
     branches:
       - master
-      - next2024
-      - next2025
       - next2026
   schedule:
     - cron: "9 16 * * 1"
@@ -344,9 +345,82 @@ jobs:
         cd docs
         make html
 
+    - name: Compute docs deploy target
+      id: target
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        echo GITHUB_REF_TYPE ${GITHUB_REF_TYPE}
+        echo GITHUB_REF_NAME ${GITHUB_REF_NAME}
+        echo GITHUB_REF ${GITHUB_REF}
+        if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+          echo "target_folder=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version_label=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+        elif [[ "${GITHUB_REF_NAME}" == "master" ]]; then
+          echo "target_folder=dev" >> "$GITHUB_OUTPUT"
+          echo "version_label=dev" >> "$GITHUB_OUTPUT"
+
+        elif [[ "${GITHUB_REF_NAME}" == "next2026" ]]; then
+          echo "target_folder=next" >> "$GITHUB_OUTPUT"
+          echo "version_label=next" >> "$GITHUB_OUTPUT"
+
+        else
+          echo "target_folder=" >> "$GITHUB_OUTPUT"
+          echo "version_label=" >> "$GITHUB_OUTPUT"
+        fi
+        echo GITHUB_OUTPUT ${GITHUB_OUTPUT}
+
     - name: GitHub Pages Deploy
-      uses: JamesIves/github-pages-deploy-action@4.1.1
-      if: github.event_name == 'push' && github.repository == 'MolSSI/QCEngine' && ( startsWith( github.ref, 'refs/tags/' ) || github.ref == 'refs/heads/master' )
+      uses: JamesIves/github-pages-deploy-action@v4
+      if: github.event_name == 'push' && github.repository == 'MolSSI/QCEngine' && ( startsWith( github.ref, 'refs/tags/' ) || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/next2026' )
       with:
         branch: gh-pages
         folder: docs/build/html
+        target-folder: ${{ steps.target.outputs.target_folder }}
+        clean: false
+
+    - name: Update versions.json
+      if: github.event_name == 'push' && github.repository == 'MolSSI/QCEngine' && ( startsWith( github.ref, 'refs/tags/' ) || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/next2026' )
+      shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION_LABEL: ${{ steps.target.outputs.version_label }}
+        TARGET_FOLDER: ${{ steps.target.outputs.target_folder }}
+      run: |
+        set -euo pipefail
+        rm -rf _ghp
+        git clone --depth 1 --branch gh-pages "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" _ghp
+        cd _ghp
+        # Create versions.json if it doesn't exist yet
+        if [[ ! -f versions.json ]]; then
+          cat > versions.json <<'JSON'
+        [
+          {"label": "dev", "path": "dev/"},
+          {"label": "next", "path": "next/"}
+        ]
+        JSON
+        fi
+        python - <<'PY'
+        import json, pathlib, os
+        p = pathlib.Path("versions.json")
+        data = json.loads(p.read_text())
+        pinned = [
+            {"label": "dev", "path": "dev/"},
+            {"label": "next", "path": "next/"},
+        ]
+        lbl = os.environ.get("VERSION_LABEL", "")
+        tgt = os.environ.get("TARGET_FOLDER", "")
+        if lbl and lbl not in ("dev", "next") and tgt:
+            pinned.insert(1, {"label": lbl, "path": tgt.rstrip("/") + "/"})
+        p.write_text(json.dumps(pinned, indent=2) + "\n")
+        PY
+        if ! git diff --quiet; then
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add versions.json
+          git commit -m "docs: update versions.json (${GITHUB_REF})"
+          git push origin gh-pages
+        fi
+
