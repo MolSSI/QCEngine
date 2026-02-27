@@ -14,6 +14,9 @@ def format_keyword(keyword: str, val: Any, lop_off: bool = True) -> Tuple[str, s
     elif str(val) == "False":
         text += ".false."
 
+    elif isinstance(val, list):
+        text += ",".join(map(str, val))
+
     # No Transform
     else:
         text += str(val).lower()
@@ -34,11 +37,19 @@ def format_keywords(keywords: Dict[str, Any]) -> str:
 
     grouped_lines = {}
     for group, opts in sorted(grouped_options.items()):
+        is_block = False
         line = []
         line.append(f"${group.lower()}")
         for key, val in sorted(grouped_options[group].items()):
-            line.append("=".join(format_keyword(key, val, lop_off=False)))
+            if key == "":
+                is_block = True
+                line.extend(val.split("\n"))
+            else:
+                line.append("=".join(format_keyword(key, val, lop_off=False)))
         line.append("$end\n")
-        grouped_lines[group] = textwrap.fill(" ".join(line), initial_indent=" ", subsequent_indent="  ")
+        if is_block:
+            grouped_lines[group] = "\n".join(" " + ln for ln in line)
+        else:
+            grouped_lines[group] = textwrap.fill(" ".join(line), initial_indent=" ", subsequent_indent="  ")
 
     return "\n".join(grouped_lines.values()) + "\n"
