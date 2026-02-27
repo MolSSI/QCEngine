@@ -86,7 +86,7 @@ class GCPHarness(ProgramHarness):
             dexe["outfiles"]["stdout"] = dexe["stdout"]
             dexe["outfiles"]["stderr"] = dexe["stderr"]
             dexe["outfiles"]["input"] = " ".join(job_inputs["command"])  # stretch to call this input
-            dexe["outfiles"]["gcp_geometry.xyz"] = job_inputs["infiles"]["gcp_geometry.xyz"]
+            dexe["outfiles"]["gcp_geometry.tmol"] = job_inputs["infiles"]["gcp_geometry.tmol"]
             output_model = self.parse_output(dexe["outfiles"], input_model)
 
         else:
@@ -181,13 +181,13 @@ class GCPHarness(ProgramHarness):
 
         calldash = {"gcp": "-", "mctc-gcp": "--"}[executable]
 
-        command = [executable, "gcp_geometry.xyz", calldash + "level", method]
+        command = [executable, "gcp_geometry.tmol", calldash + "level", method]
 
         if input_model.driver == "gradient":
             command.append(calldash + "grad")
 
         infiles = {
-            "gcp_geometry.xyz": qcel.molparse.to_string(molrec, dtype="xyz", units="Angstrom", ghost_format=""),
+            "gcp_geometry.tmol": qcel.molparse.to_string(molrec, dtype="turbomole", units="Bohr", ghost_format=""),
         }
         if method == "FILE":
             infiles[".gcppar"] = input_model.extras["parameters"]
