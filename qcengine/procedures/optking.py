@@ -51,7 +51,7 @@ class OptKingProcedure(ProcedureHarness):
         log.addHandler(logging.StreamHandler(log_stream))
         log.setLevel("INFO")
 
-        if parse_version(self.get_version()) < parse_version("0.4"):
+        if parse_version(self.get_version()) < parse_version("0.5"):
             from qcelemental.models.v1 import OptimizationResult
 
             input_data_v1 = input_model.convert_v(1).dict()
@@ -79,7 +79,7 @@ class OptKingProcedure(ProcedureHarness):
             input_data_v2 = input_model.model_dump()
 
             # Set retries to two if zero while respecting local_config
-            local_config = config.dict()
+            local_config = config.model_dump()
             local_config["retries"] = local_config.get("retries", 2) or 2
             input_data_v2["specification"]["specification"]["extras"]["_qcengine_local_config"] = local_config
 
