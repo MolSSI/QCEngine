@@ -447,5 +447,105 @@ units ang
         assert ret_last_subres['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None, f"atomic protocol did not take"
 
 
-# TODO Add this back with genopt. test name in geomeTRIC is test_lif_bsse
-# def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywords):
+@using("qcmanybody")
+@pytest.mark.parametrize("schver", [2])  # GeneralizedOptimization retired (this was the v1 precursor)
+@pytest.mark.parametrize("bsse_type", ["mbe", "ssfc"])  # aka nocp, cp
+@pytest.mark.parametrize(
+    "qcprog,qc_keywords",
+    [
+        pytest.param("psi4", {}, marks=using("psi4")),
+        pytest.param("cfour", {}, marks=using("cfour")),
+        pytest.param("nwchem", {}, marks=using("nwchem")),
+    ],
+)
+@pytest.mark.parametrize(
+    "optimizer,opt_keywords",
+    [
+        pytest.param("optking", {}, marks=using("optking_v2")),
+        # pytest.param(
+        #     "geometric", {"convergence_set": "interfrag_tight", "maxiter": 15}, marks=using("geometric_genopt")
+        # ),
+    ],
+)
+def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywords, schver):
+    # in geomeTRIC: test_lif_bsse
+
+    lif = {
+        "symbols": ["Li", "F"],
+        "geometry": [0, 0, 0, 0, 0, 3],
+        "fragments": [[0], [1]],
+        "fragment_charges": [+1, -1],
+    }
+
+    mbe_subprop = "component_properties" if schver == 1 else "cluster_properties"
+    mbe_subptcl = "component_results" if schver == 1 else "cluster_results"
+    opt_subptcl = "trajectory" if schver == 1 else "trajectory_results"
+
+    mbe_spec = {
+        "schema_name": "qcschema_many_body_specification" if schver == 2 else "qcschema_manybodyspecification",
+        "specification": {
+            "model": {
+                "method": "hf",
+                "basis": "6-31G",
+            },
+            "driver": "energy",
+            "program": qcprog,
+            "keywords": qc_keywords,
+            "protocols": {
+                "stdout": False,
+            },
+        },
+        "keywords": {
+            "bsse_type": bsse_type,
+            "supersystem_ie_only": True,
+        },
+        "protocols": {
+            mbe_subptcl: "all",
+        },
+        "driver": "energy",
+    }
+
+    if schver == 2:
+        opt_data = {
+            "initial_molecule": lif,
+            "specification": {
+                "specification": at_spec if (bsse_type == "nil") else mbe_spec,
+                "keywords": {
+                    **opt_keywords,
+                },
+                "protocols": {
+                    opt_subptcl: "final",
+                },
+            },
+        }
+    else:
+        opt_data = {
+            "initial_molecule": lif,
+            "input_specification": mbe_spec,
+            "keywords": {
+                "program": "nonsense",
+                **opt_keywords,
+            },
+            "protocols": {
+                opt_subptcl: "final",
+            },
+        }
+
+    ret = qcng.compute_procedure(opt_data, optimizer, raise_error=True, return_version=schver)
+
+    # printing will show up if job fails
+    pprint.pprint(ret.dict(), width=200)
+
+    assert ret.success
+
+    ret_traj = ret.trajectory_results if schver == 2 else ret.trajectory
+    assert len(getattr(ret_traj[0], mbe_subprop)) == (5 if bsse_type == "ssfc" else 3)
+
+    assert ret.provenance.creator.lower() == optimizer
+    assert ret_traj[0].provenance.creator == "QCManyBody"
+    atres = list(getattr(ret_traj[0], mbe_subptcl).values())[0]
+    assert atres.provenance.creator.lower() == qcprog
+
+    Rlif = ret.final_molecule.measure([0, 1])
+    Rref = 3.016 if bsse_type == "ssfc" else 2.969
+    assert compare_values(Rlif, Rref, "bond length", atol=1.0e-3)
