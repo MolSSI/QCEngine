@@ -204,6 +204,7 @@ _programs = {
     "mrchem": is_program_new_enough("mrchem", "1.0.0"),
     "mace": is_program_new_enough("mace", "0.3.2"),
     "aimnet2": which_import("pyaimnet2", return_bool=True),
+    "optking_v2": is_program_new_enough("optking", "0.4"),
 }
 _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 
