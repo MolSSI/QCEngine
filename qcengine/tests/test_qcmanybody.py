@@ -503,6 +503,7 @@ def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywo
             mbe_subptcl: "all",
         },
         "driver": "energy",
+        "program": "qcmanybody",
     }
 
     if schver == 2:
