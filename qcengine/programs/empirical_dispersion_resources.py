@@ -928,10 +928,10 @@ dashcoeff = {
             # Unlike d4bjeeqatm, d4bjeeqtwo parameters are _not_ loaded below from authoritative source below as very few are defined.
             "sapt0": {
                 "params": {
-                    "a1": 0.095,
-                    "a2": 3.637,
                     "s6": 1.000,
                     "s8": 0.738,
+                    "a1": 0.095,
+                    "a2": 3.637,
                     "s9": 0.0,
                     "alp": 16.0,
                     "ga": 3.0,
@@ -939,7 +939,26 @@ dashcoeff = {
                     "wf": 6.0,
                 },
                 "citation": "    Wallace, A. M.; Sherrill, C. D., J. Chem. Phys., 161, 114115, 2024\n",
-            },  # AMW 7/25
+            },  # AMW 7/25, 8298 -D3MBJ datset Total aDZ MAE 0.40 kcal/mol,
+            # These "sapt0" energies have unphysical asymptotic behavior for
+            # supermolecular interaction energies due to changing C6's in the
+            # dimer vs monomers. It is recommended that users use the
+            # "sapt0-d4(i)" with an intermolecular summation for -D4
+            # interaction energies instead.
+            "sapt0-d4(i)": {
+                "params": {
+                    "s6": 1.0000,
+                    "s8": 0.5606,
+                    "a1": 0.6553,
+                    "a2": 1.0645,
+                    "s9": 0.0,
+                    "alp": 16.0,
+                    "ga": 3.0,
+                    "gc": 2.0,
+                    "wf": 6.0,
+                },
+                "citation": "    Wallace, A. M.; Sherrill, C. D., J. Chem. Phys., 161, 114115, 2024\n",
+            },  # AMW 3/26, 8298 -D3MBJ datset Total aDZ MAE 0.36 kcal/mol
             "hf": {
                 "params": {
                     "a1": 0.095,
@@ -959,7 +978,7 @@ dashcoeff = {
                     "s6": 1.0,
                     "s8": 1.2042,
                     "a1": 0.9090,
-                    "a2": 0.0,  # change to 0.0?
+                    "a2": 0.0,
                     "s9": 0.0,
                     "alp": 16.0,
                     "ga": 3.0,
@@ -968,6 +987,20 @@ dashcoeff = {
                 },
                 "citation": "    Wallace, A. M.; Sherrill, C. D., (TBD)",
             },  # AMW 2/26, LoS-II Total aDZ MAE 0.49 kcal/mol
+            "sapt(b3lyp)(s)": {
+                "params": {
+                    "s6": 1.0,
+                    "s8": 1.3160,
+                    "a1": 0.8912,
+                    "a2": 0.0, # 4.38256716e-05
+                    "s9": 0.0,
+                    "alp": 16.0,
+                    "ga": 3.0,
+                    "gc": 2.0,
+                    "wf": 6.0,
+                },
+                "citation": "    Wallace, A. M.; Sherrill, C. D., (TBD)",
+            },  # AMW 3/26, LoS-II Total aDZ MAE 0.57 kcal/mol
             "sapt(pbe0)(i)": {
                 "params": {
                     "s6": 1.0,
