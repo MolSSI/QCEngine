@@ -37,8 +37,8 @@ Changelog
 
 Enhancements
 ++++++++++++
-- (:pr:`495`) DFTD4 - New SAPT (0, PBE0, B3LYP) D4 parameters for intermolecular
-  (good) and supermolecular (bad) forms.
+- (:pr:`495`) DFTD4, DFTD3 - New SAPT (0, PBE0, B3LYP) D4 and D3 parameters for
+  intermolecular (good) and supermolecular (bad) forms.
 
 
 .. _`sec:cl0341`:
