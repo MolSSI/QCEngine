@@ -235,7 +235,6 @@ jobs:
         conda install pydantic=2 -c conda-forge
         conda remove qcelemental --force || true
         python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
-        python -m pip install 'git+https://github.com/loriab/QCManyBody.git@qcmbopt' --no-deps
 
     - name: Special Config - Forced Interface Upgrade
       if: matrix.cfg.label == 'Psi4-1.6'
