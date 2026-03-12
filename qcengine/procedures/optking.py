@@ -45,14 +45,9 @@ class OptKingProcedure(ProcedureHarness):
         if self.found(raise_error=True):
             import optking
 
-        loggers = [name for name in logging.root.manager.loggerDict]
-        print(f"LOGG_ {loggers=}")
-
         log_stream = StringIO()
-        logname = "psi4.optking" if "psi4" in sys.modules else "optking"
-        ok_logname = f"{optking.log_name}{optking.__name__}"
-        print(f"LOGG1 {ok_logname=} {logname=}")
-        log = logging.getLogger(ok_logname)
+        logname = f"{optking.log_name}{optking.__name__}"
+        log = logging.getLogger(logname)
         log.addHandler(logging.StreamHandler(log_stream))
         log.setLevel("INFO")
 
@@ -91,10 +86,6 @@ class OptKingProcedure(ProcedureHarness):
             # Run the program
             output_v2 = optking.optwrapper.optimize_qcengine(input_data_v2)
             output_v2["stdout"] = log_stream.getvalue()
-            import pprint
-
-            pprint.pprint(output_v2, width=200)
-            print("HARNESS")
 
             output_v2["input_data"]["specification"]["specification"]["extras"].pop("_qcengine_local_config", None)
             if output_v2["success"]:

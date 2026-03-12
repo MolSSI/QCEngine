@@ -15,7 +15,7 @@ dependencies:
   - geometric=1.0
   - optking
   - pymdi
-  - qcmanybody>=0.6.1
+  - qcmanybody
   - pyberny
   - setuptools <82.0  # for berny
 

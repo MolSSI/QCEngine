@@ -63,6 +63,9 @@ Enhancements
 Bug Fixes
 +++++++++
 - (:pr:`392`) More precise Pydantic version constraints: v2.11, unless py314+
+- (:pr:`498`) OptKing - Grab logger from optking rather than using imitation
+  logic that is vulnerable to stray ``import psi4``. This can fix
+  ``OptimizationResult.stdout`` being unexpectedly empty.
 
 Misc.
 +++++

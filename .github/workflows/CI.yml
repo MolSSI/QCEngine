@@ -282,11 +282,6 @@ jobs:
         python -c "from psi4 import core; core.set_num_threads(42); assert core.get_num_threads() == 42"
         psi4 $CONDA_PREFIX/Lib/site-packages/psi4/tests/tu1-h2o-energy/input.dat -o stdout
 
-    - name: Run, Spot, Run
-      run: |
-        # export MKL_CBWR=AVX
-        pytest -rws -v -k gradmodel1 --color=yes qcengine/
-
     - name: PyTest
       run: |
         # export MKL_CBWR=AVX
