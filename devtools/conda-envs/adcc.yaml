@@ -7,6 +7,7 @@ dependencies:
   - adcc>=0.15.7
   - psi4>=1.8.1
   - qcmanybody>=0.6.1
+  - libint=2.9.0=*_4  # new qcmb forces psi4 1.10.0=*_2
 
   # Core
   - python

@@ -208,6 +208,9 @@ def test_optimizer_stdout(optimizer, gradprog, gradmodel, converged, input_data,
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
     ret = qcng.compute(input_data, optimizer, raise_error=True, return_version=retver)
     ret = checkver_and_convert(ret, request.node.name, "post")
+    import pprint
+
+    pprint.pprint(ret.model_dump(), width=200)
 
     assert ret.success is True
     assert converged in ret.stdout
