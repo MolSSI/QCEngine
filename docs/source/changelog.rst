@@ -28,6 +28,19 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+.. _`sec:cl0342`:
+
+0.34.2 / 2026-03-12
+-------------------
+
+`Docs <https://MolSSI.github.io/QCEngine/v0.34.2/>`_
+
+Enhancements
+++++++++++++
+- (:pr:`495`) DFTD4 - New SAPT (0, PBE0, B3LYP) D4 parameters for intermolecular
+  (good) and supermolecular (bad) forms.
+
+
 .. _`sec:cl0341`:
 
 0.34.1 / 2026-02-15
