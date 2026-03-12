@@ -72,6 +72,44 @@ Misc.
 - (:pr:`494`) CI - Fix lanes for setuptools removing pkg_resources and Libint2 update.
 
 
+.. _`sec:cl0342`:
+
+0.34.2 / 2026-03-12
+-------------------
+
+`Docs <https://MolSSI.github.io/QCEngine/v0.34.2/>`_
+
+Enhancements
+++++++++++++
+- (:pr:`495`) DFTD4, DFTD3 - New SAPT (0, PBE0, B3LYP) D4 and D3 parameters for
+  intermolecular (good) and supermolecular (bad) forms.
+
+
+.. _`sec:cl0341`:
+
+0.34.1 / 2026-02-15
+-------------------
+
+`Docs <https://MolSSI.github.io/QCEngine/v0.34.1/>`_
+
+Enhancements
+++++++++++++
+- (:pr:`492`) Docs - Set up documentation build to store versions of documentation for each tag plus dev.
+  Note that this changes intersphinx links. Below is current.
+
+.. code:: python
+
+    "qcelemental": ("https://molssi.github.io/QCElemental/dev/", None),
+    "qcengine": ("https://molssi.github.io/QCEngine/dev/", None),
+    "qcfractal": ("https://molssi.github.io/QCFractal/", None),
+
+Misc.
++++++
+- (:pr:`491`) Maint - update CI lanes for setuptools dropping pkg_resources and psi4 not pinned to right libmints. @loriab
+
+
+.. _`sec:cl0500rc1`:
+
 v0.50.0rc1 / 2026-01-31 (aka "next" aka "QCSchema v2 available") (Prerelease)
 -----------------------------------------------------------------------------
 
