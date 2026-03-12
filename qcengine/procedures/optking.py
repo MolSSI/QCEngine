@@ -45,14 +45,19 @@ class OptKingProcedure(ProcedureHarness):
         if self.found(raise_error=True):
             import optking
 
+        loggers = [name for name in logging.root.manager.loggerDict]
+        print(f"LOGG_ {loggers=}")
+
+        log_stream = StringIO()
+        logname = "psi4.optking" if "psi4" in sys.modules else "optking"
+        ok_logname = f"{optking.log_name}{optking.__name__}"
+        print(f"LOGG1 {ok_logname=} {logname=}")
+        log = logging.getLogger(ok_logname)
+        log.addHandler(logging.StreamHandler(log_stream))
+        log.setLevel("INFO")
+
         if parse_version(self.get_version()) < parse_version("0.5"):
             from qcelemental.models.v1 import OptimizationResult
-
-            log_stream = StringIO()
-            logname = "psi4.optking" if "psi4" in sys.modules else "optking"
-            log = logging.getLogger(logname)
-            log.addHandler(logging.StreamHandler(log_stream))
-            log.setLevel("INFO")
 
             input_data_v1 = input_model.convert_v(1).dict()
 
@@ -75,12 +80,6 @@ class OptKingProcedure(ProcedureHarness):
         else:
             # optking v0.5 can run QCSchema 1<->1 and 2<->2, so update to 2
             from qcelemental.models.v2 import OptimizationResult
-
-            log_stream = StringIO()
-            logname = "psi4.optking" if "psi4" in sys.modules else "optking"
-            log = logging.getLogger(logname)
-            log.addHandler(logging.StreamHandler(log_stream))
-            log.setLevel("INFO")
 
             input_data_v2 = input_model.model_dump()
 
