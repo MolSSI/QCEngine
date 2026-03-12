@@ -21,6 +21,7 @@ dependencies:
   - optking
   - pymdi
   - setuptools <82.0  # for berny
+  - qcmanybody>=0.6.1
 
     # Core
   - python

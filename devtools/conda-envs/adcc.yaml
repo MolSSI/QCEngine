@@ -6,6 +6,7 @@ channels:
 dependencies:
   - adcc>=0.15.7
   - psi4>=1.8.1
+  - qcmanybody>=0.6.1
 
   # Core
   - python

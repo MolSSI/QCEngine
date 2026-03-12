@@ -1,8 +1,12 @@
 Changelog
 =========
 
+.. .. _`sec:clxy0`:
+..
 .. vX.Y.0 / 2026-MM-DD (Unreleased)
 .. --------------------
+..
+.. :docs:`vx.y.0` for current. :docs:`v0.34.1` for QCSchema v1.
 ..
 .. Breaking Changes
 .. ++++++++++++++++
@@ -28,9 +32,31 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-`Docs <https://MolSSI.github.io/QCEngine/next/>`_
-`Docs for QCSchema v1<https://MolSSI.github.io/QCEngine/v0.34.1/>`_
+.. _`sec:cl0500rc2`:
+
+v0.50.0rc2 / 2026-MM-DD (Prerelease) (Unreleased)
+-------------------------------------------------
+
+:docs:`v0.50.0rc2` for current. :docs:`v0.34.1` for QCSchema v1.
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
 - (:pr:`493`) Docs - Serve multiple versions
+
+Enhancements
+++++++++++++
+- (:pr:`498`)
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+- (:pr:`494`) CI - Fix lanes for setuptools removing pkg_resources and Libint2 update.
+
 
 v0.50.0rc1 / 2026-01-31 (aka "next" aka "QCSchema v2 available") (Prerelease)
 -----------------------------------------------------------------------------

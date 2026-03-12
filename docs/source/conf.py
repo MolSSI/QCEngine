@@ -201,6 +201,7 @@ texinfo_documents = [
 extlinks = {
     'issue': ('https://github.com/MolSSI/QCEngine/issues/%s', 'GH#%s'),
     'pr': ('https://github.com/MolSSI/QCEngine/pull/%s', 'GH#%s')
+    "docs": ("https://MolSSI.github.io/QCEngine/%s", "Docs %s"),
 }
 
 # -- Options for intersphinx extension ---------------------------------------
