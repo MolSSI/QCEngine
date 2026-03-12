@@ -45,14 +45,14 @@ class OptKingProcedure(ProcedureHarness):
         if self.found(raise_error=True):
             import optking
 
-        log_stream = StringIO()
-        logname = "psi4.optking" if "psi4" in sys.modules else "optking"
-        log = logging.getLogger(logname)
-        log.addHandler(logging.StreamHandler(log_stream))
-        log.setLevel("INFO")
-
         if parse_version(self.get_version()) < parse_version("0.5"):
             from qcelemental.models.v1 import OptimizationResult
+
+            log_stream = StringIO()
+            logname = "psi4.optking" if "psi4" in sys.modules else "optking"
+            log = logging.getLogger(logname)
+            log.addHandler(logging.StreamHandler(log_stream))
+            log.setLevel("INFO")
 
             input_data_v1 = input_model.convert_v(1).dict()
 
@@ -76,6 +76,12 @@ class OptKingProcedure(ProcedureHarness):
             # optking v0.5 can run QCSchema 1<->1 and 2<->2, so update to 2
             from qcelemental.models.v2 import OptimizationResult
 
+            log_stream = StringIO()
+            logname = "psi4.optking" if "psi4" in sys.modules else "optking"
+            log = logging.getLogger(logname)
+            log.addHandler(logging.StreamHandler(log_stream))
+            log.setLevel("INFO")
+
             input_data_v2 = input_model.model_dump()
 
             # Set retries to two if zero while respecting local_config
@@ -86,6 +92,10 @@ class OptKingProcedure(ProcedureHarness):
             # Run the program
             output_v2 = optking.optwrapper.optimize_qcengine(input_data_v2)
             output_v2["stdout"] = log_stream.getvalue()
+            import pprint
+
+            pprint.pprint(output_v2, width=200)
+            print("HARNESS")
 
             output_v2["input_data"]["specification"]["specification"]["extras"].pop("_qcengine_local_config", None)
             if output_v2["success"]:
