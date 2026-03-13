@@ -30,7 +30,6 @@ class QCManyBodyProcedure(ProcedureHarness):
     def build_input_model(
         self, data: Union[Dict[str, Any], "ManyBodyInput"], *, return_input_schema_version: bool = False
     ) -> "ManyBodyInput":
-        from qcmanybody.models import ManyBodyInput
 
         return self._build_model(data, "ManyBodyInput", return_input_schema_version=return_input_schema_version)
 
@@ -54,21 +53,26 @@ class QCManyBodyProcedure(ProcedureHarness):
             v1_model = getattr(module_v1, model)
             v2_model = None
 
-        qcmb_v1v2 = parse_version(self.get_version()) >= parse_version("0.50a0")
+        qcmb_v1v2 = parse_version(self.get_version()) >= parse_version("0.6a0")
 
         if isinstance(data, v1_model):
             mdl = model_wrapper(data, v1_model)
-        elif isinstance(data, v2_model):
+        elif v2_model is not None and isinstance(data, v2_model):
             mdl = model_wrapper(data, v2_model)
         elif isinstance(data, dict):
             # remember these are user-provided dictionaries, so they'll have the mandatory fields,
             #   like driver, not the helpful discriminator fields like schema_version.
             # so long as versions distinguishable by a *required* field, id by dict is reliable.
 
-            # if data.get("specification", False) or data.get("schema_version") == 2:
-            #     mdl = model_wrapper(data, v2_model)
-            # else:
-            mdl = model_wrapper(data, v1_model)
+            if data.get("specification", False) or data.get("schema_version") == 2:
+                if v2_model is None:
+                    raise InputError(
+                        "v2 ManyBody inputs require QCManyBody >= 0.6a0 (first version with v2 schemas); "
+                        "please upgrade your qcmanybody installation."
+                    )
+                mdl = model_wrapper(data, v2_model)
+            else:
+                mdl = model_wrapper(data, v1_model)
 
         input_schema_version = mdl.schema_version
         if input_schema_version != 1 and qcmb_v1v2 is False:

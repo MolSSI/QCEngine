@@ -9,8 +9,6 @@ from qcengine.testing import checkver_and_convert, from_v2
 from qcengine.testing import schema_versions as schema_versionsALL5
 from qcengine.testing import schema_versions0, using
 
-# TODO full schema_versions when manybody v2 schema ready
-
 try:
     import qcmanybody as qcmb
 except ModuleNotFoundError:
@@ -302,31 +300,32 @@ def test_mbe_error(schema_versions, request):
 @pytest.mark.parametrize(
     "optimizer,bsse_type,sio",
     [
-        pytest.param("optking", "none", None, marks=using("optking")),
-        # pytest.param("genoptking", "none", None, marks=using("optking_genopt")),
-        # pytest.param("genoptking", "nocp", True, marks=using("optking_genopt")),
-        # pytest.param("genoptking", "cp", False, marks=using("optking_genopt")),
-        pytest.param("geometric", "none", None, marks=using("geometric")),
-        # pytest.param("gengeometric", "none", None, marks=using("geometric_genopt")),
-        # pytest.param("gengeometric", "nocp", False, marks=using("geometric_genopt")),
-        # pytest.param("gengeometric", "cp", True, marks=using("geometric_genopt")),
+        pytest.param("optking", "nil", "", marks=using("optking")),
+        pytest.param("optking", "cp", False, marks=using("optking_v2")),
+        pytest.param("optking", "nocp", False, marks=using("optking_v2")),
+        pytest.param("geometric", "nil", "", marks=using("geometric")),
+        # needs qcsk v2-compat geometric harness
+        # pytest.param("geometric", "nocp", False, marks=using("geometric_genopt")),
+        # pytest.param("geometric", "cp", True, marks=using("geometric_genopt")),
     ],
 )
-def test_bsse_opt_hf_trimer(schema_versions0, request, optimizer, bsse_type, sio):
-    models, retver, _ = schema_versions0
+def test_bsse_opt_hf_trimer(schema_versions, request, optimizer, bsse_type, sio):
+    models, retver, _ = schema_versions
 
+    if bsse_type != "nil" and "as_v2" not in request.node.name:
+        pytest.skip(
+            "ManyBody Optimization is only available for QCSchema v2. The experimental v1 GeneralizedOptimization is retired."
+        )
+
+    Molecule = models.Molecule
     if from_v2(request.node.name):
-        Molecule = models.Molecule
         from qcmanybody.models.v2 import ManyBodyInput
 
-        AtomicSpecification = models.AtomicSpecification
         subptcl = "cluster_results"
     else:
-        Molecule = models.v1.Molecule
-        from qcmanybody.models.v1 import AtomicSpecification, ManyBodyInput
+        from qcmanybody.models.v1 import ManyBodyInput
 
         subptcl = "component_results"
-
     # to_v2
     subres = "cluster_results" if ("v2" in request.node.name) else "component_results"
 
@@ -346,7 +345,9 @@ units ang
 
     at_spec = {
         # schema_name needed for differentiation in genopt
-        "schema_name": "qcschema_input",
+        "schema_name": "qcschema_atomic_specification" if from_v2(request.node.name) else "qcschema_input",
+        "program": "psi4",
+        "driver": "gradient",
         "model": {
             "method": "hf",
             "basis": "6-31g",
@@ -355,10 +356,15 @@ units ang
             "scf_type": "df",
         },
     }
+    if not from_v2(request.node.name):
+        at_spec.pop("program")
+        at_spec.pop("driver")
 
     mbe_spec = {
         # schema_name needed for differentiation in genopt
-        "schema_name": "qcschema_manybodyspecification",
+        "schema_name": "qcschema_many_body_specification"
+        if from_v2(request.node.name)
+        else "qcschema_manybodyspecification",
         "specification": {
             "model": {
                 "method": "hf",
@@ -384,28 +390,40 @@ units ang
         },
     }
 
-    opt_data = {
-        "initial_molecule": initial_molecule,
-        "input_specification": at_spec if (bsse_type == "none") else mbe_spec,
-        "keywords": {
-            "program": "psi4",
-            "g_convergence": "nwchem_loose",
-        },
-        "protocols": {
-            "trajectory": "initial_and_final",
-        },
-    }
-    # from qcmanybody.models.generalized_optimization import GeneralizedOptimizationInput
-    # opt_data = GeneralizedOptimizationInput(**opt_data)
+    if from_v2(request.node.name):
+        opt_data = {
+            "initial_molecule": initial_molecule,
+            "specification": {
+                "specification": at_spec if (bsse_type == "nil") else mbe_spec,
+                "keywords": {
+                    "g_convergence": "nwchem_loose",
+                },
+                "protocols": {
+                    "trajectory_results": "initial_and_final",
+                },
+            },
+        }
+    else:
+        opt_data = {
+            "initial_molecule": initial_molecule,
+            "input_specification": at_spec if (bsse_type == "nil") else mbe_spec,
+            "keywords": {
+                "program": "psi4",
+                "g_convergence": "nwchem_loose",
+            },
+            "protocols": {
+                "trajectory": "initial_and_final",
+            },
+        }
 
-    # opt_data = checkver_and_convert(opt_data, request.node.name, "pre")
+    opt_data = checkver_and_convert(opt_data, request.node.name, "pre", cast_dict_as="OptimizationInput")
     ret = qcng.compute(opt_data, optimizer, raise_error=True, return_version=retver)
-    # ret = checkver_and_convert(ret, request.node.name, "post")
+    ret = checkver_and_convert(ret, request.node.name, "post")
 
     pprint.pprint(ret.model_dump(), width=200)
 
     r_fh_hb_xptd = {
-        "none": 2.18 / constants.bohr2angstroms,
+        "nil": 2.18 / constants.bohr2angstroms,
         "nocp": 2.18 / constants.bohr2angstroms,
         "cp": 2.27 / constants.bohr2angstroms,
     }[bsse_type]
@@ -413,20 +431,122 @@ units ang
     assert (
         pytest.approx(r_fh_computed, 1.0e-2) == r_fh_hb_xptd
     ), f"hydrogen bond length computed ({r_fh_computed}) != expected ({r_fh_hb_xptd})"
+    ret_traj = ret.trajectory_results if "v2" in request.node.name else ret.trajectory
     assert (
-        len(ret.trajectory) == 2
-    ), f"trajectory protocol did not take. len(ret.trajectory)={len(ret.trajectory)} != 2 (initial_and_final)"
-    if bsse_type != "none":
+        len(ret_traj) == 2
+    ), f"trajectory protocol did not take. len(ret.trajectory)={len(ret_traj)} != 2 (initial_and_final)"
+    if bsse_type != "nil":
         xptd_nmbe = {
             ("nocp", False): 7,
             ("nocp", True): 4,
             ("cp", False): 10,
             ("cp", True): 7,
         }[(bsse_type, sio)]
-        ret_last_subres = getattr(ret.trajectory[-1], subres)
+        ret_last_subres = getattr(ret_traj[-1], subres)
         assert xptd_nmbe == len(ret_last_subres), f"mbe protocol did not take"
         assert ret_last_subres['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None, f"atomic protocol did not take"
 
 
-# TODO Add this back with genopt. test name in geomeTRIC is test_lif_bsse
-# def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywords):
+@using("qcmanybody")
+@pytest.mark.parametrize("schver", [2])  # GeneralizedOptimization retired (this was the v1 precursor)
+@pytest.mark.parametrize("bsse_type", ["mbe", "ssfc"])  # aka nocp, cp
+@pytest.mark.parametrize(
+    "qcprog,qc_keywords",
+    [
+        pytest.param("psi4", {}, marks=using("psi4")),
+        pytest.param("cfour", {}, marks=using("cfour")),
+        pytest.param("nwchem", {}, marks=using("nwchem")),
+    ],
+)
+@pytest.mark.parametrize(
+    "optimizer,opt_keywords",
+    [
+        pytest.param("optking", {}, marks=using("optking_v2")),
+        # pytest.param(
+        #     "geometric", {"convergence_set": "interfrag_tight", "maxiter": 15}, marks=using("geometric_genopt")
+        # ),
+    ],
+)
+def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywords, schver):
+    # in geomeTRIC: test_lif_bsse
+
+    lif = {
+        "symbols": ["Li", "F"],
+        "geometry": [0, 0, 0, 0, 0, 3],
+        "fragments": [[0], [1]],
+        "fragment_charges": [+1, -1],
+    }
+
+    mbe_subprop = "component_properties" if schver == 1 else "cluster_properties"
+    mbe_subptcl = "component_results" if schver == 1 else "cluster_results"
+    opt_subptcl = "trajectory" if schver == 1 else "trajectory_results"
+
+    mbe_spec = {
+        "schema_name": "qcschema_many_body_specification" if schver == 2 else "qcschema_manybodyspecification",
+        "specification": {
+            "model": {
+                "method": "hf",
+                "basis": "6-31G",
+            },
+            "driver": "energy",
+            "program": qcprog,
+            "keywords": qc_keywords,
+            "protocols": {
+                "stdout": False,
+            },
+        },
+        "keywords": {
+            "bsse_type": bsse_type,
+            "supersystem_ie_only": True,
+        },
+        "protocols": {
+            mbe_subptcl: "all",
+        },
+        "driver": "energy",
+        "program": "qcmanybody",
+    }
+
+    if schver == 2:
+        opt_data = {
+            "initial_molecule": lif,
+            "specification": {
+                "specification": at_spec if (bsse_type == "nil") else mbe_spec,
+                "keywords": {
+                    **opt_keywords,
+                },
+                "protocols": {
+                    opt_subptcl: "final",
+                },
+            },
+        }
+    else:
+        opt_data = {
+            "initial_molecule": lif,
+            "input_specification": mbe_spec,
+            "keywords": {
+                "program": "nonsense",
+                **opt_keywords,
+            },
+            "protocols": {
+                opt_subptcl: "final",
+            },
+        }
+
+    ret = qcng.compute_procedure(opt_data, optimizer, raise_error=True, return_version=schver)
+
+    # printing will show up if job fails
+    pprint.pprint(ret.dict(), width=200)
+
+    assert ret.success
+
+    ret_traj = ret.trajectory_results if schver == 2 else ret.trajectory
+    assert len(getattr(ret_traj[0], mbe_subprop)) == (5 if bsse_type == "ssfc" else 3)
+
+    assert ret.provenance.creator.lower() == optimizer
+    assert ret_traj[0].provenance.creator == "QCManyBody"
+    atres = list(getattr(ret_traj[0], mbe_subptcl).values())[0]
+    assert atres.provenance.creator.lower() == qcprog
+
+    Rlif = ret.final_molecule.measure([0, 1])
+    Rref = 3.016 if bsse_type == "ssfc" else 2.969
+    assert compare_values(Rlif, Rref, "bond length", atol=1.0e-3)

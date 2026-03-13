@@ -38,8 +38,9 @@ dependencies = [
     "pyyaml",
     "py-cpuinfo",
     "psutil",
-    "qcelemental>=0.50.0rc1,<0.70.0",
-    "pydantic >=2.12",
+    "qcelemental>=0.50.0rc3,<0.70.0",
+    "pydantic >=2.11; python_version <'3.14'",
+    "pydantic >=2.12; python_version >='3.14'",
     "pydantic-settings",
     "packaging",
 ]

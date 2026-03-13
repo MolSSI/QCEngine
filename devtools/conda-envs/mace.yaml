@@ -7,7 +7,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - qcelemental >=0.12.0
+  - conda-forge/label/qcelemental_dev::qcelemental=0.50.0rc3
   - pydantic>=2.0.0
   - pydantic-settings
 

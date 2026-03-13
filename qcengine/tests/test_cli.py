@@ -108,6 +108,7 @@ def test_run_procedure(tmp_path, schema_versions, request):
     models, retver, _ = schema_versions
 
     def check_result(stdout):
+        # print(f"STDOUT <<< {stdout} >>>")
         output = json.loads(stdout)
         output = checkver_and_convert(output, request.node.name, "post", cast_dict_as="OptimizationResult")
         assert output["provenance"]["creator"].lower() == "geometric"

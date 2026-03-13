@@ -3,9 +3,7 @@ import sys
 from io import StringIO
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Union
 
-from qcelemental.models.v1 import OptimizationResult
-from qcelemental.models.v2 import OptimizationInput
-from qcelemental.util import safe_version, which_import
+from qcelemental.util import parse_version, safe_version, which_import
 
 from .model import ProcedureHarness
 
@@ -48,27 +46,51 @@ class OptKingProcedure(ProcedureHarness):
             import optking
 
         log_stream = StringIO()
-        logname = "psi4.optking" if "psi4" in sys.modules else "optking"
+        logname = f"{optking.log_name}{optking.__name__}"
         log = logging.getLogger(logname)
         log.addHandler(logging.StreamHandler(log_stream))
         log.setLevel("INFO")
 
-        input_data_v1 = input_model.convert_v(1).dict()
+        if parse_version(self.get_version()) < parse_version("0.5"):
+            from qcelemental.models.v1 import OptimizationResult
 
-        # Set retries to two if zero while respecting local_config
-        local_config = config.dict()
-        local_config["retries"] = local_config.get("retries", 2) or 2
-        input_data_v1["input_specification"]["extras"]["_qcengine_local_config"] = local_config
+            input_data_v1 = input_model.convert_v(1).dict()
 
-        # Run the program
-        output_v1 = optking.optwrapper.optimize_qcengine(input_data_v1)
-        output_v1["stdout"] = log_stream.getvalue()
+            # Set retries to two if zero while respecting local_config
+            local_config = config.dict()
+            local_config["retries"] = local_config.get("retries", 2) or 2
+            input_data_v1["input_specification"]["extras"]["_qcengine_local_config"] = local_config
 
-        output_v1["input_specification"]["extras"].pop("_qcengine_local_config", None)
-        if output_v1["success"]:
-            output_v1 = OptimizationResult(**output_v1)
-            output = output_v1.convert_v(2, external_input_data=input_model)
+            # Run the program
+            output_v1 = optking.optwrapper.optimize_qcengine(input_data_v1)
+            output_v1["stdout"] = log_stream.getvalue()
+
+            output_v1["input_specification"]["extras"].pop("_qcengine_local_config", None)
+            if output_v1["success"]:
+                output_v1 = OptimizationResult(**output_v1)
+                output = output_v1.convert_v(2, external_input_data=input_model)
+            else:
+                output = output_v1
+
         else:
-            output = output_v1  # TODO almost certainly wrong -- need v2 conversion?
+            # optking v0.5 can run QCSchema 1<->1 and 2<->2, so update to 2
+            from qcelemental.models.v2 import OptimizationResult
+
+            input_data_v2 = input_model.model_dump()
+
+            # Set retries to two if zero while respecting local_config
+            local_config = config.model_dump()
+            local_config["retries"] = local_config.get("retries", 2) or 2
+            input_data_v2["specification"]["specification"]["extras"]["_qcengine_local_config"] = local_config
+
+            # Run the program
+            output_v2 = optking.optwrapper.optimize_qcengine(input_data_v2)
+            output_v2["stdout"] = log_stream.getvalue()
+
+            output_v2["input_data"]["specification"]["specification"]["extras"].pop("_qcengine_local_config", None)
+            if output_v2["success"]:
+                output = OptimizationResult(**output_v2)
+            else:
+                output = output_v2
 
         return output
