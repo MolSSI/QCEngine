@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcelemental.models.v2.atomic &mdash; QCEngine 0.1.dev1+g1d6d8c8df documentation</title>
+  <title>qcelemental.models.v2.atomic &mdash; QCEngine 0.1.dev1+g27a334f12 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=0c6d4f5d"></script>
+      <script src="../../../../_static/documentation_options.js?v=38b15692"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../../_static/version-switcher.js?v=313414bb"></script>
@@ -112,6 +112,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">...models</span><span class="w"> </span><span class="kn">import</span> <span class="n">QCEL_V1V2_SHIM_CODE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...util</span><span class="w"> </span><span class="kn">import</span> <span class="n">provenance_stamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.basemodels</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtendedConfigDict</span><span class="p">,</span> <span class="n">ProtoModel</span><span class="p">,</span> <span class="n">check_convertible_version</span><span class="p">,</span> <span class="n">qcschema_draft</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.basis_set</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasisSet</span>
@@ -413,6 +414,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="c1"># kwargs[&quot;encoding&quot;] = &quot;json&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_v</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">target_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;qcelemental.models.v1.AtomicResultProperties&quot;</span><span class="p">,</span> <span class="s2">&quot;qcelemental.models.v2.AtomicProperties&quot;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to instance of particular QCSchema version.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">qcelemental</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">qcel</span>
+
+        <span class="k">if</span> <span class="n">check_convertible_version</span><span class="p">(</span><span class="n">target_version</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">&quot;AtomicProperties&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;self&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="n">dself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">]:</span>
+            <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">target_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">AtomicResultProperties</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">:</span>
+                <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">_v1v2</span><span class="o">.</span><span class="n">AtomicResultProperties</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="n">target_version</span>
+
+        <span class="k">return</span> <span class="n">self_vN</span>
+
 
 <span class="k">class</span><span class="w"> </span><span class="nc">WavefunctionProperties</span><span class="p">(</span><span class="n">ProtoModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Wavefunction properties resulting from a computation.</span>
@@ -628,6 +651,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;scf_eigenvalues_a&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_eigenvalues_b&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_occupations_a&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_occupations_b&quot;</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_assert1d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
@@ -637,6 +662,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;scf_orbitals_a&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_orbitals_b&quot;</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_assert2d_nao_x</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span>
+
         <span class="n">bas</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Do not raise multiple errors</span>
@@ -662,6 +690,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_assert2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span>
+
         <span class="n">bas</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;basis&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="c1"># Do not raise multiple errors</span>
@@ -688,6 +719,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_assert_exists</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span>
+
         <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Return quantity </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> does not exist in the values.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
@@ -702,12 +736,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="k">return</span> <span class="bp">self</span>
 
         <span class="n">dself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">12</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">]:</span>
             <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;basis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">convert_v</span><span class="p">(</span><span class="n">target_version</span><span class="p">)</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">target_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">WavefunctionProperties</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="o">-</span><span class="mi">12</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">:</span>
                 <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">_v1v2</span><span class="o">.</span><span class="n">WavefunctionProperties</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="n">target_version</span>
@@ -776,6 +810,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="p">)</span>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ExtendedConfigDict</span><span class="p">(</span><span class="n">force_skip_defaults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_v</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">target_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;qcelemental.models.v1.AtomicResultProtocols&quot;</span><span class="p">,</span> <span class="s2">&quot;qcelemental.models.v2.AtomicProtocols&quot;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to instance of particular QCSchema version.&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">qcelemental</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">qcel</span>
+
+        <span class="k">if</span> <span class="n">check_convertible_version</span><span class="p">(</span><span class="n">target_version</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">&quot;AtomicProtocols&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;self&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="n">dself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">]:</span>
+            <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">target_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">AtomicResultProtocols</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">:</span>
+                <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">_v1v2</span><span class="o">.</span><span class="n">AtomicResultProtocols</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="n">target_version</span>
+
+        <span class="k">return</span> <span class="n">self_vN</span>
 
 
 <span class="c1"># ====  Inputs (Kw/Spec/In)  ====================================================</span>
@@ -880,7 +936,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="k">return</span> <span class="bp">self</span>
 
         <span class="n">dself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">12</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">]:</span>
             <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema_name&quot;</span><span class="p">)</span>
             <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema_version&quot;</span><span class="p">)</span>
 
@@ -893,7 +949,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;driver&quot;</span><span class="p">)</span>
             <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
             <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;keywords&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;keywords&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;protocols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;protocols&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;protocols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">specification</span><span class="o">.</span><span class="n">protocols</span><span class="o">.</span><span class="n">convert_v</span><span class="p">(</span><span class="n">target_version</span><span class="p">)</span>
+            <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;protocols&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
             <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;extras&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="p">{})</span>
             <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;program&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># TODO store?</span>
             <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -902,7 +961,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             <span class="k">if</span> <span class="n">target_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">AtomicInput</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="o">-</span><span class="mi">12</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">:</span>
                 <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">_v1v2</span><span class="o">.</span><span class="n">AtomicInput</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="n">target_version</span>
@@ -1097,7 +1156,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="k">return</span> <span class="bp">self</span>
 
         <span class="n">dself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">12</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">]:</span>
 
             <span class="c1"># for input_data, work from model, not dict, to use convert_v</span>
             <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;input_data&quot;</span><span class="p">)</span>
@@ -1110,12 +1169,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;extras&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">input_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="p">{}),</span> <span class="o">**</span><span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="p">{})}</span>  <span class="c1"># merge</span>
             <span class="n">dself</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">input_data</span><span class="p">,</span> <span class="o">**</span><span class="n">dself</span><span class="p">}</span>
 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">convert_v</span><span class="p">(</span><span class="n">target_version</span><span class="p">)</span>
+
             <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema_name&quot;</span><span class="p">)</span>  <span class="c1"># changed in v1</span>
             <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema_version&quot;</span><span class="p">)</span>  <span class="c1"># changed in v1</span>
 
             <span class="k">if</span> <span class="n">target_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">AtomicResult</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="o">-</span><span class="mi">12</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">:</span>
                 <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">_v1v2</span><span class="o">.</span><span class="n">AtomicResult</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="n">target_version</span>
