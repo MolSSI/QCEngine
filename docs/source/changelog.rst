@@ -1,8 +1,12 @@
 Changelog
 =========
 
+.. .. _`sec:clxy0`:
+..
 .. vX.Y.0 / 2026-MM-DD (Unreleased)
 .. --------------------
+..
+.. :docs:`vx.y.0` for current. :docs:`v0.34.1` for QCSchema v1.
 ..
 .. Breaking Changes
 .. ++++++++++++++++
@@ -28,9 +32,45 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
-`Docs <https://MolSSI.github.io/QCEngine/next/>`_
-`Docs for QCSchema v1<https://MolSSI.github.io/QCEngine/v0.34.1/>`_
+.. _`sec:cl0500rc2`:
+
+v0.50.0rc2 / 2026-03-13 (Prerelease)
+------------------------------------
+
+:docs:`v0.50.0rc2` for current. :docs:`v0.34.1` for QCSchema v1.
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
 - (:pr:`493`) Docs - Serve multiple versions
+- (:pr:`498`) QCManyBody, OptKing - MBE optimization (e.g., counterpoise-corrected
+  geometry opt) is working and tested again. Valid *only* for v2. The old
+  `GeneralizedOptimization` with v1 is retired.
+
+Enhancements
+++++++++++++
+- (:pr:`495`) DFTD4, DFTD3 - New SAPT (0, PBE0, B3LYP) D4 and D3 parameters for
+  intermolecular (good) and supermolecular (bad) forms.
+- (:pr:`498`) Deps - Require QCElemental >= v0.50.0rc3. Note that
+  `conda install qcengine -c conda-forge -c conda-forge/label/qcengine_dev -c conda-forge/label/qcelemental_dev`
+  is the way to install this at the moment.
+- (:pr:`498`) OptKing - Adapt harness so that for OptKing >=0.5.0, it runs
+  natively in QCSchema v2.
+- (:pr:`498`) QCManyBody - Allow QCManyBody harness to run in QCSchema v2 mode for >=0.6.0 .
+
+Bug Fixes
++++++++++
+- (:pr:`392`) More precise Pydantic version constraints: v2.11, unless py314+
+- (:pr:`498`) OptKing - Grab logger from optking rather than using imitation
+  logic that is vulnerable to stray ``import psi4``. This can fix
+  ``OptimizationResult.stdout`` being unexpectedly empty.
+
+Misc.
++++++
+- (:pr:`494`) CI - Fix lanes for setuptools removing pkg_resources and Libint2 update.
+
 
 v0.50.0rc1 / 2026-01-31 (aka "next" aka "QCSchema v2 available") (Prerelease)
 -----------------------------------------------------------------------------

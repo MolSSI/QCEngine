@@ -326,15 +326,18 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
 def test_geometric_rdkit_error(input_data, schema_versions, request):
     models, retver, _ = schema_versions
 
-    input_data["initial_molecule"] = models.Molecule(**qcng.get_molecule("water", return_dict=True)).copy(
-        exclude={"connectivity_"}
-    )
     if from_v2(request.node.name):
         input_data["specification"]["specification"]["model"] = {"method": "UFF", "basis": ""}
         input_data["specification"]["specification"]["program"] = "rdkit"
+        im = qcng.get_molecule("water", return_dict=True)
+        im.pop("connectivity")
+        input_data["initial_molecule"] = models.Molecule(**im).model_copy()
     else:
         input_data["input_specification"]["model"] = {"method": "UFF", "basis": ""}
         input_data["keywords"]["program"] = "rdkit"
+        input_data["initial_molecule"] = im = models.Molecule(**qcng.get_molecule("water", return_dict=True)).copy(
+            exclude={"connectivity_"}
+        )
 
     input_data = models.OptimizationInput(**input_data)
 
@@ -344,6 +347,7 @@ def test_geometric_rdkit_error(input_data, schema_versions, request):
 
     assert ret.success is False
     assert isinstance(ret.error.error_message, str)
+    assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
 
 
 @using("rdkit")

@@ -141,11 +141,12 @@ jobs:
           #  runs-on: windows-latest
           #  pytest: ""
 
-          - conda-env: mace
-            python-version: "3.10"
-            label: MACE
-            runs-on: ubuntu-latest
-            pytest: ""
+          # DOWNLOAD problem Mar 2026
+          #- conda-env: mace
+          #  python-version: "3.10"
+          #  label: MACE
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
 
           - conda-env: aimnet2
             python-version: 3.11
@@ -200,18 +201,16 @@ jobs:
 #Usage:  docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
 
     - name: Special Config - QCElemental Dep
-      #if: false
+      if: false
       run: |
         # conda remove qcelemental --force
         # python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
-        conda install "conda-forge/label/qcelemental_dev::qcelemental=0.50.0rc1"
+        conda install "conda-forge/label/qcelemental_dev::qcelemental=0.50.0rc3"
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
-      if: (startsWith(matrix.cfg.label, 'Psi4')) || (matrix.cfg.label == 'ADCC') || (matrix.cfg.label == 'optimization-dispersion')
-      run: |
-        conda remove qcengine --force
+      run: conda remove qcengine --force || true
 
     - name: Special Config - Copy in file (W)
       if: false  # "(runner.os == 'Windows')"
@@ -235,7 +234,7 @@ jobs:
       if: "(startsWith(matrix.cfg.label, 'QCSk-next'))"
       run: |
         conda install pydantic=2 -c conda-forge
-        conda remove qcelemental --force
+        conda remove qcelemental --force || true
         python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
 
     - name: Special Config - Forced Interface Upgrade
@@ -255,6 +254,7 @@ jobs:
         python -c "import qcelemental as q;print(q.__file__, q.__version__)"
         python -c "import qcengine as q;print(q.__file__, q.__version__)"
         git describe
+        git log --oneline
 
     - name: Special Config - Windows Psi4
       if: "(((matrix.cfg.label == 'optimization-dispersion') || (matrix.cfg.label == 'Psi4-1.8')) && (matrix.cfg.runs-on == 'windows-latest'))"

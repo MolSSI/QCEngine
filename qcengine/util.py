@@ -28,7 +28,7 @@ from .exceptions import InputError, QCEngineException
 __all__ = ["compute_wrapper", "model_wrapper", "handle_output_metadata", "create_mpi_invocation", "execute"]
 
 
-QCEL_V1V2_SHIM_CODE = -12
+from qcelemental.models import QCEL_V1V2_SHIM_CODE
 
 
 def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]:
