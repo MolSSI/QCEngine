@@ -70,7 +70,7 @@ class OptKingProcedure(ProcedureHarness):
                 output_v1 = OptimizationResult(**output_v1)
                 output = output_v1.convert_v(2, external_input_data=input_model)
             else:
-                output = output_v1.convert_v(2)  # TODO almost certainly wrong -- need v2 conversion?
+                output = output_v1
 
         else:
             # optking v0.5 can run QCSchema 1<->1 and 2<->2, so update to 2

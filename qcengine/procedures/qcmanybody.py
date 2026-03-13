@@ -57,7 +57,7 @@ class QCManyBodyProcedure(ProcedureHarness):
 
         if isinstance(data, v1_model):
             mdl = model_wrapper(data, v1_model)
-        elif isinstance(data, v2_model):
+        elif v2_model is not None and isinstance(data, v2_model):
             mdl = model_wrapper(data, v2_model)
         elif isinstance(data, dict):
             # remember these are user-provided dictionaries, so they'll have the mandatory fields,
@@ -65,6 +65,11 @@ class QCManyBodyProcedure(ProcedureHarness):
             # so long as versions distinguishable by a *required* field, id by dict is reliable.
 
             if data.get("specification", False) or data.get("schema_version") == 2:
+                if v2_model is None:
+                    raise InputError(
+                        "v2 ManyBody inputs require QCManyBody >= 0.6a0 (first version with v2 schemas); "
+                        "please upgrade your qcmanybody installation."
+                    )
                 mdl = model_wrapper(data, v2_model)
             else:
                 mdl = model_wrapper(data, v1_model)

@@ -141,11 +141,12 @@ jobs:
           #  runs-on: windows-latest
           #  pytest: ""
 
-          - conda-env: mace
-            python-version: "3.10"
-            label: MACE
-            runs-on: ubuntu-latest
-            pytest: ""
+          # DOWNLOAD problem Mar 2026
+          #- conda-env: mace
+          #  python-version: "3.10"
+          #  label: MACE
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
 
           - conda-env: aimnet2
             python-version: 3.11
