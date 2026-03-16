@@ -12,15 +12,7 @@ import qcelemental as qcel
 from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
-from qcengine.testing import (
-    checkver_and_convert,
-    from_v2,
-    has_program,
-    schema_versions,
-    schema_versions2,
-    using,
-    uusing,
-)
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, schema_versions2, using, uusing
 
 qcsk_bs = {"name": "custom_basis", "center_data": center_data, "atom_map": ["bs_sto3g_h", "bs_sto3g_h"]}
 

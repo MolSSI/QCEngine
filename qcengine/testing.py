@@ -3,7 +3,7 @@ Utilities for the testing suite.
 """
 
 import sys
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import pytest
@@ -261,7 +261,7 @@ def uusing(program: str):
     return _using_cache[program][0]
 
 
-def using(program: str) -> List:
+def using(program: str) -> Tuple[pytest.MarkDecorator, ...]:
     """Apply 3 marks: skipif program not detected, label "addon", and label program.
     This is the inline form for parameterizations: `marks=using("nwchem")`.
     In combo, do `marks=[*using("nwchem"), pytest.mark.quick]`

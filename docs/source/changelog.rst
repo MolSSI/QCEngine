@@ -44,7 +44,7 @@ Breaking Changes
 
 New Features
 ++++++++++++
-- (:pr:``) Testing - Program names are now pytest markers, so `pytest -m openmm`
+- (:pr:`499`) Testing - Program names are now pytest markers, so `pytest -m openmm`
   thoroughly collects all tests involving that program. Note that the nearly
   retired harnesses for Grimme programs have markers "classic-dftd3" and "classic-gcp".
 
