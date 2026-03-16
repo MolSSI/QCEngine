@@ -7,7 +7,7 @@ from qcelemental.testing import compare, compare_values
 import qcengine as qcng
 from qcengine.testing import checkver_and_convert, from_v2
 from qcengine.testing import schema_versions as schema_versionsALL5
-from qcengine.testing import schema_versions0, using
+from qcengine.testing import schema_versions0, using, uusing
 
 try:
     import qcmanybody as qcmb
@@ -35,7 +35,7 @@ def he_tetramer(schema_versions, request):
     )
 
 
-@using("qcmanybody")
+@uusing("qcmanybody")
 @pytest.mark.parametrize(
     "program,basis,keywords",
     [
@@ -164,7 +164,7 @@ def test_nbody_he4_single(
         assert an_atres.stdout is None, f"[l] atomic protocol did not take"
 
 
-@using("qcmanybody")
+@uusing("qcmanybody")
 @pytest.mark.parametrize(
     "qcprog",
     [
@@ -247,7 +247,7 @@ def test_bsse_ene_tu6_cp_ne2(schema_versions, request, qcprog):
         assert compare(2, ret.properties.calcinfo_natom, label="nat")
 
 
-@using("qcmanybody")
+@uusing("qcmanybody")
 def test_mbe_error(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -295,8 +295,8 @@ def test_mbe_error(schema_versions, request):
     assert "Program cms is not registered to QCEngine" in ret.error.error_message
 
 
-@using("psi4")
-@using("qcmanybody")
+@uusing("psi4")
+@uusing("qcmanybody")
 @pytest.mark.parametrize(
     "optimizer,bsse_type,sio",
     [
@@ -447,7 +447,7 @@ units ang
         assert ret_last_subres['["(auto)", [1, 2, 3], [1, 2, 3]]'].stdout is None, f"atomic protocol did not take"
 
 
-@using("qcmanybody")
+@uusing("qcmanybody")
 @pytest.mark.parametrize("schver", [2])  # GeneralizedOptimization retired (this was the v1 precursor)
 @pytest.mark.parametrize("bsse_type", ["mbe", "ssfc"])  # aka nocp, cp
 @pytest.mark.parametrize(

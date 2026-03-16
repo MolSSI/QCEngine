@@ -7,11 +7,11 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import using
+from qcengine.testing import uusing
 
 
-@using("psi4")
-@using("mdi")
+@uusing("psi4")
+@uusing("mdi")
 def test_mdi_water():
     json_data = {
         "molecule": qcng.get_molecule("water"),

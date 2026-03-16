@@ -32,6 +32,32 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+.. _`sec:cl0500rc3`:
+
+v0.50.0rc3 / 2026-MM-DD (Prerelease) (Unreleased)
+-------------------------------------------------
+
+:docs:`v0.50.0rc3` for current. :docs:`v0.34.1` for QCSchema v1.
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+- (:pr:``) Testing - Program names are now pytest markers, so `pytest -m openmm`
+  thoroughly collects all tests involving that program. Note that the nearly
+  retired harnesses for Grimme programs have markers "classic-dftd3" and "classic-gcp".
+
+Enhancements
+++++++++++++
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+
+
 .. _`sec:cl0500rc2`:
 
 v0.50.0rc2 / 2026-03-13 (Prerelease)

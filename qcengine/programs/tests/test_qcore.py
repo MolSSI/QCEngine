@@ -4,10 +4,10 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive, compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, schema_versions, uusing
 
 
-@using("qcore")
+@uusing("qcore")
 @pytest.mark.parametrize(
     "method, energy, gradient_norm",
     [
@@ -35,7 +35,7 @@ def test_qcore_methods(method, energy, gradient_norm, schema_versions, request):
     assert atomic_result.wavefunction is None
 
 
-@using("qcore")
+@uusing("qcore")
 def test_qcore_wavefunction(schema_versions, request):
     models, retver, _ = schema_versions
 

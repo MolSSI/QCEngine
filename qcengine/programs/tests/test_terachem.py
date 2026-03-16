@@ -3,7 +3,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, using
+from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, uusing
 
 # Prep globals
 terachem_info = qcengine_records("terachem")
@@ -39,7 +39,7 @@ def test_terachem_input_formatter(test_case):
     assert input_file.keys() >= {"commands", "infiles"}
 
 
-@using("terachem")
+@uusing("terachem")
 @pytest.mark.parametrize("test_case", terachem_info.list_test_cases())
 def test_terachem_executor(test_case, schema_versions, request):
     models, retver, _ = schema_versions

@@ -5,7 +5,7 @@ from qcelemental.testing import compare_values
 
 import qcengine as qcng
 from qcengine.programs.turbomole.harvester import parse_hessian
-from qcengine.testing import checkver_and_convert, schema_versions, using
+from qcengine.testing import checkver_and_convert, schema_versions, using, uusing
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def h2o_ricc2_def2svp_data():
             "hf",
             {"scf_conv": 4, "scf_iters": 1},
             -75.95536954370,
-            marks=[using("turbomole"), pytest.mark.xfail(raises=AssertionError, strict=True)],
+            marks=[*using("turbomole"), pytest.mark.xfail(raises=AssertionError, strict=True)],
         ),
     ],
 )
@@ -94,7 +94,7 @@ def test_turbomole_gradient(method, keywords, ref_norm, h2o_data, schema_version
     assert compare_values(ref_norm, grad_norm)
 
 
-@using("turbomole")
+@uusing("turbomole")
 def test_turbomole_ri_dsp(h2o_data, schema_versions, request):
     models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
@@ -129,7 +129,7 @@ def assert_hessian(H, ref_eigvals, ref_size):
     assert H.shape == (ref_size, ref_size)
 
 
-@using("turbomole")
+@uusing("turbomole")
 @pytest.mark.parametrize(
     "method, keywords, ref_eigvals",
     [
@@ -165,7 +165,7 @@ def test_turbomole_hessian(method, keywords, ref_eigvals, h2o_data, schema_versi
     assert_hessian(H, ref_eigvals, size)
 
 
-@using("turbomole")
+@uusing("turbomole")
 @pytest.mark.parametrize(
     "method, keywords, ref_eigvals",
     [
