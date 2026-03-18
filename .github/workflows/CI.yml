@@ -286,12 +286,12 @@ jobs:
     - name: PyTest
       run: |
         # export MKL_CBWR=AVX
-        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --durations=20 --durations-min=40 --strict-markers --color=yes --cov-report=xml qcengine/
 
     - name: PyTest - Task_Config
       run: |
         rm -f qcengine.yaml
-        pytest -rws -v -k "test_config" --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v -k "test_config" --cov=qcengine --strict-markers --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v4

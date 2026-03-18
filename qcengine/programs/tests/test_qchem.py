@@ -4,7 +4,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive, compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, using
+from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, uusing
 
 qchem_info = qcengine_records("qchem")
 qchem_logonly_info = qcengine_records("qchem_logonly")
@@ -77,7 +77,7 @@ def test_qchem_input_formatter_template(test_case):
     assert input_file.keys() >= {"commands", "infiles"}
 
 
-@using("qchem")
+@uusing("qchem")
 @pytest.mark.parametrize("test_case", qchem_info.list_test_cases())
 def test_qchem_executor(test_case, schema_versions, request):
     models, retver, _ = schema_versions
@@ -100,7 +100,7 @@ def test_qchem_executor(test_case, schema_versions, request):
     assert compare_recursive(output_ref.return_result, result.return_result, atol=atol)
 
 
-@using("qchem")
+@uusing("qchem")
 def test_qchem_orientation(schema_versions, request):
     models, retver, _ = schema_versions
 

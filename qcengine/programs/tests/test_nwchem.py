@@ -5,7 +5,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, uusing
 
 # Molecule where autoz fails
 _auto_z_problem = xyz = """C                    15.204188380000    -3.519180270000   -10.798726560000
@@ -60,7 +60,7 @@ def nh2_data():
 """
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_b3lyp(nh2_data, schema_versions, request):
     models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
@@ -96,7 +96,7 @@ def test_b3lyp(nh2_data, schema_versions, request):
     assert res["properties"]["calcinfo_nbasis"] == 13
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_hess(nh2_data, schema_versions, request):
     models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
@@ -128,7 +128,7 @@ def test_hess(nh2_data, schema_versions, request):
     assert np.isclose(np.linalg.det(res.return_result), np.linalg.det(res_shifted.return_result))
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_gradient(nh2_data, schema_versions, request):
     models, retver, _ = schema_versions
     nh2 = models.Molecule.from_data(nh2_data)
@@ -193,7 +193,7 @@ H 0 1 0
     """
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_dipole(h20_data, schema_versions, request):
     models, retver, _ = schema_versions
     h20 = models.Molecule.from_data(h20_data)
@@ -256,7 +256,7 @@ H 0 1 0
     """
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_homo_lumo(h20v2_data, schema_versions, request):
     models, retver, _ = schema_versions
     h20v2 = models.Molecule.from_data(h20v2_data)
@@ -308,7 +308,7 @@ def test_homo_lumo(h20v2_data, schema_versions, request):
     assert compare_values(0.08207131, float(res["extras"]["qcvars"]["LUMO"][0]), atol=1e-5)
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_geometry_bug(schema_versions, request):
     """Make sure that the harvester does not crash if NWChem's autosym moves atoms too far"""
     models, retver, _ = schema_versions
@@ -336,7 +336,7 @@ H       0.44142019      -0.33354425      -0.77152059"""
     atres = checkver_and_convert(atres, request.node.name, "post")
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_autoz_error(schema_versions, request):
     """Test ability to turn off autoz"""
     models, retver, _ = schema_versions
@@ -392,7 +392,7 @@ def test_autoz_error(schema_versions, request):
     assert "Error when generating redundant atomic coordinates" not in result.error.error_message
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_autoz_error_correction(schema_versions, request):
     """See if error correction for autoz works"""
     models, retver, _ = schema_versions
@@ -437,7 +437,7 @@ def test_autoz_error_correction(schema_versions, request):
         ["ccsd", "ccsd__maxiter", 4, False],
     ],
 )
-@using("nwchem")
+@uusing("nwchem")
 def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema_versions, request):
     models, retver, _ = schema_versions
     h20v2 = models.Molecule.from_data(h20v2_data)
@@ -476,7 +476,7 @@ def test_conv_threshold(h20v2_data, method, keyword, init_iters, use_tce, schema
     assert result.extras["observed_errors"]["convergence_failed"]["keyword_updates"] == {keyword: init_iters * 4}
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_restart(nh2_data, tmpdir, schema_versions, request):
     # Create a molecule that takes 5-8 steps for NWChem to relax it,
     #  but only run the relaxation for 4 steps

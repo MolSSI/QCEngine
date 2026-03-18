@@ -3,7 +3,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, using
+from qcengine.testing import checkver_and_convert, qcengine_records, schema_versions, uusing
 
 molpro_info = qcengine_records("molpro")
 
@@ -46,7 +46,7 @@ def test_molpro_input_formatter(test_case):
     assert input_file.keys() >= {"commands", "infiles"}
 
 
-@using("molpro")
+@uusing("molpro")
 @pytest.mark.parametrize("test_case", molpro_info.list_test_cases())
 def test_molpro_executor(test_case, schema_versions, request):
     models, retver, _ = schema_versions

@@ -10,10 +10,10 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, uusing
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_b97m_m01(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -42,7 +42,7 @@ def test_dftd3_task_b97m_m01(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 @pytest.mark.parametrize(
     "inp",
     [
@@ -87,7 +87,7 @@ def test_dftd3_task_pbe_m02(inp, schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_tpss_m02(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -153,7 +153,7 @@ def test_dftd3_task_tpss_m02(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_r2scan_m03(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -206,7 +206,7 @@ def test_dftd3_task_r2scan_m03(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_unknown_method(schema_versions, request):
     models, retver, models_out = schema_versions
 
@@ -241,7 +241,7 @@ def test_dftd3_task_unknown_method(schema_versions, request):
     assert atomic_result.error == error
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_cold_fusion(schema_versions, request):
     models, retver, models_out = schema_versions
 
