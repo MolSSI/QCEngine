@@ -535,7 +535,7 @@ def test_bsse_opt_lif_dimer(optimizer, opt_keywords, bsse_type, qcprog, qc_keywo
     ret = qcng.compute_procedure(opt_data, optimizer, raise_error=True, return_version=schver)
 
     # printing will show up if job fails
-    pprint.pprint(ret.dict(), width=200)
+    pprint.pprint(ret.model_dump(), width=200)
 
     assert ret.success
 

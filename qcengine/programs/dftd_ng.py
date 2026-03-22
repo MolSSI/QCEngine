@@ -104,20 +104,36 @@ class DFTD4Harness(ProgramHarness):
             level_hint = "d4"
             input_data["specification"]["keywords"]["level_hint"] = level_hint
 
-        # dftd4 speaks qcsk.v1
-        input_model_v1 = qcelemental.models.v2.AtomicInput(**input_data).convert_v(1)
+        if parse_version(self.get_version()) < parse_version("4.1.0"):
+            # dftd4 speaks qcsk.v1
+            input_model_v1 = qcelemental.models.v2.AtomicInput(**input_data).convert_v(1)
 
-        # Run the Harness
-        output_v1 = run_qcschema(input_model_v1)
+            # Run the Harness
+            output_v1 = run_qcschema(input_model_v1)
 
-        # d4 qcschema interface stores error in Result model
-        if not output_v1.success:
-            return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
+            # d4 qcschema interface stores error in Result model
+            if not output_v1.success:
+                return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
 
-        output = output_v1.convert_v(2, external_input_data=input_model)
+            output = output_v1.convert_v(2, external_input_data=input_model)
 
-        if "info" in output.extras:
-            qcvkey = output.extras["info"]["fctldash"].upper()
+        else:
+            # dftd4 >??? speaks qcsk.v1 or qcsk.v2
+            input_model_v2 = qcelemental.models.v2.AtomicInput(**input_data)
+
+            # Run the Harness
+            output_v2 = run_qcschema(input_model_v2)
+
+            # d4 qcschema interface stores error in Result model
+            # TODO
+            if not output_v2.success:
+                # return FailedOperation(input_data=input_data, error=output_v2.error.model_dump())
+                return output_v2
+
+            output = output_v2
+
+        if "info" in output.input_data.specification.extras:
+            qcvkey = output.input_data.specification.extras["info"]["fctldash"].upper()
 
         calcinfo = {}
         energy = output.properties.return_energy
@@ -279,20 +295,36 @@ class SDFTD3Harness(ProgramHarness):
                     input_data["specification"]["keywords"]["params_tweaks"] = {**planinfo["dashparams"], "s9": 0.0}
                 input_data["specification"]["keywords"]["level_hint"] = level_hint
 
-        # sdftd3 speaks qcsk.v1
-        input_model_v1 = qcelemental.models.v2.AtomicInput(**input_data).convert_v(1)
+        if parse_version(self.get_version()) < parse_version("1.3.0"):
+            # sdftd3 speaks qcsk.v1
+            input_model_v1 = qcelemental.models.v2.AtomicInput(**input_data).convert_v(1)
 
-        # Run the Harness
-        output_v1 = run_qcschema(input_model_v1)
+            # Run the Harness
+            output_v1 = run_qcschema(input_model_v1)
 
-        # d3 qcschema interface stores error in Result model
-        if not output_v1.success:
-            return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
+            # d3 qcschema interface stores error in Result model
+            if not output_v1.success:
+                return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
 
-        output = output_v1.convert_v(2, external_input_data=input_model)
+            output = output_v1.convert_v(2, external_input_data=input_model)
 
-        if "info" in output.extras:
-            qcvkey = output.extras["info"]["fctldash"].upper()
+        else:
+            # sdftd3 >1.3.0??? speaks qcsk.v1 or qcsk.v2
+            input_model_v2 = qcelemental.models.v2.AtomicInput(**input_data)
+
+            # Run the Harness
+            output_v2 = run_qcschema(input_model_v2)
+
+            # d3 qcschema interface stores error in Result model
+            # TODO
+            if not output_v2.success:
+                # return FailedOperation(input_data=input_data, error=output_v2.error.model_dump())
+                return output_v2
+
+            output = output_v2
+
+        if "info" in output.input_data.specification.extras:
+            qcvkey = output.input_data.specification.extras["info"]["fctldash"].upper()
 
         calcinfo = {}
         energy = output.properties.return_energy

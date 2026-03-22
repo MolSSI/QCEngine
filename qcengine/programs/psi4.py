@@ -172,7 +172,7 @@ class Psi4Harness(ProgramHarness):
             if pversion < parse_version("1.4a2.dev160"):
 
                 # Setup the job
-                input_data = input_model.model_dump(encoding="json")
+                input_data = input_model.model_dump(mode="json")
                 input_data["nthreads"] = config.ncores
                 input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
                 input_data["success"] = False

@@ -198,7 +198,7 @@ class GCPHarness(ProgramHarness):
             "outfiles": ["gcp_gradient"],
             "scratch_messy": config.scratch_messy,
             "scratch_directory": config.scratch_directory,
-            "input_result": input_model.copy(deep=True),
+            "input_result": input_model.model_copy(deep=True),
             "blocking_files": [os.path.join(pathlib.Path.home(), ".gcppar." + socket.gethostname())],
         }
 
@@ -260,7 +260,7 @@ class GCPHarness(ProgramHarness):
         calcinfo = {k.upper(): str(v) if isinstance(v, Decimal) else v for k, v in calcinfo.items()}
 
         retres = calcinfo[f"CURRENT {input_model.specification.driver.upper()}"]
-        if isinstance(retres, Decimal):
+        if isinstance(retres, (str, Decimal)):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()

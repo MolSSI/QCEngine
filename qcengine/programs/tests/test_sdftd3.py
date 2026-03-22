@@ -5,6 +5,8 @@ Most of the tests use mindless molecules for the diversity of element species
 to test as much different interactions as possible.
 """
 
+import pprint
+
 import numpy as np
 import pytest
 import qcelemental as qcel
@@ -288,6 +290,6 @@ def test_dftd3_task_cold_fusion(schema_versions, request):
     atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
-    print(atomic_result.error)
+    pprint.pprint(atomic_result.error.model_dump())
     assert not atomic_result.success
     assert atomic_result.error == error
