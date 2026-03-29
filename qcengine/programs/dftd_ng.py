@@ -118,7 +118,7 @@ class DFTD4Harness(ProgramHarness):
             output = output_v1.convert_v(2, external_input_data=input_model)
 
         else:
-            # dftd4 >??? speaks qcsk.v1 or qcsk.v2
+            # dftd4 >4.1 speaks qcsk.v1 or qcsk.v2
             input_model_v2 = qcelemental.models.v2.AtomicInput(**input_data)
 
             # Run the Harness

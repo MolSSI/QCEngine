@@ -50,9 +50,15 @@ New Features
 
 Enhancements
 ++++++++++++
+- (:pr:`499`) QCElemental - Update encoding=json to mode=json in serialization
+  calls to match QCElemental v0.50.0rc4 changes.
+- (:pr:`499`) DFTD3, DFTD4 - Allow running in QCSchema v2 mode for WIP upstream versions.
+- (:pr:`499`) GCP, MP2D - Update model_copy and casting of energy for qcel rc3 and Pydantic v2.
 
 Bug Fixes
 +++++++++
+- (:pr:`499`) Psi4 - Fix Psi4 detected but not registered error arising from parsing
+  of version and paths being obscured by QCSchema/Pydantic Warnings.
 
 Misc.
 +++++
