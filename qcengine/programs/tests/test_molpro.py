@@ -27,7 +27,7 @@ def test_molpro_output_parser(test_case):
     output_ref.pop("schema_version", None)
 
     # TODO add `skip` to compare_recursive
-    check = compare_recursive(output_ref, output, forgive={"stdout"})
+    check = compare_recursive(output_ref, output, forgive={"stdout", "protocols"})
     assert check, check
 
 

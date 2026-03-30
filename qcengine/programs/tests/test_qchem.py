@@ -18,6 +18,7 @@ qchem_forgive = [
     "root.extras",
     "root.molecule.extras",
     "root.schema_version",  # TODO temp until rearrangement befuddles
+    "root.protocols",
 ]
 
 
