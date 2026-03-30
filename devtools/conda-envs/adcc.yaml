@@ -1,6 +1,7 @@
 name: test
 channels:
   #- adcc
+  - conda-forge/label/qcelemental_dev
   - conda-forge
   - nodefaults
 dependencies:
@@ -11,7 +12,7 @@ dependencies:
   - python
   - py-cpuinfo
   - psutil
-  - conda-forge/label/qcelemental_dev::qcelemental
+  - qcelemental>=0.50.0rc4
   - pydantic=2
   - pydantic-settings
   - msgpack-python

@@ -133,6 +133,7 @@ class DFTD4Harness(ProgramHarness):
             output = output_v2
 
         if "info" in output.input_data.specification.extras:
+            # formerly output.extras["info"]
             qcvkey = output.input_data.specification.extras["info"]["fctldash"].upper()
 
         calcinfo = {}
@@ -324,6 +325,7 @@ class SDFTD3Harness(ProgramHarness):
             output = output_v2
 
         if "info" in output.input_data.specification.extras:
+            # formerly output.extras["info"]
             qcvkey = output.input_data.specification.extras["info"]["fctldash"].upper()
 
         calcinfo = {}
