@@ -1,6 +1,7 @@
 name: test
 channels:
   #- adcc
+  - conda-forge/label/qcelemental_dev
   - conda-forge
   - nodefaults
 dependencies:
