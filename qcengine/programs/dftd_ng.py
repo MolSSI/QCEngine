@@ -115,7 +115,7 @@ class DFTD4Harness(ProgramHarness):
             if not output_v1.success:
                 return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
 
-            output = output_v1.convert_v(2, external_input_data=input_model)
+            output = output_v1.convert_v(2, external_input_data=input_data)
 
         else:
             # dftd4 >4.1 speaks qcsk.v1 or qcsk.v2
@@ -306,7 +306,7 @@ class SDFTD3Harness(ProgramHarness):
             if not output_v1.success:
                 return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
 
-            output = output_v1.convert_v(2, external_input_data=input_model)
+            output = output_v1.convert_v(2, external_input_data=input_data)
 
         else:
             # sdftd3 >1.3.0??? speaks qcsk.v1 or qcsk.v2
