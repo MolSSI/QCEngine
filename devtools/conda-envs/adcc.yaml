@@ -1,18 +1,18 @@
 name: test
 channels:
   #- adcc
-  - conda-forge/label/qcelemental_dev
   - conda-forge
   - nodefaults
 dependencies:
   - adcc>=0.15.7
   - psi4>=1.8.1
+  - libint=2.9.0=*_4
 
   # Core
   - python
   - py-cpuinfo
   - psutil
-  - qcelemental>=0.50.0rc4
+  - conda-forge/label/qcelemental_dev::qcelemental>=0.50.0rc4
   - qcmanybody>=0.7.0
   - pydantic=2
   - pydantic-settings
