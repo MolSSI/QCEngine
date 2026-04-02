@@ -142,11 +142,11 @@ jobs:
           #  pytest: ""
 
           # DOWNLOAD problem Mar 2026
-          #- conda-env: mace
-          #  python-version: "3.10"
-          #  label: MACE
-          #  runs-on: ubuntu-latest
-          #  pytest: ""
+          - conda-env: mace
+            python-version: "3.13"
+            label: MACE
+            runs-on: ubuntu-latest
+            pytest: ""
 
           - conda-env: aimnet2
             python-version: 3.11
@@ -205,7 +205,7 @@ jobs:
       run: |
         # conda remove qcelemental --force
         # python -m pip install 'git+https://github.com/MolSSI/QCElemental.git@next2026' --no-deps
-        conda install "conda-forge/label/qcelemental_dev::qcelemental=0.50.0rc3"
+        conda install "conda-forge/label/qcelemental_dev::qcelemental=0.50.0rc4"
 
       # note: conda remove --force, not mamba remove --force b/c https://github.com/mamba-org/mamba/issues/412
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
@@ -254,7 +254,7 @@ jobs:
         python -c "import qcelemental as q;print(q.__file__, q.__version__)"
         python -c "import qcengine as q;print(q.__file__, q.__version__)"
         git describe
-        git log --oneline
+        # git log --oneline
 
     - name: Special Config - Windows Psi4
       if: "(((matrix.cfg.label == 'optimization-dispersion') || (matrix.cfg.label == 'Psi4-1.8')) && (matrix.cfg.runs-on == 'windows-latest'))"
@@ -286,12 +286,12 @@ jobs:
     - name: PyTest
       run: |
         # export MKL_CBWR=AVX
-        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --durations=20 --durations-min=40 --strict-markers --color=yes --cov-report=xml qcengine/
 
     - name: PyTest - Task_Config
       run: |
         rm -f qcengine.yaml
-        pytest -rws -v -k "test_config" --cov=qcengine --color=yes --cov-report=xml qcengine/
+        pytest -rws -v -k "test_config" --cov=qcengine --strict-markers --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
       uses: codecov/codecov-action@v4

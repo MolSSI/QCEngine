@@ -5,15 +5,17 @@ Most of the tests use mindless molecules for the diversity of element species
 to test as much different interactions as possible.
 """
 
+import pprint
+
 import numpy as np
 import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, uusing
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_b97m_m01(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -42,7 +44,7 @@ def test_dftd3_task_b97m_m01(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 @pytest.mark.parametrize(
     "inp",
     [
@@ -87,7 +89,7 @@ def test_dftd3_task_pbe_m02(inp, schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_tpss_m02(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -153,7 +155,7 @@ def test_dftd3_task_tpss_m02(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_r2scan_m03(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -206,7 +208,7 @@ def test_dftd3_task_r2scan_m03(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_unknown_method(schema_versions, request):
     models, retver, models_out = schema_versions
 
@@ -241,7 +243,7 @@ def test_dftd3_task_unknown_method(schema_versions, request):
     assert atomic_result.error == error
 
 
-@using("s-dftd3")
+@uusing("s-dftd3")
 def test_dftd3_task_cold_fusion(schema_versions, request):
     models, retver, models_out = schema_versions
 
@@ -288,6 +290,6 @@ def test_dftd3_task_cold_fusion(schema_versions, request):
     atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
     atomic_result = checkver_and_convert(atomic_result, request.node.name, "post", vercheck=False)
 
-    print(atomic_result.error)
+    pprint.pprint(atomic_result.error.model_dump())
     assert not atomic_result.success
     assert atomic_result.error == error

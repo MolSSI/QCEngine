@@ -27,9 +27,6 @@ def test_protocol_native(program, model, keywords, native, schema_versions, requ
     """
     models, retver, _ = schema_versions
 
-    if not has_program(program):
-        pytest.skip(f"Program '{program}' not found.")
-
     harness = qcng.get_program(program)
     molecule = _get_molecule(program, model["method"], models.Molecule)
 

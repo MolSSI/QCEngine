@@ -75,6 +75,8 @@ class Psi4Harness(ProgramHarness):
             with popen([sys.executable, "-c", "import psi4; print(psi4.executable)"]) as exc:
                 exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
+            if "active but incompatible with Python 3.14+" in se:
+                se = None
             error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
             # yes, everthing up to here could be got from `import psi4; psiexe = psi4.executable`. but, we try not to
             #   load programs/modules in the `def found` fns.
@@ -170,7 +172,7 @@ class Psi4Harness(ProgramHarness):
             if pversion < parse_version("1.4a2.dev160"):
 
                 # Setup the job
-                input_data = input_model.model_dump(encoding="json")
+                input_data = input_model.model_dump(mode="json")
                 input_data["nthreads"] = config.ncores
                 input_data["memory"] = int(config.memory * 1024 * 1024 * 1024 * 0.95)  # Memory in bytes
                 input_data["success"] = False

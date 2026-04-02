@@ -8,10 +8,10 @@ from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
 from qcengine.programs import empirical_dispersion_resources
-from qcengine.testing import checkver_and_convert, from_v2, is_program_new_enough, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, is_program_new_enough, schema_versions, using, uusing
 
 
-@using("dftd3")
+@uusing("classic-dftd3")
 @pytest.mark.parametrize("method", ["b3lyp-d3", "b3lyp-d3m", "b3lyp-d3bj", "b3lyp-d3mbj"])
 def test_dftd3_task(method, schema_versions, request):
     models, retver, _ = schema_versions
@@ -48,7 +48,7 @@ def test_dftd3_task(method, schema_versions, request):
     assert ret["success"] is True
 
 
-@using("dftd3")
+@uusing("classic-dftd3")
 def test_dftd3_error(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -1378,8 +1378,6 @@ Ne 0 0 0
 
 
 def eneyne_ne_qcdbmols():
-    if not is_program_new_enough("psi4", "1.4a1.dev55"):
-        pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     from psi4.driver import qcdb
 
     eneyne = qcdb.Molecule(seneyne)
@@ -1398,8 +1396,6 @@ def eneyne_ne_qcdbmols():
 
 
 def eneyne_ne_psi4mols():
-    if not is_program_new_enough("psi4", "1.4a1.dev55"):
-        pytest.skip("Psi4 requires at least Psi4 v1.3rc2")
     import psi4
 
     eneyne = psi4.core.Molecule.from_string(seneyne)
@@ -1556,7 +1552,7 @@ def test_dftd3__from_arrays__supplement():
     assert compare_recursive(ans, res, tnm() + " idempotent", atol=1.0e-4)
 
 
-@using("dftd3")
+@uusing("classic-dftd3")
 def test_3(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -1592,7 +1588,7 @@ def test_3(schema_versions, request):
     assert compare("B3LYP-D3(BJ)", _compute_key(res["extras"]["local_keywords"]), "key")
 
 
-@using("dftd3")
+@uusing("classic-dftd3")
 @pytest.mark.parametrize(
     "subjects",
     [
@@ -1619,11 +1615,11 @@ def test_3(schema_versions, request):
         # below two xfail until dftd3 that's only 2-body is out of psi4 proper
         pytest.param(
             {"first": "atmgr", "second": "atmgr", "parent": "eneyne", "subject": "gAmB", "lbl": "ATM"},
-            marks=[using("dftd3_321")],
+            marks=[*using("classic-dftd3_321")],
         ),
         pytest.param(
             {"first": "pbe-atmgr", "second": None, "parent": "ne", "subject": "atom", "lbl": "ATM"},
-            marks=[using("dftd3_321")],
+            marks=[*using("classic-dftd3_321")],
         ),
     ],
 )
@@ -1638,7 +1634,7 @@ def test_molecule__run_dftd3__23body(inp, subjects, request):
     assert compare_values(gexpected, G, atol=1.0e-7)
 
 
-@using("qcdb")
+@uusing("qcdb")
 def test_qcdb__energy_d3():
     import qcdb
 
@@ -1672,7 +1668,7 @@ def test_qcdb__energy_d3():
     )
 
 
-@using("mp2d")
+@uusing("mp2d")
 @pytest.mark.parametrize(
     "subjects",
     [
@@ -1764,14 +1760,14 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
     "program, inp",
     # fmt: off
     [
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "d3-b3lyp-d"}, "keywords": {}}, "lbl": "B3LYP-D2"}, marks=using("dftd3")),
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "mA", "qcsk": {"model": {"method": "d3-b3lyp-d3bj"}, "keywords": {}}, "lbl": "B3LYP-D3(BJ)"}, marks=using("dftd3")),
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "mB", "qcsk": {"model": { "method": "d3-PBE-D3zero"}, "keywords": {}}, "lbl": "PBE-D3"}, marks=using("dftd3")),
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "gAmB", "qcsk": { "model": { "method": "d3-PBE-D3zero"}, "keywords": {}}, "lbl": "PBE-D3"}, marks=using("dftd3")),
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "mAgB", "qcsk": { "model": { "method": "d3-PBE-D2"}, "keywords": {}}, "lbl": "PBE-D2"}, marks=using("dftd3")),
-        pytest.param("dftd3", {"parent": "ne", "subject": "atom", "qcsk": { "model": { "method": "d3-b3lyp-d3bj"}, "keywords": {}}, "lbl": "B3LYP-D3(BJ)"}, marks=using("dftd3")),
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "d3-SAPT0-D3M(BJ)"}, "keywords": {}}, "lbl": "SAPT0-D3M(BJ)"}, marks=using("dftd3")),
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "mA", "qcsk": { "model": { "method": "d3-SAPT0-D3M"}, "keywords": {}}, "lbl": "SAPT0-D3M"}, marks=using("dftd3")),
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "d3-b3lyp-d"}, "keywords": {}}, "lbl": "B3LYP-D2"}, marks=using("classic-dftd3")),
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "mA", "qcsk": {"model": {"method": "d3-b3lyp-d3bj"}, "keywords": {}}, "lbl": "B3LYP-D3(BJ)"}, marks=using("classic-dftd3")),
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "mB", "qcsk": {"model": { "method": "d3-PBE-D3zero"}, "keywords": {}}, "lbl": "PBE-D3"}, marks=using("classic-dftd3")),
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "gAmB", "qcsk": { "model": { "method": "d3-PBE-D3zero"}, "keywords": {}}, "lbl": "PBE-D3"}, marks=using("classic-dftd3")),
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "mAgB", "qcsk": { "model": { "method": "d3-PBE-D2"}, "keywords": {}}, "lbl": "PBE-D2"}, marks=using("classic-dftd3")),
+        pytest.param("dftd3", {"parent": "ne", "subject": "atom", "qcsk": { "model": { "method": "d3-b3lyp-d3bj"}, "keywords": {}}, "lbl": "B3LYP-D3(BJ)"}, marks=using("classic-dftd3")),
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "d3-SAPT0-D3M(BJ)"}, "keywords": {}}, "lbl": "SAPT0-D3M(BJ)"}, marks=using("classic-dftd3")),
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "mA", "qcsk": { "model": { "method": "d3-SAPT0-D3M"}, "keywords": {}}, "lbl": "SAPT0-D3M"}, marks=using("classic-dftd3")),
 
         pytest.param("s-dftd3", {"parent": "eneyne", "subject": "mA", "qcsk": {"model": {"method": "d3-b3lyp-d3bj"}, "keywords": {"apply_qcengine_aliases": True, "level_hint": "d3bj"}}, "lbl": "B3LYP-D3(BJ)"}, marks=using("s-dftd3")),
         pytest.param("s-dftd3", {"parent": "eneyne", "subject": "mB", "qcsk": {"model": { "method": "d3-PBE-D3zero"}, "keywords": {"apply_qcengine_aliases": True, "level_hint": "d3zero"}}, "lbl": "PBE-D3"}, marks=using("s-dftd3")),
@@ -1787,9 +1783,9 @@ _d4_b3lyp_2body = {"s8": 2.02929367, "a1": 0.40868035, "a2": 4.53807137, "s9": 0
         pytest.param("dftd4", {"parent": "eneyne", "subject": "mB", "qcsk": { "model": { "method": "d4-PBE-D4"}, "keywords": {}}, "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
         pytest.param("dftd4", {"parent": "eneyne", "subject": "mAgB", "qcsk": { "model": { "method": "d4-PBE-D4"}, "keywords": {}}, "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),
 
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # params only
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "b3lyp-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # method reinforcing params
-        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("dftd3")),  # method contradicting params (D3: params win)
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("classic-dftd3")),  # params only
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "b3lyp-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("classic-dftd3")),  # method reinforcing params
+        pytest.param("dftd3", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "B3LYP-D3"}, marks=using("classic-dftd3")),  # method contradicting params (D3: params win)
 
         pytest.param("dftd4", {"parent": "eneyne", "subject": "mAgB", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp_2body}}, "lbl": "B3LYP-D4(BJ)-2BODY"}, marks=using("dftd4")),  # params only
         pytest.param("dftd4", {"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "B3LYP-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),  # params only
@@ -1867,8 +1863,8 @@ def test_dftd3__run_dftd3__2body(inp, program, subjects, schema_versions, reques
     "inp",
     # fmt: off
     [
-        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "PBE-D3"}, marks=using("dftd3")),  # wrong ref lbl
-        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "PBE-D3"}, marks=using("dftd3")),  # method contradicting params (D3: params win -> fail)
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "PBE-D3"}, marks=using("classic-dftd3")),  # wrong ref lbl
+        pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": "pbe-d3"}, "keywords": {"level_hint": "d3", "params_tweaks": _d3_b3lyp}}, "lbl": "PBE-D3"}, marks=using("classic-dftd3")),  # method contradicting params (D3: params win -> fail)
 
         pytest.param({"parent": "eneyne", "subject": "dimer", "qcsk": {"model": {"method": ""}, "keywords": {"level_hint": "d4", "params_tweaks": _d4_b3lyp}}, "lbl": "PBE-D4(BJ,EEQ)ATM"}, marks=using("dftd4")),  # wrong ref lbl
         # LAB Nov 2022 - dftd4 from different channels (psi4, c-f) producing contrary behavior. TODO
@@ -1911,7 +1907,7 @@ def test_dftd3__run_dftd3__2body_error(inp, subjects, schema_versions, request):
         assert compare_values(expected, jrec["properties"]["return_energy"], atol=1.0e-7)
 
 
-@using("dftd3_321")
+@uusing("classic-dftd3_321")
 @pytest.mark.parametrize(
     "subjects",
     [
@@ -1999,7 +1995,9 @@ def test_dftd3__run_dftd3__3body(inp, subjects, schema_versions, request):
 @pytest.mark.parametrize(
     "inp, extrakw, program",
     [
-        pytest.param({"parent": "eneyne", "subject": "dimer", "lbl": "SAPT0-D3M"}, {}, "dftd3", marks=using("dftd3")),
+        pytest.param(
+            {"parent": "eneyne", "subject": "dimer", "lbl": "SAPT0-D3M"}, {}, "dftd3", marks=using("classic-dftd3")
+        ),
         pytest.param(
             {"parent": "eneyne", "subject": "dimer", "lbl": "SAPT0-D3M"},
             {"apply_qcengine_aliases": True, "level_hint": "d3m"},
@@ -2060,7 +2058,7 @@ def test_sapt_pairwise(inp, program, extrakw, subjects, schema_versions, request
 @pytest.mark.parametrize(
     "program",
     [
-        pytest.param("gcp", marks=using("gcp")),
+        pytest.param("gcp", marks=using("classic-gcp")),
         pytest.param("mctc-gcp", marks=using("mctc-gcp")),
     ],
 )
