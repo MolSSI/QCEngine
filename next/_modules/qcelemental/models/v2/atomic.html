@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcelemental.models.v2.atomic &mdash; QCEngine 0.1.dev1+g27a334f12 documentation</title>
+  <title>qcelemental.models.v2.atomic &mdash; QCEngine 0.1.dev1+g9cac98f86 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=38b15692"></script>
+      <script src="../../../../_static/documentation_options.js?v=60becd22"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../../_static/version-switcher.js?v=313414bb"></script>
@@ -105,20 +105,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            <div itemprop="articleBody">
              
   <h1>Source code for qcelemental.models.v2.atomic</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span><span class="p">,</span> <span class="n">model_serializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic_core.core_schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">SerializerFunctionWrapHandler</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">...models</span><span class="w"> </span><span class="kn">import</span> <span class="n">QCEL_V1V2_SHIM_CODE</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...util</span><span class="w"> </span><span class="kn">import</span> <span class="n">provenance_stamp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.basemodels</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtendedConfigDict</span><span class="p">,</span> <span class="n">ProtoModel</span><span class="p">,</span> <span class="n">check_convertible_version</span><span class="p">,</span> <span class="n">qcschema_draft</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.basemodels</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoModel</span><span class="p">,</span> <span class="n">check_convertible_version</span><span class="p">,</span> <span class="n">qcschema_draft</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.basis_set</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasisSet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.common_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriverEnum</span><span class="p">,</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Provenance</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.molecule</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">NestedData</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">qcelemental</span>
@@ -356,10 +359,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The number of CCSDTQ iterations taken before convergence.&quot;</span>
     <span class="p">)</span>
 
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ProtoModel</span><span class="o">.</span><span class="n">_merge_config_with</span><span class="p">(</span><span class="n">force_skip_defaults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">__repr_args__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ReprArgs&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude_unset</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
 
     <span class="nd">@field_validator</span><span class="p">(</span>
         <span class="s2">&quot;scf_dipole_moment&quot;</span><span class="p">,</span>
@@ -407,12 +408,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Derivative must be castable to shape </span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="c1"># pure-json dict repr for QCFractal compliance, see https://github.com/MolSSI/QCFractal/issues/579</span>
-        <span class="c1"># Sep 2021: commenting below for now to allow recomposing AtomicResult.properties for qcdb.</span>
-        <span class="c1">#   This will break QCFractal tests for now, but future qcf will be ok with it.</span>
-        <span class="c1"># kwargs[&quot;encoding&quot;] = &quot;json&quot;</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="nd">@model_serializer</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wrap&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_remove_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">:</span> <span class="n">SerializerFunctionWrapHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="c1"># Removes fields with a value of None from the serialized output</span>
+        <span class="n">serialized</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">serialized</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">convert_v</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">target_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span>
@@ -643,11 +643,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Index to the beta-spin orbital occupations of the primary return.&quot;</span>
     <span class="p">)</span>
 
-    <span class="c1"># Note that serializing WfnProp skips unset fields (and indeed the validator will error upon None values)</span>
-    <span class="c1">#   while including all fields for the submodel BasisSet. This is the right behavior, imo, but note that</span>
-    <span class="c1">#   v1 skips unset fields in BasisSet as well as the top-level model.</span>
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ProtoModel</span><span class="o">.</span><span class="n">_merge_config_with</span><span class="p">(</span><span class="n">force_skip_defaults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
     <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;scf_eigenvalues_a&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_eigenvalues_b&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_occupations_a&quot;</span><span class="p">,</span> <span class="s2">&quot;scf_occupations_b&quot;</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_assert1d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
@@ -726,6 +721,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Return quantity </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> does not exist in the values.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
+    <span class="nd">@model_serializer</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wrap&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_remove_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">:</span> <span class="n">SerializerFunctionWrapHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="c1"># Removes fields with a value of None from the serialized output</span>
+        <span class="n">serialized</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">serialized</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">convert_v</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">target_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;qcelemental.models.v1.WavefunctionProperties&quot;</span><span class="p">,</span> <span class="s2">&quot;qcelemental.models.v2.WavefunctionProperties&quot;</span><span class="p">]:</span>
@@ -735,9 +736,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="k">if</span> <span class="n">check_convertible_version</span><span class="p">(</span><span class="n">target_version</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s2">&quot;WavefunctionProperties&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;self&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
 
-        <span class="n">dself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+        <span class="n">dself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude_unset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># v1 models don&#39;t handle None</span>
         <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">]:</span>
-            <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;basis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">convert_v</span><span class="p">(</span><span class="n">target_version</span><span class="p">)</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+            <span class="n">dself</span><span class="p">[</span><span class="s2">&quot;basis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">convert_v</span><span class="p">(</span><span class="n">target_version</span><span class="p">)</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">target_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">WavefunctionProperties</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
@@ -808,8 +809,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">NativeFilesProtocolEnum</span><span class="o">.</span><span class="n">none</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Policies for keeping processed files from the computation&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-
-    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ExtendedConfigDict</span><span class="p">(</span><span class="n">force_skip_defaults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">convert_v</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">target_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span>
@@ -992,7 +991,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">properties</span><span class="p">:</span> <span class="n">AtomicProperties</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">AtomicProperties</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
     <span class="n">wavefunction</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WavefunctionProperties</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">WavefunctionProperties</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
 
-    <span class="n">return_result</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Array</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">return_result</span><span class="p">:</span> <span class="n">NestedData</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="o">...</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The primary return specified by the :attr:`~qcelemental.models.AtomicInput.driver` field. Scalar if energy; array if gradient or hessian; dictionary with property keys if properties.&quot;</span><span class="p">,</span>
     <span class="p">)</span>  <span class="c1"># type: ignore</span>
@@ -1008,7 +1007,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The success of program execution. If False, other fields may be blank.&quot;</span>
     <span class="p">)</span>
     <span class="n">provenance</span><span class="p">:</span> <span class="n">Provenance</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Provenance</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
-    <span class="n">extras</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">extras</span><span class="p">:</span> <span class="n">NestedData</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="p">{},</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Additional information to bundle with the computation. Use for schema development and scratch space.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
