@@ -34,13 +34,10 @@ Changelog
 
 .. _`sec:cl0500rc3`:
 
-v0.50.0rc3 / 2026-MM-DD (Prerelease) (Unreleased)
--------------------------------------------------
+v0.50.0rc3 / 2026-04-02 (Prerelease)
+------------------------------------
 
 :docs:`v0.50.0rc3` for current. :docs:`v0.34.1` for QCSchema v1.
-
-Breaking Changes
-++++++++++++++++
 
 New Features
 ++++++++++++
@@ -53,15 +50,14 @@ Enhancements
 - (:pr:`499`) QCElemental - Update encoding=json to mode=json in serialization
   calls to match QCElemental v0.50.0rc4 changes.
 - (:pr:`499`) DFTD3, DFTD4 - Allow running in QCSchema v2 mode for WIP upstream versions.
+  Note that QCEngine-added input extras appear in `AtomicResult.input_data.specification.extras`,
+  formerly `AtomicResult.extras`, even routing through older (pre-v1.3, v4.1) programs.
 - (:pr:`499`) GCP, MP2D - Update model_copy and casting of energy for qcel rc3 and Pydantic v2.
 
 Bug Fixes
 +++++++++
 - (:pr:`499`) Psi4 - Fix Psi4 detected but not registered error arising from parsing
   of version and paths being obscured by QCSchema/Pydantic Warnings.
-
-Misc.
-+++++
 
 
 .. _`sec:cl0500rc2`:

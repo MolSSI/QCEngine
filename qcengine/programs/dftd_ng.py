@@ -115,6 +115,9 @@ class DFTD4Harness(ProgramHarness):
             if not output_v1.success:
                 return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
 
+            # Unclear whether external_input_data should be input_model (user input in v2) or input_data
+            #   (user input + processing above with tweaks and hints). Former seems cleaner (and works)
+            #   but places "extras.info" differently in pre-/post-1.3.0 routes, so using latter.
             output = output_v1.convert_v(2, external_input_data=input_data)
 
         else:
@@ -307,6 +310,9 @@ class SDFTD3Harness(ProgramHarness):
             if not output_v1.success:
                 return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
 
+            # Unclear whether external_input_data should be input_model (user input in v2) or input_data
+            #   (user input + processing above with tweaks and hints). Former seems cleaner (and works)
+            #   but places "extras.info" differently in pre-/post-1.3.0 routes, so using latter.
             output = output_v1.convert_v(2, external_input_data=input_data)
 
         else:
