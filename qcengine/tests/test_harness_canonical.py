@@ -12,50 +12,50 @@ import qcelemental as qcel
 from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions, schema_versions2, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, schema_versions2, using, uusing
 
 qcsk_bs = {"name": "custom_basis", "center_data": center_data, "atom_map": ["bs_sto3g_h", "bs_sto3g_h"]}
 
 _canonical_methods = [
-    ("dftd3", {"method": "b3lyp-d3"}, {}),
-    ("qcore", {"method": "pbe", "basis": "6-31G"}, {}),
-    ("molpro", {"method": "hf", "basis": "6-31G"}, {}),
-    ("mopac", {"method": "PM6"}, {}),
-    ("mp2d", {"method": "MP2-DMP2"}, {}),
-    ("nwchem", {"method": "hf", "basis": "6-31G"}, {}),
-    ("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}),
-    ("psi4", {"method": "hf", "basis": "6-31G"}, {}),
-    ("qchem", {"method": "hf", "basis": "6-31G"}, {}),
-    ("rdkit", {"method": "UFF"}, {}),
-    ("terachem_pbs", {"method": "b3lyp", "basis": "6-31G"}, {}),
-    ("torchani", {"method": "ANI1x"}, {}),
-    ("turbomole", {"method": "pbe", "basis": "6-31G"}, {}),
-    ("xtb", {"method": "GFN2-xTB"}, {}),
-    ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
-    ("gcp", {"method": "hf3c"}, {}),
-    ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
-    ("cfour", {"method": "hf", "basis": "6-31G"}, {}),
-    ("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}),
-    ("mctc-gcp", {"method": "dft/sv"}, {}),
-    ("mace", {"method": "small"}, {}),
-    ("aimnet2", {"method": "b973c"}, {}),
-    ("s-dftd3", {"method": "b3lyp-d3"}, {}),
-    ("dftd4", {"method": "b3lyp-d4"}, {}),
+    pytest.param("dftd3", {"method": "b3lyp-d3"}, {}, marks=using("classic-dftd3")),
+    pytest.param("qcore", {"method": "pbe", "basis": "6-31G"}, {}, marks=using("qcore")),
+    pytest.param("molpro", {"method": "hf", "basis": "6-31G"}, {}, marks=using("molpro")),
+    pytest.param("mopac", {"method": "PM6"}, {}, marks=using("mopac")),
+    pytest.param("mp2d", {"method": "MP2-DMP2"}, {}, marks=using("mp2d")),
+    pytest.param("nwchem", {"method": "hf", "basis": "6-31G"}, {}, marks=using("nwchem")),
+    pytest.param("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}, marks=using("openmm")),
+    pytest.param("psi4", {"method": "hf", "basis": "6-31G"}, {}, marks=using("psi4")),
+    pytest.param("qchem", {"method": "hf", "basis": "6-31G"}, {}, marks=using("qchem")),
+    pytest.param("rdkit", {"method": "UFF"}, {}, marks=using("rdkit")),
+    pytest.param("terachem_pbs", {"method": "b3lyp", "basis": "6-31G"}, {}, marks=using("terachem_pbs")),
+    pytest.param("torchani", {"method": "ANI1x"}, {}, marks=using("torchani")),
+    pytest.param("turbomole", {"method": "pbe", "basis": "6-31G"}, {}, marks=using("turbomole")),
+    pytest.param("xtb", {"method": "GFN2-xTB"}, {}, marks=using("xtb")),
+    pytest.param("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}, marks=using("adcc")),
+    pytest.param("gcp", {"method": "hf3c"}, {}, marks=using("classic-gcp")),
+    pytest.param("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}, marks=using("mrchem")),
+    pytest.param("cfour", {"method": "hf", "basis": "6-31G"}, {}, marks=using("cfour")),
+    pytest.param("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}, marks=using("gamess")),
+    pytest.param("mctc-gcp", {"method": "dft/sv"}, {}, marks=using("mctc-gcp")),
+    pytest.param("mace", {"method": "small"}, {}, marks=using("mace")),
+    pytest.param("aimnet2", {"method": "b973c"}, {}, marks=using("aimnet2")),
+    pytest.param("s-dftd3", {"method": "b3lyp-d3"}, {}, marks=using("s-dftd3")),
+    pytest.param("dftd4", {"method": "b3lyp-d4"}, {}, marks=using("dftd4")),
     # add as programs available
-    # ("terachem", {"method": "bad"}),
+    # pytest.param("terachem", {"method": "bad"}, marks=using("")),
 ]
 
 _canonical_methods_qcsk_basis = [
-    ("adcc", {"method": "adc2", "basis": qcsk_bs}, {"n_triplets": 3}),
-    ("cfour", {"method": "hf", "basis": qcsk_bs}, {}),
-    ("gamess", {"method": "hf", "basis": qcsk_bs}, {}),
-    ("molpro", {"method": "hf", "basis": qcsk_bs}, {}),
-    ("nwchem", {"method": "hf", "basis": qcsk_bs}, {}),
-    ("openmm", {"method": "openff-1.0.0", "basis": qcsk_bs}, {}),
-    pytest.param("psi4", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("psi4_mp2qcsk")),
-    ("qchem", {"method": "hf", "basis": qcsk_bs}, {}),
-    ("qcore", {"method": "pbe", "basis": qcsk_bs}, {}),
-    ("turbomole", {"method": "pbe", "basis": qcsk_bs}, {}),
+    pytest.param("adcc", {"method": "adc2", "basis": qcsk_bs}, {"n_triplets": 3}, marks=using("adcc")),
+    pytest.param("cfour", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("cfour")),
+    pytest.param("gamess", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("gamess")),
+    pytest.param("molpro", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("molpro")),
+    pytest.param("nwchem", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("nwchem")),
+    pytest.param("openmm", {"method": "openff-1.0.0", "basis": qcsk_bs}, {}, marks=using("openmm")),
+    pytest.param("psi4", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("psi4")),
+    pytest.param("qchem", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("qchem")),
+    pytest.param("qcore", {"method": "pbe", "basis": qcsk_bs}, {}, marks=using("qcore")),
+    pytest.param("turbomole", {"method": "pbe", "basis": qcsk_bs}, {}, marks=using("turbomole")),
 ]
 
 
@@ -70,9 +70,6 @@ def _get_molecule(program, molcls):
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
 def test_compute_energy(program, model, keywords, schema_versions, request):
     models, retver, _ = schema_versions
-
-    if not has_program(program):
-        pytest.skip(f"Program '{program}' not found.")
 
     molecule = _get_molecule(program, models.Molecule)
 
@@ -101,9 +98,6 @@ def test_compute_energy(program, model, keywords, schema_versions, request):
 @pytest.mark.parametrize("program, model, keywords", _canonical_methods)
 def test_compute_gradient(program, model, keywords, schema_versions, request):
     models, retver, _ = schema_versions
-
-    if not has_program(program):
-        pytest.skip("Program '{}' not found.".format(program))
 
     molecule = _get_molecule(program, models.Molecule)
 
@@ -152,9 +146,6 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
 def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, request):
     models, retver, _ = schema_versions
 
-    if not has_program(program):
-        pytest.skip("Program '{}' not found.".format(program))
-
     molecule = _get_molecule(program, models.Molecule)
     if from_v2(request.node.name):
         inp = models.AtomicInput(
@@ -174,26 +165,26 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
 @pytest.mark.parametrize(
     "program, model",
     [
-        ("cfour", {"method": "bad"}),
-        ("dftd3", {"method": "bad"}),
-        ("dftd3", {"method": "b3lyp-d3", "driver": "hessian"}),
-        ("qcore", {"method": "bad"}),
-        ("gamess", {"method": "bad"}),
-        ("mopac", {"method": "bad"}),
-        ("mp2d", {"method": "bad"}),
-        ("nwchem", {"method": "bad"}),
-        ("openmm", {"method": "bad"}),
-        ("psi4", {"method": "bad"}),
-        ("qchem", {"method": "bad"}),
-        ("rdkit", {"method": "bad"}),
-        ("terachem_pbs", {"method": "bad"}),
-        ("torchani", {"method": "bad"}),
-        ("turbomole", {"method": "bad"}),
-        ("adcc", {"method": "bad"}),
-        ("gcp", {"method": "bad"}),
-        ("mrchem", {"method": "bad"}),
-        ("mctc-gcp", {"method": "bad"}),
-        ("mace", {"method": "bad"})
+        pytest.param("cfour", {"method": "bad"}, marks=using("cfour")),
+        pytest.param("dftd3", {"method": "bad"}, marks=using("classic-dftd3")),
+        pytest.param("dftd3", {"method": "b3lyp-d3", "driver": "hessian"}, marks=using("classic-dftd3")),
+        pytest.param("qcore", {"method": "bad"}, marks=using("qcore")),
+        pytest.param("gamess", {"method": "bad"}, marks=using("gamess")),
+        pytest.param("mopac", {"method": "bad"}, marks=using("mopac")),
+        pytest.param("mp2d", {"method": "bad"}, marks=using("mp2d")),
+        pytest.param("nwchem", {"method": "bad"}, marks=using("nwchem")),
+        pytest.param("openmm", {"method": "bad"}, marks=using("openmm")),
+        pytest.param("psi4", {"method": "bad"}, marks=using("psi4")),
+        pytest.param("qchem", {"method": "bad"}, marks=using("qchem")),
+        pytest.param("rdkit", {"method": "bad"}, marks=using("rdkit")),
+        pytest.param("terachem_pbs", {"method": "bad"}, marks=using("terachem_pbs")),
+        pytest.param("torchani", {"method": "bad"}, marks=using("torchani")),
+        pytest.param("turbomole", {"method": "bad"}, marks=using("turbomole")),
+        pytest.param("adcc", {"method": "bad"}, marks=using("adcc")),
+        pytest.param("gcp", {"method": "bad"}, marks=using("classic-gcp")),
+        pytest.param("mrchem", {"method": "bad"}, marks=using("mrchem")),
+        pytest.param("mctc-gcp", {"method": "bad"}, marks=using("mctc-gcp")),
+        pytest.param("mace", {"method": "bad"}, marks=using("mace"))
         # add as programs available
         # ("molpro", {"method": "bad"}),
         # ("terachem", {"method": "bad"}),
@@ -205,9 +196,6 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
 @pytest.mark.parametrize("inpdict", [False, True])
 def test_compute_bad_models(program, model, schema_versions, request, raiserr, retdict, inpdict):
     models, retver, _ = schema_versions
-
-    if not has_program(program):
-        pytest.skip("Program '{}' not found.".format(program))
 
     amodel = copy.deepcopy(model)
     adriver = amodel.pop("driver", "energy")
@@ -258,7 +246,7 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
             assert ret_method == model["method"], "input not copied over"
 
 
-@using("nwchem")
+@uusing("nwchem")
 @pytest.mark.parametrize("envshim", [True, False])
 @pytest.mark.parametrize("model", ["Atomic"])
 @pytest.mark.parametrize(
@@ -366,16 +354,13 @@ def test_compute_output_table(goodcalc, input_data, return_version, return_dict,
 @pytest.mark.parametrize(
     "program, model",
     [
-        ("psi4", {"method": "hf", "driver": "eighth"}),
+        pytest.param("psi4", {"method": "hf", "driver": "eighth"}, marks=using("psi4")),
     ],
 )
 @pytest.mark.parametrize("raiserr", [False, True])
 @pytest.mark.parametrize("retdict", [False, True])
 def test_compute_badder_models(program, model, schema_versions2, request, raiserr, retdict):
     models, retver, _ = schema_versions2
-
-    if not has_program(program):
-        pytest.skip("Program '{}' not found.".format(program))
 
     amodel = copy.deepcopy(model)
     adriver = amodel.pop("driver", "energy")
@@ -418,14 +403,12 @@ def test_compute_badder_models(program, model, schema_versions2, request, raiser
                 assert ret.input_data["driver"] == "eighth", "input not copied over"
 
 
+@uusing("psi4")
 def test_psi4_restarts(monkeypatch, schema_versions, request):
     """
     Make sure that a random error is raised which can be restarted if psi4 fails with no error message
     """
     models, retver, _ = schema_versions
-
-    if not has_program("psi4"):
-        pytest.skip("Program psi4 not found.")
 
     # create the psi4 task
     if from_v2(request.node.name):

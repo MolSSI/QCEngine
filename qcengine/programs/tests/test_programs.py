@@ -8,7 +8,7 @@ import pytest
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, failure_engine, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, failure_engine, from_v2, schema_versions, uusing
 
 
 def test_missing_key(schema_versions, request):
@@ -28,7 +28,7 @@ def test_missing_key_raises(schema_versions, request):
         ret = qcng.compute({"hello": "hi"}, "bleh", raise_error=True)
 
 
-@using("psi4")
+@uusing("psi4")
 def test_psi4_task(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -66,8 +66,8 @@ def test_psi4_task(schema_versions, request):
     assert ret.success is True
 
 
-@using("psi4")
-@using("gcp")
+@uusing("psi4")
+@uusing("classic-gcp")
 def test_psi4_hf3c_task(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -100,7 +100,7 @@ def test_psi4_hf3c_task(schema_versions, request):
         assert not ret.model.basis
 
 
-@using("psi4_runqcsk")
+@uusing("psi4")
 def test_psi4_interactive_task(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -133,7 +133,7 @@ def test_psi4_interactive_task(schema_versions, request):
     assert is_psiapi_evaluated
 
 
-@using("psi4_runqcsk")
+@uusing("psi4")
 def test_psi4_wavefunction_task(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -164,7 +164,7 @@ def test_psi4_wavefunction_task(schema_versions, request):
     assert ret.wavefunction.scf_orbitals_a.shape == (7, 7)
 
 
-@using("psi4")
+@uusing("psi4")
 def test_psi4_internal_failure(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -197,7 +197,7 @@ def test_psi4_internal_failure(schema_versions, request):
     assert "reference is only" in str(exc.value)
 
 
-@using("psi4")
+@uusing("psi4")
 def test_psi4_ref_switch(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -231,7 +231,7 @@ def test_psi4_ref_switch(schema_versions, request):
     assert ret.properties.calcinfo_nbeta == 1
 
 
-@using("rdkit")
+@uusing("rdkit")
 @pytest.mark.parametrize("method", ["UFF", "MMFF94", "MMFF94s"])
 def test_rdkit_task(method, schema_versions, request):
     models, retver, _ = schema_versions
@@ -256,7 +256,7 @@ def test_rdkit_task(method, schema_versions, request):
     assert ret.success is True
 
 
-@using("rdkit")
+@uusing("rdkit")
 def test_rdkit_connectivity_error(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -285,7 +285,7 @@ def test_rdkit_connectivity_error(schema_versions, request):
         qcng.compute(input_data, "rdkit", raise_error=True, return_version=retver)
 
 
-@using("torchani")
+@uusing("torchani")
 def test_torchani_task(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -313,7 +313,7 @@ def test_torchani_task(schema_versions, request):
         assert ret.driver == "gradient"
 
 
-@using("mopac")
+@uusing("mopac")
 def test_mopac_task(schema_versions, request):
     _, retver, _ = schema_versions
 
@@ -451,7 +451,7 @@ def test_random_failure_with_success(failure_engine, schema_versions, request):
     assert ret.extras["ncalls"] == 2
 
 
-@using("openmm")
+@uusing("openmm")
 def test_openmm_task_smirnoff(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -492,7 +492,7 @@ def test_openmm_task_smirnoff(schema_versions, request):
 
 
 @pytest.mark.skip("`basis` must be explicitly specified at this time")
-@using("openmm")
+@uusing("openmm")
 def test_openmm_task_url_basis(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -540,7 +540,7 @@ def test_openmm_task_url_basis(schema_versions, request):
     assert ret.success is True
 
 
-@using("openmm")
+@uusing("openmm")
 def test_openmm_cmiles_gradient(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -568,7 +568,7 @@ def test_openmm_cmiles_gradient(schema_versions, request):
     assert ret.success is True
 
 
-@using("openmm")
+@uusing("openmm")
 def test_openmm_cmiles_gradient_nomatch(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -605,7 +605,7 @@ def test_openmm_cmiles_gradient_nomatch(schema_versions, request):
     )
 
 
-@using("openmm")
+@uusing("openmm")
 @pytest.mark.parametrize(
     "gaff_settings",
     [
@@ -655,7 +655,7 @@ def test_openmm_gaff_keywords(gaff_settings, schema_versions, request):
         assert ret.return_result == pytest.approx(expected_result, rel=1e-6)
 
 
-@using("mace")
+@uusing("mace")
 def test_mace_energy(schema_versions, request):
     """
     Test calculating the energy with mace
@@ -677,7 +677,7 @@ def test_mace_energy(schema_versions, request):
     assert pytest.approx(result.return_result) == -76.47683956098838
 
 
-@using("mace")
+@uusing("mace")
 def test_mace_gradient(schema_versions, request):
     """
     Test calculating the gradient with mace
@@ -708,7 +708,7 @@ def test_mace_gradient(schema_versions, request):
     assert pytest.approx(result.return_result) == expected_result
 
 
-@using("aimnet2")
+@uusing("aimnet2")
 @pytest.mark.parametrize(
     "model, expected_energy",
     [
@@ -739,7 +739,7 @@ def test_aimnet2_energy(model, expected_energy, schema_versions, request):
     assert "ensemble_forces_std" in result.extras["aimnet2"]
 
 
-@using("aimnet2")
+@uusing("aimnet2")
 def test_aimnet2_gradient(schema_versions, request):
     """Test computing the gradient of water using one aimnet2 model."""
     models, retver, _ = schema_versions
@@ -775,7 +775,7 @@ def test_aimnet2_gradient(schema_versions, request):
     assert "charges" in result.extras["aimnet2"]
 
 
-@using("psi4")
+@uusing("psi4")
 def test_psi4_properties_driver(schema_versions, request):
     models, retver, _ = schema_versions
 

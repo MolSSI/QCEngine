@@ -277,7 +277,7 @@ class DFTD3Harness(ProgramHarness):
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
 
         retres = calcinfo[f"CURRENT {input_model.specification.driver.upper()}"]
-        if isinstance(retres, Decimal):
+        if isinstance(retres, (str, Decimal)):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()

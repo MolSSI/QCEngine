@@ -7,7 +7,7 @@ from typing import List
 import pytest
 
 from qcengine import cli, get_molecule, util
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, uusing
 
 
 def run_qcengine_cli(args: List[str], stdin: str = None) -> str:
@@ -59,7 +59,7 @@ def test_info():
         assert output in default_output
 
 
-@using("psi4")
+@uusing("psi4")
 def test_run_psi4(tmp_path, schema_versions, request):
     """Tests qcengine run with psi4 and JSON input"""
     models, retver, _ = schema_versions
@@ -101,8 +101,8 @@ def test_run_psi4(tmp_path, schema_versions, request):
         check_result(run_qcengine_cli(args, stdin=inp.model_dump_json()))
 
 
-@using("geometric")
-@using("psi4")
+@uusing("geometric")
+@uusing("psi4")
 def test_run_procedure(tmp_path, schema_versions, request):
     """Tests qcengine run-procedure with geometric, psi4, and JSON input"""
     models, retver, _ = schema_versions

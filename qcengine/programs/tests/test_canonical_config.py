@@ -10,22 +10,22 @@ from pathlib import Path
 import pytest
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions
+from qcengine.testing import checkver_and_convert, from_v2, has_program, schema_versions, using
 
 _canonical_methods = [
     # needs attn ("adcc", {"method": "adc2", "basis": "6-31G"}, {"n_triplets": 3}),
-    ("cfour", {"method": "hf", "basis": "6-31G"}, {}),
-    ("dftd3", {"method": "b3lyp-d3"}, {}),
-    ("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}),
-    ("gcp", {"method": "hf3c"}, {}),
-    ("mctc-gcp", {"method": "dft/sv"}, {}),
+    pytest.param("cfour", {"method": "hf", "basis": "6-31G"}, {}, marks=using("cfour")),
+    pytest.param("dftd3", {"method": "b3lyp-d3"}, {}, marks=using("classic-dftd3")),
+    pytest.param("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}, marks=using("gamess")),
+    pytest.param("gcp", {"method": "hf3c"}, {}, marks=using("classic-gcp")),
+    pytest.param("mctc-gcp", {"method": "dft/sv"}, {}, marks=using("mctc-gcp")),
     # needs attn ("molpro", {"method": "hf", "basis": "6-31G"}, {}),
     # needs attn ("mopac", {"method": "PM6"}, {}),
-    ("mp2d", {"method": "MP2-DMP2"}, {}),
+    pytest.param("mp2d", {"method": "MP2-DMP2"}, {}, marks=using("mp2d")),
     # needs attn ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
-    ("nwchem", {"method": "hf", "basis": "6-31G"}, {}),
+    pytest.param("nwchem", {"method": "hf", "basis": "6-31G"}, {}, marks=using("nwchem")),
     # needs attn ("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}),
-    ("psi4", {"method": "hf", "basis": "6-31G"}, {"gradient_write": True}),
+    pytest.param("psi4", {"method": "hf", "basis": "6-31G"}, {"gradient_write": True}, marks=using("psi4")),
     # needs attn ("qchem", {"method": "hf", "basis": "6-31G"}, {}),
     # needs attn ("qcore", {"method": "pbe", "basis": "6-31G"}, {}),
     # needs attn ("rdkit", {"method": "UFF"}, {}),
@@ -82,9 +82,6 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, sch
 
     """
     models, retver, _ = schema_versions
-
-    if not has_program(program):
-        pytest.skip(f"Program '{program}' not found.")
 
     harness = qcng.get_program(program)
     molecule = _get_molecule(program, model["method"], models.Molecule)
@@ -160,9 +157,6 @@ def test_local_options_scratch(program, model, keywords, schema_versions, reques
 
     """
     models, retver, _ = schema_versions
-
-    if not has_program(program):
-        pytest.skip(f"Program '{program}' not found.")
 
     harness = qcng.get_program(program)
     molecule = _get_molecule(program, model["method"], models.Molecule)
@@ -253,9 +247,6 @@ def test_local_options_ncores(program, model, keywords, ncores, schema_versions,
 
     """
     models, retver, _ = schema_versions
-
-    if not has_program(program):
-        pytest.skip(f"Program '{program}' not found.")
 
     harness = qcng.get_program(program)
     molecule = _get_molecule(program, model["method"], models.Molecule)

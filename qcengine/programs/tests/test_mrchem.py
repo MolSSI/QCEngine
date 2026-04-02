@@ -5,7 +5,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, uusing
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def fh(schema_versions):
     )
 
 
-@using("mrchem")
+@uusing("mrchem")
 def test_energy(h2o, schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -82,7 +82,7 @@ def test_energy(h2o, schema_versions, request):
     assert compare_values([-3.766420e-07, 0.0, 0.720473], res["properties"]["scf_dipole_moment"], atol=1e-3)
 
 
-@using("mrchem")
+@uusing("mrchem")
 def test_dipole(h2o, schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -135,7 +135,7 @@ def test_dipole(h2o, schema_versions, request):
     assert compare_values([-3.766420e-07, 0.0, 0.720473], res["properties"]["scf_dipole_moment"], atol=1e-3)
 
 
-@using("mrchem")
+@uusing("mrchem")
 def test_gradient(fh, schema_versions, request):
     models, retver, _ = schema_versions
 

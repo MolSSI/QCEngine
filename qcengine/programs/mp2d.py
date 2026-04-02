@@ -142,7 +142,7 @@ class MP2DHarness(ProgramHarness):
             "outfiles": ["mp2d_gradient"],
             "scratch_messy": config.scratch_messy,
             "scratch_directory": config.scratch_directory,
-            "input_result": input_model.copy(deep=True),
+            "input_result": input_model.model_copy(deep=True),
         }
 
     def parse_output(self, outfiles: Dict[str, str], input_model: "AtomicInput") -> "AtomicResult":
@@ -209,7 +209,7 @@ class MP2DHarness(ProgramHarness):
         # jobrec["molecule"]["real"] = list(jobrec["molecule"]["real"])
 
         retres = calcinfo[f"CURRENT {input_model.specification.driver.upper()}"]
-        if isinstance(retres, Decimal):
+        if isinstance(retres, (str, Decimal)):
             retres = float(retres)
         elif isinstance(retres, np.ndarray):
             retres = retres.ravel().tolist()

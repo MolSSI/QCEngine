@@ -115,7 +115,7 @@ class AdccHarness(ProgramHarness):
         except Exception as e:
             raise UnknownError(str(e))
 
-        input_data = input_model.model_dump(encoding="json")
+        input_data = input_model.model_dump(mode="json")
         output_data = {"input_data": input_data, "extras": {}, "molecule": mol}
         output_data["success"] = compute_success
 

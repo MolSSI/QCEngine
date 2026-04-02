@@ -11,10 +11,10 @@ import qcelemental as qcel
 from qcelemental.testing import compare_recursive
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, uusing
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn1xtb_m01(schema_versions, request):
     models, retver, _ = schema_versions
     thr = 1.0e-7
@@ -63,7 +63,7 @@ def test_xtb_task_gfn1xtb_m01(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn1xtb_m02(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -121,7 +121,7 @@ def test_xtb_task_gfn1xtb_m02(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn1xtb_m03(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -177,7 +177,7 @@ def test_xtb_task_gfn1xtb_m03(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn1xtb_m04(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -232,7 +232,7 @@ def test_xtb_task_gfn1xtb_m04(schema_versions, request):
     assert "mayer_indices" in atomic_result.return_result
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn1xtb_m05(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -264,7 +264,7 @@ def test_xtb_task_gfn1xtb_m05(schema_versions, request):
     assert "xtb" in atomic_result.extras
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn2xtb_m01(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -314,7 +314,7 @@ def test_xtb_task_gfn2xtb_m01(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn2xtb_m02(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -372,7 +372,7 @@ def test_xtb_task_gfn2xtb_m02(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn2xtb_m03(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -428,7 +428,7 @@ def test_xtb_task_gfn2xtb_m03(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn2xtb_m04(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -483,7 +483,7 @@ def test_xtb_task_gfn2xtb_m04(schema_versions, request):
     assert "mayer_indices" in atomic_result.return_result
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_gfn2xtb_m05(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -515,7 +515,7 @@ def test_xtb_task_gfn2xtb_m05(schema_versions, request):
     assert "xtb" in atomic_result.extras
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_unknown_method(schema_versions, request):
     models, retver, models_out = schema_versions
 
@@ -543,7 +543,7 @@ def test_xtb_task_unknown_method(schema_versions, request):
     assert atomic_result.error == error
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_unsupported_driver(schema_versions, request):
     models, retver, models_out = schema_versions
 
@@ -573,7 +573,7 @@ def test_xtb_task_unsupported_driver(schema_versions, request):
     assert atomic_result.error == error
 
 
-@using("xtb")
+@uusing("xtb")
 def test_xtb_task_cold_fusion(schema_versions, request):
     models, retver, models_out = schema_versions
 

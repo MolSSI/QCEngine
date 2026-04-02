@@ -5,7 +5,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, uusing
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def h2o_data():
       """
 
 
-@using("adcc")
+@uusing("adcc")
 def test_run(h2o_data, schema_versions, request):
     models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)

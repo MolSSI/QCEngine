@@ -3,7 +3,7 @@ Utilities for the testing suite.
 """
 
 import sys
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import pytest
@@ -170,15 +170,15 @@ def failure_engine(schema_versions, request):
 _programs = {
     "adcc": is_program_new_enough("adcc", "0.15.7"),
     "cfour": which("xcfour", return_bool=True),
-    "dftd3": which("dftd3", return_bool=True),
-    "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),
+    "dftd3": which("dftd3", return_bool=True),  # mark is classic-dftd3
+    "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),  # mark is classic-dftd3_321
     "dftd4": which_import("dftd4", return_bool=True),
     "dftd4_350": is_program_new_enough("dftd4", "3.5.0"),
     "s-dftd3": which_import("dftd3", return_bool=True),
     "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
     "mctc-gcp": is_program_new_enough("mctc-gcp", "2.3.0"),
-    "gcp": which("gcp", return_bool=True),
+    "gcp": which("gcp", return_bool=True),  # mark is classic-gcp
     "geometric": which_import("geometric", return_bool=True),
     "berny": which_import("berny", return_bool=True),
     "mdi": is_mdi_new_enough("1.2"),
@@ -188,9 +188,10 @@ _programs = {
     "nwchem": which("nwchem", return_bool=True),
     "optking": which_import("optking", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
-    "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
-    "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
-    "psi4_derqcsk": is_program_new_enough("psi4", "1.5a1.dev117"),
+    # below retired as pre-2022
+    # "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
+    # "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
+    # "psi4_derqcsk": is_program_new_enough("psi4", "1.5a1.dev117"),
     "qcdb": which_import("qcdb", return_bool=True),
     "qchem": is_program_new_enough("qchem", "5.1"),
     "qcmanybody": which_import("qcmanybody", return_bool=True),
@@ -210,7 +211,13 @@ _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="si
 
 
 def has_program(name):
-    if name in _programs:
+    if name == "classic-dftd3":
+        return _programs["dftd3"]
+    elif name == "classic-dftd3_321":
+        return _programs["dftd3_321"]
+    elif name == "classic-gcp":
+        return _programs["gcp"]
+    elif name in _programs:
         return _programs[name]
     else:
         raise KeyError(f"Program {name} not registered with QCEngine testing.")
@@ -219,14 +226,49 @@ def has_program(name):
 _using_cache = {}
 
 
-def using(program):
+def _using(program: str) -> None:
 
     if program not in _using_cache:
         import_message = f"Not detecting module {program}. Install package if necessary to enable tests."
         skip = pytest.mark.skipif(has_program(program) is False, reason=import_message)
-        _using_cache[program] = skip
+        general = pytest.mark.addon
+        particular = getattr(pytest.mark, program)
 
-    return _using_cache[program]
+        all_marks = (skip, general, particular)
+        _using_cache[program] = [_compose_decos(all_marks), all_marks]
+
+
+def _compose_decos(decos):
+    # thanks, https://stackoverflow.com/a/45517876
+    def composition(func):
+        for deco in reversed(decos):
+            func = deco(func)
+        return func
+
+    return composition
+
+
+def uusing(program: str):
+    """Apply 3 marks: skipif program not detected, label "addon", and label program.
+    This is the decorator form for whole test functions. For example:
+
+    @uusing("psi4")
+    @uusing("dftd4")
+    def test_psi4_disp():
+
+    """
+    _using(program)
+    return _using_cache[program][0]
+
+
+def using(program: str) -> Tuple[pytest.MarkDecorator, ...]:
+    """Apply 3 marks: skipif program not detected, label "addon", and label program.
+    This is the inline form for parameterizations: `marks=using("nwchem")`.
+    In combo, do `marks=[*using("nwchem"), pytest.mark.quick]`
+
+    """
+    _using(program)
+    return _using_cache[program][1]
 
 
 @pytest.fixture(scope="function", params=[None, "as_v1", "as_v2", "to_v1", "to_v2"])

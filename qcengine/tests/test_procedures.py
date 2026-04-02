@@ -9,7 +9,7 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, failure_engine, from_v2, schema_versions, using
+from qcengine.testing import checkver_and_convert, failure_engine, from_v2, schema_versions, using, uusing
 
 
 @pytest.fixture(scope="function")
@@ -30,7 +30,7 @@ def input_data(request):
         }
 
 
-@using("psi4")
+@uusing("psi4")
 @pytest.mark.parametrize("ncores", [1, 4])
 @pytest.mark.parametrize(
     "optimizer",
@@ -127,7 +127,7 @@ def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request)
             assert "myopttag" in ret.extras, ret.extras.keys()
 
 
-@using("psi4")
+@uusing("psi4")
 @pytest.mark.parametrize(
     "optimizer",
     [
@@ -295,8 +295,8 @@ def test_optimizer_protocols(optimizer, gradprog, gradmodel, input_data, schema_
             assert len(trajs_tgt) > 2
 
 
-@using("psi4")
-@using("berny")
+@uusing("psi4")
+@uusing("berny")
 def test_berny_failed_gradient_computation(input_data, schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -321,8 +321,8 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
     assert ret.error.error_type == qcng.exceptions.InputError.error_type
 
 
-@using("geometric")
-@using("rdkit")
+@uusing("geometric")
+@uusing("rdkit")
 def test_geometric_rdkit_error(input_data, schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -350,7 +350,7 @@ def test_geometric_rdkit_error(input_data, schema_versions, request):
     assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
 
 
-@using("rdkit")
+@uusing("rdkit")
 @pytest.mark.parametrize(
     "optimizer",
     [
@@ -407,7 +407,7 @@ def test_optimization_protocols(optimizer, input_data, schema_versions, request)
         assert ret.final_molecule.get_hash() == trajs_tgt[1].molecule.get_hash()
 
 
-@using("geometric")
+@uusing("geometric")
 def test_geometric_retries(failure_engine, input_data, schema_versions, request):
     import geometric
 
@@ -464,7 +464,7 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
         assert len(ret.input_data["trajectory"]) == 2
 
 
-@using("geometric")
+@uusing("geometric")
 @pytest.mark.parametrize(
     "program, model, bench",
     [
@@ -560,7 +560,7 @@ def test_geometric_generic(input_data, program, model, bench, schema_versions, r
     # the _secret_tags shows up in Res.extras, not in Res.input_data.extras b/c geometric running v1 internally
 
 
-@using("nwchem")
+@uusing("nwchem")
 @pytest.mark.parametrize("linopt", [0, 1])
 def test_nwchem_relax(linopt, schema_versions, request):
     models, retver, _ = schema_versions
@@ -600,7 +600,7 @@ def test_nwchem_relax(linopt, schema_versions, request):
     assert pytest.approx(ret.final_molecule.measure([0, 1]), 1.0e-4) == 1.3459150737
 
 
-@using("nwchem")
+@uusing("nwchem")
 def test_nwchem_restart(tmpdir, schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -642,8 +642,8 @@ def test_nwchem_restart(tmpdir, schema_versions, request):
     assert new_ret.success
 
 
-@using("rdkit")
-@using("torsiondrive")
+@uusing("rdkit")
+@uusing("torsiondrive")
 @pytest.mark.parametrize("scan_ptcl", ["none", "all", "lowest"])
 def test_torsiondrive_generic(schema_versions, request, scan_ptcl):
     models, retver, _ = schema_versions
@@ -735,8 +735,8 @@ def test_torsiondrive_generic(schema_versions, request, scan_ptcl):
     assert ret.stdout == "All optimizations converged at lowest energy. Job Finished!\n"
 
 
-@using("mace")
-@using("torsiondrive")
+@uusing("mace")
+@uusing("torsiondrive")
 def test_torsiondrive_extra_constraints(schema_versions, request):
     models, retver, _ = schema_versions
 
@@ -827,7 +827,7 @@ def test_torsiondrive_extra_constraints(schema_versions, request):
     assert "All optimizations converged at lowest energy. Job Finished!\n" in ret.stdout
 
 
-@using("mrchem")
+@uusing("mrchem")
 @pytest.mark.parametrize(
     "optimizer",
     [
