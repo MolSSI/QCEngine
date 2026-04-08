@@ -294,9 +294,12 @@ class SDFTD3Harness(ProgramHarness):
                 level_hint = get_dispersion_aliases()[level_hint.lower()]
                 if level_hint.endswith("atm"):
                     level_hint = level_hint[:-3]
+                    # re-route through params_tweaks needed for >=1.3.0 where atm=False became default
+                    input_data["specification"]["keywords"]["params_tweaks"] = {**planinfo["dashparams"]}
                 if level_hint.endswith("2b"):
                     level_hint = level_hint[:-2]
                     input_data["specification"]["keywords"]["params_tweaks"] = {**planinfo["dashparams"], "s9": 0.0}
+                    input_data["specification"]["extras"]["info"]["dashparams"]["s9"] = 0.0
                 input_data["specification"]["keywords"]["level_hint"] = level_hint
 
         if parse_version(self.get_version()) < parse_version("1.3.0"):

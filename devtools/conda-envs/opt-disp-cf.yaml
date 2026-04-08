@@ -10,8 +10,8 @@ dependencies:
   - libint=2.9.0=*_4  # old (1.10=*_2) psi4 to release qcmb constraint to use new qcnb (0.7) with new qcel (rc4)
 
     # Mixed Tests
-  - dftd3-python
-  - dftd4-python
+  - dftd3-python>=1.3
+  - dftd4-python>=4.1
   - gcp-correction
   - geometric=1.0
   - optking

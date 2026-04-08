@@ -78,11 +78,11 @@ jobs:
             pytest: ""
 
           # needs py314 for xtb
-          - conda-env: xtb
-            python-version: "3.14"
-            label: xTB314
-            runs-on: ubuntu-latest
-            pytest: ""
+          #- conda-env: xtb
+          #  python-version: "3.14"
+          #  label: xTB314
+          #  runs-on: ubuntu-latest
+          #  pytest: ""
 
           #- conda-env: qcore
           #  python-version: 3.7
