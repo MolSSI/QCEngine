@@ -7,7 +7,6 @@ dependencies:
   - rdkit
   # - rdkit<=2025.03.4  # Windows+psi4 error with 03.5  # sometimes fine, sometimes flaky even w/exactly same packages in env
   - mopac
-  - libint=2.9.0=*_4  # old (1.10=*_2) psi4 to release qcmb constraint to use new qcnb (0.7) with new qcel (rc4)
 
     # Mixed Tests
   - dftd3-python>=1.3
@@ -16,7 +15,6 @@ dependencies:
   - geometric=1.0
   - optking
   - pymdi
-  - qcmanybody>=0.7.0
   - pyberny
   - setuptools <82.0  # for berny
 
@@ -34,4 +32,8 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
+
+  - pip
+  - pip:
+    - qcmanybody==0.7.0
 
