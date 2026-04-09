@@ -24,6 +24,7 @@ from .psi4 import Psi4Harness
 from .qchem import QChemHarness
 from .qcore import EntosHarness, QcoreHarness
 from .rdkit import RDKitHarness
+from .tblite import TBLiteHarness
 from .terachem import TeraChemHarness
 from .terachem_frontend import TeraChemFrontEndHarness
 from .terachem_pbs import TeraChemPBSHarness
@@ -123,6 +124,7 @@ register_program(TeraChemPBSHarness())
 
 # Semi-empirical
 register_program(MopacHarness())
+register_program(TBLiteHarness())
 register_program(XTBHarness())
 
 # AI
