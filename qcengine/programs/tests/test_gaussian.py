@@ -1,5 +1,6 @@
 """Tests for the Gaussian harness: germinate, keywords, harvester, and runner."""
 
+import importlib.util
 import re
 from decimal import Decimal
 from typing import Any, Dict
@@ -17,6 +18,9 @@ from qcengine.programs.gaussian.keywords import build_com_file, build_route_line
 from qcengine.programs.gaussian import runner as gaussian_runner
 from qcengine.programs.gaussian.runner import GaussianHarness
 from qcengine.testing import uusing as using
+
+_cclib_available = importlib.util.find_spec("cclib") is not None
+requires_cclib = pytest.mark.skipif(not _cclib_available, reason="cclib not installed")
 
 # ---------------------------------------------------------------------------
 # Shared test fixtures
@@ -615,6 +619,7 @@ def _full_compute_patches(harness, water_energy_input, log_text, ccdata, return_
 
 
 # rq-99807237
+@requires_cclib
 def test_compute_returns_atomic_result_energy(harness, water_energy_input_all_files, water):
     log_text = _NORMAL_LOG
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2041.3]))
@@ -630,6 +635,7 @@ def test_compute_returns_atomic_result_energy(harness, water_energy_input_all_fi
 
 
 # rq-e62578e2
+@requires_cclib
 def test_compute_returns_atomic_result_gradient(harness, water):
     forces = np.array([[0.01, 0.0, -0.02], [0.0, 0.005, 0.01], [0.0, -0.005, 0.01]])
     ccdata = _make_ccdata_with_attrs(
@@ -661,6 +667,7 @@ def test_compute_returns_atomic_result_gradient(harness, water):
 
 
 # rq-4d683dac
+@requires_cclib
 def test_compute_returns_atomic_result_hessian(harness, water):
     hess_matrix = np.eye(9) * 0.5
     ccdata = _make_ccdata_with_attrs(
@@ -692,6 +699,7 @@ def test_compute_returns_atomic_result_hessian(harness, water):
 
 
 # rq-1a051bc2
+@requires_cclib
 def test_compute_returns_atomic_result_properties(harness, water):
     ccdata = _make_ccdata_with_attrs(
         scfenergies=np.array([-2041.3]),
@@ -740,6 +748,7 @@ def _make_water_mol():
 
 
 # rq-71b27e68
+@requires_cclib
 def test_harvest_hf_energy():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2041.3]))
@@ -751,6 +760,7 @@ def test_harvest_hf_energy():
 
 
 # rq-6bff3228
+@requires_cclib
 def test_harvest_dft_energy():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2082.1]))
@@ -762,6 +772,7 @@ def test_harvest_dft_energy():
 
 
 # rq-578bb785
+@requires_cclib
 def test_harvest_mp2_energies():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(
@@ -779,6 +790,7 @@ def test_harvest_mp2_energies():
 
 
 # rq-1b7ae62e
+@requires_cclib
 def test_harvest_ccsd_energies():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(
@@ -795,6 +807,7 @@ def test_harvest_ccsd_energies():
 
 
 # rq-eddef743
+@requires_cclib
 def test_harvest_ccsd_t_energies():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(
@@ -814,6 +827,7 @@ def test_harvest_ccsd_t_energies():
 
 
 # rq-36736115
+@requires_cclib
 def test_harvest_gradient_negated():
     in_mol = _make_water_mol()
     forces = np.array([[0.01, 0.0, -0.02], [0.0, 0.005, 0.01], [0.0, -0.005, 0.01]])
@@ -829,6 +843,7 @@ def test_harvest_gradient_negated():
 
 
 # rq-3b0adf96
+@requires_cclib
 def test_harvest_no_gradient_when_absent():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2041.3]))
@@ -844,6 +859,7 @@ def test_harvest_no_gradient_when_absent():
 
 
 # rq-f2e32162
+@requires_cclib
 def test_harvest_hessian():
     in_mol = _make_water_mol()
     hess_matrix = np.eye(9) * 0.5
@@ -859,6 +875,7 @@ def test_harvest_hessian():
 
 
 # rq-344f3432
+@requires_cclib
 def test_harvest_no_hessian_when_absent():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2041.3]))
@@ -873,6 +890,7 @@ def test_harvest_no_hessian_when_absent():
 
 
 # rq-4c4a1542
+@requires_cclib
 def test_harvest_dipole_moment():
     in_mol = _make_water_mol()
     dipole_vec = np.array([0.0, 1.85, 0.0])
@@ -886,6 +904,7 @@ def test_harvest_dipole_moment():
 
 
 # rq-ffae3fa6
+@requires_cclib
 def test_harvest_mulliken_charges():
     in_mol = _make_water_mol()
     charges = [-0.5, 0.25, 0.25]
@@ -900,6 +919,7 @@ def test_harvest_mulliken_charges():
 
 
 # rq-53f8ed12
+@requires_cclib
 def test_harvest_missing_mulliken_no_error():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(
@@ -917,6 +937,7 @@ def test_harvest_missing_mulliken_no_error():
 
 
 # rq-a76c3d7b
+@requires_cclib
 def test_harvest_output_molecule_symbols():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2041.3]))
@@ -926,6 +947,7 @@ def test_harvest_output_molecule_symbols():
 
 
 # rq-a9194afb
+@requires_cclib
 def test_harvest_nre_cross_check_passes():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2041.3]))
@@ -935,6 +957,7 @@ def test_harvest_nre_cross_check_passes():
 
 
 # rq-0b4cf843
+@requires_cclib
 def test_harvest_nre_mismatch_raises():
     in_mol = _make_water_mol()
     # Use very different geometry to force NRE mismatch
@@ -954,6 +977,7 @@ def test_harvest_nre_mismatch_raises():
 
 
 # rq-b7c7b8cb
+@requires_cclib
 def test_harvest_no_coords_raises():
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(
@@ -966,6 +990,7 @@ def test_harvest_no_coords_raises():
 
 
 # rq-bb775969
+@requires_cclib
 def test_harvest_cclib_parse_failure_propagates():
     in_mol = _make_water_mol()
     with patch(
