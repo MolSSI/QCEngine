@@ -287,6 +287,8 @@ class GaussianHarness(ProgramHarness):
         try:
             if driver.upper() == "PROPERTIES":
                 retres = float(qcvars["CURRENT ENERGY"])
+            elif driver.upper() == "ENERGY":
+                retres = float(qcvars["CURRENT ENERGY"])
             else:
                 retres = qcvars[f"CURRENT {driver.upper()}"]
         except KeyError:
