@@ -1,0 +1,728 @@
+{
+  "rq-0052a2c7": {
+    "decl": "### `build_com_file(link0: Dict[str, Any], route_line: str, title: str, charge: int, multiplicity: int, atom_block: str) -> str`",
+    "file": "gaussian/input-builder",
+    "level": 3,
+    "refs": [],
+    "title": "`build_com_file(link0: Dict[str, Any], route_line: str, title: str, charge: int, multiplicity: int, atom_block: str) -> str`",
+    "type": "section"
+  },
+  "rq-0199bb02": {
+    "decl": "Scenario: HF method maps to \"HF\" method string",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "HF method maps to \"HF\" method string",
+    "type": "scenario"
+  },
+  "rq-058819da": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-0753cd03": {
+    "decl": "- `\"NUCLEAR REPULSION ENERGY\"` — from parsed geometry.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"NUCLEAR REPULSION ENERGY\"` — from parsed geometry.",
+    "type": "api-item"
+  },
+  "rq-079b1e22": {
+    "decl": "Scenario: Method matching is case-insensitive",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Method matching is case-insensitive",
+    "type": "scenario"
+  },
+  "rq-0aa99076": {
+    "decl": "Scenario: BasisSet object for model.basis raises InputError",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "BasisSet object for model.basis raises InputError",
+    "type": "scenario"
+  },
+  "rq-0b4cf843": {
+    "decl": "Scenario: Nuclear repulsion energy mismatch raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Nuclear repulsion energy mismatch raises ValueError",
+    "type": "scenario"
+  },
+  "rq-12c41d5e": {
+    "decl": "Scenario: Absent normal termination line is classified as abnormal",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Absent normal termination line is classified as abnormal",
+    "type": "scenario"
+  },
+  "rq-165224fc": {
+    "decl": "Scenario: compute() raises InputError when the log contains an unrecognised-keyword error",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises InputError when the log contains an unrecognised-keyword error",
+    "type": "scenario"
+  },
+  "rq-17196f6b": {
+    "decl": "### Registration",
+    "file": "gaussian/runner",
+    "level": 3,
+    "refs": [],
+    "title": "Registration",
+    "type": "section"
+  },
+  "rq-186c5060": {
+    "decl": "Scenario: get_version() returns a normalised version string for Gaussian 16",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "get_version() returns a normalised version string for Gaussian 16",
+    "type": "scenario"
+  },
+  "rq-1a01df8f": {
+    "decl": "## Feature API",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-1a051bc2": {
+    "decl": "Scenario: compute() returns AtomicResult for properties driver",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() returns AtomicResult for properties driver",
+    "type": "scenario"
+  },
+  "rq-1b7ae62e": {
+    "decl": "Scenario: Parse CCSD total energy",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse CCSD total energy",
+    "type": "scenario"
+  },
+  "rq-2052a2fa": {
+    "decl": "Scenario: CCSD method maps to \"CCSD\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "CCSD method maps to \"CCSD\"",
+    "type": "scenario"
+  },
+  "rq-20d9a784": {
+    "decl": "Scenario: get_version() raises UnknownError if version cannot be parsed",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "get_version() raises UnknownError if version cannot be parsed",
+    "type": "scenario"
+  },
+  "rq-23d8b2c6": {
+    "decl": "Scenario: The .com file ends with a trailing blank line",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "The .com file ends with a trailing blank line",
+    "type": "scenario"
+  },
+  "rq-242ef1d8": {
+    "decl": "Scenario: found(raise_error=True) raises ModuleNotFoundError when cclib is missing",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found(raise_error=True) raises ModuleNotFoundError when cclib is missing",
+    "type": "scenario"
+  },
+  "rq-25c4ad49": {
+    "decl": "Scenario: Method already starting with U is not double-prefixed",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Method already starting with U is not double-prefixed",
+    "type": "scenario"
+  },
+  "rq-2ad053f2": {
+    "decl": "## Feature API",
+    "file": "gaussian/input-builder",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-2bd5902e": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/runner",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-342a2ca3": {
+    "decl": "Scenario: Charge and multiplicity are on one line in the molecule section",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Charge and multiplicity are on one line in the molecule section",
+    "type": "scenario"
+  },
+  "rq-344f3432": {
+    "decl": "Scenario: No Hessian when running energy-only or gradient calculation",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "No Hessian when running energy-only or gradient calculation",
+    "type": "scenario"
+  },
+  "rq-36736115": {
+    "decl": "Scenario: Parse gradient and negate forces",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse gradient and negate forces",
+    "type": "scenario"
+  },
+  "rq-37f40e92": {
+    "decl": "- `\"HF TOTAL ENERGY\"` — always set from `ccdata.scfenergies[-1]` (in Hartree).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"HF TOTAL ENERGY\"` — always set from `ccdata.scfenergies[-1]` (in Hartree).",
+    "type": "api-item"
+  },
+  "rq-3b0adf96": {
+    "decl": "Scenario: No gradient attribute in ccdata when running energy-only calculation",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "No gradient attribute in ccdata when running energy-only calculation",
+    "type": "scenario"
+  },
+  "rq-3c343d2a": {
+    "decl": "### `build_route_line(method_string: str, basis: str, job_type: str, extra_keywords: Dict[str, str], user_keywords: Dict[str, Any]) -> str`",
+    "file": "gaussian/input-builder",
+    "level": 3,
+    "refs": [],
+    "title": "`build_route_line(method_string: str, basis: str, job_type: str, extra_keywords: Dict[str, str], user_keywords: Dict[str, Any]) -> str`",
+    "type": "section"
+  },
+  "rq-3e134642": {
+    "decl": "Scenario: get_version() caches the result after the first call",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "get_version() caches the result after the first call",
+    "type": "scenario"
+  },
+  "rq-4336c3cd": {
+    "decl": "- `ValueError` if no coordinate information can be extracted from the log.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "ValueError",
+    "type": "api-item"
+  },
+  "rq-436a54d5": {
+    "decl": "# Feature: Gaussian Harness — Runner",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Runner",
+    "type": "file"
+  },
+  "rq-4ad16d95": {
+    "decl": "Scenario: Memory directive uses integer GB for whole-number memory",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Memory directive uses integer GB for whole-number memory",
+    "type": "scenario"
+  },
+  "rq-4c4a1542": {
+    "decl": "Scenario: Parse dipole moment for properties driver",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse dipole moment for properties driver",
+    "type": "scenario"
+  },
+  "rq-4cf7c460": {
+    "decl": "Scenario: found() returns True when g16 and cclib are both available",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found() returns True when g16 and cclib are both available",
+    "type": "scenario"
+  },
+  "rq-4d683dac": {
+    "decl": "Scenario: compute() returns AtomicResult with Hessian for hessian driver",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() returns AtomicResult with Hessian for hessian driver",
+    "type": "scenario"
+  },
+  "rq-4d763c6d": {
+    "decl": "- `multiplicity` — from `AtomicInput.molecule.molecular_multiplicity`.",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "multiplicity",
+    "type": "api-item"
+  },
+  "rq-5053204b": {
+    "decl": "Scenario: Ghost atoms in the molecule raise InputError",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Ghost atoms in the molecule raise InputError",
+    "type": "scenario"
+  },
+  "rq-53f8ed12": {
+    "decl": "Scenario: Missing Mulliken charges do not raise an error",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing Mulliken charges do not raise an error",
+    "type": "scenario"
+  },
+  "rq-546faafb": {
+    "decl": "Scenario: MP2 method maps to \"MP2\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "MP2 method maps to \"MP2\"",
+    "type": "scenario"
+  },
+  "rq-578bb785": {
+    "decl": "Scenario: Parse MP2 total and correlation energies",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse MP2 total and correlation energies",
+    "type": "scenario"
+  },
+  "rq-6bff3228": {
+    "decl": "Scenario: Parse DFT total energy (treated as HF SCF energy by cclib)",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse DFT total energy (treated as HF SCF energy by cclib)",
+    "type": "scenario"
+  },
+  "rq-6d73bb9e": {
+    "decl": "Scenario: Doublet automatically prepends U to HF",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Doublet automatically prepends U to HF",
+    "type": "scenario"
+  },
+  "rq-7049aaa5": {
+    "decl": "Scenario: SCF is an alias for HF",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "SCF is an alias for HF",
+    "type": "scenario"
+  },
+  "rq-7152455e": {
+    "decl": "Scenario: User keyword is appended to route line",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "User keyword is appended to route line",
+    "type": "scenario"
+  },
+  "rq-71aceb93": {
+    "decl": "Scenario: compute() raises UnknownError on abnormal termination with no known pattern",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises UnknownError on abnormal termination with no known pattern",
+    "type": "scenario"
+  },
+  "rq-71b27e68": {
+    "decl": "Scenario: Parse HF total energy from a closed-shell log",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse HF total energy from a closed-shell log",
+    "type": "scenario"
+  },
+  "rq-74e0110c": {
+    "decl": "## Molecule Block Construction",
+    "file": "gaussian/input-builder",
+    "level": 2,
+    "refs": [],
+    "title": "Molecule Block Construction",
+    "type": "section"
+  },
+  "rq-82942b90": {
+    "decl": "Scenario: Hessian driver produces \"Freq\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Hessian driver produces \"Freq\"",
+    "type": "scenario"
+  },
+  "rq-850ede4f": {
+    "decl": "Scenario: get_version() returns a normalised version string for Gaussian 09",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "get_version() returns a normalised version string for Gaussian 09",
+    "type": "scenario"
+  },
+  "rq-851d782c": {
+    "decl": "Scenario: Unknown method is passed through verbatim (uppercased)",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Unknown method is passed through verbatim (uppercased)",
+    "type": "scenario"
+  },
+  "rq-86c27356": {
+    "decl": "- `InputError` — if `driver` is not one of the four supported values.",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "InputError",
+    "type": "api-item"
+  },
+  "rq-8d6fc024": {
+    "decl": "### Output Molecule Construction",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "Output Molecule Construction",
+    "type": "section"
+  },
+  "rq-8e21b7d7": {
+    "decl": "Scenario: found() returns False when neither g16 nor g09 is on PATH",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found() returns False when neither g16 nor g09 is on PATH",
+    "type": "scenario"
+  },
+  "rq-90141f40": {
+    "decl": "Scenario: Normal termination line is present in a successful log",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Normal termination line is present in a successful log",
+    "type": "scenario"
+  },
+  "rq-90604835": {
+    "decl": "- `ValueError` if the nuclear repulsion energy of the parsed geometry deviates from",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "ValueError",
+    "type": "api-item"
+  },
+  "rq-92492893": {
+    "decl": "Scenario: CCSD(T) method maps to \"CCSD(T)\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "CCSD(T) method maps to \"CCSD(T)\"",
+    "type": "scenario"
+  },
+  "rq-929a262a": {
+    "decl": "### QC Variables Populated",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "QC Variables Populated",
+    "type": "section"
+  },
+  "rq-943856cc": {
+    "decl": "- `\"DIPOLE MOMENT\"` — magnitude of `ccdata.moments[1]` in Debye.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"DIPOLE MOMENT\"` — magnitude of `ccdata.moments[1]` in Debye.",
+    "type": "api-item"
+  },
+  "rq-972b6470": {
+    "decl": "Scenario: Singlet uses method name as-is (no U prefix)",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Singlet uses method name as-is (no U prefix)",
+    "type": "scenario"
+  },
+  "rq-99807237": {
+    "decl": "Scenario: compute() returns AtomicResult for a successful energy calculation",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() returns AtomicResult for a successful energy calculation",
+    "type": "scenario"
+  },
+  "rq-998da273": {
+    "decl": "### Class `GaussianHarness(ProgramHarness)`",
+    "file": "gaussian/runner",
+    "level": 3,
+    "refs": [],
+    "title": "Class `GaussianHarness(ProgramHarness)`",
+    "type": "section"
+  },
+  "rq-9acd1ce5": {
+    "decl": "Scenario: Route line for gradient calculation",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Route line for gradient calculation",
+    "type": "scenario"
+  },
+  "rq-9cdf3f7d": {
+    "decl": "# Feature: Gaussian Harness — Input Builder",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Input Builder",
+    "type": "file"
+  },
+  "rq-9d12489e": {
+    "decl": "# Feature: Gaussian Harness — Harvester",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Harvester",
+    "type": "file"
+  },
+  "rq-9ec1917a": {
+    "decl": "## Gaussian Input File Format",
+    "file": "gaussian/input-builder",
+    "level": 2,
+    "refs": [],
+    "title": "Gaussian Input File Format",
+    "type": "section"
+  },
+  "rq-a4c449da": {
+    "decl": "Scenario: compute() raises ResourceError on memory allocation failure",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises ResourceError on memory allocation failure",
+    "type": "scenario"
+  },
+  "rq-a76c3d7b": {
+    "decl": "Scenario: Output molecule geometry is constructed from ccdata",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Output molecule geometry is constructed from ccdata",
+    "type": "scenario"
+  },
+  "rq-a88c706f": {
+    "decl": "- `method` — method string from `AtomicInput.model.method` (case-insensitive).",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "method",
+    "type": "api-item"
+  },
+  "rq-a9194afb": {
+    "decl": "Scenario: Nuclear repulsion energy cross-check passes for consistent geometry",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Nuclear repulsion energy cross-check passes for consistent geometry",
+    "type": "scenario"
+  },
+  "rq-af032242": {
+    "decl": "Scenario: Route line for closed-shell HF energy",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Route line for closed-shell HF energy",
+    "type": "scenario"
+  },
+  "rq-b49bb2a2": {
+    "decl": "- `driver` — one of `\"energy\"`, `\"gradient\"`, `\"hessian\"`, `\"properties\"`.",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "driver",
+    "type": "api-item"
+  },
+  "rq-b5e72c6d": {
+    "decl": "Scenario: found() returns False when cclib is not importable",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found() returns False when cclib is not importable",
+    "type": "scenario"
+  },
+  "rq-b7c7b8cb": {
+    "decl": "Scenario: Log with no coordinate data raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Log with no coordinate data raises ValueError",
+    "type": "scenario"
+  },
+  "rq-b819d8e0": {
+    "decl": "Scenario: Atom coordinates appear in Angstrom with at least 10 decimal places",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Atom coordinates appear in Angstrom with at least 10 decimal places",
+    "type": "scenario"
+  },
+  "rq-bb0a5d96": {
+    "decl": "## cclib Integration",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "cclib Integration",
+    "type": "section"
+  },
+  "rq-bb775969": {
+    "decl": "Scenario: cclib parse failure propagates as-is",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "cclib parse failure propagates as-is",
+    "type": "scenario"
+  },
+  "rq-bd98d417": {
+    "decl": "Scenario: found(raise_error=True) raises ModuleNotFoundError when g16 is missing",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found(raise_error=True) raises ModuleNotFoundError when g16 is missing",
+    "type": "scenario"
+  },
+  "rq-c20746b1": {
+    "decl": "## Regex Fallback",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Regex Fallback",
+    "type": "section"
+  },
+  "rq-c266b9bb": {
+    "decl": "Scenario: Energy driver produces no job-type keyword",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Energy driver produces no job-type keyword",
+    "type": "scenario"
+  },
+  "rq-c5165f1f": {
+    "decl": "- `\"CURRENT ENERGY\"` — set to the highest-level energy available (see below).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"CURRENT ENERGY\"` — set to the highest-level energy available (see below).",
+    "type": "api-item"
+  },
+  "rq-c77a2c13": {
+    "decl": "Scenario: compute() raises InputError when model.basis is a BasisSet object",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises InputError when model.basis is a BasisSet object",
+    "type": "scenario"
+  },
+  "rq-c7fd08b5": {
+    "decl": "- `\"MULLIKEN CHARGES\"` — from `ccdata.atomcharges[\"mulliken\"]`.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"MULLIKEN CHARGES\"` — from `ccdata.atomcharges[\"mulliken\"]`.",
+    "type": "api-item"
+  },
+  "rq-c946c285": {
+    "decl": "Scenario: Triplet automatically prepends U to B3LYP",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Triplet automatically prepends U to B3LYP",
+    "type": "scenario"
+  },
+  "rq-cb0f61f2": {
+    "decl": "## Gaussian Executable Details",
+    "file": "gaussian/runner",
+    "level": 2,
+    "refs": [],
+    "title": "Gaussian Executable Details",
+    "type": "section"
+  },
+  "rq-cc549245": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/input-builder",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-cd0d6637": {
+    "decl": "Scenario: Route line for properties calculation includes Pop=Full",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Route line for properties calculation includes Pop=Full",
+    "type": "scenario"
+  },
+  "rq-cf6fdf8a": {
+    "decl": "## Feature API",
+    "file": "gaussian/runner",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-d3b8d8c3": {
+    "decl": "Scenario: found() falls back to g09 when g16 is absent",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found() falls back to g09 when g16 is absent",
+    "type": "scenario"
+  },
+  "rq-d7e8161d": {
+    "decl": "Scenario: Link 0 section contains NProcShared and Mem directives",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Link 0 section contains NProcShared and Mem directives",
+    "type": "scenario"
+  },
+  "rq-d9434480": {
+    "decl": "### `harvest(in_mol: Molecule, method: str, log_content: str) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]`",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "`harvest(in_mol: Molecule, method: str, log_content: str) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]`",
+    "type": "section"
+  },
+  "rq-db92093a": {
+    "decl": "Scenario: Memory directive rounds down to nearest integer GB (minimum 1)",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Memory directive rounds down to nearest integer GB (minimum 1)",
+    "type": "scenario"
+  },
+  "rq-e008c6fe": {
+    "decl": "Scenario: Unsupported driver raises InputError",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Unsupported driver raises InputError",
+    "type": "scenario"
+  },
+  "rq-e62578e2": {
+    "decl": "Scenario: compute() returns AtomicResult with gradient for gradient driver",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() returns AtomicResult with gradient for gradient driver",
+    "type": "scenario"
+  },
+  "rq-e7897f09": {
+    "decl": "Scenario: Reserved user keywords (memory, nprocs) are not appended to route line",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Reserved user keywords (memory, nprocs) are not appended to route line",
+    "type": "scenario"
+  },
+  "rq-edb73b83": {
+    "decl": "Scenario: compute() raises InputError on internal coordinate error",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises InputError on internal coordinate error",
+    "type": "scenario"
+  },
+  "rq-eddef743": {
+    "decl": "Scenario: Parse CCSD(T) total energy",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse CCSD(T) total energy",
+    "type": "scenario"
+  },
+  "rq-ef62979b": {
+    "decl": "### `muster_modelchem(method: str, driver: str, multiplicity: int) -> Dict[str, Any]`",
+    "file": "gaussian/input-builder",
+    "level": 3,
+    "refs": [],
+    "title": "`muster_modelchem(method: str, driver: str, multiplicity: int) -> Dict[str, Any]`",
+    "type": "section"
+  },
+  "rq-f1c116db": {
+    "decl": "Scenario: Gradient driver produces \"Force=NoStep\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Gradient driver produces \"Force=NoStep\"",
+    "type": "scenario"
+  },
+  "rq-f2e32162": {
+    "decl": "Scenario: Parse Hessian from frequency calculation",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse Hessian from frequency calculation",
+    "type": "scenario"
+  },
+  "rq-f512b60b": {
+    "decl": "Scenario: Properties driver produces Pop=Full in extra_keywords",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Properties driver produces Pop=Full in extra_keywords",
+    "type": "scenario"
+  },
+  "rq-fe13245b": {
+    "decl": "Scenario: Method starting with RO is not prefixed with U",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Method starting with RO is not prefixed with U",
+    "type": "scenario"
+  },
+  "rq-ffae3fa6": {
+    "decl": "Scenario: Parse Mulliken charges for properties driver",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse Mulliken charges for properties driver",
+    "type": "scenario"
+  }
+}

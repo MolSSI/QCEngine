@@ -177,6 +177,8 @@ _programs = {
     "s-dftd3": which_import("dftd3", return_bool=True),
     "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
+    "gaussian": (which("g16", return_bool=True) or which("g09", return_bool=True))
+    and which_import("cclib", return_bool=True),
     "mctc-gcp": is_program_new_enough("mctc-gcp", "2.3.0"),
     "gcp": which("gcp", return_bool=True),  # mark is classic-gcp
     "geometric": which_import("geometric", return_bool=True),
