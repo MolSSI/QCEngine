@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 import qcelemental as qcel
-from qcelemental.models import AtomicInput, BasisSet, Molecule
+from qcelemental.models.v2 import AtomicInput, AtomicSpecification, BasisSet, Molecule
 
 from qcengine.exceptions import InputError, ResourceError, UnknownError
 from qcengine.programs.gaussian.germinate import muster_modelchem
@@ -16,7 +16,7 @@ from qcengine.programs.gaussian.harvester import harvest, is_normal_termination
 from qcengine.programs.gaussian.keywords import build_com_file, build_route_line
 from qcengine.programs.gaussian import runner as gaussian_runner
 from qcengine.programs.gaussian.runner import GaussianHarness
-from qcengine.testing import using
+from qcengine.testing import uusing as using
 
 # ---------------------------------------------------------------------------
 # Shared test fixtures
@@ -42,7 +42,7 @@ def water():
 @pytest.fixture
 def water_energy_input(water):
     """Minimal AtomicInput for a closed-shell HF/STO-3G energy on water."""
-    return AtomicInput(molecule=water, driver="energy", model={"method": "HF", "basis": "STO-3G"})
+    return AtomicInput(molecule=water, specification=AtomicSpecification(program="gaussian", driver="energy", model={"method": "HF", "basis": "STO-3G"}))
 
 
 @pytest.fixture
@@ -50,9 +50,12 @@ def water_energy_input_all_files(water):
     """AtomicInput with native_files protocol set to 'all' for testing file output."""
     return AtomicInput(
         molecule=water,
-        driver="energy",
-        model={"method": "HF", "basis": "STO-3G"},
-        protocols={"native_files": "all"},
+        specification=AtomicSpecification(
+            program="gaussian",
+            driver="energy",
+            model={"method": "HF", "basis": "STO-3G"},
+            protocols={"native_files": "all"},
+        ),
     )
 
 
@@ -336,7 +339,7 @@ def test_build_com_file_trailing_blank_line():
 def test_build_input_memory_rounds_down_minimum_1(water_energy_input, harness):
     from qcengine.config import TaskConfig
 
-    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=1, memory=0.5, retries=0)
+    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=1, nnodes=1, memory=0.5, retries=0, mpiexec_command=None)
     with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/usr/local/g16/g16"):
         job = harness.build_input(water_energy_input, cfg)
     assert "%Mem=1GB" in job["infiles"]["gaussian.com"]
@@ -346,7 +349,7 @@ def test_build_input_memory_rounds_down_minimum_1(water_energy_input, harness):
 def test_build_input_memory_whole_gb(water_energy_input, harness):
     from qcengine.config import TaskConfig
 
-    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=4, memory=8.0, retries=0)
+    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=4, nnodes=1, memory=8.0, retries=0, mpiexec_command=None)
     with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/usr/local/g16/g16"):
         job = harness.build_input(water_energy_input, cfg)
     assert "%Mem=8GB" in job["infiles"]["gaussian.com"]
@@ -360,8 +363,8 @@ def test_build_input_ghost_atoms_raise(harness):
         {"symbols": ["O", "H", "H"], "geometry": [0, 0, 0.2, 0, 1.4, -0.9, 0, -1.4, -0.9],
          "real": [True, False, True]}
     )
-    inp = AtomicInput(molecule=ghost_mol, driver="energy", model={"method": "HF", "basis": "STO-3G"})
-    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=1, memory=1.0, retries=0)
+    inp = AtomicInput(molecule=ghost_mol, specification=AtomicSpecification(program="gaussian", driver="energy", model={"method": "HF", "basis": "STO-3G"}))
+    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=1, nnodes=1, memory=1.0, retries=0, mpiexec_command=None)
     with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/usr/local/g16/g16"):
         with pytest.raises(InputError):
             harness.build_input(inp, cfg)
@@ -372,8 +375,8 @@ def test_build_input_basisset_object_raises(water, harness):
     from qcengine.config import TaskConfig
 
     bs = BasisSet(name="sto-3g", center_data={}, atom_map=[])
-    inp = AtomicInput(molecule=water, driver="energy", model={"method": "HF", "basis": bs})
-    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=1, memory=1.0, retries=0)
+    inp = AtomicInput(molecule=water, specification=AtomicSpecification(program="gaussian", driver="energy", model={"method": "HF", "basis": bs}))
+    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=1, nnodes=1, memory=1.0, retries=0, mpiexec_command=None)
     with pytest.raises(InputError):
         harness.build_input(inp, cfg)
 
@@ -526,7 +529,7 @@ def _mock_compute(harness, water_energy_input, log_text):
 # rq-c77a2c13
 def test_compute_raises_for_basisset_object(harness, water):
     bs = BasisSet(name="sto-3g", center_data={}, atom_map=[])
-    inp = AtomicInput(molecule=water, driver="energy", model={"method": "HF", "basis": bs})
+    inp = AtomicInput(molecule=water, specification=AtomicSpecification(program="gaussian", driver="energy", model={"method": "HF", "basis": bs}))
     with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
         with patch("qcengine.programs.gaussian.runner.which_import", return_value=True):
             with pytest.raises(InputError):
@@ -633,7 +636,7 @@ def test_compute_returns_atomic_result_gradient(harness, water):
         scfenergies=np.array([-2041.3]),
         grads=forces[np.newaxis, :, :],  # shape (1, 3, 3)
     )
-    inp = AtomicInput(molecule=water, driver="gradient", model={"method": "HF", "basis": "STO-3G"})
+    inp = AtomicInput(molecule=water, specification=AtomicSpecification(program="gaussian", driver="gradient", model={"method": "HF", "basis": "STO-3G"}))
     log_text = _NORMAL_LOG
 
     job_record = {
@@ -664,7 +667,7 @@ def test_compute_returns_atomic_result_hessian(harness, water):
         scfenergies=np.array([-2041.3]),
         hessian=hess_matrix,
     )
-    inp = AtomicInput(molecule=water, driver="hessian", model={"method": "HF", "basis": "STO-3G"})
+    inp = AtomicInput(molecule=water, specification=AtomicSpecification(program="gaussian", driver="hessian", model={"method": "HF", "basis": "STO-3G"}))
     log_text = _NORMAL_LOG
 
     job_record = {
@@ -695,7 +698,7 @@ def test_compute_returns_atomic_result_properties(harness, water):
         moments=[None, np.array([0.0, 1.85, 0.0])],
         atomcharges={"mulliken": [-0.5, 0.25, 0.25]},
     )
-    inp = AtomicInput(molecule=water, driver="properties", model={"method": "HF", "basis": "STO-3G"})
+    inp = AtomicInput(molecule=water, specification=AtomicSpecification(program="gaussian", driver="properties", model={"method": "HF", "basis": "STO-3G"}))
     log_text = _NORMAL_LOG
 
     job_record = {
@@ -1001,11 +1004,7 @@ def test_gaussian_energy_water(water):
     import qcengine as qcng
 
     result = qcng.compute(
-        {
-            "molecule": water.dict(),
-            "driver": "energy",
-            "model": {"method": "HF", "basis": "STO-3G"},
-        },
+        AtomicInput(molecule=water, specification=AtomicSpecification(program="gaussian", driver="energy", model={"method": "HF", "basis": "STO-3G"})),
         "gaussian",
         raise_error=True,
     )
@@ -1020,11 +1019,7 @@ def test_gaussian_gradient_water(water):
     import qcengine as qcng
 
     result = qcng.compute(
-        {
-            "molecule": water.dict(),
-            "driver": "gradient",
-            "model": {"method": "HF", "basis": "STO-3G"},
-        },
+        AtomicInput(molecule=water, specification=AtomicSpecification(program="gaussian", driver="gradient", model={"method": "HF", "basis": "STO-3G"})),
         "gaussian",
         raise_error=True,
     )
