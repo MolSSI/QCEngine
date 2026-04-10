@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import qcelemental as qcel
-from qcelemental.models import AtomicInput, AtomicResult, BasisSet, Provenance
+from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which, which_import
 
 from ...exceptions import InputError, ResourceError, UnknownError
@@ -51,9 +51,6 @@ class GaussianHarness(ProgramHarness):
         "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
-
-    class Config(ProgramHarness.Config):
-        pass
 
     # rq-4cf7c460 rq-d3b8d8c3 rq-8e21b7d7 rq-b5e72c6d rq-bd98d417 rq-242ef1d8
     @staticmethod
@@ -125,7 +122,7 @@ class GaussianHarness(ProgramHarness):
         self.found(raise_error=True)
 
         # rq-c77a2c13
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError(
                 "QCSchema BasisSet for model.basis is not supported by the Gaussian harness. "
                 "Use a string basis name (e.g. 'STO-3G')."
@@ -172,11 +169,11 @@ class GaussianHarness(ProgramHarness):
     ) -> Dict[str, Any]:
         """Construct the Gaussian .com input file and execution record."""
         # rq-0aa99076
-        if isinstance(input_model.model.basis, BasisSet):
+        if isinstance(input_model.specification.model.basis, BasisSet):
             raise InputError(
                 "QCSchema BasisSet for model.basis is not supported by the Gaussian harness."
             )
-        if input_model.model.basis is None:
+        if input_model.specification.model.basis is None:
             raise InputError("model.basis must be a string basis name for the Gaussian harness.")
 
         # rq-5053204b
@@ -184,9 +181,9 @@ class GaussianHarness(ProgramHarness):
             raise InputError("The Gaussian harness does not support ghost atoms (real=False).")
 
         mol = input_model.molecule
-        method = input_model.model.method
-        basis = input_model.model.basis
-        driver = input_model.driver.value  # DriverEnum → plain lowercase string
+        method = input_model.specification.model.method
+        basis = input_model.specification.model.basis
+        driver = input_model.specification.driver.value  # DriverEnum → plain lowercase string
 
         # rq-ef62979b
         modelchem = muster_modelchem(method, driver, mol.molecular_multiplicity)
@@ -212,7 +209,7 @@ class GaussianHarness(ProgramHarness):
             basis,
             modelchem["job_type"],
             modelchem["extra_keywords"],
-            input_model.keywords,
+            input_model.specification.keywords,
         )
 
         com_text = build_com_file(
@@ -266,7 +263,7 @@ class GaussianHarness(ProgramHarness):
         input_text = outfiles.pop("input", "") or ""
         log_text = outfiles.get("gaussian.log", "") or ""
 
-        method = input_model.model.method.lower()
+        method = input_model.specification.model.method.lower()
         # Strip any "gaussian-" prefix in case caller added one
         if method.startswith("gaussian-"):
             method = method[len("gaussian-"):]
@@ -286,7 +283,7 @@ class GaussianHarness(ProgramHarness):
             qcvars[f"{method_upper} TOTAL HESSIAN"] = hess
             qcvars["CURRENT HESSIAN"] = hess
 
-        driver = input_model.driver.value  # DriverEnum → plain lowercase string
+        driver = input_model.specification.driver.value  # DriverEnum → plain lowercase string
         try:
             if driver.upper() == "PROPERTIES":
                 retres = float(qcvars["CURRENT ENERGY"])
@@ -308,12 +305,13 @@ class GaussianHarness(ProgramHarness):
             creator="Gaussian",
             version=self.get_version(),
             routine="gaussian",
-        ).dict()
+        ).model_dump()
 
         output_data = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "input_data": input_model,
             "molecule": out_mol,
-            "extras": {**input_model.extras, "qcvars": qcvars_serialised},
+            "extras": {**input_model.specification.extras, "qcvars": qcvars_serialised},
             "native_files": {
                 "gaussian.com": input_text,
                 "gaussian.log": log_text,
@@ -326,4 +324,4 @@ class GaussianHarness(ProgramHarness):
             "success": True,
         }
 
-        return AtomicResult(**{**input_model.dict(), **output_data})
+        return AtomicResult(**output_data)

@@ -51,7 +51,7 @@ Located at `qcengine/programs/gaussian/runner.py`.
 #### `compute(input_model: AtomicInput, config: TaskConfig) -> AtomicResult`
 
 - Calls `found(raise_error=True)`.
-- Raises `InputError` immediately if `input_model.model.basis` is a `BasisSet` instance
+- Raises `InputError` immediately if `input_model.specification.model.basis` is a `BasisSet` instance
   (only string basis names are supported).
 - Calls `self.build_input(input_model, config)` to produce the job record.
 - Calls `self.execute(job_inputs)` to run Gaussian.
@@ -69,7 +69,7 @@ Located at `qcengine/programs/gaussian/runner.py`.
 
 #### `build_input(input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None) -> Dict[str, Any]`
 
-- Raises `InputError` if `input_model.model.basis` is a `BasisSet` instance or `None`.
+- Raises `InputError` if `input_model.specification.model.basis` is a `BasisSet` instance or `None`.
 - Delegates method/driver/multiplicity mapping to `muster_modelchem()` (germinate.py).
 - Delegates `.com` file assembly to `build_com_file()` (keywords.py).
 - Returns a dict:
@@ -111,14 +111,14 @@ Located at `qcengine/programs/gaussian/runner.py`.
 - Returns:
   ```python
   AtomicResult(**{
-      **input_model.dict(),
-      "schema_version": 1,
+      "schema_version": 2,
+      "input_data": input_model,
       "molecule": mol,
-      "extras": {**input_model.extras, "qcvars": qcvars_serialised},
+      "extras": {**input_model.specification.extras, "qcvars": qcvars_serialised},
       "native_files": {"gaussian.com": input_text, "gaussian.log": log_text},
       "properties": atprop,
       "provenance": Provenance(creator="Gaussian", version=self.get_version(),
-                               routine="gaussian").dict(),
+                               routine="gaussian").model_dump(),
       "return_result": retres,
       "stderr": stderr,
       "stdout": stdout,
