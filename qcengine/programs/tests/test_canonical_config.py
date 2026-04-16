@@ -34,6 +34,7 @@ _canonical_methods = [
     # needs attn ("torchani", {"method": "ANI1x"}, {}),
     # needs attn ("turbomole", {"method": "pbe", "basis": "6-31G"}, {}),
     # needs attn ("xtb", {"method": "GFN2-xTB"}, {}),
+    pytest.param("tblite", {"method": "GFN2-xTB"}, {}, marks=using("tblite")),
 ]
 
 
@@ -59,6 +60,7 @@ def _get_molecule(program, method, molcls):
                 "gamess": {"system__mwords": "5000"},
                 "nwchem": {"memory": "5 gb"},
                 "psi4": {},  # no contradictory memory keyword in psi
+                "tblite": {},  # no contradictory memory keyword in tblite -- all through envvars
             },
             id="dsl",
         ),
@@ -124,6 +126,7 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, sch
         "gamess": "208000000 WORDS OF MEMORY AVAILABLE",
         "nwchem": r"total\s+=\s+2087085\d\d doubles =\s+1592.3 Mbytes",  # doubles is quad-words. Mbytes is MiB
         "psi4": "1592 MiB Core",
+        "tblite": "",  # no output signal so always passing. envvar status has been checked
     }
 
     #  <<  Test
@@ -285,6 +288,7 @@ def test_local_options_ncores(program, model, keywords, ncores, schema_versions,
         # "gamess": rf"PARALLEL VERSION RUNNING ON\s+{ncores} PROCESSORS IN\s+1 NODES",  # no line for serial
         # nwchem is node_parallel only
         "psi4": rf"Threads:\s+{ncores}",
+        "tblite": "",  # no record in output, but I've checked the envvar is set
     }
 
     #  <<  Test

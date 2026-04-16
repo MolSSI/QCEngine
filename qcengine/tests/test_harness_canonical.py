@@ -41,6 +41,7 @@ _canonical_methods = [
     pytest.param("aimnet2", {"method": "b973c"}, {}, marks=using("aimnet2")),
     pytest.param("s-dftd3", {"method": "b3lyp-d3"}, {}, marks=using("s-dftd3")),
     pytest.param("dftd4", {"method": "b3lyp-d4"}, {}, marks=using("dftd4")),
+    pytest.param("tblite", {"method": "GFN2-xTB"}, {}, marks=using("tblite")),
     # add as programs available
     # pytest.param("terachem", {"method": "bad"}, marks=using("")),
 ]
@@ -184,7 +185,8 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
         pytest.param("gcp", {"method": "bad"}, marks=using("classic-gcp")),
         pytest.param("mrchem", {"method": "bad"}, marks=using("mrchem")),
         pytest.param("mctc-gcp", {"method": "bad"}, marks=using("mctc-gcp")),
-        pytest.param("mace", {"method": "bad"}, marks=using("mace"))
+        pytest.param("mace", {"method": "bad"}, marks=using("mace")),
+        pytest.param("tblite", {"method": "bad"}, marks=using("tblite")),
         # add as programs available
         # ("molpro", {"method": "bad"}),
         # ("terachem", {"method": "bad"}),
@@ -221,7 +223,7 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
         ret = qcng.compute(inp, program, raise_error=raiserr, return_dict=retdict, return_version=retver)
         ret = checkver_and_convert(
             ret, request.node.name, "post", vercheck=False, cast_dict_as="FailedOperation"
-        )  # TODO release vercheck=F?
+        )
         if retdict:
             assert ret["success"] is False, "wrongly successful"
             assert (
