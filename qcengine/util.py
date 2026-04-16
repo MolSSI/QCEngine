@@ -19,6 +19,7 @@ from threading import Thread
 from typing import Any, BinaryIO, Dict, List, Optional, TextIO, Tuple, Union
 
 import pydantic
+from qcelemental.models import QCEL_V1V2_SHIM_CODE
 
 from qcengine.config import TaskConfig
 
@@ -26,9 +27,6 @@ from .config import LOGGER, get_provenance_augments
 from .exceptions import InputError, QCEngineException
 
 __all__ = ["compute_wrapper", "model_wrapper", "handle_output_metadata", "create_mpi_invocation", "execute"]
-
-
-from qcelemental.models import QCEL_V1V2_SHIM_CODE
 
 
 def create_mpi_invocation(executable: str, task_config: TaskConfig) -> List[str]:

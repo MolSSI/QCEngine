@@ -237,7 +237,9 @@ def compute(
 
 
 def compute_procedure(*args, **kwargs):
-    from qcelemental.models.common_models import _qcsk_v2_default_v1_importpathschange
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        from qcelemental.models.common_models import _qcsk_v2_default_v1_importpathschange
 
     warnings.warn(
         "Using the `compute_procedure` function is deprecated in favor of using `compute`, "

@@ -10,7 +10,8 @@ from qcelemental.models.v2 import AtomicInput, AtomicResult
 from qcelemental.util import safe_version, which_import
 
 from ..config import TaskConfig
-from ..exceptions import ResourceError
+from ..exceptions import ResourceError, InputError
+from ..util import environ_context
 from .model import ProgramHarness
 
 
@@ -23,7 +24,7 @@ class TBLiteHarness(ProgramHarness):
         "thread_safe": True,
         "thread_parallel": True,
         "node_parallel": False,
-        "managed_memory": False,
+        "managed_memory": True,
     }
     version_cache: Dict[str, str] = {}
 
@@ -65,5 +66,14 @@ class TBLiteHarness(ProgramHarness):
         from tblite.qcschema import run_schema
 
         # tblite v0.6.0 natively speaks QCSchema v2 and returns AtomicResult or FailedOperation
-        output = run_schema(input_data)
+        env = {
+            "OMP_STACKSIZE": f"{config.memory} G",
+            "OMP_NUM_THREADS": f"{config.ncores},1",
+        }
+        with environ_context(env=env):
+            output = run_schema(input_data)
+
+        if not output.success:
+            raise InputError(output.error.error_message)
+ 
         return output

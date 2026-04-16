@@ -75,6 +75,8 @@ def test_protocol_native(program, model, keywords, native, schema_versions, requ
         "mp2d": rf"--TT_a1=0.944 --TT_a2=0.48",
         "nwchem": rf"H library 6-31G",
         "psi4": rf'"driver": "gradient",',
+        # Py API, so no written input. could add AtIn but already present as input_data and would need to be upstream where AtRes formed.
+        "tblite": None,
     }
 
     all_ref = {
@@ -86,6 +88,7 @@ def test_protocol_native(program, model, keywords, native, schema_versions, requ
         "mp2d": ("mp2d_geometry", rf"H\s+0.0+\s+0.0+\s+0.34"),
         "nwchem": ("nwchem.grad", rf"0.0, 0.0, 0.03"),
         "psi4": ("psi4.grad", rf"1.0+\s+(-?)0.0+\s+(-?)0.0+\s+0.03"),
+        "tblite": None,  # extra files available only from fit mode
     }
 
     #  <<  Test
@@ -103,10 +106,10 @@ def test_protocol_native(program, model, keywords, native, schema_versions, requ
         assert "stderr" not in ret.native_files, f"Stderr found in native_files -- clean up the harness"
     assert "outfiles" not in ret.extras, f"Outfiles found in extras -- clean up the harness"
 
-    if native in ["input", "all"]:
+    if native in ["input", "all"] and input_ref[program] is not None:
         assert re.search(
             input_ref[program], ret.native_files["input"]
         ), f"Input file pattern not found: {input_ref[program]}"
-    if native == "all" and program != "psi4":  # allow psi4 once native_files PR merged
+    if native == "all" and all_ref[program] is not None:
         fl, snip = all_ref[program]
         assert re.search(snip, ret.native_files[fl]), f"Ancillary file pattern not found in {fl}: {snip}"

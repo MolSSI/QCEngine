@@ -664,7 +664,7 @@ def test_tblite_task_unknown_method(schema_versions, request):
             driver="energy",
         )
     error = models_out.ComputeError(
-        error_type="input_error", error_message="Model 'GFN-xTB' is not supported by tblite."
+        error_type="input_error", error_message="QCEngine Input Error: Model 'GFN-xTB' is not supported by tblite."
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
@@ -695,7 +695,7 @@ def test_tblite_task_unsupported_driver(schema_versions, request):
             driver="hessian",
         )
     error = models_out.ComputeError(
-        error_type="input_error", error_message="Driver 'hessian' is not supported by tblite."
+        error_type="input_error", error_message="QCEngine Input Error: Driver 'hessian' is not supported by tblite."
     )
 
     atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
