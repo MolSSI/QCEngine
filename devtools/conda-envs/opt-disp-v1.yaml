@@ -1,0 +1,36 @@
+name: test
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - psi4=1.9.1
+  - libint=2.9.0=*_4
+  - rdkit
+  - mopac
+  - pydantic-settings
+
+    # Mixed Tests
+  - dftd3-python<1.3
+  - dftd4-python<4.1
+  - gcp-correction
+  - geometric
+  - optking
+  - pymdi
+  - setuptools <82.0  # for berny
+
+    # Core
+  - python
+  - pyyaml
+  - py-cpuinfo
+  - psutil
+  - conda-forge/label/qcelemental_dev::qcelemental
+  - msgpack-python
+
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+
+  - pip
+  - pip:
+    - pyberny

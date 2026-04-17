@@ -12,7 +12,7 @@ visit `its documentation <https://xtb-python.readthedocs.io>`_.
 from typing import Any, ClassVar, Dict
 
 from qcelemental.models.v2 import AtomicInput, AtomicResult, FailedOperation
-from qcelemental.util import safe_version, which_import
+from qcelemental.util import parse_version, safe_version, which_import
 
 from ..config import TaskConfig
 from .model import ProgramHarness
@@ -65,13 +65,25 @@ class XTBHarness(ProgramHarness):
         import xtb
         from xtb.qcschema.harness import run_qcschema
 
-        # Run the Harness
-        input_data_v1 = input_data.convert_v(1)
-        output_v1 = run_qcschema(input_data_v1)
+        if parse_version(self.get_version()) < parse_version("26.1"):
+            # xtb-python speaks qcsk.v1
 
-        # xtb qcschema interface stores error in Result model
-        if not output_v1.success:
-            return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
+            # Run the Harness
+            input_model_v1 = input_data.convert_v(1)
+            output_v1 = run_qcschema(input_model_v1)
 
-        output = output_v1.convert_v(2, external_input_data=input_data)
-        return output
+            # xtb qcschema interface stores error in Result model
+            if not output_v1.success:
+                return FailedOperation(input_data=input_data, error=output_v1.error.model_dump())
+
+            output = output_v1.convert_v(2, external_input_data=input_data)
+            return output
+
+        else:
+            # xtb-python >26.1 speaks qcsk.v1 or qcsk.v2
+
+            # Run the Harness
+            input_model_v2 = input_data
+            output_v2 = run_qcschema(input_model_v2)
+
+            return output_v2

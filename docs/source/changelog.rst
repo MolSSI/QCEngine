@@ -32,6 +32,40 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+.. _`sec:cl0500rc4`:
+
+v0.50.0rc4 / 2026-MM-DD (Prerelease) (Unreleased)
+--------------------
+
+:docs:`v0.50.0rc4` for current. :docs:`v0.34.1` for QCSchema v1.
+
+Breaking Changes
+++++++++++++++++
+- (:pr:`500`) s-dftd3 - For simple-dftd3 >=1.3.0, 3-body is now off by default
+  (s9=0.0) through the python interface used by the QCSchema interface and by
+  QCEngine. Results will change if you're not passing ``params_tweaks`` or using
+  ``apply_qcengine_aliases=True`` (see below). Pass "atm=True" and "method" to
+  re-impose s9=1.0 as in test case ``test_dftd3_task_pbe_m02``. @loriab
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`500`) s-dftd3 - When ``apply_qcengine_aliases=True`` for a 3-body-including
+  dispersion correction (which includes unspecified, e.g. d3bj) the parameters are
+  now explicitly passed as params_tweaks. There is no change in results, but this
+  compensates for a change in default in the simple-dftd3 v1.3.0 project. Also,
+  for 2-body-only, the returned "info" parameters (namely, s9) will more accurately
+  match those used. @loriab
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+
+
 .. _`sec:cl0500rc3`:
 
 v0.50.0rc3 / 2026-04-02 (Prerelease)
