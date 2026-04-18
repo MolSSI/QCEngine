@@ -11,6 +11,7 @@ from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
 from .dftd_ng import DFTD4Harness, SDFTD3Harness
 from .gamess import GAMESSHarness
+from .gaussian import GaussianHarness
 from .gcp import GCPHarness, MCTCGCPHarness
 from .mace import MACEHarness
 from .model import ProgramHarness
@@ -110,6 +111,7 @@ register_program(AdccHarness())
 register_program(CFOURHarness())
 register_program(EntosHarness())  # Duplicate of Qcore harness to transition the namespace, to be deprecated
 register_program(GAMESSHarness())
+register_program(GaussianHarness())
 register_program(MRChemHarness())
 register_program(MolproHarness())
 register_program(NWChemHarness())
