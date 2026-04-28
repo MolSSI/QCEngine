@@ -251,7 +251,13 @@ def handle_output_metadata(
             else:
                 inp_ret = output_data.__class__(**output_fusion)
         else:
-            inp_ret = output_fusion
+            if isinstance(output_data, (FOp_v1, FOp_v2)):
+                # when harnesses return FailedOp object rather than raising error
+                # this branch averts input_data.input_data but avoid it by raising in harness
+                # FailedOp preserves input_data layout run rather than submitted to QCEngine
+                inp_ret = output_data.input_data.model_dump()
+            else:
+                inp_ret = output_fusion
         ret = model(success=success_ret, error=error_ret, input_data=inp_ret)
 
     # temp while ManyBody has no v2. empty string for FailedOp
