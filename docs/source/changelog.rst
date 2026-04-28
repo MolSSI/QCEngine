@@ -35,7 +35,7 @@ Changelog
 .. _`sec:cl0500rc4`:
 
 v0.50.0rc4 / 2026-MM-DD (Prerelease) (Unreleased)
---------------------
+-----------------------
 
 :docs:`v0.50.0rc4` for current. :docs:`v0.34.1` for QCSchema v1.
 
@@ -49,6 +49,8 @@ Breaking Changes
 
 New Features
 ++++++++++++
+- (:pr:`500`) xtb - Update harness to allow versions that can use QCSchema v2
+  natively, anticipated as v26.1 . @loriab
 
 Enhancements
 ++++++++++++

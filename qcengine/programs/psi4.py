@@ -1,6 +1,7 @@
 """
 Calls the Psi4 executable.
 """
+import inspect
 import json
 import os
 import sys
@@ -220,9 +221,13 @@ class Psi4Harness(ProgramHarness):
             else:
                 use_psiapi_mode = input_model.specification.extras.get("psiapi", False)
 
+                import psi4
+
+                psi4_can_v2 = "dtype" in inspect.signature(psi4.driver.p4util.state_to_atomicinput).parameters
+
                 # psi4 QCSchema interface before ~v1.11 only speaks qcsk.v1
                 # * note that only psiapi=True calcs need this until rearrangement affects all
-                if pversion < parse_version("1.11a1.dev1"):  # TODO adjust for v2-compat merge
+                if not psi4_can_v2:
                     input_model_v1or2 = input_model.convert_v(1)
                     # TODO check what this does with py314
                 else:
@@ -317,7 +322,7 @@ class Psi4Harness(ProgramHarness):
         # Delete keys
         output_data_v1or2.pop("return_output", None)
 
-        if pversion < parse_version("1.11a1.dev1"):  # TODO adjust for v2-compat merge
+        if not psi4_can_v2:
             atres = qcelemental.models.v1.AtomicResult(**output_data_v1or2)
             output_model_v2 = atres.convert_v(2, external_input_data=input_model)
         else:
