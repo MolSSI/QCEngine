@@ -55,7 +55,7 @@ class GeometricProcedure(ProcedureHarness):
         input_data_v2["specification"]["specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
-        # * geomeTRIC only speaks v1
+        # * geomeTRIC only speaks v1 as of v1.1
         # * envvar allows geomeTRIC to call back QCEngine for gradients
         input_data__v1v2 = OptimizationInput(**input_data_v2).convert_v(QCEL_V1V2_SHIM_CODE).model_dump()
         with environ_context(env={"QCNG_USE_V1V2_SHIM": "1"}):
