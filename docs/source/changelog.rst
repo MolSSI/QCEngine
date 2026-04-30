@@ -60,6 +60,8 @@ Enhancements
   compensates for a change in default in the simple-dftd3 v1.3.0 project. Also,
   for 2-body-only, the returned "info" parameters (namely, s9) will more accurately
   match those used. @loriab
+- (:pr:`503`) geomeTRIC - Though upstream continues to work with only QCSchema v1,
+  the harness now uses the v1-layout-in-v2-API class so it can work with Py 3.14. @loriab
 
 Bug Fixes
 +++++++++
