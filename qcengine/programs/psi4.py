@@ -220,12 +220,13 @@ class Psi4Harness(ProgramHarness):
                 output_data.pop("nthreads", None)
                 output_data["stdout"] = output_data.pop("raw_output", None)
 
-            else:
-                use_psiapi_mode = input_model.specification.extras.get("psiapi", False)
+                output_data_v1or2 = output_data
 
+            else:
                 import psi4
 
                 psi4_can_v2 = "dtype" in inspect.signature(psi4.driver.p4util.state_to_atomicinput).parameters
+                use_psiapi_mode = input_model.specification.extras.get("psiapi", False)
 
                 # psi4 QCSchema interface before ~v1.11 only speaks qcsk.v1
                 # * note that only psiapi=True calcs need this until rearrangement affects all

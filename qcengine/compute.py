@@ -220,15 +220,13 @@ def compute(
                     break
                 except RandomError as e:
                     if return_version >= 2:
-                        error_extras = getattr(e, "extras", None) or {}
-                        failed_result = error_extras.get("failed_result", None)
-                        output_data = failed_result if isinstance(failed_result, dict) else input_data
+                        output_data = input_data
 
                     if x == config.retries:
                         raise e
                     else:
                         metadata["retries"] += 1
-                except Exception as e:
+                except Exception:
                     if return_version >= 2:
                         output_data = input_data
                     raise
