@@ -253,7 +253,7 @@ jobs:
         python -m pip install . --no-deps
 
     - name: Special Config - Truncate schema variations
-      run: sed -i 's;params=\[None, "as_v1", "as_v2", "to_v1", "to_v2"\])  # TRUNCATE FOR CI;params=["as_v1", "as_v2"]);' qcengine/testing.py
+      run: sed -i 's;params=\[None, "as_v1", "as_v2", "to_v1", "to_v2"\]);params=["as_v1", "as_v2"]);' qcengine/testing.py
 
     - name: Environment Information
       run: |
