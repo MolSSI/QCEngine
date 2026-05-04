@@ -34,7 +34,7 @@ Changelog
 
 .. _`sec:cl0500rc4`:
 
-v0.50.0rc4 / 2026-05-02 (Prerelease)
+v0.50.0rc4 / 2026-05-04 (Prerelease)
 ------------------------------------
 
 :docs:`v0.50.0rc4` for current. :docs:`v0.34.1` for QCSchema v1.
@@ -51,6 +51,11 @@ New Features
 ++++++++++++
 - (:pr:`500`) xtb - Update harness to allow versions that can use QCSchema v2
   natively, anticipated as v26.1 . @loriab
+- (:pr:`503`) geomeTRIC and optking - Failed runs that have produced useful results
+  (e.g., a gradient) now store them in `FailedOperation.error.extras["failed_result"]`.
+  These are structured in that they are dicts but have no guarantees of what
+  information is stored or which style (QCSchema v1 or v2) they most resemble.
+  They are presented as returned from the optimizer.
 
 Enhancements
 ++++++++++++

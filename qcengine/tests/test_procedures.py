@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import pytest
 import qcelemental as qcel
-from qcelemental.testing import compare_values
+from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.testing import checkver_and_convert, failure_engine, from_v2, schema_versions, using, uusing
@@ -536,12 +536,19 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
-    assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
+    assert ret.error.extras and "failed_result" in ret.error.extras
+    if "v2" in request.node.name:
+        assert compare(["He", "He"], ret.input_data.initial_molecule.symbols, "symbols")
+    else:
+        assert compare(["He", "He"], ret.input_data["initial_molecule"]["symbols"], "symbols")
+    failed_result = ret.error.extras["failed_result"]
+    failed_traj = failed_result.get("trajectory", failed_result.get("trajectory_results"))
+    assert failed_traj[0]["provenance"]["retries"] == 1
     if tric_ver == "1.1":
         # bad! temp until https://github.com/leeping/geomeTRIC/pull/222 available
-        assert len(ret.input_data["trajectory"]) == 1
+        assert len(failed_traj) == 1
     else:
-        assert len(ret.input_data["trajectory"]) == 2
+        assert len(failed_traj) == 2
 
 
 @uusing("geometric")
