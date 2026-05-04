@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 import pytest
 import qcelemental as qcel
+from qcelemental.testing import compare_values
 
 import qcengine as qcng
 from qcengine.testing import checkver_and_convert, failure_engine, from_v2, schema_versions, using, uusing
@@ -348,6 +349,85 @@ def test_geometric_rdkit_error(input_data, schema_versions, request):
     assert ret.success is False
     assert isinstance(ret.error.error_message, str)
     assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
+
+
+@pytest.mark.parametrize(
+    "optimizer",
+    [
+        pytest.param("geometric", marks=using("geometric")),
+        pytest.param("optking", marks=using("optking")),
+    ],
+)
+def test_geometric_maxiter_failure(optimizer, failure_engine, input_data, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    failure_engine.iter_modes = ["pass"] * 20
+
+    input_data["initial_molecule"] = {
+        "symbols": ["He", "He"],
+        "geometry": [0, 0, 0, 0, 0, failure_engine.start_distance],
+    }
+
+    if from_v2(request.node.name):
+        input_data["specification"]["specification"]["model"] = {"method": "something"}
+        input_data["specification"]["specification"]["program"] = failure_engine.name
+        if optimizer == "geometric":
+            input_data["specification"]["keywords"].update({"coordsys": "cart", "maxiter": 1})
+        elif optimizer == "optking":
+            input_data["specification"]["keywords"].update({"geom_maxiter": 1})
+            input_data["specification"]["keywords"].pop("maxiter")
+    else:
+        input_data["input_specification"]["model"] = {"method": "something"}
+        input_data["keywords"]["program"] = failure_engine.name
+        if optimizer == "optking":
+            input_data["keywords"].update({"geom_maxiter": 1})
+            input_data["keywords"].pop("maxiter", None)
+        else:
+            input_data["keywords"].update({"coordsys": "cart", "maxiter": 1})
+
+    input_data = models.OptimizationInput(**input_data)
+
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
+    ret = qcng.compute(input_data, optimizer, raise_error=False, return_version=retver)
+    ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
+
+    assert ret.success is False
+    assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
+    assert ret.error.extras and "failed_result" in ret.error.extras
+
+    assert not hasattr(ret, "stdout")
+    if "v2" in request.node.name:
+        assert ret.input_data.schema_name == "qcschema_optimization_input"
+
+    retgrad = [0.0, 0.0, -1.0, 0.0, 0.0, 1.0]
+    if optimizer == "geometric":
+        assert r"failed to converge" in ret.error.error_message.lower(), ret.error.error_message
+        assert (
+            "Maximum iterations reached (1); increase --maxiter for more" in ret.error.extras["failed_result"]["stdout"]
+        )
+        assert "Job type: Energy minimization" in ret.error.extras["failed_result"]["stdout"]
+        final_result = ret.error.extras["failed_result"]["trajectory"][-1]["return_result"]
+        assert compare_values(
+            [0.0, 0.0, -0.6220, 0.0, 0.0, 0.6220],
+            final_result,
+            "fake gradient",
+            atol=1.0e-4,
+        )
+        assert ret.error.extras["failed_result"]["provenance"]["creator"] == "geomeTRIC"
+        assert compare_values(
+            retgrad, ret.error.extras["failed_result"]["trajectory"][0]["return_result"], "fake gradient traj"
+        )  # note v1 field name
+    elif optimizer == "optking":
+        assert r"maximum number of steps exceeded: 1" in ret.error.error_message.lower(), ret.error.error_message
+        assert "Dumping history: Warning last point not converged" in ret.error.extras["failed_result"]["stdout"]
+        assert compare_values(
+            retgrad, ret.error.extras["failed_result"]["properties"]["return_gradient"], "fake gradient", atol=1.0e-6
+        )
+        assert ret.error.extras["failed_result"]["properties"]["optimization_iterations"] == 1
+        assert ret.error.extras["failed_result"]["provenance"]["creator"] == "optking"
+        assert compare_values(
+            retgrad, ret.error.extras["failed_result"]["trajectory_results"][0]["return_result"], "fake gradient traj"
+        )  # note v2 field name
 
 
 @uusing("rdkit")

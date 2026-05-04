@@ -4,6 +4,7 @@ from qcelemental.models._v1v2 import OptimizationResult
 from qcelemental.models.v2 import OptimizationInput
 from qcelemental.util import safe_version, which_import
 
+from ..exceptions import RandomError, UnknownError
 from ..util import QCEL_V1V2_SHIM_CODE, environ_context
 from .model import ProcedureHarness
 
@@ -73,6 +74,25 @@ class GeometricProcedure(ProcedureHarness):
             output_model__v1v2 = OptimizationResult(**output_v1)
             output = output_model__v1v2.convert_v(2, external_input_data=input_model)
         else:
-            output = output_v1  # TODO almost certainly wrong, needs v2 conv
+            error_block = output_v1.get("error", {})
+            if isinstance(error_block, dict):
+                error_message = error_block.get("error_message", "geomeTRIC failed without an error message.")
+                error_type = error_block.get("error_type", "unknown_error")
+            else:
+                error_message = str(error_block) if error_block else "geomeTRIC failed without an error message."
+                error_type = "unknown_error"
+            # TODO undo "unable to serialize"
+            is_random_path = (error_type == "random_error") or (
+                "unable to serialize unknown type" in error_message.lower()
+            )
+            failed_result = output_v1
+            if is_random_path:
+                trajectory = failed_result.get("trajectory")
+                if isinstance(trajectory, list):
+                    for point in trajectory:
+                        if isinstance(point, dict):
+                            point.setdefault("provenance", {}).setdefault("retries", local_config["retries"])
+            error_cls = RandomError if is_random_path else UnknownError
+            raise error_cls(error_message, extras={"failed_result": failed_result})
 
         return output

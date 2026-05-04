@@ -10,7 +10,7 @@ class QCEngineException(Exception):
     error_type = "base_error"
     header = "QCEngine Base Error"
 
-    def __init__(self, message: str):
+    def __init__(self, message: str, extras: Optional[Dict[str, Any]] = None):
 
         # Call the base class constructor with the parameters it needs
         super().__init__(message)
@@ -18,6 +18,7 @@ class QCEngineException(Exception):
         # Now for your custom code...
         self.raw_message = message
         self.traceback = traceback.format_exc()
+        self.extras = extras
 
     @property
     def error_message(self) -> str:
