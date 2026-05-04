@@ -271,7 +271,7 @@ def using(program: str) -> Tuple[pytest.MarkDecorator, ...]:
     return _using_cache[program][1]
 
 
-@pytest.fixture(scope="function", params=[None, "as_v1", "as_v2", "to_v1", "to_v2"])
+@pytest.fixture(scope="function", params=[None, "as_v1", "as_v2", "to_v1", "to_v2"])  # TRUNCATE FOR CI
 def schema_versions(request):
     # V1V2TEST uncomment below
     if sys.version_info >= (3, 14) and request.param != "as_v2":
