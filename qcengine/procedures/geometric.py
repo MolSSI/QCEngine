@@ -9,6 +9,25 @@ from ..util import QCEL_V1V2_SHIM_CODE, environ_context
 from .model import ProcedureHarness
 
 
+def _handle_errors(output_data: Dict[str, Any], default_error: str) -> tuple[str, str]:
+    error_block = output_data.get("error")
+    if isinstance(error_block, dict):
+        if "error_message" in error_block:
+            return error_block["error_message"], error_block.get("error_type", "unknown_error")
+        return str(error_block), "unknown_error"
+    if isinstance(error_block, str):
+        return error_block, "unknown_error"
+    return default_error, "unknown_error"
+
+
+def _attach_retry_provenance(failed_result: Dict[str, Any], retries: int) -> None:
+    trajectory = failed_result.get("trajectory")
+    if isinstance(trajectory, list):
+        for point in trajectory:
+            if isinstance(point, dict):
+                point.setdefault("provenance", {}).setdefault("retries", retries)
+
+
 class GeometricProcedure(ProcedureHarness):
 
     _defaults: ClassVar[Dict[str, Any]] = {"name": "geomeTRIC", "procedure": "optimization"}
@@ -74,25 +93,11 @@ class GeometricProcedure(ProcedureHarness):
             output_model__v1v2 = OptimizationResult(**output_v1)
             output = output_model__v1v2.convert_v(2, external_input_data=input_model)
         else:
-            error_block = output_v1.get("error", {})
-            if isinstance(error_block, dict):
-                error_message = error_block.get("error_message", "geomeTRIC failed without an error message.")
-                error_type = error_block.get("error_type", "unknown_error")
-            else:
-                error_message = str(error_block) if error_block else "geomeTRIC failed without an error message."
-                error_type = "unknown_error"
-            # TODO undo "unable to serialize"
-            is_random_path = (error_type == "random_error") or (
-                "unable to serialize unknown type" in error_message.lower()
-            )
-            failed_result = output_v1
+            error_message, error_type = _handle_errors(output_v1, "geomeTRIC failed without an error message.")
+            is_random_path = error_type == "random_error"
             if is_random_path:
-                trajectory = failed_result.get("trajectory")
-                if isinstance(trajectory, list):
-                    for point in trajectory:
-                        if isinstance(point, dict):
-                            point.setdefault("provenance", {}).setdefault("retries", local_config["retries"])
+                _attach_retry_provenance(output_v1, local_config["retries"])
             error_cls = RandomError if is_random_path else UnknownError
-            raise error_cls(error_message, extras={"failed_result": failed_result})
+            raise error_cls(error_message, extras={"failed_result": output_v1})
 
         return output

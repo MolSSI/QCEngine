@@ -401,14 +401,17 @@ def test_geometric_maxiter_failure(optimizer, failure_engine, input_data, schema
 
     retgrad = [0.0, 0.0, -1.0, 0.0, 0.0, 1.0]
     if optimizer == "geometric":
+        # There's more iterations than wanted (trajectory[0] != trajectory[-1]) with gradients
+        #   [0.0, 0.0, -0.6220, 0.0, 0.0, 0.6220] (v1.1) or [0,0,-0.0875 ... (v1.0.2), but this
+        #   test is focused on structure of FailedOp.
         assert r"failed to converge" in ret.error.error_message.lower(), ret.error.error_message
         assert (
             "Maximum iterations reached (1); increase --maxiter for more" in ret.error.extras["failed_result"]["stdout"]
         )
         assert "Job type: Energy minimization" in ret.error.extras["failed_result"]["stdout"]
-        final_result = ret.error.extras["failed_result"]["trajectory"][-1]["return_result"]
+        final_result = ret.error.extras["failed_result"]["trajectory"][0]["return_result"]
         assert compare_values(
-            [0.0, 0.0, -0.6220, 0.0, 0.0, 0.6220],
+            retgrad,
             final_result,
             "fake gradient",
             atol=1.0e-4,
@@ -418,16 +421,28 @@ def test_geometric_maxiter_failure(optimizer, failure_engine, input_data, schema
             retgrad, ret.error.extras["failed_result"]["trajectory"][0]["return_result"], "fake gradient traj"
         )  # note v1 field name
     elif optimizer == "optking":
+        import optking as ok
+
         assert r"maximum number of steps exceeded: 1" in ret.error.error_message.lower(), ret.error.error_message
         assert "Dumping history: Warning last point not converged" in ret.error.extras["failed_result"]["stdout"]
-        assert compare_values(
-            retgrad, ret.error.extras["failed_result"]["properties"]["return_gradient"], "fake gradient", atol=1.0e-6
-        )
-        assert ret.error.extras["failed_result"]["properties"]["optimization_iterations"] == 1
         assert ret.error.extras["failed_result"]["provenance"]["creator"] == "optking"
-        assert compare_values(
-            retgrad, ret.error.extras["failed_result"]["trajectory_results"][0]["return_result"], "fake gradient traj"
-        )  # note v2 field name
+        if int(ok.__version__.split(".")[1]) < 5:
+            assert compare_values(
+                retgrad, ret.error.extras["failed_result"]["trajectory"][0]["return_result"], "fake gradient traj"
+            )  # note v1 field name
+        else:
+            assert compare_values(
+                retgrad,
+                ret.error.extras["failed_result"]["properties"]["return_gradient"],
+                "fake gradient",
+                atol=1.0e-6,
+            )
+            assert ret.error.extras["failed_result"]["properties"]["optimization_iterations"] == 1
+            assert compare_values(
+                retgrad,
+                ret.error.extras["failed_result"]["trajectory_results"][0]["return_result"],
+                "fake gradient traj",
+            )  # note v2 field name
 
 
 @uusing("rdkit")

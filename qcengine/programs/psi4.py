@@ -172,6 +172,8 @@ class Psi4Harness(ProgramHarness):
             # Old-style JSON-based command line
             if pversion < parse_version("1.4a2.dev160"):
 
+                psi4_can_v2 = False
+
                 # Setup the job
                 input_data = input_model.model_dump(mode="json")
                 input_data["nthreads"] = config.ncores
