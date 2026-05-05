@@ -103,7 +103,7 @@ def capture_stdout():
 def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> Dict[str, Any]:
     """Wraps compute for timing, output capturing, and raise protection"""
 
-    metadata = {"stdout": None, "stderr": None, "success": True, "retries": 0}
+    metadata = {"stdout": None, "stderr": None, "success": True, "retries": 0, "error_extras": None}
 
     # Start timer
     comp_time = time.time()
@@ -126,6 +126,7 @@ def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> D
 
         metadata["error_type"] = exc.error_type
         metadata["error_message"] = exc.error_message
+        metadata["error_extras"] = exc.extras
         metadata["success"] = False
 
     # Unknown QCEngine exception likely in the Python layer, show traceback
@@ -135,6 +136,7 @@ def compute_wrapper(capture_output: bool = True, raise_error: bool = False) -> D
 
         metadata["error_type"] = "unknown_error"
         metadata["error_message"] = "QCEngine Execution Error:\n" + traceback.format_exc()
+        metadata["error_extras"] = None
         metadata["success"] = False
 
     # Place data
@@ -188,6 +190,8 @@ def handle_output_metadata(
     if metadata["success"] is not True:
         output_fusion["success"] = False
         output_fusion["error"] = {"error_type": metadata["error_type"], "error_message": metadata["error_message"]}
+        if metadata.get("error_extras") is not None:
+            output_fusion["error"]["extras"] = metadata["error_extras"]
 
     # Raise an error if one exists and a user requested a raise
     if raise_error and (output_fusion["success"] is not True):

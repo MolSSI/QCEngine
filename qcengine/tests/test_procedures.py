@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 import pytest
 import qcelemental as qcel
+from qcelemental.testing import compare, compare_values
 
 import qcengine as qcng
 from qcengine.testing import checkver_and_convert, failure_engine, from_v2, schema_versions, using, uusing
@@ -350,6 +351,100 @@ def test_geometric_rdkit_error(input_data, schema_versions, request):
     assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
 
 
+@pytest.mark.parametrize(
+    "optimizer",
+    [
+        pytest.param("geometric", marks=using("geometric")),
+        pytest.param("optking", marks=using("optking")),
+    ],
+)
+def test_geometric_maxiter_failure(optimizer, failure_engine, input_data, schema_versions, request):
+    models, retver, _ = schema_versions
+
+    failure_engine.iter_modes = ["pass"] * 20
+
+    input_data["initial_molecule"] = {
+        "symbols": ["He", "He"],
+        "geometry": [0, 0, 0, 0, 0, failure_engine.start_distance],
+    }
+
+    if from_v2(request.node.name):
+        input_data["specification"]["specification"]["model"] = {"method": "something"}
+        input_data["specification"]["specification"]["program"] = failure_engine.name
+        if optimizer == "geometric":
+            input_data["specification"]["keywords"].update({"coordsys": "cart", "maxiter": 1})
+        elif optimizer == "optking":
+            input_data["specification"]["keywords"].update({"geom_maxiter": 1})
+            input_data["specification"]["keywords"].pop("maxiter")
+    else:
+        input_data["input_specification"]["model"] = {"method": "something"}
+        input_data["keywords"]["program"] = failure_engine.name
+        if optimizer == "optking":
+            input_data["keywords"].update({"geom_maxiter": 1})
+            input_data["keywords"].pop("maxiter", None)
+        else:
+            input_data["keywords"].update({"coordsys": "cart", "maxiter": 1})
+
+    input_data = models.OptimizationInput(**input_data)
+
+    input_data = checkver_and_convert(input_data, request.node.name, "pre")
+    ret = qcng.compute(input_data, optimizer, raise_error=False, return_version=retver)
+    ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
+
+    assert ret.success is False
+    assert isinstance(ret, (qcel.models.v1.FailedOperation, qcel.models.v2.FailedOperation))
+    assert ret.error.extras and "failed_result" in ret.error.extras
+
+    assert not hasattr(ret, "stdout")
+    if "v2" in request.node.name:
+        assert ret.input_data.schema_name == "qcschema_optimization_input"
+
+    retgrad = [0.0, 0.0, -1.0, 0.0, 0.0, 1.0]
+    if optimizer == "geometric":
+        # There's more iterations than wanted (trajectory[0] != trajectory[-1]) with gradients
+        #   [0.0, 0.0, -0.6220, 0.0, 0.0, 0.6220] (v1.1) or [0,0,-0.0875 ... (v1.0.2), but this
+        #   test is focused on structure of FailedOp.
+        assert r"failed to converge" in ret.error.error_message.lower(), ret.error.error_message
+        assert (
+            "Maximum iterations reached (1); increase --maxiter for more" in ret.error.extras["failed_result"]["stdout"]
+        )
+        assert "Job type: Energy minimization" in ret.error.extras["failed_result"]["stdout"]
+        final_result = ret.error.extras["failed_result"]["trajectory"][0]["return_result"]
+        assert compare_values(
+            retgrad,
+            final_result,
+            "fake gradient",
+            atol=1.0e-4,
+        )
+        assert ret.error.extras["failed_result"]["provenance"]["creator"] == "geomeTRIC"
+        assert compare_values(
+            retgrad, ret.error.extras["failed_result"]["trajectory"][0]["return_result"], "fake gradient traj"
+        )  # note v1 field name
+    elif optimizer == "optking":
+        import optking as ok
+
+        assert r"maximum number of steps exceeded: 1" in ret.error.error_message.lower(), ret.error.error_message
+        assert "Dumping history: Warning last point not converged" in ret.error.extras["failed_result"]["stdout"]
+        assert ret.error.extras["failed_result"]["provenance"]["creator"] == "optking"
+        if int(ok.__version__.split(".")[1]) < 5:
+            assert compare_values(
+                retgrad, ret.error.extras["failed_result"]["trajectory"][0]["return_result"], "fake gradient traj"
+            )  # note v1 field name
+        else:
+            assert compare_values(
+                retgrad,
+                ret.error.extras["failed_result"]["properties"]["return_gradient"],
+                "fake gradient",
+                atol=1.0e-6,
+            )
+            assert ret.error.extras["failed_result"]["properties"]["optimization_iterations"] == 1
+            assert compare_values(
+                retgrad,
+                ret.error.extras["failed_result"]["trajectory_results"][0]["return_result"],
+                "fake gradient traj",
+            )  # note v2 field name
+
+
 @uusing("rdkit")
 @pytest.mark.parametrize(
     "optimizer",
@@ -456,12 +551,19 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
     ret = checkver_and_convert(ret, request.node.name, "post", vercheck=False)
 
     assert ret.success is False
-    assert ret.input_data["trajectory"][0]["provenance"]["retries"] == 1
+    assert ret.error.extras and "failed_result" in ret.error.extras
+    if "v2" in request.node.name:
+        assert compare(["He", "He"], ret.input_data.initial_molecule.symbols, "symbols")
+    else:
+        assert compare(["He", "He"], ret.input_data["initial_molecule"]["symbols"], "symbols")
+    failed_result = ret.error.extras["failed_result"]
+    failed_traj = failed_result.get("trajectory", failed_result.get("trajectory_results"))
+    assert failed_traj[0]["provenance"]["retries"] == 1
     if tric_ver == "1.1":
         # bad! temp until https://github.com/leeping/geomeTRIC/pull/222 available
-        assert len(ret.input_data["trajectory"]) == 1
+        assert len(failed_traj) == 1
     else:
-        assert len(ret.input_data["trajectory"]) == 2
+        assert len(failed_traj) == 2
 
 
 @uusing("geometric")

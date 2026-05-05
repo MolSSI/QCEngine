@@ -288,7 +288,7 @@ class SDFTD3Harness(ProgramHarness):
                 input_data["specification"]["model"]["method"] = method
 
         # consolidate dispersion level aliases
-        if input_model.specification.keywords.pop("apply_qcengine_aliases", False):
+        if input_data["specification"]["keywords"].pop("apply_qcengine_aliases", False):
             level_hint = input_model.specification.keywords.get("level_hint", None)
             if level_hint:
                 level_hint = get_dispersion_aliases()[level_hint.lower()]

@@ -192,7 +192,7 @@ def compute(
                     # return_version = -12 = QCEL_V1V2_SHIM_CODE signals to use the shim classes that represent certain
                     #   QCSchema v1 layouts (QCSk v1 only exist in pydantic.v1 API) in pydantic v2 API.
                     #   We never want to release these into the wild so only available if returning
-                    #   dict and only for Atomic models (i.e., shims not avail for Opt, TD, MBE).
+                    #   dict and only for Atomic models (i.e., shims not avail for TD, MBE; shim avail for Opt but not enabled here).
                     return_version = QCEL_V1V2_SHIM_CODE
                 else:
                     # reset retver so that FailedOp w/_MSG314 can be constructed
@@ -226,7 +226,7 @@ def compute(
                         raise e
                     else:
                         metadata["retries"] += 1
-                except:
+                except Exception:
                     if return_version >= 2:
                         output_data = input_data
                     raise

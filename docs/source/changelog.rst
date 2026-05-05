@@ -34,8 +34,8 @@ Changelog
 
 .. _`sec:cl0500rc4`:
 
-v0.50.0rc4 / 2026-MM-DD (Prerelease) (Unreleased)
---------------------
+v0.50.0rc4 / 2026-05-04 (Prerelease)
+------------------------------------
 
 :docs:`v0.50.0rc4` for current. :docs:`v0.34.1` for QCSchema v1.
 
@@ -49,6 +49,13 @@ Breaking Changes
 
 New Features
 ++++++++++++
+- (:pr:`500`) xtb - Update harness to allow versions that can use QCSchema v2
+  natively, anticipated as v26.1 . @loriab
+- (:pr:`503`) geomeTRIC and optking - Failed runs that have produced useful results
+  (e.g., a gradient) now store them in `FailedOperation.error.extras["failed_result"]`.
+  These are structured in that they are dicts but have no guarantees of what
+  information is stored or which style (QCSchema v1 or v2) they most resemble.
+  They are presented as returned from the optimizer.
 
 Enhancements
 ++++++++++++
@@ -58,6 +65,8 @@ Enhancements
   compensates for a change in default in the simple-dftd3 v1.3.0 project. Also,
   for 2-body-only, the returned "info" parameters (namely, s9) will more accurately
   match those used. @loriab
+- (:pr:`503`) geomeTRIC - Though upstream continues to work with only QCSchema v1,
+  the harness now uses the v1-layout-in-v2-API class so it can work with Py 3.14. @loriab
 
 Bug Fixes
 +++++++++
