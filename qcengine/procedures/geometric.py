@@ -1,10 +1,31 @@
 from typing import Any, ClassVar, Dict, Union
 
-from qcelemental.models.v1 import OptimizationResult
+from qcelemental.models._v1v2 import OptimizationResult
 from qcelemental.models.v2 import OptimizationInput
 from qcelemental.util import safe_version, which_import
 
+from ..exceptions import RandomError, UnknownError
+from ..util import QCEL_V1V2_SHIM_CODE, environ_context
 from .model import ProcedureHarness
+
+
+def _handle_errors(output_data: Dict[str, Any], default_error: str) -> tuple[str, str]:
+    error_block = output_data.get("error")
+    if isinstance(error_block, dict):
+        if "error_message" in error_block:
+            return error_block["error_message"], error_block.get("error_type", "unknown_error")
+        return str(error_block), "unknown_error"
+    if isinstance(error_block, str):
+        return error_block, "unknown_error"
+    return default_error, "unknown_error"
+
+
+def _attach_retry_provenance(failed_result: Dict[str, Any], retries: int) -> None:
+    trajectory = failed_result.get("trajectory")
+    if isinstance(trajectory, list):
+        for point in trajectory:
+            if isinstance(point, dict):
+                point.setdefault("provenance", {}).setdefault("retries", retries)
 
 
 class GeometricProcedure(ProcedureHarness):
@@ -43,18 +64,22 @@ class GeometricProcedure(ProcedureHarness):
         except ModuleNotFoundError:
             raise ModuleNotFoundError("Could not find geomeTRIC in the Python path.")
 
-        input_data_v1 = input_model.convert_v(1).dict()
+        input_data_v2 = input_model.model_dump()
 
         # Temporary patch for geomeTRIC
-        input_data_v1["initial_molecule"]["symbols"] = list(input_data_v1["initial_molecule"]["symbols"])
+        input_data_v2["initial_molecule"]["symbols"] = list(input_data_v2["initial_molecule"]["symbols"])
 
         # Set retries to two if zero while respecting local_config
-        local_config = config.dict()
+        local_config = config.model_dump()
         local_config["retries"] = local_config.get("retries", 2) or 2
-        input_data_v1["input_specification"]["extras"]["_qcengine_local_config"] = local_config
+        input_data_v2["specification"]["specification"]["extras"]["_qcengine_local_config"] = local_config
 
         # Run the program
-        output_v1 = geometric.run_json.geometric_run_json(input_data_v1)
+        # * geomeTRIC only speaks v1 as of v1.1
+        # * envvar allows geomeTRIC to call back QCEngine for gradients
+        input_data__v1v2 = OptimizationInput(**input_data_v2).convert_v(QCEL_V1V2_SHIM_CODE).model_dump()
+        with environ_context(env={"QCNG_USE_V1V2_SHIM": "1"}):
+            output_v1 = geometric.run_json.geometric_run_json(input_data__v1v2)
 
         output_v1["provenance"] = {
             "creator": "geomeTRIC",
@@ -65,9 +90,14 @@ class GeometricProcedure(ProcedureHarness):
         output_v1["schema_name"] = "qcschema_optimization_output"  # overwrites OptIn value
         output_v1["input_specification"]["extras"].pop("_qcengine_local_config", None)
         if output_v1["success"]:
-            output_v1 = OptimizationResult(**output_v1)
-            output = output_v1.convert_v(2, external_input_data=input_model)
+            output_model__v1v2 = OptimizationResult(**output_v1)
+            output = output_model__v1v2.convert_v(2, external_input_data=input_model)
         else:
-            output = output_v1  # TODO almost certainly wrong, needs v2 conv
+            error_message, error_type = _handle_errors(output_v1, "geomeTRIC failed without an error message.")
+            is_random_path = error_type == "random_error"
+            if is_random_path:
+                _attach_retry_provenance(output_v1, local_config["retries"])
+            error_cls = RandomError if is_random_path else UnknownError
+            raise error_cls(error_message, extras={"failed_result": output_v1})
 
         return output
