@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Changelog &mdash; QCEngine 0.1.dev1+g96d8b5fb6 documentation</title>
+  <title>Changelog &mdash; QCEngine 0.1.dev1+gcf5dc2b74 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=b1f3998e"></script>
+      <script src="_static/documentation_options.js?v=4314d8bb"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/version-switcher.js?v=313414bb"></script>
@@ -80,7 +80,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">QCEngine API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#v0-50-0rc4-2026-mm-dd-prerelease-unreleased">v0.50.0rc4 / 2026-MM-DD (Prerelease) (Unreleased)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v0-50-0rc4-2026-05-04-prerelease">v0.50.0rc4 / 2026-05-04 (Prerelease)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#breaking-changes">Breaking Changes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#new-features">New Features</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#enhancements">Enhancements</a></li>
@@ -379,8 +379,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              
   <section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading"></a></h1>
-<section id="v0-50-0rc4-2026-mm-dd-prerelease-unreleased">
-<span id="sec-cl0500rc4"></span><h2>v0.50.0rc4 / 2026-MM-DD (Prerelease) (Unreleased)<a class="headerlink" href="#v0-50-0rc4-2026-mm-dd-prerelease-unreleased" title="Link to this heading"></a></h2>
+<section id="v0-50-0rc4-2026-05-04-prerelease">
+<span id="sec-cl0500rc4"></span><h2>v0.50.0rc4 / 2026-05-04 (Prerelease)<a class="headerlink" href="#v0-50-0rc4-2026-05-04-prerelease" title="Link to this heading"></a></h2>
 <p><a class="extlink-docs reference external" href="https://MolSSI.github.io/QCEngine/v0.50.0rc4">Docs v0.50.0rc4</a> for current. <a class="extlink-docs reference external" href="https://MolSSI.github.io/QCEngine/v0.34.1">Docs v0.34.1</a> for QCSchema v1.</p>
 <section id="breaking-changes">
 <h3>Breaking Changes<a class="headerlink" href="#breaking-changes" title="Link to this heading"></a></h3>
@@ -394,6 +394,15 @@ re-impose s9=1.0 as in test case <code class="docutils literal notranslate"><spa
 </section>
 <section id="new-features">
 <h3>New Features<a class="headerlink" href="#new-features" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>(<a class="extlink-pr reference external" href="https://github.com/MolSSI/QCEngine/pull/500">GH#500</a>) xtb - Update harness to allow versions that can use QCSchema v2
+natively, anticipated as v26.1 . &#64;loriab</p></li>
+<li><p>(<a class="extlink-pr reference external" href="https://github.com/MolSSI/QCEngine/pull/503">GH#503</a>) geomeTRIC and optking - Failed runs that have produced useful results
+(e.g., a gradient) now store them in <cite>FailedOperation.error.extras[“failed_result”]</cite>.
+These are structured in that they are dicts but have no guarantees of what
+information is stored or which style (QCSchema v1 or v2) they most resemble.
+They are presented as returned from the optimizer.</p></li>
+</ul>
 </section>
 <section id="enhancements">
 <h3>Enhancements<a class="headerlink" href="#enhancements" title="Link to this heading"></a></h3>
@@ -404,6 +413,8 @@ now explicitly passed as params_tweaks. There is no change in results, but this
 compensates for a change in default in the simple-dftd3 v1.3.0 project. Also,
 for 2-body-only, the returned “info” parameters (namely, s9) will more accurately
 match those used. &#64;loriab</p></li>
+<li><p>(<a class="extlink-pr reference external" href="https://github.com/MolSSI/QCEngine/pull/503">GH#503</a>) geomeTRIC - Though upstream continues to work with only QCSchema v1,
+the harness now uses the v1-layout-in-v2-API class so it can work with Py 3.14. &#64;loriab</p></li>
 </ul>
 </section>
 <section id="bug-fixes">

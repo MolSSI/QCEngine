@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Single Compute &mdash; QCEngine 0.1.dev1+g96d8b5fb6 documentation</title>
+  <title>Single Compute &mdash; QCEngine 0.1.dev1+gcf5dc2b74 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=b1f3998e"></script>
+      <script src="_static/documentation_options.js?v=4314d8bb"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/version-switcher.js?v=313414bb"></script>
@@ -295,8 +295,7 @@ longstanding v1 model.</p>
 <span class="w">            </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">               </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The program specific keywords to be used.&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Keywords&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Keywords&quot;</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;program&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -331,8 +330,7 @@ longstanding v1 model.</p>
 <span class="w">            </span><span class="nt">&quot;extras&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">               </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Additional information to bundle with the computation. Use for schema development and scratch space.&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Extras&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Extras&quot;</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">},</span>
 <span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -1400,6 +1398,18 @@ longstanding v1 model.</p>
 <span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Wavefunction properties resulting from a computation.\n    Matrix quantities are stored in column-major order. Presence and contents configurable by protocol.&quot;</span>
 <span class="w">      </span><span class="p">},</span>
 <span class="w">      </span><span class="nt">&quot;return_result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;anyOf&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">               </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;number&quot;</span>
+<span class="w">               </span><span class="p">},</span>
+<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{}</span>
+<span class="w">         </span><span class="p">],</span>
 <span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The primary return specified by the :attr:`~qcelemental.models.AtomicInput.driver` field. Scalar if energy; array if gradient or hessian; dictionary with property keys if properties.&quot;</span><span class="p">,</span>
 <span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Return Result&quot;</span>
 <span class="w">      </span><span class="p">},</span>
@@ -2264,8 +2274,7 @@ longstanding v1 model.</p>
 <span class="w">            </span><span class="nt">&quot;keywords&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">               </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The program specific keywords to be used.&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Keywords&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Keywords&quot;</span>
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="nt">&quot;program&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -2300,8 +2309,7 @@ longstanding v1 model.</p>
 <span class="w">            </span><span class="nt">&quot;extras&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">               </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">               </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Additional information to bundle with the computation. Use for schema development and scratch space.&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Extras&quot;</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span>
+<span class="w">               </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Extras&quot;</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">         </span><span class="p">},</span>
 <span class="w">         </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -3835,14 +3843,14 @@ longstanding v1 model.</p>
 </details></p><dl class="field-list simple">
 <dt class="field-odd">Fields<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extras</span> <span class="pre">(Any)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extras</span> <span class="pre">(Dict[str,</span> <span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">Any)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_data</span> <span class="pre">(qcelemental.models.v2.atomic.AtomicInput)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">molecule</span> <span class="pre">(qcelemental.models.v2.molecule.Molecule)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">native_files</span> <span class="pre">(Dict[str,</span> <span class="pre">Any])</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">properties</span> <span class="pre">(qcelemental.models.v2.atomic.AtomicProperties)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">provenance</span> <span class="pre">(qcelemental.models.v2.common_models.Provenance)</span></code></p></li>
-<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">return_result</span> <span class="pre">(Any)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">return_result</span> <span class="pre">(float</span> <span class="pre">|</span> <span class="pre">numpy.ndarray[tuple[int,</span> <span class="pre">...],</span> <span class="pre">numpy.dtype[float]]</span> <span class="pre">|</span> <span class="pre">Any)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">schema_name</span> <span class="pre">(Literal['qcschema_atomic_result'])</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">schema_version</span> <span class="pre">(Literal[2])</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">stderr</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
@@ -3862,16 +3870,16 @@ longstanding v1 model.</p>
 </dl>
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extras</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NestedData</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extras</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">GenericData</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em></dt>
 <dd><p>Additional information to bundle with the computation. Use for schema development and scratch space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Constraints<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>__module__</strong> = qcelemental.models.v2.types</p></li>
-<li><p><strong>__get_pydantic_core_schema__</strong> = &lt;bound method NestedDataAnnotation.__get_pydantic_core_schema__ of &lt;class ‘qcelemental.models.v2.types.NestedDataAnnotation’&gt;&gt;</p></li>
-<li><p><strong>__get_pydantic_json_schema__</strong> = &lt;bound method NestedDataAnnotation.__get_pydantic_json_schema__ of &lt;class ‘qcelemental.models.v2.types.NestedDataAnnotation’&gt;&gt;</p></li>
-<li><p><strong>__dict__</strong> = {‘__module__’: ‘qcelemental.models.v2.types’, ‘__get_pydantic_core_schema__’: &lt;classmethod(&lt;function NestedDataAnnotation.__get_pydantic_core_schema__ at 0x7f5465371990&gt;)&gt;, ‘__get_pydantic_json_schema__’: &lt;classmethod(&lt;function NestedDataAnnotation.__get_pydantic_json_schema__ at 0x7f5465371a20&gt;)&gt;, ‘__dict__’: &lt;attribute ‘__dict__’ of ‘NestedDataAnnotation’ objects&gt;, ‘__weakref__’: &lt;attribute ‘__weakref__’ of ‘NestedDataAnnotation’ objects&gt;, ‘__doc__’: None}</p></li>
-<li><p><strong>__weakref__</strong> = &lt;attribute ‘__weakref__’ of ‘NestedDataAnnotation’ objects&gt;</p></li>
+<li><p><strong>__get_pydantic_core_schema__</strong> = &lt;bound method GenericDataAnnotation.__get_pydantic_core_schema__ of &lt;class ‘qcelemental.models.v2.types.GenericDataAnnotation’&gt;&gt;</p></li>
+<li><p><strong>__get_pydantic_json_schema__</strong> = &lt;bound method GenericDataAnnotation.__get_pydantic_json_schema__ of &lt;class ‘qcelemental.models.v2.types.GenericDataAnnotation’&gt;&gt;</p></li>
+<li><p><strong>__dict__</strong> = {‘__module__’: ‘qcelemental.models.v2.types’, ‘__get_pydantic_core_schema__’: &lt;classmethod(&lt;function GenericDataAnnotation.__get_pydantic_core_schema__ at 0x7ff4f556da20&gt;)&gt;, ‘__get_pydantic_json_schema__’: &lt;classmethod(&lt;function GenericDataAnnotation.__get_pydantic_json_schema__ at 0x7ff4f556dab0&gt;)&gt;, ‘__dict__’: &lt;attribute ‘__dict__’ of ‘GenericDataAnnotation’ objects&gt;, ‘__weakref__’: &lt;attribute ‘__weakref__’ of ‘GenericDataAnnotation’ objects&gt;, ‘__doc__’: None}</p></li>
+<li><p><strong>__weakref__</strong> = &lt;attribute ‘__weakref__’ of ‘GenericDataAnnotation’ objects&gt;</p></li>
 </ul>
 </dd>
 </dl>
@@ -3927,16 +3935,12 @@ longstanding v1 model.</p>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NestedData</span></em><em class="property"> <span class="pre">[Required]</span></em></dt>
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">return_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union[float,</span> <span class="pre">Array[float],</span> <span class="pre">ReturnResultData]</span></em><em class="property"> <span class="pre">[Required]</span></em></dt>
 <dd><p>The primary return specified by the <code class="xref py py-attr docutils literal notranslate"><span class="pre">driver</span></code> field. Scalar if energy; array if gradient or hessian; dictionary with property keys if properties.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Constraints<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>__module__</strong> = qcelemental.models.v2.types</p></li>
-<li><p><strong>__get_pydantic_core_schema__</strong> = &lt;bound method NestedDataAnnotation.__get_pydantic_core_schema__ of &lt;class ‘qcelemental.models.v2.types.NestedDataAnnotation’&gt;&gt;</p></li>
-<li><p><strong>__get_pydantic_json_schema__</strong> = &lt;bound method NestedDataAnnotation.__get_pydantic_json_schema__ of &lt;class ‘qcelemental.models.v2.types.NestedDataAnnotation’&gt;&gt;</p></li>
-<li><p><strong>__dict__</strong> = {‘__module__’: ‘qcelemental.models.v2.types’, ‘__get_pydantic_core_schema__’: &lt;classmethod(&lt;function NestedDataAnnotation.__get_pydantic_core_schema__ at 0x7f5465371990&gt;)&gt;, ‘__get_pydantic_json_schema__’: &lt;classmethod(&lt;function NestedDataAnnotation.__get_pydantic_json_schema__ at 0x7f5465371a20&gt;)&gt;, ‘__dict__’: &lt;attribute ‘__dict__’ of ‘NestedDataAnnotation’ objects&gt;, ‘__weakref__’: &lt;attribute ‘__weakref__’ of ‘NestedDataAnnotation’ objects&gt;, ‘__doc__’: None}</p></li>
-<li><p><strong>__weakref__</strong> = &lt;attribute ‘__weakref__’ of ‘NestedDataAnnotation’ objects&gt;</p></li>
+<li><p><strong>union_mode</strong> = left_to_right</p></li>
 </ul>
 </dd>
 <dt class="field-even">Validated by<span class="colon">:</span></dt>

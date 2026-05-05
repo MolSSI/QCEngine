@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcelemental.models.v2.atomic &mdash; QCEngine 0.1.dev1+g96d8b5fb6 documentation</title>
+  <title>qcelemental.models.v2.atomic &mdash; QCEngine 0.1.dev1+gcf5dc2b74 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=b1f3998e"></script>
+      <script src="../../../../_static/documentation_options.js?v=4314d8bb"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../../_static/version-switcher.js?v=313414bb"></script>
@@ -121,7 +121,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.basis_set</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasisSet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.common_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriverEnum</span><span class="p">,</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Provenance</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.molecule</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">NestedData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">GenericData</span><span class="p">,</span> <span class="n">ReturnResultData</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">qcelemental</span>
@@ -841,7 +841,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="n">schema_name</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;qcschema_atomic_specification&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;qcschema_atomic_specification&quot;</span>
 
-    <span class="n">keywords</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">({},</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The program specific keywords to be used.&quot;</span><span class="p">)</span>
+    <span class="n">keywords</span><span class="p">:</span> <span class="n">GenericData</span> <span class="o">=</span> <span class="n">Field</span><span class="p">({},</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The program specific keywords to be used.&quot;</span><span class="p">)</span>
     <span class="n">program</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The program for which the Specification is intended.&quot;</span>
     <span class="p">)</span>  <span class="c1"># TODO interaction with cmdline</span>
@@ -851,7 +851,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">AtomicProtocols</span><span class="p">(),</span>
         <span class="n">description</span><span class="o">=</span><span class="n">AtomicProtocols</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">extras</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">extras</span><span class="p">:</span> <span class="n">GenericData</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="p">{},</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Additional information to bundle with the computation. Use for schema development and scratch space.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
@@ -867,7 +867,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <span class="n">loss_store</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">dself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">target_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">target_version</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">]:</span>
             <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema_name&quot;</span><span class="p">)</span>
 
             <span class="n">loss_store</span><span class="p">[</span><span class="s2">&quot;protocols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dself</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;protocols&quot;</span><span class="p">)</span>
@@ -877,7 +877,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <span class="k">pass</span>
                 <span class="c1"># TODO dself[&quot;extras&quot;][&quot;_qcsk_conversion_loss&quot;] = loss_store</span>
 
-            <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">QCInputSpecification</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">target_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">QCInputSpecification</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">target_version</span> <span class="o">==</span> <span class="n">QCEL_V1V2_SHIM_CODE</span><span class="p">:</span>
+                <span class="n">self_vN</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">_v1v2</span><span class="o">.</span><span class="n">QCInputSpecification</span><span class="p">(</span><span class="o">**</span><span class="n">dself</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="n">target_version</span>
 
@@ -991,9 +994,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">properties</span><span class="p">:</span> <span class="n">AtomicProperties</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">AtomicProperties</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
     <span class="n">wavefunction</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">WavefunctionProperties</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">WavefunctionProperties</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
 
-    <span class="n">return_result</span><span class="p">:</span> <span class="n">NestedData</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">return_result</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Array</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">ReturnResultData</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="o">...</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The primary return specified by the :attr:`~qcelemental.models.AtomicInput.driver` field. Scalar if energy; array if gradient or hessian; dictionary with property keys if properties.&quot;</span><span class="p">,</span>
+        <span class="n">union_mode</span><span class="o">=</span><span class="s2">&quot;left_to_right&quot;</span><span class="p">,</span>
     <span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="n">stdout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
@@ -1007,7 +1011,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The success of program execution. If False, other fields may be blank.&quot;</span>
     <span class="p">)</span>
     <span class="n">provenance</span><span class="p">:</span> <span class="n">Provenance</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Provenance</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
-    <span class="n">extras</span><span class="p">:</span> <span class="n">NestedData</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">extras</span><span class="p">:</span> <span class="n">GenericData</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="p">{},</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Additional information to bundle with the computation. Use for schema development and scratch space.&quot;</span><span class="p">,</span>
     <span class="p">)</span>

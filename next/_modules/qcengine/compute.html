@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.compute &mdash; QCEngine 0.1.dev1+g96d8b5fb6 documentation</title>
+  <title>qcengine.compute &mdash; QCEngine 0.1.dev1+gcf5dc2b74 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=b1f3998e"></script>
+      <script src="../../_static/documentation_options.js?v=4314d8bb"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/version-switcher.js?v=313414bb"></script>
@@ -301,7 +301,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <span class="c1"># return_version = -12 = QCEL_V1V2_SHIM_CODE signals to use the shim classes that represent certain</span>
                     <span class="c1">#   QCSchema v1 layouts (QCSk v1 only exist in pydantic.v1 API) in pydantic v2 API.</span>
                     <span class="c1">#   We never want to release these into the wild so only available if returning</span>
-                    <span class="c1">#   dict and only for Atomic models (i.e., shims not avail for Opt, TD, MBE).</span>
+                    <span class="c1">#   dict and only for Atomic models (i.e., shims not avail for TD, MBE; shim avail for Opt but not enabled here).</span>
                     <span class="n">return_version</span> <span class="o">=</span> <span class="n">QCEL_V1V2_SHIM_CODE</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># reset retver so that FailedOp w/_MSG314 can be constructed</span>
@@ -335,7 +335,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <span class="k">raise</span> <span class="n">e</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;retries&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">except</span><span class="p">:</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">return_version</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
                         <span class="n">output_data</span> <span class="o">=</span> <span class="n">input_data</span>
                     <span class="k">raise</span>
