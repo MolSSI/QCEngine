@@ -136,6 +136,7 @@ markers = [
     "qcmanybody: tests using QCManyBody software; skip if unavailable",
     "qcore: tests using Qcore (ret.) software; skip if unavailable",
     "rdkit: tests using RDKIT software; skip if unavailable",
+    "tblite: tests using tblite software; skip if unavailable",
     "terachem: tests using TeraChem software; skip if unavailable",
     "terachem_pbs: tests using TeraChem through PBS software; skip if unavailable",
     "torchani: tests using Torch-ANI software; skip if unavailable",
