@@ -52,6 +52,14 @@ cross-program alignment tests (`atol = 2e-7`).
 "Direct Energy Parsing" below). cclib energy attributes are used only as a fallback
 if the regex fails to match.
 
+> **Considered alternative:** Using `cclib.parser.utils.convertor(ccdata.scfenergies[-1],
+> 'eV', 'hartree')` produces a lossless round-trip (cclib's own forward and reverse
+> factors are exact inverses). This was rejected in favour of direct parsing because:
+> (a) it couples the harvester to cclib's internal conversion remaining self-consistent
+> across future versions, (b) direct log parsing captures the full precision printed by
+> Gaussian (up to 12 significant digits), and (c) cclib provides no public API contract
+> guaranteeing lossless eV↔Hartree round-trips.
+
 **2. Hessian not extracted by cclib:**
 
 cclib does not parse the "Force constants in Cartesian coordinates" block from
