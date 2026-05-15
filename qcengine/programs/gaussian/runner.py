@@ -179,10 +179,6 @@ class GaussianHarness(ProgramHarness):
         if input_model.specification.model.basis is None:
             raise InputError("model.basis must be a string basis name for the Gaussian harness.")
 
-        # rq-5053204b
-        if not all(input_model.molecule.real):
-            raise InputError("The Gaussian harness does not support ghost atoms (real=False).")
-
         mol = input_model.molecule
         method = input_model.specification.model.method
         basis = input_model.specification.model.basis
@@ -191,13 +187,15 @@ class GaussianHarness(ProgramHarness):
         # rq-ef62979b
         modelchem = muster_modelchem(method, driver, mol.molecular_multiplicity)
 
-        # rq-74e0110c — build atom block in Ångström with 10+ decimal places
+        # rq-74e0110c rq-bd6cd9a4 — build atom block in Ångström with 10+ decimal places
+        # Ghost atoms (real=False) get a "-Bq" suffix so Gaussian places basis functions
+        # without a nucleus or electrons.
         bohr_to_ang = qcel.constants.conversion_factor("bohr", "angstrom")
         geom_ang = mol.geometry.reshape(-1, 3) * bohr_to_ang
-        atom_lines = [
-            f"{sym:2s}  {x:24.14f}  {y:24.14f}  {z:24.14f}"
-            for sym, (x, y, z) in zip(mol.symbols, geom_ang)
-        ]
+        atom_lines = []
+        for sym, is_real, (x, y, z) in zip(mol.symbols, mol.real, geom_ang):
+            label = sym if is_real else f"{sym}-Bq"
+            atom_lines.append(f"{label:5s}  {x:24.14f}  {y:24.14f}  {z:24.14f}")
         atom_block = "\n".join(atom_lines)
 
         # rq-db92093a rq-4ad16d95

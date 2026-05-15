@@ -359,21 +359,6 @@ def test_build_input_memory_whole_gb(water_energy_input, harness):
     assert "%Mem=8GB" in job["infiles"]["gaussian.com"]
 
 
-# rq-5053204b
-def test_build_input_ghost_atoms_raise(harness):
-    from qcengine.config import TaskConfig
-
-    ghost_mol = Molecule.from_data(
-        {"symbols": ["O", "H", "H"], "geometry": [0, 0, 0.2, 0, 1.4, -0.9, 0, -1.4, -0.9],
-         "real": [True, False, True]}
-    )
-    inp = AtomicInput(molecule=ghost_mol, specification=AtomicSpecification(program="gaussian", driver="energy", model={"method": "HF", "basis": "STO-3G"}))
-    cfg = TaskConfig(scratch_directory=None, scratch_messy=False, ncores=1, nnodes=1, memory=1.0, retries=0, mpiexec_command=None)
-    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/usr/local/g16/g16"):
-        with pytest.raises(InputError):
-            harness.build_input(inp, cfg)
-
-
 # rq-0aa99076
 def test_build_input_basisset_object_raises(water, harness):
     from qcengine.config import TaskConfig
@@ -1016,6 +1001,342 @@ def test_is_normal_termination_true():
 def test_is_normal_termination_false():
     log = "Some output\nError termination via Lnk1e\n"
     assert is_normal_termination(log) is False
+
+
+# ---------------------------------------------------------------------------
+# Tests: ghost-atom support
+# ---------------------------------------------------------------------------
+
+
+def _make_hene_ghost_mol():
+    """He real at origin, Ne ghost at (2.5, 0, 0) Å, with fix_com/fix_orientation."""
+    return Molecule.from_data(
+        """
+        0 1
+        He 0.0 0.0 0.0
+        @Ne 2.5 0.0 0.0
+        nocom
+        noreorient
+        """
+    )
+
+
+def _default_taskconfig(**overrides):
+    from qcengine.config import TaskConfig
+
+    cfg = dict(
+        scratch_directory=None,
+        scratch_messy=False,
+        ncores=1,
+        nnodes=1,
+        memory=1.0,
+        retries=0,
+        mpiexec_command=None,
+    )
+    cfg.update(overrides)
+    return TaskConfig(**cfg)
+
+
+def _spec(driver="energy", method="HF", basis="STO-3G"):
+    return AtomicSpecification(
+        program="gaussian",
+        driver=driver,
+        model={"method": method, "basis": basis},
+    )
+
+
+# rq-2229f087
+def test_ghost_real_atom_emits_plain_symbol(harness):
+    mol = Molecule.from_data(
+        {
+            "symbols": ["H"],
+            "geometry": [0.0, 0.0, 0.0],
+            "real": [True],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 2,
+        }
+    )
+    inp = AtomicInput(molecule=mol, specification=_spec())
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    com = job["infiles"]["gaussian.com"]
+    atom_lines = [ln for ln in com.splitlines() if ln.lstrip().startswith(("H ", "H-Bq"))]
+    assert any(ln.lstrip().startswith("H ") for ln in atom_lines)
+    assert not any(ln.lstrip().startswith("H-Bq ") for ln in atom_lines)
+
+
+# rq-916e4919
+def test_ghost_atom_emits_bq_suffix(harness):
+    mol = Molecule.from_data(
+        {
+            "symbols": ["H"],
+            "geometry": [0.0, 0.0, 0.0],
+            "real": [False],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        }
+    )
+    inp = AtomicInput(molecule=mol, specification=_spec())
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    com = job["infiles"]["gaussian.com"]
+    assert any(ln.lstrip().startswith("H-Bq ") for ln in com.splitlines())
+
+
+# rq-2a015edf
+def test_ghost_mixed_real_and_ghost(harness):
+    mol = _make_hene_ghost_mol()
+    inp = AtomicInput(molecule=mol, specification=_spec())
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    lines = [ln for ln in job["infiles"]["gaussian.com"].splitlines() if ln.strip()]
+    he_idx = next(i for i, ln in enumerate(lines) if ln.lstrip().startswith("He "))
+    ne_idx = next(i for i, ln in enumerate(lines) if ln.lstrip().startswith("Ne-Bq "))
+    assert he_idx < ne_idx  # input order preserved
+
+
+# rq-a100502c
+def test_ghost_route_line_unchanged(harness):
+    mol = _make_hene_ghost_mol()
+    inp = AtomicInput(molecule=mol, specification=_spec(method="HF", basis="6-31G*"))
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    lines = job["infiles"]["gaussian.com"].splitlines()
+    route_lines = [ln for ln in lines if ln.startswith("#P")]
+    assert route_lines == ["#P HF/6-31G*"]
+
+
+# rq-ce76f384
+def test_ghost_all_atoms_ghost(harness):
+    mol = Molecule.from_data(
+        {
+            "symbols": ["H", "H"],
+            "geometry": [0.0, 0.0, 0.0, 0.0, 0.0, 1.4],
+            "real": [False, False],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        }
+    )
+    inp = AtomicInput(molecule=mol, specification=_spec())
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    com = job["infiles"]["gaussian.com"]
+    atom_lines = [
+        ln for ln in com.splitlines()
+        if ln.lstrip().startswith(("H ", "H-Bq"))
+    ]
+    assert len(atom_lines) == 2
+    assert all("-Bq" in ln for ln in atom_lines)
+
+
+# rq-ceef73bd
+def test_ghost_coordinate_precision_preserved(harness):
+    mol = Molecule.from_data(
+        {
+            "symbols": ["H"],
+            "geometry": [1.23456789012 / qcel.constants.conversion_factor("bohr", "angstrom"), 0.0, 0.0],
+            "real": [False],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        }
+    )
+    inp = AtomicInput(molecule=mol, specification=_spec())
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    com = job["infiles"]["gaussian.com"]
+    ghost_line = next(ln for ln in com.splitlines() if "H-Bq" in ln)
+    assert re.search(r"\d+\.\d{10}", ghost_line)
+
+
+# rq-b27d4aff
+@requires_cclib
+def test_ghost_out_mol_real_preserved():
+    in_mol = _make_hene_ghost_mol()
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-77.7]),
+        atomcoords=np.array([[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0]]]),
+        atomnos=np.array([2, 10]),
+    )
+    with _patch_cclib(ccdata):
+        _, _, _, out_mol = harvest(in_mol, "hf", "dummy log")
+    assert list(out_mol.real) == [True, False]
+
+
+# rq-731f01ba
+@requires_cclib
+def test_ghost_out_mol_symbols_from_in_mol():
+    in_mol = _make_hene_ghost_mol()
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-77.7]),
+        atomcoords=np.array([[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0]]]),
+        atomnos=np.array([2, 10]),
+    )
+    with _patch_cclib(ccdata):
+        _, _, _, out_mol = harvest(in_mol, "hf", "dummy log")
+    assert list(out_mol.symbols) == ["He", "Ne"]
+
+
+# rq-7411efa0
+@requires_cclib
+def test_ghost_atom_count_sanity_check_passes():
+    in_mol = _make_hene_ghost_mol()
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-77.7]),
+        atomcoords=np.array([[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0]]]),
+        atomnos=np.array([2, 10]),
+    )
+    with _patch_cclib(ccdata):
+        # Should not raise: 2 atoms in cclib output == 2 atoms in in_mol
+        harvest(in_mol, "hf", "dummy log")
+
+
+# rq-66067019
+@requires_cclib
+def test_ghost_atom_count_mismatch_raises():
+    in_mol = _make_hene_ghost_mol()  # 2 atoms
+    # cclib reports 3 atoms but in_mol has 2 → mismatch
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-77.7]),
+        atomcoords=np.array([[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0], [5.0, 0.0, 0.0]]]),
+        atomnos=np.array([2, 10, 10]),
+    )
+    with _patch_cclib(ccdata):
+        with pytest.raises(ValueError, match="atom count"):
+            harvest(in_mol, "hf", "dummy log")
+
+
+# rq-a69d0898
+@requires_cclib
+def test_ghost_nre_check_excludes_ghosts():
+    in_mol = _make_hene_ghost_mol()
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-77.7]),
+        atomcoords=np.array([[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0]]]),
+        atomnos=np.array([2, 10]),
+    )
+    with _patch_cclib(ccdata):
+        # NRE = 0 for both (single real atom), no ValueError
+        harvest(in_mol, "hf", "dummy log")
+
+
+# rq-b57c882b
+@requires_cclib
+def test_ghost_nre_mismatch_still_raises():
+    # Use a 2 real + 1 ghost system so the real-atom-only NRE is nonzero
+    # and can mismatch when the parsed geometry differs.
+    in_mol = Molecule.from_data(
+        {
+            "symbols": ["H", "H", "He"],
+            "geometry": [0.0, 0.0, 0.0, 0.0, 0.0, 1.4, 5.0, 0.0, 0.0],
+            "real": [True, True, False],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+            "fix_com": True,
+            "fix_orientation": True,
+        }
+    )
+    # Parsed geometry has the two real H atoms far apart, so the
+    # real-atom-only NRE differs from in_mol's by far more than 1e-3 Ha.
+    far_coords = np.array([[[0.0, 0.0, 0.0], [0.0, 0.0, 50.0], [5.0, 0.0, 0.0]]])
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-1.0]),
+        atomcoords=far_coords,
+        atomnos=np.array([1, 1, 2]),
+    )
+    with _patch_cclib(ccdata):
+        with pytest.raises(ValueError, match="inconsistent"):
+            harvest(in_mol, "hf", "dummy log")
+
+
+# rq-e5a98119
+@requires_cclib
+def test_ghost_nre_check_unchanged_for_all_real():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2041.3]))
+    with _patch_cclib(ccdata):
+        # Existing behaviour: no ghosts, full-mol NRE comparison, no raise
+        harvest(in_mol, "hf", "dummy log")
+
+
+# rq-d97cc860
+@requires_cclib
+def test_ghost_gradient_spans_real_and_ghost():
+    in_mol = _make_hene_ghost_mol()
+    # Forces: nonzero on He, zero on Ne (ghost)
+    forces = np.array([[0.001, 0.0, 0.0], [0.0, 0.0, 0.0]])
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-77.7]),
+        atomcoords=np.array([[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0]]]),
+        atomnos=np.array([2, 10]),
+        grads=forces[np.newaxis, :, :],
+    )
+    with _patch_cclib(ccdata):
+        _, grad, _, _ = harvest(in_mol, "hf", "dummy log")
+    assert grad is not None
+    assert grad.shape == (6,)
+    # Ghost atom (index 1) gradient is zero
+    np.testing.assert_allclose(grad[3:6], np.zeros(3), atol=1e-12)
+
+
+# rq-f8ce079b
+@requires_cclib
+def test_ghost_align_uses_generic_ghosts():
+    # The harvester constructs calc_mol via qcelemental.models.Molecule (v1)
+    # and dispatches align() on it, so spy on the same class.
+    from qcelemental.models import Molecule as HarvesterMolecule
+
+    in_mol = _make_hene_ghost_mol()
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-77.7]),
+        atomcoords=np.array([[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0]]]),
+        atomnos=np.array([2, 10]),
+    )
+
+    captured = {"calls": []}
+    real_align = HarvesterMolecule.align
+
+    def spy_align(self, other, **kwargs):
+        captured["calls"].append(kwargs)
+        return real_align(self, other, **kwargs)
+
+    with _patch_cclib(ccdata):
+        with patch.object(HarvesterMolecule, "align", spy_align):
+            harvest(in_mol, "hf", "dummy log")
+
+    assert captured["calls"], "expected at least one Molecule.align call"
+    assert all(call.get("generic_ghosts") is True for call in captured["calls"])
+
+
+# rq-04028610
+@requires_cclib
+def test_ghost_compute_preserves_ghost_designation(harness):
+    in_mol = _make_hene_ghost_mol()
+    inp = AtomicInput(molecule=in_mol, specification=_spec(method="HF", basis="STO-3G"))
+
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-77.7]),
+        atomcoords=np.array([[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0]]]),
+        atomnos=np.array([2, 10]),
+    )
+    log_text = _NORMAL_LOG
+    job_record = {
+        "infiles": {"gaussian.com": "%NProcShared=1\n#P HF/STO-3G\n"},
+        "command": ["/g16", "gaussian.com"],
+        "scratch_directory": None,
+        "scratch_messy": False,
+    }
+    dexe = {"outfiles": {"gaussian.log": log_text}, "stdout": "", "stderr": ""}
+
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        with patch("qcengine.programs.gaussian.runner.which_import", return_value=True):
+            with patch.object(GaussianHarness, "build_input", return_value=job_record):
+                with patch.object(GaussianHarness, "execute", return_value=(True, dexe)):
+                    with patch.object(GaussianHarness, "get_version", return_value="16.C.02"):
+                        with _patch_cclib(ccdata):
+                            result = harness.compute(inp, MagicMock())
+
+    assert list(result.molecule.real) == [True, False]
+    assert list(result.molecule.symbols) == ["He", "Ne"]
 
 
 # ---------------------------------------------------------------------------

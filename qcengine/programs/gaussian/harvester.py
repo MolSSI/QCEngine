@@ -138,14 +138,35 @@ def harvest(
     angstrom_to_bohr = qcel.constants.conversion_factor("angstrom", "bohr")
     coords_bohr = ccdata.atomcoords[-1] * angstrom_to_bohr  # shape (natoms, 3)
 
-    symbols = [qcel.periodictable.to_symbol(z) for z in ccdata.atomnos]
+    # rq-f1d712bb rq-66067019 rq-7411efa0 — cclib cannot distinguish ghost atoms
+    # from real ones in Gaussian output (Gaussian marks ghosts via the "Atomic Type"
+    # column = 1000, which cclib does not expose). Trust in_mol.real as the sole
+    # source of ghost designation; sanity-check only that the parsed atom count
+    # matches in_mol when ghosts are present.
+    in_real = list(in_mol.real)
+    has_ghosts = not all(in_real)
+    if has_ghosts:
+        if len(ccdata.atomnos) != len(in_mol.symbols):
+            raise ValueError(
+                f"Gaussian log atom count ({len(ccdata.atomnos)}) does not match the "
+                f"input molecule's atom count ({len(in_mol.symbols)})."
+            )
+        symbols = list(in_mol.symbols)
+        real_flags = in_real
+    else:
+        symbols = [qcel.periodictable.to_symbol(z) for z in ccdata.atomnos]
+        real_flags = None
 
-    calc_mol = Molecule(
+    # rq-f1d712bb — preserve ghost designation on calc_mol so its NRE excludes ghosts
+    calc_mol_kwargs = dict(
         symbols=symbols,
         geometry=coords_bohr.flatten(),
         fix_com=True,
         fix_orientation=True,
     )
+    if real_flags is not None:
+        calc_mol_kwargs["real"] = real_flags
+    calc_mol = Molecule(**calc_mol_kwargs)
 
     natoms = len(ccdata.atomnos)
     qcvars["N ATOMS"] = str(natoms)
@@ -163,7 +184,9 @@ def harvest(
     # rq-0753cd03
     qcvars["NUCLEAR REPULSION ENERGY"] = str(round(calc_mol.nuclear_repulsion_energy(), 10))
 
-    # rq-90604835 — cross-check NRE against input molecule
+    # rq-90604835 rq-a69d0898 rq-e5a98119 — cross-check NRE against input molecule.
+    # Molecule.nuclear_repulsion_energy() excludes ghost atoms (zero Z), so when
+    # calc_mol.real mirrors in_mol.real both NREs sum over real atoms only.
     if abs(calc_mol.nuclear_repulsion_energy() - in_mol.nuclear_repulsion_energy()) > 1.0e-3:
         raise ValueError(
             f"Gaussian output geometry (NRE: {calc_mol.nuclear_repulsion_energy():.6f}) "
@@ -171,14 +194,17 @@ def harvest(
         )
 
     # Frame considerations (same pattern as GAMESS harvester)
-    # rq-8d6fc024
+    # rq-8d6fc024 rq-f8ce079b
+    align_kwargs = dict(atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+    if has_ghosts:
+        align_kwargs["generic_ghosts"] = True
     if in_mol.fix_com and in_mol.fix_orientation:
         # Impose input frame if important as signalled by fix_*=True
         return_mol = in_mol
-        _, data = calc_mol.align(in_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+        _, data = calc_mol.align(in_mol, **align_kwargs)
         mill = data["mill"]
     else:
-        return_mol, _ = in_mol.align(calc_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+        return_mol, _ = in_mol.align(calc_mol, **align_kwargs)
         mill = qcel.molutil.compute_scramble(
             len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
         )  # identity AlignmentMill
@@ -269,7 +295,8 @@ def harvest(
                 # return_mol is in calc/standard frame; need to transform
                 # hessian from input→standard. The mill from calc_mol.align(in_mol)
                 # transforms calc→input, so we need input→calc.
-                _, data = in_mol.align(calc_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+                # rq-f8ce079b
+                _, data = in_mol.align(calc_mol, **align_kwargs)
                 input_to_calc_mill = data["mill"]
                 hess = input_to_calc_mill.align_hessian(parsed_hess)
 

@@ -14,6 +14,20 @@
     "title": "HF method maps to \"HF\" method string",
     "type": "scenario"
   },
+  "rq-04028610": {
+    "decl": "Scenario: AtomicResult.molecule preserves ghost designation",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "AtomicResult.molecule preserves ghost designation",
+    "type": "scenario"
+  },
+  "rq-04ed684d": {
+    "decl": "Scenario: Gradient of a ghost-bearing system matches a reference vector",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Gradient of a ghost-bearing system matches a reference vector",
+    "type": "scenario"
+  },
   "rq-058819da": {
     "decl": "## Gherkin Scenarios",
     "file": "gaussian/harvester",
@@ -159,6 +173,13 @@
     "title": "get_version() raises UnknownError if version cannot be parsed",
     "type": "scenario"
   },
+  "rq-2229f087": {
+    "decl": "Scenario: Real atom emits a plain element symbol in the atom block",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Real atom emits a plain element symbol in the atom block",
+    "type": "scenario"
+  },
   "rq-23d8b2c6": {
     "decl": "Scenario: The .com file ends with a trailing blank line",
     "file": "gaussian/input-builder",
@@ -173,11 +194,25 @@
     "title": "found(raise_error=True) raises ModuleNotFoundError when cclib is missing",
     "type": "scenario"
   },
+  "rq-24d73182": {
+    "decl": "Scenario: Energy of a ghost-bearing system matches a reference value",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Energy of a ghost-bearing system matches a reference value",
+    "type": "scenario"
+  },
   "rq-25c4ad49": {
     "decl": "Scenario: Method already starting with U is not double-prefixed",
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Method already starting with U is not double-prefixed",
+    "type": "scenario"
+  },
+  "rq-2a015edf": {
+    "decl": "Scenario: Mixed real and ghost atoms in one molecule",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Mixed real and ghost atoms in one molecule",
     "type": "scenario"
   },
   "rq-2aa0e9e1": {
@@ -268,6 +303,14 @@
     "title": "get_version() caches the result after the first call",
     "type": "scenario"
   },
+  "rq-4091a959": {
+    "decl": "## Method and Driver Compatibility",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Method and Driver Compatibility",
+    "type": "section"
+  },
   "rq-4252ac2d": {
     "decl": "Scenario: Multi-core execution succeeds and ncores is reflected in output",
     "file": "gaussian/integration-tests",
@@ -337,13 +380,6 @@
     "refs": [],
     "title": "multiplicity",
     "type": "api-item"
-  },
-  "rq-5053204b": {
-    "decl": "Scenario: Ghost atoms in the molecule raise InputError",
-    "file": "gaussian/input-builder",
-    "refs": [],
-    "title": "Ghost atoms in the molecule raise InputError",
-    "type": "scenario"
   },
   "rq-519fbe49": {
     "decl": "Scenario: Single-core execution succeeds",
@@ -424,6 +460,13 @@
     "title": "Memory configuration is applied with 1.555 GiB total node memory",
     "type": "scenario"
   },
+  "rq-66067019": {
+    "decl": "Scenario: Atom count mismatch raises ValueError when ghosts are present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Atom count mismatch raises ValueError when ghosts are present",
+    "type": "scenario"
+  },
   "rq-6a889dea": {
     "decl": "Scenario: UHF energy is invariant to input frame scrambling",
     "file": "gaussian/integration-tests",
@@ -480,6 +523,27 @@
     "title": "Parse HF total energy from a closed-shell log",
     "type": "scenario"
   },
+  "rq-731f01ba": {
+    "decl": "Scenario: out_mol.symbols are copied from in_mol for ghost positions",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "out_mol.symbols are copied from in_mol for ghost positions",
+    "type": "scenario"
+  },
+  "rq-73c1f919": {
+    "decl": "# Feature: Gaussian Harness — Ghost Atom Support",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Ghost Atom Support",
+    "type": "file"
+  },
+  "rq-7411efa0": {
+    "decl": "Scenario: Atom count sanity check passes when cclib atom count matches in_mol",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Atom count sanity check passes when cclib atom count matches in_mol",
+    "type": "scenario"
+  },
   "rq-74e0110c": {
     "decl": "## Molecule Block Construction",
     "file": "gaussian/input-builder",
@@ -525,6 +589,14 @@
     "refs": [],
     "title": "Hessian driver produces \"Freq\"",
     "type": "scenario"
+  },
+  "rq-84b093c1": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
   },
   "rq-850ede4f": {
     "decl": "Scenario: get_version() returns a normalised version string for Gaussian 09",
@@ -589,6 +661,13 @@
     "refs": [],
     "title": "ValueError",
     "type": "api-item"
+  },
+  "rq-916e4919": {
+    "decl": "Scenario: Ghost atom emits a \"-Bq\" suffix in the atom block",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Ghost atom emits a \"-Bq\" suffix in the atom block",
+    "type": "scenario"
   },
   "rq-923b3212": {
     "decl": "Scenario: native_files protocol \"input\" returns only the input file",
@@ -678,11 +757,25 @@
     "title": "Gaussian Input File Format",
     "type": "section"
   },
+  "rq-a100502c": {
+    "decl": "Scenario: Route line is unchanged when ghost atoms are present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Route line is unchanged when ghost atoms are present",
+    "type": "scenario"
+  },
   "rq-a4c449da": {
     "decl": "Scenario: compute() raises ResourceError on memory allocation failure",
     "file": "gaussian/runner",
     "refs": [],
     "title": "compute() raises ResourceError on memory allocation failure",
+    "type": "scenario"
+  },
+  "rq-a69d0898": {
+    "decl": "Scenario: NRE cross-check excludes ghost atoms when present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "NRE cross-check excludes ghost atoms when present",
     "type": "scenario"
   },
   "rq-a76c3d7b": {
@@ -691,6 +784,14 @@
     "refs": [],
     "title": "Output molecule geometry is constructed from ccdata",
     "type": "scenario"
+  },
+  "rq-a78c68a8": {
+    "decl": "## Feature API",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
   },
   "rq-a88c706f": {
     "decl": "- `method` — method string from `AtomicInput.model.method` (case-insensitive).",
@@ -720,12 +821,26 @@
     "title": "Route line for closed-shell HF energy",
     "type": "scenario"
   },
+  "rq-b27d4aff": {
+    "decl": "Scenario: out_mol.real is copied from in_mol when ghosts are present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "out_mol.real is copied from in_mol when ghosts are present",
+    "type": "scenario"
+  },
   "rq-b49bb2a2": {
     "decl": "- `driver` — one of `\"energy\"`, `\"gradient\"`, `\"hessian\"`, `\"properties\"`.",
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "driver",
     "type": "api-item"
+  },
+  "rq-b57c882b": {
+    "decl": "Scenario: NRE cross-check still catches geometry mismatches with ghosts present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "NRE cross-check still catches geometry mismatches with ghosts present",
+    "type": "scenario"
   },
   "rq-b5e72c6d": {
     "decl": "Scenario: found() returns False when cclib is not importable",
@@ -778,6 +893,14 @@
     "title": "Prerequisite: native_files Key Convention",
     "type": "section"
   },
+  "rq-bd6cd9a4": {
+    "decl": "### Modified: `GaussianHarness.build_input(input_model, config, template=None)`",
+    "file": "gaussian/ghost-atoms",
+    "level": 3,
+    "refs": [],
+    "title": "Modified: `GaussianHarness.build_input(input_model, config, template=None)`",
+    "type": "section"
+  },
   "rq-bd98d417": {
     "decl": "Scenario: found(raise_error=True) raises ModuleNotFoundError when g16 is missing",
     "file": "gaussian/runner",
@@ -807,6 +930,14 @@
     "refs": [],
     "title": "Energy driver produces no job-type keyword",
     "type": "scenario"
+  },
+  "rq-c4439b82": {
+    "decl": "## Integration Tests",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Integration Tests",
+    "type": "section"
   },
   "rq-c5165f1f": {
     "decl": "- `\"CURRENT ENERGY\"` — set to the highest-level energy available (see below).",
@@ -867,6 +998,20 @@
     "title": "Route line for properties calculation includes Pop=Full",
     "type": "scenario"
   },
+  "rq-ce76f384": {
+    "decl": "Scenario: All-ghost molecule produces an atom block with every line \"-Bq\"-suffixed",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "All-ghost molecule produces an atom block with every line \"-Bq\"-suffixed",
+    "type": "scenario"
+  },
+  "rq-ceef73bd": {
+    "decl": "Scenario: Coordinate precision is preserved for ghost atoms",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Coordinate precision is preserved for ghost atoms",
+    "type": "scenario"
+  },
   "rq-cf6fdf8a": {
     "decl": "## Feature API",
     "file": "gaussian/runner",
@@ -904,6 +1049,13 @@
     "title": "`harvest(in_mol: Molecule, method: str, log_content: str) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]`",
     "type": "section"
   },
+  "rq-d97cc860": {
+    "decl": "Scenario: Gradient array spans real and ghost atoms in input order",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Gradient array spans real and ghost atoms in input order",
+    "type": "scenario"
+  },
   "rq-db92093a": {
     "decl": "Scenario: Memory directive rounds down to nearest integer GB (minimum 1)",
     "file": "gaussian/input-builder",
@@ -911,11 +1063,34 @@
     "title": "Memory directive rounds down to nearest integer GB (minimum 1)",
     "type": "scenario"
   },
+  "rq-dceb51f5": {
+    "decl": "## Background: Gaussian Ghost-Atom Syntax",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Background: Gaussian Ghost-Atom Syntax",
+    "type": "section"
+  },
+  "rq-df7eb0c3": {
+    "decl": "## Migration Notes",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Migration Notes",
+    "type": "section"
+  },
   "rq-e008c6fe": {
     "decl": "Scenario: Unsupported driver raises InputError",
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Unsupported driver raises InputError",
+    "type": "scenario"
+  },
+  "rq-e5a98119": {
+    "decl": "Scenario: NRE cross-check is unchanged for all-real molecules",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "NRE cross-check is unchanged for all-real molecules",
     "type": "scenario"
   },
   "rq-e62578e2": {
@@ -984,6 +1159,14 @@
     "title": "Gradient driver produces \"Force=NoStep\"",
     "type": "scenario"
   },
+  "rq-f1d712bb": {
+    "decl": "### Modified: `harvest(in_mol, method, log_content)`",
+    "file": "gaussian/ghost-atoms",
+    "level": 3,
+    "refs": [],
+    "title": "Modified: `harvest(in_mol, method, log_content)`",
+    "type": "section"
+  },
   "rq-f28b3bed": {
     "decl": "## Implementation Notes",
     "file": "gaussian/integration-tests",
@@ -1028,6 +1211,13 @@
     "refs": [],
     "title": "cclib Limitations",
     "type": "section"
+  },
+  "rq-f8ce079b": {
+    "decl": "Scenario: align() calls use generic_ghosts=True when ghosts are present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "align() calls use generic_ghosts=True when ghosts are present",
+    "type": "scenario"
   },
   "rq-fe13245b": {
     "decl": "Scenario: Method starting with RO is not prefixed with U",

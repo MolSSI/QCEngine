@@ -36,6 +36,7 @@ def hene_data():
             marks=using("nwchem"),
         ),
         pytest.param("psi4", "aug-cc-pvdz", {"scf_type": "direct"}, marks=using("psi4")),
+        pytest.param("gaussian", "aug-cc-pvdz", {}, marks=using("gaussian")),
     ],
 )
 def test_simple_ghost(driver, program, basis, keywords, hene_data, schema_versions, request):

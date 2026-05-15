@@ -159,8 +159,9 @@ present in the XYZ format), or equivalently by iterating over `molecule.symbols`
 Coordinates must be written with sufficient decimal places (at least 10) to preserve
 numerical precision.
 
-Ghost atoms (`real=False` in the molecule) are not supported; `InputError` is raised if
-any atom is a ghost atom.
+Ghost atoms (`real=False` in the molecule) are supported: the atom symbol is emitted as
+`<symbol>-Bq` (e.g. `Ne-Bq`) rather than `<symbol>`. See [[ghost-atoms]] for the full
+specification of ghost-atom behavior across the input builder and harvester.
 
 ## Gherkin Scenarios <!-- rq-cc549245 -->
 
@@ -316,12 +317,7 @@ Feature: Gaussian input builder
     Then the returned string ends with "\n\n"
 
   # --- Ghost atoms ---
-
-  @rq-5053204b
-  Scenario: Ghost atoms in the molecule raise InputError
-    Given an AtomicInput whose molecule contains a ghost atom (real=False)
-    When build_input() is called
-    Then InputError is raised
+  # Ghost-atom scenarios are owned by ghost-atoms.md (see [[ghost-atoms]]).
 
   # --- BasisSet object ---
 
