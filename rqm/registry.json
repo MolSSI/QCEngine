@@ -50,6 +50,21 @@
     "title": "Nuclear repulsion energy mismatch raises ValueError",
     "type": "scenario"
   },
+  "rq-0edebcd3": {
+    "decl": "### `test_local_options_memory_gib` (`test_canonical_config.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_local_options_memory_gib` (`test_canonical_config.py`)",
+    "type": "section"
+  },
+  "rq-0f585dce": {
+    "decl": "# Feature: Gaussian Harness --- Cross-Program Integration Tests",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Feature: Gaussian Harness --- Cross-Program Integration Tests",
+    "type": "file"
+  },
   "rq-12c41d5e": {
     "decl": "Scenario: Absent normal termination line is classified as abnormal",
     "file": "gaussian/harvester",
@@ -136,6 +151,13 @@
     "title": "Method already starting with U is not double-prefixed",
     "type": "scenario"
   },
+  "rq-2aa0e9e1": {
+    "decl": "Scenario: Memory configuration is not overridden by conflicting DSL keywords",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Memory configuration is not overridden by conflicting DSL keywords",
+    "type": "scenario"
+  },
   "rq-2ad053f2": {
     "decl": "## Feature API",
     "file": "gaussian/input-builder",
@@ -166,6 +188,13 @@
     "title": "No Hessian when running energy-only or gradient calculation",
     "type": "scenario"
   },
+  "rq-349bf8c3": {
+    "decl": "Scenario: UHF gradient is correctly aligned to the (scrambled) input frame",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "UHF gradient is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
   "rq-36736115": {
     "decl": "Scenario: Parse gradient and negate forces",
     "file": "gaussian/harvester",
@@ -179,6 +208,14 @@
     "refs": [],
     "title": "- `\"HF TOTAL ENERGY\"` — always set from `ccdata.scfenergies[-1]` (in Hartree).",
     "type": "api-item"
+  },
+  "rq-3a18d6af": {
+    "decl": "### `test_local_options_ncores` (`test_canonical_config.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_local_options_ncores` (`test_canonical_config.py`)",
+    "type": "section"
   },
   "rq-3b0adf96": {
     "decl": "Scenario: No gradient attribute in ccdata when running energy-only calculation",
@@ -202,6 +239,13 @@
     "title": "get_version() caches the result after the first call",
     "type": "scenario"
   },
+  "rq-4252ac2d": {
+    "decl": "Scenario: Multi-core execution succeeds and ncores is reflected in output",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Multi-core execution succeeds and ncores is reflected in output",
+    "type": "scenario"
+  },
   "rq-4336c3cd": {
     "decl": "- `ValueError` if no coordinate information can be extracted from the log.",
     "file": "gaussian/harvester",
@@ -215,6 +259,13 @@
     "refs": [],
     "title": "Feature: Gaussian Harness — Runner",
     "type": "file"
+  },
+  "rq-475c8796": {
+    "decl": "Scenario: CCSD(T)/aug-cc-pVDZ RHF energy on water matches Gaussian-specific reference",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "CCSD(T)/aug-cc-pVDZ RHF energy on water matches Gaussian-specific reference",
+    "type": "scenario"
   },
   "rq-4ad16d95": {
     "decl": "Scenario: Memory directive uses integer GB for whole-number memory",
@@ -258,6 +309,13 @@
     "title": "Ghost atoms in the molecule raise InputError",
     "type": "scenario"
   },
+  "rq-519fbe49": {
+    "decl": "Scenario: Single-core execution succeeds",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Single-core execution succeeds",
+    "type": "scenario"
+  },
   "rq-53f8ed12": {
     "decl": "Scenario: Missing Mulliken charges do not raise an error",
     "file": "gaussian/harvester",
@@ -272,11 +330,62 @@
     "title": "MP2 method maps to \"MP2\"",
     "type": "scenario"
   },
+  "rq-56e891e7": {
+    "decl": "### Empirical Reference Values",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "Empirical Reference Values",
+    "type": "section"
+  },
   "rq-578bb785": {
     "decl": "Scenario: Parse MP2 total and correlation energies",
     "file": "gaussian/harvester",
     "refs": [],
     "title": "Parse MP2 total and correlation energies",
+    "type": "scenario"
+  },
+  "rq-5d9b0b40": {
+    "decl": "Scenario: UHF hessian is correctly aligned to the (scrambled) input frame",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "UHF hessian is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-637d486d": {
+    "decl": "Scenario: RHF gradient is correctly aligned to the (scrambled) input frame",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "RHF gradient is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-6423b98b": {
+    "decl": "### Files Modified",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "Files Modified",
+    "type": "section"
+  },
+  "rq-647b596c": {
+    "decl": "Scenario: Gaussian appears in _canonical_methods",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Gaussian appears in _canonical_methods",
+    "type": "scenario"
+  },
+  "rq-65cb367e": {
+    "decl": "Scenario: Memory configuration is applied with 1.555 GiB total node memory",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Memory configuration is applied with 1.555 GiB total node memory",
+    "type": "scenario"
+  },
+  "rq-6a889dea": {
+    "decl": "Scenario: UHF energy is invariant to input frame scrambling",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "UHF energy is invariant to input frame scrambling",
     "type": "scenario"
   },
   "rq-6bff3228": {
@@ -307,6 +416,13 @@
     "title": "User keyword is appended to route line",
     "type": "scenario"
   },
+  "rq-71824b99": {
+    "decl": "Scenario: Scratch directory is used and files are left behind when scratch_messy=True",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Scratch directory is used and files are left behind when scratch_messy=True",
+    "type": "scenario"
+  },
   "rq-71aceb93": {
     "decl": "Scenario: compute() raises UnknownError on abnormal termination with no known pattern",
     "file": "gaussian/runner",
@@ -327,6 +443,30 @@
     "level": 2,
     "refs": [],
     "title": "Molecule Block Construction",
+    "type": "section"
+  },
+  "rq-8070c4fd": {
+    "decl": "## Test Integrations",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Test Integrations",
+    "type": "section"
+  },
+  "rq-815d5fee": {
+    "decl": "### `test_local_options_scratch` (`test_canonical_config.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_local_options_scratch` (`test_canonical_config.py`)",
+    "type": "section"
+  },
+  "rq-81bc1d68": {
+    "decl": "### `test_hf_alignment` (`test_alignment.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_hf_alignment` (`test_alignment.py`)",
     "type": "section"
   },
   "rq-82942b90": {
@@ -357,6 +497,13 @@
     "title": "InputError",
     "type": "api-item"
   },
+  "rq-87c8fb49": {
+    "decl": "Scenario: RHF hessian is correctly aligned to the (scrambled) input frame",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "RHF hessian is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
   "rq-8d6fc024": {
     "decl": "### Output Molecule Construction",
     "file": "gaussian/harvester",
@@ -364,6 +511,13 @@
     "refs": [],
     "title": "Output Molecule Construction",
     "type": "section"
+  },
+  "rq-8df082e3": {
+    "decl": "Scenario: native_files protocol \"none\" returns empty native_files",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "native_files protocol \"none\" returns empty native_files",
+    "type": "scenario"
   },
   "rq-8e21b7d7": {
     "decl": "Scenario: found() returns False when neither g16 nor g09 is on PATH",
@@ -385,6 +539,13 @@
     "refs": [],
     "title": "ValueError",
     "type": "api-item"
+  },
+  "rq-923b3212": {
+    "decl": "Scenario: native_files protocol \"input\" returns only the input file",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "native_files protocol \"input\" returns only the input file",
+    "type": "scenario"
   },
   "rq-92492893": {
     "decl": "Scenario: CCSD(T) method maps to \"CCSD(T)\"",
@@ -428,6 +589,14 @@
     "level": 3,
     "refs": [],
     "title": "Class `GaussianHarness(ProgramHarness)`",
+    "type": "section"
+  },
+  "rq-9aa3cac4": {
+    "decl": "### `test_sp_ccsd_t_rhf_full` (`test_standard_suite_ccsd(t).py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_sp_ccsd_t_rhf_full` (`test_standard_suite_ccsd(t).py`)",
     "type": "section"
   },
   "rq-9acd1ce5": {
@@ -487,6 +656,13 @@
     "title": "Nuclear repulsion energy cross-check passes for consistent geometry",
     "type": "scenario"
   },
+  "rq-aa991a3a": {
+    "decl": "Scenario: native_files protocol \"all\" returns input and output files",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "native_files protocol \"all\" returns input and output files",
+    "type": "scenario"
+  },
   "rq-af032242": {
     "decl": "Scenario: Route line for closed-shell HF energy",
     "file": "gaussian/input-builder",
@@ -522,6 +698,13 @@
     "title": "Atom coordinates appear in Angstrom with at least 10 decimal places",
     "type": "scenario"
   },
+  "rq-ba0f397f": {
+    "decl": "Scenario: RHF energy is invariant to input frame scrambling",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "RHF energy is invariant to input frame scrambling",
+    "type": "scenario"
+  },
   "rq-bb0a5d96": {
     "decl": "## cclib Integration",
     "file": "gaussian/harvester",
@@ -537,12 +720,28 @@
     "title": "cclib parse failure propagates as-is",
     "type": "scenario"
   },
+  "rq-bb7d680f": {
+    "decl": "## Prerequisite: native_files Key Convention",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Prerequisite: native_files Key Convention",
+    "type": "section"
+  },
   "rq-bd98d417": {
     "decl": "Scenario: found(raise_error=True) raises ModuleNotFoundError when g16 is missing",
     "file": "gaussian/runner",
     "refs": [],
     "title": "found(raise_error=True) raises ModuleNotFoundError when g16 is missing",
     "type": "scenario"
+  },
+  "rq-c01c892e": {
+    "decl": "### `test_protocol_native` (`test_canonical_fields.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_protocol_native` (`test_canonical_fields.py`)",
+    "type": "section"
   },
   "rq-c20746b1": {
     "decl": "## Regex Fallback",
@@ -632,6 +831,13 @@
     "title": "Link 0 section contains NProcShared and Mem directives",
     "type": "scenario"
   },
+  "rq-d87ddeb8": {
+    "decl": "Scenario: native_files never contains \"stdout\" or \"stderr\"",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "native_files never contains \"stdout\" or \"stderr\"",
+    "type": "scenario"
+  },
   "rq-d9434480": {
     "decl": "### `harvest(in_mol: Molecule, method: str, log_content: str) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]`",
     "file": "gaussian/harvester",
@@ -661,12 +867,28 @@
     "title": "compute() returns AtomicResult with gradient for gradient driver",
     "type": "scenario"
   },
+  "rq-e71357c5": {
+    "decl": "## Canonical Methods Entry",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Canonical Methods Entry",
+    "type": "section"
+  },
   "rq-e7897f09": {
     "decl": "Scenario: Reserved user keywords (memory, nprocs) are not appended to route line",
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Reserved user keywords (memory, nprocs) are not appended to route line",
     "type": "scenario"
+  },
+  "rq-e7c13c1e": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
   },
   "rq-edb73b83": {
     "decl": "Scenario: compute() raises InputError on internal coordinate error",
@@ -690,12 +912,27 @@
     "title": "`muster_modelchem(method: str, driver: str, multiplicity: int) -> Dict[str, Any]`",
     "type": "section"
   },
+  "rq-f13e0d24": {
+    "decl": "Scenario: parse_output uses standard \"input\" key in native_files",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "parse_output uses standard \"input\" key in native_files",
+    "type": "scenario"
+  },
   "rq-f1c116db": {
     "decl": "Scenario: Gradient driver produces \"Force=NoStep\"",
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Gradient driver produces \"Force=NoStep\"",
     "type": "scenario"
+  },
+  "rq-f28b3bed": {
+    "decl": "## Implementation Notes",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Implementation Notes",
+    "type": "section"
   },
   "rq-f2e32162": {
     "decl": "Scenario: Parse Hessian from frequency calculation",

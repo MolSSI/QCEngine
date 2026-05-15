@@ -629,7 +629,7 @@ def test_compute_returns_atomic_result_energy(harness, water_energy_input_all_fi
 
     assert result.success is True
     assert isinstance(result.return_result, float)
-    assert "gaussian.com" in result.native_files
+    assert "input" in result.native_files  # rq-f13e0d24
     assert "gaussian.log" in result.native_files
     assert result.provenance.creator == "Gaussian"
 

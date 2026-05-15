@@ -83,6 +83,15 @@ Regex is used for items cclib does not expose:
 
 ### QC Variables Populated <!-- rq-929a262a -->
 
+> **Priority note:** The `properties` field on `AtomicResult` (populated via
+> `build_atomicproperties`) is the proper QCSchema interface for consumers.
+> `extras["qcvars"]` is retained for diagnostics and compatibility with other
+> harnesses, but `properties` mappings are the primary contract.  All energy,
+> gradient, and hessian variables listed below have existing mappings in
+> `qcvars_to_atomicproperties`.  `"MULLIKEN CHARGES"` and `"DIPOLE MOMENT"`
+> do not have `properties` mappings (the dipole mapping expects a vector
+> `"HF DIPOLE"`, not the scalar magnitude stored here).
+
 The following variables are placed in `qcvars` based on the method:
 
 **All calculations**:

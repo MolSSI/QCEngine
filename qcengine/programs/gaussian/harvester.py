@@ -59,6 +59,14 @@ def harvest(
     qcvars = PreservingDict()
     method_lower = method.lower()
 
+    # Normalise method variants: strip Gaussian-specific sub-options like ",full"
+    # so that energy-extraction logic sees the canonical method name.
+    # e.g. "ccsd(t,full)" → "ccsd(t)"
+    _METHOD_NORMALISE = {
+        "ccsd(t,full)": "ccsd(t)",
+    }
+    method_lower = _METHOD_NORMALISE.get(method_lower, method_lower)
+
     # --- Geometry and output molecule ---
     # rq-8d6fc024 rq-a76c3d7b rq-b7c7b8cb
     if not hasattr(ccdata, "atomcoords") or len(ccdata.atomcoords) == 0:
@@ -90,9 +98,18 @@ def harvest(
             f"is inconsistent with the input molecule (NRE: {in_mol.nuclear_repulsion_energy():.6f})."
         )
 
-    # Align output molecule to input molecule (same pattern as GAMESS harvester)
+    # Frame considerations (same pattern as GAMESS harvester)
     # rq-8d6fc024
-    return_mol, _ = in_mol.align(calc_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+    if in_mol.fix_com and in_mol.fix_orientation:
+        # Impose input frame if important as signalled by fix_*=True
+        return_mol = in_mol
+        _, data = calc_mol.align(in_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+        mill = data["mill"]
+    else:
+        return_mol, _ = in_mol.align(calc_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+        mill = qcel.molutil.compute_scramble(
+            len(in_mol.symbols), do_resort=False, do_shift=False, do_rotate=False, do_mirror=False
+        )  # identity AlignmentMill
 
     # --- Energies ---
     # rq-37f40e92 — HF/SCF energy is always extracted from scfenergies
@@ -136,14 +153,15 @@ def harvest(
     grad: Optional[np.ndarray] = None
     if hasattr(ccdata, "grads") and ccdata.grads is not None and len(ccdata.grads) > 0:
         # ccdata.grads shape: (nsteps, natoms, 3) in Hartree/Bohr (forces = -dE/dR)
-        # Gradient = -forces
-        grad = (-ccdata.grads[-1]).flatten()
+        # Gradient = -forces; align_gradient expects (natom, 3)
+        calc_grad = -ccdata.grads[-1]  # shape (natoms, 3)
+        grad = mill.align_gradient(calc_grad).flatten()
 
     # --- Hessian ---
     # rq-f2e32162 rq-344f3432
     hess: Optional[np.ndarray] = None
     if hasattr(ccdata, "hessian") and ccdata.hessian is not None:
-        hess = np.array(ccdata.hessian)
+        hess = mill.align_hessian(np.array(ccdata.hessian))
 
     # --- Properties: dipole and Mulliken charges ---
     # rq-c7fd08b5 rq-943856cc rq-53f8ed12 rq-4c4a1542 rq-ffae3fa6

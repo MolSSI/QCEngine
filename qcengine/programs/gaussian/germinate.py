@@ -14,6 +14,7 @@ _METHOD_MAP = {
     "mp2": "MP2",
     "ccsd": "CCSD",
     "ccsd(t)": "CCSD(T)",
+    "ccsd(t,full)": "CCSD(T,Full)",
 }
 
 # rq-ef62979b rq-c266b9bb rq-f1c116db rq-82942b90 rq-f512b60b

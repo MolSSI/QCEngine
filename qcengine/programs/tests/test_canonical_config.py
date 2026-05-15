@@ -17,6 +17,8 @@ _canonical_methods = [
     pytest.param("cfour", {"method": "hf", "basis": "6-31G"}, {}, marks=using("cfour")),
     pytest.param("dftd3", {"method": "b3lyp-d3"}, {}, marks=using("classic-dftd3")),
     pytest.param("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}, marks=using("gamess")),
+    # rq-e71357c5
+    pytest.param("gaussian", {"method": "hf", "basis": "STO-3G"}, {}, marks=using("gaussian")),
     pytest.param("gcp", {"method": "hf3c"}, {}, marks=using("classic-gcp")),
     pytest.param("mctc-gcp", {"method": "dft/sv"}, {}, marks=using("mctc-gcp")),
     # needs attn ("molpro", {"method": "hf", "basis": "6-31G"}, {}),
@@ -58,6 +60,7 @@ def _get_molecule(program, method, molcls):
                 "cfour": {"memory_size": "5000"},
                 "gamess": {"system__mwords": "5000"},
                 "nwchem": {"memory": "5 gb"},
+                "gaussian": {},  # memory is Link 0, not a route keyword (rq-0edebcd3)
                 "psi4": {},  # no contradictory memory keyword in psi
             },
             id="dsl",
@@ -122,6 +125,8 @@ def test_local_options_memory_gib(program, model, keywords, memory_trickery, sch
     stdout_ref = {  # 1.555 GiB = 208708567 quad-words
         "cfour": "Allocated    1592 MB of main memory",
         "gamess": "208000000 WORDS OF MEMORY AVAILABLE",
+        # rq-0edebcd3 — Gaussian echoes Link 0 %Mem in the log; int(1.555)=1
+        "gaussian": r"%Mem=1GB",
         "nwchem": r"total\s+=\s+2087085\d\d doubles =\s+1592.3 Mbytes",  # doubles is quad-words. Mbytes is MiB
         "psi4": "1592 MiB Core",
     }
@@ -195,6 +200,7 @@ def test_local_options_scratch(program, model, keywords, schema_versions, reques
         "cfour": "University of Florida",  # freebie
         "dftd3": "Grimme",  # freebie
         "gamess": "IOWA STATE UNIVERSITY",  # freebie
+        "gaussian": "Gaussian, Inc.",  # freebie (rq-815d5fee)
         "gcp": "Grimme",  # freebie
         "mctc-gcp": "Grimme",  # freebie
         "mp2d": "Beran",  # freebie
@@ -210,6 +216,7 @@ def test_local_options_scratch(program, model, keywords, schema_versions, reques
         "cfour": "*/NEWFOCK",
         "dftd3": "*/dftd3_geometry.xyz",  # no outfiles
         "gamess": "*/gamess.dat",
+        "gaussian": "*/gaussian.log",  # rq-815d5fee
         "gcp": "*/gcp_geometry.xyz",  # no outfiles
         "mctc-gcp": "*/gcp_geometry.xyz",  # no outfiles
         "mp2d": "*/mp2d_geometry",  # no outfiles
@@ -283,6 +290,8 @@ def test_local_options_ncores(program, model, keywords, ncores, schema_versions,
         "cfour": rf"Running with {ncores} threads/proc",
         "gamess": rf"MEMDDI DISTRIBUTED OVER\s+{ncores} PROCESSORS",
         # "gamess": rf"PARALLEL VERSION RUNNING ON\s+{ncores} PROCESSORS IN\s+1 NODES",  # no line for serial
+        # rq-3a18d6af — Gaussian echoes %NProcShared=N and "Will use up to N processors"
+        "gaussian": rf"Will use up to\s+{ncores} processors",
         # nwchem is node_parallel only
         "psi4": rf"Threads:\s+{ncores}",
     }

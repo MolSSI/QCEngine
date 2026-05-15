@@ -133,7 +133,10 @@ class GaussianHarness(ProgramHarness):
 
         log_text = dexe["outfiles"].get("gaussian.log") or ""
         stdin = job_inputs["infiles"].get("gaussian.com", "")
-        stdout = dexe.get("stdout", "") or ""
+        # Gaussian writes all output to the .log file (not to process stdout) when
+        # given a .com file argument. Expose the log as stdout for consistency with
+        # other harnesses whose programs write to process stdout.
+        stdout = log_text or dexe.get("stdout", "") or ""
         stderr = dexe.get("stderr", "") or ""
 
         # rq-a4c449da
@@ -192,7 +195,7 @@ class GaussianHarness(ProgramHarness):
         bohr_to_ang = qcel.constants.conversion_factor("bohr", "angstrom")
         geom_ang = mol.geometry.reshape(-1, 3) * bohr_to_ang
         atom_lines = [
-            f"{sym:2s}  {x:20.10f}  {y:20.10f}  {z:20.10f}"
+            f"{sym:2s}  {x:24.14f}  {y:24.14f}  {z:24.14f}"
             for sym, (x, y, z) in zip(mol.symbols, geom_ang)
         ]
         atom_block = "\n".join(atom_lines)
@@ -252,6 +255,7 @@ class GaussianHarness(ProgramHarness):
         )
         return success, dexe
 
+    # rq-bb7d680f
     def parse_output(
         self,
         outfiles: Dict[str, str],
@@ -260,7 +264,7 @@ class GaussianHarness(ProgramHarness):
         """Parse Gaussian output files and return an AtomicResult."""
         stdout = outfiles.pop("stdout", "") or ""
         stderr = outfiles.pop("stderr", "") or ""
-        input_text = outfiles.pop("input", "") or ""
+        input_text = outfiles.get("input", "") or ""
         log_text = outfiles.get("gaussian.log", "") or ""
 
         method = input_model.specification.model.method.lower()
@@ -309,15 +313,15 @@ class GaussianHarness(ProgramHarness):
             routine="gaussian",
         ).model_dump()
 
+        # rq-bb7d680f — use outfiles passthrough pattern (matching NWChem/GAMESS/CFOUR)
+        native_files = {k: v for k, v in outfiles.items() if v is not None}
+
         output_data = {
             "schema_version": 2,
             "input_data": input_model,
             "molecule": out_mol,
             "extras": {**input_model.specification.extras, "qcvars": qcvars_serialised},
-            "native_files": {
-                "gaussian.com": input_text,
-                "gaussian.log": log_text,
-            },
+            "native_files": native_files,
             "properties": atprop,
             "provenance": provenance,
             "return_result": retres,
