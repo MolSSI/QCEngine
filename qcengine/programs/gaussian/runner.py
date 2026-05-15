@@ -280,8 +280,11 @@ class GaussianHarness(ProgramHarness):
         method_upper = method.upper()
 
         if grad is not None:
-            qcvars[f"{method_upper} TOTAL GRADIENT"] = grad
-            qcvars["CURRENT GRADIENT"] = grad
+            # Reshape to (natom, 3) to match other harnesses' convention
+            natom = len(input_model.molecule.symbols)
+            grad_reshaped = grad.reshape(natom, 3)
+            qcvars[f"{method_upper} TOTAL GRADIENT"] = grad_reshaped
+            qcvars["CURRENT GRADIENT"] = grad_reshaped
 
         if hess is not None:
             qcvars[f"{method_upper} TOTAL HESSIAN"] = hess

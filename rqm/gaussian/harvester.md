@@ -20,30 +20,98 @@ The `ccdata` object exposes parsed attributes used as follows:
 
 | cclib attribute | Units (cclib) | Conversion | QCEngine usage |
 |-----------------|---------------|------------|----------------|
-| `ccdata.scfenergies[-1]` | eV | ÷ eV/Hartree | SCF/HF/DFT total energy |
-| `ccdata.mpenergies[-1][-1]` | eV | ÷ eV/Hartree | MP2 total energy |
-| `ccdata.ccenergies[-1]` | eV | ÷ eV/Hartree | CCSD or CCSD(T) total energy |
+| `ccdata.scfenergies[-1]` | eV | (fallback only) | SCF/HF/DFT total energy |
+| `ccdata.mpenergies[-1][-1]` | eV | (fallback only) | MP2 total energy |
+| `ccdata.ccenergies[-1]` | eV | (fallback only) | CCSD or CCSD(T) total energy |
 | `ccdata.grads[-1]` | Hartree/Bohr | negate (forces → gradient) | Gradient array |
-| `ccdata.hessian` | Hartree/Bohr² | none | Hessian matrix |
-| `ccdata.atomcoords[-1]` | Ångström | × Bohr/Å | Geometry for output molecule |
+| `ccdata.atomcoords[-1]` | Ångström | × Bohr/Å | Geometry for output molecule (standard orientation) |
 | `ccdata.atomnos` | atomic numbers | via qcel periodic table | Element symbols |
-| `ccdata.atommasses` | amu | none | Atomic masses |
+| `ccdata.nbasis` | integer | none | Number of basis functions |
+| `ccdata.nmo` | integer | none | Number of molecular orbitals |
+| `ccdata.homos` | integer array | +1 for count | N alpha/beta electrons |
 | `ccdata.moments[1]` | Debye | none | Dipole moment vector |
 | `ccdata.atomcharges["mulliken"]` | e | none | Mulliken partial charges |
 
-Energy conversion factor: `qcel.constants.conversion_factor("eV", "hartree")`.
+### cclib Limitations <!-- rq-f6537c40 -->
+
+Two significant cclib limitations require direct log parsing as the primary strategy
+for energies and the Hessian:
+
+**1. Energy precision loss (eV conversion factor mismatch):**
+
+cclib internally stores energies in electron volts (eV). It parses the Hartree value
+from the Gaussian log, multiplies by its own Hartree→eV factor (`27.21138505`), and
+stores the result. When the harvester converts back to Hartree using qcelemental's
+factor (`qcel.constants.conversion_factor("eV", "hartree")` = `0.036749322481536`,
+corresponding to `27.21138602` Hartree→eV), the round-trip introduces a relative error
+of approximately `3.6e-9`. For typical SCF energies (~100 Hartree), this produces
+absolute errors of ~3.6e-7 Hartree, which exceeds the tolerances required by the
+cross-program alignment tests (`atol = 2e-7`).
+
+**Resolution:** Energies are parsed directly from the Gaussian log via regex (see
+"Direct Energy Parsing" below). cclib energy attributes are used only as a fallback
+if the regex fails to match.
+
+**2. Hessian not extracted by cclib:**
+
+cclib does not parse the "Force constants in Cartesian coordinates" block from
+Gaussian frequency (`Freq`) calculations. The `ccdata.hessian` attribute is always
+absent for Gaussian logs.
+
+**Resolution:** The Hessian is parsed directly from the log via `_parse_force_constants()`
+(see "Hessian Parsing" below).
+
+### Coordinate Frame <!-- rq-f4900ee1 -->
+
+cclib's `atomcoords[-1]` returns geometry in Gaussian's **standard orientation**
+(the internally reoriented frame). This affects frame alignment logic — see
+"Output Molecule Construction" below.
 
 **Important**: Gaussian reports atomic **forces** (= −dE/dR) in its output; cclib
 preserves this sign convention in `ccdata.grads`. The gradient (= +dE/dR) is obtained by
 **negating** the forces array:
 
 ```python
-gradient = -ccdata.grads[-1]   # shape (natoms, 3) → flatten to (3*natoms,)
+gradient = -ccdata.grads[-1]   # shape (natoms, 3)
 ```
 
-## Regex Fallback <!-- rq-c20746b1 -->
+## Direct Energy Parsing <!-- rq-c20746b1 -->
 
-Regex is used for items cclib does not expose:
+Energies are parsed directly from the Gaussian log in Hartree to avoid the cclib eV
+round-trip. The following regex patterns are used:
+
+| Energy | Regex | Format |
+|--------|-------|--------|
+| SCF/HF/DFT | `r"SCF Done:\s+E\(\S+\)\s*=\s*([-\d.]+)"` | Plain float |
+| MP2 | `r"EUMP2\s*=\s*([-\d.DE+]+)"` | Fortran D-exponent |
+| CCSD(T) | `r"CCSD\(T\)=\s*([-\d.DE+]+)"` | Fortran D-exponent |
+| CCSD | `r"DE\(Corr\)=\s*[-\d.]+\s+E\(CORR\)=\s*([-\d.]+)"` (last match) | Plain float |
+
+Fortran D-exponent values (e.g. `-0.76276030623D+02`) are converted by replacing
+`D` with `E` before calling `float()`.
+
+If a regex does not match, the harvester falls back to cclib's eV-based energy with
+the qcelemental conversion factor.
+
+## Hessian Parsing <!-- rq-c5b27d26 -->
+
+The Hessian is parsed from the "Force constants in Cartesian coordinates:" block in
+the Gaussian Freq log. This block contains the lower triangle of the symmetric
+force constant matrix in Fortran D-exponent format, printed in column groups of 5.
+
+The parser (`_parse_force_constants`) reconstructs the full `(3N, 3N)` symmetric matrix.
+
+**Coordinate frame for force constants:** Gaussian prints force constants in the
+**input orientation** (the coordinates from the `.com` file), NOT in the standard
+orientation. This is significant for frame alignment:
+
+- When `fix_com=True` and `fix_orientation=True`: the return molecule is `in_mol`
+  (input frame) and the Hessian is already in the input frame — no rotation needed.
+- When `fix_com=False` or `fix_orientation=False`: the return molecule is in the
+  standard/calc frame. The Hessian must be transformed from input→calc frame using
+  `in_mol.align(calc_mol)`.
+
+## Other Regex Items <!-- rq-0743e952 -->
 
 | Item | Pattern |
 |------|---------|
@@ -63,7 +131,7 @@ Regex is used for items cclib does not expose:
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `in_mol` | `qcelemental.models.Molecule` | The input molecule (used for alignment and NRE cross-check). |
-| `method` | `str` | Lowercase QCSchema method string (e.g. `"hf"`, `"mp2"`, `"b3lyp"`). |
+| `method` | `str` | Lowercase QCSchema method string (e.g. `"hf"`, `"mp2"`, `"b3lyp"`, `"ccsd(t,full)"`). Gaussian-specific sub-options like `,full` are normalised internally (e.g. `"ccsd(t,full)"` → `"ccsd(t)"` for energy extraction). |
 | `log_content` | `str` | Full text of `gaussian.log`. |
 
 **Returns** a 4-tuple `(qcvars, grad, hess, out_mol)`:
@@ -96,8 +164,15 @@ The following variables are placed in `qcvars` based on the method:
 
 **All calculations**:
 - `"NUCLEAR REPULSION ENERGY"` — from parsed geometry. <!-- rq-0753cd03 -->
-- `"HF TOTAL ENERGY"` — always set from `ccdata.scfenergies[-1]` (in Hartree). <!-- rq-37f40e92 -->
+- `"HF TOTAL ENERGY"` — from direct log parsing (SCF Done line), falling back to `ccdata.scfenergies[-1]` converted from eV. <!-- rq-37f40e92 -->
+- `"SCF TOTAL ENERGY"` — same value as `"HF TOTAL ENERGY"` (required by standard suite contracts). <!-- rq-f59a07b8 -->
+- `"CURRENT REFERENCE ENERGY"` — same value as `"HF TOTAL ENERGY"` (required by standard suite contracts). <!-- rq-0d2711f1 -->
 - `"CURRENT ENERGY"` — set to the highest-level energy available (see below). <!-- rq-c5165f1f -->
+- `"N ATOMS"` — from `len(ccdata.atomnos)`. <!-- rq-463ef385 -->
+- `"N BASIS FUNCTIONS"` — from `ccdata.nbasis` (when available). <!-- rq-17e8c0f7 -->
+- `"N MOLECULAR ORBITALS"` — from `ccdata.nmo` (when available). <!-- rq-7f2c22fd -->
+- `"N ALPHA ELECTRONS"` — from `ccdata.homos[0] + 1`. <!-- rq-6453046a -->
+- `"N BETA ELECTRONS"` — from `ccdata.homos[-1] + 1` (or same as alpha for closed-shell). <!-- rq-0cdd386d -->
 
 **Method-specific**:
 
@@ -113,18 +188,38 @@ The following variables are placed in `qcvars` based on the method:
 - `"DIPOLE MOMENT"` — magnitude of `ccdata.moments[1]` in Debye. <!-- rq-943856cc -->
 
 **Gradient** (when present):
-- The negated forces array (shape `(3*natoms,)`) is returned as `grad`; the runner sets
-  `"CURRENT GRADIENT"` and `"<METHOD> TOTAL GRADIENT"` in `qcvars`.
+- The negated forces array is transformed via `mill.align_gradient()` and returned as
+  `grad` with shape `(3*natoms,)`. The runner stores this in `qcvars` as
+  `"CURRENT GRADIENT"` and `"<METHOD> TOTAL GRADIENT"` with shape `(natoms, 3)`.
 
 **Hessian** (when present):
-- The Hessian matrix (shape `(3*natoms, 3*natoms)`) is returned as `hess`; the runner
-  sets `"CURRENT HESSIAN"` and `"<METHOD> TOTAL HESSIAN"` in `qcvars`.
+- Parsed from the log's "Force constants in Cartesian coordinates" block (see
+  "Hessian Parsing" above), transformed to the output molecule frame as needed,
+  and returned as `hess` with shape `(3*natoms, 3*natoms)`. The runner sets
+  `"CURRENT HESSIAN"` and `"<METHOD> TOTAL HESSIAN"` in `qcvars`.
 
-### Output Molecule Construction <!-- rq-8d6fc024 -->
+### Output Molecule Construction and Frame Alignment <!-- rq-8d6fc024 -->
 
 The output molecule is constructed from `ccdata.atomnos` and `ccdata.atomcoords[-1]`
-(converted from Ångström to Bohr), then aligned to `in_mol` using
-`in_mol.align(calc_mol, ...)` — the same pattern used by the GAMESS harvester.
+(converted from Ångström to Bohr) as `calc_mol`. Note that cclib returns coordinates in
+Gaussian's **standard orientation** (internally reoriented), not the input orientation.
+
+Frame handling follows the same pattern as the GAMESS harvester:
+
+- **`fix_com=True` and `fix_orientation=True`**: the return molecule is `in_mol`
+  (preserving the input frame). An alignment mill is computed via
+  `calc_mol.align(in_mol)` and applied to the gradient to transform it from standard
+  orientation to the input frame. The Hessian (from direct log parsing) is already in
+  the input frame and requires no rotation.
+
+- **Otherwise** (free frame): the return molecule is produced by
+  `in_mol.align(calc_mol)` (adopting the standard orientation frame). The gradient
+  mill is identity (no transformation needed since cclib's gradient is already in
+  standard orientation). The Hessian must be transformed from input→standard frame
+  via `in_mol.align(calc_mol)`.
+
+The `mill.align_gradient()` and `mill.align_hessian()` methods handle atom reordering
+and rotation as needed.
 
 ## Gherkin Scenarios <!-- rq-058819da -->
 

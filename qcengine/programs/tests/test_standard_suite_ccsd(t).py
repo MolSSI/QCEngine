@@ -78,11 +78,7 @@ def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o_data, schema_versions,
     assert res["success"] is True
 
     # aug-cc-pvdz
-    # rq-9aa3cac4 — Gaussian produces a slightly different value due to coordinate
-    # precision (10 decimals in the .com file) vs the exact Bohr geometry.
-    ccsd_t_tot = {
-        "gaussian": -76.27602790541,
-    }.get(program, -76.276030676767)
+    ccsd_t_tot = -76.276030676767
 
     atol = 1.0e-6
     assert compare_values(ccsd_t_tot, res["return_result"], atol=atol)

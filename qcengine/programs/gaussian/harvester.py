@@ -14,9 +14,71 @@ from ..util import PreservingDict
 _NORMAL_TERMINATION_RE = re.compile(r"Normal termination of Gaussian")
 _VERSION_RE = re.compile(r"Gaussian\s+(\d+),\s+Revision\s+([\w.]+),")
 
-# eV → Hartree conversion factor
+# eV → Hartree conversion factor (only used as fallback for cclib quantities
+# that have no direct Hartree regex; direct log parsing is preferred for
+# energies to avoid precision loss from cclib's slightly different eV factor).
 # rq-bb0a5d96
 _EV_TO_HARTREE = qcel.constants.conversion_factor("eV", "hartree")
+
+# Regex patterns for parsing energies directly from Gaussian log in Hartree.
+# These bypass cclib's eV round-trip which causes ~1e-6 precision loss due to
+# a conversion-factor mismatch between cclib and qcelemental.
+_SCF_DONE_RE = re.compile(r"SCF Done:\s+E\(\S+\)\s*=\s*([-\d.]+)")
+_MP2_ENERGY_RE = re.compile(r"EUMP2\s*=\s*([-\d.DE+]+)")
+_CCSD_T_ENERGY_RE = re.compile(r"CCSD\(T\)=\s*([-\d.DE+]+)")
+_CCSD_ENERGY_RE = re.compile(r"DE\(Corr\)=\s*[-\d.]+\s+E\(CORR\)=\s*([-\d.]+)")
+
+
+def _fortran_float(s: str) -> float:
+    """Convert a Fortran-style D-exponent string (e.g. '-0.76D+02') to float."""
+    return float(s.replace("D", "E").replace("d", "e"))
+
+
+def _parse_force_constants(log_content: str, ndim: int) -> Optional[np.ndarray]:
+    """Parse the lower-triangle 'Force constants in Cartesian coordinates' block
+    from a Gaussian Freq log into a full symmetric (ndim, ndim) matrix.
+
+    Returns None if the block is not found.
+    """
+    marker = "Force constants in Cartesian coordinates:"
+    idx = log_content.find(marker)
+    if idx == -1:
+        return None
+
+    # Extract the block: starts after marker, ends at "Leave Link"
+    block_start = idx + len(marker)
+    block_end = log_content.find("Leave Link", block_start)
+    if block_end == -1:
+        block_end = len(log_content)
+    block = log_content[block_start:block_end]
+
+    hess = np.zeros((ndim, ndim))
+    # Parse lower-triangle entries: row lines have format "  <row>  <val1> <val2> ..."
+    # Column header lines have format "       <col1>  <col2>  ..."
+    col_offset = 0
+    for line in block.splitlines():
+        tokens = line.split()
+        if not tokens:
+            continue
+        # Column header line: all tokens are integers
+        try:
+            cols = [int(t) for t in tokens]
+            col_offset = cols[0] - 1  # 1-based → 0-based
+            continue
+        except ValueError:
+            pass
+        # Data line: first token is row index, rest are Fortran D-exponents
+        try:
+            row = int(tokens[0]) - 1  # 1-based → 0-based
+            vals = [_fortran_float(t) for t in tokens[1:]]
+        except (ValueError, IndexError):
+            continue
+        for j, val in enumerate(vals):
+            c = col_offset + j
+            hess[row, c] = val
+            hess[c, row] = val  # symmetric
+
+    return hess
 
 
 # rq-d9434480
@@ -88,6 +150,16 @@ def harvest(
     natoms = len(ccdata.atomnos)
     qcvars["N ATOMS"] = str(natoms)
 
+    if hasattr(ccdata, "nbasis") and ccdata.nbasis is not None:
+        qcvars["N BASIS FUNCTIONS"] = str(ccdata.nbasis)
+    if hasattr(ccdata, "nmo") and ccdata.nmo is not None:
+        qcvars["N MOLECULAR ORBITALS"] = str(ccdata.nmo)
+    # cclib doesn't have nalpha/nbeta directly; derive from homos array
+    if hasattr(ccdata, "homos") and ccdata.homos is not None:
+        qcvars["N ALPHA ELECTRONS"] = str(ccdata.homos[0] + 1)
+        nbeta = ccdata.homos[-1] + 1 if len(ccdata.homos) > 1 else ccdata.homos[0] + 1
+        qcvars["N BETA ELECTRONS"] = str(nbeta)
+
     # rq-0753cd03
     qcvars["NUCLEAR REPULSION ENERGY"] = str(round(calc_mol.nuclear_repulsion_energy(), 10))
 
@@ -112,9 +184,20 @@ def harvest(
         )  # identity AlignmentMill
 
     # --- Energies ---
-    # rq-37f40e92 — HF/SCF energy is always extracted from scfenergies
-    scf_hartree = float(ccdata.scfenergies[-1]) * _EV_TO_HARTREE
+    # Parse energies directly from the Gaussian log in Hartree to avoid
+    # precision loss from cclib's eV round-trip (cclib and qcelemental use
+    # slightly different Hartree↔eV conversion factors, causing ~1e-6 error).
+    # Fall back to cclib values if regex fails.
+
+    # rq-37f40e92 — HF/SCF energy
+    scf_match = _SCF_DONE_RE.search(log_content)
+    if scf_match:
+        scf_hartree = float(scf_match.group(1))
+    else:
+        scf_hartree = float(ccdata.scfenergies[-1]) * _EV_TO_HARTREE
     qcvars["HF TOTAL ENERGY"] = str(scf_hartree)
+    qcvars["SCF TOTAL ENERGY"] = str(scf_hartree)
+    qcvars["CURRENT REFERENCE ENERGY"] = str(scf_hartree)
 
     # rq-929a262a rq-c5165f1f — method-specific variables
     if method_lower in ("hf", "scf") or _is_dft(method_lower):
@@ -122,26 +205,36 @@ def harvest(
 
     elif method_lower == "mp2":
         # rq-578bb785
-        mp2_hartree = float(ccdata.mpenergies[-1][-1]) * _EV_TO_HARTREE
+        mp2_match = _MP2_ENERGY_RE.search(log_content)
+        if mp2_match:
+            mp2_hartree = _fortran_float(mp2_match.group(1))
+        else:
+            mp2_hartree = float(ccdata.mpenergies[-1][-1]) * _EV_TO_HARTREE
         qcvars["MP2 TOTAL ENERGY"] = str(mp2_hartree)
         qcvars["MP2 CORRELATION ENERGY"] = str(mp2_hartree - scf_hartree)
         qcvars["CURRENT ENERGY"] = str(mp2_hartree)
 
     elif method_lower == "ccsd":
         # rq-1b7ae62e
-        ccsd_hartree = float(ccdata.ccenergies[-1]) * _EV_TO_HARTREE
+        # Find the last converged CCSD energy from the iteration lines
+        ccsd_matches = list(_CCSD_ENERGY_RE.finditer(log_content))
+        if ccsd_matches:
+            ccsd_hartree = float(ccsd_matches[-1].group(1))
+        else:
+            ccsd_hartree = float(ccdata.ccenergies[-1]) * _EV_TO_HARTREE
         qcvars["CCSD TOTAL ENERGY"] = str(ccsd_hartree)
         qcvars["CCSD CORRELATION ENERGY"] = str(ccsd_hartree - scf_hartree)
         qcvars["CURRENT ENERGY"] = str(ccsd_hartree)
 
     elif method_lower == "ccsd(t)":
         # rq-eddef743
-        # cclib stores CCSD(T) energy in ccenergies for Gaussian
-        ccsdt_hartree = float(ccdata.ccenergies[-1]) * _EV_TO_HARTREE
+        ccsdt_match = _CCSD_T_ENERGY_RE.search(log_content)
+        if ccsdt_match:
+            ccsdt_hartree = _fortran_float(ccsdt_match.group(1))
+        else:
+            ccsdt_hartree = float(ccdata.ccenergies[-1]) * _EV_TO_HARTREE
         qcvars["CCSD(T) TOTAL ENERGY"] = str(ccsdt_hartree)
         qcvars["CCSD(T) CORRELATION ENERGY"] = str(ccsdt_hartree - scf_hartree)
-        # Also populate CCSD energy if cclib exposes it separately
-        # (cclib may not separate CCSD and CCSD(T) — use what we have)
         qcvars["CURRENT ENERGY"] = str(ccsdt_hartree)
 
     else:
@@ -161,7 +254,24 @@ def harvest(
     # rq-f2e32162 rq-344f3432
     hess: Optional[np.ndarray] = None
     if hasattr(ccdata, "hessian") and ccdata.hessian is not None:
+        # cclib hessian would be in standard orientation → transform with mill
         hess = mill.align_hessian(np.array(ccdata.hessian))
+    else:
+        # cclib does not parse force constants from Gaussian Freq output;
+        # fall back to direct log parsing. Gaussian's "Force constants in
+        # Cartesian coordinates" are in the INPUT orientation.
+        parsed_hess = _parse_force_constants(log_content, 3 * natoms)
+        if parsed_hess is not None:
+            if in_mol.fix_com and in_mol.fix_orientation:
+                # return_mol = in_mol (input frame), hessian already in input frame
+                hess = parsed_hess
+            else:
+                # return_mol is in calc/standard frame; need to transform
+                # hessian from input→standard. The mill from calc_mol.align(in_mol)
+                # transforms calc→input, so we need input→calc.
+                _, data = in_mol.align(calc_mol, atoms_map=False, mols_align=True, run_mirror=True, verbose=0)
+                input_to_calc_mill = data["mill"]
+                hess = input_to_calc_mill.align_hessian(parsed_hess)
 
     # --- Properties: dipole and Mulliken charges ---
     # rq-c7fd08b5 rq-943856cc rq-53f8ed12 rq-4c4a1542 rq-ffae3fa6

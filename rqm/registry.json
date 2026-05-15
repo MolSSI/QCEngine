@@ -22,6 +22,14 @@
     "title": "Gherkin Scenarios",
     "type": "section"
   },
+  "rq-0743e952": {
+    "decl": "## Other Regex Items",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Other Regex Items",
+    "type": "section"
+  },
   "rq-0753cd03": {
     "decl": "- `\"NUCLEAR REPULSION ENERGY\"` — from parsed geometry.",
     "file": "gaussian/harvester",
@@ -49,6 +57,20 @@
     "refs": [],
     "title": "Nuclear repulsion energy mismatch raises ValueError",
     "type": "scenario"
+  },
+  "rq-0cdd386d": {
+    "decl": "- `\"N BETA ELECTRONS\"` — from `ccdata.homos[-1] + 1` (or same as alpha for closed-shell).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N BETA ELECTRONS\"` — from `ccdata.homos[-1] + 1` (or same as alpha for closed-shell).",
+    "type": "api-item"
+  },
+  "rq-0d2711f1": {
+    "decl": "- `\"CURRENT REFERENCE ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"CURRENT REFERENCE ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
+    "type": "api-item"
   },
   "rq-0edebcd3": {
     "decl": "### `test_local_options_memory_gib` (`test_canonical_config.py`)",
@@ -86,6 +108,13 @@
     "refs": [],
     "title": "Registration",
     "type": "section"
+  },
+  "rq-17e8c0f7": {
+    "decl": "- `\"N BASIS FUNCTIONS\"` — from `ccdata.nbasis` (when available).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N BASIS FUNCTIONS\"` — from `ccdata.nbasis` (when available).",
+    "type": "api-item"
   },
   "rq-186c5060": {
     "decl": "Scenario: get_version() returns a normalised version string for Gaussian 16",
@@ -203,10 +232,10 @@
     "type": "scenario"
   },
   "rq-37f40e92": {
-    "decl": "- `\"HF TOTAL ENERGY\"` — always set from `ccdata.scfenergies[-1]` (in Hartree).",
+    "decl": "- `\"HF TOTAL ENERGY\"` — from direct log parsing (SCF Done line), falling back to `ccdata.scfenergies[-1]` converted from eV.",
     "file": "gaussian/harvester",
     "refs": [],
-    "title": "- `\"HF TOTAL ENERGY\"` — always set from `ccdata.scfenergies[-1]` (in Hartree).",
+    "title": "- `\"HF TOTAL ENERGY\"` — from direct log parsing (SCF Done line), falling back to `ccdata.scfenergies[-1]` converted from eV.",
     "type": "api-item"
   },
   "rq-3a18d6af": {
@@ -259,6 +288,13 @@
     "refs": [],
     "title": "Feature: Gaussian Harness — Runner",
     "type": "file"
+  },
+  "rq-463ef385": {
+    "decl": "- `\"N ATOMS\"` — from `len(ccdata.atomnos)`.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N ATOMS\"` — from `len(ccdata.atomnos)`.",
+    "type": "api-item"
   },
   "rq-475c8796": {
     "decl": "Scenario: CCSD(T)/aug-cc-pVDZ RHF energy on water matches Gaussian-specific reference",
@@ -367,6 +403,13 @@
     "title": "Files Modified",
     "type": "section"
   },
+  "rq-6453046a": {
+    "decl": "- `\"N ALPHA ELECTRONS\"` — from `ccdata.homos[0] + 1`.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N ALPHA ELECTRONS\"` — from `ccdata.homos[0] + 1`.",
+    "type": "api-item"
+  },
   "rq-647b596c": {
     "decl": "Scenario: Gaussian appears in _canonical_methods",
     "file": "gaussian/integration-tests",
@@ -445,6 +488,13 @@
     "title": "Molecule Block Construction",
     "type": "section"
   },
+  "rq-7f2c22fd": {
+    "decl": "- `\"N MOLECULAR ORBITALS\"` — from `ccdata.nmo` (when available).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N MOLECULAR ORBITALS\"` — from `ccdata.nmo` (when available).",
+    "type": "api-item"
+  },
   "rq-8070c4fd": {
     "decl": "## Test Integrations",
     "file": "gaussian/integration-tests",
@@ -505,11 +555,11 @@
     "type": "scenario"
   },
   "rq-8d6fc024": {
-    "decl": "### Output Molecule Construction",
+    "decl": "### Output Molecule Construction and Frame Alignment",
     "file": "gaussian/harvester",
     "level": 3,
     "refs": [],
-    "title": "Output Molecule Construction",
+    "title": "Output Molecule Construction and Frame Alignment",
     "type": "section"
   },
   "rq-8df082e3": {
@@ -744,11 +794,11 @@
     "type": "section"
   },
   "rq-c20746b1": {
-    "decl": "## Regex Fallback",
+    "decl": "## Direct Energy Parsing",
     "file": "gaussian/harvester",
     "level": 2,
     "refs": [],
-    "title": "Regex Fallback",
+    "title": "Direct Energy Parsing",
     "type": "section"
   },
   "rq-c266b9bb": {
@@ -764,6 +814,14 @@
     "refs": [],
     "title": "- `\"CURRENT ENERGY\"` — set to the highest-level energy available (see below).",
     "type": "api-item"
+  },
+  "rq-c5b27d26": {
+    "decl": "## Hessian Parsing",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Hessian Parsing",
+    "type": "section"
   },
   "rq-c77a2c13": {
     "decl": "Scenario: compute() raises InputError when model.basis is a BasisSet object",
@@ -941,12 +999,35 @@
     "title": "Parse Hessian from frequency calculation",
     "type": "scenario"
   },
+  "rq-f4900ee1": {
+    "decl": "### Coordinate Frame",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "Coordinate Frame",
+    "type": "section"
+  },
   "rq-f512b60b": {
     "decl": "Scenario: Properties driver produces Pop=Full in extra_keywords",
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Properties driver produces Pop=Full in extra_keywords",
     "type": "scenario"
+  },
+  "rq-f59a07b8": {
+    "decl": "- `\"SCF TOTAL ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"SCF TOTAL ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
+    "type": "api-item"
+  },
+  "rq-f6537c40": {
+    "decl": "### cclib Limitations",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "cclib Limitations",
+    "type": "section"
   },
   "rq-fe13245b": {
     "decl": "Scenario: Method starting with RO is not prefixed with U",
