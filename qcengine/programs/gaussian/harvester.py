@@ -126,6 +126,8 @@ def harvest(
     # e.g. "ccsd(t,full)" → "ccsd(t)"
     _METHOD_NORMALISE = {
         "ccsd(t,full)": "ccsd(t)",
+        # rq-2cb2c5c0
+        "mp2(full)": "mp2",
     }
     method_lower = _METHOD_NORMALISE.get(method_lower, method_lower)
 

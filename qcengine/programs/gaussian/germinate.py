@@ -12,6 +12,10 @@ _METHOD_MAP = {
     "hf": "HF",
     "scf": "HF",
     "mp2": "MP2",
+    # rq-2cb2c5c0 — Gaussian's analytic MP2 gradient requires the Full
+    # option be attached to the method spec (e.g. "MP2(Full)/basis"); the
+    # alternative "MP2=Full" route keyword works for energy only.
+    "mp2(full)": "MP2(Full)",
     "ccsd": "CCSD",
     "ccsd(t)": "CCSD(T)",
     "ccsd(t,full)": "CCSD(T,Full)",

@@ -14,6 +14,14 @@
     "title": "HF method maps to \"HF\" method string",
     "type": "scenario"
   },
+  "rq-03c1f71c": {
+    "decl": "### `GaussianHarness.build_input` — confirmed behavior for labeled molecules",
+    "file": "gaussian/atom-labels",
+    "level": 3,
+    "refs": [],
+    "title": "`GaussianHarness.build_input` — confirmed behavior for labeled molecules",
+    "type": "section"
+  },
   "rq-04028610": {
     "decl": "Scenario: AtomicResult.molecule preserves ghost designation",
     "file": "gaussian/ghost-atoms",
@@ -58,6 +66,13 @@
     "title": "Method matching is case-insensitive",
     "type": "scenario"
   },
+  "rq-090d144e": {
+    "decl": "Scenario: Labels do not appear in the route line",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Labels do not appear in the route line",
+    "type": "scenario"
+  },
   "rq-0aa99076": {
     "decl": "Scenario: BasisSet object for model.basis raises InputError",
     "file": "gaussian/input-builder",
@@ -86,6 +101,13 @@
     "title": "- `\"CURRENT REFERENCE ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
     "type": "api-item"
   },
+  "rq-0dab9c40": {
+    "decl": "# Feature: Gaussian Harness — Atom-Label Tolerance",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Atom-Label Tolerance",
+    "type": "file"
+  },
   "rq-0edebcd3": {
     "decl": "### `test_local_options_memory_gib` (`test_canonical_config.py`)",
     "file": "gaussian/integration-tests",
@@ -107,6 +129,14 @@
     "refs": [],
     "title": "Absent normal termination line is classified as abnormal",
     "type": "scenario"
+  },
+  "rq-1601c435": {
+    "decl": "## Migration Notes",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Migration Notes",
+    "type": "section"
   },
   "rq-165224fc": {
     "decl": "Scenario: compute() raises InputError when the log contains an unrecognised-keyword error",
@@ -157,6 +187,13 @@
     "file": "gaussian/harvester",
     "refs": [],
     "title": "Parse CCSD total energy",
+    "type": "scenario"
+  },
+  "rq-20063525": {
+    "decl": "Scenario: Labeled hydrogen atom emits a bare \"H \" line (no label suffix)",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Labeled hydrogen atom emits a bare \"H \" line (no label suffix)",
     "type": "scenario"
   },
   "rq-2052a2fa": {
@@ -238,6 +275,28 @@
     "title": "Gherkin Scenarios",
     "type": "section"
   },
+  "rq-2cb2c5c0": {
+    "decl": "### `test_tricky_ghost` (eneyne+Ne, MP2)",
+    "file": "gaussian/ghost-atoms",
+    "level": 3,
+    "refs": [],
+    "title": "`test_tricky_ghost` (eneyne+Ne, MP2)",
+    "type": "section"
+  },
+  "rq-31334859": {
+    "decl": "Scenario: MP2/6-31G* energy on gAmB (ghost ethylene + real ethyne) matches reference",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* energy on gAmB (ghost ethylene + real ethyne) matches reference",
+    "type": "scenario"
+  },
+  "rq-3257a6f5": {
+    "decl": "Scenario: MP2/6-31G* energy on eneyne dimer matches consensus reference",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* energy on eneyne dimer matches consensus reference",
+    "type": "scenario"
+  },
   "rq-342a2ca3": {
     "decl": "Scenario: Charge and multiplicity are on one line in the molecule section",
     "file": "gaussian/input-builder",
@@ -257,6 +316,13 @@
     "file": "gaussian/integration-tests",
     "refs": [],
     "title": "UHF gradient is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-351864ac": {
+    "decl": "Scenario: Gaussian SCF and MP2 on the labeled-H system match one of the two accepted solutions",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Gaussian SCF and MP2 on the labeled-H system match one of the two accepted solutions",
     "type": "scenario"
   },
   "rq-36736115": {
@@ -296,12 +362,27 @@
     "title": "`build_route_line(method_string: str, basis: str, job_type: str, extra_keywords: Dict[str, str], user_keywords: Dict[str, Any]) -> str`",
     "type": "section"
   },
+  "rq-3dd2d934": {
+    "decl": "Scenario: test_atom_labels runs successfully with Gaussian",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "test_atom_labels runs successfully with Gaussian",
+    "type": "scenario"
+  },
   "rq-3e134642": {
     "decl": "Scenario: get_version() caches the result after the first call",
     "file": "gaussian/runner",
     "refs": [],
     "title": "get_version() caches the result after the first call",
     "type": "scenario"
+  },
+  "rq-4061edf7": {
+    "decl": "### `test_atom_labels` (`test_ghost.py`)",
+    "file": "gaussian/atom-labels",
+    "level": 3,
+    "refs": [],
+    "title": "`test_atom_labels` (`test_ghost.py`)",
+    "type": "section"
   },
   "rq-4091a959": {
     "decl": "## Method and Driver Compatibility",
@@ -353,6 +434,14 @@
     "title": "Memory directive uses integer GB for whole-number memory",
     "type": "scenario"
   },
+  "rq-4bd911ec": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
   "rq-4c4a1542": {
     "decl": "Scenario: Parse dipole moment for properties driver",
     "file": "gaussian/harvester",
@@ -380,6 +469,14 @@
     "refs": [],
     "title": "multiplicity",
     "type": "api-item"
+  },
+  "rq-4f50add1": {
+    "decl": "## Integration Test",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Integration Test",
+    "type": "section"
   },
   "rq-519fbe49": {
     "decl": "Scenario: Single-core execution succeeds",
@@ -417,11 +514,40 @@
     "title": "Parse MP2 total and correlation energies",
     "type": "scenario"
   },
+  "rq-5c529f02": {
+    "decl": "Scenario: out_mol preserves atom_labels when fix_com and fix_orientation are True",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "out_mol preserves atom_labels when fix_com and fix_orientation are True",
+    "type": "scenario"
+  },
+  "rq-5d5df0b4": {
+    "decl": "## Design Rationale",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Design Rationale",
+    "type": "section"
+  },
   "rq-5d9b0b40": {
     "decl": "Scenario: UHF hessian is correctly aligned to the (scrambled) input frame",
     "file": "gaussian/integration-tests",
     "refs": [],
     "title": "UHF hessian is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-609268f8": {
+    "decl": "Scenario: MP2/6-31G* gradient on eneyne dimer matches consensus reference",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* gradient on eneyne dimer matches consensus reference",
+    "type": "scenario"
+  },
+  "rq-6121b3e1": {
+    "decl": "Scenario: test_tricky_ghost uses the default ref branch for non-mB Gaussian subjects",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "test_tricky_ghost uses the default ref branch for non-mB Gaussian subjects",
     "type": "scenario"
   },
   "rq-637d486d": {
@@ -451,6 +577,13 @@
     "file": "gaussian/integration-tests",
     "refs": [],
     "title": "Gaussian appears in _canonical_methods",
+    "type": "scenario"
+  },
+  "rq-64be1785": {
+    "decl": "Scenario: pgline regex matches Gaussian's \"Full point group\" line for linear C*V",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "pgline regex matches Gaussian's \"Full point group\" line for linear C*V",
     "type": "scenario"
   },
   "rq-65cb367e": {
@@ -552,6 +685,20 @@
     "title": "Molecule Block Construction",
     "type": "section"
   },
+  "rq-7a592160": {
+    "decl": "Scenario: Empty atom_labels (all-default) preserves existing behavior",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Empty atom_labels (all-default) preserves existing behavior",
+    "type": "scenario"
+  },
+  "rq-7e1b0bb4": {
+    "decl": "Scenario: test_tricky_ghost accepts Gaussian's linear PG for the mB subject",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "test_tricky_ghost accepts Gaussian's linear PG for the mB subject",
+    "type": "scenario"
+  },
   "rq-7f2c22fd": {
     "decl": "- `\"N MOLECULAR ORBITALS\"` — from `ccdata.nmo` (when available).",
     "file": "gaussian/harvester",
@@ -581,6 +728,14 @@
     "level": 3,
     "refs": [],
     "title": "`test_hf_alignment` (`test_alignment.py`)",
+    "type": "section"
+  },
+  "rq-824f4a96": {
+    "decl": "## Feature API",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
     "type": "section"
   },
   "rq-82942b90": {
@@ -648,6 +803,13 @@
     "title": "found() returns False when neither g16 nor g09 is on PATH",
     "type": "scenario"
   },
+  "rq-8fa7c4c3": {
+    "decl": "Scenario: Gaussian \"NoSymm\" keyword forces C1 symmetry in the route line",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Gaussian \"NoSymm\" keyword forces C1 symmetry in the route line",
+    "type": "scenario"
+  },
   "rq-90141f40": {
     "decl": "Scenario: Normal termination line is present in a successful log",
     "file": "gaussian/harvester",
@@ -697,6 +859,14 @@
     "refs": [],
     "title": "- `\"DIPOLE MOMENT\"` — magnitude of `ccdata.moments[1]` in Debye.",
     "type": "api-item"
+  },
+  "rq-95dab09b": {
+    "decl": "### `test_simple_ghost` (He···Ne)",
+    "file": "gaussian/ghost-atoms",
+    "level": 3,
+    "refs": [],
+    "title": "`test_simple_ghost` (He···Ne)",
+    "type": "section"
   },
   "rq-972b6470": {
     "decl": "Scenario: Singlet uses method name as-is (no U prefix)",
@@ -764,11 +934,33 @@
     "title": "Route line is unchanged when ghost atoms are present",
     "type": "scenario"
   },
+  "rq-a1bc15af": {
+    "decl": "Scenario: build_input() accepts a labeled molecule without raising",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "build_input() accepts a labeled molecule without raising",
+    "type": "scenario"
+  },
+  "rq-a203a314": {
+    "decl": "### `harvest` — confirmed behavior for labeled molecules",
+    "file": "gaussian/atom-labels",
+    "level": 3,
+    "refs": [],
+    "title": "`harvest` — confirmed behavior for labeled molecules",
+    "type": "section"
+  },
   "rq-a4c449da": {
     "decl": "Scenario: compute() raises ResourceError on memory allocation failure",
     "file": "gaussian/runner",
     "refs": [],
     "title": "compute() raises ResourceError on memory allocation failure",
+    "type": "scenario"
+  },
+  "rq-a5593d5c": {
+    "decl": "Scenario: MP2/6-31G* on mB (linear ethyne alone) returns the correct energy",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* on mB (linear ethyne alone) returns the correct energy",
     "type": "scenario"
   },
   "rq-a69d0898": {
@@ -800,6 +992,13 @@
     "title": "method",
     "type": "api-item"
   },
+  "rq-a9026c9f": {
+    "decl": "Scenario: Method \"mp2(full)\" is normalised back to \"mp2\" by the harvester",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Method \"mp2(full)\" is normalised back to \"mp2\" by the harvester",
+    "type": "scenario"
+  },
   "rq-a9194afb": {
     "decl": "Scenario: Nuclear repulsion energy cross-check passes for consistent geometry",
     "file": "gaussian/harvester",
@@ -819,6 +1018,13 @@
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Route line for closed-shell HF energy",
+    "type": "scenario"
+  },
+  "rq-b074f046": {
+    "decl": "Scenario: The \"alternative SCF solution\" branch in test_atom_labels accepts Gaussian",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "The \"alternative SCF solution\" branch in test_atom_labels accepts Gaussian",
     "type": "scenario"
   },
   "rq-b27d4aff": {
@@ -847,6 +1053,13 @@
     "file": "gaussian/runner",
     "refs": [],
     "title": "found() returns False when cclib is not importable",
+    "type": "scenario"
+  },
+  "rq-b604feb4": {
+    "decl": "Scenario: A ghost atom with a non-empty label still emits \"<symbol>-Bq\" (label dropped)",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "A ghost atom with a non-empty label still emits \"<symbol>-Bq\" (label dropped)",
     "type": "scenario"
   },
   "rq-b7c7b8cb": {
@@ -929,6 +1142,29 @@
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Energy driver produces no job-type keyword",
+    "type": "scenario"
+  },
+  "rq-c2a6aabb": {
+    "decl": "## Out-of-Scope",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Out-of-Scope",
+    "type": "section"
+  },
+  "rq-c3ebee03": {
+    "decl": "## Method and Driver Compatibility",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Method and Driver Compatibility",
+    "type": "section"
+  },
+  "rq-c40101e6": {
+    "decl": "Scenario: Method \"mp2(full)\" maps to \"MP2(Full)\" in the Gaussian route line",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Method \"mp2(full)\" maps to \"MP2(Full)\" in the Gaussian route line",
     "type": "scenario"
   },
   "rq-c4439b82": {
@@ -1027,6 +1263,13 @@
     "title": "found() falls back to g09 when g16 is absent",
     "type": "scenario"
   },
+  "rq-d4e60dd2": {
+    "decl": "Scenario: MP2/6-31G* energy on mAgB (real ethylene + ghost ethyne) matches reference",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* energy on mAgB (real ethylene + ghost ethyne) matches reference",
+    "type": "scenario"
+  },
   "rq-d7e8161d": {
     "decl": "Scenario: Link 0 section contains NProcShared and Mem directives",
     "file": "gaussian/input-builder",
@@ -1056,11 +1299,25 @@
     "title": "Gradient array spans real and ghost atoms in input order",
     "type": "scenario"
   },
+  "rq-da7df6e9": {
+    "decl": "Scenario: Multiple same-element atoms with distinct labels each emit bare element lines",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Multiple same-element atoms with distinct labels each emit bare element lines",
+    "type": "scenario"
+  },
   "rq-db92093a": {
     "decl": "Scenario: Memory directive rounds down to nearest integer GB (minimum 1)",
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Memory directive rounds down to nearest integer GB (minimum 1)",
+    "type": "scenario"
+  },
+  "rq-dc9a34d9": {
+    "decl": "Scenario: pgline regex matches Gaussian's \"Full point group\" line for C2v",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "pgline regex matches Gaussian's \"Full point group\" line for C2v",
     "type": "scenario"
   },
   "rq-dceb51f5": {

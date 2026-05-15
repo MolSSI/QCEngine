@@ -265,9 +265,98 @@ Feature: Gaussian harness ghost-atom support
     Then return_result has shape (2, 3)
     And the gradient on the real He atom matches the reference vector (atol 1e-6)
     And the gradient on the ghost Ne atom is approximately zero (atol 1e-6)
+
+  # --- test_tricky_ghost: eneyne + Ne, MP2 ---
+
+  @rq-c40101e6
+  Scenario: Method "mp2(full)" maps to "MP2(Full)" in the Gaussian route line
+    Given AtomicInput.specification.model.method is "mp2(full)"
+    When muster_modelchem("mp2(full)", "energy", 1) is called
+    Then the returned method_string is "MP2(Full)"
+
+  @rq-a9026c9f
+  Scenario: Method "mp2(full)" is normalised back to "mp2" by the harvester
+    Given a Gaussian log produced by a method "mp2(full)" calculation
+    When harvest(in_mol, "mp2(full)", log_content) is called
+    Then the MP2-specific qcvars (MP2 TOTAL ENERGY, MP2 CORRELATION ENERGY) are populated
+    And qcvars["CURRENT ENERGY"] equals MP2 TOTAL ENERGY
+
+  @rq-8fa7c4c3
+  Scenario: Gaussian "NoSymm" keyword forces C1 symmetry in the route line
+    Given user_keywords = {"NoSymm": ""}
+    When build_route_line is invoked
+    Then the route line contains the bare token "NoSymm"
+
+  @rq-3257a6f5
+  Scenario: MP2/6-31G* energy on eneyne dimer matches consensus reference
+    Given the dimer subject from eneyne_ne_qcschemamols() (10 real atoms, 0 ghosts)
+    And keywords = {"NoSymm": ""} and method = "mp2(full)"
+    When qcng.compute is called with program "gaussian", method "mp2", basis "6-31g*", driver "energy"
+    Then the result is successful
+    And properties.nuclear_repulsion_energy matches bimol_ref["eneyne"]["nre"]["dimer"] (atol 1e-4)
+    And properties.calcinfo_nbasis equals 72
+    And properties.calcinfo_nmo equals 72
+    And properties.return_energy matches bimol_ref["eneyne"]["mp2"]["dimer"] (atol 3e-6)
+
+  @rq-609268f8
+  Scenario: MP2/6-31G* gradient on eneyne dimer matches consensus reference
+    Given the dimer subject from eneyne_ne_qcschemamols()
+    And keywords = {"NoSymm": ""} and method = "mp2(full)"
+    When qcng.compute is called with driver "gradient"
+    Then return_result equals bimol_ref["eneyne"]["mp2_gradient"]["dimer"] (atol 3e-6)
+
+  @rq-d4e60dd2
+  Scenario: MP2/6-31G* energy on mAgB (real ethylene + ghost ethyne) matches reference
+    Given the mAgB subject (6 real + 4 ghost atoms)
+    And keywords = {"NoSymm": ""} and method = "mp2(full)"
+    When qcng.compute is called with driver "energy"
+    Then properties.return_energy matches bimol_ref["eneyne"]["mp2"]["mAgB"] (atol 3e-6)
+
+  @rq-31334859
+  Scenario: MP2/6-31G* energy on gAmB (ghost ethylene + real ethyne) matches reference
+    Given the gAmB subject (4 real + 6 ghost atoms)
+    And keywords = {"NoSymm": ""} and method = "mp2(full)"
+    When qcng.compute is called with driver "energy"
+    Then properties.return_energy matches bimol_ref["eneyne"]["mp2"]["gAmB"] (atol 3e-6)
+
+  @rq-a5593d5c
+  Scenario: MP2/6-31G* on mB (linear ethyne alone) returns the correct energy
+    Given the mB subject (4 real atoms, linear)
+    And keywords = {"NoSymm": ""} and method = "mp2(full)"
+    When qcng.compute is called with driver "energy"
+    Then the result is successful
+    And properties.return_energy matches bimol_ref["eneyne"]["mp2"]["mB"] (atol 3e-6)
+
+  @rq-dc9a34d9
+  Scenario: pgline regex matches Gaussian's "Full point group" line for C2v
+    Given a Gaussian log containing a line like " Full point group                 C2V     NOp   4"
+    When the regex r"Full point group\s+(?P<pg>\S+)" is applied
+    Then the captured "pg" group is "C2V"
+
+  @rq-64be1785
+  Scenario: pgline regex matches Gaussian's "Full point group" line for linear C*V
+    Given a Gaussian log containing a line like " Full point group                 C*V     NOp   4"
+    When the regex r"Full point group\s+(?P<pg>\S+)" is applied
+    Then the captured "pg" group is "C*V"
+
+  @rq-7e1b0bb4
+  Scenario: test_tricky_ghost accepts Gaussian's linear PG for the mB subject
+    Given qcprog is "gaussian" and subject is "mB"
+    And the test has parsed pg "C*v" from atres.stdout
+    When the test reaches the point-group assertion
+    Then the Gaussian/mB branch is taken (assert pg == "C*v"), not the default ref branch
+
+  @rq-6121b3e1
+  Scenario: test_tricky_ghost uses the default ref branch for non-mB Gaussian subjects
+    Given qcprog is "gaussian" and subject is "dimer"
+    And the test has parsed pg "C2v" from atres.stdout
+    When the test reaches the point-group assertion
+    Then the default branch is taken (assert pg in ref["pg"][subject])
 ```
 
 ## Integration Tests <!-- rq-c4439b82 -->
+
+### `test_simple_ghost` (He···Ne) <!-- rq-95dab09b -->
 
 `qcengine/programs/tests/test_ghost.py::test_simple_ghost` already parametrises a He
 real / Ne ghost system across cfour, gamess, nwchem, and psi4. As part of this feature,
@@ -285,6 +374,111 @@ The integration test asserts:
 
 No new integration-test infrastructure is required; the existing parametrisation is
 extended in place.
+
+### `test_tricky_ghost` (eneyne+Ne, MP2) <!-- rq-2cb2c5c0 -->
+
+`qcengine/programs/tests/test_ghost.py::test_tricky_ghost` exercises MP2/6-31G* on the
+ethylene–ethyne–Ne system across five "subjects" (`dimer`, `mA`, `mB`, `mAgB`, `gAmB`)
+that vary which fragments are real vs. ghost, and across `energy` and `gradient`
+drivers. As part of this feature, Gaussian is added to the `qcprog` parametrisation:
+
+```python
+pytest.param(
+    "gaussian",
+    "6-31g*",
+    {"NoSymm": ""},
+    id="gaussian",
+    marks=using("gaussian"),
+),
+```
+
+**Per-program method override**: the test overrides the QCSchema method for
+Gaussian only (other programs continue to use `"mp2"`):
+
+```python
+method = "mp2(full)" if qcprog == "gaussian" else "mp2"
+```
+
+**Keyword rationale**:
+
+- `"NoSymm": ""` — Gaussian uses symmetry to standardise the molecular orientation
+  by default; `NoSymm` (emitted as a bare token by `build_route_line`) tells
+  Gaussian not to use symmetry in the calculation. With `fix_com=True` and
+  `fix_orientation=True` already imposed on the input molecule, `NoSymm` keeps
+  Gaussian's internal frame aligned with the input frame for clean integration
+  accuracy. Note that `NoSymm` does **not** suppress the geometric point-group
+  printout — Gaussian still prints e.g. `Full point group  C*V` for linear
+  systems regardless.
+
+**Method-spec rationale (`mp2(full)`)**:
+
+Gaussian's MP2 freezes core orbitals by default (`NFC=4` for the
+ethylene+ethyne system, ~9.5 mHa offset from the all-electron reference). Two
+syntaxes exist for forcing all-electron MP2:
+
+1. `MP2=Full` as a separate route keyword. Works for energy, but Gaussian
+   refuses to compute analytic gradients with this form:
+   `"Post-SCF densities or gradients only with Real MP2, MP3, MP4SDQ, CI, CCD, and QCI."`
+2. `MP2(Full)/basis` with the option attached to the method spec inline. Works
+   for both energy and gradient.
+
+This feature adds a new `_METHOD_MAP` entry to `germinate.py` that maps the
+lower-case method string `"mp2(full)"` to the Gaussian token `"MP2(Full)"`,
+mirroring the existing `"ccsd(t,full)" → "CCSD(T,Full)"` convention. The
+harvester's `_METHOD_NORMALISE` dict in `harvester.py` is also extended so
+`"mp2(full)"` is normalised to `"mp2"` for energy-extraction purposes (the
+EUMP2 regex matches both forms).
+
+**Reference values** are reused from the existing `bimol_ref["eneyne"]` dict with
+the existing tolerances (`atol = 1.0e-4` for NRE, `atol = 3.0e-6` for energy and
+return-result comparison). If empirical verification during implementation reveals
+a systematic Gaussian-specific offset > 3.0e-6, the test should be amended to use a
+Gaussian-specific reference (with a comment explaining why); otherwise the existing
+references stand.
+
+**Point-group assertion**: the `pgline` dict at the bottom of `test_tricky_ghost`
+gains a Gaussian regex:
+
+```python
+"gaussian": r"Full point group\s+(?P<pg>\S+)",
+```
+
+The `\S+` form (rather than `\w+`) is required because Gaussian writes
+non-word characters (e.g. `*`) in linear point-group labels such as `C*V`.
+
+Gaussian's natural PG labels match the existing `bimol_ref["eneyne"]["pg"]`
+list for four of the five subjects (after the `pg.capitalize()` normalisation
+that already runs in the test):
+
+| subject | Gaussian | ref |
+|---------|----------|------|
+| dimer | C2V → C2v | "C2v" ✓ |
+| mA | C2V → C2v | ["D2h", "C2v"] ✓ |
+| mB | C*V → C*v | ["D4h", "C4v", "C2v"] ✗ |
+| mAgB | C2V → C2v | "C2v" ✓ |
+| gAmB | C2V → C2v | "C2v" ✓ |
+
+Only the `mB` subject (ethyne alone, linear) is problematic: Gaussian reports
+the natural linear point group `C*v`, whereas the existing consensus list
+records the abelian subgroups other programs reduce it to. The test grows a
+single Gaussian-specific branch that accepts `C*v` for `mB`:
+
+```python
+if qcprog == "gamess":
+    assert pg == "C1"
+elif qcprog == "gaussian" and subject == "mB":
+    assert pg == "C*v"
+else:
+    assert pg in ref["pg"][subject]
+```
+
+This preserves the original PG check for all other Gaussian subjects while
+avoiding a Gaussian-specific edit to the cross-program `bimol_ref["eneyne"]["pg"]`
+dict.
+
+**Out-of-scope**: no Gaussian-specific reference-data file is created. No harness
+changes are required — the existing ghost-atom support (this document) plus the
+existing user-keyword pass-through (`input-builder.md`) suffice.
 
 ## Migration Notes <!-- rq-df7eb0c3 -->
 

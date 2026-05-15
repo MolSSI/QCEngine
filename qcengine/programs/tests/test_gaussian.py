@@ -1340,6 +1340,230 @@ def test_ghost_compute_preserves_ghost_designation(harness):
 
 
 # ---------------------------------------------------------------------------
+# Tests: tricky-ghost (mp2(full) method + NoSymm)
+# ---------------------------------------------------------------------------
+
+
+# rq-2cb2c5c0
+def test_tricky_ghost_mp2_full_method_string():
+    """muster_modelchem("mp2(full)") emits Gaussian's "MP2(Full)" route token."""
+    result = muster_modelchem("mp2(full)", "energy", 1)
+    assert result["method_string"] == "MP2(Full)"
+
+
+# rq-2cb2c5c0
+def test_tricky_ghost_mp2_full_method_string_gradient():
+    """muster_modelchem("mp2(full)", "gradient") uses Force=NoStep job type."""
+    result = muster_modelchem("mp2(full)", "gradient", 1)
+    assert result["method_string"] == "MP2(Full)"
+    assert result["job_type"] == "Force=NoStep"
+
+
+# rq-2cb2c5c0
+def test_tricky_ghost_mp2_full_open_shell():
+    """Open-shell mp2(full) gets a U prefix like other MP2 variants."""
+    result = muster_modelchem("mp2(full)", "energy", 2)
+    assert result["method_string"] == "UMP2(Full)"
+
+
+# rq-2cb2c5c0
+def test_tricky_ghost_nosymm_emitted_bare():
+    """NoSymm in user_keywords with empty value emits as a bare token."""
+    line = build_route_line("MP2(Full)", "6-31g*", "Force=NoStep", {}, {"NoSymm": ""})
+    assert line.startswith("#P MP2(Full)/6-31g* Force=NoStep")
+    assert " NoSymm" in line
+    assert "NoSymm=" not in line  # bare, not "NoSymm="
+
+
+# rq-2cb2c5c0
+@requires_cclib
+def test_tricky_ghost_mp2_full_harvested_as_mp2():
+    """harvest() normalises method 'mp2(full)' to 'mp2' so MP2 qcvars are populated."""
+    in_mol = _make_water_mol()
+    log_with_mp2 = "EUMP2 =    -0.76276030623D+02\n"
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-2041.3]),
+        mpenergies=np.array([[-2044.8]]),
+    )
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "mp2(full)", log_with_mp2)
+    assert "MP2 TOTAL ENERGY" in qcvars
+    assert "MP2 CORRELATION ENERGY" in qcvars
+    # CURRENT ENERGY should be the MP2 total (highest level)
+    assert abs(float(qcvars["CURRENT ENERGY"]) - float(qcvars["MP2 TOTAL ENERGY"])) < 1e-12
+
+
+# rq-dc9a34d9
+def test_pgline_regex_matches_c2v():
+    """The pgline regex extracts a non-* Gaussian point group."""
+    line = " Full point group                 C2V     NOp   4"
+    m = re.search(r"Full point group\s+(?P<pg>\S+)", line)
+    assert m is not None
+    assert m.group("pg") == "C2V"
+
+
+# rq-dc9a34d9
+def test_pgline_regex_matches_linear():
+    """The pgline regex extracts a linear point group containing '*'."""
+    line = " Full point group                 C*V     NOp   4"
+    m = re.search(r"Full point group\s+(?P<pg>\S+)", line)
+    assert m is not None
+    assert m.group("pg") == "C*V"
+
+
+# ---------------------------------------------------------------------------
+# Tests: atom-label tolerance
+# ---------------------------------------------------------------------------
+
+
+def _build_labeled_h_mol(real_flags=None):
+    """4 H atoms with the labels from test_atom_labels."""
+    geom_bohr = [0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 5.0, 0.0]
+    return Molecule.from_data(
+        {
+            "symbols": ["H", "H", "H", "H"],
+            "atom_labels": ["", "5", "_other", "_4sq"],
+            "geometry": geom_bohr,
+            "real": real_flags if real_flags is not None else [True, True, True, True],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        }
+    )
+
+
+# rq-20063525
+def test_atom_labels_single_labeled_h_emits_bare_symbol(harness):
+    mol = Molecule.from_data(
+        {
+            "symbols": ["H"],
+            "atom_labels": ["_other"],
+            "geometry": [0.0, 0.0, 0.0],
+            "real": [True],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 2,
+        }
+    )
+    inp = AtomicInput(molecule=mol, specification=_spec())
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    com = job["infiles"]["gaussian.com"]
+    atom_lines = [
+        ln for ln in com.splitlines()
+        if ln.lstrip().startswith("H ") or "_other" in ln
+    ]
+    assert any(ln.lstrip().startswith("H ") for ln in atom_lines)
+    assert not any("_other" in ln for ln in atom_lines)
+
+
+# rq-da7df6e9
+def test_atom_labels_four_labeled_h_emit_bare_symbols(harness):
+    mol = _build_labeled_h_mol()
+    inp = AtomicInput(molecule=mol, specification=_spec(method="MP2", basis="aug-cc-pvdz"))
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    com = job["infiles"]["gaussian.com"]
+    h_lines = [ln for ln in com.splitlines() if ln.lstrip().startswith("H ")]
+    assert len(h_lines) == 4
+    for forbidden in ("H5", "H_other", "H_4sq"):
+        assert forbidden not in com
+
+
+# rq-7a592160
+def test_atom_labels_empty_labels_same_output_as_unlabeled(harness):
+    geom = [0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 5.0, 0.0]
+    mol_with_empty = Molecule.from_data(
+        {
+            "symbols": ["H", "H", "H", "H"],
+            "atom_labels": ["", "", "", ""],
+            "geometry": geom,
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        }
+    )
+    mol_without = Molecule.from_data(
+        {
+            "symbols": ["H", "H", "H", "H"],
+            "geometry": geom,
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        }
+    )
+    spec = _spec(method="MP2", basis="aug-cc-pvdz")
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        com_with = harness.build_input(AtomicInput(molecule=mol_with_empty, specification=spec), _default_taskconfig())["infiles"]["gaussian.com"]
+        com_without = harness.build_input(AtomicInput(molecule=mol_without, specification=spec), _default_taskconfig())["infiles"]["gaussian.com"]
+    assert com_with == com_without
+
+
+# rq-090d144e
+def test_atom_labels_route_line_clean(harness):
+    mol = _build_labeled_h_mol()
+    inp = AtomicInput(molecule=mol, specification=_spec(method="MP2", basis="aug-cc-pvdz"))
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    route = next(ln for ln in job["infiles"]["gaussian.com"].splitlines() if ln.startswith("#P"))
+    for forbidden in ("5", "_other", "_4sq"):
+        assert forbidden not in route or forbidden in "aug-cc-pvdz"
+
+
+# rq-c0a7e84e
+def test_atom_labels_build_input_does_not_raise(harness):
+    mol = _build_labeled_h_mol()
+    inp = AtomicInput(molecule=mol, specification=_spec(method="MP2", basis="aug-cc-pvdz"))
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        # Should not raise
+        harness.build_input(inp, _default_taskconfig())
+
+
+# rq-0892bdc0 — ghost atom with non-empty label still emits "<sym>-Bq", label dropped
+def test_atom_labels_ghost_with_label_emits_bq(harness):
+    mol = Molecule.from_data(
+        {
+            "symbols": ["He", "H"],
+            "atom_labels": ["", "ghost_a"],
+            "geometry": [0.0, 0.0, 0.0, 0.0, 0.0, 2.0],
+            "real": [True, False],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        }
+    )
+    inp = AtomicInput(molecule=mol, specification=_spec())
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    com = job["infiles"]["gaussian.com"]
+    ghost_lines = [ln for ln in com.splitlines() if "H-Bq" in ln]
+    assert len(ghost_lines) == 1
+    assert "ghost_a" not in com
+
+
+# rq-d4eaf3c7
+@requires_cclib
+def test_atom_labels_out_mol_preserves_labels_when_fixed():
+    """When fix_com=True and fix_orientation=True, out_mol is in_mol → labels preserved."""
+    mol = Molecule.from_data(
+        {
+            "symbols": ["H", "H", "H", "H"],
+            "atom_labels": ["", "5", "_other", "_4sq"],
+            "geometry": [0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 5.0, 0.0],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+            "fix_com": True,
+            "fix_orientation": True,
+        }
+    )
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-45.0]),
+        atomcoords=np.array(
+            [[[0.0, 0.0, 0.0], [2.645886, 0.0, 0.0], [0.0, 2.645886, 0.0], [2.645886, 2.645886, 0.0]]]
+        ),
+        atomnos=np.array([1, 1, 1, 1]),
+    )
+    with _patch_cclib(ccdata):
+        _, _, _, out_mol = harvest(mol, "hf", "dummy log")
+    assert list(out_mol.atom_labels) == ["", "5", "_other", "_4sq"]
+
+
+# ---------------------------------------------------------------------------
 # Integration tests (require Gaussian + cclib installed)
 # ---------------------------------------------------------------------------
 

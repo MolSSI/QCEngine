@@ -178,6 +178,13 @@ bimol_ref["eneyne"]["mp2_gradient"] = dict(zip(dmm, [
             id="psi4",
             marks=using("psi4"),
         ),
+        pytest.param(
+            "gaussian",
+            "6-31g*",
+            {"NoSymm": ""},
+            id="gaussian",
+            marks=using("gaussian"),
+        ),
     ],
 )
 def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions, request):
@@ -201,16 +208,19 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
     assert len(kmol.symbols) == ref["natom"][subject]
     assert sum([int(at) for at in kmol.real]) == ref["nreal"][subject]
 
+    # Gaussian's analytic MP2 gradient needs the inline "mp2(full)"
+    method = "mp2(full)" if qcprog == "gaussian" else "mp2"
+
     if from_v2(request.node.name):
         atin = models.AtomicInput(
             **{
                 "molecule": kmol,
-                "specification": {"model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords},
+                "specification": {"model": {"method": method, "basis": basis}, "driver": driver, "keywords": keywords},
             }
         )
     else:
         atin = models.AtomicInput(
-            **{"molecule": kmol, "model": {"method": "mp2", "basis": basis}, "driver": driver, "keywords": keywords}
+            **{"molecule": kmol, "model": {"method": method, "basis": basis}, "driver": driver, "keywords": keywords}
         )
 
     if qcprog == "gamess" and subject in ["mAgB", "gAmB"]:
@@ -245,6 +255,7 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
         "gamess": r"THE POINT GROUP IS (?P<pg>[\w\s,=]+)",
         "nwchem": r"Group name\s+(?P<pg>\w+)",
         "psi4": r"Running in (?P<pg>\w+) symmetry.",
+        "gaussian": r"Full point group\s+(?P<pg>\S+)",
     }
     mobj = re.search(pgline[qcprog], atres.stdout)
     if mobj:
@@ -258,6 +269,12 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
     if qcprog == "gamess":  # and subject in ["mAgB", "gAmB"]:
         # don't know how to get master frame w/ghosts in gamess, so C1 forced
         assert pg == "C1", f"pg: {pg} != C1"
+    elif qcprog == "gaussian" and subject == "mB":
+        # rq-2cb2c5c0 — Gaussian reports the linear point group C*V for the
+        # mB (ethyne-alone) subject; the existing cross-program ref list
+        # {D4h, C4v, C2v} reflects how other programs reduce the linear group
+        # to an abelian subgroup. Accept Gaussian's native linear label.
+        assert pg == "C*v", f"pg: {pg} != C*v"
     else:
         assert pg in ref["pg"][subject], f'pg: {pg} != {ref["pg"][subject]}'
 
@@ -286,6 +303,7 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
             id="psi4",
             marks=using("psi4"),
         ),
+        pytest.param("gaussian", "aug-cc-pvdz", {}, id="gaussian", marks=using("gaussian")),
     ],
 )
 def test_atom_labels(qcprog, basis, keywords, schema_versions, request):
@@ -338,7 +356,7 @@ def test_atom_labels(qcprog, basis, keywords, schema_versions, request):
             scf, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
         ), f"scf ene: {atres.properties.scf_total_energy} != {scf}"
     except AssertionError as exc:
-        if qcprog == "nwchem":
+        if qcprog in ("nwchem", "gaussian"):
             assert compare_values(
                 scf_alt, atres.properties.scf_total_energy, atol=3.0e-6, label="scf ene"
             ), f"scf ene: {atres.properties.scf_total_energy} != {scf_alt}"
