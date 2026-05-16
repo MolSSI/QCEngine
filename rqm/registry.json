@@ -36,6 +36,14 @@
     "title": "Gradient of a ghost-bearing system matches a reference vector",
     "type": "scenario"
   },
+  "rq-051e6b78": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
   "rq-058819da": {
     "decl": "## Gherkin Scenarios",
     "file": "gaussian/harvester",
@@ -87,6 +95,14 @@
     "refs": [],
     "title": "BasisSet object for model.basis raises InputError",
     "type": "scenario"
+  },
+  "rq-0afebead": {
+    "decl": "## Out-of-Scope",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Out-of-Scope",
+    "type": "section"
   },
   "rq-0b4cf843": {
     "decl": "Scenario: Nuclear repulsion energy mismatch raises ValueError",
@@ -204,6 +220,13 @@
     "title": "get_version() returns a normalised version string for Gaussian 16",
     "type": "scenario"
   },
+  "rq-18a8cc19": {
+    "decl": "Scenario: UHF/cc-pVDZ energy on NH2 radical matches reference and emits UHF route line",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "UHF/cc-pVDZ energy on NH2 radical matches reference and emits UHF route line",
+    "type": "scenario"
+  },
   "rq-1a01df8f": {
     "decl": "## Feature API",
     "file": "gaussian/harvester",
@@ -239,6 +262,22 @@
     "level": 3,
     "refs": [],
     "title": "Extended: `harvest(in_mol, method, log_content)`",
+    "type": "section"
+  },
+  "rq-1e76932b": {
+    "decl": "### T3: Plain B3LYP energy on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T3: Plain B3LYP energy on water",
+    "type": "section"
+  },
+  "rq-1ed899e3": {
+    "decl": "## Implementation Notes",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Implementation Notes",
     "type": "section"
   },
   "rq-20063525": {
@@ -435,6 +474,13 @@
     "title": "Parse gradient and negate forces",
     "type": "scenario"
   },
+  "rq-3727e53b": {
+    "decl": "- `test_gaussian_dft_b3lyp_water` (T3)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_dft_b3lyp_water",
+    "type": "api-item"
+  },
   "rq-37f40e92": {
     "decl": "- `\"HF TOTAL ENERGY\"` — from `ccdata.scfenergies[-1]` converted via `cclib.parser.utils.convertor(\"eV\", \"hartree\")`.",
     "file": "gaussian/harvester",
@@ -630,6 +676,13 @@
     "title": "MP2 method maps to \"MP2\"",
     "type": "scenario"
   },
+  "rq-54afb7b8": {
+    "decl": "- `test_gaussian_hessian_hf_water` (T1)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_hessian_hf_water",
+    "type": "api-item"
+  },
   "rq-56e891e7": {
     "decl": "### Empirical Reference Values",
     "file": "gaussian/integration-tests",
@@ -652,6 +705,13 @@
     "refs": [],
     "title": "Extended: `build_input(input_model, config, template=None)`",
     "type": "section"
+  },
+  "rq-5c04235d": {
+    "decl": "Scenario: HF/cc-pVDZ energy on a single He atom returns the expected value with NRE=0",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "HF/cc-pVDZ energy on a single He atom returns the expected value with NRE=0",
+    "type": "scenario"
   },
   "rq-5c529f02": {
     "decl": "Scenario: out_mol preserves atom_labels when fix_com and fix_orientation are True",
@@ -696,6 +756,14 @@
     "title": "RHF gradient is correctly aligned to the (scrambled) input frame",
     "type": "scenario"
   },
+  "rq-6385e33d": {
+    "decl": "### T1: HF Hessian on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T1: HF Hessian on water",
+    "type": "section"
+  },
   "rq-6423b98b": {
     "decl": "### Files Modified",
     "file": "gaussian/integration-tests",
@@ -731,6 +799,13 @@
     "refs": [],
     "title": "Atom count mismatch raises ValueError when ghosts are present",
     "type": "scenario"
+  },
+  "rq-66ca9a20": {
+    "decl": "- `test_gaussian_b3lyp_d3_gradient_water` (T4)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_b3lyp_d3_gradient_water",
+    "type": "api-item"
   },
   "rq-68840f83": {
     "decl": "Scenario: Gradient is unchanged when dispersion is present",
@@ -788,6 +863,13 @@
     "title": "SCF is an alias for HF",
     "type": "scenario"
   },
+  "rq-70b16c33": {
+    "decl": "- `test_gaussian_properties_hf_water` (T2)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_properties_hf_water",
+    "type": "api-item"
+  },
   "rq-7152455e": {
     "decl": "Scenario: User keyword is appended to route line",
     "file": "gaussian/input-builder",
@@ -844,6 +926,14 @@
     "title": "Atom count sanity check passes when cclib atom count matches in_mol",
     "type": "scenario"
   },
+  "rq-7472fc74": {
+    "decl": "## Coverage Gaps Closed by This Feature",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Coverage Gaps Closed by This Feature",
+    "type": "section"
+  },
   "rq-74e0110c": {
     "decl": "## Molecule Block Construction",
     "file": "gaussian/input-builder",
@@ -858,6 +948,14 @@
     "refs": [],
     "title": "muster_modelchem recognises canonical key alias \"d3zero2b\"",
     "type": "scenario"
+  },
+  "rq-7c70da2a": {
+    "decl": "## Reference Values",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Reference Values",
+    "type": "section"
   },
   "rq-7d1fb16e": {
     "decl": "## Feature API",
@@ -887,6 +985,14 @@
     "level": 2,
     "refs": [],
     "title": "Test Integrations",
+    "type": "section"
+  },
+  "rq-80a8de50": {
+    "decl": "### T4: B3LYP-D3 gradient on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T4: B3LYP-D3 gradient on water",
     "type": "section"
   },
   "rq-815d5fee": {
@@ -942,6 +1048,14 @@
     "title": "Unknown method is passed through verbatim (uppercased)",
     "type": "scenario"
   },
+  "rq-86480a7b": {
+    "decl": "## Feature API",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
   "rq-86c27356": {
     "decl": "- `InputError` — if `driver` is not one of the four supported values.",
     "file": "gaussian/input-builder",
@@ -961,6 +1075,13 @@
     "file": "gaussian/integration-tests",
     "refs": [],
     "title": "RHF hessian is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-89896430": {
+    "decl": "Scenario: HF/STO-3G Hessian on water has correct shape and reference values",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "HF/STO-3G Hessian on water has correct shape and reference values",
     "type": "scenario"
   },
   "rq-8d6fc024": {
@@ -1048,6 +1169,14 @@
     "refs": [],
     "title": "- `\"DIPOLE MOMENT\"` — magnitude of `ccdata.moments[1]` in Debye.",
     "type": "api-item"
+  },
+  "rq-954dd6f3": {
+    "decl": "### T6: Single-atom He HF/cc-pVDZ",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T6: Single-atom He HF/cc-pVDZ",
+    "type": "section"
   },
   "rq-95535d13": {
     "decl": "Scenario: muster_modelchem raises InputError for D3M(BJ)",
@@ -1217,6 +1346,13 @@
     "title": "Nuclear repulsion energy cross-check passes for consistent geometry",
     "type": "scenario"
   },
+  "rq-a9ab12b3": {
+    "decl": "# Feature: Gaussian Harness — End-to-End Coverage Tests",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — End-to-End Coverage Tests",
+    "type": "file"
+  },
   "rq-aa991a3a": {
     "decl": "Scenario: native_files protocol \"all\" returns input and output files",
     "file": "gaussian/integration-tests",
@@ -1231,6 +1367,13 @@
     "title": "Route line for closed-shell HF energy",
     "type": "scenario"
   },
+  "rq-af1fd6a9": {
+    "decl": "Scenario: B3LYP/cc-pVDZ energy on water matches reference without emitting dispersion qcvars",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "B3LYP/cc-pVDZ energy on water matches reference without emitting dispersion qcvars",
+    "type": "scenario"
+  },
   "rq-af4f9bf0": {
     "decl": "Scenario: muster_modelchem strips \"-d2\" and emits EmpiricalDispersion=GD2",
     "file": "gaussian/dispersion",
@@ -1243,6 +1386,13 @@
     "file": "gaussian/atom-labels",
     "refs": [],
     "title": "The \"alternative SCF solution\" branch in test_atom_labels accepts Gaussian",
+    "type": "scenario"
+  },
+  "rq-b10501a0": {
+    "decl": "Scenario: B3LYP-D3/6-31G* gradient on water matches reference and exposes dispersion qcvars",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "B3LYP-D3/6-31G* gradient on water matches reference and exposes dispersion qcvars",
     "type": "scenario"
   },
   "rq-b27d4aff": {
@@ -1286,6 +1436,13 @@
     "refs": [],
     "title": "Log with no coordinate data raises ValueError",
     "type": "scenario"
+  },
+  "rq-b8065553": {
+    "decl": "- `test_gaussian_b3lyp_d3_hessian_water` (T7)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_b3lyp_d3_hessian_water",
+    "type": "api-item"
   },
   "rq-b819d8e0": {
     "decl": "Scenario: Atom coordinates appear in Angstrom with at least 10 decimal places",
@@ -1370,6 +1527,14 @@
     "title": "Out-of-Scope",
     "type": "section"
   },
+  "rq-c38f1b61": {
+    "decl": "### T5: NH₂· UHF on cc-pVDZ",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T5: NH₂· UHF on cc-pVDZ",
+    "type": "section"
+  },
   "rq-c3ebee03": {
     "decl": "## Method and Driver Compatibility",
     "file": "gaussian/atom-labels",
@@ -1429,6 +1594,14 @@
     "title": "- `\"MULLIKEN CHARGES\"` — from `ccdata.atomcharges[\"mulliken\"]`.",
     "type": "api-item"
   },
+  "rq-c88cc8ec": {
+    "decl": "### Fixtures and helpers",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "Fixtures and helpers",
+    "type": "section"
+  },
   "rq-c946c285": {
     "decl": "Scenario: Triplet automatically prepends U to B3LYP",
     "file": "gaussian/input-builder",
@@ -1459,6 +1632,21 @@
     "title": "Route line for properties calculation includes Pop=Full",
     "type": "scenario"
   },
+  "rq-cd65e68a": {
+    "decl": "- `test_gaussian_single_atom_he` (T6)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_single_atom_he",
+    "type": "api-item"
+  },
+  "rq-ce2ecf6a": {
+    "decl": "### Reference-value provenance",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "Reference-value provenance",
+    "type": "section"
+  },
   "rq-ce76f384": {
     "decl": "Scenario: All-ghost molecule produces an atom block with every line \"-Bq\"-suffixed",
     "file": "gaussian/ghost-atoms",
@@ -1473,6 +1661,13 @@
     "refs": [],
     "title": "Integration Test",
     "type": "section"
+  },
+  "rq-cedda71e": {
+    "decl": "Scenario: B3LYP-D3/6-31G* Hessian on water succeeds and emits the dispersion qcvar",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "B3LYP-D3/6-31G* Hessian on water succeeds and emits the dispersion qcvar",
+    "type": "scenario"
   },
   "rq-ceef73bd": {
     "decl": "Scenario: Coordinate precision is preserved for ghost atoms",
@@ -1489,12 +1684,27 @@
     "title": "Feature API",
     "type": "section"
   },
+  "rq-d06d7266": {
+    "decl": "- `test_gaussian_uhf_nh2` (T5)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_uhf_nh2",
+    "type": "api-item"
+  },
   "rq-d3b8d8c3": {
     "decl": "Scenario: found() falls back to g09 when g16 is absent",
     "file": "gaussian/runner",
     "refs": [],
     "title": "found() falls back to g09 when g16 is absent",
     "type": "scenario"
+  },
+  "rq-d42168a0": {
+    "decl": "### Test runtime budget",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "Test runtime budget",
+    "type": "section"
   },
   "rq-d4e60dd2": {
     "decl": "Scenario: MP2/6-31G* energy on mAgB (real ethylene + ghost ethyne) matches reference",
@@ -1551,6 +1761,21 @@
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Memory directive rounds down to nearest integer GB (minimum 1)",
+    "type": "scenario"
+  },
+  "rq-dbf8a9a5": {
+    "decl": "### T7: B3LYP-D3 Hessian on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T7: B3LYP-D3 Hessian on water",
+    "type": "section"
+  },
+  "rq-dc1bf912": {
+    "decl": "Scenario: HF/STO-3G properties on water populates dipole and Mulliken charges",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "HF/STO-3G properties on water populates dipole and Mulliken charges",
     "type": "scenario"
   },
   "rq-dceb51f5": {
@@ -1611,6 +1836,14 @@
     "refs": [],
     "title": "ROHF + dispersion does not double-prefix U",
     "type": "scenario"
+  },
+  "rq-e199db9a": {
+    "decl": "### T2: HF properties on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T2: HF properties on water",
+    "type": "section"
   },
   "rq-e5a98119": {
     "decl": "Scenario: NRE cross-check is unchanged for all-real molecules",

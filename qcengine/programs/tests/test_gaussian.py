@@ -2016,3 +2016,215 @@ def test_gaussian_b3lyp_d3_water(water):
     assert abs(float(qcvars["CURRENT ENERGY"]) - tot) < 1.0e-10
     # SCF TOTAL ENERGY / HF TOTAL ENERGY exclude dispersion.
     assert abs(float(qcvars["SCF TOTAL ENERGY"]) - scf) < 1.0e-10
+
+
+# ---------------------------------------------------------------------------
+# E2E coverage tests (see rqm/gaussian/e2e-coverage.md)
+# ---------------------------------------------------------------------------
+
+
+# rq-54afb7b8
+@using("gaussian")
+def test_gaussian_hessian_hf_water(water):
+    """HF/STO-3G Hessian on water — exercises _parse_force_constants pipeline end-to-end."""
+    import qcengine as qcng
+
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian", driver="hessian",
+            model={"method": "HF", "basis": "STO-3G"},
+        ),
+    )
+    result = qcng.compute(inp, "gaussian", raise_error=True)
+    assert result.success is True
+
+    hess = np.asarray(result.return_result)
+    atol = 1.0e-6
+    assert hess.shape == (9, 9)
+    assert abs(np.trace(hess) - 3.2315247000) < atol
+    assert abs(np.linalg.norm(hess) - 2.2444460940) < atol
+    assert abs(hess[0, 0] - (-0.0560541000)) < atol
+    assert abs(hess[3, 3] - (-0.0223351000)) < atol
+    assert abs(hess[0, 1]) < 1.0e-10
+    assert np.allclose(hess, hess.T, atol=1.0e-10)
+
+
+# rq-70b16c33
+@using("gaussian")
+def test_gaussian_properties_hf_water(water):
+    """HF/STO-3G properties driver: dipole + Mulliken end-to-end."""
+    import qcengine as qcng
+
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian", driver="properties",
+            model={"method": "HF", "basis": "STO-3G"},
+        ),
+    )
+    result = qcng.compute(inp, "gaussian", raise_error=True)
+    assert result.success is True
+    assert isinstance(result.return_result, float)
+
+    qcvars = result.extras["qcvars"]
+    atol = 1.0e-6
+    assert abs(float(qcvars["HF TOTAL ENERGY"]) - (-74.962963201)) < atol
+    # Dipole magnitude (Debye) — looser tol absorbs Gaussian rounding in the log.
+    assert abs(float(qcvars["DIPOLE MOMENT"]) - 1.7252) < 1.0e-3
+    mulliken = list(qcvars["MULLIKEN CHARGES"])
+    assert len(mulliken) == 3
+    assert abs(sum(float(q) for q in mulliken)) < 1.0e-4
+    assert abs(float(mulliken[0]) - (-0.366114)) < 1.0e-3
+
+
+# rq-3727e53b
+@using("gaussian")
+def test_gaussian_dft_b3lyp_water(water):
+    """Plain B3LYP/cc-pVDZ (no dispersion suffix) — confirms the DFT pass-through branch."""
+    import qcengine as qcng
+
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian", driver="energy",
+            model={"method": "B3LYP", "basis": "cc-pVDZ"},
+        ),
+    )
+    result = qcng.compute(inp, "gaussian", raise_error=True)
+    assert result.success is True
+
+    atol = 1.0e-6
+    ref = -76.4203540604
+    assert abs(float(result.return_result) - ref) < atol
+
+    qcvars = result.extras["qcvars"]
+    # The SCF energy IS the B3LYP energy when no dispersion is requested.
+    assert abs(float(qcvars["HF TOTAL ENERGY"]) - ref) < 1.0e-10
+    assert abs(float(qcvars["CURRENT ENERGY"]) - ref) < 1.0e-10
+    # No dispersion qcvars when the method has no dispersion suffix.
+    assert "DISPERSION CORRECTION ENERGY" not in qcvars
+    assert "B3LYP-D3 DISPERSION CORRECTION ENERGY" not in qcvars
+
+
+# rq-66ca9a20
+@using("gaussian")
+def test_gaussian_b3lyp_d3_gradient_water(water):
+    """B3LYP-D3/6-31G* gradient — confirms the dispersion + gradient combination."""
+    import qcengine as qcng
+
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian", driver="gradient",
+            model={"method": "b3lyp-d3", "basis": "6-31g*"},
+        ),
+    )
+    result = qcng.compute(inp, "gaussian", raise_error=True)
+    assert result.success is True
+
+    grad = np.asarray(result.return_result)
+    assert grad.shape == (3, 3)
+    ref_grad = np.array([
+        [0.0,  0.0,        -0.01437422],
+        [0.0, -0.00800138,  0.00718711],
+        [0.0,  0.00800138,  0.00718711],
+    ])
+    np.testing.assert_allclose(grad, ref_grad, atol=1.0e-6)
+
+    qcvars = result.extras["qcvars"]
+    atol = 1.0e-6
+    assert abs(float(qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"]) - (-0.0000078919)) < atol
+    assert abs(float(qcvars["B3LYP FUNCTIONAL TOTAL ENERGY"]) - (-76.4087263383)) < atol
+    assert abs(float(qcvars["B3LYP-D3 TOTAL ENERGY"]) - (-76.4087342302)) < atol
+
+
+# rq-d06d7266
+@using("gaussian")
+def test_gaussian_uhf_nh2():
+    """NH2 radical (charge=0, mult=2) — confirms U-prefix auto-emission for open-shell."""
+    import qcengine as qcng
+
+    nh2 = Molecule.from_data(
+        """
+        0 2
+        N  0.000000000  0.000000000  0.140030000
+        H  0.000000000  0.802300000 -0.490100000
+        H  0.000000000 -0.802300000 -0.490100000
+        units angstrom
+        """
+    )
+    inp = AtomicInput(
+        molecule=nh2,
+        specification=AtomicSpecification(
+            program="gaussian", driver="energy",
+            model={"method": "HF", "basis": "cc-pVDZ"},
+            protocols={"native_files": "all"},
+        ),
+    )
+    result = qcng.compute(inp, "gaussian", raise_error=True)
+    assert result.success is True
+
+    atol = 1.0e-6
+    assert abs(float(result.return_result) - (-55.5671259096)) < atol
+
+    qcvars = result.extras["qcvars"]
+    assert abs(float(qcvars["HF TOTAL ENERGY"]) - (-55.5671259096)) < atol
+
+    com = result.native_files["input"]
+    assert "UHF/cc-pVDZ" in com
+    # Charge/multiplicity line — look for an exact "0 2" line in the molecule block.
+    assert any(ln.strip() == "0 2" for ln in com.splitlines())
+
+
+# rq-cd65e68a
+@using("gaussian")
+def test_gaussian_single_atom_he():
+    """Single He atom HF/cc-pVDZ — edge case: zero NRE, no bonds."""
+    import qcengine as qcng
+
+    he = Molecule.from_data(
+        """
+        0 1
+        He 0.0 0.0 0.0
+        units angstrom
+        """
+    )
+    inp = AtomicInput(
+        molecule=he,
+        specification=AtomicSpecification(
+            program="gaussian", driver="energy",
+            model={"method": "HF", "basis": "cc-pVDZ"},
+        ),
+    )
+    result = qcng.compute(inp, "gaussian", raise_error=True)
+    assert result.success is True
+    assert abs(float(result.return_result) - (-2.85516047724)) < 1.0e-6
+    assert result.properties.nuclear_repulsion_energy == 0.0
+
+
+# rq-b8065553
+@using("gaussian")
+def test_gaussian_b3lyp_d3_hessian_water(water):
+    """B3LYP-D3/6-31G* Hessian — confirms DFT-D Hessian succeeds and emits dispersion qcvar."""
+    import qcengine as qcng
+
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian", driver="hessian",
+            model={"method": "b3lyp-d3", "basis": "6-31g*"},
+        ),
+    )
+    result = qcng.compute(inp, "gaussian", raise_error=True)
+    assert result.success is True
+
+    hess = np.asarray(result.return_result)
+    atol = 1.0e-6
+    assert hess.shape == (9, 9)
+    assert abs(np.trace(hess) - 2.3626060600) < atol
+    assert abs(np.linalg.norm(hess) - 1.5979941261) < atol
+    assert np.allclose(hess, hess.T, atol=1.0e-10)
+
+    qcvars = result.extras["qcvars"]
+    assert abs(float(qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"]) - (-0.0000078919)) < atol
