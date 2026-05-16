@@ -187,6 +187,20 @@ class GaussianHarness(ProgramHarness):
         # rq-ef62979b
         modelchem = muster_modelchem(method, driver, mol.molecular_multiplicity)
 
+        # rq-59b816b7 — Conflict between method-suffix dispersion and a
+        # user-provided EmpiricalDispersion keyword is ambiguous; raise rather
+        # than silently picking one.
+        if modelchem.get("dispersion_level") is not None:
+            user_kw = input_model.specification.keywords or {}
+            for k in user_kw:
+                if k.lower() == "empiricaldispersion":
+                    raise InputError(
+                        f"Empirical dispersion is overspecified: method "
+                        f"'{method}' implies EmpiricalDispersion="
+                        f"{modelchem['extra_keywords']['EmpiricalDispersion']}, "
+                        f"but keywords also contains '{k}'. Specify only one."
+                    )
+
         # rq-74e0110c rq-bd6cd9a4 — build atom block in Ångström with 10+ decimal places
         # Ghost atoms (real=False) get a "-Bq" suffix so Gaussian places basis functions
         # without a nucleus or electrons.

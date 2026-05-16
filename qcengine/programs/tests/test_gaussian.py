@@ -1564,6 +1564,330 @@ def test_atom_labels_out_mol_preserves_labels_when_fixed():
 
 
 # ---------------------------------------------------------------------------
+# Tests: empirical dispersion (germinate)
+# ---------------------------------------------------------------------------
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_d3():
+    """muster_modelchem strips '-d3' and emits EmpiricalDispersion=GD3."""
+    result = muster_modelchem("b3lyp-d3", "energy", 1)
+    assert result["method_string"] == "B3LYP"
+    assert result["extra_keywords"]["EmpiricalDispersion"] == "GD3"
+    assert result["dispersion_level"] == "D3"
+    assert result["functional_name"] == "B3LYP"
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_d3bj():
+    result = muster_modelchem("b3lyp-d3bj", "energy", 1)
+    assert result["method_string"] == "B3LYP"
+    assert result["extra_keywords"]["EmpiricalDispersion"] == "GD3BJ"
+    assert result["dispersion_level"] == "D3(BJ)"
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_d2():
+    result = muster_modelchem("b3lyp-d2", "energy", 1)
+    assert result["method_string"] == "B3LYP"
+    assert result["extra_keywords"]["EmpiricalDispersion"] == "GD2"
+    assert result["dispersion_level"] == "D2"
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_d3zero2b_alias():
+    result = muster_modelchem("b3lyp-d3zero2b", "energy", 1)
+    assert result["dispersion_level"] == "D3"
+    assert result["functional_name"] == "B3LYP"
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_bare_d_alias():
+    """The bare '-d' alias maps to D2 (per QCEngine's get_dispersion_aliases)."""
+    result = muster_modelchem("b3lyp-d", "energy", 1)
+    assert result["dispersion_level"] == "D2"
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_no_suffix_unchanged():
+    result = muster_modelchem("b3lyp", "energy", 1)
+    assert result["method_string"] == "B3LYP"
+    assert "EmpiricalDispersion" not in result["extra_keywords"]
+    assert "dispersion_level" not in result
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_hyphenated_non_dispersion_preserved():
+    """cam-B3LYP must not get falsely stripped (cam isn't an alias)."""
+    result = muster_modelchem("cam-b3lyp", "energy", 1)
+    assert result["method_string"] == "CAM-B3LYP"
+    assert "EmpiricalDispersion" not in result["extra_keywords"]
+    assert "dispersion_level" not in result
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_hf_d3():
+    result = muster_modelchem("hf-d3", "energy", 1)
+    assert result["method_string"] == "HF"
+    assert result["extra_keywords"]["EmpiricalDispersion"] == "GD3"
+    assert result["functional_name"] == "HF"
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_open_shell():
+    result = muster_modelchem("b3lyp-d3", "energy", 2)
+    assert result["method_string"] == "UB3LYP"
+    assert result["extra_keywords"]["EmpiricalDispersion"] == "GD3"
+    assert result["dispersion_level"] == "D3"
+    assert result["functional_name"] == "B3LYP"
+
+
+# rq-0c1b5066
+def test_dispersion_germinate_rohf_no_double_prefix():
+    result = muster_modelchem("rohf-d3", "energy", 2)
+    assert result["method_string"] == "ROHF"
+    assert result["extra_keywords"]["EmpiricalDispersion"] == "GD3"
+
+
+# rq-0c1b5066
+@pytest.mark.parametrize("method", ["b3lyp-d3m", "b3lyp-d3mbj", "b3lyp-d4", "b3lyp-d3op", "b3lyp-nl"])
+def test_dispersion_germinate_unsupported_levels_raise(method):
+    with pytest.raises(InputError, match=r"not natively supported"):
+        muster_modelchem(method, "energy", 1)
+
+
+# rq-0c1b5066 — explicit "longer suffix wins" test
+def test_dispersion_germinate_longer_suffix_wins():
+    """d3bj must be matched before d3 + stray 'bj'."""
+    result = muster_modelchem("b3lyp-d3bj", "energy", 1)
+    assert result["dispersion_level"] == "D3(BJ)"
+    assert result["functional_name"] == "B3LYP"
+
+
+# ---------------------------------------------------------------------------
+# Tests: empirical dispersion (runner conflict detection)
+# ---------------------------------------------------------------------------
+
+
+# rq-59b816b7
+def test_dispersion_conflict_raises(harness, water):
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian",
+            driver="energy",
+            model={"method": "b3lyp-d3", "basis": "STO-3G"},
+            keywords={"EmpiricalDispersion": "GD3BJ"},
+        ),
+    )
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        with pytest.raises(InputError, match="overspecified"):
+            harness.build_input(inp, _default_taskconfig())
+
+
+# rq-59b816b7
+def test_dispersion_conflict_case_insensitive(harness, water):
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian",
+            driver="energy",
+            model={"method": "b3lyp-d3", "basis": "STO-3G"},
+            keywords={"empiricaldispersion": "GD3"},
+        ),
+    )
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        with pytest.raises(InputError, match="overspecified"):
+            harness.build_input(inp, _default_taskconfig())
+
+
+# rq-59b816b7
+def test_dispersion_user_keyword_only_passes_through(harness, water):
+    """If the method has no dispersion suffix, a user EmpiricalDispersion kw passes through."""
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian",
+            driver="energy",
+            model={"method": "B3LYP", "basis": "STO-3G"},
+            keywords={"EmpiricalDispersion": "GD3"},
+        ),
+    )
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    assert "EmpiricalDispersion=GD3" in job["infiles"]["gaussian.com"]
+
+
+# rq-59b816b7
+def test_dispersion_method_suffix_only(harness, water):
+    """method='b3lyp-d3' produces exactly one EmpiricalDispersion token and bare B3LYP/basis."""
+    inp = AtomicInput(
+        molecule=water,
+        specification=AtomicSpecification(
+            program="gaussian",
+            driver="energy",
+            model={"method": "b3lyp-d3", "basis": "STO-3G"},
+        ),
+    )
+    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
+        job = harness.build_input(inp, _default_taskconfig())
+    com = job["infiles"]["gaussian.com"]
+    assert com.count("EmpiricalDispersion=GD3") == 1
+    # Route line has B3LYP/STO-3G, NOT B3LYP-D3/STO-3G
+    route = next(ln for ln in com.splitlines() if ln.startswith("#P"))
+    assert "B3LYP/STO-3G" in route
+    assert "B3LYP-D3/" not in route
+
+
+# ---------------------------------------------------------------------------
+# Tests: empirical dispersion (harvester)
+# ---------------------------------------------------------------------------
+
+
+_DISP_LOG_SNIPPET = (
+    " SCF Done:  E(RB3LYP) =  -76.4014123456     A.U. after   12 cycles\n"
+    " Dispersion energy=       -0.0046617305 Hartrees.\n"
+)
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_regex_path():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
+    assert abs(float(qcvars["DISPERSION CORRECTION ENERGY"]) - (-0.0046617305)) < 1e-12
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_cclib_fallback():
+    """When the log has no 'Dispersion energy=' line, fall back to ccdata.dispersionenergies."""
+    in_mol = _make_water_mol()
+    # eV values that round-trip to a known Hartree quantity
+    disp_ev = -0.1269192
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    ccdata.dispersionenergies = np.array([disp_ev])
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "SCF Done: E(RB3LYP) = -76.4 A.U. after 10 cycles\n")
+    expected = disp_ev * _EV_TO_HARTREE
+    assert abs(float(qcvars["DISPERSION CORRECTION ENERGY"]) - expected) < 1e-8
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_functional_specific_qcvars():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
+    assert "B3LYP-D3 DISPERSION CORRECTION ENERGY" in qcvars
+    assert abs(float(qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"]) - (-0.0046617305)) < 1e-12
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_functional_total_excludes_dispersion():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
+    scf = -76.4014123456
+    disp = -0.0046617305
+    assert abs(float(qcvars["B3LYP FUNCTIONAL TOTAL ENERGY"]) - scf) < 1e-10
+    assert abs(float(qcvars["B3LYP-D3 TOTAL ENERGY"]) - (scf + disp)) < 1e-10
+    assert abs(float(qcvars["CURRENT ENERGY"]) - (scf + disp)) < 1e-10
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_d3bj_uses_parenthesised_label():
+    in_mol = _make_water_mol()
+    log = (
+        " SCF Done:  E(RB3LYP) =  -76.4014123456     A.U. after   12 cycles\n"
+        " Dispersion energy=       -0.0070000000 Hartrees.\n"
+    )
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3bj", log)
+    assert "B3LYP-D3(BJ) DISPERSION CORRECTION ENERGY" in qcvars
+    assert "B3LYP-D3(BJ) TOTAL ENERGY" in qcvars
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_scf_hf_unchanged():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
+    scf = -76.4014123456
+    # SCF TOTAL ENERGY / HF TOTAL ENERGY excludes the dispersion contribution
+    assert abs(float(qcvars["HF TOTAL ENERGY"]) - scf) < 1e-10
+    assert abs(float(qcvars["SCF TOTAL ENERGY"]) - scf) < 1e-10
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_method_without_suffix_no_functional_qcvars():
+    """If user passes EmpiricalDispersion via keyword (no method suffix), generic qcvars only."""
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp", _DISP_LOG_SNIPPET)
+    assert "DISPERSION CORRECTION ENERGY" in qcvars
+    # No formal dash label known → no functional-specific qcvars
+    assert "B3LYP-D3 DISPERSION CORRECTION ENERGY" not in qcvars
+    assert "B3LYP-D3 TOTAL ENERGY" not in qcvars
+    # CURRENT ENERGY still reflects scf + disp for DFT
+    scf = -76.4014123456
+    disp = -0.0046617305
+    assert abs(float(qcvars["CURRENT ENERGY"]) - (scf + disp)) < 1e-10
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_absent_no_qcvars():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    # No dispersion line in log, no dispersionenergies attribute
+    log = " SCF Done:  E(RB3LYP) =  -76.4014123456     A.U. after   12 cycles\n"
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp", log)
+    assert "DISPERSION CORRECTION ENERGY" not in qcvars
+    assert abs(float(qcvars["CURRENT ENERGY"]) - float(qcvars["SCF TOTAL ENERGY"])) < 1e-12
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_nlc_method_no_dispersion_qcvars():
+    """wB97M-V is self-consistent NLC; no 'Dispersion energy=' line in log."""
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    log = " SCF Done:  E(RwB97M-V) =  -76.5     A.U. after   12 cycles\n"
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "wb97m-v", log)
+    assert "DISPERSION CORRECTION ENERGY" not in qcvars
+
+
+# rq-1d5da737
+@requires_cclib
+def test_dispersion_harvest_gradient_unchanged():
+    """Dispersion in log doesn't disturb the gradient pipeline; cclib's grads is the total."""
+    in_mol = _make_water_mol()
+    forces = np.array([[0.01, 0.0, -0.02], [0.0, 0.005, 0.01], [0.0, -0.005, 0.01]])
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([-2079.3]),
+        grads=forces[np.newaxis, :, :],
+    )
+    with _patch_cclib(ccdata):
+        qcvars, grad, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
+    assert grad is not None
+    np.testing.assert_allclose(grad, -forces.flatten(), atol=1e-12)
+
+
+# ---------------------------------------------------------------------------
 # Integration tests (require Gaussian + cclib installed)
 # ---------------------------------------------------------------------------
 
@@ -1595,3 +1919,48 @@ def test_gaussian_gradient_water(water):
     )
     assert result.success is True
     assert np.array(result.return_result).shape == (3, 3)
+
+
+# rq-17959824
+@using("gaussian")
+def test_gaussian_b3lyp_d3_water(water):
+    """B3LYP-D3/6-31G* energy on water; verify dispersion qcvars are populated and consistent."""
+    import qcengine as qcng
+
+    result = qcng.compute(
+        AtomicInput(
+            molecule=water,
+            specification=AtomicSpecification(
+                program="gaussian",
+                driver="energy",
+                model={"method": "b3lyp-d3", "basis": "6-31g*"},
+            ),
+        ),
+        "gaussian",
+        raise_error=True,
+    )
+    assert result.success is True
+
+    qcvars = result.extras["qcvars"]
+    # All three Psi4-convention qcvars must be present.
+    assert "B3LYP-D3 DISPERSION CORRECTION ENERGY" in qcvars
+    assert "B3LYP-D3 TOTAL ENERGY" in qcvars
+    assert "B3LYP FUNCTIONAL TOTAL ENERGY" in qcvars
+    # Empirical reference values (Gaussian 16, Revision C.02). Tolerance is loose
+    # enough to absorb minor patch-level variation in the D3 parameter set.
+    atol = 1.0e-6
+    ref_func = -76.4087263383
+    ref_disp = -0.0000078919
+    ref_total = ref_func + ref_disp
+    assert abs(float(qcvars["B3LYP FUNCTIONAL TOTAL ENERGY"]) - ref_func) < atol
+    assert abs(float(qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"]) - ref_disp) < atol
+    assert abs(float(qcvars["B3LYP-D3 TOTAL ENERGY"]) - ref_total) < atol
+    # SCF + dispersion == total (numerical consistency).
+    scf = float(qcvars["B3LYP FUNCTIONAL TOTAL ENERGY"])
+    disp = float(qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"])
+    tot = float(qcvars["B3LYP-D3 TOTAL ENERGY"])
+    assert abs((scf + disp) - tot) < 1.0e-10
+    # CURRENT ENERGY is the dispersion-corrected total.
+    assert abs(float(qcvars["CURRENT ENERGY"]) - tot) < 1.0e-10
+    # SCF TOTAL ENERGY / HF TOTAL ENERGY exclude dispersion.
+    assert abs(float(qcvars["SCF TOTAL ENERGY"]) - scf) < 1.0e-10

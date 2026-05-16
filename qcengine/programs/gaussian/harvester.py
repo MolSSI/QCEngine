@@ -27,6 +27,10 @@ _SCF_DONE_RE = re.compile(r"SCF Done:\s+E\(\S+\)\s*=\s*([-\d.]+)")
 _MP2_ENERGY_RE = re.compile(r"EUMP2\s*=\s*([-\d.DE+]+)")
 _CCSD_T_ENERGY_RE = re.compile(r"CCSD\(T\)=\s*([-\d.DE+]+)")
 _CCSD_ENERGY_RE = re.compile(r"DE\(Corr\)=\s*[-\d.]+\s+E\(CORR\)=\s*([-\d.]+)")
+# rq-1d5da737 — Gaussian writes "Dispersion energy=  <value> Hartrees." in the
+# log when EmpiricalDispersion is active. Direct regex parsing avoids cclib's
+# eV round-trip.
+_DISPERSION_ENERGY_RE = re.compile(r"Dispersion energy=\s*([-\d.]+)\s*Hartrees?")
 
 
 def _fortran_float(s: str) -> float:
@@ -120,6 +124,16 @@ def harvest(
 
     qcvars = PreservingDict()
     method_lower = method.lower()
+
+    # rq-1d5da737 — Strip an empirical-dispersion suffix from the method so the
+    # existing per-method energy extraction below sees just the functional name.
+    # The stripped suffix is retained as `dispersion_level` / `functional_label`
+    # so the qcvars at the end of this function can be tagged correctly.
+    from .germinate import recognize_dispersion
+
+    functional, _emp_disp_value, dispersion_level, _ = recognize_dispersion(method)
+    method_lower = functional.lower()
+    functional_label = functional.upper() if dispersion_level is not None else None
 
     # Normalise method variants: strip Gaussian-specific sub-options like ",full"
     # so that energy-extraction logic sees the canonical method name.
@@ -268,6 +282,37 @@ def harvest(
     else:
         # Unknown method: fall back to SCF energy
         qcvars["CURRENT ENERGY"] = str(scf_hartree)
+
+    # --- Empirical dispersion correction ---
+    # rq-1d5da737 — Gaussian writes the dispersion contribution on a separate
+    # "Dispersion energy=" line; cclib keeps it out of `scfenergies` and stores
+    # it in `dispersionenergies`. Add it to the SCF total when present.
+    disp_hartree: Optional[float] = None
+    disp_match = _DISPERSION_ENERGY_RE.search(log_content)
+    if disp_match:
+        disp_hartree = float(disp_match.group(1))
+    elif (
+        hasattr(ccdata, "dispersionenergies")
+        and ccdata.dispersionenergies is not None
+        and len(ccdata.dispersionenergies) > 0
+    ):
+        disp_hartree = float(ccdata.dispersionenergies[-1]) * _EV_TO_HARTREE
+
+    if disp_hartree is not None:
+        qcvars["DISPERSION CORRECTION ENERGY"] = str(disp_hartree)
+        # Only emit the dispersion-corrected DFT total when this was a DFT
+        # branch (i.e. CURRENT ENERGY currently == SCF). Post-HF branches
+        # (MP2/CCSD/CCSD(T)) handle their own totals.
+        if method_lower in ("hf", "scf") or _is_dft(method_lower):
+            qcvars["CURRENT ENERGY"] = str(scf_hartree + disp_hartree)
+        # Functional-specific qcvars (Psi4 convention) are emitted only when
+        # the input method carried a recognised dispersion suffix, so we know
+        # the formal dash label.
+        if dispersion_level is not None and functional_label is not None:
+            tag = f"{functional_label}-{dispersion_level}"
+            qcvars[f"{tag} DISPERSION CORRECTION ENERGY"] = str(disp_hartree)
+            qcvars[f"{tag} TOTAL ENERGY"] = str(scf_hartree + disp_hartree)
+            qcvars[f"{functional_label} FUNCTIONAL TOTAL ENERGY"] = str(scf_hartree)
 
     # --- Gradient (forces → negate for gradient) ---
     # rq-36736115 rq-3b0adf96
