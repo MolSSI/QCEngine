@@ -29,9 +29,17 @@ requires_cclib = pytest.mark.skipif(not _cclib_available, reason="cclib not inst
 # The harvester reads all energies via cclib's parsed attributes and reverses
 # the eV → Hartree conversion with cclib's own convertor (structurally exact).
 # Tests compute expected values via the same factor so the round-trip is exact.
-from cclib.parser.utils import convertor as _cclib_convertor  # noqa: E402
-_EV_TO_HARTREE = _cclib_convertor(1.0, "eV", "hartree")
-_HARTREE_TO_EV = _cclib_convertor(1.0, "hartree", "eV")
+# Guard the import: when cclib is missing, every test that uses these helpers
+# is already gated behind @requires_cclib, so the module must still be
+# importable for collection on cclib-less CI runners.
+if _cclib_available:
+    from cclib.parser.utils import convertor as _cclib_convertor
+    _EV_TO_HARTREE = _cclib_convertor(1.0, "eV", "hartree")
+    _HARTREE_TO_EV = _cclib_convertor(1.0, "hartree", "eV")
+else:
+    _cclib_convertor = None
+    _EV_TO_HARTREE = None
+    _HARTREE_TO_EV = None
 
 
 def _ha_to_ev(value_ha):
