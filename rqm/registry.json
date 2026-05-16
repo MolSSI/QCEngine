@@ -74,13 +74,6 @@
     "title": "Method matching is case-insensitive",
     "type": "scenario"
   },
-  "rq-090d144e": {
-    "decl": "Scenario: Labels do not appear in the route line",
-    "file": "gaussian/atom-labels",
-    "refs": [],
-    "title": "Labels do not appear in the route line",
-    "type": "scenario"
-  },
   "rq-09dd261d": {
     "decl": "Scenario: muster_modelchem raises InputError for D4",
     "file": "gaussian/dispersion",
@@ -530,13 +523,6 @@
     "title": "Feature: Gaussian Harness — Runner",
     "type": "file"
   },
-  "rq-44289c40": {
-    "decl": "Scenario: Dispersion energy is read from ccdata.dispersionenergies",
-    "file": "gaussian/harvester",
-    "refs": [],
-    "title": "Dispersion energy is read from ccdata.dispersionenergies",
-    "type": "scenario"
-  },
   "rq-44319e8c": {
     "decl": "Scenario: Conflict detection is case-insensitive on the keyword name",
     "file": "gaussian/dispersion",
@@ -732,13 +718,6 @@
     "title": "Gaussian appears in _canonical_methods",
     "type": "scenario"
   },
-  "rq-64be1785": {
-    "decl": "Scenario: pgline regex matches Gaussian's \"Full point group\" line for linear C*V",
-    "file": "gaussian/ghost-atoms",
-    "refs": [],
-    "title": "pgline regex matches Gaussian's \"Full point group\" line for linear C*V",
-    "type": "scenario"
-  },
   "rq-65cb367e": {
     "decl": "Scenario: Memory configuration is applied with 1.555 GiB total node memory",
     "file": "gaussian/integration-tests",
@@ -796,10 +775,10 @@
     "type": "scenario"
   },
   "rq-6f52a6d9": {
-    "decl": "Scenario: Functional-specific dispersion qcvar uses the formal label",
+    "decl": "Scenario: Dispersion energy populates generic and functional-specific qcvars",
     "file": "gaussian/dispersion",
     "refs": [],
-    "title": "Functional-specific dispersion qcvar uses the formal label",
+    "title": "Dispersion energy populates generic and functional-specific qcvars",
     "type": "scenario"
   },
   "rq-7049aaa5": {
@@ -873,13 +852,6 @@
     "title": "Molecule Block Construction",
     "type": "section"
   },
-  "rq-7a592160": {
-    "decl": "Scenario: Empty atom_labels (all-default) preserves existing behavior",
-    "file": "gaussian/atom-labels",
-    "refs": [],
-    "title": "Empty atom_labels (all-default) preserves existing behavior",
-    "type": "scenario"
-  },
   "rq-7c3a72b9": {
     "decl": "Scenario: muster_modelchem recognises canonical key alias \"d3zero2b\"",
     "file": "gaussian/dispersion",
@@ -900,13 +872,6 @@
     "file": "gaussian/ghost-atoms",
     "refs": [],
     "title": "test_tricky_ghost accepts Gaussian's linear PG for the mB subject",
-    "type": "scenario"
-  },
-  "rq-7edf875d": {
-    "decl": "Scenario: No log-text regex is used for SCF, MP*, CC, or dispersion energies",
-    "file": "gaussian/harvester",
-    "refs": [],
-    "title": "No log-text regex is used for SCF, MP*, CC, or dispersion energies",
     "type": "scenario"
   },
   "rq-7f2c22fd": {
@@ -1179,13 +1144,6 @@
     "title": "Route line is unchanged when ghost atoms are present",
     "type": "scenario"
   },
-  "rq-a1bc15af": {
-    "decl": "Scenario: build_input() accepts a labeled molecule without raising",
-    "file": "gaussian/atom-labels",
-    "refs": [],
-    "title": "build_input() accepts a labeled molecule without raising",
-    "type": "scenario"
-  },
   "rq-a203a314": {
     "decl": "### `harvest` — confirmed behavior for labeled molecules",
     "file": "gaussian/atom-labels",
@@ -1237,13 +1195,6 @@
     "refs": [],
     "title": "Feature API",
     "type": "section"
-  },
-  "rq-a83b7d5f": {
-    "decl": "Scenario: Dispersion energy is read from ccdata.dispersionenergies via cclib's convertor",
-    "file": "gaussian/dispersion",
-    "refs": [],
-    "title": "Dispersion energy is read from ccdata.dispersionenergies via cclib's convertor",
-    "type": "scenario"
   },
   "rq-a88c706f": {
     "decl": "- `method` — method string from `AtomicInput.model.method` (case-insensitive).",
@@ -1600,13 +1551,6 @@
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Memory directive rounds down to nearest integer GB (minimum 1)",
-    "type": "scenario"
-  },
-  "rq-dc9a34d9": {
-    "decl": "Scenario: pgline regex matches Gaussian's \"Full point group\" line for C2v",
-    "file": "gaussian/ghost-atoms",
-    "refs": [],
-    "title": "pgline regex matches Gaussian's \"Full point group\" line for C2v",
     "type": "scenario"
   },
   "rq-dceb51f5": {

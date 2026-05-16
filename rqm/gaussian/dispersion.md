@@ -342,14 +342,6 @@ Feature: Gaussian harness empirical-dispersion support
 
   # --- harvester: dispersion energy extraction ---
 
-  @rq-a83b7d5f
-  Scenario: Dispersion energy is read from ccdata.dispersionenergies via cclib's convertor
-    Given a B3LYP-D3 Gaussian log where ccdata.dispersionenergies[-1] is the
-        dispersion contribution (eV form: e.g. convertor(-0.0046617305, "hartree", "eV"))
-    When harvest(in_mol, "b3lyp-d3", log_content) is called
-    Then qcvars["DISPERSION CORRECTION ENERGY"] equals -0.0046617305
-        within 1 ULP (~1e-14 Ha)
-
   @rq-3136523b
   Scenario: No dispersionenergies attribute means no dispersion qcvars
     Given a Gaussian log where cclib's ccdata has no "dispersionenergies" attribute
@@ -357,10 +349,12 @@ Feature: Gaussian harness empirical-dispersion support
     Then qcvars does not contain "DISPERSION CORRECTION ENERGY"
 
   @rq-6f52a6d9
-  Scenario: Functional-specific dispersion qcvar uses the formal label
-    Given a B3LYP-D3 log with ccdata.dispersionenergies[-1] = convertor(-0.005, "hartree", "eV")
+  Scenario: Dispersion energy populates generic and functional-specific qcvars
+    Given a B3LYP-D3 Gaussian log where ccdata.dispersionenergies[-1] is the
+        dispersion contribution (eV form: e.g. convertor(-0.0046617305, "hartree", "eV"))
     When harvest(in_mol, "b3lyp-d3", log_content) is called
-    Then qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"] equals -0.005
+    Then qcvars["DISPERSION CORRECTION ENERGY"] equals -0.0046617305 within 1 ULP
+    And qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"] equals -0.0046617305 within 1 ULP
 
   @rq-f5d05419
   Scenario: Functional total energy excludes dispersion

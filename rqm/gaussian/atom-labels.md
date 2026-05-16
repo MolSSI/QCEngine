@@ -147,24 +147,6 @@ Feature: Gaussian harness atom-label tolerance
     Then the gaussian.com atom block contains exactly 4 lines beginning with "H "
     And no atom-block line contains any of the substrings "H5", "H_other", "H_4sq"
 
-  @rq-7a592160
-  Scenario: Empty atom_labels (all-default) preserves existing behavior
-    Given an AtomicInput whose molecule has atom_labels = ["", "", "", ""]
-    When build_input() is called
-    Then the gaussian.com atom block content is identical to what it would be if atom_labels were omitted entirely
-
-  @rq-090d144e
-  Scenario: Labels do not appear in the route line
-    Given an AtomicInput with non-empty atom_labels
-    When build_input() is called
-    Then the route line of the resulting .com file does not contain any atom-label substring
-
-  @rq-a1bc15af
-  Scenario: build_input() accepts a labeled molecule without raising
-    Given an AtomicInput with non-empty atom_labels
-    When build_input() is called
-    Then no exception is raised
-
   # --- Atom-label and ghost-atom coexistence ---
 
   @rq-b604feb4

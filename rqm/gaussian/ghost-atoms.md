@@ -328,18 +328,6 @@ Feature: Gaussian harness ghost-atom support
     Then the result is successful
     And properties.return_energy matches bimol_ref["eneyne"]["mp2"]["mB"] (atol 3e-6)
 
-  @rq-dc9a34d9
-  Scenario: pgline regex matches Gaussian's "Full point group" line for C2v
-    Given a Gaussian log containing a line like " Full point group                 C2V     NOp   4"
-    When the regex r"Full point group\s+(?P<pg>\S+)" is applied
-    Then the captured "pg" group is "C2V"
-
-  @rq-64be1785
-  Scenario: pgline regex matches Gaussian's "Full point group" line for linear C*V
-    Given a Gaussian log containing a line like " Full point group                 C*V     NOp   4"
-    When the regex r"Full point group\s+(?P<pg>\S+)" is applied
-    Then the captured "pg" group is "C*V"
-
   @rq-7e1b0bb4
   Scenario: test_tricky_ghost accepts Gaussian's linear PG for the mB subject
     Given qcprog is "gaussian" and subject is "mB"

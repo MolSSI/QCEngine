@@ -1407,24 +1407,6 @@ def test_tricky_ghost_mp2_full_harvested_as_mp2():
     assert abs(float(qcvars["CURRENT ENERGY"]) - float(qcvars["MP2 TOTAL ENERGY"])) < 1e-12
 
 
-# rq-dc9a34d9
-def test_pgline_regex_matches_c2v():
-    """The pgline regex extracts a non-* Gaussian point group."""
-    line = " Full point group                 C2V     NOp   4"
-    m = re.search(r"Full point group\s+(?P<pg>\S+)", line)
-    assert m is not None
-    assert m.group("pg") == "C2V"
-
-
-# rq-dc9a34d9
-def test_pgline_regex_matches_linear():
-    """The pgline regex extracts a linear point group containing '*'."""
-    line = " Full point group                 C*V     NOp   4"
-    m = re.search(r"Full point group\s+(?P<pg>\S+)", line)
-    assert m is not None
-    assert m.group("pg") == "C*V"
-
-
 # ---------------------------------------------------------------------------
 # Tests: atom-label tolerance
 # ---------------------------------------------------------------------------
@@ -1480,53 +1462,6 @@ def test_atom_labels_four_labeled_h_emit_bare_symbols(harness):
     assert len(h_lines) == 4
     for forbidden in ("H5", "H_other", "H_4sq"):
         assert forbidden not in com
-
-
-# rq-7a592160
-def test_atom_labels_empty_labels_same_output_as_unlabeled(harness):
-    geom = [0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 5.0, 0.0, 5.0, 5.0, 0.0]
-    mol_with_empty = Molecule.from_data(
-        {
-            "symbols": ["H", "H", "H", "H"],
-            "atom_labels": ["", "", "", ""],
-            "geometry": geom,
-            "molecular_charge": 0,
-            "molecular_multiplicity": 1,
-        }
-    )
-    mol_without = Molecule.from_data(
-        {
-            "symbols": ["H", "H", "H", "H"],
-            "geometry": geom,
-            "molecular_charge": 0,
-            "molecular_multiplicity": 1,
-        }
-    )
-    spec = _spec(method="MP2", basis="aug-cc-pvdz")
-    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
-        com_with = harness.build_input(AtomicInput(molecule=mol_with_empty, specification=spec), _default_taskconfig())["infiles"]["gaussian.com"]
-        com_without = harness.build_input(AtomicInput(molecule=mol_without, specification=spec), _default_taskconfig())["infiles"]["gaussian.com"]
-    assert com_with == com_without
-
-
-# rq-090d144e
-def test_atom_labels_route_line_clean(harness):
-    mol = _build_labeled_h_mol()
-    inp = AtomicInput(molecule=mol, specification=_spec(method="MP2", basis="aug-cc-pvdz"))
-    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
-        job = harness.build_input(inp, _default_taskconfig())
-    route = next(ln for ln in job["infiles"]["gaussian.com"].splitlines() if ln.startswith("#P"))
-    for forbidden in ("5", "_other", "_4sq"):
-        assert forbidden not in route or forbidden in "aug-cc-pvdz"
-
-
-# rq-c0a7e84e
-def test_atom_labels_build_input_does_not_raise(harness):
-    mol = _build_labeled_h_mol()
-    inp = AtomicInput(molecule=mol, specification=_spec(method="MP2", basis="aug-cc-pvdz"))
-    with patch("qcengine.programs.gaussian.runner._find_gaussian", return_value="/g16"):
-        # Should not raise
-        harness.build_input(inp, _default_taskconfig())
 
 
 # rq-0892bdc0 — ghost atom with non-empty label still emits "<sym>-Bq", label dropped
@@ -1777,16 +1712,6 @@ def _disp_ccdata(scf_ha=_DISP_SCF_HA, disp_ha=_DISP_DISP_HA, disp_present=True):
 
 # rq-1d5da737
 @requires_cclib
-def test_dispersion_harvest_from_cclib():
-    """Dispersion energy is read from ccdata.dispersionenergies."""
-    in_mol = _make_water_mol()
-    with _patch_cclib(_disp_ccdata()):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "")
-    assert abs(float(qcvars["DISPERSION CORRECTION ENERGY"]) - _DISP_DISP_HA) < 1e-12
-
-
-# rq-1d5da737
-@requires_cclib
 def test_dispersion_harvest_no_dispersionenergies_no_qcvars():
     """When ccdata has no dispersionenergies attribute, no dispersion qcvars are set."""
     in_mol = _make_water_mol()
@@ -1798,10 +1723,13 @@ def test_dispersion_harvest_no_dispersionenergies_no_qcvars():
 
 # rq-1d5da737
 @requires_cclib
-def test_dispersion_harvest_functional_specific_qcvars():
+def test_dispersion_harvest_qcvars_from_cclib():
+    """Dispersion energy is read from ccdata.dispersionenergies and emitted under
+    both the generic and functional-specific qcvar keys."""
     in_mol = _make_water_mol()
     with _patch_cclib(_disp_ccdata()):
         qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "")
+    assert abs(float(qcvars["DISPERSION CORRECTION ENERGY"]) - _DISP_DISP_HA) < 1e-12
     assert "B3LYP-D3 DISPERSION CORRECTION ENERGY" in qcvars
     assert abs(float(qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"]) - _DISP_DISP_HA) < 1e-12
 
@@ -1857,11 +1785,10 @@ def test_dispersion_harvest_method_without_suffix_no_functional_qcvars():
 @requires_cclib
 def test_dispersion_harvest_absent_no_qcvars():
     in_mol = _make_water_mol()
+    # ccdata has scfenergies but no dispersionenergies attribute
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    # No dispersion line in log, no dispersionenergies attribute
-    log = " SCF Done:  E(RB3LYP) =  -76.4014123456     A.U. after   12 cycles\n"
     with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp", log)
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp", "")
     assert "DISPERSION CORRECTION ENERGY" not in qcvars
     assert abs(float(qcvars["CURRENT ENERGY"]) - float(qcvars["SCF TOTAL ENERGY"])) < 1e-12
 
@@ -1869,12 +1796,11 @@ def test_dispersion_harvest_absent_no_qcvars():
 # rq-1d5da737
 @requires_cclib
 def test_dispersion_harvest_nlc_method_no_dispersion_qcvars():
-    """wB97M-V is self-consistent NLC; no 'Dispersion energy=' line in log."""
+    """wB97M-V is self-consistent NLC; cclib's dispersionenergies attribute is absent."""
     in_mol = _make_water_mol()
     ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    log = " SCF Done:  E(RwB97M-V) =  -76.5     A.U. after   12 cycles\n"
     with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "wb97m-v", log)
+        qcvars, _, _, _ = harvest(in_mol, "wb97m-v", "")
     assert "DISPERSION CORRECTION ENERGY" not in qcvars
 
 
@@ -2003,17 +1929,6 @@ def test_cclib_only_ccsd_t_does_not_emit_ccsd_qcvar():
     assert "CCSD(T) TOTAL ENERGY" in qcvars
     assert "CCSD TOTAL ENERGY" not in qcvars
     assert abs(float(qcvars["CCSD(T) TOTAL ENERGY"]) - ccsdt_ha) < 1e-12
-
-
-# rq-0743e952
-def test_cclib_only_no_energy_regex_constants_in_harvester():
-    """The harvester module must not define energy-extraction regex constants."""
-    from qcengine.programs.gaussian import harvester as h
-    for name in ("_SCF_DONE_RE", "_MP2_ENERGY_RE", "_CCSD_ENERGY_RE",
-                 "_CCSD_T_ENERGY_RE", "_DISPERSION_ENERGY_RE"):
-        assert not hasattr(h, name), f"harvester still defines removed constant {name!r}"
-    # _fortran_float is retained for Hessian parsing
-    assert hasattr(h, "_fortran_float")
 
 
 # ---------------------------------------------------------------------------

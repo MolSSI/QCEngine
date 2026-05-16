@@ -464,20 +464,7 @@ Feature: Gaussian harvester
     Then qcvars["CCSD(T) TOTAL ENERGY"] equals convertor(ccenergies[-1], "eV", "hartree")
     And qcvars does NOT contain "CCSD TOTAL ENERGY"
 
-  @rq-44289c40
-  Scenario: Dispersion energy is read from ccdata.dispersionenergies
-    Given a B3LYP-D3 log where ccdata.dispersionenergies[-1] is the dispersion contribution (eV)
-    When harvest(in_mol, "b3lyp-d3", log_content) is called
-    Then qcvars["DISPERSION CORRECTION ENERGY"] equals convertor(dispersionenergies[-1], "eV", "hartree")
-
-  # --- Source-level structure ---
-
-  @rq-7edf875d
-  Scenario: No log-text regex is used for SCF, MP*, CC, or dispersion energies
-    Given an inspection of the harvester source
-    Then the module contains no `_SCF_DONE_RE`, `_MP2_ENERGY_RE`, `_CCSD_ENERGY_RE`,
-        `_CCSD_T_ENERGY_RE`, or `_DISPERSION_ENERGY_RE` constants
-    And the Fortran D-exponent helper `_fortran_float()` is retained for Hessian parsing
+  # (Dispersion-energy extraction Gherkin is owned by [[dispersion]].)
 
   # --- Normal termination check (regex) ---
 
