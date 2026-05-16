@@ -60,14 +60,20 @@ if the regex fails to match.
 > Gaussian (up to 12 significant digits), and (c) cclib provides no public API contract
 > guaranteeing lossless eV↔Hartree round-trips.
 
-**2. Hessian not extracted by cclib:**
+**2. Full Cartesian Hessian not extracted by cclib:**
 
-cclib does not parse the "Force constants in Cartesian coordinates" block from
-Gaussian frequency (`Freq`) calculations. The `ccdata.hessian` attribute is always
-absent for Gaussian logs.
+cclib's Gaussian parser does populate `ccdata.vibfconsts` (per-normal-mode reduced
+force constants, shape `(nmodes,)`) from the `"Frc consts --"` lines of a `Freq`
+job. It does **not**, however, populate `ccdata.hessian` (the full `3N × 3N`
+Cartesian Hessian matrix) for Gaussian logs — that attribute is only assigned by
+parsers for programs whose output prints the full matrix in a format cclib
+recognises. The "Force constants in Cartesian coordinates" lower-triangular block
+that Gaussian prints is not parsed by cclib.
 
-**Resolution:** The Hessian is parsed directly from the log via `_parse_force_constants()`
-(see "Hessian Parsing" below).
+**Resolution:** The full Cartesian Hessian is parsed directly from the log via
+`_parse_force_constants()` (see "Hessian Parsing" below). `ccdata.vibfconsts` is
+not used by this harvester — the full matrix is required for QCSchema's
+`return_result` and downstream consumers.
 
 ### Coordinate Frame <!-- rq-f4900ee1 -->
 

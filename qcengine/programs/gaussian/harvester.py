@@ -330,9 +330,12 @@ def harvest(
         # cclib hessian would be in standard orientation → transform with mill
         hess = mill.align_hessian(np.array(ccdata.hessian))
     else:
-        # cclib does not parse force constants from Gaussian Freq output;
-        # fall back to direct log parsing. Gaussian's "Force constants in
-        # Cartesian coordinates" are in the INPUT orientation.
+        # cclib's Gaussian parser does not populate ccdata.hessian (the full
+        # 3N×3N Cartesian Hessian matrix). It does populate ccdata.vibfconsts
+        # (per-normal-mode reduced force constants, shape (nmodes,)) from the
+        # "Frc consts --" lines, but that's not the matrix we need. Fall back
+        # to direct log parsing of "Force constants in Cartesian coordinates"
+        # (printed in the INPUT orientation).
         parsed_hess = _parse_force_constants(log_content, 3 * natoms)
         if parsed_hess is not None:
             if in_mol.fix_com and in_mol.fix_orientation:
