@@ -20,9 +20,9 @@ The `ccdata` object exposes parsed attributes used as follows:
 
 | cclib attribute | Units (cclib) | Conversion | QCEngine usage |
 |-----------------|---------------|------------|----------------|
-| `ccdata.scfenergies[-1]` | eV | (fallback only) | SCF/HF/DFT total energy |
-| `ccdata.mpenergies[-1][-1]` | eV | (fallback only) | MP2 total energy |
-| `ccdata.ccenergies[-1]` | eV | (fallback only) | CCSD or CCSD(T) total energy |
+| `ccdata.scfenergies[-1]` | eV | `cclib.parser.utils.convertor("eV"→"hartree")` (fallback only) | SCF/HF/DFT total energy |
+| `ccdata.mpenergies[-1][-1]` | eV | `cclib...convertor` (fallback only) | MP2 total energy |
+| `ccdata.ccenergies[-1]` | eV | `cclib...convertor` (fallback only) | CCSD or CCSD(T) total energy |
 | `ccdata.grads[-1]` | Hartree/Bohr | negate (forces → gradient) | Gradient array |
 | `ccdata.atomcoords[-1]` | Ångström | × Bohr/Å | Geometry for output molecule (standard orientation) |
 | `ccdata.atomnos` | atomic numbers | via qcel periodic table | Element symbols (no-ghost branch only) |
@@ -38,28 +38,32 @@ The `ccdata` object exposes parsed attributes used as follows:
 Two significant cclib limitations require direct log parsing as the primary strategy
 for energies and the Hessian:
 
-**1. Energy precision loss (eV conversion factor mismatch):**
+**1. Energy precision loss when reversing cclib's eV storage with a foreign factor:**
 
-cclib internally stores energies in electron volts (eV). It parses the Hartree value
-from the Gaussian log, multiplies by its own Hartree→eV factor (`27.21138505`), and
-stores the result. When the harvester converts back to Hartree using qcelemental's
-factor (`qcel.constants.conversion_factor("eV", "hartree")` = `0.036749322481536`,
-corresponding to `27.21138602` Hartree→eV), the round-trip introduces a relative error
-of approximately `3.6e-9`. For typical SCF energies (~100 Hartree), this produces
-absolute errors of ~3.6e-7 Hartree, which exceeds the tolerances required by the
-cross-program alignment tests (`atol = 2e-7`).
+cclib internally stores energies in electron volts. It parses the Hartree value
+from the Gaussian log, multiplies by its internal Hartree→eV factor
+(`27.21138505`), and stores the result on `ccdata.scfenergies`, `ccdata.mpenergies`,
+`ccdata.ccenergies`, and `ccdata.dispersionenergies`. If the harvester reverses
+this with qcelemental's factor (`qcel.constants.conversion_factor("eV", "hartree")`
+= `0.036749322481536`, corresponding to `27.21138602` Hartree→eV — the values
+disagree at the 8th decimal place because they were derived from different
+CODATA cycles), the round-trip introduces a relative error of approximately
+`3.6e-9`. For typical SCF energies (~100 Hartree) that's an absolute error of
+~3.6e-6 Hartree, exceeding the cross-program tolerances (`atol = 2e-7`) and
+the empirical-dispersion test tolerances.
 
-**Resolution:** Energies are parsed directly from the Gaussian log via regex (see
-"Direct Energy Parsing" below). cclib energy attributes are used only as a fallback
-if the regex fails to match.
+**Resolution (two layers):**
 
-> **Considered alternative:** Using `cclib.parser.utils.convertor(ccdata.scfenergies[-1],
-> 'eV', 'hartree')` produces a lossless round-trip (cclib's own forward and reverse
-> factors are exact inverses). This was rejected in favour of direct parsing because:
-> (a) it couples the harvester to cclib's internal conversion remaining self-consistent
-> across future versions, (b) direct log parsing captures the full precision printed by
-> Gaussian (up to 12 significant digits), and (c) cclib provides no public API contract
-> guaranteeing lossless eV↔Hartree round-trips.
+1. *Primary path:* energies are parsed directly from the Gaussian log via regex
+   (see "Direct Energy Parsing" below). This preserves Gaussian's full printed
+   precision (up to 12 significant digits) and avoids cclib's eV detour entirely.
+2. *Fallback path:* when the regex misses, the harvester reads the eV-stored
+   value from `ccdata` and converts back via `cclib.parser.utils.convertor(x,
+   "eV", "hartree")` — cclib's own converter, which uses the same `27.21138505`
+   factor in both directions. The forward/reverse pair is structurally exact
+   (single factor, both directions in the same `_convertor` dict), so the
+   round-trip introduces zero round-trip error and is forward-compatible with
+   any future CODATA refresh inside cclib.
 
 **2. Full Cartesian Hessian not extracted by cclib:**
 

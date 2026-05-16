@@ -517,10 +517,10 @@
     "type": "scenario"
   },
   "rq-463ef385": {
-    "decl": "- `\"N ATOMS\"` — from `len(ccdata.atomnos)`.",
+    "decl": "- `\"N ATOMS\"` — from `ccdata.natom`.",
     "file": "gaussian/harvester",
     "refs": [],
-    "title": "- `\"N ATOMS\"` — from `len(ccdata.atomnos)`.",
+    "title": "- `\"N ATOMS\"` — from `ccdata.natom`.",
     "type": "api-item"
   },
   "rq-475c8796": {

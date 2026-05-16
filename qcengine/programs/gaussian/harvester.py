@@ -14,11 +14,18 @@ from ..util import PreservingDict
 _NORMAL_TERMINATION_RE = re.compile(r"Normal termination of Gaussian")
 _VERSION_RE = re.compile(r"Gaussian\s+(\d+),\s+Revision\s+([\w.]+),")
 
-# eV → Hartree conversion factor (only used as fallback for cclib quantities
-# that have no direct Hartree regex; direct log parsing is preferred for
-# energies to avoid precision loss from cclib's slightly different eV factor).
-# rq-bb0a5d96
-_EV_TO_HARTREE = qcel.constants.conversion_factor("eV", "hartree")
+
+# rq-bb0a5d96 — eV → Hartree fallback converter.
+# Uses cclib's own conversion factor (via cclib.parser.utils.convertor) rather
+# than qcelemental's: cclib stores ccdata.scfenergies / mpenergies / ccenergies
+# / dispersionenergies in eV using its internal Hartree↔eV factor (27.21138505).
+# Reversing with cclib's factor is an exact round-trip; reversing with qcel's
+# factor (27.21138602) introduces a ~3.6e-6 Ha bias that exceeds the
+# cross-program tolerances. This also keeps the fallback forward-compatible
+# with any future CODATA refresh in cclib.
+def _cclib_ev_to_hartree(value_ev: float) -> float:
+    from cclib.parser.utils import convertor
+    return convertor(value_ev, "eV", "hartree")
 
 # Regex patterns for parsing energies directly from Gaussian log in Hartree.
 # These bypass cclib's eV round-trip which causes ~1e-6 precision loss due to
@@ -226,17 +233,18 @@ def harvest(
         )  # identity AlignmentMill
 
     # --- Energies ---
-    # Parse energies directly from the Gaussian log in Hartree to avoid
-    # precision loss from cclib's eV round-trip (cclib and qcelemental use
-    # slightly different Hartree↔eV conversion factors, causing ~1e-6 error).
-    # Fall back to cclib values if regex fails.
+    # Parse energies directly from the Gaussian log in Hartree as the primary
+    # path; this preserves Gaussian's full printed precision. Fall back to
+    # cclib's stored value (in eV) only if the regex fails, converting via
+    # cclib.parser.utils.convertor so the eV→Ha reversal uses cclib's own
+    # factor and is exact relative to how cclib stored the quantity.
 
     # rq-37f40e92 — HF/SCF energy
     scf_match = _SCF_DONE_RE.search(log_content)
     if scf_match:
         scf_hartree = float(scf_match.group(1))
     else:
-        scf_hartree = float(ccdata.scfenergies[-1]) * _EV_TO_HARTREE
+        scf_hartree = _cclib_ev_to_hartree(float(ccdata.scfenergies[-1]))
     qcvars["HF TOTAL ENERGY"] = str(scf_hartree)
     qcvars["SCF TOTAL ENERGY"] = str(scf_hartree)
     qcvars["CURRENT REFERENCE ENERGY"] = str(scf_hartree)
@@ -251,7 +259,7 @@ def harvest(
         if mp2_match:
             mp2_hartree = _fortran_float(mp2_match.group(1))
         else:
-            mp2_hartree = float(ccdata.mpenergies[-1][-1]) * _EV_TO_HARTREE
+            mp2_hartree = _cclib_ev_to_hartree(float(ccdata.mpenergies[-1][-1]))
         qcvars["MP2 TOTAL ENERGY"] = str(mp2_hartree)
         qcvars["MP2 CORRELATION ENERGY"] = str(mp2_hartree - scf_hartree)
         qcvars["CURRENT ENERGY"] = str(mp2_hartree)
@@ -263,7 +271,7 @@ def harvest(
         if ccsd_matches:
             ccsd_hartree = float(ccsd_matches[-1].group(1))
         else:
-            ccsd_hartree = float(ccdata.ccenergies[-1]) * _EV_TO_HARTREE
+            ccsd_hartree = _cclib_ev_to_hartree(float(ccdata.ccenergies[-1]))
         qcvars["CCSD TOTAL ENERGY"] = str(ccsd_hartree)
         qcvars["CCSD CORRELATION ENERGY"] = str(ccsd_hartree - scf_hartree)
         qcvars["CURRENT ENERGY"] = str(ccsd_hartree)
@@ -274,7 +282,7 @@ def harvest(
         if ccsdt_match:
             ccsdt_hartree = _fortran_float(ccsdt_match.group(1))
         else:
-            ccsdt_hartree = float(ccdata.ccenergies[-1]) * _EV_TO_HARTREE
+            ccsdt_hartree = _cclib_ev_to_hartree(float(ccdata.ccenergies[-1]))
         qcvars["CCSD(T) TOTAL ENERGY"] = str(ccsdt_hartree)
         qcvars["CCSD(T) CORRELATION ENERGY"] = str(ccsdt_hartree - scf_hartree)
         qcvars["CURRENT ENERGY"] = str(ccsdt_hartree)
@@ -296,7 +304,7 @@ def harvest(
         and ccdata.dispersionenergies is not None
         and len(ccdata.dispersionenergies) > 0
     ):
-        disp_hartree = float(ccdata.dispersionenergies[-1]) * _EV_TO_HARTREE
+        disp_hartree = _cclib_ev_to_hartree(float(ccdata.dispersionenergies[-1]))
 
     if disp_hartree is not None:
         qcvars["DISPERSION CORRECTION ENERGY"] = str(disp_hartree)

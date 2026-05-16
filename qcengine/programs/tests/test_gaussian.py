@@ -26,7 +26,12 @@ requires_cclib = pytest.mark.skipif(not _cclib_available, reason="cclib not inst
 # Shared test fixtures
 # ---------------------------------------------------------------------------
 
-_EV_TO_HARTREE = qcel.constants.conversion_factor("eV", "hartree")
+# The harvester now reverses cclib's eV-stored energies via cclib's own
+# convertor (avoiding the ~3.6e-6 Ha bias from qcel's slightly different CODATA
+# factor). Tests of the cclib-fallback path compute expected values via the
+# same factor so the round-trip is exact.
+from cclib.parser.utils import convertor as _cclib_convertor  # noqa: E402
+_EV_TO_HARTREE = _cclib_convertor(1.0, "eV", "hartree")
 
 
 @pytest.fixture

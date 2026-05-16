@@ -121,8 +121,11 @@ extraction:
 - A new regex `_DISPERSION_ENERGY_RE = re.compile(r"Dispersion energy=\s*([-\d.]+)\s*Hartrees?")`
   is matched against the log. If a match exists, `disp_hartree = float(match.group(1))`.
 - If the regex does not match, the cclib fallback is
-  `disp_hartree = float(ccdata.dispersionenergies[-1]) * _EV_TO_HARTREE` when the
-  attribute exists and is non-empty.
+  `disp_hartree = cclib.parser.utils.convertor(float(ccdata.dispersionenergies[-1]), "eV", "hartree")`
+  when the attribute exists and is non-empty. The cclib converter is used
+  (rather than `* qcel.constants.conversion_factor("eV", "hartree")`) so the
+  eV → Hartree round-trip is exact relative to how cclib stored the value
+  — see [[harvester]] §"cclib Limitations" for the bias-vs-exactness analysis.
 - If neither source yields a value, `disp_hartree` is `None` and dispersion qcvars
   are not set.
 
@@ -357,7 +360,7 @@ Feature: Gaussian harness empirical-dispersion support
     Given a Gaussian log without a "Dispersion energy=" line
     And ccdata.dispersionenergies equals [-0.1269192] (in eV)
     When harvest(in_mol, "b3lyp-d3", log_content) is called
-    Then qcvars["DISPERSION CORRECTION ENERGY"] equals -0.1269192 * eV->Ha (atol 1e-8)
+    Then qcvars["DISPERSION CORRECTION ENERGY"] equals cclib.convertor(-0.1269192, "eV", "hartree") (atol 1e-8)
 
   @rq-6f52a6d9
   Scenario: Functional-specific dispersion qcvar uses the formal label
