@@ -134,6 +134,10 @@ def _make_ccdata_with_attrs(**kwargs):
     defaults.update(kwargs)
     for k, v in defaults.items():
         setattr(ccdata, k, v)
+    # cclib's Gaussian parser sets `natom` as an int. Mirror that here so the
+    # harvester's `ccdata.natom` reads work without each test having to set it.
+    if not hasattr(ccdata, "natom"):
+        setattr(ccdata, "natom", len(ccdata.atomnos))
     return ccdata
 
 

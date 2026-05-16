@@ -98,7 +98,8 @@ designation present in `in_mol`:
   tolerance. The behavior for molecules with no ghosts is unchanged.
 
 - **Atom-count sanity check**: after parsing, when ghost atoms are present in
-  `in_mol`, the harvester verifies that `len(ccdata.atomnos) == len(in_mol.symbols)`.
+  `in_mol`, the harvester verifies that `ccdata.natom == len(in_mol.symbols)`
+  (using cclib's `natom` integer attribute rather than `len(ccdata.atomnos)`).
   A mismatch indicates that Gaussian dropped or duplicated atoms during input parsing,
   or that cclib's parse drifted; the harvester raises `ValueError` with a descriptive
   message. (This check is performed only when ghosts are present, since it is the
@@ -187,14 +188,14 @@ Feature: Gaussian harness ghost-atom support
   @rq-7411efa0
   Scenario: Atom count sanity check passes when cclib atom count matches in_mol
     Given an in_mol with exactly one ghost atom (length 2)
-    And a Gaussian log where ccdata.atomnos has length 2
+    And a Gaussian log where ccdata.natom == 2
     When harvest(in_mol, "hf", log_content) is called
     Then no ValueError is raised
 
   @rq-66067019
   Scenario: Atom count mismatch raises ValueError when ghosts are present
     Given an in_mol with exactly one ghost atom (length 2)
-    And a Gaussian log where ccdata.atomnos has length != 2
+    And a Gaussian log where ccdata.natom != 2
     When harvest(in_mol, "hf", log_content) is called
     Then ValueError is raised
 

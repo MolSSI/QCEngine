@@ -25,7 +25,8 @@ The `ccdata` object exposes parsed attributes used as follows:
 | `ccdata.ccenergies[-1]` | eV | (fallback only) | CCSD or CCSD(T) total energy |
 | `ccdata.grads[-1]` | Hartree/Bohr | negate (forces → gradient) | Gradient array |
 | `ccdata.atomcoords[-1]` | Ångström | × Bohr/Å | Geometry for output molecule (standard orientation) |
-| `ccdata.atomnos` | atomic numbers | via qcel periodic table | Element symbols |
+| `ccdata.atomnos` | atomic numbers | via qcel periodic table | Element symbols (no-ghost branch only) |
+| `ccdata.natom` | integer | none | Atom count for the sanity check and downstream sizing (preferred over `len(atomnos)`) |
 | `ccdata.nbasis` | integer | none | Number of basis functions |
 | `ccdata.nmo` | integer | none | Number of molecular orbitals |
 | `ccdata.homos` | integer array | +1 for count | N alpha/beta electrons |
@@ -182,7 +183,7 @@ The following variables are placed in `qcvars` based on the method:
 - `"SCF TOTAL ENERGY"` — same value as `"HF TOTAL ENERGY"` (required by standard suite contracts). <!-- rq-f59a07b8 -->
 - `"CURRENT REFERENCE ENERGY"` — same value as `"HF TOTAL ENERGY"` (required by standard suite contracts). <!-- rq-0d2711f1 -->
 - `"CURRENT ENERGY"` — set to the highest-level energy available (see below). <!-- rq-c5165f1f -->
-- `"N ATOMS"` — from `len(ccdata.atomnos)`. <!-- rq-463ef385 -->
+- `"N ATOMS"` — from `ccdata.natom`. <!-- rq-463ef385 -->
 - `"N BASIS FUNCTIONS"` — from `ccdata.nbasis` (when available). <!-- rq-17e8c0f7 -->
 - `"N MOLECULAR ORBITALS"` — from `ccdata.nmo` (when available). <!-- rq-7f2c22fd -->
 - `"N ALPHA ELECTRONS"` — from `ccdata.homos[0] + 1`. <!-- rq-6453046a -->

@@ -162,9 +162,9 @@ def harvest(
     in_real = list(in_mol.real)
     has_ghosts = not all(in_real)
     if has_ghosts:
-        if len(ccdata.atomnos) != len(in_mol.symbols):
+        if ccdata.natom != len(in_mol.symbols):
             raise ValueError(
-                f"Gaussian log atom count ({len(ccdata.atomnos)}) does not match the "
+                f"Gaussian log atom count ({ccdata.natom}) does not match the "
                 f"input molecule's atom count ({len(in_mol.symbols)})."
             )
         symbols = list(in_mol.symbols)
@@ -184,7 +184,7 @@ def harvest(
         calc_mol_kwargs["real"] = real_flags
     calc_mol = Molecule(**calc_mol_kwargs)
 
-    natoms = len(ccdata.atomnos)
+    natoms = ccdata.natom
     qcvars["N ATOMS"] = str(natoms)
 
     if hasattr(ccdata, "nbasis") and ccdata.nbasis is not None:
