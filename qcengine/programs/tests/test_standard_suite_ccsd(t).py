@@ -38,6 +38,8 @@ def nh2_data():
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=using("nwchem")),
         pytest.param("psi4", "aug-cc-pvdz", {}, marks=using("psi4")),
         pytest.param("gamess", "accd", {"ccinp__ncore": 0, "contrl__ispher": 1}, marks=using("gamess")),
+        # rq-9aa3cac4
+        pytest.param("gaussian", "aug-cc-pVDZ", {}, marks=using("gaussian")),
     ],
 )
 def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o_data, schema_versions, request):
@@ -48,16 +50,19 @@ def test_sp_ccsd_t_rhf_full(program, basis, keywords, h2o_data, schema_versions,
     models, retver, _ = schema_versions
     h2o = models.Molecule.from_data(h2o_data)
 
+    # Gaussian defaults to frozen-core; use "ccsd(t,full)" for all-electron
+    method = "ccsd(t,full)" if program == "gaussian" else "ccsd(t)"
+
     if from_v2(request.node.name):
         resi = {
             "molecule": h2o,
-            "specification": {"driver": "energy", "model": {"method": "ccsd(t)", "basis": basis}, "keywords": keywords},
+            "specification": {"driver": "energy", "model": {"method": method, "basis": basis}, "keywords": keywords},
         }
     else:
         resi = {
             "molecule": h2o,
             "driver": "energy",
-            "model": {"method": "ccsd(t)", "basis": basis},
+            "model": {"method": method, "basis": basis},
             "keywords": keywords,
         }
 

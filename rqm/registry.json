@@ -1,0 +1,2061 @@
+{
+  "rq-0052a2c7": {
+    "decl": "### `build_com_file(link0: Dict[str, Any], route_line: str, title: str, charge: int, multiplicity: int, atom_block: str) -> str`",
+    "file": "gaussian/input-builder",
+    "level": 3,
+    "refs": [],
+    "title": "`build_com_file(link0: Dict[str, Any], route_line: str, title: str, charge: int, multiplicity: int, atom_block: str) -> str`",
+    "type": "section"
+  },
+  "rq-0199bb02": {
+    "decl": "Scenario: HF method maps to \"HF\" method string",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "HF method maps to \"HF\" method string",
+    "type": "scenario"
+  },
+  "rq-03c1f71c": {
+    "decl": "### `GaussianHarness.build_input` — confirmed behavior for labeled molecules",
+    "file": "gaussian/atom-labels",
+    "level": 3,
+    "refs": [],
+    "title": "`GaussianHarness.build_input` — confirmed behavior for labeled molecules",
+    "type": "section"
+  },
+  "rq-04028610": {
+    "decl": "Scenario: AtomicResult.molecule preserves ghost designation",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "AtomicResult.molecule preserves ghost designation",
+    "type": "scenario"
+  },
+  "rq-04ed684d": {
+    "decl": "Scenario: Gradient of a ghost-bearing system matches a reference vector",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Gradient of a ghost-bearing system matches a reference vector",
+    "type": "scenario"
+  },
+  "rq-051e6b78": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-058819da": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-06ce6129": {
+    "decl": "## Out-of-Scope",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "Out-of-Scope",
+    "type": "section"
+  },
+  "rq-0743e952": {
+    "decl": "## Regex Use",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Regex Use",
+    "type": "section"
+  },
+  "rq-0753cd03": {
+    "decl": "- `\"NUCLEAR REPULSION ENERGY\"` — from parsed geometry.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"NUCLEAR REPULSION ENERGY\"` — from parsed geometry.",
+    "type": "api-item"
+  },
+  "rq-079b1e22": {
+    "decl": "Scenario: Method matching is case-insensitive",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Method matching is case-insensitive",
+    "type": "scenario"
+  },
+  "rq-09dd261d": {
+    "decl": "Scenario: muster_modelchem raises InputError for D4",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem raises InputError for D4",
+    "type": "scenario"
+  },
+  "rq-0aa99076": {
+    "decl": "Scenario: BasisSet object for model.basis raises InputError",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "BasisSet object for model.basis raises InputError",
+    "type": "scenario"
+  },
+  "rq-0afebead": {
+    "decl": "## Out-of-Scope",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Out-of-Scope",
+    "type": "section"
+  },
+  "rq-0b4cf843": {
+    "decl": "Scenario: Nuclear repulsion energy mismatch raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Nuclear repulsion energy mismatch raises ValueError",
+    "type": "scenario"
+  },
+  "rq-0c1b5066": {
+    "decl": "### Extended: `muster_modelchem(method, driver, multiplicity)`",
+    "file": "gaussian/dispersion",
+    "level": 3,
+    "refs": [],
+    "title": "Extended: `muster_modelchem(method, driver, multiplicity)`",
+    "type": "section"
+  },
+  "rq-0cdd386d": {
+    "decl": "- `\"N BETA ELECTRONS\"` — from `ccdata.homos[-1] + 1` (or same as alpha for closed-shell).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N BETA ELECTRONS\"` — from `ccdata.homos[-1] + 1` (or same as alpha for closed-shell).",
+    "type": "api-item"
+  },
+  "rq-0d2711f1": {
+    "decl": "- `\"CURRENT REFERENCE ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"CURRENT REFERENCE ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
+    "type": "api-item"
+  },
+  "rq-0dab9c40": {
+    "decl": "# Feature: Gaussian Harness — Atom-Label Tolerance",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Atom-Label Tolerance",
+    "type": "file"
+  },
+  "rq-0edebcd3": {
+    "decl": "### `test_local_options_memory_gib` (`test_canonical_config.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_local_options_memory_gib` (`test_canonical_config.py`)",
+    "type": "section"
+  },
+  "rq-0f585dce": {
+    "decl": "# Feature: Gaussian Harness --- Cross-Program Integration Tests",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Feature: Gaussian Harness --- Cross-Program Integration Tests",
+    "type": "file"
+  },
+  "rq-0fe273a8": {
+    "decl": "Scenario: End-to-end B3LYP-D3/6-31G* energy on water with real Gaussian",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "End-to-end B3LYP-D3/6-31G* energy on water with real Gaussian",
+    "type": "scenario"
+  },
+  "rq-11602838": {
+    "decl": "Scenario: HF with dispersion produces an HF functional",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "HF with dispersion produces an HF functional",
+    "type": "scenario"
+  },
+  "rq-12c41d5e": {
+    "decl": "Scenario: Absent normal termination line is classified as abnormal",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Absent normal termination line is classified as abnormal",
+    "type": "scenario"
+  },
+  "rq-1601c435": {
+    "decl": "## Migration Notes",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Migration Notes",
+    "type": "section"
+  },
+  "rq-165224fc": {
+    "decl": "Scenario: compute() raises InputError when the log contains an unrecognised-keyword error",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises InputError when the log contains an unrecognised-keyword error",
+    "type": "scenario"
+  },
+  "rq-17196f6b": {
+    "decl": "### Registration",
+    "file": "gaussian/runner",
+    "level": 3,
+    "refs": [],
+    "title": "Registration",
+    "type": "section"
+  },
+  "rq-17959824": {
+    "decl": "# Feature: Gaussian Harness — Empirical Dispersion Support",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Empirical Dispersion Support",
+    "type": "file"
+  },
+  "rq-17e8c0f7": {
+    "decl": "- `\"N BASIS FUNCTIONS\"` — from `ccdata.nbasis` (when available).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N BASIS FUNCTIONS\"` — from `ccdata.nbasis` (when available).",
+    "type": "api-item"
+  },
+  "rq-186c5060": {
+    "decl": "Scenario: get_version() returns a normalised version string for Gaussian 16",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "get_version() returns a normalised version string for Gaussian 16",
+    "type": "scenario"
+  },
+  "rq-18a8cc19": {
+    "decl": "Scenario: UHF/cc-pVDZ energy on NH2 radical matches reference and emits UHF route line",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "UHF/cc-pVDZ energy on NH2 radical matches reference and emits UHF route line",
+    "type": "scenario"
+  },
+  "rq-1a01df8f": {
+    "decl": "## Feature API",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-1a051bc2": {
+    "decl": "Scenario: compute() returns AtomicResult for properties driver",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() returns AtomicResult for properties driver",
+    "type": "scenario"
+  },
+  "rq-1b7ae62e": {
+    "decl": "Scenario: Parse CCSD total energy",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse CCSD total energy",
+    "type": "scenario"
+  },
+  "rq-1bdc1372": {
+    "decl": "Scenario: muster_modelchem strips \"-d3\" and emits EmpiricalDispersion=GD3",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem strips \"-d3\" and emits EmpiricalDispersion=GD3",
+    "type": "scenario"
+  },
+  "rq-1d5da737": {
+    "decl": "### Extended: `harvest(in_mol, method, log_content)`",
+    "file": "gaussian/dispersion",
+    "level": 3,
+    "refs": [],
+    "title": "Extended: `harvest(in_mol, method, log_content)`",
+    "type": "section"
+  },
+  "rq-1e76932b": {
+    "decl": "### T3: Plain B3LYP energy on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T3: Plain B3LYP energy on water",
+    "type": "section"
+  },
+  "rq-1ed899e3": {
+    "decl": "## Implementation Notes",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Implementation Notes",
+    "type": "section"
+  },
+  "rq-20063525": {
+    "decl": "Scenario: Labeled hydrogen atom emits a bare \"H \" line (no label suffix)",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Labeled hydrogen atom emits a bare \"H \" line (no label suffix)",
+    "type": "scenario"
+  },
+  "rq-2052a2fa": {
+    "decl": "Scenario: CCSD method maps to \"CCSD\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "CCSD method maps to \"CCSD\"",
+    "type": "scenario"
+  },
+  "rq-20d9a784": {
+    "decl": "Scenario: get_version() raises UnknownError if version cannot be parsed",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "get_version() raises UnknownError if version cannot be parsed",
+    "type": "scenario"
+  },
+  "rq-2229f087": {
+    "decl": "Scenario: Real atom emits a plain element symbol in the atom block",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Real atom emits a plain element symbol in the atom block",
+    "type": "scenario"
+  },
+  "rq-23d8b2c6": {
+    "decl": "Scenario: The .com file ends with a trailing blank line",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "The .com file ends with a trailing blank line",
+    "type": "scenario"
+  },
+  "rq-242ef1d8": {
+    "decl": "Scenario: found(raise_error=True) raises ModuleNotFoundError when cclib is missing",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found(raise_error=True) raises ModuleNotFoundError when cclib is missing",
+    "type": "scenario"
+  },
+  "rq-24d73182": {
+    "decl": "Scenario: Energy of a ghost-bearing system matches a reference value",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Energy of a ghost-bearing system matches a reference value",
+    "type": "scenario"
+  },
+  "rq-25c4ad49": {
+    "decl": "Scenario: Method already starting with U is not double-prefixed",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Method already starting with U is not double-prefixed",
+    "type": "scenario"
+  },
+  "rq-2816c5f6": {
+    "decl": "Scenario: SCF energy round-trips through cclib's convertor exactly",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "SCF energy round-trips through cclib's convertor exactly",
+    "type": "scenario"
+  },
+  "rq-28b5b1b3": {
+    "decl": "Scenario: Missing scfenergies for an HF/DFT job raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing scfenergies for an HF/DFT job raises ValueError",
+    "type": "scenario"
+  },
+  "rq-29751017": {
+    "decl": "## Background: Gaussian Dispersion Output",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "Background: Gaussian Dispersion Output",
+    "type": "section"
+  },
+  "rq-29bb67d8": {
+    "decl": "## References",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "References",
+    "type": "section"
+  },
+  "rq-2a015edf": {
+    "decl": "Scenario: Mixed real and ghost atoms in one molecule",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Mixed real and ghost atoms in one molecule",
+    "type": "scenario"
+  },
+  "rq-2aa0e9e1": {
+    "decl": "Scenario: Memory configuration is not overridden by conflicting DSL keywords",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Memory configuration is not overridden by conflicting DSL keywords",
+    "type": "scenario"
+  },
+  "rq-2abaea4c": {
+    "decl": "Scenario: Missing ccenergies for a CCSD job raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing ccenergies for a CCSD job raises ValueError",
+    "type": "scenario"
+  },
+  "rq-2ad053f2": {
+    "decl": "## Feature API",
+    "file": "gaussian/input-builder",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-2bd5902e": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/runner",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-2cb2c5c0": {
+    "decl": "### `test_tricky_ghost` (eneyne+Ne, MP2)",
+    "file": "gaussian/ghost-atoms",
+    "level": 3,
+    "refs": [],
+    "title": "`test_tricky_ghost` (eneyne+Ne, MP2)",
+    "type": "section"
+  },
+  "rq-2de0fabe": {
+    "decl": "Scenario: muster_modelchem raises InputError for -NL non-local dispersion alias",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem raises InputError for -NL non-local dispersion alias",
+    "type": "scenario"
+  },
+  "rq-31334859": {
+    "decl": "Scenario: MP2/6-31G* energy on gAmB (ghost ethylene + real ethyne) matches reference",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* energy on gAmB (ghost ethylene + real ethyne) matches reference",
+    "type": "scenario"
+  },
+  "rq-3136523b": {
+    "decl": "Scenario: No dispersionenergies attribute means no dispersion qcvars",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "No dispersionenergies attribute means no dispersion qcvars",
+    "type": "scenario"
+  },
+  "rq-3257a6f5": {
+    "decl": "Scenario: MP2/6-31G* energy on eneyne dimer matches consensus reference",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* energy on eneyne dimer matches consensus reference",
+    "type": "scenario"
+  },
+  "rq-342a2ca3": {
+    "decl": "Scenario: Charge and multiplicity are on one line in the molecule section",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Charge and multiplicity are on one line in the molecule section",
+    "type": "scenario"
+  },
+  "rq-344f3432": {
+    "decl": "Scenario: No Hessian when running energy-only or gradient calculation",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "No Hessian when running energy-only or gradient calculation",
+    "type": "scenario"
+  },
+  "rq-349bf8c3": {
+    "decl": "Scenario: UHF gradient is correctly aligned to the (scrambled) input frame",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "UHF gradient is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-351864ac": {
+    "decl": "Scenario: Gaussian SCF and MP2 on the labeled-H system match one of the two accepted solutions",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Gaussian SCF and MP2 on the labeled-H system match one of the two accepted solutions",
+    "type": "scenario"
+  },
+  "rq-36736115": {
+    "decl": "Scenario: Parse gradient and negate forces",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse gradient and negate forces",
+    "type": "scenario"
+  },
+  "rq-3727e53b": {
+    "decl": "- `test_gaussian_dft_b3lyp_water` (T3)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_dft_b3lyp_water",
+    "type": "api-item"
+  },
+  "rq-37f40e92": {
+    "decl": "- `\"HF TOTAL ENERGY\"` — from `ccdata.scfenergies[-1]` converted via `cclib.parser.utils.convertor(\"eV\", \"hartree\")`.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"HF TOTAL ENERGY\"` — from `ccdata.scfenergies[-1]` converted via `cclib.parser.utils.convertor(\"eV\", \"hartree\")`.",
+    "type": "api-item"
+  },
+  "rq-3a18d6af": {
+    "decl": "### `test_local_options_ncores` (`test_canonical_config.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_local_options_ncores` (`test_canonical_config.py`)",
+    "type": "section"
+  },
+  "rq-3b0adf96": {
+    "decl": "Scenario: No gradient attribute in ccdata when running energy-only calculation",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "No gradient attribute in ccdata when running energy-only calculation",
+    "type": "scenario"
+  },
+  "rq-3c343d2a": {
+    "decl": "### `build_route_line(method_string: str, basis: str, job_type: str, extra_keywords: Dict[str, str], user_keywords: Dict[str, Any]) -> str`",
+    "file": "gaussian/input-builder",
+    "level": 3,
+    "refs": [],
+    "title": "`build_route_line(method_string: str, basis: str, job_type: str, extra_keywords: Dict[str, str], user_keywords: Dict[str, Any]) -> str`",
+    "type": "section"
+  },
+  "rq-3dd2d934": {
+    "decl": "Scenario: test_atom_labels runs successfully with Gaussian",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "test_atom_labels runs successfully with Gaussian",
+    "type": "scenario"
+  },
+  "rq-3e134642": {
+    "decl": "Scenario: get_version() caches the result after the first call",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "get_version() caches the result after the first call",
+    "type": "scenario"
+  },
+  "rq-4061edf7": {
+    "decl": "### `test_atom_labels` (`test_ghost.py`)",
+    "file": "gaussian/atom-labels",
+    "level": 3,
+    "refs": [],
+    "title": "`test_atom_labels` (`test_ghost.py`)",
+    "type": "section"
+  },
+  "rq-4091a959": {
+    "decl": "## Method and Driver Compatibility",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Method and Driver Compatibility",
+    "type": "section"
+  },
+  "rq-4252ac2d": {
+    "decl": "Scenario: Multi-core execution succeeds and ncores is reflected in output",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Multi-core execution succeeds and ncores is reflected in output",
+    "type": "scenario"
+  },
+  "rq-4262d5f2": {
+    "decl": "Scenario: muster_modelchem leaves a hyphenated non-dispersion method unchanged",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem leaves a hyphenated non-dispersion method unchanged",
+    "type": "scenario"
+  },
+  "rq-4336c3cd": {
+    "decl": "- `ValueError` if no coordinate information can be extracted from the log.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "ValueError",
+    "type": "api-item"
+  },
+  "rq-436a54d5": {
+    "decl": "# Feature: Gaussian Harness — Runner",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Runner",
+    "type": "file"
+  },
+  "rq-44319e8c": {
+    "decl": "Scenario: Conflict detection is case-insensitive on the keyword name",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Conflict detection is case-insensitive on the keyword name",
+    "type": "scenario"
+  },
+  "rq-463ef385": {
+    "decl": "- `\"N ATOMS\"` — from `ccdata.natom`.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N ATOMS\"` — from `ccdata.natom`.",
+    "type": "api-item"
+  },
+  "rq-475c8796": {
+    "decl": "Scenario: CCSD(T)/aug-cc-pVDZ RHF energy on water matches Gaussian-specific reference",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "CCSD(T)/aug-cc-pVDZ RHF energy on water matches Gaussian-specific reference",
+    "type": "scenario"
+  },
+  "rq-4ad16d95": {
+    "decl": "Scenario: Memory directive uses integer GB for whole-number memory",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Memory directive uses integer GB for whole-number memory",
+    "type": "scenario"
+  },
+  "rq-4bd911ec": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-4c4a1542": {
+    "decl": "Scenario: Parse dipole moment for properties driver",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse dipole moment for properties driver",
+    "type": "scenario"
+  },
+  "rq-4cf7c460": {
+    "decl": "Scenario: found() returns True when g16 and cclib are both available",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found() returns True when g16 and cclib are both available",
+    "type": "scenario"
+  },
+  "rq-4d653775": {
+    "decl": "Scenario: CCSD(T) total energy is read from ccenergies[-1]",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "CCSD(T) total energy is read from ccenergies[-1]",
+    "type": "scenario"
+  },
+  "rq-4d683dac": {
+    "decl": "Scenario: compute() returns AtomicResult with Hessian for hessian driver",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() returns AtomicResult with Hessian for hessian driver",
+    "type": "scenario"
+  },
+  "rq-4d763c6d": {
+    "decl": "- `multiplicity` — from `AtomicInput.molecule.molecular_multiplicity`.",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "multiplicity",
+    "type": "api-item"
+  },
+  "rq-4f50add1": {
+    "decl": "## Integration Test",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Integration Test",
+    "type": "section"
+  },
+  "rq-519fbe49": {
+    "decl": "Scenario: Single-core execution succeeds",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Single-core execution succeeds",
+    "type": "scenario"
+  },
+  "rq-53f8ed12": {
+    "decl": "Scenario: Missing Mulliken charges do not raise an error",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing Mulliken charges do not raise an error",
+    "type": "scenario"
+  },
+  "rq-540caf62": {
+    "decl": "Scenario: Conflict between method suffix and user keyword raises InputError",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Conflict between method suffix and user keyword raises InputError",
+    "type": "scenario"
+  },
+  "rq-546faafb": {
+    "decl": "Scenario: MP2 method maps to \"MP2\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "MP2 method maps to \"MP2\"",
+    "type": "scenario"
+  },
+  "rq-54afb7b8": {
+    "decl": "- `test_gaussian_hessian_hf_water` (T1)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_hessian_hf_water",
+    "type": "api-item"
+  },
+  "rq-56e891e7": {
+    "decl": "### Empirical Reference Values",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "Empirical Reference Values",
+    "type": "section"
+  },
+  "rq-578bb785": {
+    "decl": "Scenario: Parse MP2 total and correlation energies",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse MP2 total and correlation energies",
+    "type": "scenario"
+  },
+  "rq-59b816b7": {
+    "decl": "### Extended: `build_input(input_model, config, template=None)`",
+    "file": "gaussian/dispersion",
+    "level": 3,
+    "refs": [],
+    "title": "Extended: `build_input(input_model, config, template=None)`",
+    "type": "section"
+  },
+  "rq-5c04235d": {
+    "decl": "Scenario: HF/cc-pVDZ energy on a single He atom returns the expected value with NRE=0",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "HF/cc-pVDZ energy on a single He atom returns the expected value with NRE=0",
+    "type": "scenario"
+  },
+  "rq-5c529f02": {
+    "decl": "Scenario: out_mol preserves atom_labels when fix_com and fix_orientation are True",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "out_mol preserves atom_labels when fix_com and fix_orientation are True",
+    "type": "scenario"
+  },
+  "rq-5d5df0b4": {
+    "decl": "## Design Rationale",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Design Rationale",
+    "type": "section"
+  },
+  "rq-5d9b0b40": {
+    "decl": "Scenario: UHF hessian is correctly aligned to the (scrambled) input frame",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "UHF hessian is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-609268f8": {
+    "decl": "Scenario: MP2/6-31G* gradient on eneyne dimer matches consensus reference",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* gradient on eneyne dimer matches consensus reference",
+    "type": "scenario"
+  },
+  "rq-6121b3e1": {
+    "decl": "Scenario: test_tricky_ghost uses the default ref branch for non-mB Gaussian subjects",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "test_tricky_ghost uses the default ref branch for non-mB Gaussian subjects",
+    "type": "scenario"
+  },
+  "rq-637d486d": {
+    "decl": "Scenario: RHF gradient is correctly aligned to the (scrambled) input frame",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "RHF gradient is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-6385e33d": {
+    "decl": "### T1: HF Hessian on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T1: HF Hessian on water",
+    "type": "section"
+  },
+  "rq-6423b98b": {
+    "decl": "### Files Modified",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "Files Modified",
+    "type": "section"
+  },
+  "rq-6453046a": {
+    "decl": "- `\"N ALPHA ELECTRONS\"` — from `ccdata.homos[0] + 1`.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N ALPHA ELECTRONS\"` — from `ccdata.homos[0] + 1`.",
+    "type": "api-item"
+  },
+  "rq-647b596c": {
+    "decl": "Scenario: Gaussian appears in _canonical_methods",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Gaussian appears in _canonical_methods",
+    "type": "scenario"
+  },
+  "rq-65cb367e": {
+    "decl": "Scenario: Memory configuration is applied with 1.555 GiB total node memory",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Memory configuration is applied with 1.555 GiB total node memory",
+    "type": "scenario"
+  },
+  "rq-66067019": {
+    "decl": "Scenario: Atom count mismatch raises ValueError when ghosts are present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Atom count mismatch raises ValueError when ghosts are present",
+    "type": "scenario"
+  },
+  "rq-66ca9a20": {
+    "decl": "- `test_gaussian_b3lyp_d3_gradient_water` (T4)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_b3lyp_d3_gradient_water",
+    "type": "api-item"
+  },
+  "rq-68840f83": {
+    "decl": "Scenario: Gradient is unchanged when dispersion is present",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Gradient is unchanged when dispersion is present",
+    "type": "scenario"
+  },
+  "rq-69740b1b": {
+    "decl": "Scenario: Missing mpenergies for an MP2 job raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing mpenergies for an MP2 job raises ValueError",
+    "type": "scenario"
+  },
+  "rq-6a889dea": {
+    "decl": "Scenario: UHF energy is invariant to input frame scrambling",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "UHF energy is invariant to input frame scrambling",
+    "type": "scenario"
+  },
+  "rq-6a93ae95": {
+    "decl": "Scenario: muster_modelchem strips \"-d3bj\" and emits EmpiricalDispersion=GD3BJ",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem strips \"-d3bj\" and emits EmpiricalDispersion=GD3BJ",
+    "type": "scenario"
+  },
+  "rq-6bff3228": {
+    "decl": "Scenario: Parse DFT total energy (treated as HF SCF energy by cclib)",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse DFT total energy (treated as HF SCF energy by cclib)",
+    "type": "scenario"
+  },
+  "rq-6d73bb9e": {
+    "decl": "Scenario: Doublet automatically prepends U to HF",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Doublet automatically prepends U to HF",
+    "type": "scenario"
+  },
+  "rq-6f52a6d9": {
+    "decl": "Scenario: Dispersion energy populates generic and functional-specific qcvars",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Dispersion energy populates generic and functional-specific qcvars",
+    "type": "scenario"
+  },
+  "rq-7049aaa5": {
+    "decl": "Scenario: SCF is an alias for HF",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "SCF is an alias for HF",
+    "type": "scenario"
+  },
+  "rq-70b16c33": {
+    "decl": "- `test_gaussian_properties_hf_water` (T2)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_properties_hf_water",
+    "type": "api-item"
+  },
+  "rq-7152455e": {
+    "decl": "Scenario: User keyword is appended to route line",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "User keyword is appended to route line",
+    "type": "scenario"
+  },
+  "rq-71824b99": {
+    "decl": "Scenario: Scratch directory is used and files are left behind when scratch_messy=True",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "Scratch directory is used and files are left behind when scratch_messy=True",
+    "type": "scenario"
+  },
+  "rq-71aceb93": {
+    "decl": "Scenario: compute() raises UnknownError on abnormal termination with no known pattern",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises UnknownError on abnormal termination with no known pattern",
+    "type": "scenario"
+  },
+  "rq-71b27e68": {
+    "decl": "Scenario: Parse HF total energy from a closed-shell log",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse HF total energy from a closed-shell log",
+    "type": "scenario"
+  },
+  "rq-7211fb49": {
+    "decl": "Scenario: SCF TOTAL ENERGY and HF TOTAL ENERGY exclude dispersion",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "SCF TOTAL ENERGY and HF TOTAL ENERGY exclude dispersion",
+    "type": "scenario"
+  },
+  "rq-731f01ba": {
+    "decl": "Scenario: out_mol.symbols are copied from in_mol for ghost positions",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "out_mol.symbols are copied from in_mol for ghost positions",
+    "type": "scenario"
+  },
+  "rq-73c1f919": {
+    "decl": "# Feature: Gaussian Harness — Ghost Atom Support",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Ghost Atom Support",
+    "type": "file"
+  },
+  "rq-7411efa0": {
+    "decl": "Scenario: Atom count sanity check passes when cclib atom count matches in_mol",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Atom count sanity check passes when cclib atom count matches in_mol",
+    "type": "scenario"
+  },
+  "rq-7472fc74": {
+    "decl": "## Coverage Gaps Closed by This Feature",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Coverage Gaps Closed by This Feature",
+    "type": "section"
+  },
+  "rq-74e0110c": {
+    "decl": "## Molecule Block Construction",
+    "file": "gaussian/input-builder",
+    "level": 2,
+    "refs": [],
+    "title": "Molecule Block Construction",
+    "type": "section"
+  },
+  "rq-7c3a72b9": {
+    "decl": "Scenario: muster_modelchem recognises canonical key alias \"d3zero2b\"",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem recognises canonical key alias \"d3zero2b\"",
+    "type": "scenario"
+  },
+  "rq-7c70da2a": {
+    "decl": "## Reference Values",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Reference Values",
+    "type": "section"
+  },
+  "rq-7d1fb16e": {
+    "decl": "## Feature API",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-7e1b0bb4": {
+    "decl": "Scenario: test_tricky_ghost accepts Gaussian's linear PG for the mB subject",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "test_tricky_ghost accepts Gaussian's linear PG for the mB subject",
+    "type": "scenario"
+  },
+  "rq-7f2c22fd": {
+    "decl": "- `\"N MOLECULAR ORBITALS\"` — from `ccdata.nmo` (when available).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"N MOLECULAR ORBITALS\"` — from `ccdata.nmo` (when available).",
+    "type": "api-item"
+  },
+  "rq-8070c4fd": {
+    "decl": "## Test Integrations",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Test Integrations",
+    "type": "section"
+  },
+  "rq-80a8de50": {
+    "decl": "### T4: B3LYP-D3 gradient on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T4: B3LYP-D3 gradient on water",
+    "type": "section"
+  },
+  "rq-815d5fee": {
+    "decl": "### `test_local_options_scratch` (`test_canonical_config.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_local_options_scratch` (`test_canonical_config.py`)",
+    "type": "section"
+  },
+  "rq-81bc1d68": {
+    "decl": "### `test_hf_alignment` (`test_alignment.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_hf_alignment` (`test_alignment.py`)",
+    "type": "section"
+  },
+  "rq-824f4a96": {
+    "decl": "## Feature API",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-82942b90": {
+    "decl": "Scenario: Hessian driver produces \"Freq\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Hessian driver produces \"Freq\"",
+    "type": "scenario"
+  },
+  "rq-84b093c1": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-850ede4f": {
+    "decl": "Scenario: get_version() returns a normalised version string for Gaussian 09",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "get_version() returns a normalised version string for Gaussian 09",
+    "type": "scenario"
+  },
+  "rq-851d782c": {
+    "decl": "Scenario: Unknown method is passed through verbatim (uppercased)",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Unknown method is passed through verbatim (uppercased)",
+    "type": "scenario"
+  },
+  "rq-86480a7b": {
+    "decl": "## Feature API",
+    "file": "gaussian/e2e-coverage",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-86c27356": {
+    "decl": "- `InputError` — if `driver` is not one of the four supported values.",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "InputError",
+    "type": "api-item"
+  },
+  "rq-879110d8": {
+    "decl": "Scenario: Doublet adds U prefix to functional before stripping dispersion",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Doublet adds U prefix to functional before stripping dispersion",
+    "type": "scenario"
+  },
+  "rq-87c8fb49": {
+    "decl": "Scenario: RHF hessian is correctly aligned to the (scrambled) input frame",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "RHF hessian is correctly aligned to the (scrambled) input frame",
+    "type": "scenario"
+  },
+  "rq-89896430": {
+    "decl": "Scenario: HF/STO-3G Hessian on water has correct shape and reference values",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "HF/STO-3G Hessian on water has correct shape and reference values",
+    "type": "scenario"
+  },
+  "rq-8d6fc024": {
+    "decl": "### Output Molecule Construction and Frame Alignment",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "Output Molecule Construction and Frame Alignment",
+    "type": "section"
+  },
+  "rq-8df082e3": {
+    "decl": "Scenario: native_files protocol \"none\" returns empty native_files",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "native_files protocol \"none\" returns empty native_files",
+    "type": "scenario"
+  },
+  "rq-8e21b7d7": {
+    "decl": "Scenario: found() returns False when neither g16 nor g09 is on PATH",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found() returns False when neither g16 nor g09 is on PATH",
+    "type": "scenario"
+  },
+  "rq-8fa7c4c3": {
+    "decl": "Scenario: Gaussian \"NoSymm\" keyword forces C1 symmetry in the route line",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Gaussian \"NoSymm\" keyword forces C1 symmetry in the route line",
+    "type": "scenario"
+  },
+  "rq-90141f40": {
+    "decl": "Scenario: Normal termination line is present in a successful log",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Normal termination line is present in a successful log",
+    "type": "scenario"
+  },
+  "rq-90604835": {
+    "decl": "- `ValueError` if the nuclear repulsion energy of the parsed geometry deviates from",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "ValueError",
+    "type": "api-item"
+  },
+  "rq-916e4919": {
+    "decl": "Scenario: Ghost atom emits a \"-Bq\" suffix in the atom block",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Ghost atom emits a \"-Bq\" suffix in the atom block",
+    "type": "scenario"
+  },
+  "rq-923b3212": {
+    "decl": "Scenario: native_files protocol \"input\" returns only the input file",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "native_files protocol \"input\" returns only the input file",
+    "type": "scenario"
+  },
+  "rq-92492893": {
+    "decl": "Scenario: CCSD(T) method maps to \"CCSD(T)\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "CCSD(T) method maps to \"CCSD(T)\"",
+    "type": "scenario"
+  },
+  "rq-929a262a": {
+    "decl": "### QC Variables Populated",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "QC Variables Populated",
+    "type": "section"
+  },
+  "rq-93777ba8": {
+    "decl": "Scenario: NLC method (wB97M-V) does not emit dispersion qcvars",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "NLC method (wB97M-V) does not emit dispersion qcvars",
+    "type": "scenario"
+  },
+  "rq-943856cc": {
+    "decl": "- `\"DIPOLE MOMENT\"` — magnitude of `ccdata.moments[1]` in Debye.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"DIPOLE MOMENT\"` — magnitude of `ccdata.moments[1]` in Debye.",
+    "type": "api-item"
+  },
+  "rq-954dd6f3": {
+    "decl": "### T6: Single-atom He HF/cc-pVDZ",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T6: Single-atom He HF/cc-pVDZ",
+    "type": "section"
+  },
+  "rq-95535d13": {
+    "decl": "Scenario: muster_modelchem raises InputError for D3M(BJ)",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem raises InputError for D3M(BJ)",
+    "type": "scenario"
+  },
+  "rq-95aa6edf": {
+    "decl": "Scenario: muster_modelchem recognises the bare alias \"d\" as D2",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem recognises the bare alias \"d\" as D2",
+    "type": "scenario"
+  },
+  "rq-95dab09b": {
+    "decl": "### `test_simple_ghost` (He···Ne)",
+    "file": "gaussian/ghost-atoms",
+    "level": 3,
+    "refs": [],
+    "title": "`test_simple_ghost` (He···Ne)",
+    "type": "section"
+  },
+  "rq-96507cf6": {
+    "decl": "Scenario: Method suffix alone (no keyword) produces a single EmpiricalDispersion route token",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Method suffix alone (no keyword) produces a single EmpiricalDispersion route token",
+    "type": "scenario"
+  },
+  "rq-972b6470": {
+    "decl": "Scenario: Singlet uses method name as-is (no U prefix)",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Singlet uses method name as-is (no U prefix)",
+    "type": "scenario"
+  },
+  "rq-99807237": {
+    "decl": "Scenario: compute() returns AtomicResult for a successful energy calculation",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() returns AtomicResult for a successful energy calculation",
+    "type": "scenario"
+  },
+  "rq-998da273": {
+    "decl": "### Class `GaussianHarness(ProgramHarness)`",
+    "file": "gaussian/runner",
+    "level": 3,
+    "refs": [],
+    "title": "Class `GaussianHarness(ProgramHarness)`",
+    "type": "section"
+  },
+  "rq-9aa3cac4": {
+    "decl": "### `test_sp_ccsd_t_rhf_full` (`test_standard_suite_ccsd(t).py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_sp_ccsd_t_rhf_full` (`test_standard_suite_ccsd(t).py`)",
+    "type": "section"
+  },
+  "rq-9acd1ce5": {
+    "decl": "Scenario: Route line for gradient calculation",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Route line for gradient calculation",
+    "type": "scenario"
+  },
+  "rq-9cdf3f7d": {
+    "decl": "# Feature: Gaussian Harness — Input Builder",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Input Builder",
+    "type": "file"
+  },
+  "rq-9d12489e": {
+    "decl": "# Feature: Gaussian Harness — Harvester",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — Harvester",
+    "type": "file"
+  },
+  "rq-9ec1917a": {
+    "decl": "## Gaussian Input File Format",
+    "file": "gaussian/input-builder",
+    "level": 2,
+    "refs": [],
+    "title": "Gaussian Input File Format",
+    "type": "section"
+  },
+  "rq-a100502c": {
+    "decl": "Scenario: Route line is unchanged when ghost atoms are present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Route line is unchanged when ghost atoms are present",
+    "type": "scenario"
+  },
+  "rq-a203a314": {
+    "decl": "### `harvest` — confirmed behavior for labeled molecules",
+    "file": "gaussian/atom-labels",
+    "level": 3,
+    "refs": [],
+    "title": "`harvest` — confirmed behavior for labeled molecules",
+    "type": "section"
+  },
+  "rq-a3c37e5d": {
+    "decl": "### cclib Limitation: Full Cartesian Hessian not extracted",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "cclib Limitation: Full Cartesian Hessian not extracted",
+    "type": "section"
+  },
+  "rq-a4c449da": {
+    "decl": "Scenario: compute() raises ResourceError on memory allocation failure",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises ResourceError on memory allocation failure",
+    "type": "scenario"
+  },
+  "rq-a5593d5c": {
+    "decl": "Scenario: MP2/6-31G* on mB (linear ethyne alone) returns the correct energy",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* on mB (linear ethyne alone) returns the correct energy",
+    "type": "scenario"
+  },
+  "rq-a69d0898": {
+    "decl": "Scenario: NRE cross-check excludes ghost atoms when present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "NRE cross-check excludes ghost atoms when present",
+    "type": "scenario"
+  },
+  "rq-a76c3d7b": {
+    "decl": "Scenario: Output molecule geometry is constructed from ccdata",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Output molecule geometry is constructed from ccdata",
+    "type": "scenario"
+  },
+  "rq-a78c68a8": {
+    "decl": "## Feature API",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-a88c706f": {
+    "decl": "- `method` — method string from `AtomicInput.model.method` (case-insensitive).",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "method",
+    "type": "api-item"
+  },
+  "rq-a9026c9f": {
+    "decl": "Scenario: Method \"mp2(full)\" is normalised back to \"mp2\" by the harvester",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Method \"mp2(full)\" is normalised back to \"mp2\" by the harvester",
+    "type": "scenario"
+  },
+  "rq-a9194afb": {
+    "decl": "Scenario: Nuclear repulsion energy cross-check passes for consistent geometry",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Nuclear repulsion energy cross-check passes for consistent geometry",
+    "type": "scenario"
+  },
+  "rq-a9ab12b3": {
+    "decl": "# Feature: Gaussian Harness — End-to-End Coverage Tests",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "Feature: Gaussian Harness — End-to-End Coverage Tests",
+    "type": "file"
+  },
+  "rq-aa991a3a": {
+    "decl": "Scenario: native_files protocol \"all\" returns input and output files",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "native_files protocol \"all\" returns input and output files",
+    "type": "scenario"
+  },
+  "rq-af032242": {
+    "decl": "Scenario: Route line for closed-shell HF energy",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Route line for closed-shell HF energy",
+    "type": "scenario"
+  },
+  "rq-af1fd6a9": {
+    "decl": "Scenario: B3LYP/cc-pVDZ energy on water matches reference without emitting dispersion qcvars",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "B3LYP/cc-pVDZ energy on water matches reference without emitting dispersion qcvars",
+    "type": "scenario"
+  },
+  "rq-af4f9bf0": {
+    "decl": "Scenario: muster_modelchem strips \"-d2\" and emits EmpiricalDispersion=GD2",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem strips \"-d2\" and emits EmpiricalDispersion=GD2",
+    "type": "scenario"
+  },
+  "rq-b074f046": {
+    "decl": "Scenario: The \"alternative SCF solution\" branch in test_atom_labels accepts Gaussian",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "The \"alternative SCF solution\" branch in test_atom_labels accepts Gaussian",
+    "type": "scenario"
+  },
+  "rq-b10501a0": {
+    "decl": "Scenario: B3LYP-D3/6-31G* gradient on water matches reference and exposes dispersion qcvars",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "B3LYP-D3/6-31G* gradient on water matches reference and exposes dispersion qcvars",
+    "type": "scenario"
+  },
+  "rq-b27d4aff": {
+    "decl": "Scenario: out_mol.real is copied from in_mol when ghosts are present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "out_mol.real is copied from in_mol when ghosts are present",
+    "type": "scenario"
+  },
+  "rq-b49bb2a2": {
+    "decl": "- `driver` — one of `\"energy\"`, `\"gradient\"`, `\"hessian\"`, `\"properties\"`.",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "driver",
+    "type": "api-item"
+  },
+  "rq-b57c882b": {
+    "decl": "Scenario: NRE cross-check still catches geometry mismatches with ghosts present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "NRE cross-check still catches geometry mismatches with ghosts present",
+    "type": "scenario"
+  },
+  "rq-b5e72c6d": {
+    "decl": "Scenario: found() returns False when cclib is not importable",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found() returns False when cclib is not importable",
+    "type": "scenario"
+  },
+  "rq-b604feb4": {
+    "decl": "Scenario: A ghost atom with a non-empty label still emits \"<symbol>-Bq\" (label dropped)",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "A ghost atom with a non-empty label still emits \"<symbol>-Bq\" (label dropped)",
+    "type": "scenario"
+  },
+  "rq-b7c7b8cb": {
+    "decl": "Scenario: Log with no coordinate data raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Log with no coordinate data raises ValueError",
+    "type": "scenario"
+  },
+  "rq-b8065553": {
+    "decl": "- `test_gaussian_b3lyp_d3_hessian_water` (T7)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_b3lyp_d3_hessian_water",
+    "type": "api-item"
+  },
+  "rq-b819d8e0": {
+    "decl": "Scenario: Atom coordinates appear in Angstrom with at least 10 decimal places",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Atom coordinates appear in Angstrom with at least 10 decimal places",
+    "type": "scenario"
+  },
+  "rq-ba0f397f": {
+    "decl": "Scenario: RHF energy is invariant to input frame scrambling",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "RHF energy is invariant to input frame scrambling",
+    "type": "scenario"
+  },
+  "rq-bb0a5d96": {
+    "decl": "## cclib Integration",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "cclib Integration",
+    "type": "section"
+  },
+  "rq-bb775969": {
+    "decl": "Scenario: cclib parse failure propagates as-is",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "cclib parse failure propagates as-is",
+    "type": "scenario"
+  },
+  "rq-bb7d680f": {
+    "decl": "## Prerequisite: native_files Key Convention",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Prerequisite: native_files Key Convention",
+    "type": "section"
+  },
+  "rq-bd6cd9a4": {
+    "decl": "### Modified: `GaussianHarness.build_input(input_model, config, template=None)`",
+    "file": "gaussian/ghost-atoms",
+    "level": 3,
+    "refs": [],
+    "title": "Modified: `GaussianHarness.build_input(input_model, config, template=None)`",
+    "type": "section"
+  },
+  "rq-bd98d417": {
+    "decl": "Scenario: found(raise_error=True) raises ModuleNotFoundError when g16 is missing",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found(raise_error=True) raises ModuleNotFoundError when g16 is missing",
+    "type": "scenario"
+  },
+  "rq-c01c892e": {
+    "decl": "### `test_protocol_native` (`test_canonical_fields.py`)",
+    "file": "gaussian/integration-tests",
+    "level": 3,
+    "refs": [],
+    "title": "`test_protocol_native` (`test_canonical_fields.py`)",
+    "type": "section"
+  },
+  "rq-c20746b1": {
+    "decl": "## Energy Extraction",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Energy Extraction",
+    "type": "section"
+  },
+  "rq-c266b9bb": {
+    "decl": "Scenario: Energy driver produces no job-type keyword",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Energy driver produces no job-type keyword",
+    "type": "scenario"
+  },
+  "rq-c2a6aabb": {
+    "decl": "## Out-of-Scope",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Out-of-Scope",
+    "type": "section"
+  },
+  "rq-c38f1b61": {
+    "decl": "### T5: NH₂· UHF on cc-pVDZ",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T5: NH₂· UHF on cc-pVDZ",
+    "type": "section"
+  },
+  "rq-c3ebee03": {
+    "decl": "## Method and Driver Compatibility",
+    "file": "gaussian/atom-labels",
+    "level": 2,
+    "refs": [],
+    "title": "Method and Driver Compatibility",
+    "type": "section"
+  },
+  "rq-c40101e6": {
+    "decl": "Scenario: Method \"mp2(full)\" maps to \"MP2(Full)\" in the Gaussian route line",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Method \"mp2(full)\" maps to \"MP2(Full)\" in the Gaussian route line",
+    "type": "scenario"
+  },
+  "rq-c4439b82": {
+    "decl": "## Integration Tests",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Integration Tests",
+    "type": "section"
+  },
+  "rq-c5165f1f": {
+    "decl": "- `\"CURRENT ENERGY\"` — set to the highest-level energy available (see below).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"CURRENT ENERGY\"` — set to the highest-level energy available (see below).",
+    "type": "api-item"
+  },
+  "rq-c5b27d26": {
+    "decl": "## Hessian Parsing",
+    "file": "gaussian/harvester",
+    "level": 2,
+    "refs": [],
+    "title": "Hessian Parsing",
+    "type": "section"
+  },
+  "rq-c68dde2e": {
+    "decl": "Scenario: User keyword alone (no method suffix) passes through unchanged",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "User keyword alone (no method suffix) passes through unchanged",
+    "type": "scenario"
+  },
+  "rq-c77a2c13": {
+    "decl": "Scenario: compute() raises InputError when model.basis is a BasisSet object",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises InputError when model.basis is a BasisSet object",
+    "type": "scenario"
+  },
+  "rq-c7fd08b5": {
+    "decl": "- `\"MULLIKEN CHARGES\"` — from `ccdata.atomcharges[\"mulliken\"]`.",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"MULLIKEN CHARGES\"` — from `ccdata.atomcharges[\"mulliken\"]`.",
+    "type": "api-item"
+  },
+  "rq-c88cc8ec": {
+    "decl": "### Fixtures and helpers",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "Fixtures and helpers",
+    "type": "section"
+  },
+  "rq-c946c285": {
+    "decl": "Scenario: Triplet automatically prepends U to B3LYP",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Triplet automatically prepends U to B3LYP",
+    "type": "scenario"
+  },
+  "rq-cb0f61f2": {
+    "decl": "## Gaussian Executable Details",
+    "file": "gaussian/runner",
+    "level": 2,
+    "refs": [],
+    "title": "Gaussian Executable Details",
+    "type": "section"
+  },
+  "rq-cc549245": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/input-builder",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-cd0d6637": {
+    "decl": "Scenario: Route line for properties calculation includes Pop=Full",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Route line for properties calculation includes Pop=Full",
+    "type": "scenario"
+  },
+  "rq-cd65e68a": {
+    "decl": "- `test_gaussian_single_atom_he` (T6)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_single_atom_he",
+    "type": "api-item"
+  },
+  "rq-ce2ecf6a": {
+    "decl": "### Reference-value provenance",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "Reference-value provenance",
+    "type": "section"
+  },
+  "rq-ce76f384": {
+    "decl": "Scenario: All-ghost molecule produces an atom block with every line \"-Bq\"-suffixed",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "All-ghost molecule produces an atom block with every line \"-Bq\"-suffixed",
+    "type": "scenario"
+  },
+  "rq-ce8f4843": {
+    "decl": "## Integration Test",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "Integration Test",
+    "type": "section"
+  },
+  "rq-cedda71e": {
+    "decl": "Scenario: B3LYP-D3/6-31G* Hessian on water succeeds and emits the dispersion qcvar",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "B3LYP-D3/6-31G* Hessian on water succeeds and emits the dispersion qcvar",
+    "type": "scenario"
+  },
+  "rq-ceef73bd": {
+    "decl": "Scenario: Coordinate precision is preserved for ghost atoms",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Coordinate precision is preserved for ghost atoms",
+    "type": "scenario"
+  },
+  "rq-cf6fdf8a": {
+    "decl": "## Feature API",
+    "file": "gaussian/runner",
+    "level": 2,
+    "refs": [],
+    "title": "Feature API",
+    "type": "section"
+  },
+  "rq-d06d7266": {
+    "decl": "- `test_gaussian_uhf_nh2` (T5)",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "test_gaussian_uhf_nh2",
+    "type": "api-item"
+  },
+  "rq-d3b8d8c3": {
+    "decl": "Scenario: found() falls back to g09 when g16 is absent",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "found() falls back to g09 when g16 is absent",
+    "type": "scenario"
+  },
+  "rq-d42168a0": {
+    "decl": "### Test runtime budget",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "Test runtime budget",
+    "type": "section"
+  },
+  "rq-d4e60dd2": {
+    "decl": "Scenario: MP2/6-31G* energy on mAgB (real ethylene + ghost ethyne) matches reference",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "MP2/6-31G* energy on mAgB (real ethylene + ghost ethyne) matches reference",
+    "type": "scenario"
+  },
+  "rq-d7e8161d": {
+    "decl": "Scenario: Link 0 section contains NProcShared and Mem directives",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Link 0 section contains NProcShared and Mem directives",
+    "type": "scenario"
+  },
+  "rq-d87ddeb8": {
+    "decl": "Scenario: native_files never contains \"stdout\" or \"stderr\"",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "native_files never contains \"stdout\" or \"stderr\"",
+    "type": "scenario"
+  },
+  "rq-d9434480": {
+    "decl": "### `harvest(in_mol: Molecule, method: str, log_content: str) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]`",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "`harvest(in_mol: Molecule, method: str, log_content: str) -> Tuple[PreservingDict, Optional[np.ndarray], Optional[np.ndarray], Molecule]`",
+    "type": "section"
+  },
+  "rq-d96c128f": {
+    "decl": "Scenario: muster_modelchem raises InputError for D3M",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem raises InputError for D3M",
+    "type": "scenario"
+  },
+  "rq-d97cc860": {
+    "decl": "Scenario: Gradient array spans real and ghost atoms in input order",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "Gradient array spans real and ghost atoms in input order",
+    "type": "scenario"
+  },
+  "rq-da7df6e9": {
+    "decl": "Scenario: Multiple same-element atoms with distinct labels each emit bare element lines",
+    "file": "gaussian/atom-labels",
+    "refs": [],
+    "title": "Multiple same-element atoms with distinct labels each emit bare element lines",
+    "type": "scenario"
+  },
+  "rq-db92093a": {
+    "decl": "Scenario: Memory directive rounds down to nearest integer GB (minimum 1)",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Memory directive rounds down to nearest integer GB (minimum 1)",
+    "type": "scenario"
+  },
+  "rq-dbf8a9a5": {
+    "decl": "### T7: B3LYP-D3 Hessian on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T7: B3LYP-D3 Hessian on water",
+    "type": "section"
+  },
+  "rq-dc1bf912": {
+    "decl": "Scenario: HF/STO-3G properties on water populates dipole and Mulliken charges",
+    "file": "gaussian/e2e-coverage",
+    "refs": [],
+    "title": "HF/STO-3G properties on water populates dipole and Mulliken charges",
+    "type": "scenario"
+  },
+  "rq-dceb51f5": {
+    "decl": "## Background: Gaussian Ghost-Atom Syntax",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Background: Gaussian Ghost-Atom Syntax",
+    "type": "section"
+  },
+  "rq-dd7024df": {
+    "decl": "Scenario: MP2 total energy is read from mpenergies[-1][-1]",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "MP2 total energy is read from mpenergies[-1][-1]",
+    "type": "scenario"
+  },
+  "rq-dea9f7c9": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-df49b3b8": {
+    "decl": "Scenario: No dispersionenergies attribute produces no dispersion qcvars",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "No dispersionenergies attribute produces no dispersion qcvars",
+    "type": "scenario"
+  },
+  "rq-df7eb0c3": {
+    "decl": "## Migration Notes",
+    "file": "gaussian/ghost-atoms",
+    "level": 2,
+    "refs": [],
+    "title": "Migration Notes",
+    "type": "section"
+  },
+  "rq-e008c6fe": {
+    "decl": "Scenario: Unsupported driver raises InputError",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Unsupported driver raises InputError",
+    "type": "scenario"
+  },
+  "rq-e05f5cfe": {
+    "decl": "Scenario: Missing ccenergies for a CCSD(T) job raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing ccenergies for a CCSD(T) job raises ValueError",
+    "type": "scenario"
+  },
+  "rq-e1150329": {
+    "decl": "Scenario: ROHF + dispersion does not double-prefix U",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "ROHF + dispersion does not double-prefix U",
+    "type": "scenario"
+  },
+  "rq-e199db9a": {
+    "decl": "### T2: HF properties on water",
+    "file": "gaussian/e2e-coverage",
+    "level": 3,
+    "refs": [],
+    "title": "T2: HF properties on water",
+    "type": "section"
+  },
+  "rq-e5a98119": {
+    "decl": "Scenario: NRE cross-check is unchanged for all-real molecules",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "NRE cross-check is unchanged for all-real molecules",
+    "type": "scenario"
+  },
+  "rq-e62578e2": {
+    "decl": "Scenario: compute() returns AtomicResult with gradient for gradient driver",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() returns AtomicResult with gradient for gradient driver",
+    "type": "scenario"
+  },
+  "rq-e71357c5": {
+    "decl": "## Canonical Methods Entry",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Canonical Methods Entry",
+    "type": "section"
+  },
+  "rq-e7897f09": {
+    "decl": "Scenario: Reserved user keywords (memory, nprocs) are not appended to route line",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Reserved user keywords (memory, nprocs) are not appended to route line",
+    "type": "scenario"
+  },
+  "rq-e7c13c1e": {
+    "decl": "## Gherkin Scenarios",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Gherkin Scenarios",
+    "type": "section"
+  },
+  "rq-e89c4144": {
+    "decl": "Scenario: BJ-damped variant uses parenthesised formal label",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "BJ-damped variant uses parenthesised formal label",
+    "type": "scenario"
+  },
+  "rq-e9a472db": {
+    "decl": "Scenario: muster_modelchem raises InputError for OP damping",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem raises InputError for OP damping",
+    "type": "scenario"
+  },
+  "rq-ea37df39": {
+    "decl": "## Migration Notes",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "Migration Notes",
+    "type": "section"
+  },
+  "rq-edb73b83": {
+    "decl": "Scenario: compute() raises InputError on internal coordinate error",
+    "file": "gaussian/runner",
+    "refs": [],
+    "title": "compute() raises InputError on internal coordinate error",
+    "type": "scenario"
+  },
+  "rq-eddef743": {
+    "decl": "Scenario: Parse CCSD(T) total energy",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse CCSD(T) total energy",
+    "type": "scenario"
+  },
+  "rq-ef62979b": {
+    "decl": "### `muster_modelchem(method: str, driver: str, multiplicity: int) -> Dict[str, Any]`",
+    "file": "gaussian/input-builder",
+    "level": 3,
+    "refs": [],
+    "title": "`muster_modelchem(method: str, driver: str, multiplicity: int) -> Dict[str, Any]`",
+    "type": "section"
+  },
+  "rq-ef982ff3": {
+    "decl": "Scenario: muster_modelchem prefers the longer suffix (d3bj over d3)",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem prefers the longer suffix (d3bj over d3)",
+    "type": "scenario"
+  },
+  "rq-f13e0d24": {
+    "decl": "Scenario: parse_output uses standard \"input\" key in native_files",
+    "file": "gaussian/integration-tests",
+    "refs": [],
+    "title": "parse_output uses standard \"input\" key in native_files",
+    "type": "scenario"
+  },
+  "rq-f1c116db": {
+    "decl": "Scenario: Gradient driver produces \"Force=NoStep\"",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Gradient driver produces \"Force=NoStep\"",
+    "type": "scenario"
+  },
+  "rq-f1d712bb": {
+    "decl": "### Modified: `harvest(in_mol, method, log_content)`",
+    "file": "gaussian/ghost-atoms",
+    "level": 3,
+    "refs": [],
+    "title": "Modified: `harvest(in_mol, method, log_content)`",
+    "type": "section"
+  },
+  "rq-f237caf7": {
+    "decl": "## Open Cases",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "Open Cases",
+    "type": "section"
+  },
+  "rq-f28b3bed": {
+    "decl": "## Implementation Notes",
+    "file": "gaussian/integration-tests",
+    "level": 2,
+    "refs": [],
+    "title": "Implementation Notes",
+    "type": "section"
+  },
+  "rq-f2e32162": {
+    "decl": "Scenario: Parse Hessian from frequency calculation",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse Hessian from frequency calculation",
+    "type": "scenario"
+  },
+  "rq-f357f8db": {
+    "decl": "## Method-Name Recognition Details",
+    "file": "gaussian/dispersion",
+    "level": 2,
+    "refs": [],
+    "title": "Method-Name Recognition Details",
+    "type": "section"
+  },
+  "rq-f4900ee1": {
+    "decl": "### Coordinate Frame",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "Coordinate Frame",
+    "type": "section"
+  },
+  "rq-f49de098": {
+    "decl": "Scenario: Methods without dispersion suffix still get the generic qcvar when dispersionenergies is present",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Methods without dispersion suffix still get the generic qcvar when dispersionenergies is present",
+    "type": "scenario"
+  },
+  "rq-f4cbb515": {
+    "decl": "Scenario: muster_modelchem leaves a non-dispersion method unchanged",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "muster_modelchem leaves a non-dispersion method unchanged",
+    "type": "scenario"
+  },
+  "rq-f512b60b": {
+    "decl": "Scenario: Properties driver produces Pop=Full in extra_keywords",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Properties driver produces Pop=Full in extra_keywords",
+    "type": "scenario"
+  },
+  "rq-f59a07b8": {
+    "decl": "- `\"SCF TOTAL ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "- `\"SCF TOTAL ENERGY\"` — same value as `\"HF TOTAL ENERGY\"` (required by standard suite contracts).",
+    "type": "api-item"
+  },
+  "rq-f5d05419": {
+    "decl": "Scenario: Functional total energy excludes dispersion",
+    "file": "gaussian/dispersion",
+    "refs": [],
+    "title": "Functional total energy excludes dispersion",
+    "type": "scenario"
+  },
+  "rq-f6537c40": {
+    "decl": "### cclib Energy Precision",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "cclib Energy Precision",
+    "type": "section"
+  },
+  "rq-f8ce079b": {
+    "decl": "Scenario: align() calls use generic_ghosts=True when ghosts are present",
+    "file": "gaussian/ghost-atoms",
+    "refs": [],
+    "title": "align() calls use generic_ghosts=True when ghosts are present",
+    "type": "scenario"
+  },
+  "rq-fe13245b": {
+    "decl": "Scenario: Method starting with RO is not prefixed with U",
+    "file": "gaussian/input-builder",
+    "refs": [],
+    "title": "Method starting with RO is not prefixed with U",
+    "type": "scenario"
+  },
+  "rq-ffae3fa6": {
+    "decl": "Scenario: Parse Mulliken charges for properties driver",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Parse Mulliken charges for properties driver",
+    "type": "scenario"
+  }
+}
