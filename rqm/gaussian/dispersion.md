@@ -44,8 +44,9 @@ The numeric value is in Hartrees. cclib parses this line into
 `ccdata.dispersionenergies` (as a list, in eV), separately from `ccdata.scfenergies`
 (which remains the pure SCF without the dispersion contribution).
 
-The `SCF Done:` line that the existing harvester regex (`_SCF_DONE_RE`) matches is
-also the **pure SCF** value, *not* the dispersion-corrected total.
+The `SCF Done:` line that Gaussian writes (and that cclib stores into
+`ccdata.scfenergies` after multiplying by its Hartree→eV factor) is the
+**pure SCF** value, *not* the dispersion-corrected total.
 
 For analytic gradients, Gaussian writes a single forces table that already includes
 the dispersion contribution; no special handling is required on the gradient side.
@@ -115,19 +116,11 @@ suffix from the (lowercased) method. The resulting bare method drives the existi
 energy-extraction branch. The original method (with suffix) is retained so qcvars
 can be tagged with the correct formal label.
 
-**Dispersion-energy parsing**: after the existing SCF and post-HF energy
-extraction:
+**Dispersion-energy parsing** (see [[harvester]] §"Energy Extraction"):
 
-- A new regex `_DISPERSION_ENERGY_RE = re.compile(r"Dispersion energy=\s*([-\d.]+)\s*Hartrees?")`
-  is matched against the log. If a match exists, `disp_hartree = float(match.group(1))`.
-- If the regex does not match, the cclib fallback is
-  `disp_hartree = cclib.parser.utils.convertor(float(ccdata.dispersionenergies[-1]), "eV", "hartree")`
-  when the attribute exists and is non-empty. The cclib converter is used
-  (rather than `* qcel.constants.conversion_factor("eV", "hartree")`) so the
-  eV → Hartree round-trip is exact relative to how cclib stored the value
-  — see [[harvester]] §"cclib Limitations" for the bias-vs-exactness analysis.
-- If neither source yields a value, `disp_hartree` is `None` and dispersion qcvars
-  are not set.
+- If `ccdata.dispersionenergies` is present and non-empty, set
+  `disp_hartree = cclib.parser.utils.convertor(float(ccdata.dispersionenergies[-1]), "eV", "hartree")`.
+- Otherwise `disp_hartree = None` and no dispersion qcvars are set.
 
 **qcvars emitted when `disp_hartree is not None`** (Psi4/QCEngine convention; see
 `qcvar_identities_resources.py`):
@@ -350,21 +343,22 @@ Feature: Gaussian harness empirical-dispersion support
   # --- harvester: dispersion energy extraction ---
 
   @rq-a83b7d5f
-  Scenario: Dispersion energy is parsed via regex when the log contains the line
-    Given a Gaussian log containing " Dispersion energy=       -0.0046617305 Hartrees."
+  Scenario: Dispersion energy is read from ccdata.dispersionenergies via cclib's convertor
+    Given a B3LYP-D3 Gaussian log where ccdata.dispersionenergies[-1] is the
+        dispersion contribution (eV form: e.g. convertor(-0.0046617305, "hartree", "eV"))
     When harvest(in_mol, "b3lyp-d3", log_content) is called
-    Then qcvars["DISPERSION CORRECTION ENERGY"] equals -0.0046617305 (atol 1e-12)
+    Then qcvars["DISPERSION CORRECTION ENERGY"] equals -0.0046617305
+        within 1 ULP (~1e-14 Ha)
 
   @rq-3136523b
-  Scenario: Dispersion energy falls back to ccdata.dispersionenergies when regex misses
-    Given a Gaussian log without a "Dispersion energy=" line
-    And ccdata.dispersionenergies equals [-0.1269192] (in eV)
+  Scenario: No dispersionenergies attribute means no dispersion qcvars
+    Given a Gaussian log where cclib's ccdata has no "dispersionenergies" attribute
     When harvest(in_mol, "b3lyp-d3", log_content) is called
-    Then qcvars["DISPERSION CORRECTION ENERGY"] equals cclib.convertor(-0.1269192, "eV", "hartree") (atol 1e-8)
+    Then qcvars does not contain "DISPERSION CORRECTION ENERGY"
 
   @rq-6f52a6d9
   Scenario: Functional-specific dispersion qcvar uses the formal label
-    Given a log with "Dispersion energy=  -0.005 Hartrees." for a B3LYP-D3 calculation
+    Given a B3LYP-D3 log with ccdata.dispersionenergies[-1] = convertor(-0.005, "hartree", "eV")
     When harvest(in_mol, "b3lyp-d3", log_content) is called
     Then qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"] equals -0.005
 
@@ -378,7 +372,7 @@ Feature: Gaussian harness empirical-dispersion support
 
   @rq-e89c4144
   Scenario: BJ-damped variant uses parenthesised formal label
-    Given a B3LYP-D3(BJ) calculation log with "Dispersion energy=  -0.007 Hartrees."
+    Given a B3LYP-D3(BJ) calculation where ccdata.dispersionenergies[-1] = convertor(-0.007, "hartree", "eV")
     When harvest(in_mol, "b3lyp-d3bj", log_content) is called
     Then qcvars["B3LYP-D3(BJ) DISPERSION CORRECTION ENERGY"] equals -0.007
     And qcvars["B3LYP-D3(BJ) TOTAL ENERGY"] equals scf + disp
@@ -391,25 +385,25 @@ Feature: Gaussian harness empirical-dispersion support
     And qcvars["SCF TOTAL ENERGY"] equals qcvars["HF TOTAL ENERGY"]
 
   @rq-f49de098
-  Scenario: Methods without dispersion suffix do not get dispersion qcvars even if log has the line
-    Given a Gaussian log containing a "Dispersion energy=" line (e.g. user passed EmpiricalDispersion keyword)
+  Scenario: Methods without dispersion suffix still get the generic qcvar when dispersionenergies is present
+    Given a Gaussian log where ccdata.dispersionenergies is non-empty
+        (e.g. user passed EmpiricalDispersion as a keyword without using a method suffix)
     And the method passed to harvest is "b3lyp" (no dispersion suffix)
     When harvest(in_mol, "b3lyp", log_content) is called
-    Then qcvars["DISPERSION CORRECTION ENERGY"] is still populated
+    Then qcvars["DISPERSION CORRECTION ENERGY"] is populated
     And qcvars["CURRENT ENERGY"] equals scf + disp
     But no functional-specific "<FCTL>-<DASH>" qcvars are set (we cannot infer the dash level)
 
   @rq-df49b3b8
-  Scenario: No dispersion in log produces no dispersion qcvars
-    Given a Gaussian log without a "Dispersion energy=" line
-    And ccdata has no dispersionenergies attribute (or it's empty)
+  Scenario: No dispersionenergies attribute produces no dispersion qcvars
+    Given a Gaussian log where ccdata.dispersionenergies is absent (or empty)
     When harvest(in_mol, "b3lyp", log_content) is called
     Then no DISPERSION* qcvars are set
     And qcvars["CURRENT ENERGY"] equals qcvars["SCF TOTAL ENERGY"]
 
   @rq-93777ba8
   Scenario: NLC method (wB97M-V) does not emit dispersion qcvars
-    Given a wB97M-V calculation log (NLC self-consistent, no "Dispersion energy=" line)
+    Given a wB97M-V calculation log (NLC self-consistent; cclib's dispersionenergies attribute is absent)
     When harvest(in_mol, "wb97m-v", log_content) is called
     Then no DISPERSION qcvars are set
     And the existing pass-through DFT behaviour is preserved

@@ -26,12 +26,17 @@ requires_cclib = pytest.mark.skipif(not _cclib_available, reason="cclib not inst
 # Shared test fixtures
 # ---------------------------------------------------------------------------
 
-# The harvester now reverses cclib's eV-stored energies via cclib's own
-# convertor (avoiding the ~3.6e-6 Ha bias from qcel's slightly different CODATA
-# factor). Tests of the cclib-fallback path compute expected values via the
-# same factor so the round-trip is exact.
+# The harvester reads all energies via cclib's parsed attributes and reverses
+# the eV → Hartree conversion with cclib's own convertor (structurally exact).
+# Tests compute expected values via the same factor so the round-trip is exact.
 from cclib.parser.utils import convertor as _cclib_convertor  # noqa: E402
 _EV_TO_HARTREE = _cclib_convertor(1.0, "eV", "hartree")
+_HARTREE_TO_EV = _cclib_convertor(1.0, "hartree", "eV")
+
+
+def _ha_to_ev(value_ha):
+    """Convert Hartree → eV via cclib's converter for use in test mocks."""
+    return _cclib_convertor(value_ha, "hartree", "eV")
 
 
 @pytest.fixture
@@ -1753,73 +1758,71 @@ def test_dispersion_method_suffix_only(harness, water):
 # ---------------------------------------------------------------------------
 
 
-_DISP_LOG_SNIPPET = (
-    " SCF Done:  E(RB3LYP) =  -76.4014123456     A.U. after   12 cycles\n"
-    " Dispersion energy=       -0.0046617305 Hartrees.\n"
-)
+_DISP_SCF_HA = -76.4014123456
+_DISP_DISP_HA = -0.0046617305
+
+
+def _disp_ccdata(scf_ha=_DISP_SCF_HA, disp_ha=_DISP_DISP_HA, disp_present=True):
+    """Build a mock ccdata for B3LYP-D3-like calculations.
+
+    Both energies are stored in eV via cclib's converter, so harvest()'s
+    inverse cclib.parser.utils.convertor("eV", "hartree") recovers the
+    original Hartree values exactly.
+    """
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([_ha_to_ev(scf_ha)]))
+    if disp_present:
+        ccdata.dispersionenergies = np.array([_ha_to_ev(disp_ha)])
+    return ccdata
 
 
 # rq-1d5da737
 @requires_cclib
-def test_dispersion_harvest_regex_path():
+def test_dispersion_harvest_from_cclib():
+    """Dispersion energy is read from ccdata.dispersionenergies."""
     in_mol = _make_water_mol()
-    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
-    assert abs(float(qcvars["DISPERSION CORRECTION ENERGY"]) - (-0.0046617305)) < 1e-12
+    with _patch_cclib(_disp_ccdata()):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "")
+    assert abs(float(qcvars["DISPERSION CORRECTION ENERGY"]) - _DISP_DISP_HA) < 1e-12
 
 
 # rq-1d5da737
 @requires_cclib
-def test_dispersion_harvest_cclib_fallback():
-    """When the log has no 'Dispersion energy=' line, fall back to ccdata.dispersionenergies."""
+def test_dispersion_harvest_no_dispersionenergies_no_qcvars():
+    """When ccdata has no dispersionenergies attribute, no dispersion qcvars are set."""
     in_mol = _make_water_mol()
-    # eV values that round-trip to a known Hartree quantity
-    disp_ev = -0.1269192
-    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    ccdata.dispersionenergies = np.array([disp_ev])
-    with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "SCF Done: E(RB3LYP) = -76.4 A.U. after 10 cycles\n")
-    expected = disp_ev * _EV_TO_HARTREE
-    assert abs(float(qcvars["DISPERSION CORRECTION ENERGY"]) - expected) < 1e-8
+    with _patch_cclib(_disp_ccdata(disp_present=False)):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "")
+    assert "DISPERSION CORRECTION ENERGY" not in qcvars
+    assert "B3LYP-D3 DISPERSION CORRECTION ENERGY" not in qcvars
 
 
 # rq-1d5da737
 @requires_cclib
 def test_dispersion_harvest_functional_specific_qcvars():
     in_mol = _make_water_mol()
-    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
+    with _patch_cclib(_disp_ccdata()):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "")
     assert "B3LYP-D3 DISPERSION CORRECTION ENERGY" in qcvars
-    assert abs(float(qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"]) - (-0.0046617305)) < 1e-12
+    assert abs(float(qcvars["B3LYP-D3 DISPERSION CORRECTION ENERGY"]) - _DISP_DISP_HA) < 1e-12
 
 
 # rq-1d5da737
 @requires_cclib
 def test_dispersion_harvest_functional_total_excludes_dispersion():
     in_mol = _make_water_mol()
-    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
-    scf = -76.4014123456
-    disp = -0.0046617305
-    assert abs(float(qcvars["B3LYP FUNCTIONAL TOTAL ENERGY"]) - scf) < 1e-10
-    assert abs(float(qcvars["B3LYP-D3 TOTAL ENERGY"]) - (scf + disp)) < 1e-10
-    assert abs(float(qcvars["CURRENT ENERGY"]) - (scf + disp)) < 1e-10
+    with _patch_cclib(_disp_ccdata()):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "")
+    assert abs(float(qcvars["B3LYP FUNCTIONAL TOTAL ENERGY"]) - _DISP_SCF_HA) < 1e-10
+    assert abs(float(qcvars["B3LYP-D3 TOTAL ENERGY"]) - (_DISP_SCF_HA + _DISP_DISP_HA)) < 1e-10
+    assert abs(float(qcvars["CURRENT ENERGY"]) - (_DISP_SCF_HA + _DISP_DISP_HA)) < 1e-10
 
 
 # rq-1d5da737
 @requires_cclib
 def test_dispersion_harvest_d3bj_uses_parenthesised_label():
     in_mol = _make_water_mol()
-    log = (
-        " SCF Done:  E(RB3LYP) =  -76.4014123456     A.U. after   12 cycles\n"
-        " Dispersion energy=       -0.0070000000 Hartrees.\n"
-    )
-    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3bj", log)
+    with _patch_cclib(_disp_ccdata(disp_ha=-0.007)):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3bj", "")
     assert "B3LYP-D3(BJ) DISPERSION CORRECTION ENERGY" in qcvars
     assert "B3LYP-D3(BJ) TOTAL ENERGY" in qcvars
 
@@ -1828,13 +1831,11 @@ def test_dispersion_harvest_d3bj_uses_parenthesised_label():
 @requires_cclib
 def test_dispersion_harvest_scf_hf_unchanged():
     in_mol = _make_water_mol()
-    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
-    scf = -76.4014123456
+    with _patch_cclib(_disp_ccdata()):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp-d3", "")
     # SCF TOTAL ENERGY / HF TOTAL ENERGY excludes the dispersion contribution
-    assert abs(float(qcvars["HF TOTAL ENERGY"]) - scf) < 1e-10
-    assert abs(float(qcvars["SCF TOTAL ENERGY"]) - scf) < 1e-10
+    assert abs(float(qcvars["HF TOTAL ENERGY"]) - _DISP_SCF_HA) < 1e-10
+    assert abs(float(qcvars["SCF TOTAL ENERGY"]) - _DISP_SCF_HA) < 1e-10
 
 
 # rq-1d5da737
@@ -1842,17 +1843,14 @@ def test_dispersion_harvest_scf_hf_unchanged():
 def test_dispersion_harvest_method_without_suffix_no_functional_qcvars():
     """If user passes EmpiricalDispersion via keyword (no method suffix), generic qcvars only."""
     in_mol = _make_water_mol()
-    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
-    with _patch_cclib(ccdata):
-        qcvars, _, _, _ = harvest(in_mol, "b3lyp", _DISP_LOG_SNIPPET)
+    with _patch_cclib(_disp_ccdata()):
+        qcvars, _, _, _ = harvest(in_mol, "b3lyp", "")
     assert "DISPERSION CORRECTION ENERGY" in qcvars
     # No formal dash label known → no functional-specific qcvars
     assert "B3LYP-D3 DISPERSION CORRECTION ENERGY" not in qcvars
     assert "B3LYP-D3 TOTAL ENERGY" not in qcvars
     # CURRENT ENERGY still reflects scf + disp for DFT
-    scf = -76.4014123456
-    disp = -0.0046617305
-    assert abs(float(qcvars["CURRENT ENERGY"]) - (scf + disp)) < 1e-10
+    assert abs(float(qcvars["CURRENT ENERGY"]) - (_DISP_SCF_HA + _DISP_DISP_HA)) < 1e-10
 
 
 # rq-1d5da737
@@ -1883,17 +1881,139 @@ def test_dispersion_harvest_nlc_method_no_dispersion_qcvars():
 # rq-1d5da737
 @requires_cclib
 def test_dispersion_harvest_gradient_unchanged():
-    """Dispersion in log doesn't disturb the gradient pipeline; cclib's grads is the total."""
+    """Dispersion in ccdata doesn't disturb the gradient pipeline; cclib's grads is the total."""
     in_mol = _make_water_mol()
     forces = np.array([[0.01, 0.0, -0.02], [0.0, 0.005, 0.01], [0.0, -0.005, 0.01]])
-    ccdata = _make_ccdata_with_attrs(
-        scfenergies=np.array([-2079.3]),
-        grads=forces[np.newaxis, :, :],
-    )
+    ccdata = _disp_ccdata()
+    ccdata.grads = forces[np.newaxis, :, :]
     with _patch_cclib(ccdata):
-        qcvars, grad, _, _ = harvest(in_mol, "b3lyp-d3", _DISP_LOG_SNIPPET)
+        qcvars, grad, _, _ = harvest(in_mol, "b3lyp-d3", "")
     assert grad is not None
     np.testing.assert_allclose(grad, -forces.flatten(), atol=1e-12)
+
+
+# ---------------------------------------------------------------------------
+# Tests: cclib-only energy extraction (error and consistency)
+# ---------------------------------------------------------------------------
+
+
+def _make_ccdata_without(*attrs):
+    """Build a ccdata mock and delete the named attributes (to simulate missing cclib data)."""
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([-2079.3]))
+    for a in attrs:
+        if hasattr(ccdata, a):
+            delattr(ccdata, a)
+    return ccdata
+
+
+# rq-c20746b1
+@requires_cclib
+def test_cclib_only_missing_scfenergies_raises():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_without("scfenergies")
+    with _patch_cclib(ccdata):
+        with pytest.raises(ValueError, match=r"scfenergies"):
+            harvest(in_mol, "hf", "")
+
+
+# rq-c20746b1
+@requires_cclib
+def test_cclib_only_empty_scfenergies_raises():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([]))
+    with _patch_cclib(ccdata):
+        with pytest.raises(ValueError, match=r"scfenergies"):
+            harvest(in_mol, "hf", "")
+
+
+# rq-c20746b1
+@requires_cclib
+def test_cclib_only_missing_mpenergies_raises_for_mp2():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_without("mpenergies")  # scfenergies kept
+    with _patch_cclib(ccdata):
+        with pytest.raises(ValueError, match=r"mpenergies"):
+            harvest(in_mol, "mp2", "")
+
+
+# rq-c20746b1
+@requires_cclib
+def test_cclib_only_missing_ccenergies_raises_for_ccsd():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_without("ccenergies")
+    with _patch_cclib(ccdata):
+        with pytest.raises(ValueError, match=r"ccenergies"):
+            harvest(in_mol, "ccsd", "")
+
+
+# rq-c20746b1
+@requires_cclib
+def test_cclib_only_missing_ccenergies_raises_for_ccsd_t():
+    in_mol = _make_water_mol()
+    ccdata = _make_ccdata_without("ccenergies")
+    with _patch_cclib(ccdata):
+        with pytest.raises(ValueError, match=r"ccenergies"):
+            harvest(in_mol, "ccsd(t)", "")
+
+
+# rq-c20746b1
+@requires_cclib
+def test_cclib_only_scf_round_trips_within_1_ulp():
+    """The Ha → eV → Ha round-trip through cclib's convertor must be ≤ 1 ULP."""
+    in_mol = _make_water_mol()
+    scf_ha = -76.0571491640
+    ccdata = _make_ccdata_with_attrs(scfenergies=np.array([_ha_to_ev(scf_ha)]))
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "hf", "")
+    # The round-trip should be exact to within a single ULP of the magnitude.
+    import math
+    delta = abs(float(qcvars["HF TOTAL ENERGY"]) - scf_ha)
+    assert delta <= math.ulp(scf_ha) * 4  # generous: 4 ULPs
+
+
+# rq-c20746b1
+@requires_cclib
+def test_cclib_only_mp2_total_from_mpenergies_last():
+    in_mol = _make_water_mol()
+    scf_ha = -76.05
+    mp2_ha = -76.30
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([_ha_to_ev(scf_ha)]),
+        mpenergies=np.array([[_ha_to_ev(mp2_ha)]]),
+    )
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "mp2", "")
+    assert abs(float(qcvars["MP2 TOTAL ENERGY"]) - mp2_ha) < 1e-12
+    assert abs(float(qcvars["MP2 CORRELATION ENERGY"]) - (mp2_ha - scf_ha)) < 1e-12
+
+
+# rq-c20746b1 rq-eddef743
+@requires_cclib
+def test_cclib_only_ccsd_t_does_not_emit_ccsd_qcvar():
+    """For a CCSD(T) job, cclib only stores the CCSD(T) total; no CCSD qcvar surfaces."""
+    in_mol = _make_water_mol()
+    scf_ha = -76.05
+    ccsdt_ha = -76.32
+    ccdata = _make_ccdata_with_attrs(
+        scfenergies=np.array([_ha_to_ev(scf_ha)]),
+        ccenergies=np.array([_ha_to_ev(ccsdt_ha)]),
+    )
+    with _patch_cclib(ccdata):
+        qcvars, _, _, _ = harvest(in_mol, "ccsd(t)", "")
+    assert "CCSD(T) TOTAL ENERGY" in qcvars
+    assert "CCSD TOTAL ENERGY" not in qcvars
+    assert abs(float(qcvars["CCSD(T) TOTAL ENERGY"]) - ccsdt_ha) < 1e-12
+
+
+# rq-0743e952
+def test_cclib_only_no_energy_regex_constants_in_harvester():
+    """The harvester module must not define energy-extraction regex constants."""
+    from qcengine.programs.gaussian import harvester as h
+    for name in ("_SCF_DONE_RE", "_MP2_ENERGY_RE", "_CCSD_ENERGY_RE",
+                 "_CCSD_T_ENERGY_RE", "_DISPERSION_ENERGY_RE"):
+        assert not hasattr(h, name), f"harvester still defines removed constant {name!r}"
+    # _fortran_float is retained for Hessian parsing
+    assert hasattr(h, "_fortran_float")
 
 
 # ---------------------------------------------------------------------------

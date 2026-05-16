@@ -53,11 +53,11 @@
     "type": "section"
   },
   "rq-0743e952": {
-    "decl": "## Other Regex Items",
+    "decl": "## Regex Use",
     "file": "gaussian/harvester",
     "level": 2,
     "refs": [],
-    "title": "Other Regex Items",
+    "title": "Regex Use",
     "type": "section"
   },
   "rq-0753cd03": {
@@ -304,6 +304,20 @@
     "title": "Method already starting with U is not double-prefixed",
     "type": "scenario"
   },
+  "rq-2816c5f6": {
+    "decl": "Scenario: SCF energy round-trips through cclib's convertor exactly",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "SCF energy round-trips through cclib's convertor exactly",
+    "type": "scenario"
+  },
+  "rq-28b5b1b3": {
+    "decl": "Scenario: Missing scfenergies for an HF/DFT job raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing scfenergies for an HF/DFT job raises ValueError",
+    "type": "scenario"
+  },
   "rq-29751017": {
     "decl": "## Background: Gaussian Dispersion Output",
     "file": "gaussian/dispersion",
@@ -332,6 +346,13 @@
     "file": "gaussian/integration-tests",
     "refs": [],
     "title": "Memory configuration is not overridden by conflicting DSL keywords",
+    "type": "scenario"
+  },
+  "rq-2abaea4c": {
+    "decl": "Scenario: Missing ccenergies for a CCSD job raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing ccenergies for a CCSD job raises ValueError",
     "type": "scenario"
   },
   "rq-2ad053f2": {
@@ -373,10 +394,10 @@
     "type": "scenario"
   },
   "rq-3136523b": {
-    "decl": "Scenario: Dispersion energy falls back to ccdata.dispersionenergies when regex misses",
+    "decl": "Scenario: No dispersionenergies attribute means no dispersion qcvars",
     "file": "gaussian/dispersion",
     "refs": [],
-    "title": "Dispersion energy falls back to ccdata.dispersionenergies when regex misses",
+    "title": "No dispersionenergies attribute means no dispersion qcvars",
     "type": "scenario"
   },
   "rq-3257a6f5": {
@@ -422,10 +443,10 @@
     "type": "scenario"
   },
   "rq-37f40e92": {
-    "decl": "- `\"HF TOTAL ENERGY\"` — from direct log parsing (SCF Done line), falling back to `ccdata.scfenergies[-1]` converted from eV.",
+    "decl": "- `\"HF TOTAL ENERGY\"` — from `ccdata.scfenergies[-1]` converted via `cclib.parser.utils.convertor(\"eV\", \"hartree\")`.",
     "file": "gaussian/harvester",
     "refs": [],
-    "title": "- `\"HF TOTAL ENERGY\"` — from direct log parsing (SCF Done line), falling back to `ccdata.scfenergies[-1]` converted from eV.",
+    "title": "- `\"HF TOTAL ENERGY\"` — from `ccdata.scfenergies[-1]` converted via `cclib.parser.utils.convertor(\"eV\", \"hartree\")`.",
     "type": "api-item"
   },
   "rq-3a18d6af": {
@@ -509,6 +530,13 @@
     "title": "Feature: Gaussian Harness — Runner",
     "type": "file"
   },
+  "rq-44289c40": {
+    "decl": "Scenario: Dispersion energy is read from ccdata.dispersionenergies",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Dispersion energy is read from ccdata.dispersionenergies",
+    "type": "scenario"
+  },
   "rq-44319e8c": {
     "decl": "Scenario: Conflict detection is case-insensitive on the keyword name",
     "file": "gaussian/dispersion",
@@ -557,6 +585,13 @@
     "file": "gaussian/runner",
     "refs": [],
     "title": "found() returns True when g16 and cclib are both available",
+    "type": "scenario"
+  },
+  "rq-4d653775": {
+    "decl": "Scenario: CCSD(T) total energy is read from ccenergies[-1]",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "CCSD(T) total energy is read from ccenergies[-1]",
     "type": "scenario"
   },
   "rq-4d683dac": {
@@ -725,6 +760,13 @@
     "title": "Gradient is unchanged when dispersion is present",
     "type": "scenario"
   },
+  "rq-69740b1b": {
+    "decl": "Scenario: Missing mpenergies for an MP2 job raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing mpenergies for an MP2 job raises ValueError",
+    "type": "scenario"
+  },
   "rq-6a889dea": {
     "decl": "Scenario: UHF energy is invariant to input frame scrambling",
     "file": "gaussian/integration-tests",
@@ -858,6 +900,13 @@
     "file": "gaussian/ghost-atoms",
     "refs": [],
     "title": "test_tricky_ghost accepts Gaussian's linear PG for the mB subject",
+    "type": "scenario"
+  },
+  "rq-7edf875d": {
+    "decl": "Scenario: No log-text regex is used for SCF, MP*, CC, or dispersion energies",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "No log-text regex is used for SCF, MP*, CC, or dispersion energies",
     "type": "scenario"
   },
   "rq-7f2c22fd": {
@@ -1145,6 +1194,14 @@
     "title": "`harvest` — confirmed behavior for labeled molecules",
     "type": "section"
   },
+  "rq-a3c37e5d": {
+    "decl": "### cclib Limitation: Full Cartesian Hessian not extracted",
+    "file": "gaussian/harvester",
+    "level": 3,
+    "refs": [],
+    "title": "cclib Limitation: Full Cartesian Hessian not extracted",
+    "type": "section"
+  },
   "rq-a4c449da": {
     "decl": "Scenario: compute() raises ResourceError on memory allocation failure",
     "file": "gaussian/runner",
@@ -1182,10 +1239,10 @@
     "type": "section"
   },
   "rq-a83b7d5f": {
-    "decl": "Scenario: Dispersion energy is parsed via regex when the log contains the line",
+    "decl": "Scenario: Dispersion energy is read from ccdata.dispersionenergies via cclib's convertor",
     "file": "gaussian/dispersion",
     "refs": [],
-    "title": "Dispersion energy is parsed via regex when the log contains the line",
+    "title": "Dispersion energy is read from ccdata.dispersionenergies via cclib's convertor",
     "type": "scenario"
   },
   "rq-a88c706f": {
@@ -1340,11 +1397,11 @@
     "type": "section"
   },
   "rq-c20746b1": {
-    "decl": "## Direct Energy Parsing",
+    "decl": "## Energy Extraction",
     "file": "gaussian/harvester",
     "level": 2,
     "refs": [],
-    "title": "Direct Energy Parsing",
+    "title": "Energy Extraction",
     "type": "section"
   },
   "rq-c266b9bb": {
@@ -1560,6 +1617,13 @@
     "title": "Background: Gaussian Ghost-Atom Syntax",
     "type": "section"
   },
+  "rq-dd7024df": {
+    "decl": "Scenario: MP2 total energy is read from mpenergies[-1][-1]",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "MP2 total energy is read from mpenergies[-1][-1]",
+    "type": "scenario"
+  },
   "rq-dea9f7c9": {
     "decl": "## Gherkin Scenarios",
     "file": "gaussian/dispersion",
@@ -1569,10 +1633,10 @@
     "type": "section"
   },
   "rq-df49b3b8": {
-    "decl": "Scenario: No dispersion in log produces no dispersion qcvars",
+    "decl": "Scenario: No dispersionenergies attribute produces no dispersion qcvars",
     "file": "gaussian/dispersion",
     "refs": [],
-    "title": "No dispersion in log produces no dispersion qcvars",
+    "title": "No dispersionenergies attribute produces no dispersion qcvars",
     "type": "scenario"
   },
   "rq-df7eb0c3": {
@@ -1588,6 +1652,13 @@
     "file": "gaussian/input-builder",
     "refs": [],
     "title": "Unsupported driver raises InputError",
+    "type": "scenario"
+  },
+  "rq-e05f5cfe": {
+    "decl": "Scenario: Missing ccenergies for a CCSD(T) job raises ValueError",
+    "file": "gaussian/harvester",
+    "refs": [],
+    "title": "Missing ccenergies for a CCSD(T) job raises ValueError",
     "type": "scenario"
   },
   "rq-e1150329": {
@@ -1747,10 +1818,10 @@
     "type": "section"
   },
   "rq-f49de098": {
-    "decl": "Scenario: Methods without dispersion suffix do not get dispersion qcvars even if log has the line",
+    "decl": "Scenario: Methods without dispersion suffix still get the generic qcvar when dispersionenergies is present",
     "file": "gaussian/dispersion",
     "refs": [],
-    "title": "Methods without dispersion suffix do not get dispersion qcvars even if log has the line",
+    "title": "Methods without dispersion suffix still get the generic qcvar when dispersionenergies is present",
     "type": "scenario"
   },
   "rq-f4cbb515": {
@@ -1782,11 +1853,11 @@
     "type": "scenario"
   },
   "rq-f6537c40": {
-    "decl": "### cclib Limitations",
+    "decl": "### cclib Energy Precision",
     "file": "gaussian/harvester",
     "level": 3,
     "refs": [],
-    "title": "cclib Limitations",
+    "title": "cclib Energy Precision",
     "type": "section"
   },
   "rq-f8ce079b": {

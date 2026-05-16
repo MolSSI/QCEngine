@@ -20,9 +20,10 @@ The `ccdata` object exposes parsed attributes used as follows:
 
 | cclib attribute | Units (cclib) | Conversion | QCEngine usage |
 |-----------------|---------------|------------|----------------|
-| `ccdata.scfenergies[-1]` | eV | `cclib.parser.utils.convertor("eV"→"hartree")` (fallback only) | SCF/HF/DFT total energy |
-| `ccdata.mpenergies[-1][-1]` | eV | `cclib...convertor` (fallback only) | MP2 total energy |
-| `ccdata.ccenergies[-1]` | eV | `cclib...convertor` (fallback only) | CCSD or CCSD(T) total energy |
+| `ccdata.scfenergies[-1]` | eV | `cclib.parser.utils.convertor("eV"→"hartree")` | SCF/HF/DFT total energy |
+| `ccdata.mpenergies[-1][-1]` | eV | `cclib.parser.utils.convertor("eV"→"hartree")` | MP2 total energy |
+| `ccdata.ccenergies[-1]` | eV | `cclib.parser.utils.convertor("eV"→"hartree")` | CCSD or CCSD(T) total energy |
+| `ccdata.dispersionenergies[-1]` | eV | `cclib.parser.utils.convertor("eV"→"hartree")` | Empirical dispersion correction (see [[dispersion]]) |
 | `ccdata.grads[-1]` | Hartree/Bohr | negate (forces → gradient) | Gradient array |
 | `ccdata.atomcoords[-1]` | Ångström | × Bohr/Å | Geometry for output molecule (standard orientation) |
 | `ccdata.atomnos` | atomic numbers | via qcel periodic table | Element symbols (no-ghost branch only) |
@@ -33,39 +34,43 @@ The `ccdata` object exposes parsed attributes used as follows:
 | `ccdata.moments[1]` | Debye | none | Dipole moment vector |
 | `ccdata.atomcharges["mulliken"]` | e | none | Mulliken partial charges |
 
-### cclib Limitations <!-- rq-f6537c40 -->
+### cclib Energy Precision <!-- rq-f6537c40 -->
 
-Two significant cclib limitations require direct log parsing as the primary strategy
-for energies and the Hessian:
+cclib stores parsed energies in electron volts. For Gaussian, the parser
+reads the Hartree value from a line such as `SCF Done: E(RHF) =
+-76.0571491640 A.U.`, calls `utils.float()` on the token (just `float()` with
+D-exponent handling), multiplies by cclib's Hartree→eV factor (`27.21138505`),
+and stores the result on `ccdata.scfenergies` (and analogously on
+`mpenergies`, `ccenergies`, `dispersionenergies`).
 
-**1. Energy precision loss when reversing cclib's eV storage with a foreign factor:**
+The harvester reverses this with `cclib.parser.utils.convertor(x, "eV",
+"hartree")`, which uses the same `27.21138505` factor in both directions
+inside cclib's `_convertor` dict. The round-trip precision is:
 
-cclib internally stores energies in electron volts. It parses the Hartree value
-from the Gaussian log, multiplies by its internal Hartree→eV factor
-(`27.21138505`), and stores the result on `ccdata.scfenergies`, `ccdata.mpenergies`,
-`ccdata.ccenergies`, and `ccdata.dispersionenergies`. If the harvester reverses
-this with qcelemental's factor (`qcel.constants.conversion_factor("eV", "hartree")`
-= `0.036749322481536`, corresponding to `27.21138602` Hartree→eV — the values
-disagree at the 8th decimal place because they were derived from different
-CODATA cycles), the round-trip introduces a relative error of approximately
-`3.6e-9`. For typical SCF energies (~100 Hartree) that's an absolute error of
-~3.6e-6 Hartree, exceeding the cross-program tolerances (`atol = 2e-7`) and
-the empirical-dispersion test tolerances.
+| Step | Loss |
+|------|------|
+| Gaussian text → Python `float` via `utils.float()` | none (the text fits within IEEE-754 double precision) |
+| `× cclib's Hartree→eV factor` | none beyond 1 ULP of float multiplication |
+| `× cclib's eV→Hartree factor` (via `cclib.parser.utils.convertor`) | none beyond 1 ULP |
+| **End-to-end Ha → eV → Ha round-trip** | **≤ 1 ULP (~1×10⁻¹⁴ Ha for ~100-Ha energies); often exactly 0** |
 
-**Resolution (two layers):**
+This is 7+ orders of magnitude below any tolerance the test suite cares
+about (e.g. `atol = 2e-7` for cross-program alignment).
 
-1. *Primary path:* energies are parsed directly from the Gaussian log via regex
-   (see "Direct Energy Parsing" below). This preserves Gaussian's full printed
-   precision (up to 12 significant digits) and avoids cclib's eV detour entirely.
-2. *Fallback path:* when the regex misses, the harvester reads the eV-stored
-   value from `ccdata` and converts back via `cclib.parser.utils.convertor(x,
-   "eV", "hartree")` — cclib's own converter, which uses the same `27.21138505`
-   factor in both directions. The forward/reverse pair is structurally exact
-   (single factor, both directions in the same `_convertor` dict), so the
-   round-trip introduces zero round-trip error and is forward-compatible with
-   any future CODATA refresh inside cclib.
+The reverse step **must** use `cclib.parser.utils.convertor` rather than
+`qcel.constants.conversion_factor("eV", "hartree")`: qcel and cclib carry
+different CODATA Hartree↔eV factors (qcel: `27.21138602`; cclib:
+`27.21138505`), and reversing cclib's eV-stored value with qcel's factor
+introduces a `~3.6×10⁻⁶ Ha` bias for typical SCF energies that exceeds the
+cross-program tolerance.
 
-**2. Full Cartesian Hessian not extracted by cclib:**
+All SCF, MP*, CC, and dispersion energies are read directly from cclib's
+parsed attributes (`ccdata.scfenergies`, `ccdata.mpenergies`,
+`ccdata.ccenergies`, `ccdata.dispersionenergies`) via this converter. No
+log-text regex is used for energies — see "Regex Use" below for the items
+that warrant regex.
+
+### cclib Limitation: Full Cartesian Hessian not extracted <!-- rq-a3c37e5d -->
 
 cclib's Gaussian parser does populate `ccdata.vibfconsts` (per-normal-mode reduced
 force constants, shape `(nmodes,)`) from the `"Frc consts --"` lines of a `Freq`
@@ -94,23 +99,37 @@ preserves this sign convention in `ccdata.grads`. The gradient (= +dE/dR) is obt
 gradient = -ccdata.grads[-1]   # shape (natoms, 3)
 ```
 
-## Direct Energy Parsing <!-- rq-c20746b1 -->
+## Energy Extraction <!-- rq-c20746b1 -->
 
-Energies are parsed directly from the Gaussian log in Hartree to avoid the cclib eV
-round-trip. The following regex patterns are used:
+Energies are read from cclib's parsed attributes and converted eV → Hartree
+via `cclib.parser.utils.convertor`. The per-method attribute mapping is:
 
-| Energy | Regex | Format |
-|--------|-------|--------|
-| SCF/HF/DFT | `r"SCF Done:\s+E\(\S+\)\s*=\s*([-\d.]+)"` | Plain float |
-| MP2 | `r"EUMP2\s*=\s*([-\d.DE+]+)"` | Fortran D-exponent |
-| CCSD(T) | `r"CCSD\(T\)=\s*([-\d.DE+]+)"` | Fortran D-exponent |
-| CCSD | `r"DE\(Corr\)=\s*[-\d.]+\s+E\(CORR\)=\s*([-\d.]+)"` (last match) | Plain float |
+| Method | cclib source | qcvars set |
+|--------|--------------|------------|
+| `"hf"` / `"scf"` / DFT (default) | `ccdata.scfenergies[-1]` | `HF TOTAL ENERGY`, `SCF TOTAL ENERGY`, `CURRENT REFERENCE ENERGY`, `CURRENT ENERGY` |
+| `"mp2"` | `ccdata.mpenergies[-1][-1]` | adds `MP2 TOTAL ENERGY`, `MP2 CORRELATION ENERGY`; `CURRENT ENERGY` = MP2 total |
+| `"ccsd"` | `ccdata.ccenergies[-1]` | adds `CCSD TOTAL ENERGY`, `CCSD CORRELATION ENERGY`; `CURRENT ENERGY` = CCSD total |
+| `"ccsd(t)"` | `ccdata.ccenergies[-1]` | adds `CCSD(T) TOTAL ENERGY`, `CCSD(T) CORRELATION ENERGY`; `CURRENT ENERGY` = CCSD(T) total |
+| `"b3lyp-d3"` (etc., dispersion suffix) | `scfenergies[-1]` + `dispersionenergies[-1]` | per `dispersion.md` |
 
-Fortran D-exponent values (e.g. `-0.76276030623D+02`) are converted by replacing
-`D` with `E` before calling `float()`.
+**`mpenergies[-1][-1]`** retrieves the highest-order Møller–Plesset energy
+cclib stored for the last step (e.g. `[[MP2]]` for an MP2-only job).
 
-If a regex does not match, the harvester falls back to cclib's eV-based energy with
-the qcelemental conversion factor.
+**`ccenergies[-1]`** retrieves the highest-level coupled-cluster energy:
+the CCSD total for a CCSD job, the CCSD(T) total for a CCSD(T) job. cclib
+does not separately store the intermediate CCSD value inside a CCSD(T) job,
+so no CCSD qcvar is surfaced inside a CCSD(T) run.
+
+**Error handling:** if the cclib attribute the method requires is absent
+(`hasattr` is false) or empty (zero-length array), the harvester raises
+`ValueError(...)` with a message naming the missing attribute. The runner
+wraps this in `UnknownError`.
+
+**Method-string normalisation:** `"ccsd(t,full)" → "ccsd(t)"` and
+`"mp2(full)" → "mp2"` are applied at the top of `harvest()` so the above
+branching matches. Dispersion suffixes (e.g. `"b3lyp-d3"`) are stripped to
+recover the functional name; the unknown-functional branch falls through to
+the SCF/DFT case.
 
 ## Hessian Parsing <!-- rq-c5b27d26 -->
 
@@ -130,13 +149,19 @@ orientation. This is significant for frame alignment:
   standard/calc frame. The Hessian must be transformed from input→calc frame using
   `in_mol.align(calc_mol)`.
 
-## Other Regex Items <!-- rq-0743e952 -->
+## Regex Use <!-- rq-0743e952 -->
 
-| Item | Pattern |
-|------|---------|
-| Normal termination | `"Normal termination of Gaussian"` in log |
-| Abnormal termination | absence of the above line, or `"Error termination"` |
-| Gaussian version (for provenance) | `r"Gaussian\s+(\d+),\s+Revision\s+([\w.]+),"` |
+Log-text regex is used only for the following non-energy items:
+
+| Item | Pattern | Why regex (not cclib) |
+|------|---------|-----------------------|
+| Normal termination | `"Normal termination of Gaussian"` substring | cclib doesn't surface a success/failure flag |
+| Abnormal termination | absence of the above line, or `"Error termination"` | same |
+| Gaussian version (for provenance) | `r"Gaussian\s+(\d+),\s+Revision\s+([\w.]+),"` | extracted from the startup banner before any cclib parse |
+| Hessian (Cartesian, full 3N×3N) | `"Force constants in Cartesian coordinates:"` block, parsed by `_parse_force_constants()` | cclib does not populate `ccdata.hessian` for Gaussian (see "cclib Limitation: Full Cartesian Hessian not extracted") |
+
+The Fortran D-exponent helper `_fortran_float()` is retained for the Hessian
+block.
 
 ## Feature API <!-- rq-1a01df8f -->
 
@@ -183,7 +208,7 @@ The following variables are placed in `qcvars` based on the method:
 
 **All calculations**:
 - `"NUCLEAR REPULSION ENERGY"` — from parsed geometry. <!-- rq-0753cd03 -->
-- `"HF TOTAL ENERGY"` — from direct log parsing (SCF Done line), falling back to `ccdata.scfenergies[-1]` converted from eV. <!-- rq-37f40e92 -->
+- `"HF TOTAL ENERGY"` — from `ccdata.scfenergies[-1]` converted via `cclib.parser.utils.convertor("eV", "hartree")`. <!-- rq-37f40e92 -->
 - `"SCF TOTAL ENERGY"` — same value as `"HF TOTAL ENERGY"` (required by standard suite contracts). <!-- rq-f59a07b8 -->
 - `"CURRENT REFERENCE ENERGY"` — same value as `"HF TOTAL ENERGY"` (required by standard suite contracts). <!-- rq-0d2711f1 -->
 - `"CURRENT ENERGY"` — set to the highest-level energy available (see below). <!-- rq-c5165f1f -->
@@ -200,7 +225,7 @@ The following variables are placed in `qcvars` based on the method:
 | `"hf"` or `"scf"` or DFT | `"HF TOTAL ENERGY"`, `"CURRENT ENERGY"` |
 | `"mp2"` | `"MP2 CORRELATION ENERGY"` (= MP2 total − HF total), `"MP2 TOTAL ENERGY"`, `"CURRENT ENERGY"` |
 | `"ccsd"` | `"CCSD CORRELATION ENERGY"`, `"CCSD TOTAL ENERGY"`, `"CURRENT ENERGY"` |
-| `"ccsd(t)"` | `"CCSD CORRELATION ENERGY"`, `"CCSD TOTAL ENERGY"`, `"CCSD(T) CORRELATION ENERGY"`, `"CCSD(T) TOTAL ENERGY"`, `"CURRENT ENERGY"` |
+| `"ccsd(t)"` | `"CCSD(T) CORRELATION ENERGY"`, `"CCSD(T) TOTAL ENERGY"`, `"CURRENT ENERGY"` (cclib does not separately store the CCSD intermediate inside a CCSD(T) job, so no `"CCSD TOTAL ENERGY"` is set) |
 
 **Properties driver extras** (when cclib attributes are available):
 - `"MULLIKEN CHARGES"` — from `ccdata.atomcharges["mulliken"]`. <!-- rq-c7fd08b5 -->
@@ -387,6 +412,72 @@ Feature: Gaussian harvester
     Given a log_content string that cclib.io.ccopen cannot parse
     When harvest(in_mol, "hf", log_content) is called
     Then the cclib exception propagates to the caller
+
+  # --- Missing cclib energy attributes ---
+
+  @rq-28b5b1b3
+  Scenario: Missing scfenergies for an HF/DFT job raises ValueError
+    Given a cclib parse where ccdata has no "scfenergies" attribute (or it is empty)
+    When harvest(in_mol, "hf", log_content) is called
+    Then ValueError is raised
+    And the message names "scfenergies"
+
+  @rq-69740b1b
+  Scenario: Missing mpenergies for an MP2 job raises ValueError
+    Given a cclib parse where scfenergies is populated but mpenergies is absent
+    When harvest(in_mol, "mp2", log_content) is called
+    Then ValueError is raised
+    And the message names "mpenergies"
+
+  @rq-2abaea4c
+  Scenario: Missing ccenergies for a CCSD job raises ValueError
+    Given a cclib parse where scfenergies is populated but ccenergies is absent
+    When harvest(in_mol, "ccsd", log_content) is called
+    Then ValueError is raised
+    And the message names "ccenergies"
+
+  @rq-e05f5cfe
+  Scenario: Missing ccenergies for a CCSD(T) job raises ValueError
+    Given a cclib parse where scfenergies is populated but ccenergies is absent
+    When harvest(in_mol, "ccsd(t)", log_content) is called
+    Then ValueError is raised
+
+  # --- Numerical consistency ---
+
+  @rq-2816c5f6
+  Scenario: SCF energy round-trips through cclib's convertor exactly
+    Given a Gaussian log with "SCF Done: E(RHF) = -76.0571491640 A.U."
+    And cclib stores ccdata.scfenergies[-1] = convertor(-76.0571491640, "hartree", "eV")
+    When harvest(in_mol, "hf", log_content) is called
+    Then qcvars["HF TOTAL ENERGY"] equals -76.0571491640 within 1 ULP (~1e-14 Hartree)
+
+  @rq-dd7024df
+  Scenario: MP2 total energy is read from mpenergies[-1][-1]
+    Given a Gaussian MP2 log where ccdata.mpenergies[-1] has one entry MP2
+    When harvest(in_mol, "mp2", log_content) is called
+    Then qcvars["MP2 TOTAL ENERGY"] equals convertor(mpenergies[-1][-1], "eV", "hartree")
+
+  @rq-4d653775
+  Scenario: CCSD(T) total energy is read from ccenergies[-1]
+    Given a Gaussian CCSD(T) log where ccdata.ccenergies[-1] is the CCSD(T) total
+    When harvest(in_mol, "ccsd(t)", log_content) is called
+    Then qcvars["CCSD(T) TOTAL ENERGY"] equals convertor(ccenergies[-1], "eV", "hartree")
+    And qcvars does NOT contain "CCSD TOTAL ENERGY"
+
+  @rq-44289c40
+  Scenario: Dispersion energy is read from ccdata.dispersionenergies
+    Given a B3LYP-D3 log where ccdata.dispersionenergies[-1] is the dispersion contribution (eV)
+    When harvest(in_mol, "b3lyp-d3", log_content) is called
+    Then qcvars["DISPERSION CORRECTION ENERGY"] equals convertor(dispersionenergies[-1], "eV", "hartree")
+
+  # --- Source-level structure ---
+
+  @rq-7edf875d
+  Scenario: No log-text regex is used for SCF, MP*, CC, or dispersion energies
+    Given an inspection of the harvester source
+    Then the module contains no `_SCF_DONE_RE`, `_MP2_ENERGY_RE`, `_CCSD_ENERGY_RE`,
+        `_CCSD_T_ENERGY_RE`, or `_DISPERSION_ENERGY_RE` constants
+    And the Fortran D-exponent helper `_fortran_float()` is retained for Hessian parsing
 
   # --- Normal termination check (regex) ---
 
