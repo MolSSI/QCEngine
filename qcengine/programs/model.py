@@ -101,6 +101,8 @@ class ProgramHarness(BaseModel, abc.ABC):
                     from qcelemental.models._v1v2 import AtomicInput as v1v2_model
 
                     mdl = model_wrapper(data, v1v2_model)
+        else:
+            raise TypeError(f"Unsupported input type for build_input_model: {type(data).__name__}")
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:

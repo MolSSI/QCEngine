@@ -10,9 +10,8 @@ issues = "https://github.com/MolSSI/QCEngine/issues"
 
 [project]
 name = "qcengine"
-#version = "0.31.0"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 description = "A compute wrapper for Quantum Chemistry, ingesting and producing QCSchema for a variety of QC programs."
 authors = [
   { name="The QCArchive Development Team", email="qcarchive@molssi.org" },
@@ -24,7 +23,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -38,7 +36,7 @@ dependencies = [
     "pyyaml",
     "py-cpuinfo",
     "psutil",
-    "qcelemental>=0.50.0rc5,<0.70.0",
+    "qcelemental>=0.50.0,<0.70.0",
     "pydantic >=2.11; python_version <'3.14'",
     "pydantic >=2.12; python_version >='3.14'",
     "pydantic-settings",
@@ -59,7 +57,7 @@ lint = [
     # "autoflake",
     # "flake8",
 ]
-docs = [  # probably >=py39
+docs = [
     "numpydoc",
     # "docutils",
     "sphinx >=7.0.0",
@@ -68,8 +66,6 @@ docs = [  # probably >=py39
     "autodoc-pydantic>=2.0",
     # "sphinx-automodapi",
     # "sphinx-autodoc-typehints",
-    # "pydantic ==2.5.0",  # for now
-    # "pydantic-settings ==2.2.0",  # for now
 ]
 
 [project.scripts]
@@ -77,14 +73,16 @@ qcengine = "qcengine.cli:main"
 
 [tool.black]
 line-length = 120
-target-version = ['py38']
+target-version = ['py310']
 
 [tool.isort]
 profile = "black"
 line_length = 120
 
 [tool.setuptools]
-packages = ["qcengine"]
+
+[tool.setuptools.packages.find]
+include = ["qcengine*"]
 
 [aliases]
 test="pytest"

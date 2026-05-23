@@ -53,8 +53,8 @@ class OptKingProcedure(ProcedureHarness):
         return self.version_cache[which_prog]
 
     def compute(self, input_model: "OptimizationInput", config: "TaskConfig") -> "OptimizationResult":
-        if self.found(raise_error=True):
-            import optking
+        self.found(raise_error=True)
+        import optking
 
         log_stream = StringIO()
         logname = f"{optking.log_name}{optking.__name__}"
