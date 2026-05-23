@@ -25,6 +25,6 @@ dependencies:
   - pytest>=4.0.0
   - pytest-cov
   - codecov
-
+  - pip
   #- pip:
   #   - git+https://github.com/MolSSI/qcarchive-sphinx-theme#egg=qcarchive_sphinx_theme
