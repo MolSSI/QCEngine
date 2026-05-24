@@ -70,6 +70,7 @@ class TorchANIHarness(ProgramHarness):
               - m((species, coordinates))
               - m(species, coordinates, *extra_args)
             """
+
             def __init__(self, base_model):
                 super().__init__()
                 self.base = base_model
@@ -126,7 +127,7 @@ class TorchANIHarness(ProgramHarness):
         if name not in ani_models:
             raise InputError(f"TorchANI only accepts methods: {list(ani_models.keys())}")
 
-        base = ani_models[name]()         # the actual TorchANI model
+        base = ani_models[name]()  # the actual TorchANI model
         wrapped = EnsembleEnergies(base)  # your compatibility wrapper
         self._CACHE[name] = wrapped
 
@@ -166,6 +167,7 @@ class TorchANIHarness(ProgramHarness):
 
             # Older TorchANI (e.g., 2.2.4): convert to model indices using model.species
             from torchani.utils import ChemicalSymbolsToInts
+
             if not hasattr(model, "species"):
                 raise RuntimeError(
                     "TorchANI version lacks ChemicalSymbolsToAtomicNumbers, and model has no .species; "

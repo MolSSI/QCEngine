@@ -12,7 +12,7 @@ from .config import get_config
 from .exceptions import InputError, RandomError
 from .procedures import get_procedure
 from .programs import get_program
-from .util import QCEL_V1V2_SHIM_CODE, compute_wrapper, environ_context, handle_output_metadata, model_wrapper
+from .util import QCEL_V1V2_SHIM_CODE, compute_wrapper, environ_context, handle_output_metadata
 
 if TYPE_CHECKING:
     from pydantic.main import BaseModel
