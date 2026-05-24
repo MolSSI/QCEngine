@@ -34,7 +34,6 @@ H  0.0  1.494  1.027
     model={"method": "SCF", "basis": "sto-3g"},
     keywords={"scf_type": "df"}
     )
-```
 
 >>> inp = qcel.models.AtomicInput(  # QCSchema v2
     molecule=mol,

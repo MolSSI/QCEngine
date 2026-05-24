@@ -76,7 +76,7 @@ class Psi4Harness(ProgramHarness):
                         psiapi = which_import("psi4", return_bool=True)
 
         if psiapi and not psithon:
-            with popen([sys.executable, "-Xgil=1", "-c", "import psi4; print(psi4.executable)"]) as exc:
+            with popen([sys.executable, "-X", "gil=1", "-c", "import psi4; print(psi4.executable)"]) as exc:
                 exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
             if os.environ.get("QCNG_RELAX_PSI4_DETECTION"):

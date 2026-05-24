@@ -5,7 +5,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
 from pydantic import BaseModel, ConfigDict
 
 from qcengine.config import TaskConfig
-from qcengine.exceptions import KnownErrorException
+from qcengine.exceptions import InputError, KnownErrorException
 
 from ..util import model_wrapper
 
@@ -102,7 +102,7 @@ class ProgramHarness(BaseModel, abc.ABC):
 
                     mdl = model_wrapper(data, v1v2_model)
         else:
-            raise TypeError(f"Unsupported input type for build_input_model: {type(data).__name__}")
+            raise InputError(f"Unsupported input type for build_input_model: {type(data).__name__}")
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:

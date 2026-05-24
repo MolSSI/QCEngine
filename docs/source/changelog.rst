@@ -50,7 +50,7 @@ Enhancements
 - (:pr:`504`) Psi4 - Other projects keep printing warnings to stderr that disrupt
   Psi4 detection (QCElemental, Einsums, Python). This (1) fends off freethreading/GIL
   messages from Python itself and (2) establishes an environment variable
-  ``QCNG_RELAX_PSI4_DETECTION`` that can be set to ignore stdout so that any new
+  ``QCNG_RELAX_PSI4_DETECTION`` that can be set to ignore stderr so that any new
   cases don't require a new QCEngine release. (QCElemental and Einsums have been
   fixed upstream as of 0.50.0rc5 and 1.1.3, respectively.)
 
