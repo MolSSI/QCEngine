@@ -47,7 +47,7 @@ New Features
 
 Enhancements
 ++++++++++++
-- (:pr:`xxx`) Psi4 - Other projects keep printing warnings to stderr that disrupt
+- (:pr:`504`) Psi4 - Other projects keep printing warnings to stderr that disrupt
   Psi4 detection (QCElemental, Einsums, Python). This (1) fends off freethreading/GIL
   messages from Python itself and (2) establishes an environment variable
   ``QCNG_RELAX_PSI4_DETECTION`` that can be set to ignore stdout so that any new
@@ -56,6 +56,7 @@ Enhancements
 
 Bug Fixes
 +++++++++
+- (:pr:`504`) Misc - Linting, pip addition, CodeQL, and Copilot fixes.
 
 Misc.
 +++++

@@ -23,7 +23,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - conda-forge/label/qcelemental_dev::qcelemental
+  - qcelemental>=0.50.0
   - msgpack-python
 
     # Testing

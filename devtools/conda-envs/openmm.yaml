@@ -18,7 +18,7 @@ dependencies:
   - pyyaml
   - py-cpuinfo
   - psutil
-  - conda-forge/label/qcelemental_dev::qcelemental
+  - qcelemental>=0.50.0
   - pydantic >=2
   - pydantic-settings
   # - pint <0.22  # needed for a while see #416

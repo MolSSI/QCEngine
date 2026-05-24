@@ -12,7 +12,7 @@ dependencies:
   - python
   - py-cpuinfo
   - psutil
-  - conda-forge/label/qcelemental_dev::qcelemental>=0.50.0rc5
+  - qcelemental>=0.50.0
   - qcmanybody>=0.7.0
   - pydantic=2
   - pydantic-settings

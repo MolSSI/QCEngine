@@ -1,7 +1,7 @@
 QCEngine
 ========
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/.github%2Fworkflows%2FCI.yaml?branch=master&logo=github&link=https%3A%2F%2Fgithub.com%2FMolSSI%2FQCEngine%2Factions%3Fquery%3Dworkflow%253ACI)
+![Build Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/CI.yml?branch=master&logo=github&link=https%3A%2F%2Fgithub.com%2FMolSSI%2FQCEngine%2Factions%3Fquery%3Dworkflow%253ACI)
 [![codecov](https://img.shields.io/codecov/c/github/MolSSI/QCEngine.svg?logo=Codecov&logoColor=white)](https://codecov.io/gh/MolSSI/QCEngine)
 [![Documentation
 Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/CI.yaml?label=docs&logo=readthedocs&logoColor=white)](https://molssi.github.io/QCEngine/)
