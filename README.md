@@ -1,14 +1,18 @@
 QCEngine
 ========
-[![Build Status](https://github.com/MolSSI/QCEngine/workflows/CI/badge.svg?branch=master)](https://github.com/MolSSI/QCEngine/actions?query=workflow%3ACI)
+
+![Build Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/.github%2Fworkflows%2FCI.yaml?branch=master&logo=github&link=https%3A%2F%2Fgithub.com%2FMolSSI%2FQCEngine%2Factions%3Fquery%3Dworkflow%253ACI)
 [![codecov](https://img.shields.io/codecov/c/github/MolSSI/QCEngine.svg?logo=Codecov&logoColor=white)](https://codecov.io/gh/MolSSI/QCEngine)
-[![Documentation Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/CI.yml?label=docs&logo=readthedocs&logoColor=white)](https://molssi.github.io/QCEngine/)
-[![Conda (channel only)](https://img.shields.io/conda/vn/conda-forge/qcengine?color=blue&logo=anaconda&logoColor=white)](https://anaconda.org/conda-forge/qcengine)
-[![Chat on Slack](https://img.shields.io/badge/chat-on_slack-808493.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcarchive/shared_invite/enQtNDIzNTQ2OTExODk0LTE3MWI0YzBjNzVhNzczNDM0ZTA5MmQ1ODcxYTc0YTA1ZDQ2MTk1NDhlMjhjMmQ0YWYwOGMzYzJkZTM2NDlmOGM)
-![python](https://img.shields.io/badge/python-3.7+-blue.svg)
+[![Documentation
+Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/CI.yaml?label=docs&logo=readthedocs&logoColor=white)](https://molssi.github.io/QCEngine/)
+[![Chat on Slack](https://img.shields.io/badge/chat-on_slack-green.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcarchive/shared_invite/zt-3calopudd-2rtUC~XN1tj1Zn9MHkV6GQ)
+![python](https://img.shields.io/badge/python-3.10+-blue.svg)
+
+**Documentation:** [GitHub Pages](https://molssi.github.io/QCEngine/)
 
 <!--[![Azure Build Status](https://dev.azure.com/MolSSI/QCArchive/_apis/build/status/MolSSI.QCEngine?branchName=master)](https://dev.azure.com/MolSSI/QCArchive/_build/latest?definitionId=5&branchName=master)-->
-Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QCSchema)) for quantum chemistry.
+<!--Quantum chemistry program executor and IO standardizer ([QCSchema](https://github.com/MolSSI/QCSchema)) for quantum chemistry.-->
+Quantum chemistry program executor and IO standardizer (QCSchema) for quantum chemistry.
 
 # Example
 
@@ -24,12 +28,21 @@ H  0.0 -1.494  1.027
 H  0.0  1.494  1.027
 """)
 
->>> inp = qcel.models.AtomicInput(
+>>> inp = qcel.models.AtomicInput(  # QCSchema v1
     molecule=mol,
     driver="energy",
     model={"method": "SCF", "basis": "sto-3g"},
     keywords={"scf_type": "df"}
     )
+```
+
+>>> inp = qcel.models.AtomicInput(  # QCSchema v2
+    molecule=mol,
+    specification={
+        "driver": "energy",
+        "model": {"method": "SCF", "basis": "sto-3g"},
+        "keywords": {"scf_type": "df"}
+    })
 ```
 
 These input specifications can be executed with the ``compute`` function along with a program specifier:
