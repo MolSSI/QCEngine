@@ -289,6 +289,10 @@ def test_compute_output_table(goodcalc, input_data, return_version, return_dict,
                 "molecule": h2,
                 "specification": {"driver": "energy", "model": {"method": method, "basis": "sto-3g"}},
             }
+        else:
+            pytest.fail(f"Unsupported input_data value for Atomic model: {input_data}")
+    else:
+        pytest.fail(f"Unsupported model value: {model}")
 
     if sys.version_info >= (3, 14):
         if envshim:
