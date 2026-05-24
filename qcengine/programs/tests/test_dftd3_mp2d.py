@@ -8,7 +8,7 @@ from qcelemental.testing import compare, compare_recursive, compare_values, tnm
 
 import qcengine as qcng
 from qcengine.programs import empirical_dispersion_resources
-from qcengine.testing import checkver_and_convert, from_v2, is_program_new_enough, schema_versions, using, uusing
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using, uusing
 
 
 @uusing("classic-dftd3")
@@ -78,7 +78,7 @@ def test_dftd3_error(schema_versions, request):
             input_data["driver"] = "properties"
 
         input_data = checkver_and_convert(input_data, request.node.name, "pre")
-        ret = qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
+        qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
 
     assert "properties not implemented" in str(exc.value)
 
@@ -91,7 +91,7 @@ def test_dftd3_error(schema_versions, request):
             input_data["model"]["method"] = "b3lyp-quadD"
 
         input_data = checkver_and_convert(input_data, request.node.name, "pre")
-        ret = qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
+        qcng.compute(input_data, "dftd3", raise_error=True, return_version=retver)
 
     assert "correction level" in str(exc.value)
 
