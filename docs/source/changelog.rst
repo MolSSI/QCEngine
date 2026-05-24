@@ -32,6 +32,29 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+.. _`sec:cl0500`:
+
+v0.50.0 / 2026-MM-DD (Unreleased)
+--------------------
+
+:docs:`v0.50.0` for current. :docs:`v0.34.1` for QCSchema v1.
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+
+
 .. _`sec:cl0500rc4`:
 
 v0.50.0rc4 / 2026-05-04 (Prerelease)

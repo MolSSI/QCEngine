@@ -98,7 +98,8 @@ class NWChemDriverProcedure(ProcedureHarness):
             final_molecule=final_step.molecule,
             trajectory_results=atomic_results,
             trajectory_properties=[
-                {k: v for k, v in grad.properties.model_dump() if k in optsubproperties} for grad in atomic_results
+                {k: v for k, v in grad.properties.model_dump().items() if k in optsubproperties}
+                for grad in atomic_results
             ],
             properties={
                 "return_energy": atomic_results[-1].properties.return_energy,
