@@ -280,6 +280,7 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
 def test_compute_output_table(goodcalc, input_data, return_version, return_dict, xptd, model, envshim, monkeypatch):
     h2 = qcng.get_molecule("hydrogen", return_dict=True)
     method = "hf" if goodcalc else "standard_model_of_particle_physics"
+    inp = None
 
     if model == "Atomic":
         if input_data == 1:
