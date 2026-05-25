@@ -1,7 +1,7 @@
 QCEngine
 ========
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/.github%2Fworkflows%2FCI.yml?branch=master&logo=github&link=https%3A%2F%2Fgithub.com%2FMolSSI%2FQCEngine%2Factions%3Fquery%3Dworkflow%253ACI)
+[![Build Status](https://github.com/MolSSI/QCEngine/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/MolSSI/QCEngine/actions/workflows/CI.yml)
 [![codecov](https://img.shields.io/codecov/c/github/MolSSI/QCEngine.svg?logo=Codecov&logoColor=white)](https://codecov.io/gh/MolSSI/QCEngine)
 [![Documentation Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/.github%2Fworkflows%2FCI.yml?label=docs&logo=readthedocs&logoColor=white)](https://molssi.github.io/QCEngine/dev/)
 [![Chat on Slack](https://img.shields.io/badge/chat-on_slack-green.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcarchive/shared_invite/zt-3calopudd-2rtUC~XN1tj1Zn9MHkV6GQ)
@@ -21,20 +21,20 @@ A simple example of QCEngine's capabilities is as follows:
 >>> import qcengine as qcng
 >>> import qcelemental as qcel
 
->>> mol = qcel.models.Molecule.from_data("""
+>>> mol = qcel.models.v1.Molecule.from_data("""  # QCSchema v1 or v2
 O  0.0  0.000  -0.129
 H  0.0 -1.494  1.027
 H  0.0  1.494  1.027
 """)
 
->>> inp = qcel.models.AtomicInput(  # QCSchema v1
+>>> inp = qcel.models.v1.AtomicInput(  # QCSchema v1
     molecule=mol,
     driver="energy",
     model={"method": "SCF", "basis": "sto-3g"},
     keywords={"scf_type": "df"}
     )
 
->>> inp = qcel.models.AtomicInput(  # QCSchema v2
+>>> inp = qcel.models.v2.AtomicInput(  # QCSchema v2
     molecule=mol,
     specification={
         "driver": "energy",

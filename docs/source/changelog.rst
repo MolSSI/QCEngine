@@ -42,9 +42,9 @@ v0.50.0 / 2026-05-25
 Please review release notes from the 0.50.0 release candidates below.
 Highlights from those are repeated here. There is also at QCElemental:
 
-* [release notes](https://molssi.github.io/QCElemental/v0.50.1/changelog.html#sec-cl0500)
-* a graphical [cheat sheet](https://github.com/MolSSI/QCElemental/blob/master/docs/qcschema_cheatsheet_20May2026.pdf) comparing QCSchema v1 and v2
-* a [migration guide](https://github.com/MolSSI/QCElemental/blob/master/docs/MIGRATION.md)
+* `release notes <https://molssi.github.io/QCElemental/v0.50.1/changelog.html#sec-cl0500>`_
+* a graphical `cheat sheet <https://github.com/MolSSI/QCElemental/blob/master/docs/qcschema_cheatsheet_20May2026.pdf>`_ comparing QCSchema v1 and v2
+* a `migration guide <https://github.com/MolSSI/QCElemental/blob/master/docs/MIGRATION.md>`_
 
 Breaking Changes
 ++++++++++++++++
