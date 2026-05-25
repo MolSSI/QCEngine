@@ -1,0 +1,6 @@
+get_config
+==========
+
+.. currentmodule:: qcengine.config
+
+.. autofunction:: get_config

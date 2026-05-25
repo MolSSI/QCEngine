@@ -1,0 +1,6 @@
+register_program
+================
+
+.. currentmodule:: qcengine
+
+.. autofunction:: register_program

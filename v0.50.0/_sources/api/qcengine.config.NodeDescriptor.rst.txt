@@ -1,0 +1,6 @@
+NodeDescriptor
+==============
+
+.. currentmodule:: qcengine.config
+
+.. autopydantic_model:: NodeDescriptor

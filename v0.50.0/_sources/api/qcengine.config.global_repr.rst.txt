@@ -1,0 +1,6 @@
+global_repr
+===========
+
+.. currentmodule:: qcengine.config
+
+.. autofunction:: global_repr

@@ -1,0 +1,6 @@
+compute_wrapper
+===============
+
+.. currentmodule:: qcengine.util
+
+.. autofunction:: compute_wrapper
