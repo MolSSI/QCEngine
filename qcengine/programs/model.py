@@ -11,6 +11,9 @@ from ..util import model_wrapper
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from qcelemental.models.v2 import AtomicInput, AtomicResult, FailedOperation
+
 
 class ProgramHarness(BaseModel, abc.ABC):
     """Base class for analytic single-geometry capable harnesses."""

@@ -16,6 +16,7 @@ from .util import QCEL_V1V2_SHIM_CODE, compute_wrapper, environ_context, handle_
 
 if TYPE_CHECKING:
     from pydantic.main import BaseModel
+    from qcelemental.models.v2 import FailedOperation
 
 
 __all__ = ["compute", "compute_procedure"]

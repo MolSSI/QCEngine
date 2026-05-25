@@ -10,6 +10,9 @@ import datetime
 import os
 import sys
 
+# alters a QCElemental line (dt = _core_schema) that typing can't process
+os.environ["SPHINX_BUILD"] = "1"
+
 sys.path.insert(0, os.path.abspath("../.."))
 import qcengine
 

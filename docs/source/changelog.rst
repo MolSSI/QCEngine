@@ -251,6 +251,7 @@ Enhancements (General)
   to ``qcengine.compute(..., return_version=1|2)`` so CLI matches API capabilities.
   Note *not* ported to phasing-out ``qcengine run-procedure``.
 - API — Standardize failed job handling toward models for QCSchema v2.
+
   - (:pr:`458`) When qcengine.compute() fails and forms a fop = FailedOperation
     (raise_error=T), with v2, `fop.input_data` will be an <>Input model (when
     possible; if the error was in forming the model, it'll still be a dict), not
