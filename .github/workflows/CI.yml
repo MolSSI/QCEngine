@@ -176,12 +176,12 @@ jobs:
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
     - name: Create Environment
-      uses: conda-incubator/setup-miniconda@v3
+      uses: conda-incubator/setup-miniconda@v4
       with:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml
@@ -302,7 +302,7 @@ jobs:
         pytest -rws -v -k "test_config" --cov=qcengine --strict-markers --color=yes --cov-report=xml qcengine/
 
     - name: CodeCov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v6
 
   release_sphinx:
     needs: [build]
@@ -322,10 +322,10 @@ jobs:
     runs-on: ${{ matrix.cfg.runs-on }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Create Environment
-      uses: conda-incubator/setup-miniconda@v3
+      uses: conda-incubator/setup-miniconda@v4
       with:
         activate-environment: test
         environment-file: devtools/conda-envs/${{ matrix.cfg.conda-env }}.yaml

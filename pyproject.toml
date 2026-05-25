@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
+requires = ["setuptools>=77.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project.urls]
@@ -16,7 +16,7 @@ description = "A compute wrapper for Quantum Chemistry, ingesting and producing 
 authors = [
   { name="The QCArchive Development Team", email="qcarchive@molssi.org" },
 ]
-license = { file="LICENSE" }
+license-files = ["LICENSE"]
 readme = "README.md"
 classifiers = [
     "Development Status :: 4 - Beta",
