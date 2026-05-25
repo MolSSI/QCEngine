@@ -192,7 +192,7 @@ def test_psi4_internal_failure(schema_versions, request):
         }
     with pytest.raises(qcng.exceptions.InputError) as exc:
         psi4_task = checkver_and_convert(psi4_task, request.node.name, "pre")
-        ret = qcng.compute(psi4_task, "psi4", raise_error=True, return_version=retver)
+        qcng.compute(psi4_task, "psi4", raise_error=True, return_version=retver)
 
     assert "reference is only" in str(exc.value)
 

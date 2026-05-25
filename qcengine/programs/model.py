@@ -1,15 +1,18 @@
 import abc
 import logging
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, ConfigDict
 
 from qcengine.config import TaskConfig
-from qcengine.exceptions import KnownErrorException
+from qcengine.exceptions import InputError, KnownErrorException
 
 from ..util import model_wrapper
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from qcelemental.models.v2 import AtomicInput, AtomicResult, FailedOperation
 
 
 class ProgramHarness(BaseModel, abc.ABC):
@@ -101,6 +104,8 @@ class ProgramHarness(BaseModel, abc.ABC):
                     from qcelemental.models._v1v2 import AtomicInput as v1v2_model
 
                     mdl = model_wrapper(data, v1v2_model)
+        else:
+            raise InputError(f"Unsupported input type for build_input_model: {type(data).__name__}")
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:

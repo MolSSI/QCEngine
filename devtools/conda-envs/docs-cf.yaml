@@ -5,13 +5,13 @@ channels:
 dependencies:
   - python
   - networkx
-  - pydantic=2.5
+  - pydantic
   - pydantic-settings
   - numpy
   - pint
 
     # qc
-  - qcelemental
+  - qcelemental>=0.50.0
 
     # docs
   - python-graphviz
@@ -22,9 +22,9 @@ dependencies:
   - autodoc-pydantic=2
 
     # testing
-  - pytest>=4.0.0
+  - pytest
   - pytest-cov
   - codecov
-
+  - pip
   #- pip:
   #   - git+https://github.com/MolSSI/qcarchive-sphinx-theme#egg=qcarchive_sphinx_theme

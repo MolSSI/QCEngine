@@ -9,7 +9,7 @@ dependencies:
   - numpy<2
   - libgcc<14.3  # until psi4 package itself conveys this
   - pydantic-settings
-  - conda-forge/label/qcelemental_dev::qcelemental
+  - qcelemental>=0.50.0
 
     # Core
   - python
@@ -22,3 +22,4 @@ dependencies:
   - pytest
   - pytest-cov
   - codecov
+  - pip

@@ -13,7 +13,7 @@ from qcelemental.models.v2 import AtomicResult, BasisSet
 from qcelemental.util import deserialize, parse_version, safe_version, which, which_import
 
 from ..exceptions import InputError, RandomError, ResourceError, UnknownError
-from ..util import execute, popen, temporary_directory
+from ..util import environ_context, execute, popen, temporary_directory
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
@@ -58,12 +58,15 @@ class Psi4Harness(ProgramHarness):
         error_which = which
 
         if psithon and not psiapi:
-            with popen([which("psi4"), "--module"]) as exc:
-                exc["proc"].wait(timeout=30)
+            with environ_context(env={"PYTHON_GIL": "1"}):
+                with popen([which("psi4"), "--module"]) as exc:
+                    exc["proc"].wait(timeout=30)
             if "module does not exist" in exc["stderr"]:
                 psiapi = True  # --module argument only in Psi4 DDD branch (or >=1.6) so grandfathered in
             else:
                 so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
+                if os.environ.get("QCNG_RELAX_PSI4_DETECTION"):
+                    se = None
                 error_msg = f" In particular, psi4 command found but unable to load psi4 module into sys.path. stdout: {so}, stderr: {se}"
                 error_which = which_import
                 if (so) and (not se) and (rc == 0):
@@ -73,13 +76,14 @@ class Psi4Harness(ProgramHarness):
                         psiapi = which_import("psi4", return_bool=True)
 
         if psiapi and not psithon:
-            with popen([sys.executable, "-c", "import psi4; print(psi4.executable)"]) as exc:
-                exc["proc"].wait(timeout=30)
+            with environ_context(env={"PYTHON_GIL": "1"}):
+                with popen([sys.executable, "-c", "import psi4; print(psi4.executable)"]) as exc:
+                    exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
-            if "active but incompatible with Python 3.14+" in se:
+            if os.environ.get("QCNG_RELAX_PSI4_DETECTION"):
                 se = None
             error_msg = f" In particular, psi4 module found but unable to load psi4 command into PATH. stdout: {so}, stderr: {se}"
-            # yes, everthing up to here could be got from `import psi4; psiexe = psi4.executable`. but, we try not to
+            # yes, everything up to here could be got from `import psi4; psiexe = psi4.executable`. but, we try not to
             #   load programs/modules in the `def found` fns.
             if (so) and (not se) and (rc == 0):
                 psiexe = Path(so)
@@ -103,10 +107,11 @@ class Psi4Harness(ProgramHarness):
 
         which_prog = which("psi4")
         if which_prog not in self.version_cache:
-            with popen([which_prog, "--version"]) as exc:
-                exc["proc"].wait(timeout=30)
+            with environ_context(env={"PYTHON_GIL": "1"}):
+                with popen([which_prog, "--version"]) as exc:
+                    exc["proc"].wait(timeout=30)
             so, se, rc = exc["stdout"].strip(), exc["stderr"], exc["proc"].returncode
-            if "active but incompatible with Python 3.14+" in se:
+            if os.environ.get("QCNG_RELAX_PSI4_DETECTION"):
                 se = None
             if (so) and (not se) and (rc == 0):
                 # Windows echos the command, so split stdout to collect response

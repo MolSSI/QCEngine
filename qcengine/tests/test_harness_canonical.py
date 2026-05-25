@@ -280,6 +280,7 @@ def test_compute_bad_models(program, model, schema_versions, request, raiserr, r
 def test_compute_output_table(goodcalc, input_data, return_version, return_dict, xptd, model, envshim, monkeypatch):
     h2 = qcng.get_molecule("hydrogen", return_dict=True)
     method = "hf" if goodcalc else "standard_model_of_particle_physics"
+    inp = None
 
     if model == "Atomic":
         if input_data == 1:
@@ -289,6 +290,10 @@ def test_compute_output_table(goodcalc, input_data, return_version, return_dict,
                 "molecule": h2,
                 "specification": {"driver": "energy", "model": {"method": method, "basis": "sto-3g"}},
             }
+        else:
+            pytest.fail(f"Unsupported input_data value for Atomic model: {input_data}")
+    else:
+        pytest.fail(f"Unsupported model value: {model}")
 
     if sys.version_info >= (3, 14):
         if envshim:
