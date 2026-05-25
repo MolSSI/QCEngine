@@ -52,6 +52,11 @@ By default the job is given resources relating to the compute environment it is 
 
     >>> ret = qcng.compute(inp, "psi4", local_options={"memory": 2, "ncores": 3})
 
+By default, the job returns a QCSchema Result of the same ``schema_version`` as the Input (v1 if Input version can't be determined). To request a specific version back, use the ``return_version`` keyword:
+
+.. code:: python
+
+    >>> ret = qcng.compute(inp, "psi4", return_version=2)
 
 
 Results
@@ -74,13 +79,19 @@ The results contain a complete record of the computation:
 Input Fields
 -------------
 
-.. autopydantic_model:: qcelemental.models.AtomicInput
+Note this is QCSchema v2 ``AtomicInput``. See the QCElemental docs for the
+longstanding v1 model.
+
+.. autopydantic_model:: qcelemental.models.v2.AtomicInput
    :noindex:
 
 Returned Fields
 ---------------
 
-.. autopydantic_model:: qcelemental.models.AtomicResult
+Note this is QCSchema v2 ``AtomicResult``. See the QCElemental docs for the
+longstanding v1 model.
+
+.. autopydantic_model:: qcelemental.models.v2.AtomicResult
    :noindex:
 
 FAQ

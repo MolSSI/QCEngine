@@ -1,23 +1,23 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QCEngine API &mdash; QCEngine 0+untagged.1.g8186b65 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+  <title>QCEngine API &mdash; QCEngine 0.1.dev1+gd1842c4dd documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=ae202b17"></script>
-      <script src="_static/doctools.js?v=888ff710"></script>
-      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="_static/documentation_options.js?v=1e8aa7b5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/version-switcher.js?v=313414bb"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -84,6 +84,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.compute.html">compute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.compute_procedure.html">compute_procedure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_config.html">get_config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_information.html">get_information</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_molecule.html">get_molecule</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_procedure.html">get_procedure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/qcengine.get_program.html">get_program</a></li>
@@ -174,55 +175,58 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            <div itemprop="articleBody">
              
   <section id="qcengine-api">
-<h1>QCEngine API<a class="headerlink" href="#qcengine-api" title="Permalink to this heading"></a></h1>
+<h1>QCEngine API<a class="headerlink" href="#qcengine-api" title="Link to this heading"></a></h1>
 <section id="module-qcengine">
-<span id="qcengine-package"></span><h2>qcengine Package<a class="headerlink" href="#module-qcengine" title="Permalink to this heading"></a></h2>
+<span id="qcengine-package"></span><h2>qcengine Package<a class="headerlink" href="#module-qcengine" title="Link to this heading"></a></h2>
 <p>Base file for the dqm_compute module.</p>
 <section id="functions">
-<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.compute.html#qcengine.compute" title="qcengine.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(input_data, program[, raise_error, ...])</p></td>
 <td><p>Executes a single CMS program given a QCSchema input.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.compute_procedure.html#qcengine.compute_procedure" title="qcengine.compute_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_procedure</span></code></a>(input_data, procedure[, ...])</p></td>
-<td><p>Runs a procedure (a collection of the quantum chemistry executions)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.compute_procedure.html#qcengine.compute_procedure" title="qcengine.compute_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_procedure</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.get_config.html#qcengine.get_config" title="qcengine.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config</span></code></a>(*[, hostname, task_config])</p></td>
 <td><p>Returns the configuration key for qcengine.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.get_molecule.html#qcengine.get_molecule" title="qcengine.get_molecule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_molecule</span></code></a>(name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.get_information.html#qcengine.get_information" title="qcengine.get_information"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_information</span></code></a>(key)</p></td>
+<td><p>Obtains a variety of runtime information about QCEngine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.get_molecule.html#qcengine.get_molecule" title="qcengine.get_molecule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_molecule</span></code></a>(name, *[, return_dict])</p></td>
 <td><p>Returns a QC JSON representation of a test molecule.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.get_procedure.html#qcengine.get_procedure" title="qcengine.get_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_procedure</span></code></a>(name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.get_procedure.html#qcengine.get_procedure" title="qcengine.get_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_procedure</span></code></a>(name)</p></td>
 <td><p>Returns a procedures executor class</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.get_program.html#qcengine.get_program" title="qcengine.get_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_program</span></code></a>(name[, check])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.get_program.html#qcengine.get_program" title="qcengine.get_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_program</span></code></a>(name[, check])</p></td>
 <td><p>Returns a program's executor class</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.list_all_procedures.html#qcengine.list_all_procedures" title="qcengine.list_all_procedures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_procedures</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.list_all_procedures.html#qcengine.list_all_procedures" title="qcengine.list_all_procedures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_procedures</span></code></a>()</p></td>
 <td><p>List all procedures registered by QCEngine.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.list_all_programs.html#qcengine.list_all_programs" title="qcengine.list_all_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_programs</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.list_all_programs.html#qcengine.list_all_programs" title="qcengine.list_all_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_all_programs</span></code></a>()</p></td>
 <td><p>List all programs registered by QCEngine.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.list_available_procedures.html#qcengine.list_available_procedures" title="qcengine.list_available_procedures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_available_procedures</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.list_available_procedures.html#qcengine.list_available_procedures" title="qcengine.list_available_procedures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_available_procedures</span></code></a>()</p></td>
 <td><p>List all procedures that can be exectued (found) by QCEngine.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.list_available_programs.html#qcengine.list_available_programs" title="qcengine.list_available_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_available_programs</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.list_available_programs.html#qcengine.list_available_programs" title="qcengine.list_available_programs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_available_programs</span></code></a>()</p></td>
 <td><p>List all programs that can be exectued (found) by QCEngine.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.register_program.html#qcengine.register_program" title="qcengine.register_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_program</span></code></a>(entry_point)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.register_program.html#qcengine.register_program" title="qcengine.register_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_program</span></code></a>(entry_point)</p></td>
 <td><p>Register a new ProgramHarness with QCEngine.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.unregister_program.html#qcengine.unregister_program" title="qcengine.unregister_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unregister_program</span></code></a>(name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.unregister_program.html#qcengine.unregister_program" title="qcengine.unregister_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unregister_program</span></code></a>(name)</p></td>
 <td><p>Unregisters a given program.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="classes">
-<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.MDIServer.html#qcengine.MDIServer" title="qcengine.MDIServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MDIServer</span></code></a>(mdi_options, program, molecule, ...)</p></td>
@@ -232,29 +236,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </table>
 </section>
 <section id="class-inheritance-diagram">
-<h3>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this heading"></a></h3>
+<h3>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Link to this heading"></a></h3>
 <div class="graphviz"><img src="_images/inheritance-f0f36dbf79b2a1e42b9c6cc34fa47d5a4e33766c.png" alt="Inheritance diagram of qcengine.mdi_server.MDIServer" usemap="#inheritance3313e95587" class="inheritance graphviz" /></div>
 <map id="inheritance3313e95587" name="inheritance3313e95587">
 <area shape="rect" id="node1" href="api/qcengine.MDIServer.html#qcengine.MDIServer" target="_top" title="MDIServer" alt="" coords="5,5,95,33"/>
 </map></section>
 </section>
 <section id="module-qcengine.config">
-<span id="qcengine-config-module"></span><h2>qcengine.config Module<a class="headerlink" href="#module-qcengine.config" title="Permalink to this heading"></a></h2>
+<span id="qcengine-config-module"></span><h2>qcengine.config Module<a class="headerlink" href="#module-qcengine.config" title="Link to this heading"></a></h2>
 <p>Creates globals for the qcengine module</p>
 <section id="id1">
-<h3>Functions<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<h3>Functions<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.config.get_config.html#qcengine.config.get_config" title="qcengine.config.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config</span></code></a>(*[, hostname, task_config])</p></td>
 <td><p>Returns the configuration key for qcengine.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="api/qcengine.config.get_provenance_augments.html#qcengine.config.get_provenance_augments" title="qcengine.config.get_provenance_augments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_provenance_augments</span></code></a>()</p></td>
-<td><p><dl class="field-list simple">
-<dt class="field-odd">rtype<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.10/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.10/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
-</dd>
-</dl>
-</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.config.global_repr.html#qcengine.config.global_repr" title="qcengine.config.global_repr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">global_repr</span></code></a>()</p></td>
 <td><p>A representation of the current global configuration.</p></td>
@@ -263,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </table>
 </section>
 <section id="id2">
-<h3>Classes<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<h3>Classes<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor" title="qcengine.config.NodeDescriptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeDescriptor</span></code></a></p></td>
@@ -273,17 +272,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </table>
 </section>
 <section id="id3">
-<h3>Class Inheritance Diagram<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
-<div class="graphviz"><img src="_images/inheritance-c72d11f91e00b97018aea4f61e7125b725684508.png" alt="Inheritance diagram of qcengine.config.NodeDescriptor" usemap="#inheritance6d8ac8d9b4" class="inheritance graphviz" /></div>
+<h3>Class Inheritance Diagram<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<div class="graphviz"><img src="_images/inheritance-256353b87950929490c6ded1f089c8b8aea08bd5.png" alt="Inheritance diagram of qcengine.config.NodeDescriptor" usemap="#inheritance6d8ac8d9b4" class="inheritance graphviz" /></div>
 <map id="inheritance6d8ac8d9b4" name="inheritance6d8ac8d9b4">
-<area shape="rect" id="node3" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor" target="_top" title="Description of an individual node" alt="" coords="315,5,437,33"/>
+<area shape="rect" id="node2" href="api/qcengine.config.NodeDescriptor.html#qcengine.config.NodeDescriptor" target="_top" title="Description of an individual node" alt="" coords="147,5,269,33"/>
 </map></section>
 </section>
 <section id="module-qcengine.util">
-<span id="qcengine-util-module"></span><h2>qcengine.util Module<a class="headerlink" href="#module-qcengine.util" title="Permalink to this heading"></a></h2>
+<span id="qcengine-util-module"></span><h2>qcengine.util Module<a class="headerlink" href="#module-qcengine.util" title="Link to this heading"></a></h2>
 <p>Several import utilities</p>
 <section id="id4">
-<h3>Functions<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<h3>Functions<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.util.compute_wrapper.html#qcengine.util.compute_wrapper" title="qcengine.util.compute_wrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_wrapper</span></code></a>([capture_output, raise_error])</p></td>
@@ -306,9 +305,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 </section>
 <section id="module-qcengine.programs">
-<span id="qcengine-programs-package"></span><h2>qcengine.programs Package<a class="headerlink" href="#module-qcengine.programs" title="Permalink to this heading"></a></h2>
+<span id="qcengine-programs-package"></span><h2>qcengine.programs Package<a class="headerlink" href="#module-qcengine.programs" title="Link to this heading"></a></h2>
 <section id="id5">
-<h3>Functions<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<h3>Functions<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.get_program.html#qcengine.programs.get_program" title="qcengine.programs.get_program"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_program</span></code></a>(name[, check])</p></td>
@@ -330,20 +329,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </table>
 </section>
 <section id="id6">
-<h3>Classes<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<h3>Classes<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" title="qcengine.programs.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProgramHarness</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Base class for analytic single-geometry capable harnesses.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="id7">
-<h3>Class Inheritance Diagram<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
-<div class="graphviz"><img src="_images/inheritance-73f22ae93c9fefc236fdafee2d96c1966f59ad9b.png" alt="Inheritance diagram of qcengine.programs.model.ProgramHarness" usemap="#inheritance27cf6b60bd" class="inheritance graphviz" /></div>
+<h3>Class Inheritance Diagram<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<div class="graphviz"><img src="_images/inheritance-b7dae30230a50944cfbe00b39460b068d2311b2f.png" alt="Inheritance diagram of qcengine.programs.model.ProgramHarness" usemap="#inheritance27cf6b60bd" class="inheritance graphviz" /></div>
 <map id="inheritance27cf6b60bd" name="inheritance27cf6b60bd">
-<area shape="rect" id="node4" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" target="_top" title="ProgramHarness" alt="" coords="315,32,444,60"/>
+<area shape="rect" id="node1" href="https://docs.python.org/3.13/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="16,5,88,33"/>
+<area shape="rect" id="node3" href="api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" target="_top" title="Base class for analytic single&#45;geometry capable harnesses." alt="" coords="147,32,276,60"/>
 </map></section>
 </section>
 </section>

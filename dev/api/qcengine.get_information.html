@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>get_program &mdash; QCEngine 0.1.dev1+gd1842c4dd documentation</title>
+  <title>get_information &mdash; QCEngine 0.1.dev1+gd1842c4dd documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="list_all_procedures" href="qcengine.list_all_procedures.html" />
-    <link rel="prev" title="get_procedure" href="qcengine.get_procedure.html" />
+    <link rel="next" title="get_molecule" href="qcengine.get_molecule.html" />
+    <link rel="prev" title="get_config" href="qcengine.get_config.html" />
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -84,10 +84,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.compute.html">compute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.compute_procedure.html">compute_procedure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.get_config.html">get_config</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qcengine.get_information.html">get_information</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">get_information</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.get_molecule.html">get_molecule</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.get_procedure.html">get_procedure</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">get_program</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qcengine.get_program.html">get_program</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.list_all_procedures.html">list_all_procedures</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.list_all_programs.html">list_all_programs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qcengine.list_available_procedures.html">list_available_procedures</a></li>
@@ -124,9 +124,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../api.html">QCEngine API</a></li>
-      <li class="breadcrumb-item active">get_program</li>
+      <li class="breadcrumb-item active">get_information</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/qcengine.get_program.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/qcengine.get_information.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -134,25 +134,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="get-program">
-<h1>get_program<a class="headerlink" href="#get-program" title="Link to this heading"></a></h1>
+  <section id="get-information">
+<h1>get_information<a class="headerlink" href="#get-information" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="qcengine.get_program">
-<span class="sig-prename descclassname"><span class="pre">qcengine.</span></span><span class="sig-name descname"><span class="pre">get_program</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/base.html#get_program"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.get_program" title="Link to this definition"></a></dt>
-<dd><p>Returns a program’s executor class</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>check</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – <code class="docutils literal notranslate"><span class="pre">True</span></code> Do raise error if program not found. <code class="docutils literal notranslate"><span class="pre">False</span></code> is handy for
-the specialized case of calling non-execution methods (like parsing for testing)
-on the returned <code class="docutils literal notranslate"><span class="pre">Harness</span></code>.</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness" title="qcengine.programs.model.ProgramHarness"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProgramHarness</span></code></a></span></p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="qcengine.get_information">
+<span class="sig-prename descclassname"><span class="pre">qcengine.</span></span><span class="sig-name descname"><span class="pre">get_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/extras.html#get_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.get_information" title="Link to this definition"></a></dt>
+<dd><p>Obtains a variety of runtime information about QCEngine.</p>
 </dd></dl>
 
 </section>
@@ -161,8 +148,8 @@ on the returned <code class="docutils literal notranslate"><span class="pre">Har
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qcengine.get_procedure.html" class="btn btn-neutral float-left" title="get_procedure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qcengine.list_all_procedures.html" class="btn btn-neutral float-right" title="list_all_procedures" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qcengine.get_config.html" class="btn btn-neutral float-left" title="get_config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qcengine.get_molecule.html" class="btn btn-neutral float-right" title="get_molecule" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
