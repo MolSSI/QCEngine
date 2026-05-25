@@ -34,16 +34,34 @@ Changelog
 
 .. _`sec:cl0500`:
 
-v0.50.0 / 2026-MM-DD (Unreleased)
+v0.50.0 / 2026-05-25
 --------------------
 
 :docs:`v0.50.0` for current. :docs:`v0.34.1` for QCSchema v1.
 
+Please review release notes from the 0.50.0 release candidates below.
+Highlights from those are repeated here. There is also at QCElemental:
+
+* [release notes](https://molssi.github.io/QCElemental/v0.50.1/changelog.html#sec-cl0500)
+* a graphical [cheat sheet](https://github.com/MolSSI/QCElemental/blob/master/docs/qcschema_cheatsheet_20May2026.pdf) comparing QCSchema v1 and v2
+* a [migration guide](https://github.com/MolSSI/QCElemental/blob/master/docs/MIGRATION.md)
+
 Breaking Changes
 ++++++++++++++++
+- No uses of QCSchema v1 should break. (They won't work with Python >=3.14, though.)
 
 New Features
 ++++++++++++
+- QCSchema v2 implemented and used internally for harnesses.
+- Both QCSchema v1 and v2 may be used for input and requested as output.
+- `qcengine.compute` and `qcengine.compute_procedure` have been merged in favor
+  of the former. By default it'll return the input schema versions, but a different
+  one can be requested through keyword ``qcengine.compute(..., return_version=1|2)``
+  or ``qcengine run ... --return-version=1|2`` .
+- Note that QCSchema v2 field layout isn't finalized until v0.60, so there may
+  be lock-step advancements of the QCArchive stack.
+- Python 3.14 is now useable. Use of QCSchema v1 with 3.14 is limited (by Pydantic).
+- Improvements to various harnesses -- see below.
 
 Enhancements
 ++++++++++++
@@ -60,6 +78,11 @@ Bug Fixes
 
 Misc.
 +++++
+- Require minimum Pydantic v2.11 (v2.12 for Py v3.14).
+- Require pydantic-settings
+- (:pr:`504`) Requires minimum Python v3.10.
+- Entos harness no longer tested or supported. Legacy dftd3 and gcp (executables)
+  harnesses still around but no known users.
 
 
 .. _`sec:cl0500rc4`:

@@ -3,7 +3,7 @@ QCEngine
 
 ![Build Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/.github%2Fworkflows%2FCI.yml?branch=master&logo=github&link=https%3A%2F%2Fgithub.com%2FMolSSI%2FQCEngine%2Factions%3Fquery%3Dworkflow%253ACI)
 [![codecov](https://img.shields.io/codecov/c/github/MolSSI/QCEngine.svg?logo=Codecov&logoColor=white)](https://codecov.io/gh/MolSSI/QCEngine)
-![Documentation Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/.github%2Fworkflows%2FCI.yml?branch=master&logo=readthedocs&label=docs&link=https%3A%2F%2Fmolssi.github.io%2FQCEngine%2Fdev%2F)
+[![Documentation Status](https://img.shields.io/github/actions/workflow/status/MolSSI/QCEngine/.github%2Fworkflows%2FCI.yml?label=docs&logo=readthedocs&logoColor=white)](https://molssi.github.io/QCEngine/dev/)
 [![Chat on Slack](https://img.shields.io/badge/chat-on_slack-green.svg?longCache=true&style=flat&logo=slack)](https://join.slack.com/t/qcarchive/shared_invite/zt-3calopudd-2rtUC~XN1tj1Zn9MHkV6GQ)
 ![python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
