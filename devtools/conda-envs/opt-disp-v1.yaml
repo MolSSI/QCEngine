@@ -25,6 +25,7 @@ dependencies:
   - psutil
   - qcelemental>=0.50.0
   - msgpack-python
+  - numpy<2.5.0  # for geometric np.long
 
     # Testing
   - pytest
