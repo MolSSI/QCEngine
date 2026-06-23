@@ -277,7 +277,7 @@ jobs:
         qcengine info
 
     - name: QCEngineRecords
-      if: ((matrix.cfg.label != 'Psi4-1.6') && (matrix.cfg.python-version != '3.14') && (matrix.cfg.label != 'dftd-v1'))
+      if: ((matrix.cfg.label != 'Psi4-1.6') && (matrix.cfg.python-version != '3.14'))
       run: |
         qcengine info
         export QCER_VER=`python -c "import qcengine.testing; print(qcengine.testing.QCENGINE_RECORDS_COMMIT)"`
