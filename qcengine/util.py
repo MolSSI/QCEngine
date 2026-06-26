@@ -400,8 +400,11 @@ def popen(
             stderr_reader.join()
 
             # Retrieve the standard output for the process
-            ret["stdout"] = stdout.getvalue().decode()
-            ret["stderr"] = stderr.getvalue().decode()
+            # Use 'replace' error handling for robustness across platforms
+            # On Windows, subprocess output may contain non-UTF-8 bytes (e.g., code pages)
+            # This ensures the function doesn't crash but instead replaces invalid sequences
+            ret["stdout"] = stdout.getvalue().decode(errors="replace")
+            ret["stderr"] = stderr.getvalue().decode(errors="replace")
             ret["proc"].stdout.close()
             ret["proc"].stderr.close()
 
