@@ -29,6 +29,7 @@ dependencies:
   - psutil
   - qcelemental>=0.50.0
   - msgpack-python
+  - scipy 1.17.*
 
     # Testing
   - pytest

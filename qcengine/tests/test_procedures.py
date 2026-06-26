@@ -559,7 +559,7 @@ def test_geometric_retries(failure_engine, input_data, schema_versions, request)
     failed_result = ret.error.extras["failed_result"]
     failed_traj = failed_result.get("trajectory", failed_result.get("trajectory_results"))
     assert failed_traj[0]["provenance"]["retries"] == 1
-    if tric_ver == "1.1":
+    if tric_ver in ["1.1", "1.1.1"]:
         # bad! temp until https://github.com/leeping/geomeTRIC/pull/222 available
         assert len(failed_traj) == 1
     else:
