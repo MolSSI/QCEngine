@@ -32,6 +32,32 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+.. _`sec:cl0510`:
+
+v0.51.0 / 2026-MM-DD (Unreleased)
+--------------------
+
+:docs:`v0.51.0` for current. :docs:`v0.34.1` for QCSchema v1.
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+
+Enhancements
+++++++++++++
+- (:pr:`507`) Deps - require QCElemental v0.50.4 for NumPy v2.5 compatibility.
+
+Bug Fixes
++++++++++
+
+Misc.
++++++
+- (:pr:`507`) Update a geometric test for v1.1.1 release
+- (:pr:`507`) CI - update some environments with scipy constraints to accommodate new NumPy.
+
+
 .. _`sec:cl0500`:
 
 v0.50.0 / 2026-05-25
