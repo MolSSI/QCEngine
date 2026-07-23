@@ -3,7 +3,7 @@ import qcelemental as qcel
 from qcelemental.testing import compare_values
 
 import qcengine as qcng
-from qcengine.testing import checkver_and_convert, from_v2, schema_versions, schema_versions5, using
+from qcengine.testing import checkver_and_convert, drop_qcsk, from_v2, schema_versions, schema_versions5, using
 
 
 @pytest.fixture
@@ -136,8 +136,12 @@ def test_sp_hf_rhf(program, basis, keywords, h2o_data, schema_versions, request)
         resi = {"molecule": h2o, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
+    qcschema_input_version = 2 if from_v2(request.node.name) else 1
+    drop_qcsk(resi, request.node.name, "AtomicInput", qcschema_version=qcschema_input_version)
     res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
+    qcschema_output_version = 2 if "v2" in request.node.name else 1
+    drop_qcsk(res, request.node.name, "AtomicResult", qcschema_version=qcschema_output_version)
 
     if "v2" in request.node.name:
         assert res["input_data"]["specification"]["driver"] == "energy"
@@ -200,8 +204,12 @@ def test_sp_hf_uhf(program, basis, keywords, nh2_data, schema_versions, request)
     resi = models.AtomicInput(**resi)
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
+    qcschema_input_version = 2 if from_v2(request.node.name) else 1
+    drop_qcsk(resi, request.node.name, "AtomicInput", qcschema_version=qcschema_input_version)
     res = qcng.compute(resi, program, raise_error=True, return_dict=False, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
+    qcschema_output_version = 2 if "v2" in request.node.name else 1
+    drop_qcsk(res, request.node.name, "AtomicResult", qcschema_version=qcschema_output_version)
 
     assert res.success is True
     res = res.model_dump()
@@ -255,8 +263,12 @@ def test_sp_hf_rohf(program, basis, keywords, nh2_data, schema_versions, request
         resi = {"molecule": nh2, "driver": "energy", "model": {"method": "hf", "basis": basis}, "keywords": keywords}
 
     resi = checkver_and_convert(resi, request.node.name, "pre")
+    qcschema_input_version = 2 if from_v2(request.node.name) else 1
+    drop_qcsk(resi, request.node.name, "AtomicInput", qcschema_version=qcschema_input_version)
     res = qcng.compute(resi, program, raise_error=True, return_dict=True, return_version=retver)
     res = checkver_and_convert(res, request.node.name, "post")
+    qcschema_output_version = 2 if "v2" in request.node.name else 1
+    drop_qcsk(res, request.node.name, "AtomicResult", qcschema_version=qcschema_output_version)
 
     if "v2" in request.node.name:
         assert res["input_data"]["specification"]["driver"] == "energy"

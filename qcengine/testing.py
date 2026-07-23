@@ -2,7 +2,12 @@
 Utilities for the testing suite.
 """
 
+import json
+import math
+import os
+import re
 import sys
+from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
@@ -15,6 +20,83 @@ from qcelemental.util import which, which_import
 import qcengine as qcng
 
 QCENGINE_RECORDS_COMMIT = "19b843b"
+_qcschema_data_path = Path(__file__).parent.resolve() / "tests" / "qcschema_instances"
+
+
+def _qcschema_example_name(test_name: str) -> str:
+    """Remove the schema-version pathway from a pytest node name."""
+
+    name = re.sub(r"\[(?:as_v1|as_v2)(?:-|(?=\]))", "[", test_name, count=1)
+    name = name.replace("[]", "")
+    return f"qcengine-{name.replace('/', '_')}"
+
+
+def _round_qcschema_floats(value):
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            return value
+        return 0.0 if abs(value) < 1.0e-12 else float(f"{value:.12g}")
+    if isinstance(value, list):
+        return [_round_qcschema_floats(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _round_qcschema_floats(item) for key, item in value.items()}
+    return value
+
+
+def drop_qcsk(instance, tnm: str, schema_name: str = None, *, qcschema_version: int = None):
+    """Write a direct-v1 or direct-v2 QCSchema example during collection mode.
+
+    Conversion-path and default-namespace cases are deliberately ignored so
+    they cannot overwrite the canonical ``as_v1`` and ``as_v2`` examples.
+    Raw dictionaries require an explicit model name and schema version.
+    """
+
+    if os.environ.get("QCSCHEMA_EXAMPLES_GENERATE") != "1":
+        return
+    if not re.search(r"\[(?:as_v1|as_v2)(?:-|\])", tnm):
+        return
+
+    if isinstance(instance, qcel.models.v2.ProtoModel):
+        inferred_version = 2
+        is_model = True
+    elif sys.version_info < (3, 14) and isinstance(instance, qcel.models.v1.ProtoModel):
+        inferred_version = 1
+        is_model = True
+    elif isinstance(instance, dict):
+        if qcschema_version not in (1, 2):
+            raise ValueError("Raw dictionary QCSchema examples require qcschema_version=1 or 2")
+        inferred_version = qcschema_version
+        is_model = False
+    else:
+        raise TypeError(f"QCSchema example must be a model or dictionary, not {type(instance)!r}")
+
+    if qcschema_version is not None and qcschema_version != inferred_version:
+        raise ValueError(
+            f"Explicit QCSchema version {qcschema_version} does not match inferred version {inferred_version}"
+        )
+    if is_model and schema_name is None:
+        schema_name = type(instance).__name__
+    if schema_name is None:
+        raise ValueError("Raw dictionary QCSchema examples require schema_name")
+
+    drop = (
+        _qcschema_data_path / f"v{inferred_version}" / schema_name / _qcschema_example_name(tnm)
+    ).with_suffix(".json")
+    drop.parent.mkdir(parents=True, exist_ok=True)
+
+    if not is_model:
+        namespace = qcel.models.v1 if inferred_version == 1 else qcel.models.v2
+        instance = getattr(namespace, schema_name)(**instance)
+    instance = json.loads(instance.model_dump_json(exclude_unset=True, exclude_none=True))
+    if schema_name == "AtomicResult":
+        instance.pop("stdout", None)
+        provenance = instance.get("provenance", {})
+        for field in ("cpu", "hostname", "memory", "nthreads", "username", "wall_time"):
+            provenance.pop(field, None)
+        instance = _round_qcschema_floats(instance)
+    with open(drop, "w") as fp:
+        json.dump(instance, fp, sort_keys=True, indent=2)
+        fp.write("\n")
 
 
 def _check_qcenginerecords(return_data=False):

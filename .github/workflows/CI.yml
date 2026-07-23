@@ -9,6 +9,7 @@ on:
       - 'v[0-9]*.[0-9]*.[0-9]*rc[0-9]*'
     branches:
       - master
+      - testci
       - QCSchema_v1
   pull_request:
     branches:
@@ -290,7 +291,14 @@ jobs:
         python -c "from psi4 import core; core.set_num_threads(42); assert core.get_num_threads() == 42"
         psi4 $CONDA_PREFIX/Lib/site-packages/psi4/tests/tu1-h2o-energy/input.dat -o stdout
 
+    - name: PyTest and collect QCSchema examples
+      if: matrix.cfg.conda-env == 'opt-disp'
+      run: |
+        # export MKL_CBWR=AVX
+        pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --durations=20 --durations-min=40 --strict-markers --color=yes --cov-report=xml --qcschema-examples qcengine/
+
     - name: PyTest
+      if: matrix.cfg.conda-env != 'opt-disp'
       run: |
         # export MKL_CBWR=AVX
         pytest -rws -v ${{ matrix.cfg.pytest }} --cov=qcengine --durations=20 --durations-min=40 --strict-markers --color=yes --cov-report=xml qcengine/
@@ -300,8 +308,50 @@ jobs:
         rm -f qcengine.yaml
         pytest -rws -v -k "test_config" --cov=qcengine --strict-markers --color=yes --cov-report=xml qcengine/
 
+    - name: Validate QCSchema examples
+      if: matrix.cfg.conda-env == 'opt-disp'
+      run: pytest -rws -v --strict-markers --color=yes --validate-qcschema-examples
+
+    - name: Upload QCSchema examples
+      if: matrix.cfg.conda-env == 'opt-disp'
+      uses: actions/upload-artifact@v4
+      with:
+        name: qcschema-examples
+        path: qcengine/tests/qcschema_instances
+        retention-days: 14
+        if-no-files-found: error
+
     - name: CodeCov
       uses: codecov/codecov-action@v6
+
+  qcschema_examples_deploy:
+    name: Deploy QCSchema examples
+    needs: build
+    if: >-
+      github.event_name == 'push' &&
+      github.repository == 'MolSSI/QCEngine' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/testci')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: qcschema-examples
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+      - name: Download validated QCSchema examples
+        uses: actions/download-artifact@v4
+        with:
+          name: qcschema-examples
+          path: _qcschema_examples
+      - name: Deploy QCSchema examples
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: qcschema-examples
+          folder: _qcschema_examples
+          clean: true
 
   release_sphinx:
     needs: [build]
@@ -430,4 +480,3 @@ jobs:
           git commit -m "docs: update versions.json (${GITHUB_REF})"
           git push origin gh-pages
         fi
-
