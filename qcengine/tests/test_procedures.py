@@ -470,14 +470,16 @@ def test_optimization_protocols(optimizer, input_data, schema_versions, request)
         input_data["specification"]["specification"]["model"] = grad_model
         input_data["specification"]["specification"]["program"] = grad_program
         input_data["specification"]["protocols"] = {"trajectory_results": "initial_and_final"}
-        if optimizer != "geometric":
+        if optimizer == "berny":
             input_data["specification"]["keywords"].pop("coordsys")
+            input_data["specification"]["keywords"].pop("maxiter")
     else:
         input_data["input_specification"]["model"] = grad_model
         input_data["keywords"]["program"] = grad_program
         input_data["protocols"] = {"trajectory": "initial_and_final"}
-        if optimizer != "geometric":
+        if optimizer == "berny":
             input_data["keywords"].pop("coordsys")
+            input_data["keywords"].pop("maxiter")
 
     input_data = models.OptimizationInput(**input_data)
 
@@ -951,14 +953,17 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
         input_data["specification"]["specification"]["keywords"] = {"world_prec": 1.0e-4}
         input_data["specification"]["specification"]["program"] = "mrchem"
         input_data["specification"]["protocols"] = {"trajectory_results": "final"}  # to test provenance
-        if optimizer != "geometric":
+        if optimizer == "berny":
+            # pyberny v0.7 rejects unrecognized options
             input_data["specification"]["keywords"].pop("coordsys")
+            input_data["specification"]["keywords"].pop("maxiter")
     else:
         input_data["input_specification"]["model"] = {"method": "HF"}
         input_data["input_specification"]["keywords"] = {"world_prec": 1.0e-4}
         input_data["keywords"]["program"] = "mrchem"
-        if optimizer != "geometric":
+        if optimizer == "berny":
             input_data["keywords"].pop("coordsys")
+            input_data["keywords"].pop("maxiter")
 
     input_data = models.OptimizationInput(**input_data)
 
