@@ -31,6 +31,15 @@ def input_data(request):
         }
 
 
+def _remove_unsupported_berny_keywords(input_data, optimizer, test_name):
+    """Remove geomeTRIC-only options rejected by pyberny v0.7."""
+
+    if optimizer == "berny":
+        keywords = input_data["specification"]["keywords"] if from_v2(test_name) else input_data["keywords"]
+        keywords.pop("coordsys", None)
+        keywords.pop("maxiter", None)
+
+
 @uusing("psi4")
 @pytest.mark.parametrize("ncores", [1, 4])
 @pytest.mark.parametrize(
@@ -68,6 +77,7 @@ def test_geometric_psi4(input_data, optimizer, ncores, schema_versions, request)
         input_data["input_specification"]["extras"] = {"myqctag": "hello psi4"}
         input_data["extras"] = {"myopttag": "hello qcengine"}
 
+    _remove_unsupported_berny_keywords(input_data, optimizer, request.node.name)
     input_data = models.OptimizationInput(**input_data)
 
     task_config = {
@@ -150,6 +160,7 @@ def test_geometric_local_options(input_data, schema_versions, request, optimizer
         input_data["input_specification"]["model"] = {"method": "HF", "basis": "sto-3g"}
         input_data["keywords"]["program"] = "psi4"
 
+    _remove_unsupported_berny_keywords(input_data, optimizer, request.node.name)
     input_data = models.OptimizationInput(**input_data)
 
     # Set some extremely large number to test
@@ -204,6 +215,7 @@ def test_optimizer_stdout(optimizer, gradprog, gradmodel, converged, input_data,
         input_data["keywords"]["program"] = gradprog
         # no way to turn off gradient stdout in v1
 
+    _remove_unsupported_berny_keywords(input_data, optimizer, request.node.name)
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
@@ -269,6 +281,7 @@ def test_optimizer_protocols(optimizer, gradprog, gradmodel, input_data, schema_
         if traj_ptcl != "default":
             input_data["protocols"] = {"trajectory": traj_ptcl}
 
+    _remove_unsupported_berny_keywords(input_data, optimizer, request.node.name)
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
@@ -311,6 +324,7 @@ def test_berny_failed_gradient_computation(input_data, schema_versions, request)
         input_data["input_specification"]["keywords"] = {"badpsi4key": "badpsi4value"}
         input_data["keywords"]["program"] = "psi4"
 
+    _remove_unsupported_berny_keywords(input_data, "berny", request.node.name)
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
@@ -470,17 +484,12 @@ def test_optimization_protocols(optimizer, input_data, schema_versions, request)
         input_data["specification"]["specification"]["model"] = grad_model
         input_data["specification"]["specification"]["program"] = grad_program
         input_data["specification"]["protocols"] = {"trajectory_results": "initial_and_final"}
-        if optimizer == "berny":
-            input_data["specification"]["keywords"].pop("coordsys")
-            input_data["specification"]["keywords"].pop("maxiter")
     else:
         input_data["input_specification"]["model"] = grad_model
         input_data["keywords"]["program"] = grad_program
         input_data["protocols"] = {"trajectory": "initial_and_final"}
-        if optimizer == "berny":
-            input_data["keywords"].pop("coordsys")
-            input_data["keywords"].pop("maxiter")
 
+    _remove_unsupported_berny_keywords(input_data, optimizer, request.node.name)
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")
@@ -953,18 +962,12 @@ def test_optimization_mrchem(input_data, optimizer, schema_versions, request):
         input_data["specification"]["specification"]["keywords"] = {"world_prec": 1.0e-4}
         input_data["specification"]["specification"]["program"] = "mrchem"
         input_data["specification"]["protocols"] = {"trajectory_results": "final"}  # to test provenance
-        if optimizer == "berny":
-            # pyberny v0.7 rejects unrecognized options
-            input_data["specification"]["keywords"].pop("coordsys")
-            input_data["specification"]["keywords"].pop("maxiter")
     else:
         input_data["input_specification"]["model"] = {"method": "HF"}
         input_data["input_specification"]["keywords"] = {"world_prec": 1.0e-4}
         input_data["keywords"]["program"] = "mrchem"
-        if optimizer == "berny":
-            input_data["keywords"].pop("coordsys")
-            input_data["keywords"].pop("maxiter")
 
+    _remove_unsupported_berny_keywords(input_data, optimizer, request.node.name)
     input_data = models.OptimizationInput(**input_data)
 
     input_data = checkver_and_convert(input_data, request.node.name, "pre")

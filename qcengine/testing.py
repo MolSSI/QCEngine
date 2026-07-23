@@ -79,9 +79,9 @@ def drop_qcsk(instance, tnm: str, schema_name: str = None, *, qcschema_version: 
     if schema_name is None:
         raise ValueError("Raw dictionary QCSchema examples require schema_name")
 
-    drop = (
-        _qcschema_data_path / f"v{inferred_version}" / schema_name / _qcschema_example_name(tnm)
-    ).with_suffix(".json")
+    drop = (_qcschema_data_path / f"v{inferred_version}" / schema_name / _qcschema_example_name(tnm)).with_suffix(
+        ".json"
+    )
     drop.parent.mkdir(parents=True, exist_ok=True)
 
     if not is_model:
