@@ -24,6 +24,9 @@ def _model_and_version(path: Path):
     return getattr(namespace, model_name), version
 
 
+# COMPAT(qcelemental==0.50.4, pydantic>=2.13): Remove this function and
+# _restore_array_dtype_metadata once QCEngine requires a QCElemental release
+# containing commit 4d37d451 (recursive array dtype lookup).
 def _find_array_dtype(schema):
     if isinstance(schema, dict):
         metadata = schema.get("metadata", {})
@@ -49,8 +52,7 @@ def _restore_array_dtype_metadata(schema, restored):
             *metadata.get("pydantic_js_annotation_functions", ()),
         )
         is_array_hook = any(
-            getattr(getattr(hook, "__self__", None), "__name__", None) == "ValidatableArrayAnnotation"
-            for hook in hooks
+            getattr(getattr(hook, "__self__", None), "__name__", None) == "ValidatableArrayAnnotation" for hook in hooks
         )
         if is_array_hook and "dtype" not in metadata:
             dtype = _find_array_dtype(schema)
@@ -69,6 +71,8 @@ def _schema(model, version):
     if version == 1:
         return model.schema()
 
+    # COMPAT removal: once the QCElemental minimum includes 4d37d451,
+    # replace this try/fallback section with `return model.model_json_schema()`.
     try:
         return model.model_json_schema()
     except KeyError as exc:
