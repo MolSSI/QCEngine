@@ -1,5 +1,7 @@
 import json
+import os
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -24,7 +26,20 @@ def _model_and_version(path: Path):
 
 
 def _schema(model, version):
-    return model.schema() if version == 1 else model.model_json_schema()
+    if version == 1:
+        return model.schema()
+
+    try:
+        return model.model_json_schema()
+    except KeyError as exc:
+        if exc.args != ("dtype",):
+            raise
+
+        # QCElemental 0.50.4 cannot find array dtype metadata after Pydantic
+        # 2.13 wraps its core schema. Use QCElemental's own schema-export
+        # fallback until the recursive dtype lookup is available in a release.
+        with patch.dict(os.environ, {"SPHINX_BUILD": "1"}):
+            return model.model_json_schema()
 
 
 def _validate_json_schema(instance, model, version):
