@@ -28,8 +28,6 @@ dependencies:
   - py-cpuinfo
   - psutil
   - qcelemental>=0.50.0
-  # QCElemental 0.50.4 needs pre-2.13 core-schema metadata for exact array JSON Schema types.
-  - pydantic >=2.11,<2.13
   - msgpack-python
   - scipy 1.17.*
 

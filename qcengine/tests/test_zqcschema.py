@@ -1,4 +1,5 @@
 import json
+from functools import cache
 from pathlib import Path
 
 import pytest
@@ -23,8 +24,67 @@ def _model_and_version(path: Path):
     return getattr(namespace, model_name), version
 
 
+def _find_array_dtype(schema):
+    if isinstance(schema, dict):
+        metadata = schema.get("metadata", {})
+        if "dtype" in metadata:
+            return metadata["dtype"]
+        for value in schema.values():
+            dtype = _find_array_dtype(value)
+            if dtype is not None:
+                return dtype
+    elif isinstance(schema, (list, tuple)):
+        for value in schema:
+            dtype = _find_array_dtype(value)
+            if dtype is not None:
+                return dtype
+    return None
+
+
+def _restore_array_dtype_metadata(schema, restored):
+    if isinstance(schema, dict):
+        metadata = schema.get("metadata", {})
+        hooks = (
+            *metadata.get("pydantic_js_functions", ()),
+            *metadata.get("pydantic_js_annotation_functions", ()),
+        )
+        is_array_hook = any(
+            getattr(getattr(hook, "__self__", None), "__name__", None) == "ValidatableArrayAnnotation"
+            for hook in hooks
+        )
+        if is_array_hook and "dtype" not in metadata:
+            dtype = _find_array_dtype(schema)
+            if dtype is not None:
+                metadata["dtype"] = dtype
+                restored.append(metadata)
+        for value in schema.values():
+            _restore_array_dtype_metadata(value, restored)
+    elif isinstance(schema, (list, tuple)):
+        for value in schema:
+            _restore_array_dtype_metadata(value, restored)
+
+
+@cache
 def _schema(model, version):
-    return model.schema() if version == 1 else model.model_json_schema()
+    if version == 1:
+        return model.schema()
+
+    try:
+        return model.model_json_schema()
+    except KeyError as exc:
+        if exc.args != ("dtype",):
+            raise
+
+    # QCElemental 0.50.4's array JSON-Schema hook expects dtype metadata
+    # on a wrapper where Pydantic 2.13 no longer preserves it. Copy each
+    # nested dtype to that wrapper for schema export, then restore the model.
+    restored = []
+    _restore_array_dtype_metadata(model.__pydantic_core_schema__, restored)
+    try:
+        return model.model_json_schema()
+    finally:
+        for metadata in restored:
+            metadata.pop("dtype")
 
 
 def _validate_json_schema(instance, model, version):
