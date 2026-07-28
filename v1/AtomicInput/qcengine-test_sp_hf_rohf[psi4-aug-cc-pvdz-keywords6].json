@@ -1,0 +1,53 @@
+{
+  "driver": "energy",
+  "extras": {},
+  "keywords": {
+    "reference": "rohf",
+    "scf_type": "direct"
+  },
+  "model": {
+    "basis": "aug-cc-pvdz",
+    "method": "hf"
+  },
+  "molecule": {
+    "extras": {},
+    "fix_com": false,
+    "fix_orientation": false,
+    "fix_symmetry": "c1",
+    "geometry": [
+      0.0,
+      0.0,
+      -0.1459129186349,
+      0.0,
+      -1.511214298139,
+      1.0136825969461,
+      0.0,
+      1.511214298139,
+      1.0136825969461
+    ],
+    "molecular_charge": 0.0,
+    "molecular_multiplicity": 2,
+    "name": "H2N",
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.molparse.from_string",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_molecule",
+    "schema_version": 2,
+    "symbols": [
+      "N",
+      "H",
+      "H"
+    ],
+    "validated": true
+  },
+  "protocols": {},
+  "provenance": {
+    "creator": "QCElemental",
+    "routine": "qcelemental.models.v1.results",
+    "version": "0.50.4"
+  },
+  "schema_name": "qcschema_input",
+  "schema_version": 1
+}

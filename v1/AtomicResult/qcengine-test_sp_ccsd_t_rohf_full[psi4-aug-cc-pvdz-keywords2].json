@@ -1,0 +1,161 @@
+{
+  "driver": "energy",
+  "extras": {
+    "qcvars": {
+      "(T) CORRECTION ENERGY": -0.00390108535566,
+      "AAA (T) CORRECTION ENERGY": -0.000118701629418,
+      "AAB (T) CORRECTION ENERGY": -0.00235833739958,
+      "ABB (T) CORRECTION ENERGY": -0.00140538495235,
+      "BBB (T) CORRECTION ENERGY": -1.86613743227e-05,
+      "CC D1 DIAGNOSTIC": 0.0,
+      "CC D2 DIAGNOSTIC": 0.0,
+      "CC NEW D1 DIAGNOSTIC": 0.0,
+      "CC T1 DIAGNOSTIC": 0.0197869260071,
+      "CCSD CORRELATION ENERGY": -0.17823602681,
+      "CCSD DOUBLES ENERGY": -0.174960781341,
+      "CCSD ITERATIONS": 15.0,
+      "CCSD OPPOSITE-SPIN CORRELATION ENERGY": -0.140978074312,
+      "CCSD SAME-SPIN CORRELATION ENERGY": -0.0339827070291,
+      "CCSD SINGLES ENERGY": -0.00327524546902,
+      "CCSD TOTAL ENERGY": -55.7489603754,
+      "CCSD(T) CORRELATION ENERGY": -0.182137112166,
+      "CCSD(T) TOTAL ENERGY": -55.7528614607,
+      "CURRENT CORRELATION ENERGY": -0.182137112166,
+      "CURRENT DIPOLE": [
+        0.0,
+        0.0,
+        0.740543230097
+      ],
+      "CURRENT ENERGY": -55.7528614607,
+      "CURRENT REFERENCE ENERGY": -55.5707243486,
+      "DD SOLVATION ENERGY": 0.0,
+      "HF KINETIC ENERGY": 55.5148722482,
+      "HF POTENTIAL ENERGY": -111.085596597,
+      "HF TOTAL ENERGY": -55.5707243486,
+      "HF VIRIAL RATIO": 2.00100607455,
+      "LCCSD (+LMP2) TOTAL ENERGY": -55.7460134149,
+      "MP2 CORRELATION ENERGY": -0.159497439376,
+      "MP2 DOUBLES ENERGY": -0.15666780875,
+      "MP2 OPPOSITE-SPIN CORRELATION ENERGY": -0.121250716512,
+      "MP2 SAME-SPIN CORRELATION ENERGY": -0.0354170922379,
+      "MP2 SINGLES ENERGY": -0.00282963062599,
+      "MP2 TOTAL ENERGY": -55.7302217879,
+      "NUCLEAR REPULSION ENERGY": 7.68054324153,
+      "ONE-ELECTRON ENERGY": -90.3423769644,
+      "PCM POLARIZATION ENERGY": 0.0,
+      "PE ENERGY": 0.0,
+      "SCF DIPOLE": [
+        0.0,
+        0.0,
+        0.740543230097
+      ],
+      "SCF ITERATION ENERGY": -55.5707243486,
+      "SCF ITERATIONS": 10.0,
+      "SCF TOTAL ENERGIES": [
+        -54.8295069211,
+        -55.5364063413,
+        -55.5639642667,
+        -55.5703070335,
+        -55.5706920471,
+        -55.570722809,
+        -55.5707242621,
+        -55.5707243439,
+        -55.5707243483,
+        -55.5707243486,
+        -55.5707243486
+      ],
+      "SCF TOTAL ENERGY": -55.5707243486,
+      "TWO-ELECTRON ENERGY": 27.0911093743
+    }
+  },
+  "keywords": {
+    "reference": "rohf"
+  },
+  "model": {
+    "basis": "aug-cc-pvdz",
+    "method": "ccsd(t)"
+  },
+  "molecule": {
+    "extras": {},
+    "fix_com": false,
+    "fix_orientation": false,
+    "geometry": [
+      0.0,
+      0.0,
+      -0.145912918262,
+      0.0,
+      -1.51121429814,
+      1.01368259732,
+      0.0,
+      1.51121429814,
+      1.01368259732
+    ],
+    "molecular_charge": 0.0,
+    "molecular_multiplicity": 2,
+    "name": "H2N",
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.molparse.from_string",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_molecule",
+    "schema_version": 2,
+    "symbols": [
+      "N",
+      "H",
+      "H"
+    ],
+    "validated": true
+  },
+  "native_files": {},
+  "properties": {
+    "calcinfo_nalpha": 5,
+    "calcinfo_natom": 3,
+    "calcinfo_nbasis": 41,
+    "calcinfo_nbeta": 4,
+    "calcinfo_nmo": 41,
+    "ccsd_correlation_energy": -0.17823602681,
+    "ccsd_doubles_energy": -0.174960781341,
+    "ccsd_iterations": 15,
+    "ccsd_opposite_spin_correlation_energy": -0.140978074312,
+    "ccsd_prt_pr_correlation_energy": -0.182137112166,
+    "ccsd_prt_pr_total_energy": -55.7528614607,
+    "ccsd_same_spin_correlation_energy": -0.0339827070291,
+    "ccsd_singles_energy": -0.00327524546902,
+    "ccsd_total_energy": -55.7489603754,
+    "mp2_correlation_energy": -0.159497439376,
+    "mp2_doubles_energy": -0.15666780875,
+    "mp2_opposite_spin_correlation_energy": -0.121250716512,
+    "mp2_same_spin_correlation_energy": -0.0354170922379,
+    "mp2_singles_energy": -0.00282963062599,
+    "mp2_total_energy": -55.7302217879,
+    "nuclear_repulsion_energy": 7.68054324153,
+    "return_energy": -55.7528614607,
+    "scf_dipole_moment": [
+      0.0,
+      0.0,
+      0.740543230097
+    ],
+    "scf_iterations": 10,
+    "scf_one_electron_energy": -90.3423769644,
+    "scf_total_energy": -55.5707243486,
+    "scf_two_electron_energy": 27.0911093743
+  },
+  "protocols": {
+    "error_correction": {
+      "default_policy": true
+    },
+    "native_files": "none",
+    "stdout": true,
+    "wavefunction": "none"
+  },
+  "provenance": {
+    "creator": "Psi4",
+    "module": "ccenergy",
+    "qcengine_version": "0.50.1.dev10+gb2e4681ca",
+    "routine": "psi4.schema_runner.run_qcschema",
+    "version": "1.9.1"
+  },
+  "return_result": -55.7528614607,
+  "success": true
+}

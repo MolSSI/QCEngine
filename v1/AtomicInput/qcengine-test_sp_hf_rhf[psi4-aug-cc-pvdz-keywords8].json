@@ -1,0 +1,51 @@
+{
+  "driver": "energy",
+  "extras": {},
+  "keywords": {
+    "scf_type": "direct"
+  },
+  "model": {
+    "basis": "aug-cc-pvdz",
+    "method": "hf"
+  },
+  "molecule": {
+    "extras": {},
+    "fix_com": false,
+    "fix_orientation": false,
+    "geometry": [
+      0.0,
+      1.431430901356,
+      0.984293362719,
+      0.0,
+      0.0,
+      -0.1240388603,
+      0.0,
+      -1.431430901356,
+      0.984293362719
+    ],
+    "molecular_charge": 0.0,
+    "molecular_multiplicity": 1,
+    "name": "H2O",
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.molparse.from_string",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_molecule",
+    "schema_version": 2,
+    "symbols": [
+      "H",
+      "O",
+      "H"
+    ],
+    "validated": true
+  },
+  "protocols": {},
+  "provenance": {
+    "creator": "QCElemental",
+    "routine": "qcelemental.models.v1.results",
+    "version": "0.50.4"
+  },
+  "schema_name": "qcschema_input",
+  "schema_version": 1
+}

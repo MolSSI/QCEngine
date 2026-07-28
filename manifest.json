@@ -1,0 +1,21 @@
+{
+  "counts": {
+    "v1": {
+      "AtomicInput": 5,
+      "AtomicResult": 5
+    },
+    "v2": {
+      "AtomicInput": 5,
+      "AtomicResult": 5
+    }
+  },
+  "example_count": 20,
+  "format_version": 1,
+  "generated_at": "2026-07-28T07:31:21.079197+00:00",
+  "origin": "qcengine",
+  "pytest_exitstatus": 0,
+  "qcelemental_version": "0.50.4",
+  "qcengine_version": "0.50.1.dev10+gb2e4681ca",
+  "source_branch": "testci",
+  "source_commit": "b2e4681ca2a0b86889a477ec48500fc1c1b755be"
+}

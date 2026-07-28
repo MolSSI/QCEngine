@@ -1,0 +1,164 @@
+{
+  "extras": {
+    "qcvars": {
+      "CURRENT DIPOLE": [
+        0.0,
+        0.0,
+        0.741738095321
+      ],
+      "CURRENT ENERGY": -55.5751380522,
+      "CURRENT REFERENCE ENERGY": -55.5751380522,
+      "DD SOLVATION ENERGY": 0.0,
+      "HF KINETIC ENERGY": 55.5234635573,
+      "HF POTENTIAL ENERGY": -111.098601609,
+      "HF TOTAL ENERGY": -55.5751380522,
+      "HF VIRIAL RATIO": 2.00093067852,
+      "NUCLEAR REPULSION ENERGY": 7.68054322505,
+      "ONE-ELECTRON ENERGY": -90.3415564682,
+      "PCM POLARIZATION ENERGY": 0.0,
+      "PE ENERGY": 0.0,
+      "SCF DIPOLE": [
+        0.0,
+        0.0,
+        0.741738095321
+      ],
+      "SCF ITERATION ENERGY": -55.5751380522,
+      "SCF ITERATIONS": 11.0,
+      "SCF TOTAL ENERGIES": [
+        -55.5751380443,
+        -55.5751380522
+      ],
+      "SCF TOTAL ENERGY": -55.5751380522,
+      "TWO-ELECTRON ENERGY": 27.0858751909
+    }
+  },
+  "input_data": {
+    "molecule": {
+      "extras": {},
+      "fix_com": false,
+      "fix_orientation": false,
+      "fix_symmetry": "c1",
+      "geometry": [
+        0.0,
+        0.0,
+        -0.14591292,
+        0.0,
+        -1.5112143,
+        1.0136826,
+        0.0,
+        1.5112143,
+        1.0136826
+      ],
+      "molecular_charge": 0.0,
+      "molecular_multiplicity": 2.0,
+      "name": "H2N",
+      "provenance": {
+        "creator": "QCElemental",
+        "routine": "qcelemental.molparse.from_string",
+        "version": "0.50.4"
+      },
+      "schema_name": "qcschema_molecule",
+      "schema_version": 3,
+      "symbols": [
+        "N",
+        "H",
+        "H"
+      ],
+      "validated": true
+    },
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.models.v2.atomic",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_atomic_input",
+    "schema_version": 2,
+    "specification": {
+      "driver": "energy",
+      "extras": {},
+      "keywords": {
+        "reference": "uhf",
+        "scf_type": "direct"
+      },
+      "model": {
+        "basis": "aug-cc-pvdz",
+        "method": "hf"
+      },
+      "program": "",
+      "protocols": {
+        "error_correction": {
+          "default_policy": true
+        },
+        "native_files": "none",
+        "schema_name": "qcschema_atomic_protocols",
+        "stdout": true,
+        "wavefunction": "none"
+      },
+      "schema_name": "qcschema_atomic_specification"
+    }
+  },
+  "molecule": {
+    "extras": {},
+    "fix_com": false,
+    "fix_orientation": false,
+    "fix_symmetry": "c1",
+    "geometry": [
+      0.0,
+      0.0,
+      -0.145912918818,
+      0.0,
+      -1.5112143,
+      1.01368260118,
+      0.0,
+      1.5112143,
+      1.01368260118
+    ],
+    "molecular_charge": 0.0,
+    "molecular_multiplicity": 2.0,
+    "name": "H2N",
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.molparse.from_string",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_molecule",
+    "schema_version": 3,
+    "symbols": [
+      "N",
+      "H",
+      "H"
+    ],
+    "validated": true
+  },
+  "native_files": {},
+  "properties": {
+    "calcinfo_nalpha": 5,
+    "calcinfo_natom": 3,
+    "calcinfo_nbasis": 41,
+    "calcinfo_nbeta": 4,
+    "calcinfo_nmo": 41,
+    "nuclear_repulsion_energy": 7.68054322505,
+    "return_energy": -55.5751380522,
+    "scf_dipole_moment": [
+      0.0,
+      0.0,
+      0.741738095321
+    ],
+    "scf_iterations": 11,
+    "scf_one_electron_energy": -90.3415564682,
+    "scf_total_energy": -55.5751380522,
+    "scf_two_electron_energy": 27.0858751909,
+    "schema_name": "qcschema_atomic_properties"
+  },
+  "provenance": {
+    "creator": "Psi4",
+    "module": "scf",
+    "qcengine_version": "0.50.1.dev10+gb2e4681ca",
+    "routine": "psi4.schema_runner.run_qcschema",
+    "version": "1.9.1"
+  },
+  "return_result": -55.5751380522,
+  "schema_name": "qcschema_atomic_result",
+  "schema_version": 2,
+  "success": true
+}

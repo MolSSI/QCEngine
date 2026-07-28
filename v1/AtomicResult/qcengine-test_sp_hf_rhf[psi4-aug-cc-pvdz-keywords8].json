@@ -1,0 +1,114 @@
+{
+  "driver": "energy",
+  "extras": {
+    "qcvars": {
+      "CURRENT DIPOLE": [
+        0.0,
+        0.0,
+        0.786647673226
+      ],
+      "CURRENT ENERGY": -76.0413815332,
+      "CURRENT REFERENCE ENERGY": -76.0413815332,
+      "DD SOLVATION ENERGY": 0.0,
+      "HF KINETIC ENERGY": 75.9243328725,
+      "HF POTENTIAL ENERGY": -151.965714406,
+      "HF TOTAL ENERGY": -76.0413815332,
+      "HF VIRIAL RATIO": 2.00154164885,
+      "NUCLEAR REPULSION ENERGY": 9.18733357471,
+      "ONE-ELECTRON ENERGY": -122.962646376,
+      "PCM POLARIZATION ENERGY": 0.0,
+      "PE ENERGY": 0.0,
+      "SCF DIPOLE": [
+        0.0,
+        0.0,
+        0.786647673226
+      ],
+      "SCF ITERATION ENERGY": -76.0413815332,
+      "SCF ITERATIONS": 11.0,
+      "SCF TOTAL ENERGIES": [
+        -76.0413815202,
+        -76.0413815329,
+        -76.0413815332
+      ],
+      "SCF TOTAL ENERGY": -76.0413815332,
+      "TWO-ELECTRON ENERGY": 37.7339312676
+    }
+  },
+  "keywords": {
+    "scf_type": "direct"
+  },
+  "model": {
+    "basis": "aug-cc-pvdz",
+    "method": "hf"
+  },
+  "molecule": {
+    "extras": {},
+    "fix_com": false,
+    "fix_orientation": false,
+    "geometry": [
+      0.0,
+      1.43143090136,
+      0.984293362719,
+      0.0,
+      0.0,
+      -0.1240388603,
+      0.0,
+      -1.43143090136,
+      0.984293362719
+    ],
+    "molecular_charge": 0.0,
+    "molecular_multiplicity": 1,
+    "name": "H2O",
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.molparse.from_string",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_molecule",
+    "schema_version": 2,
+    "symbols": [
+      "H",
+      "O",
+      "H"
+    ],
+    "validated": true
+  },
+  "native_files": {},
+  "properties": {
+    "calcinfo_nalpha": 5,
+    "calcinfo_natom": 3,
+    "calcinfo_nbasis": 41,
+    "calcinfo_nbeta": 5,
+    "calcinfo_nmo": 41,
+    "nuclear_repulsion_energy": 9.18733357471,
+    "return_energy": -76.0413815332,
+    "scf_dipole_moment": [
+      0.0,
+      0.0,
+      0.786647673226
+    ],
+    "scf_iterations": 11,
+    "scf_one_electron_energy": -122.962646376,
+    "scf_total_energy": -76.0413815332,
+    "scf_two_electron_energy": 37.7339312676
+  },
+  "protocols": {
+    "error_correction": {
+      "default_policy": true
+    },
+    "native_files": "none",
+    "stdout": true,
+    "wavefunction": "none"
+  },
+  "provenance": {
+    "creator": "Psi4",
+    "module": "scf",
+    "qcengine_version": "0.50.1.dev10+gb2e4681ca",
+    "routine": "psi4.schema_runner.run_qcschema",
+    "version": "1.9.1"
+  },
+  "return_result": -76.0413815332,
+  "schema_name": "qcschema_output",
+  "schema_version": 1,
+  "success": true
+}

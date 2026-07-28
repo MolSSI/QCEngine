@@ -1,0 +1,205 @@
+{
+  "extras": {
+    "qcvars": {
+      "(T) CORRECTION ENERGY": -0.00523856479534,
+      "CC D1 DIAGNOSTIC": 0.0264613771887,
+      "CC D2 DIAGNOSTIC": 0.125804572886,
+      "CC NEW D1 DIAGNOSTIC": 0.0264613771887,
+      "CC T1 DIAGNOSTIC": 0.0109594331093,
+      "CCSD CORRELATION ENERGY": -0.229410577948,
+      "CCSD DOUBLES ENERGY": -0.229410577948,
+      "CCSD ITERATIONS": 13.0,
+      "CCSD OPPOSITE-SPIN CORRELATION ENERGY": -0.179232598897,
+      "CCSD SAME-SPIN CORRELATION ENERGY": -0.0501779790515,
+      "CCSD SINGLES ENERGY": 0.0,
+      "CCSD TOTAL ENERGY": -76.2707921113,
+      "CCSD(T) CORRELATION ENERGY": -0.234649142744,
+      "CCSD(T) TOTAL ENERGY": -76.2760306761,
+      "CURRENT CORRELATION ENERGY": -0.234649142744,
+      "CURRENT DIPOLE": [
+        0.0,
+        0.0,
+        0.786647991382
+      ],
+      "CURRENT ENERGY": -76.2760306761,
+      "CURRENT REFERENCE ENERGY": -76.0413815333,
+      "DD SOLVATION ENERGY": 0.0,
+      "HF KINETIC ENERGY": 75.9243136345,
+      "HF POTENTIAL ENERGY": -151.965695168,
+      "HF TOTAL ENERGY": -76.0413815333,
+      "HF VIRIAL RATIO": 2.00154190263,
+      "LCCSD (+LMP2) TOTAL ENERGY": -76.2680329344,
+      "MP2 CORRELATION ENERGY": -0.221897724789,
+      "MP2 DOUBLES ENERGY": -0.221897724789,
+      "MP2 OPPOSITE-SPIN CORRELATION ENERGY": -0.165197841447,
+      "MP2 SAME-SPIN CORRELATION ENERGY": -0.0566998833418,
+      "MP2 SINGLES ENERGY": 0.0,
+      "MP2 TOTAL ENERGY": -76.2632792581,
+      "NUCLEAR REPULSION ENERGY": 9.1873335893,
+      "ONE-ELECTRON ENERGY": -122.962628881,
+      "PCM POLARIZATION ENERGY": 0.0,
+      "PE ENERGY": 0.0,
+      "SCF DIPOLE": [
+        0.0,
+        0.0,
+        0.786647991382
+      ],
+      "SCF ITERATION ENERGY": -76.0413815333,
+      "SCF ITERATIONS": 10.0,
+      "SCF TOTAL ENERGIES": [
+        -75.4652520202,
+        -75.9572548494,
+        -76.0104912229,
+        -76.0408484216,
+        -76.0413588123,
+        -76.0413797376,
+        -76.0413814597,
+        -76.0413815315,
+        -76.0413815333,
+        -76.0413815333,
+        -76.0413815333
+      ],
+      "SCF TOTAL ENERGY": -76.0413815333,
+      "TWO-ELECTRON ENERGY": 37.7339137585
+    }
+  },
+  "input_data": {
+    "molecule": {
+      "extras": {},
+      "fix_com": false,
+      "fix_orientation": false,
+      "geometry": [
+        0.0,
+        1.4314309,
+        0.98429336,
+        0.0,
+        0.0,
+        -0.12403886,
+        0.0,
+        -1.4314309,
+        0.98429336
+      ],
+      "molecular_charge": 0.0,
+      "molecular_multiplicity": 1.0,
+      "name": "H2O",
+      "provenance": {
+        "creator": "QCElemental",
+        "routine": "qcelemental.molparse.from_string",
+        "version": "0.50.4"
+      },
+      "schema_name": "qcschema_molecule",
+      "schema_version": 3,
+      "symbols": [
+        "H",
+        "O",
+        "H"
+      ],
+      "validated": true
+    },
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.models.v2.atomic",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_atomic_input",
+    "schema_version": 2,
+    "specification": {
+      "driver": "energy",
+      "extras": {},
+      "keywords": {},
+      "model": {
+        "basis": "aug-cc-pvdz",
+        "method": "ccsd(t)"
+      },
+      "program": "",
+      "protocols": {
+        "error_correction": {
+          "default_policy": true
+        },
+        "native_files": "none",
+        "schema_name": "qcschema_atomic_protocols",
+        "stdout": true,
+        "wavefunction": "none"
+      },
+      "schema_name": "qcschema_atomic_specification"
+    }
+  },
+  "molecule": {
+    "extras": {},
+    "fix_com": false,
+    "fix_orientation": false,
+    "geometry": [
+      0.0,
+      1.4314309,
+      0.984293360038,
+      0.0,
+      0.0,
+      -0.124038859962,
+      0.0,
+      -1.4314309,
+      0.984293360038
+    ],
+    "molecular_charge": 0.0,
+    "molecular_multiplicity": 1.0,
+    "name": "H2O",
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.molparse.from_string",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_molecule",
+    "schema_version": 3,
+    "symbols": [
+      "H",
+      "O",
+      "H"
+    ],
+    "validated": true
+  },
+  "native_files": {},
+  "properties": {
+    "calcinfo_nalpha": 5,
+    "calcinfo_natom": 3,
+    "calcinfo_nbasis": 41,
+    "calcinfo_nbeta": 5,
+    "calcinfo_nmo": 41,
+    "ccsd_correlation_energy": -0.229410577948,
+    "ccsd_doubles_energy": -0.229410577948,
+    "ccsd_iterations": 13,
+    "ccsd_opposite_spin_correlation_energy": -0.179232598897,
+    "ccsd_prt_pr_correlation_energy": -0.234649142744,
+    "ccsd_prt_pr_total_energy": -76.2760306761,
+    "ccsd_same_spin_correlation_energy": -0.0501779790515,
+    "ccsd_singles_energy": 0.0,
+    "ccsd_total_energy": -76.2707921113,
+    "mp2_correlation_energy": -0.221897724789,
+    "mp2_doubles_energy": -0.221897724789,
+    "mp2_opposite_spin_correlation_energy": -0.165197841447,
+    "mp2_same_spin_correlation_energy": -0.0566998833418,
+    "mp2_singles_energy": 0.0,
+    "mp2_total_energy": -76.2632792581,
+    "nuclear_repulsion_energy": 9.1873335893,
+    "return_energy": -76.2760306761,
+    "scf_dipole_moment": [
+      0.0,
+      0.0,
+      0.786647991382
+    ],
+    "scf_iterations": 10,
+    "scf_one_electron_energy": -122.962628881,
+    "scf_total_energy": -76.0413815333,
+    "scf_two_electron_energy": 37.7339137585,
+    "schema_name": "qcschema_atomic_properties"
+  },
+  "provenance": {
+    "creator": "Psi4",
+    "module": "ccenergy",
+    "qcengine_version": "0.50.1.dev10+gb2e4681ca",
+    "routine": "psi4.schema_runner.run_qcschema",
+    "version": "1.9.1"
+  },
+  "return_result": -76.2760306761,
+  "schema_name": "qcschema_atomic_result",
+  "schema_version": 2,
+  "success": true
+}

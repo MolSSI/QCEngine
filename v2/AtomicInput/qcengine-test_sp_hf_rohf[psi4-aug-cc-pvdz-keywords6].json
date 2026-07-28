@@ -1,0 +1,65 @@
+{
+  "molecule": {
+    "extras": {},
+    "fix_com": false,
+    "fix_orientation": false,
+    "fix_symmetry": "c1",
+    "geometry": [
+      0.0,
+      0.0,
+      -0.14591292,
+      0.0,
+      -1.5112143,
+      1.0136826,
+      0.0,
+      1.5112143,
+      1.0136826
+    ],
+    "molecular_charge": 0.0,
+    "molecular_multiplicity": 2.0,
+    "name": "H2N",
+    "provenance": {
+      "creator": "QCElemental",
+      "routine": "qcelemental.molparse.from_string",
+      "version": "0.50.4"
+    },
+    "schema_name": "qcschema_molecule",
+    "schema_version": 3,
+    "symbols": [
+      "N",
+      "H",
+      "H"
+    ],
+    "validated": true
+  },
+  "provenance": {
+    "creator": "QCElemental",
+    "routine": "qcelemental.models.v2.atomic",
+    "version": "0.50.4"
+  },
+  "schema_name": "qcschema_atomic_input",
+  "schema_version": 2,
+  "specification": {
+    "driver": "energy",
+    "extras": {},
+    "keywords": {
+      "reference": "rohf",
+      "scf_type": "direct"
+    },
+    "model": {
+      "basis": "aug-cc-pvdz",
+      "method": "hf"
+    },
+    "program": "",
+    "protocols": {
+      "error_correction": {
+        "default_policy": true
+      },
+      "native_files": "none",
+      "schema_name": "qcschema_atomic_protocols",
+      "stdout": true,
+      "wavefunction": "none"
+    },
+    "schema_name": "qcschema_atomic_specification"
+  }
+}
