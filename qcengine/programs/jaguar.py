@@ -208,9 +208,7 @@ class JaguarHarness(ProgramHarness):
                 if source_input.sectionDefined(section):
                     section_body = source_input.getSectionText(section)
                     if section_body is not None:
-                        mm.mmjag_sect_append_wrapper(
-                            jaguar_input.handle, f"&{section}\n{section_body}\n&\n"
-                        )
+                        mm.mmjag_sect_append_wrapper(jaguar_input.handle, f"&{section}\n{section_body}\n&\n")
         except InputError:
             raise
         except Exception as exc:
@@ -340,9 +338,7 @@ class JaguarHarness(ProgramHarness):
 
         dipole = getattr(results, "dipole_qm", None)
         if dipole is not None and None not in (dipole.x, dipole.y, dipole.z):
-            properties["scf_dipole_moment"] = (
-                np.asarray([dipole.x, dipole.y, dipole.z]) / constants.dipmom_au2debye
-            )
+            properties["scf_dipole_moment"] = np.asarray([dipole.x, dipole.y, dipole.z]) / constants.dipmom_au2debye
 
         return properties
 
@@ -543,6 +539,6 @@ class JaguarHarness(ProgramHarness):
                 "jaguar": {
                     "suite_version": self.get_suite_version(),
                     "point_group": jaguar_output.point_group,
-                }
+                },
             },
         )
