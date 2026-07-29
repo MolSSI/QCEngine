@@ -12,13 +12,13 @@ from qcengine.programs.jaguar import JaguarHarness
 from qcengine.testing import uusing
 
 
-def _input(driver="energy", method="hf", basis="sto-3g", keywords=None, extras=None):
+def _input(driver="energy", method="hf", basis="sto-3g", keywords=None, extras=None, charge=0, multiplicity=1):
     return AtomicInput(
         molecule={
             "symbols": ["H", "H"],
             "geometry": [0.0, 0.0, -0.7, 0.0, 0.0, 0.7],
-            "molecular_charge": 0,
-            "molecular_multiplicity": 1,
+            "molecular_charge": charge,
+            "molecular_multiplicity": multiplicity,
         },
         specification={
             "driver": driver,
@@ -75,6 +75,7 @@ def test_property_mapping():
 
     assert properties["calcinfo_natom"] == 2
     assert properties["calcinfo_nbasis"] == 5
+    assert properties["calcinfo_nmo"] == 5
     assert properties["calcinfo_nalpha"] == properties["calcinfo_nbeta"] == 1
     assert properties["return_energy"] == -1.1
     assert properties["scf_total_energy"] == -1.0
@@ -83,6 +84,43 @@ def test_property_mapping():
         properties["scf_dipole_moment"],
         np.array([1.0, 2.0, 3.0]) / constants.dipmom_au2debye,
     )
+
+
+def test_rohf_electron_counts():
+    output = SimpleNamespace(
+        nelectron=7,
+        nbasis=5,
+        num_occ_orbs_alpha=4,
+        num_occ_orbs_beta=4,
+        last_results=SimpleNamespace(energy=-1.1),
+    )
+    input_model = _input(charge=1, multiplicity=2)
+
+    properties = JaguarHarness._optional_properties(output, input_model)
+
+    assert properties["calcinfo_nalpha"] == 4
+    assert properties["calcinfo_nbeta"] == 3
+
+
+@pytest.mark.parametrize(
+    "driver, derivative_label",
+    [("energy", None), ("gradient", "GRADIENT"), ("hessian", "HESSIAN")],
+)
+def test_hf_qcvars(driver, derivative_label):
+    properties = {"return_energy": -1.0, "scf_total_energy": -1.0}
+    if derivative_label:
+        properties[f"return_{derivative_label.lower()}"] = np.zeros((2, 3))
+
+    qcvars = JaguarHarness._qcvars(properties, driver, "hf")
+
+    assert qcvars["HF TOTAL ENERGY"] == -1.0
+    assert qcvars["SCF TOTAL ENERGY"] == -1.0
+    assert qcvars["CURRENT REFERENCE ENERGY"] == -1.0
+    assert qcvars["CURRENT ENERGY"] == -1.0
+    assert "CURRENT CORRELATION ENERGY" not in qcvars
+    if derivative_label:
+        assert f"HF TOTAL {derivative_label}" in qcvars
+        assert f"CURRENT {derivative_label}" in qcvars
 
 
 def test_rejects_unsupported_driver():
