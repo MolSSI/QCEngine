@@ -27,6 +27,28 @@ def test_check_program_avail(program):
     assert program in qcng.list_available_programs()
 
 
+def test_program_version_check_is_targeted(monkeypatch):
+    from qcengine.testing import is_program_new_enough
+
+    class AvailableHarness:
+        @staticmethod
+        def found():
+            return True
+
+        @staticmethod
+        def get_version():
+            return "2.0"
+
+    def unexpected_full_scan():
+        pytest.fail("is_program_new_enough should not scan every registered program")
+
+    monkeypatch.setattr(qcng, "list_all_procedures", lambda: set())
+    monkeypatch.setattr(qcng, "list_available_programs", unexpected_full_scan)
+    monkeypatch.setattr(qcng, "get_program", lambda name, check=False: AvailableHarness())
+
+    assert is_program_new_enough("available", "1.0")
+
+
 def test_program_avail_bounce():
 
     with pytest.raises(qcng.exceptions.InputError) as exc:
