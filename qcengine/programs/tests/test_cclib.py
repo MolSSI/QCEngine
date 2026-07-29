@@ -722,6 +722,39 @@ def test_qchem_input_rejects_reserved_keywords_case_insensitively(reserved):
         )
 
 
+@pytest.mark.parametrize("reserved", sorted(_QCHEM_RESERVED))
+@pytest.mark.parametrize("alias", [" {}", "{} ", "\t{}", "{}\t"])
+def test_qchem_input_keyword_name_rejects_whitespace_aliases_for_every_reserved_key(reserved, alias):
+    malformed_key = alias.format(reserved.swapcase())
+
+    with pytest.raises(InputError, match="keyword name"):
+        cclib_harness._build_qchem_input(
+            _atomic_input(keywords={malformed_key: "user"}), _task_config(), "/opt/qchem"
+        )
+
+
+@pytest.mark.parametrize(
+    "malformed_key",
+    [
+        "",
+        " ",
+        "\t",
+        "ordinary key",
+        "ordinary\tkey",
+        " ordinary",
+        "ordinary ",
+        "ordinary\x00key",
+        "ordinary\x1fkey",
+        "ordinary\x7fkey",
+    ],
+)
+def test_qchem_input_keyword_name_rejects_empty_whitespace_and_control_characters(malformed_key):
+    with pytest.raises(InputError, match="keyword name"):
+        cclib_harness._build_qchem_input(
+            _atomic_input(keywords={malformed_key: "value"}), _task_config(), "/opt/qchem"
+        )
+
+
 def test_qchem_input_rejects_case_insensitive_user_keyword_collisions():
     with pytest.raises(InputError, match="collision"):
         cclib_harness._build_qchem_input(

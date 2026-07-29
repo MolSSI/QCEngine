@@ -201,6 +201,12 @@ def _build_qchem_input(input_model: "AtomicInput", config: TaskConfig, executabl
 
     user_options: Dict[str, str] = {}
     for key, value in input_model.specification.keywords.items():
+        if (
+            not isinstance(key, str)
+            or not key
+            or any(character.isspace() or not character.isprintable() for character in key)
+        ):
+            raise InputError(f"Q-Chem keyword name must be exactly one non-empty native token: {key!r}")
         normalized_key = key.upper()
         if normalized_key in QCHEM_RESERVED:
             raise InputError(f"Q-Chem keyword {key!r} is reserved by CCLibHarness")
