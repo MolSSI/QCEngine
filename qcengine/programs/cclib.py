@@ -18,7 +18,7 @@ from qcelemental.util import parse_version, safe_version, which
 
 from ..config import TaskConfig
 from ..exceptions import InputError, ResourceError, UnknownError
-from ..util import execute
+from ..util import execute, temporary_directory
 from .model import ProgramHarness
 
 if TYPE_CHECKING:
@@ -47,6 +47,18 @@ class _Job:
     output_filename: str
     input_text: str
     executable: str
+
+
+@dataclass(frozen=True)
+class _ExecutionResult:
+    process_success: bool
+    executable: str
+    input_filename: str
+    output_filename: str
+    input_text: str
+    output_text: str
+    stdout: str
+    stderr: str
 
 
 def _validate_input_subset(input_model: "AtomicInput") -> Tuple[str, str, str]:
@@ -343,16 +355,22 @@ def _build_orca_input(input_model: "AtomicInput", config: TaskConfig, executable
 
 def _select_qchem_output(outputs: Mapping[str, Any]) -> str:
     try:
-        return str(outputs["dispatch.out"])
+        output = outputs["dispatch.out"]
     except KeyError as exc:
         raise UnknownError("Q-Chem did not produce dispatch.out") from exc
+    if output is None:
+        raise UnknownError("Q-Chem did not produce dispatch.out")
+    return str(output)
 
 
 def _select_orca_output(outputs: Mapping[str, Any]) -> str:
     try:
-        return str(outputs["stdout"])
+        output = outputs["stdout"]
     except KeyError as exc:
         raise UnknownError("ORCA did not produce captured stdout") from exc
+    if output is None:
+        raise UnknownError("ORCA did not produce captured stdout")
+    return str(output)
 
 
 def _path_has_mode(path: str, mode: int) -> bool:
@@ -481,6 +499,139 @@ _PROGRAM_DEFINITIONS: Mapping[str, _ProgramDefinition] = {
         preflight=_preflight_none,
     ),
 }
+
+
+def _diagnostic_tail(text: str, max_lines: int = 40, max_chars: int = 4000) -> str:
+    """Return the bounded trailing portion used in execution diagnostics."""
+
+    line_bounded = "\n".join(text.splitlines()[-max_lines:])
+    return line_bounded[-max_chars:]
+
+
+def _missing_qchem_environment_variable(diagnostic: str) -> Optional[str]:
+    patterns = (
+        r"undefined\s+environment\s+variable\s*[:=]?\s*['\"`]?\$?\{?([A-Za-z_][A-Za-z0-9_]*)",
+        r"['\"`]?\b([A-Za-z_][A-Za-z0-9_]*)['\"`]?\s*:\s*(?:undefined|unbound)\s+variable",
+        r"environment\s+variable\s+['\"`]?\$?\{?([A-Za-z_][A-Za-z0-9_]*)['\"`}]?\s+"
+        r"(?:is\s+)?(?:undefined|not\s+(?:defined|set)|must\s+be\s+defined)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, diagnostic, re.IGNORECASE)
+        if match is not None:
+            return match.group(1)
+    return None
+
+
+def _raise_execution_failure(
+    definition: _ProgramDefinition,
+    job: _Job,
+    stage: str,
+    diagnostic: str,
+    cause: Optional[BaseException] = None,
+) -> None:
+    """Raise one consistently formatted, stage-aware execution failure."""
+
+    missing_variable = (
+        _missing_qchem_environment_variable(diagnostic) if definition.selector == "cclib-qchem" else None
+    )
+    is_environment_failure = definition.selector == "cclib-qchem" and (
+        missing_variable is not None
+        or re.search(
+            r"undefined\s+(?:environment\s+)?variable|environment\s+variable.*"
+            r"(?:undefined|not\s+(?:defined|set)|must\s+be\s+defined)",
+            diagnostic,
+            re.IGNORECASE,
+        )
+        is not None
+    )
+    is_license_failure = any(
+        marker in diagnostic.lower()
+        for marker in ("flexnet", "license checkout", "unable to validate license")
+    )
+    error_type = ResourceError if is_environment_failure or is_license_failure else UnknownError
+
+    detail = ""
+    if missing_variable is not None:
+        detail = f"; undefined Q-Chem environment variable {missing_variable}"
+    elif is_environment_failure:
+        detail = "; undefined Q-Chem environment variable"
+    elif is_license_failure:
+        detail = "; license resource unavailable"
+    message = (
+        f"{definition.selector} failed for resolved executable {job.executable} "
+        f"during {stage} stage{detail}.\nDiagnostic tail:\n{_diagnostic_tail(diagnostic)}"
+    )
+    if cause is None:
+        raise error_type(message)
+    raise error_type(message) from cause
+
+
+def _execution_diagnostic(outputs: Mapping[str, Any], stdout: str, stderr: str) -> str:
+    parts = [str(value) for value in outputs.values() if value not in (None, "")]
+    for stream in (stdout, stderr):
+        if stream and stream not in parts:
+            parts.append(stream)
+    return "\n".join(parts)
+
+
+def _execute_job(definition: _ProgramDefinition, job: _Job, config: TaskConfig) -> _ExecutionResult:
+    """Execute a generated job with QCEngine's managed scratch utilities."""
+
+    environment = definition.preflight(job.executable, os.environ.copy())
+
+    def run(scratch_directory: Optional[str]) -> _ExecutionResult:
+        try:
+            process_success, process = execute(
+                job.command,
+                infiles=job.infiles,
+                outfiles=job.outfiles,
+                scratch_directory=scratch_directory,
+                scratch_messy=config.scratch_messy,
+                environment=environment,
+            )
+        except Exception as exc:
+            _raise_execution_failure(definition, job, "execution", str(exc), exc)
+
+        stdout = str(process.get("stdout") or "")
+        stderr = str(process.get("stderr") or "")
+        outputs = dict(process.get("outfiles") or {})
+        diagnostic = _execution_diagnostic(outputs, stdout, stderr)
+        if not process_success:
+            _raise_execution_failure(definition, job, "execution", diagnostic)
+
+        selection_inputs = dict(outputs)
+        if "stdout" in process:
+            selection_inputs["stdout"] = process["stdout"]
+        if "stderr" in process:
+            selection_inputs["stderr"] = process["stderr"]
+        try:
+            output_text = definition.output_selector(selection_inputs)
+        except Exception as exc:
+            _raise_execution_failure(definition, job, "output selection", diagnostic, exc)
+
+        if definition.normal_termination not in output_text:
+            _raise_execution_failure(definition, job, "termination", output_text)
+
+        return _ExecutionResult(
+            process_success=process_success,
+            executable=job.executable,
+            input_filename=job.input_filename,
+            output_filename=job.output_filename,
+            input_text=job.input_text,
+            output_text=output_text,
+            stdout=stdout,
+            stderr=stderr,
+        )
+
+    if definition.selector == "cclib-qchem":
+        with temporary_directory(
+            parent=config.scratch_directory,
+            suffix="_cclib_qchem_scratch",
+            messy=config.scratch_messy,
+        ) as qcscratch:
+            environment["QCSCRATCH"] = str(qcscratch)
+            return run(str(qcscratch))
+    return run(config.scratch_directory)
 
 
 def _probe_executable(

@@ -905,3 +905,209 @@ def test_orca_input_build_input_delegates_to_job(monkeypatch):
         "outfiles": [],
         "scratch_directory": "/tmp/scratch",
     }
+
+
+def test_qchem_execution_selection_requests_primary_output_and_preserves_job(monkeypatch, tmp_path):
+    job = cclib_harness._build_qchem_input(_atomic_input(), _task_config(), "/resolved/qchem")
+    definition = replace(cclib_harness._PROGRAM_DEFINITIONS["qchem"], preflight=lambda exe, env: dict(env))
+    inherited_environment = os.environ.copy()
+    calls = []
+
+    def fake_execute(command, infiles=None, outfiles=None, **kwargs):
+        calls.append((command, infiles, outfiles, kwargs))
+        return True, {
+            "stdout": "launcher stdout",
+            "stderr": "launcher stderr",
+            "outfiles": {"dispatch.out": _qchem_probe_output()},
+        }
+
+    monkeypatch.setattr(cclib_harness, "execute", fake_execute)
+    result = cclib_harness._execute_job(
+        definition, job, _task_config(scratch_directory=str(tmp_path))
+    )
+
+    command, infiles, outfiles, kwargs = calls[0]
+    assert command == job.command
+    assert infiles == job.infiles
+    assert outfiles == ["dispatch.out"]
+    assert {key: kwargs["environment"][key] for key in inherited_environment} == inherited_environment
+    assert result.output_text == _qchem_probe_output()
+    assert (result.stdout, result.stderr) == ("launcher stdout", "launcher stderr")
+
+
+def test_orca_execution_selection_uses_captured_stdout_and_preserves_job(monkeypatch, tmp_path):
+    job = cclib_harness._build_orca_input(_atomic_input(), _task_config(), "/resolved/orca")
+    definition = cclib_harness._PROGRAM_DEFINITIONS["orca"]
+    inherited_environment = os.environ.copy()
+    calls = []
+    output = _orca_probe_output()
+
+    def fake_execute(command, infiles=None, outfiles=None, **kwargs):
+        calls.append((command, infiles, outfiles, kwargs))
+        return True, {"stdout": output, "stderr": "", "outfiles": {}}
+
+    monkeypatch.setattr(cclib_harness, "execute", fake_execute)
+    result = cclib_harness._execute_job(
+        definition, job, _task_config(scratch_directory=str(tmp_path))
+    )
+
+    command, infiles, outfiles, kwargs = calls[0]
+    assert (command, infiles, outfiles) == (job.command, job.infiles, [])
+    assert kwargs["environment"] == inherited_environment
+    assert result.output_text == output
+    assert result.stdout == output
+
+
+def test_qchem_managed_scratch_overrides_inherited_qcscratch(monkeypatch, tmp_path):
+    monkeypatch.setenv("QCSCRATCH", "/inherited/unmanaged")
+    job = cclib_harness._build_qchem_input(_atomic_input(), _task_config(), "/resolved/qchem")
+    definition = replace(cclib_harness._PROGRAM_DEFINITIONS["qchem"], preflight=lambda exe, env: dict(env))
+    observed = {}
+
+    def fake_execute(command, infiles=None, outfiles=None, **kwargs):
+        qcscratch = kwargs["environment"]["QCSCRATCH"]
+        observed["qcscratch"] = qcscratch
+        assert os.path.isdir(qcscratch)
+        assert os.path.commonpath([qcscratch, str(tmp_path)]) == str(tmp_path)
+        assert kwargs["scratch_directory"] == qcscratch
+        return True, {"stdout": "", "stderr": "", "outfiles": {"dispatch.out": _qchem_probe_output()}}
+
+    monkeypatch.setattr(cclib_harness, "execute", fake_execute)
+    cclib_harness._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
+
+    assert not os.path.exists(observed["qcscratch"])
+
+
+def _qchem_execution_case():
+    job = cclib_harness._build_qchem_input(_atomic_input(), _task_config(), "/resolved/qchem")
+    definition = replace(cclib_harness._PROGRAM_DEFINITIONS["qchem"], preflight=lambda exe, env: dict(env))
+    return definition, job
+
+
+def _assert_execution_message(error, definition, job, stage, diagnostic):
+    message = str(error)
+    assert definition.selector in message
+    assert job.executable in message
+    assert stage in message
+    assert cclib_harness._diagnostic_tail(diagnostic) in message
+
+
+def test_diagnostic_tail_enforces_exact_line_and_character_bounds():
+    lines = [f"diagnostic line {index}: " + ("x" * 120) for index in range(50)]
+    text = "\n".join(lines)
+
+    expected = "\n".join(lines[-40:])[-4000:]
+    tail = cclib_harness._diagnostic_tail(text)
+
+    assert tail == expected
+    assert len(tail) == 4000
+    assert len(tail.splitlines()) <= 40
+    assert cclib_harness._diagnostic_tail("short output") == "short output"
+    assert cclib_harness._diagnostic_tail("") == ""
+
+
+def test_nonzero_execution_error_is_unknown_with_bounded_diagnostic(monkeypatch, tmp_path):
+    definition, job = _qchem_execution_case()
+    diagnostic = "\n".join(f"failure line {index}" for index in range(60))
+    output = diagnostic + "\n" + definition.normal_termination
+    monkeypatch.setattr(
+        cclib_harness,
+        "execute",
+        lambda *args, **kwargs: (False, {"stdout": "", "stderr": "", "outfiles": {"dispatch.out": output}}),
+    )
+
+    with pytest.raises(cclib_harness.UnknownError) as exc_info:
+        cclib_harness._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
+
+    _assert_execution_message(exc_info.value, definition, job, "execution", output)
+
+
+@pytest.mark.parametrize("program", ["qchem", "orca"])
+def test_missing_primary_output_is_unknown_output_selection_error(monkeypatch, tmp_path, program):
+    diagnostic = f"{program} launcher produced no primary output"
+    if program == "qchem":
+        definition, job = _qchem_execution_case()
+        process = {"stdout": diagnostic, "stderr": "", "outfiles": {"dispatch.out": None}}
+    else:
+        definition = cclib_harness._PROGRAM_DEFINITIONS["orca"]
+        job = cclib_harness._build_orca_input(_atomic_input(), _task_config(), "/resolved/orca")
+        process = {"stderr": diagnostic, "outfiles": {}}
+    monkeypatch.setattr(cclib_harness, "execute", lambda *args, **kwargs: (True, process))
+
+    with pytest.raises(cclib_harness.UnknownError) as exc_info:
+        cclib_harness._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
+
+    _assert_execution_message(exc_info.value, definition, job, "output selection", diagnostic)
+    assert exc_info.value.__cause__ is not None
+
+
+def test_zero_exit_without_normal_termination_marker_is_unknown(monkeypatch, tmp_path):
+    definition, job = _qchem_execution_case()
+    output = "Q-Chem stopped before its farewell"
+    monkeypatch.setattr(
+        cclib_harness,
+        "execute",
+        lambda *args, **kwargs: (True, {"stdout": "", "stderr": "", "outfiles": {"dispatch.out": output}}),
+    )
+
+    with pytest.raises(cclib_harness.UnknownError) as exc_info:
+        cclib_harness._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
+
+    _assert_execution_message(exc_info.value, definition, job, "termination", output)
+
+
+@pytest.mark.parametrize(
+    "diagnostic,variable",
+    [
+        ("Undefined environment variable QCAUX", "QCAUX"),
+        ("QCFILE: Undefined variable.", "QCFILE"),
+        ("Environment variable 'QC' must be defined", "QC"),
+    ],
+)
+def test_qchem_undefined_environment_execution_error_is_resource_error(
+    monkeypatch, tmp_path, diagnostic, variable
+):
+    definition, job = _qchem_execution_case()
+    monkeypatch.setattr(
+        cclib_harness,
+        "execute",
+        lambda *args, **kwargs: (False, {"stdout": "", "stderr": diagnostic, "outfiles": {"dispatch.out": None}}),
+    )
+
+    with pytest.raises(ResourceError) as exc_info:
+        cclib_harness._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
+
+    _assert_execution_message(exc_info.value, definition, job, "execution", diagnostic)
+    assert variable in str(exc_info.value)
+
+
+@pytest.mark.parametrize("license_message", ["FlexNet failure", "license checkout failed", "unable to validate license"])
+def test_license_execution_error_is_resource_error(monkeypatch, tmp_path, license_message):
+    definition = cclib_harness._PROGRAM_DEFINITIONS["orca"]
+    job = cclib_harness._build_orca_input(_atomic_input(), _task_config(), "/resolved/orca")
+    monkeypatch.setattr(
+        cclib_harness,
+        "execute",
+        lambda *args, **kwargs: (False, {"stdout": license_message, "stderr": "", "outfiles": {}}),
+    )
+
+    with pytest.raises(ResourceError) as exc_info:
+        cclib_harness._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
+
+    _assert_execution_message(exc_info.value, definition, job, "execution", license_message)
+
+
+def test_execution_exception_is_unknown_and_chained(monkeypatch, tmp_path):
+    definition = cclib_harness._PROGRAM_DEFINITIONS["orca"]
+    job = cclib_harness._build_orca_input(_atomic_input(), _task_config(), "/resolved/orca")
+    original = OSError("scheduler launch failed")
+
+    def fail_execute(*args, **kwargs):
+        raise original
+
+    monkeypatch.setattr(cclib_harness, "execute", fail_execute)
+    with pytest.raises(cclib_harness.UnknownError) as exc_info:
+        cclib_harness._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
+
+    _assert_execution_message(exc_info.value, definition, job, "execution", str(original))
+    assert exc_info.value.__cause__ is original
