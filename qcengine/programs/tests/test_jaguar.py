@@ -12,7 +12,7 @@ from qcengine.programs.jaguar import JaguarHarness
 from qcengine.testing import uusing
 
 
-def _input(driver="energy", method="hf", basis="sto-3g", keywords=None):
+def _input(driver="energy", method="hf", basis="sto-3g", keywords=None, extras=None):
     return AtomicInput(
         molecule={
             "symbols": ["H", "H"],
@@ -24,6 +24,7 @@ def _input(driver="energy", method="hf", basis="sto-3g", keywords=None):
             "driver": driver,
             "model": {"method": method, "basis": basis},
             "keywords": keywords or {},
+            "extras": extras or {},
             "protocols": {"native_files": "all"},
         },
     )
@@ -89,6 +90,12 @@ def test_rejects_unsupported_driver():
         JaguarHarness._validate_input(_input(driver="properties"))
 
 
+def test_rejects_invalid_guess_input():
+    input_model = _input(extras={"jaguar": {"guess_input": 42}})
+    with pytest.raises(InputError, match="guess_input must be a non-empty string"):
+        JaguarHarness._validate_input(input_model)
+
+
 @uusing("jaguar")
 def test_input_mapping(tmp_path):
     input_model = _input(
@@ -112,6 +119,43 @@ def test_input_mapping(tmp_path):
         [[atom.x, atom.y, atom.z] for atom in jaguar_input.getStructure().atom],
         np.asarray(input_model.molecule.geometry) * constants.bohr2angstroms,
     )
+
+
+@uusing("jaguar")
+def test_guess_input_mapping(tmp_path):
+    guess_text = """&gen
+maxit=7
+basis=6-31g
+&
+&zmat
+H1 0.0 0.0 -1.0
+H2 0.0 0.0  1.0
+&
+&guess basgss=sto-3g numd=1
+    1 Orbital Energy -0.500000 Occupation 1.000000 Symmetry A
+  1.000000 0.000000
+&
+"""
+    input_model = _input(
+        driver="gradient",
+        keywords={"maxit": 99},
+        extras={"jaguar": {"guess_input": guess_text}},
+    )
+    job_base = tmp_path / "guess"
+
+    JaguarHarness._validate_input(input_model)
+    jaguar_input = JaguarHarness._build_jaguar_input(input_model, str(job_base))
+
+    assert jaguar_input.getValue("maxit") == 99
+    assert jaguar_input.getValue("igeopt") == -1
+    assert jaguar_input.sectionDefined("guess")
+    assert "Orbital Energy -0.500000" in jaguar_input.getSectionText("guess")
+
+    jaguar_input.save()
+    output_text = job_base.with_suffix(".in").read_text()
+    assert "&guess" in output_text
+    assert "maxit=99" in output_text.replace(" ", "")
+    assert "maxit=7" not in output_text.replace(" ", "")
 
 
 @uusing("jaguar")
@@ -195,7 +239,7 @@ def test_compute(driver, shape, tmp_path):
     assert np.asarray(result.return_result).shape == shape
     assert result.properties.return_energy is not None
     assert result.provenance.version == harness.get_version()
-    assert result.extras["jaguar"]["jaguar_version"] == harness.get_version()
+    assert set(result.extras["jaguar"]) == {"suite_version", "point_group"}
     assert result.extras["jaguar"]["suite_version"] == harness.get_suite_version()
     assert "Jaguar version" in result.stdout
     assert "&gen" in result.native_files["input"]

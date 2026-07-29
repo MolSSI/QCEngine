@@ -122,7 +122,8 @@ class JaguarHarness(ProgramHarness):
         ------
         InputError
             If the driver is unsupported, the basis is an explicit QCSchema
-            ``BasisSet``, or a ghost dummy center is requested.
+            ``BasisSet``, a ghost dummy center is requested, or the optional
+            Jaguar guess input is malformed.
         """
         driver = input_model.specification.driver
         if driver not in {"energy", "gradient", "hessian"}:
@@ -132,9 +133,88 @@ class JaguarHarness(ProgramHarness):
         if isinstance(basis, BasisSet):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use a string basis name.")
 
+        JaguarHarness._get_guess_input(input_model)
+
         for symbol, real in zip(input_model.molecule.symbols, input_model.molecule.real):
             if str(symbol).lower() == "x" and not real:
                 raise InputError("A QCSchema dummy center (symbol X) cannot also be a ghost atom.")
+
+    @staticmethod
+    def _get_guess_input(input_model: "AtomicInput") -> Optional[str]:
+        """Return and validate the optional Jaguar guess input text.
+
+        Parameters
+        ----------
+        input_model
+            Atomic input whose ``specification.extras.jaguar`` mapping may
+            contain a ``guess_input`` string.
+
+        Returns
+        -------
+        str or None
+            Text of a Jaguar input containing an ``&guess`` section, or
+            ``None`` when no guess was supplied.
+
+        Raises
+        ------
+        InputError
+            If the Jaguar extras or ``guess_input`` have invalid types, or
+            the guess string is empty.
+        """
+        jaguar_extras = input_model.specification.extras.get("jaguar", {})
+        if not isinstance(jaguar_extras, dict):
+            raise InputError("specification.extras.jaguar must be a mapping.")
+
+        guess_input = jaguar_extras.get("guess_input")
+        if guess_input is None:
+            return None
+        if not isinstance(guess_input, str) or not guess_input.strip():
+            raise InputError("specification.extras.jaguar.guess_input must be a non-empty string.")
+        return guess_input
+
+    @staticmethod
+    def _append_guess_sections(jaguar_input: Any, guess_input: str, job_name: str) -> None:
+        """Copy guess-related sections from text into a Jaguar input object.
+
+        Parameters
+        ----------
+        jaguar_input
+            Target ``JaguarInput`` configured from the current QCSchema
+            molecule, model, driver, and keywords.
+        guess_input
+            Contents of a Jaguar input file containing an ``&guess`` section
+            and, optionally, an ``&guess_basis`` section.
+        job_name
+            Target job path, used to place a temporary source input in the
+            same scratch directory.
+
+        Raises
+        ------
+        InputError
+            If Jaguar cannot parse the supplied text or it has no ``&guess``
+            section.
+        """
+        from schrodinger.application.jaguar.input import JaguarInput
+        from schrodinger.infra import mm
+
+        guess_file = Path(job_name).parent / "_qcengine_guess.in"
+        try:
+            guess_file.write_text(guess_input, encoding="utf-8")
+            source_input = JaguarInput(str(guess_file), compute_connectivity=False)
+            if not source_input.sectionDefined("guess"):
+                raise InputError("specification.extras.jaguar.guess_input has no &guess section.")
+
+            for section in ("guess", "guess_basis"):
+                if source_input.sectionDefined(section):
+                    section_body = source_input.getSectionText(section)
+                    if section_body is not None:
+                        mm.mmjag_sect_append_wrapper(
+                            jaguar_input.handle, f"&{section}\n{section_body}\n&\n"
+                        )
+        except InputError:
+            raise
+        except Exception as exc:
+            raise InputError(f"Could not parse Jaguar guess_input: {exc}") from exc
 
     @staticmethod
     def _build_jaguar_input(input_model: "AtomicInput", job_name: str):
@@ -161,6 +241,9 @@ class JaguarHarness(ProgramHarness):
         ``Du`` atoms, which Jaguar serializes with its standard ``X<n>`` label.
         Ghost atoms retain their element and are marked as counterpoise atoms,
         which Jaguar serializes by appending ``@`` to the atom label.
+        If ``specification.extras.jaguar.guess_input`` is present, only its
+        ``&guess`` and optional ``&guess_basis`` sections are copied; its old
+        geometry and ``&gen`` settings are intentionally ignored.
         """
         from schrodinger import structure
         from schrodinger.application.jaguar.input import JaguarInput
@@ -186,6 +269,10 @@ class JaguarHarness(ProgramHarness):
         keywords["isymm"] = 0
 
         jaguar_input = JaguarInput(name=job_name, structure=jaguar_structure, genkeys=keywords)
+        guess_input = JaguarHarness._get_guess_input(input_model)
+        if guess_input is not None:
+            JaguarHarness._append_guess_sections(jaguar_input, guess_input, job_name)
+
         for atom_index, real in enumerate(molecule.real, start=1):
             if not real:
                 jaguar_input._setCounterpoise(atom_index, True)
@@ -412,11 +499,7 @@ class JaguarHarness(ProgramHarness):
             provenance=provenance,
             extras={
                 "jaguar": {
-                    "jaguar_version": self.get_version(),
                     "suite_version": self.get_suite_version(),
-                    "method": jaguar_output.method,
-                    "functional": jaguar_output.functional,
-                    "basis": jaguar_output.basis,
                     "point_group": jaguar_output.point_group,
                 }
             },
