@@ -177,6 +177,7 @@ _programs = {
     "s-dftd3": which_import("dftd3", return_bool=True),
     "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
+    "jaguar": which_import("schrodinger.application.jaguar.input", return_bool=True),
     "mctc-gcp": is_program_new_enough("mctc-gcp", "2.3.0"),
     "gcp": which("gcp", return_bool=True),  # mark is classic-gcp
     "geometric": which_import("geometric", return_bool=True),
