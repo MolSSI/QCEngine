@@ -319,12 +319,20 @@ class JaguarHarness(ProgramHarness):
             value = getattr(owner, source, None)
             if value is not None:
                 properties[target] = value
+        if "calcinfo_nbasis" in properties:
+            properties["calcinfo_nmo"] = properties["calcinfo_nbasis"]
 
-        nalpha = getattr(jaguar_output, "num_occ_orbs_alpha", None)
-        nbeta = getattr(jaguar_output, "num_occ_orbs_beta", None)
-        if nalpha is None and nbeta is None:
-            nocc = getattr(jaguar_output, "num_occ_orbs", None)
-            nalpha = nbeta = nocc
+        nelectron = getattr(jaguar_output, "nelectron", None)
+        if nelectron is not None:
+            spin = int(input_model.molecule.molecular_multiplicity) - 1
+            nalpha = (nelectron + spin) // 2
+            nbeta = (nelectron - spin) // 2
+        else:
+            nalpha = getattr(jaguar_output, "num_occ_orbs_alpha", None)
+            nbeta = getattr(jaguar_output, "num_occ_orbs_beta", None)
+            if nalpha is None and nbeta is None:
+                nocc = getattr(jaguar_output, "num_occ_orbs", None)
+                nalpha = nbeta = nocc
         if nalpha is not None:
             properties["calcinfo_nalpha"] = nalpha
         if nbeta is not None:
@@ -337,6 +345,35 @@ class JaguarHarness(ProgramHarness):
             )
 
         return properties
+
+    @staticmethod
+    def _qcvars(properties: Dict[str, Any], driver: str, method: str) -> Dict[str, Any]:
+        """Build legacy QCVariable aliases required by QCEngine's standard suite.
+
+        QCSchema properties remain the canonical result representation. The
+        aliases here let older cross-program tests and clients query the same
+        Hartree--Fock results through their traditional QCVariable names.
+        """
+        qcvars = {"CURRENT ENERGY": properties["return_energy"]}
+        if method.lower() != "hf":
+            return qcvars
+
+        scf_energy = properties["scf_total_energy"]
+        qcvars.update(
+            {
+                "HF TOTAL ENERGY": scf_energy,
+                "SCF TOTAL ENERGY": scf_energy,
+                "CURRENT REFERENCE ENERGY": scf_energy,
+            }
+        )
+        if driver == "gradient":
+            gradient = properties["return_gradient"]
+            qcvars.update({"HF TOTAL GRADIENT": gradient, "CURRENT GRADIENT": gradient})
+        elif driver == "hessian":
+            hessian = properties["return_hessian"]
+            qcvars.update({"HF TOTAL HESSIAN": hessian, "CURRENT HESSIAN": hessian})
+
+        return qcvars
 
     @staticmethod
     def _read_hessian(job_base: Path, natom: int):
@@ -474,8 +511,12 @@ class JaguarHarness(ProgramHarness):
                     raise UnknownError("Jaguar completed the gradient calculation but returned no forces.")
                 return_result = -np.asarray(results.forces)
                 properties["return_gradient"] = return_result
+                if input_model.specification.model.method.lower() == "hf":
+                    properties["scf_total_gradient"] = return_result
             else:
                 return_result, restart_file = self._read_hessian(job_base, len(input_model.molecule.symbols))
+                if input_model.specification.model.method.lower() == "hf":
+                    properties["scf_total_hessian"] = return_result
                 properties["return_hessian"] = return_result
 
             output_file = job_base.with_suffix(".out")
@@ -498,6 +539,7 @@ class JaguarHarness(ProgramHarness):
             success=True,
             provenance=provenance,
             extras={
+                "qcvars": self._qcvars(properties, driver, input_model.specification.model.method),
                 "jaguar": {
                     "suite_version": self.get_suite_version(),
                     "point_group": jaguar_output.point_group,
