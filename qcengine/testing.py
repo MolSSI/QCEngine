@@ -170,6 +170,7 @@ def failure_engine(schema_versions, request):
 _programs = {
     "adcc": is_program_new_enough("adcc", "0.15.7"),
     "cfour": which("xcfour", return_bool=True),
+    "chronusq": which("chronusq", return_bool=True),
     "dftd3": which("dftd3", return_bool=True),  # mark is classic-dftd3
     "dftd3_321": is_program_new_enough("dftd3", "3.2.1"),  # mark is classic-dftd3_321
     "dftd4": which_import("dftd4", return_bool=True),
