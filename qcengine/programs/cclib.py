@@ -4,14 +4,16 @@ External cclib modules are intentionally imported only by the loader below so th
 cclib remains an optional dependency of QCEngine.
 """
 
+import math
 import os
 import re
 import stat
 import sys
 import tempfile
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Literal, Mapping, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Literal, Mapping, Optional, Tuple, Type
 
+from qcelemental import constants
 from qcelemental.util import parse_version, safe_version, which
 
 from ..config import TaskConfig
@@ -34,6 +36,37 @@ class _CCLibAPI:
 
 
 _cclib_compatibility_cache: Optional[Tuple[bool, str]] = None
+
+
+@dataclass(frozen=True)
+class _Job:
+    command: List[str]
+    infiles: Dict[str, str]
+    outfiles: List[str]
+    input_filename: str
+    output_filename: str
+    input_text: str
+    executable: str
+
+
+def _validate_input_subset(input_model: "AtomicInput") -> Tuple[str, str, str]:
+    """Validate and return the unmodified supported QCSchema request fields."""
+
+    driver_value = input_model.specification.driver
+    driver = driver_value.value if hasattr(driver_value, "value") else str(driver_value)
+    method = input_model.specification.model.method
+    basis = input_model.specification.model.basis
+
+    if driver.lower() not in {"energy", "gradient", "hessian"}:
+        raise InputError(f"Unsupported driver for CCLibHarness: {driver}")
+    if method.lower() not in {"hf", "b3lyp", "bp86", "mp2", "ccsd"}:
+        raise InputError(f"Unsupported method for CCLibHarness: {method}")
+    if not isinstance(basis, str) or not basis.strip():
+        raise InputError("CCLibHarness basis must be a non-empty string")
+    if not all(bool(real) for real in input_model.molecule.real):
+        raise InputError("CCLibHarness requires all atoms to be real; ghost atoms are unsupported")
+
+    return driver, method, basis
 
 
 def _load_cclib_api() -> _CCLibAPI:
@@ -133,10 +166,173 @@ def _check_cclib_compatibility() -> Tuple[bool, str]:
     return _cclib_compatibility_cache
 
 
-def _require_generation(*args: Any, **kwargs: Any) -> Any:
-    """Mark the task boundary before native input generation is added."""
+QCHEM_RESERVED = {
+    "JOBTYPE",
+    "METHOD",
+    "BASIS",
+    "MEM_TOTAL",
+    "INPUT_BOHR",
+    "SCF_FINAL_PRINT",
+    "PRINT_GENERAL_BASIS",
+    "PRINT_ORBITALS",
+    "MOLDEN_FORMAT",
+}
 
-    raise InputError("Native input generation is not part of the availability probe")
+
+def _render_qchem_scalar(key: str, value: Any) -> str:
+    if "\n" in key or "\r" in key:
+        raise InputError(f"Q-Chem keyword contains a newline: {key!r}")
+    if isinstance(value, str):
+        if "\n" in value or "\r" in value:
+            raise InputError(f"Q-Chem keyword {key!r} contains a newline")
+        return value
+    if isinstance(value, bool):
+        return "TRUE" if value else "FALSE"
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float) and math.isfinite(value):
+        return str(value)
+    raise InputError(f"Q-Chem keyword {key!r} must have a string, bool, int, or finite float value")
+
+
+def _build_qchem_input(input_model: "AtomicInput", config: TaskConfig, executable: str) -> _Job:
+    driver, method, basis = _validate_input_subset(input_model)
+    jobtype = {"energy": "sp", "gradient": "force", "hessian": "freq"}[driver.lower()]
+
+    user_options: Dict[str, str] = {}
+    for key, value in input_model.specification.keywords.items():
+        normalized_key = key.upper()
+        if normalized_key in QCHEM_RESERVED:
+            raise InputError(f"Q-Chem keyword {key!r} is reserved by CCLibHarness")
+        if normalized_key in user_options:
+            raise InputError(f"Q-Chem keyword collision after case normalization: {key!r}")
+        user_options[normalized_key] = _render_qchem_scalar(key, value)
+
+    molecule = input_model.molecule
+    charge = int(molecule.molecular_charge)
+    multiplicity = int(molecule.molecular_multiplicity)
+    geometry_lines = [
+        f"{symbol} {str(coordinates[0])} {str(coordinates[1])} {str(coordinates[2])}"
+        for symbol, coordinates in zip(molecule.symbols, molecule.geometry)
+    ]
+    rem_lines = [
+        f"JOBTYPE {jobtype}",
+        f"METHOD {method}",
+        f"BASIS {basis}",
+        f"MEM_TOTAL {int(config.memory * 1024)}",
+        "INPUT_BOHR TRUE",
+        "SCF_FINAL_PRINT 2",
+        "PRINT_GENERAL_BASIS TRUE",
+        "PRINT_ORBITALS TRUE",
+        "MOLDEN_FORMAT FALSE",
+    ]
+    rem_lines.extend(f"{key} {user_options[key]}" for key in sorted(user_options))
+    input_text = (
+        "$comment\n"
+        "QCEngine CCLibHarness\n"
+        "$end\n\n"
+        "$molecule\n"
+        f"{charge} {multiplicity}\n"
+        + "\n".join(geometry_lines)
+        + "\n$end\n\n"
+        "$rem\n"
+        + "\n".join(rem_lines)
+        + "\n$end\n"
+    )
+    return _Job(
+        command=[executable, "-nt", str(config.ncores), "dispatch.in", "dispatch.out"],
+        infiles={"dispatch.in": input_text},
+        outfiles=["dispatch.out"],
+        input_filename="dispatch.in",
+        output_filename="dispatch.out",
+        input_text=input_text,
+        executable=executable,
+    )
+
+
+_ORCA_OUTPUT_DEFAULTS = [
+    "PrintLevel Normal",
+    "Print[P_Basis] 2",
+    "Print[P_MOs] 1",
+    "Print[P_Overlap] 1",
+    "Print[P_Hirshfeld] 1",
+]
+
+
+def _build_orca_input(input_model: "AtomicInput", config: TaskConfig, executable: str) -> _Job:
+    driver, method, basis = _validate_input_subset(input_model)
+    driver_keyword = {"energy": None, "gradient": "engrad", "hessian": "freq"}[driver.lower()]
+
+    keywords = input_model.specification.keywords
+    if not isinstance(keywords, Mapping):
+        raise InputError("ORCA keywords must be a mapping")
+    unknown = set(keywords) - {"simple", "blocks"}
+    if unknown:
+        raise InputError(f"ORCA keywords contain unknown top-level keys: {sorted(unknown)!r}")
+
+    simple = keywords.get("simple", [])
+    if not isinstance(simple, list):
+        raise InputError("ORCA simple keywords must be a list")
+    for value in simple:
+        if not isinstance(value, str) or not value.strip() or "\n" in value or "\r" in value:
+            raise InputError("ORCA simple keywords must be non-empty strings without newlines")
+
+    blocks = keywords.get("blocks", {})
+    if not isinstance(blocks, Mapping):
+        raise InputError("ORCA blocks must be a mapping")
+    output_body: Optional[str] = None
+    user_blocks: Dict[str, str] = {}
+    for name, body in blocks.items():
+        if not isinstance(name, str) or re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", name) is None:
+            raise InputError(f"ORCA block name is invalid: {name!r}")
+        if not isinstance(body, str):
+            raise InputError(f"ORCA block {name!r} body must be a string")
+        normalized_name = name.lower()
+        if normalized_name in {"pal", "maxcore"}:
+            raise InputError(f"ORCA block {name!r} is reserved for TaskConfig resources")
+        if normalized_name == "coords":
+            raise InputError("ORCA coordinate block 'coords' is reserved for QCSchema geometry")
+        if normalized_name == "output":
+            output_body = body
+        else:
+            user_blocks[name] = body
+
+    simple_line = [method, basis]
+    if driver_keyword is not None:
+        simple_line.append(driver_keyword)
+    simple_line.extend(simple)
+    lines = ["! " + " ".join(simple_line), "%output", *_ORCA_OUTPUT_DEFAULTS]
+    if output_body is not None:
+        lines.extend(output_body.splitlines())
+    lines.append("end")
+
+    for name in sorted(user_blocks, key=lambda value: (value.lower(), value)):
+        lines.append(f"%{name}")
+        lines.extend(user_blocks[name].splitlines())
+        lines.append("end")
+
+    maxcore = max(1, int(config.memory * 1024 / config.ncores))
+    lines.extend(["%pal", f"nprocs {config.ncores}", "end", f"%MaxCore {maxcore}"])
+
+    molecule = input_model.molecule
+    charge = int(molecule.molecular_charge)
+    multiplicity = int(molecule.molecular_multiplicity)
+    lines.append(f"* xyz {charge} {multiplicity}")
+    for symbol, coordinates in zip(molecule.symbols, molecule.geometry):
+        converted = [float(coordinate) * constants.bohr2angstroms for coordinate in coordinates]
+        lines.append(f"{symbol} {str(converted[0])} {str(converted[1])} {str(converted[2])}")
+    lines.append("*")
+    input_text = "\n".join(lines) + "\n"
+
+    return _Job(
+        command=[executable, "dispatch.inp"],
+        infiles={"dispatch.inp": input_text},
+        outfiles=[],
+        input_filename="dispatch.inp",
+        output_filename="dispatch.out",
+        input_text=input_text,
+        executable=executable,
+    )
 
 
 def _select_qchem_output(outputs: Mapping[str, Any]) -> str:
@@ -260,7 +456,7 @@ _PROGRAM_DEFINITIONS: Mapping[str, _ProgramDefinition] = {
         output_filename="dispatch.out",
         expected_parser="QChem",
         normal_termination="Thank you very much for using Q-Chem",
-        generator=_require_generation,
+        generator=_build_qchem_input,
         probe=_probe_qchem,
         output_selector=_select_qchem_output,
         preflight=_preflight_qchem,
@@ -273,7 +469,7 @@ _PROGRAM_DEFINITIONS: Mapping[str, _ProgramDefinition] = {
         output_filename="dispatch.out",
         expected_parser="ORCA",
         normal_termination="ORCA TERMINATED NORMALLY",
-        generator=_require_generation,
+        generator=_build_orca_input,
         probe=_probe_orca,
         output_selector=_select_orca_output,
         preflight=_preflight_none,
@@ -355,6 +551,21 @@ class CCLibHarness(ProgramHarness):
             raise ResourceError(f"{definition.selector} executable '{definition.executable}' was not found on PATH")
         environment = definition.preflight(executable, os.environ.copy())
         return _probe_executable(self, executable, environment)
+
+    def build_input(
+        self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
+    ) -> Dict[str, Any]:
+        definition = _PROGRAM_DEFINITIONS[self.program]
+        executable = which(definition.executable)
+        if executable is None:
+            raise ResourceError(f"{definition.selector} executable '{definition.executable}' was not found on PATH")
+        job = definition.generator(input_model, config, executable)
+        return {
+            "commands": job.command,
+            "infiles": job.infiles,
+            "outfiles": job.outfiles,
+            "scratch_directory": config.scratch_directory,
+        }
 
     def compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
         raise NotImplementedError
