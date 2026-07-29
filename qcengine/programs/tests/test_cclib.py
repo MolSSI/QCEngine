@@ -3,9 +3,7 @@ import os
 import subprocess
 import sys
 from dataclasses import replace
-from types import SimpleNamespace
 
-import numpy as np
 import pytest
 
 import qcengine as qcng
@@ -56,29 +54,96 @@ print(json.dumps(sorted(qcengine.list_all_programs())))
     assert {"qchem", "cclib-qchem", "cclib-orca"} <= programs
 
 
-def _synthetic_cclib_data(ccdata):
-    return ccdata(
-        {
-            "atomcoords": np.array([[[1.0, 0.0, 0.0]]]),
-            "atomnos": np.array([2]),
-            "atomcharges": {"mulliken": np.array([0.0])},
-            "charge": 0,
-            "homos": np.array([0]),
-            "metadata": {
-                "package": "Synthetic",
-                "package_version": "1.0",
-                "methods": ["HF"],
-                "basis_set": "sto-3g",
+@pytest.fixture
+def fake_cclib_api():
+    class FakeCCData:
+        def __init__(self, attributes=None):
+            self.attributes = attributes or {}
+
+    class FakeQCSchemaWriter:
+        calls = 0
+        mutation = None
+
+        def __init__(self, data):
+            self.data = data
+
+        def as_dict(self, validate=True):
+            type(self).calls += 1
+            assert validate is False
+            assert self.data.attributes["atomcoords"] == [[[1.0, 0.0, 0.0]]]
+            assert self.data.attributes["atomcharges"] == {"mulliken": [0.0]}
+            output = {
+                "schema_name": "qcschema_output",
+                "schema_version": 1,
+                "molecule": {
+                    "geometry": [1.8897261255, 0.0, 0.0],
+                    "molecular_charge": 0,
+                    "molecular_multiplicity": 1,
+                    "schema_name": "qcschema_molecule",
+                    "schema_version": 2,
+                    "symbols": ["He"],
+                    "validated": True,
+                },
+                "provenance": {
+                    "creator": "Synthetic",
+                    "version": "1.0",
+                    "routine": "fake.QCSchemaWriter",
+                },
                 "success": True,
-            },
-            "mult": 1,
-            "natom": 1,
-            "nbasis": 1,
-            "nmo": 1,
-            "scfenergies": np.array([-24.6]),
-            "scftargets": np.array([[[1.0e-6]]]),
-            "scfvalues": np.array([[[1.0e-4], [1.0e-7]]]),
-        }
+                "error": None,
+                "stdout": None,
+                "stderr": None,
+                "extras": {
+                    "atomcharges": {"mulliken": [0.0]},
+                    "atomcoords": [[[1.8897261255, 0.0, 0.0]]],
+                    "atomnos": [2],
+                    "charge": 0,
+                    "homos": [0],
+                    "mult": 1,
+                    "natom": 1,
+                    "nbasis": 1,
+                    "nmo": 1,
+                    "scfenergies": [-0.9040333652549597],
+                    "scftargets": [[[1.0e-6]]],
+                    "scfvalues": [[[1.0e-4], [1.0e-7]]],
+                },
+                "driver": "energy",
+                "keywords": {},
+                "model": {"method": "hf", "basis": "sto-3g"},
+                "properties": {
+                    "calcinfo_nalpha": 1,
+                    "calcinfo_natom": 1,
+                    "calcinfo_nbasis": 1,
+                    "calcinfo_nbeta": 1,
+                    "calcinfo_nmo": 1,
+                    "return_energy": -0.9040333652549597,
+                    "scf_iterations": 2,
+                    "scf_total_energy": -0.9040333652549597,
+                },
+                "return_result": -0.9040333652549597,
+            }
+            if type(self).mutation == "wrong_units":
+                output["molecule"]["geometry"][0] = 1.0
+                output["extras"]["atomcoords"][0][0][0] = 1.0
+            elif type(self).mutation == "missing_atomcoords":
+                output["extras"].pop("atomcoords")
+            elif type(self).mutation == "missing_atomcharges":
+                output["extras"].pop("atomcharges")
+            return output
+
+    class FakeQChem:
+        pass
+
+    class FakeORCA:
+        pass
+
+    return cclib_harness._CCLibAPI(
+        version="1.9.test",
+        ccData=FakeCCData,
+        QCSchemaWriter=FakeQCSchemaWriter,
+        ccread=lambda source: source,
+        QChem=FakeQChem,
+        ORCA=FakeORCA,
     )
 
 
@@ -105,16 +170,17 @@ def test_cclib_missing_is_reported_by_compatibility_probe(monkeypatch):
     assert "not importable" in message
 
 
-def test_cclib_compatibility_validates_v1_geometry_and_flat_extras():
+def test_cclib_compatibility_validates_v1_geometry_and_flat_extras(monkeypatch, fake_cclib_api):
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: fake_cclib_api)
+
     success, version = cclib_harness._check_cclib_compatibility()
     assert success is True
-    assert version
+    assert version == "1.9.test"
 
-    api = cclib_harness._load_cclib_api()
-    output = api.QCSchemaWriter(_synthetic_cclib_data(api.ccData)).as_dict(validate=False)
-    from qcelemental.models.v1 import AtomicResult
-
-    result = AtomicResult(**output)
+    output = fake_cclib_api.QCSchemaWriter(
+        cclib_harness._synthetic_ccdata(fake_cclib_api.ccData)
+    ).as_dict(validate=False)
+    result = cclib_harness._validate_v1_atomic_result(output)
     assert result.schema_version == 1
     assert result.molecule.geometry[0][0] == pytest.approx(1.8897261255, abs=2.0e-9)
     assert result.extras["atomcoords"][0][0][0] == pytest.approx(1.8897261255, abs=2.0e-9)
@@ -122,73 +188,32 @@ def test_cclib_compatibility_validates_v1_geometry_and_flat_extras():
 
 
 @pytest.mark.parametrize("mutation", ["wrong_units", "missing_atomcoords", "missing_atomcharges"])
-def test_cclib_compatibility_rejects_incomplete_writer(monkeypatch, mutation):
-    real_api = cclib_harness._load_cclib_api()
+def test_cclib_compatibility_rejects_incomplete_writer(monkeypatch, fake_cclib_api, mutation):
+    fake_cclib_api.QCSchemaWriter.mutation = mutation
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: fake_cclib_api)
 
-    class BrokenWriter:
-        calls = 0
-
-        def __init__(self, data):
-            self.data = data
-
-        def as_dict(self, validate=False):
-            BrokenWriter.calls += 1
-            output = real_api.QCSchemaWriter(self.data).as_dict(validate=validate)
-            if mutation == "wrong_units":
-                output["molecule"]["geometry"][0] = 1.0
-                output["extras"]["atomcoords"][0][0][0] = 1.0
-            elif mutation == "missing_atomcoords":
-                output["extras"].pop("atomcoords")
-            else:
-                output["extras"].pop("atomcharges")
-            return output
-
-    monkeypatch.setattr(
-        cclib_harness,
-        "_load_cclib_api",
-        lambda: SimpleNamespace(
-            version=real_api.version,
-            ccData=real_api.ccData,
-            QCSchemaWriter=BrokenWriter,
-            ccread=real_api.ccread,
-            QChem=real_api.QChem,
-            ORCA=real_api.ORCA,
-        ),
-    )
     success, message = cclib_harness._check_cclib_compatibility()
 
     assert success is False
     assert mutation.replace("_", " ").split()[0] in message.lower()
 
 
-def test_cclib_compatibility_probe_is_cached_once_per_process(monkeypatch):
-    real_api = cclib_harness._load_cclib_api()
-
-    class CountingWriter(real_api.QCSchemaWriter):
-        calls = 0
-
-        def as_dict(self, validate=False):
-            CountingWriter.calls += 1
-            return super().as_dict(validate=validate)
-
-    monkeypatch.setattr(
-        cclib_harness,
-        "_load_cclib_api",
-        lambda: SimpleNamespace(
-            version=real_api.version,
-            ccData=real_api.ccData,
-            QCSchemaWriter=CountingWriter,
-            ccread=real_api.ccread,
-            QChem=real_api.QChem,
-            ORCA=real_api.ORCA,
-        ),
-    )
+def test_cclib_compatibility_probe_is_cached_once_per_process(monkeypatch, fake_cclib_api):
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: fake_cclib_api)
 
     first = cclib_harness._check_cclib_compatibility()
     second = cclib_harness._check_cclib_compatibility()
     assert first == second
     assert first[0] is True
-    assert CountingWriter.calls == 1
+    assert fake_cclib_api.QCSchemaWriter.calls == 1
+
+
+@pytest.mark.addon
+def test_real_cclib_compatibility_when_installed():
+    pytest.importorskip("cclib")
+
+    success, version_or_message = cclib_harness._check_cclib_compatibility()
+    assert success is True, version_or_message
 
 
 def _qchem_probe_output(version="5.1"):
