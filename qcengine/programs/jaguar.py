@@ -63,7 +63,7 @@ class JaguarHarness(ProgramHarness):
             "schrodinger.application.jaguar.input",
             return_bool=True,
             raise_error=raise_error,
-            raise_msg="Run QCEngine from a Schrödinger Python environment with SCHRODINGER defined.",
+            raise_msg="Run QCEngine from a Schrodinger Python environment with SCHRODINGER defined.",
         )
 
     def get_version(self) -> str:
