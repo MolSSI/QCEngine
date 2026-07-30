@@ -17,27 +17,31 @@ Supported inputs
 
 The first implementation accepts only the following atomic calculations:
 
-+------------+-----------------+---------------------+
-| Driver     | Q-Chem job type | ORCA driver keyword |
-+============+=================+=====================+
-| ``energy`` | ``sp``          | none                |
-+------------+-----------------+---------------------+
-| ``gradient`` | ``force``     | ``engrad``          |
-+------------+-----------------+---------------------+
-| ``hessian`` | ``freq``       | ``freq``            |
-+------------+-----------------+---------------------+
++--------------+-----------------+---------------------+
+| Driver       | Q-Chem job type | ORCA support        |
++==============+=================+=====================+
+| ``energy``   | ``sp``          | supported           |
++--------------+-----------------+---------------------+
+| ``gradient`` | ``force``       | not supported       |
++--------------+-----------------+---------------------+
+| ``hessian``  | ``freq``        | not supported       |
++--------------+-----------------+---------------------+
 
-Methods are case-insensitive ``hf``, ``b3lyp``, ``bp86``, ``mp2``, and
-``ccsd``.  The basis must be a non-empty string.  Structured QCSchema basis
-objects are not supported.  Molecules must contain only real atoms; ghost atoms
-are rejected.  Charge, multiplicity, atom order, and Cartesian geometry come
-from the QCSchema molecule.  Geometry is written in bohr for Q-Chem and
-converted to Angstrom for ORCA.
+Method strings pass through to the native program rather than being restricted
+by a harness-maintained allowlist.  Methods unsupported by the selected native
+program fail downstream.  ORCA gradient and Hessian calculations are disabled
+because current cclib parsing does not support the verified output path.
+
+The basis must be a non-empty string.  Structured QCSchema basis objects are
+not supported.  Molecules must contain only real atoms; ghost atoms are
+rejected.  Charge, multiplicity, atom order, and Cartesian geometry come from
+the QCSchema molecule.  Geometry is written in bohr for Q-Chem and converted
+to Angstrom for ORCA.
 
 These selectors do not accept raw native input, multi-job or restart files,
-node launchers, or drivers and methods outside the lists above.  ORCA's
-node-parallel harness flag is scheduler capability metadata; the generated
-input uses ``TaskConfig.ncores`` in ``%pal``.
+node launchers, or unsupported drivers.  ORCA's node-parallel harness flag is
+scheduler capability metadata; the generated input uses ``TaskConfig.ncores``
+in ``%pal``.
 
 Program keywords and resources
 ------------------------------
@@ -101,12 +105,12 @@ for example:
 
    python -m pip install "cclib @ git+https://github.com/cclib/cclib.git"
 
-At availability checking time, QCEngine runs a small compatibility probe that
-validates the cclib writer's QCSchema v1 output, geometry units, and flat
-extras.  Each executable is discovered only through ``PATH`` and then checked
-for the expected program identity and minimum version.  Cached executable
-versions are keyed by resolved path, so an unrelated executable named ``orca``
-does not satisfy ``cclib-orca``.
+At availability checking time, QCEngine lazily imports the required cclib
+interfaces.  Each executable is discovered only through ``PATH`` and then
+checked for the expected program identity and minimum version.  Cached
+executable versions are keyed by resolved path, so an unrelated executable
+named ``orca`` does not satisfy ``cclib-orca``.  Real writer output is validated
+as QCSchema v1 during result conversion.
 
 Configure ``PATH`` and all proprietary-program environment variables *before*
 starting or importing in the Python process that will call QCEngine.  The
@@ -158,77 +162,49 @@ QCSchema v1 model rejects ``native_files``, the generated input is retained as
 ``extras["cclib_harness"]["native_input"]`` when requested and native files
 are otherwise omitted.
 
+Adding another cclib-backed program
+-----------------------------------
+
+The package layout is:
+
+.. code-block:: text
+
+   qcengine/programs/cclib_programs/
+   |-- __init__.py
+   |-- base.py
+   |-- cclib_orca.py
+   |-- cclib_qchem.py
+   `-- tests/
+       |-- __init__.py
+       `-- test_cclib.py
+
+``base.py`` owns shared lazy loading, execution, parsing, and QCSchema
+conversion.  A ``cclib_<program>.py`` module owns native input, preflight,
+version probe, output selection, parser type, and its concrete subclass.
+``ProgramDefinition`` is the immutable callback contract consumed by
+``CCLibHarness``.
+
+Program modules must not import cclib at module import time, which preserves
+cclib as an optional dependency.  Every helper must have a
+responsibility-focused docstring that describes the single boundary it owns.
+
 Fixture and live verification
 -----------------------------
 
 Fixture integration requires a cclib source checkout with its ``data``
-directory.  A portable invocation is:
+directory.  Set the checkout only for the test process:
 
 .. code-block:: console
 
    CCLIB_SOURCE_ROOT=/path/to/cclib \
-     python -m pytest qcengine/programs/tests/test_cclib.py -q -k fixture
+     python -m pytest qcengine/programs/cclib_programs/tests/test_cclib.py -q -k fixture
 
-The approved fixture set has seven passing cases and one intentional skip:
-ORCA ``dvb_ir`` Hessian is deferred because the successful cclib parse lacks
-``metadata.functional`` and its QCSchema writer raises ``KeyError``.
+The approved fixture set has exactly seven passing cases.  It contains only
+supported Q-Chem calculations and ORCA energy calculations.
 
 Live tests run only when the corresponding optional selector is available:
 
 .. code-block:: console
 
-   python -m pytest qcengine/programs/tests/test_cclib.py -q -m "cclib-qchem"
-   python -m pytest qcengine/programs/tests/test_cclib.py -q -m "cclib-orca"
-   python qchem_water_mp2.py
-   python orca_water_ccsd.py
-
-Each demonstration writes a complete ``*.result.json`` file and reports one
-``PASS`` or ``FAIL`` line per comparison.  The Q-Chem MP2 demonstration checks
-all six SCF history rows, not only the iteration count:
-
-.. code-block:: python
-
-   [[[0.398], [0.0668], [0.00822], [0.0016], [2.83e-5], [8.23e-6]]]
-
-The nested shape and every row value are compared with an absolute ``1e-6``
-tolerance.  The demonstration also checks the six required numerical
-properties, calculation dimensions, seven historical MO energies, Mulliken
-charges, schema/molecule/provenance, and representative flat extras.  The ORCA
-CCSD demonstration selects strict extra references from the exact
-``major.minor.patch`` provenance version: ``6.0.x`` and ``6.1.x`` each have
-version-aware atom-charge, coordinate, orbital, CCSD, and SCF references.
-Floating-point extra values use an absolute ``1e-6`` tolerance and discrete
-values are exact.  Missing, malformed, or unsupported minor versions (including
-``6.2.x``) fail
-the demonstration's reference check rather than silently using another
-version's values.  Known anomalous MP2 fields in the historical ORCA CCSD
-writer output must be present but are deliberately not numerically endorsed.
-
-Non-portable verification example
----------------------------------
-
-.. warning::
-
-   The commands and paths in this section are machine-local examples only.
-   They are not portable configuration, are not used by the harness or unit
-   tests, and must be adapted for another installation.  Initialize this shell
-   before starting Python.
-
-.. code-block:: bash
-
-   export PATH=/projects/cos-lab-cs207/common/software/orca_6_1_1_linux_x86-64_shared_openmpi418_nodmrg:$PATH
-   source ~/qchem_vars.sh
-   which qchem
-   # /projects/cos-lab-cs207/common/software/qchem5.1/bin/qchem
-   which orca
-   # /projects/cos-lab-cs207/common/software/orca_6_1_1_linux_x86-64_shared_openmpi418_nodmrg/orca
-
-   python -m pip install -e /home/awallace43/gits/cclib
-   python -m pip install -e '/home/awallace43/gits/qcengine[test]'
-
-   CCLIB_SOURCE_ROOT=/home/awallace43/gits/cclib \
-     python -m pytest qcengine/programs/tests/test_cclib.py -q -k fixture
-   python -m pytest qcengine/programs/tests/test_cclib.py -q -m "cclib-qchem"
-   python -m pytest qcengine/programs/tests/test_cclib.py -q -m "cclib-orca"
-   python qchem_water_mp2.py
-   python orca_water_ccsd.py
+   python -m pytest qcengine/programs/cclib_programs/tests/test_cclib.py -q -m cclib_qchem
+   python -m pytest qcengine/programs/cclib_programs/tests/test_cclib.py -q -m cclib_orca

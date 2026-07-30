@@ -1108,17 +1108,6 @@ _REAL_CCLIB_FIXTURES = [
     pytest.param("qchem", "QChem/basicQChem5.1/water_ccsd.out", id="qchem-water-ccsd"),
     pytest.param("orca", "ORCA/basicORCA6.0/water_mp2.out", id="orca-water-mp2"),
     pytest.param("orca", "ORCA/basicORCA6.0/dvb_sp_hf.out", id="orca-hf-energy"),
-    pytest.param(
-        "orca",
-        "ORCA/basicORCA6.0/dvb_ir.out",
-        id="orca-dvb-ir-deferred",
-        marks=pytest.mark.skip(
-            reason=(
-                "deferred: cclib's successful ORCA DFT parse lacks metadata.functional, "
-                "so QCSchemaWriter raises KeyError"
-            )
-        ),
-    ),
     pytest.param("orca", "ORCA/basicORCA6.0/water_ccsd.out", id="orca-water-ccsd"),
 ]
 
