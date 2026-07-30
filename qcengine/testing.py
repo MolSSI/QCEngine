@@ -185,6 +185,7 @@ _programs = {
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
     "mp2d": which("mp2d", return_bool=True),
+    "mpqc": which("mpqc", return_bool=True),
     "nwchem": which("nwchem", return_bool=True),
     "optking": which_import("optking", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
