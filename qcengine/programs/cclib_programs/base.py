@@ -58,18 +58,14 @@ class ExecutionResult:
     stderr: str
 
 
-def _validate_input_subset(input_model: "AtomicInput") -> Tuple[str, str, str]:
-    """Validate and return the unmodified supported QCSchema request fields."""
+def _input_fields(input_model: "AtomicInput") -> Tuple[str, str, str]:
+    """Return native driver, method, and basis after shared structural validation."""
 
     driver_value = input_model.specification.driver
     driver = driver_value.value if hasattr(driver_value, "value") else str(driver_value)
     method = input_model.specification.model.method
     basis = input_model.specification.model.basis
 
-    if driver.lower() not in {"energy", "gradient", "hessian"}:
-        raise InputError(f"Unsupported driver for CCLibHarness: {driver}")
-    if method.lower() not in {"hf", "b3lyp", "bp86", "mp2", "ccsd"}:
-        raise InputError(f"Unsupported method for CCLibHarness: {method}")
     if not isinstance(basis, str) or not basis.strip():
         raise InputError("CCLibHarness basis must be a non-empty string")
     if not all(bool(real) for real in input_model.molecule.real):
@@ -258,16 +254,6 @@ def _execute_job(definition: ProgramDefinition, job: Job, config: TaskConfig) ->
     return run(config.scratch_directory)
 
 
-_METHOD_ALIASES = {
-    "rhf": "hf",
-    "uhf": "hf",
-    "rmp2": "mp2",
-    "ump2": "mp2",
-    "rccsd": "ccsd",
-    "uccsd": "ccsd",
-}
-
-
 def _raise_conversion_failure(
     definition: ProgramDefinition,
     execution: ExecutionResult,
@@ -432,18 +418,12 @@ def _parse_and_convert(
     except Exception as exc:
         _raise_conversion_failure(definition, execution, "QCSchema writer augmentation", exc)
 
-    requested_driver, requested_method, requested_basis = _validate_input_subset(input_model)
+    requested_driver, _, requested_basis = _input_fields(input_model)
     writer_model = output.get("model") if isinstance(output.get("model"), Mapping) else {}
     parsed_driver = output.get("driver")
-    parsed_method = writer_model.get("method")
     parsed_basis = writer_model.get("basis")
     identities = (
         ("driver", requested_driver.casefold(), str(parsed_driver).casefold()),
-        (
-            "method",
-            _METHOD_ALIASES.get(requested_method.casefold(), requested_method.casefold()),
-            _METHOD_ALIASES.get(str(parsed_method).casefold(), str(parsed_method).casefold()),
-        ),
         ("basis", requested_basis.strip().casefold(), str(parsed_basis).strip().casefold()),
     )
     for field, requested, parsed_value in identities:
@@ -575,7 +555,7 @@ class CCLibHarness(ProgramHarness):
         """Execute the native program and convert its output through cclib."""
 
         definition = self.definition
-        _validate_input_subset(input_data)
+        _input_fields(input_data)
         executable = which(definition.executable)
         if executable is None:
             raise ResourceError(

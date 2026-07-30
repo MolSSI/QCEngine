@@ -9,7 +9,7 @@ from qcelemental.util import safe_version
 from ...config import TaskConfig
 from ...exceptions import InputError, ResourceError, UnknownError
 from ...util import execute
-from .base import CCLibHarness, Job, ProgramDefinition, _validate_input_subset
+from .base import CCLibHarness, Job, ProgramDefinition, _input_fields
 
 if TYPE_CHECKING:
     from qcelemental.models.v2 import AtomicInput
@@ -41,8 +41,12 @@ def _validate_orca_block_body(name: str, body: str) -> None:
 def build_input(input_model: "AtomicInput", config: TaskConfig, executable: str) -> Job:
     """Generate an ORCA job from the supported QCSchema subset."""
 
-    driver, method, basis = _validate_input_subset(input_model)
-    driver_keyword = {"energy": None, "gradient": "engrad", "hessian": "freq"}[driver.lower()]
+    driver, method, basis = _input_fields(input_model)
+    if driver.casefold() != "energy":
+        raise InputError(
+            "cclib-orca currently supports only the energy driver because cclib "
+            "gradient and Hessian parsing is unsupported"
+        )
 
     keywords = input_model.specification.keywords
     if not isinstance(keywords, Mapping):
@@ -80,8 +84,6 @@ def build_input(input_model: "AtomicInput", config: TaskConfig, executable: str)
             user_blocks[name] = body
 
     simple_line = [method, basis]
-    if driver_keyword is not None:
-        simple_line.append(driver_keyword)
     simple_line.extend(simple)
     lines = ["! " + " ".join(simple_line), "%output", *_ORCA_OUTPUT_DEFAULTS]
     if output_body is not None:

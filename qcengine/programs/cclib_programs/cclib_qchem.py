@@ -12,7 +12,7 @@ from qcelemental.util import safe_version
 from ...config import TaskConfig
 from ...exceptions import InputError, ResourceError, UnknownError
 from ...util import execute
-from .base import CCLibHarness, Job, ProgramDefinition, _validate_input_subset
+from .base import CCLibHarness, Job, ProgramDefinition, _input_fields
 
 if TYPE_CHECKING:
     from qcelemental.models.v2 import AtomicInput
@@ -52,8 +52,14 @@ def _render_qchem_scalar(key: str, value: Any) -> str:
 def build_input(input_model: "AtomicInput", config: TaskConfig, executable: str) -> Job:
     """Generate a Q-Chem job from the supported QCSchema subset."""
 
-    driver, method, basis = _validate_input_subset(input_model)
-    jobtype = {"energy": "sp", "gradient": "force", "hessian": "freq"}[driver.lower()]
+    driver, method, basis = _input_fields(input_model)
+    jobtypes = {"energy": "sp", "gradient": "force", "hessian": "freq"}
+    try:
+        jobtype = jobtypes[driver.casefold()]
+    except KeyError as exc:
+        raise InputError(
+            "cclib-qchem supports only energy, gradient, and hessian drivers"
+        ) from exc
 
     user_options: Dict[str, str] = {}
     for key, value in input_model.specification.keywords.items():

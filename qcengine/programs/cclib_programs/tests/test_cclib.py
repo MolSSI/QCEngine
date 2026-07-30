@@ -301,19 +301,19 @@ def _task_config(ncores=4, memory=2.734375, scratch_directory="/scratch"):
     )
 
 
-@pytest.mark.parametrize("driver", ["energy", "gradient", "hessian"])
-@pytest.mark.parametrize("method", ["hf", "b3lyp", "bp86", "mp2", "ccsd", "HF", "B3lYp", "Mp2"])
-def test_input_subset_accepts_supported_drivers_and_methods_without_changing_spelling(driver, method):
+@pytest.mark.parametrize(
+    "driver,method",
+    [("energy", "wb97x-d"), ("properties", "dlpno-ccsd(t)")],
+)
+def test_input_fields_preserve_native_driver_and_method_without_allowlists(driver, method):
     input_model = _atomic_input(driver=driver, method=method, basis="STO-3G")
 
-    assert cclib_base._validate_input_subset(input_model) == (driver, method, "STO-3G")
+    assert cclib_base._input_fields(input_model) == (driver, method, "STO-3G")
 
 
 @pytest.mark.parametrize(
     "input_model,match",
     [
-        (_atomic_input(driver="properties"), "driver"),
-        (_atomic_input(method="mp3"), "method"),
         (_atomic_input(basis=None), "basis"),
         (_atomic_input(basis=""), "basis"),
         (_atomic_input(basis="   "), "basis"),
@@ -337,9 +337,36 @@ def test_input_subset_accepts_supported_drivers_and_methods_without_changing_spe
         ),
     ],
 )
-def test_input_subset_rejects_unsupported_requests_before_generation(input_model, match):
+def test_input_fields_reject_invalid_common_structural_requests(input_model, match):
     with pytest.raises(InputError, match=match):
-        cclib_base._validate_input_subset(input_model)
+        cclib_base._input_fields(input_model)
+
+
+@pytest.mark.parametrize(
+    "program_module,method",
+    [
+        (cclib_qchem, "wb97x-d"),
+        (cclib_orca, "dlpno-ccsd(t)"),
+    ],
+)
+def test_native_methods_pass_through_without_qcengine_allowlist(program_module, method):
+    job = program_module.build_input(
+        _atomic_input(method=method), _task_config(), f"/{program_module.__name__.split('_')[-1]}"
+    )
+    assert method in job.input_text
+
+
+@pytest.mark.parametrize("driver,jobtype", [("energy", "sp"), ("gradient", "force"), ("hessian", "freq")])
+def test_qchem_supports_verified_drivers(driver, jobtype):
+    assert f"JOBTYPE {jobtype}" in cclib_qchem.build_input(
+        _atomic_input(driver=driver), _task_config(), "/qchem"
+    ).input_text
+
+
+@pytest.mark.parametrize("driver", ["gradient", "hessian"])
+def test_orca_rejects_unverified_cclib_drivers(driver):
+    with pytest.raises(InputError, match="cclib-orca.*energy"):
+        cclib_orca.build_input(_atomic_input(driver=driver), _task_config(), "/orca")
 
 
 _QCHEM_RESERVED = {
@@ -549,15 +576,13 @@ def test_qchem_input_build_input_delegates_to_job(monkeypatch):
     }
 
 
-@pytest.mark.parametrize("driver,keyword", [("energy", None), ("gradient", "engrad"), ("hessian", "freq")])
 @pytest.mark.parametrize("method", ["hf", "b3lyp", "bp86", "mp2", "ccsd"])
-def test_orca_input_maps_supported_driver_and_method(driver, keyword, method):
+def test_orca_input_maps_energy_and_method(method):
     job = cclib_orca.build_input(
-        _atomic_input(driver=driver, method=method), _task_config(), "/opt/orca"
+        _atomic_input(driver="energy", method=method), _task_config(), "/opt/orca"
     )
 
-    expected_line = f"! {method} sto-3g" + (f" {keyword}" if keyword else "")
-    assert job.input_text.splitlines()[0] == expected_line
+    assert job.input_text.splitlines()[0] == f"! {method} sto-3g"
 
 
 def test_orca_input_resources_defaults_geometry_charge_order_and_job_metadata():
@@ -618,10 +643,10 @@ def test_orca_input_preserves_simple_order_sorts_blocks_and_appends_output_body(
         },
     }
     job = cclib_orca.build_input(
-        _atomic_input(driver="gradient", keywords=keywords), _task_config(), "/opt/orca"
+        _atomic_input(driver="energy", keywords=keywords), _task_config(), "/opt/orca"
     )
 
-    assert job.input_text.splitlines()[0] == "! hf sto-3g engrad rks usesym TightSCF"
+    assert job.input_text.splitlines()[0] == "! hf sto-3g rks usesym TightSCF"
     defaults_end = job.input_text.index("Print[P_Hirshfeld] 1")
     user_output = job.input_text.index("PrintLevel Mini")
     basis = job.input_text.index("%basis")
@@ -1233,9 +1258,9 @@ def test_qcschema_v1_validation_failure_is_unknown_and_chained(monkeypatch):
 
 @pytest.mark.parametrize(
     "requested,parsed",
-    [("hf", "RHF"), ("hf", "UHF"), ("mp2", "RMP2"), ("mp2", "UMP2"), ("ccsd", "RCCSD"), ("ccsd", "UCCSD")],
+    [("wb97x-d", "wB97X-D3"), ("dlpno-ccsd(t)", "DLPNO-CCSD(T0)")],
 )
-def test_successful_conversion_preserves_identity_data_and_aliases(monkeypatch, requested, parsed):
+def test_successful_conversion_preserves_writer_identity_data(monkeypatch, requested, parsed):
     output = _fake_writer_output(driver="energy", method=parsed, basis="STO-3G")
     api, definition, execution, opened = _fake_conversion_case(output)
     monkeypatch.setattr(cclib_base, "_load_cclib_api", lambda: api)
@@ -1310,16 +1335,34 @@ def test_basis_identity_real_mismatch_after_trimming_is_rejected(monkeypatch):
         cclib_base._parse_and_convert(definition, execution, _atomic_input(basis="  STO-3G  "))
 
 
+def test_parsed_method_is_preserved_without_requested_method_mismatch_rejection(monkeypatch):
+    parsed_method = "ROHF"
+    output = _fake_writer_output(method=parsed_method)
+    api, definition, execution, _ = _fake_conversion_case(output)
+    monkeypatch.setattr(cclib_base, "_load_cclib_api", lambda: api)
+    original_validate = cclib_base._validate_v1_atomic_result
+    validated_output = {}
+
+    def capture_validated_output(value):
+        validated_output.update(value)
+        return original_validate(value)
+
+    monkeypatch.setattr(cclib_base, "_validate_v1_atomic_result", capture_validated_output)
+
+    result = cclib_base._parse_and_convert(definition, execution, _atomic_input(method="wb97x-d"))
+
+    assert result.success is True
+    assert validated_output["model"]["method"] == parsed_method
+
+
 @pytest.mark.parametrize(
     "field,requested,parsed",
     [
         ("driver", "energy", "gradient"),
-        ("method", "hf", "b3lyp"),
-        ("method", "hf", "ROHF"),
         ("basis", "sto-3g", "6-31g"),
     ],
 )
-def test_parsed_identity_mismatch_is_rejected_without_relabeling(monkeypatch, field, requested, parsed):
+def test_parsed_driver_or_basis_mismatch_is_rejected_without_relabeling(monkeypatch, field, requested, parsed):
     values = {"driver": "energy", "method": "hf", "basis": "sto-3g"}
     values[field] = parsed
     output = _fake_writer_output(**values)
