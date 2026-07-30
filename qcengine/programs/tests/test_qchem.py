@@ -105,12 +105,10 @@ def test_qchem_executor(test_case, schema_versions, request):
 def test_qchem_orientation(schema_versions, request):
     models, retver, _ = schema_versions
 
-    mol = models.Molecule.from_data(
-        """
+    mol = models.Molecule.from_data("""
         He 0.0  0.7  0.7
         He 0.0 -0.7 -0.7
-        """
-    )
+        """)
 
     # Compare with rotation
     inp = {"molecule": mol, "driver": "gradient", "model": {"method": "HF", "basis": "6-31g"}}

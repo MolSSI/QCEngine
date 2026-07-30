@@ -1,6 +1,7 @@
 """
 Tests the DQM compute dispatch module
 """
+
 import copy
 import sys
 import warnings
@@ -201,7 +202,7 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
         pytest.param("gcp", {"method": "bad"}, marks=using("classic-gcp")),
         pytest.param("mrchem", {"method": "bad"}, marks=using("mrchem")),
         pytest.param("mctc-gcp", {"method": "bad"}, marks=using("mctc-gcp")),
-        pytest.param("mace", {"method": "bad"}, marks=using("mace"))
+        pytest.param("mace", {"method": "bad"}, marks=using("mace")),
         # add as programs available
         # ("molpro", {"method": "bad"}),
         # ("terachem", {"method": "bad"}),

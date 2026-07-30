@@ -329,8 +329,7 @@ def test_bsse_opt_hf_trimer(schema_versions, request, optimizer, bsse_type, sio)
     # to_v2
     subres = "cluster_results" if ("v2" in request.node.name) else "component_results"
 
-    initial_molecule = Molecule.from_data(
-        """
+    initial_molecule = Molecule.from_data("""
 F         -0.04288        2.78905        0.00000
 H          0.59079        2.03435        0.00000
 --
@@ -340,8 +339,7 @@ H         -1.60642        0.21789       -0.00000
 F          2.03569       -0.60531       -0.00000
 H          1.06527       -0.77673        0.00000
 units ang
-"""
-    )
+""")
 
     at_spec = {
         # schema_name needed for differentiation in genopt
@@ -362,9 +360,9 @@ units ang
 
     mbe_spec = {
         # schema_name needed for differentiation in genopt
-        "schema_name": "qcschema_many_body_specification"
-        if from_v2(request.node.name)
-        else "qcschema_manybodyspecification",
+        "schema_name": (
+            "qcschema_many_body_specification" if from_v2(request.node.name) else "qcschema_manybodyspecification"
+        ),
         "specification": {
             "model": {
                 "method": "hf",

@@ -2,7 +2,6 @@
 Tests the MDI interface
 """
 
-
 import qcelemental as qcel
 from qcelemental.testing import compare_values
 

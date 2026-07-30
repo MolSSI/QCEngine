@@ -1,4 +1,5 @@
 """Known errors for NWChem"""
+
 import logging
 from typing import Any, Dict
 

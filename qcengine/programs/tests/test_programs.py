@@ -2,7 +2,6 @@
 Tests the DQM compute dispatch module
 """
 
-
 import numpy as np
 import pytest
 from qcelemental.testing import compare_values
@@ -168,11 +167,9 @@ def test_psi4_wavefunction_task(schema_versions, request):
 def test_psi4_internal_failure(schema_versions, request):
     models, retver, _ = schema_versions
 
-    mol = models.Molecule.from_data(
-        """0 3
+    mol = models.Molecule.from_data("""0 3
      O    0.000000000000     0.000000000000    -0.068516245955
-    """
-    )
+    """)
 
     if from_v2(request.node.name):
         psi4_task = {

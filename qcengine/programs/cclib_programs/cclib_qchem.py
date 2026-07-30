@@ -57,9 +57,7 @@ def build_input(input_model: "AtomicInput", config: TaskConfig, executable: str)
     try:
         jobtype = jobtypes[driver.casefold()]
     except KeyError as exc:
-        raise InputError(
-            "cclib-qchem supports only energy, gradient, and hessian drivers"
-        ) from exc
+        raise InputError("cclib-qchem supports only energy, gradient, and hessian drivers") from exc
 
     user_options: Dict[str, str] = {}
     for key, value in input_model.specification.keywords.items():
@@ -96,12 +94,8 @@ def build_input(input_model: "AtomicInput", config: TaskConfig, executable: str)
         "QCEngine CCLibHarness\n"
         "$end\n\n"
         "$molecule\n"
-        f"{charge} {multiplicity}\n"
-        + "\n".join(geometry_lines)
-        + "\n$end\n\n"
-        "$rem\n"
-        + "\n".join(rem_lines)
-        + "\n$end\n"
+        f"{charge} {multiplicity}\n" + "\n".join(geometry_lines) + "\n$end\n\n"
+        "$rem\n" + "\n".join(rem_lines) + "\n$end\n"
     )
     return Job(
         command=[executable, "-nt", str(config.ncores), "dispatch.in", "dispatch.out"],

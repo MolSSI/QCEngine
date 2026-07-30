@@ -173,8 +173,7 @@ def _raise_execution_failure(
         is not None
     )
     is_license_failure = any(
-        marker in diagnostic.lower()
-        for marker in ("flexnet", "license checkout", "unable to validate license")
+        marker in diagnostic.lower() for marker in ("flexnet", "license checkout", "unable to validate license")
     )
     error_type = ResourceError if is_environment_failure or is_license_failure else UnknownError
 
@@ -313,9 +312,7 @@ def _parse_and_convert(
         # cclib's FileWrapper requires an iterable stream. Create the named
         # output securely, finish writing and close it, then reopen read-only
         # so the lifecycle is portable to Windows as well as POSIX.
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".out", encoding="utf-8", delete=False
-        ) as temporary:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".out", encoding="utf-8", delete=False) as temporary:
             temporary_path = temporary.name
             temporary.write(execution.output_text)
 
@@ -348,9 +345,7 @@ def _parse_and_convert(
                         definition,
                         execution,
                         "parser identity",
-                        ValueError(
-                            f"cclib selected {type(parser).__name__}; expected {definition.parser_name}"
-                        ),
+                        ValueError(f"cclib selected {type(parser).__name__}; expected {definition.parser_name}"),
                     )
 
                 try:
@@ -475,9 +470,7 @@ def _parse_and_convert(
     return result_v2
 
 
-def _probe_executable(
-    harness: "CCLibHarness", executable: str, environment: Optional[Mapping[str, str]] = None
-) -> str:
+def _probe_executable(harness: "CCLibHarness", executable: str, environment: Optional[Mapping[str, str]] = None) -> str:
     """Validate and cache the concrete harness executable version."""
 
     if executable in harness.version_cache:
@@ -522,9 +515,7 @@ class CCLibHarness(ProgramHarness):
             _load_cclib_api()
             executable = which(definition.executable)
             if executable is None:
-                raise ResourceError(
-                    f"{definition.selector} executable '{definition.executable}' was not found on PATH"
-                )
+                raise ResourceError(f"{definition.selector} executable '{definition.executable}' was not found on PATH")
             environment = definition.preflight(executable, os.environ.copy())
             _probe_executable(self, executable, environment)
             return True
@@ -571,9 +562,7 @@ class CCLibHarness(ProgramHarness):
         _input_fields(input_data)
         executable = which(definition.executable)
         if executable is None:
-            raise ResourceError(
-                f"{definition.selector} executable '{definition.executable}' was not found on PATH"
-            )
+            raise ResourceError(f"{definition.selector} executable '{definition.executable}' was not found on PATH")
         job = definition.generator(input_data, config, executable)
         execution = _execute_job(definition, job, config)
         return _parse_and_convert(definition, execution, input_data)

@@ -33,9 +33,7 @@ def _validate_orca_block_body(name: str, body: str) -> None:
             continue
         first_token = stripped.split(None, 1)[0].casefold()
         if first_token in {"end", "$new_job"} or stripped.startswith(("%", "*")):
-            raise InputError(
-                f"ORCA block {name!r} body contains reserved outer syntax on line {line_number}: {line!r}"
-            )
+            raise InputError(f"ORCA block {name!r} body contains reserved outer syntax on line {line_number}: {line!r}")
 
 
 def build_input(input_model: "AtomicInput", config: TaskConfig, executable: str) -> Job:

@@ -33,6 +33,7 @@ def test_registration_and_independent_concrete_instances(monkeypatch):
         assert selector in testing._programs
         monkeypatch.setitem(testing._programs, selector, True)
         testing._using_cache.pop(selector, None)
+
         def marked_test():
             pass
 
@@ -55,7 +56,7 @@ def test_registration_and_independent_concrete_instances(monkeypatch):
 
 
 def test_import_qcengine_does_not_import_external_cclib():
-    script = r'''
+    script = r"""
 import importlib.abc
 import json
 import sys
@@ -69,7 +70,7 @@ class RejectCCLib(importlib.abc.MetaPathFinder):
 sys.meta_path.insert(0, RejectCCLib())
 import qcengine
 print(json.dumps(sorted(qcengine.list_all_programs())))
-'''
+"""
     result = subprocess.run(
         [sys.executable, "-c", script],
         cwd=os.fspath(os.path.dirname(qcng.__file__)),
@@ -90,11 +91,7 @@ def _qchem_probe_output(version="5.1"):
 
 
 def _orca_probe_output(version="6.0"):
-    return (
-        "                         O   R   C   A\n"
-        f"Program Version {version}.0\n"
-        "ORCA TERMINATED NORMALLY\n"
-    )
+    return "                         O   R   C   A\n" f"Program Version {version}.0\n" "ORCA TERMINATED NORMALLY\n"
 
 
 def test_missing_executable_is_a_resource_error(monkeypatch):
@@ -372,9 +369,7 @@ $end
     )
 
     for driver, jobtype in (("energy", "sp"), ("gradient", "force"), ("hessian", "freq")):
-        mapped = cclib_qchem.build_input(
-            _atomic_input(driver=driver, method="wb97x-d"), _task_config(), "/opt/qchem"
-        )
+        mapped = cclib_qchem.build_input(_atomic_input(driver=driver, method="wb97x-d"), _task_config(), "/opt/qchem")
         assert f"JOBTYPE {jobtype}\n" in mapped.input_text
         assert "METHOD wb97x-d\n" in mapped.input_text
     with pytest.raises(InputError, match="cclib-qchem.*driver"):
@@ -402,10 +397,18 @@ def test_qchem_scalar_keyword_rendering_and_malformed_reserved_rejection():
     assert positions == sorted(positions)
 
     malformed = [
-        {"bad": "line one\nline two"}, {"bad\nkey": "value"}, {"bad": None},
-        {"bad": [1]}, {"bad": {"nested": 1}}, {"bad": float("nan")},
-        {"": "value"}, {"ordinary key": "value"}, {"ordinary\x00key": "value"},
-        {"$end": "value"}, {"$molecule": "value"}, {"-leading": "value"},
+        {"bad": "line one\nline two"},
+        {"bad\nkey": "value"},
+        {"bad": None},
+        {"bad": [1]},
+        {"bad": {"nested": 1}},
+        {"bad": float("nan")},
+        {"": "value"},
+        {"ordinary key": "value"},
+        {"ordinary\x00key": "value"},
+        {"$end": "value"},
+        {"$molecule": "value"},
+        {"-leading": "value"},
         {"nonascii_é": "value"},
     ]
     for candidate in malformed:
@@ -413,17 +416,11 @@ def test_qchem_scalar_keyword_rendering_and_malformed_reserved_rejection():
             cclib_qchem.build_input(_atomic_input(keywords=candidate), _task_config(), "/opt/qchem")
     for reserved in _QCHEM_RESERVED:
         with pytest.raises(InputError, match="reserved"):
-            cclib_qchem.build_input(
-                _atomic_input(keywords={reserved.swapcase(): "user"}), _task_config(), "/opt/qchem"
-            )
+            cclib_qchem.build_input(_atomic_input(keywords={reserved.swapcase(): "user"}), _task_config(), "/opt/qchem")
         with pytest.raises(InputError, match="keyword name"):
-            cclib_qchem.build_input(
-                _atomic_input(keywords={f" {reserved}": "user"}), _task_config(), "/opt/qchem"
-            )
+            cclib_qchem.build_input(_atomic_input(keywords={f" {reserved}": "user"}), _task_config(), "/opt/qchem")
     with pytest.raises(InputError, match="collision"):
-        cclib_qchem.build_input(
-            _atomic_input(keywords={"thresh": 8, "THRESH": 10}), _task_config(), "/opt/qchem"
-        )
+        cclib_qchem.build_input(_atomic_input(keywords={"thresh": 8, "THRESH": 10}), _task_config(), "/opt/qchem")
 
 
 def test_orca_exact_input_and_energy_only_policy():
@@ -486,12 +483,10 @@ def test_orca_deterministic_blocks_and_malformed_reserved_rejection():
         "blocks": {
             "scf": "MaxIter 200",
             "output": "PrintLevel Mini\nPrint[P_AtCharges_M] 1",
-            "basis": "NewGTO H \"def2-TZVP\" end",
+            "basis": 'NewGTO H "def2-TZVP" end',
         },
     }
-    job = cclib_orca.build_input(
-        _atomic_input(driver="energy", keywords=keywords), _task_config(), "/opt/orca"
-    )
+    job = cclib_orca.build_input(_atomic_input(driver="energy", keywords=keywords), _task_config(), "/opt/orca")
 
     assert job.input_text.splitlines()[0] == "! hf sto-3g rks usesym TightSCF"
     defaults_end = job.input_text.index("Print[P_Hirshfeld] 1")
@@ -514,18 +509,26 @@ def test_orca_deterministic_blocks_and_malformed_reserved_rejection():
         assert body in rendered.input_text
 
     outer_syntax = [
-        "end\n* xyz 9 1\nH 0 0 0\n*", "  EnD trailing text  ", "%pal\nnprocs 99\nend",
-        "  %MAXCORE 9999 # comment", "%coords\nctyp xyz", "$new_job", " * xyz 0 1",
+        "end\n* xyz 9 1\nH 0 0 0\n*",
+        "  EnD trailing text  ",
+        "%pal\nnprocs 99\nend",
+        "  %MAXCORE 9999 # comment",
+        "%coords\nctyp xyz",
+        "$new_job",
+        " * xyz 0 1",
     ]
     for body in outer_syntax:
         with pytest.raises(InputError, match="block body|outer syntax"):
-            cclib_orca.build_input(
-                _atomic_input(keywords={"blocks": {"output": body}}), _task_config(), "/opt/orca"
-            )
+            cclib_orca.build_input(_atomic_input(keywords={"blocks": {"output": body}}), _task_config(), "/opt/orca")
 
     malformed = [
-        {"unknown": []}, {"simple": "rks"}, {"simple": [""]}, {"simple": ["rks\n* xyz 9 9"]},
-        {"blocks": "output"}, {"blocks": {"bad-name": "value"}}, {"blocks": {"scf": None}},
+        {"unknown": []},
+        {"simple": "rks"},
+        {"simple": [""]},
+        {"simple": ["rks\n* xyz 9 9"]},
+        {"blocks": "output"},
+        {"blocks": {"bad-name": "value"}},
+        {"blocks": {"scf": None}},
         {"coordinates": []},
     ]
     for candidate in malformed:
@@ -553,9 +556,7 @@ def test_primary_output_selection(monkeypatch, tmp_path):
         }
 
     monkeypatch.setattr(cclib_base, "execute", fake_execute)
-    result = cclib_base._execute_job(
-        definition, job, _task_config(scratch_directory=str(tmp_path))
-    )
+    result = cclib_base._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
 
     command, infiles, outfiles, kwargs = calls[0]
     assert command == job.command
@@ -1039,9 +1040,7 @@ def test_parsed_driver_or_basis_mismatch_is_rejected_without_relabeling(monkeypa
         pytest.param("all", set(), True, id="v1_incompatible-all"),
     ],
 )
-def test_native_file_protocols_and_public_schema_conversion(
-    monkeypatch, protocol, expected, v1_incompatible
-):
+def test_native_file_protocols_and_public_schema_conversion(monkeypatch, protocol, expected, v1_incompatible):
     api, definition, execution, _ = _fake_conversion_case()
     monkeypatch.setattr(cclib_base, "_load_cclib_api", lambda: api)
     if v1_incompatible:
@@ -1054,9 +1053,7 @@ def test_native_file_protocols_and_public_schema_conversion(
 
         monkeypatch.setattr(cclib_base, "_validate_v1_atomic_result", reject_native_files)
 
-    result = cclib_base._parse_and_convert(
-        definition, execution, _atomic_input(protocols={"native_files": protocol})
-    )
+    result = cclib_base._parse_and_convert(definition, execution, _atomic_input(protocols={"native_files": protocol}))
 
     native_files = result.native_files or {}
     assert set(native_files) == expected
@@ -1121,12 +1118,8 @@ def test_native_file_protocols_and_public_schema_conversion(
 @pytest.mark.parametrize(
     "selector,minimum",
     [
-        pytest.param(
-            "cclib-qchem", "5.1", marks=[*using("cclib-qchem"), pytest.mark.cclib_qchem]
-        ),
-        pytest.param(
-            "cclib-orca", "6.0", marks=[*using("cclib-orca"), pytest.mark.cclib_orca]
-        ),
+        pytest.param("cclib-qchem", "5.1", marks=[*using("cclib-qchem"), pytest.mark.cclib_qchem]),
+        pytest.param("cclib-orca", "6.0", marks=[*using("cclib-orca"), pytest.mark.cclib_orca]),
     ],
 )
 def test_live_version_uses_available_software(selector, minimum):
@@ -1160,19 +1153,25 @@ def test_live_qchem_hessian():
     "selector,input_model,expected,absolute_tolerance",
     [
         pytest.param(
-            "cclib-qchem", _water_input(), -75.00228214, 1.0e-6,
-            marks=[*using("cclib-qchem"), pytest.mark.cclib_qchem], id="qchem-water-mp2",
+            "cclib-qchem",
+            _water_input(),
+            -75.00228214,
+            1.0e-6,
+            marks=[*using("cclib-qchem"), pytest.mark.cclib_qchem],
+            id="qchem-water-mp2",
         ),
         # ORCA 6.x HF/STO-3G for He; 1e-8 Eh permits only final-digit output/parser variation.
         pytest.param(
-            "cclib-orca", _atomic_input(), -2.8077839575, 1.0e-8,
-            marks=[*using("cclib-orca"), pytest.mark.cclib_orca], id="orca-he-hf",
+            "cclib-orca",
+            _atomic_input(),
+            -2.8077839575,
+            1.0e-8,
+            marks=[*using("cclib-orca"), pytest.mark.cclib_orca],
+            id="orca-he-hf",
         ),
     ],
 )
-def test_live_qchem_and_orca_energy_calculations(
-    selector, input_model, expected, absolute_tolerance
-):
+def test_live_qchem_and_orca_energy_calculations(selector, input_model, expected, absolute_tolerance):
     result = qcng.compute(
         input_model,
         selector,

@@ -1,4 +1,5 @@
 """Tests for NWChem functionality"""
+
 import numpy as np
 import pytest
 import qcelemental as qcel

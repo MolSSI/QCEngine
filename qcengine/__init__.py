@@ -1,6 +1,7 @@
 """
 Base file for the dqm_compute module.
 """
+
 from importlib.metadata import version
 
 __version__ = version("qcengine")
