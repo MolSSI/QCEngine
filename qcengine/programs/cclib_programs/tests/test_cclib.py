@@ -857,22 +857,48 @@ def test_writer_required_fields_extras_collision_and_validation_failure(monkeypa
 
 
 @pytest.mark.parametrize(
-    "program,requested,parsed,creator,version",
+    "program,requested,parsed,requested_basis,parsed_basis,creator,version",
     [
-        ("qchem", "wb97x-d", "wB97X-D3", "Q-Chem", "6.2"),
-        ("orca", "dlpno-ccsd(t)", "DLPNO-CCSD(T0)", "ORCA", "6.0.1"),
+        pytest.param(
+            "qchem",
+            "wb97x-d",
+            "wB97X-D3",
+            "  sTo-3G  ",
+            "\tSTo-3g ",
+            "Q-Chem",
+            "6.2",
+            id="normalized_basis-qchem",
+        ),
+        pytest.param(
+            "orca",
+            "dlpno-ccsd(t)",
+            "DLPNO-CCSD(T0)",
+            "sto-3g",
+            "STO-3G",
+            "ORCA",
+            "6.0.1",
+            id="orca",
+        ),
     ],
 )
 def test_successful_v1_to_v2_conversion_and_provenance_preservation(
-    monkeypatch, program, requested, parsed, creator, version
+    monkeypatch, program, requested, parsed, requested_basis, parsed_basis, creator, version
 ):
-    output = _fake_writer_output(driver="energy", method=parsed, basis="STO-3G")
+    output = _fake_writer_output(driver="energy", method=parsed, basis=parsed_basis)
     output["provenance"] = {"creator": creator, "version": version, "routine": "cclib.QCSchemaWriter"}
     if program == "orca":
         output["extras"]["dispersionenergies"] = [-0.001]
     api, definition, execution, opened = _fake_conversion_case(output, program=program)
     monkeypatch.setattr(cclib_base, "_load_cclib_api", lambda: api)
-    input_model = _atomic_input(method=requested, basis="sto-3g")
+    original_validate = cclib_base._validate_v1_atomic_result
+    validated_output = {}
+
+    def capture_validated_output(value):
+        validated_output.update(value)
+        return original_validate(value)
+
+    monkeypatch.setattr(cclib_base, "_validate_v1_atomic_result", capture_validated_output)
+    input_model = _atomic_input(method=requested, basis=requested_basis)
 
     result = cclib_base._parse_and_convert(definition, execution, input_model)
 
@@ -882,6 +908,8 @@ def test_successful_v1_to_v2_conversion_and_provenance_preservation(
     assert result.stdout == execution.output_text
     assert result.provenance.creator == creator
     assert result.provenance.version == version
+    assert validated_output["model"]["basis"] == parsed_basis
+    assert result.input_data.specification.model.basis == requested_basis
     assert opened == [execution.output_text]
     assert set(result.extras) == set(output["extras"]) | {"cclib_harness"}
     for key, value in output["extras"].items():
@@ -915,26 +943,49 @@ def test_parsed_driver_or_basis_mismatch_is_rejected_without_relabeling(monkeypa
 
 
 @pytest.mark.parametrize(
-    "protocol,expected",
-    [("none", set()), ("input", {"input"}), ("all", {"input", "dispatch.out"})],
+    "protocol,expected,v1_incompatible",
+    [
+        pytest.param("none", set(), False, id="none"),
+        pytest.param("input", {"input"}, False, id="input"),
+        pytest.param("all", {"input", "dispatch.out"}, False, id="all"),
+        pytest.param("none", set(), True, id="v1_incompatible-none"),
+        pytest.param("all", set(), True, id="v1_incompatible-all"),
+    ],
 )
-def test_native_file_protocols_and_public_schema_conversion(monkeypatch, protocol, expected):
+def test_native_file_protocols_and_public_schema_conversion(
+    monkeypatch, protocol, expected, v1_incompatible
+):
     api, definition, execution, _ = _fake_conversion_case()
     monkeypatch.setattr(cclib_base, "_load_cclib_api", lambda: api)
+    if v1_incompatible:
+        original_validate = cclib_base._validate_v1_atomic_result
+
+        def reject_native_files(output):
+            if "native_files" in output:
+                raise ValueError("native_files is not a permitted v1 field")
+            return original_validate(output)
+
+        monkeypatch.setattr(cclib_base, "_validate_v1_atomic_result", reject_native_files)
 
     result = cclib_base._parse_and_convert(
         definition, execution, _atomic_input(protocols={"native_files": protocol})
     )
 
-    assert set(result.native_files) == expected
-    assert "stdout" not in result.native_files
-    assert "stderr" not in result.native_files
+    native_files = result.native_files or {}
+    assert set(native_files) == expected
+    assert "stdout" not in native_files
+    assert "stderr" not in native_files
     assert "outfiles" not in result.extras
     assert result.stdout == execution.output_text
-    if protocol != "none":
-        assert result.native_files["input"] == execution.input_text
-    if protocol == "all":
-        assert result.native_files["dispatch.out"] == execution.output_text
+    if protocol != "none" and not v1_incompatible:
+        assert native_files["input"] == execution.input_text
+    if protocol == "all" and not v1_incompatible:
+        assert native_files["dispatch.out"] == execution.output_text
+    harness_extras = result.extras["cclib_harness"]
+    retains_fallback_input = v1_incompatible and protocol == "all"
+    assert ("native_input" in harness_extras) is retains_fallback_input
+    if retains_fallback_input:
+        assert harness_extras["native_input"] == execution.input_text
 
     input_model = _atomic_input(protocols={"native_files": protocol})
     job = cclib_base.Job(
@@ -969,9 +1020,15 @@ def test_native_file_protocols_and_public_schema_conversion(monkeypatch, protoco
     )
     assert direct.schema_version == 2
     assert direct.input_data == input_model
+    assert set(direct.native_files or {}) == expected
+    direct_extras = direct.extras["cclib_harness"]
+    assert ("native_input" in direct_extras) is retains_fallback_input
+    if retains_fallback_input:
+        assert direct_extras["native_input"] == execution.input_text
     assert public.schema_version == 1
     assert public.driver.value == input_model.specification.driver.value
     assert public.model.method == input_model.specification.model.method
+    assert public.model.basis == input_model.specification.model.basis
 
 
 @pytest.mark.parametrize(
