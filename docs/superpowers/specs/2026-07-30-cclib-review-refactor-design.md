@@ -119,7 +119,7 @@ The suite will be reduced rather than merely relocated. It will remove:
 - synthetic cclib compatibility and cache tests;
 - mocked executable-banner/version tests;
 - redundant permutations that assert the same implementation detail;
-- low-value demonstration serialization internals already covered by live paths.
+- all obsolete demonstration-script tests; commit `71e6531` intentionally removed those standalone scripts and they will remain deleted.
 
 Focused package tests will retain coverage for:
 
@@ -132,7 +132,6 @@ Focused package tests will retain coverage for:
 - parser lifecycle and parser-identity rejection;
 - real writer conversion, required-field validation, extras collision handling, identity checks, native-file protocols, and public schema conversion;
 - cclib fixture parsing where `CCLIB_SOURCE_ROOT` is available;
-- the two live demonstrations.
 
 `qcengine/tests/test_harness_canonical.py` will include:
 
@@ -152,10 +151,9 @@ Implementation completion requires:
 4. cclib fixture conversion tests with `CCLIB_SOURCE_ROOT`;
 5. live Q-Chem energy, gradient, and Hessian execution;
 6. live ORCA energy execution;
-7. both demonstration scripts;
-8. Sphinx with warnings as errors;
-9. compile checks, `git diff --check`, and an audit for machine-local paths;
-10. independent review of the complete branch diff.
+7. Sphinx with warnings as errors;
+8. compile checks, `git diff --check`, and an audit for machine-local paths;
+9. independent review of the complete branch diff.
 
 ## Review-comment disposition
 

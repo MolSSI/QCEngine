@@ -19,7 +19,7 @@
 - Tests must live at `qcengine/programs/cclib_programs/tests/test_cclib.py` and be reduced rather than merely relocated.
 - Version tests must use availability-gated installed software, not fabricated executable output.
 - Reusable source and unit tests must not contain machine-local executable or setup paths.
-- Preserve the demonstration scripts and generated result artifacts unless a task explicitly updates their source.
+- Keep `qchem_water_mp2.py` and `orca_water_ccsd.py` deleted as established by commit `71e6531`; remove their obsolete tests.
 
 ## File Structure
 
@@ -61,6 +61,7 @@ test_executable_identity_or_version_rejection
 test_unrelated_orca_executable_is_rejected
 test_executable_probe_cache_is_keyed_by_resolved_path
 test_get_version_returns_external_program_version
+all tests and helper fixtures that import `qchem_water_mp2` or `orca_water_ccsd`
 ```
 
 Update availability tests to patch `_load_cclib_api` directly and verify that `found()` calls it before executable resolution:
@@ -491,14 +492,13 @@ writer required fields/extras collision/validation failure
 successful v1-to-v2 conversion and provenance preservation
 parsed driver/basis mismatch rejection
 native-file protocols and public schema conversion
-demonstration acceptance checks
 live installed versions
 live Q-Chem Hessian
-live Q-Chem and ORCA demonstrations
+live Q-Chem and ORCA energy calculations
 real cclib fixture conversion
 ```
 
-Delete separate tests whose assertions are subsumed by a parameterized contract, especially duplicate malformed-key variants, duplicate failure-chain cases, and demonstration serialization implementation details. Do not weaken security boundaries for native keyword injection, extras ownership, or temporary-file cleanup.
+Delete separate tests whose assertions are subsumed by a parameterized contract, especially duplicate malformed-key variants and duplicate failure-chain cases. Do not weaken security boundaries for native keyword injection, extras ownership, or temporary-file cleanup.
 
 - [ ] **Step 2: Add canonical selector entries**
 
@@ -569,7 +569,7 @@ After sourcing the existing machine-local Q-Chem setup and adding ORCA to `PATH`
   -m 'cclib_qchem or cclib_orca' -q
 ```
 
-Expected: real version checks, Q-Chem Hessian, canonical Q-Chem energy/gradient, canonical ORCA energy/rejection behavior, and demonstrations pass.
+Expected: real version checks, Q-Chem Hessian, canonical Q-Chem energy/gradient, and canonical ORCA energy/rejection behavior pass.
 
 - [ ] **Step 6: Commit the consolidated coverage**
 
@@ -584,8 +584,6 @@ git commit -m "test: consolidate cclib harness coverage"
 
 **Files:**
 - Modify: `docs/source/programs_cclib.rst`
-- Verify: `qchem_water_mp2.py`
-- Verify: `orca_water_ccsd.py`
 
 **Interfaces:**
 - Documents the final package extension contract and verified support matrix.
@@ -631,19 +629,17 @@ cd docs
 
 Expected: build succeeds with no warnings.
 
-- [ ] **Step 4: Run fixture and demonstration verification**
+- [ ] **Step 4: Run fixture verification**
 
 With `CCLIB_SOURCE_ROOT` set only in the shell environment, run:
 
 ```bash
 /tmp/qcengine-cclib-venv/bin/python -m pytest \
   qcengine/programs/cclib_programs/tests/test_cclib.py \
-  -k 'fixture or demonstration' -q
-/tmp/qcengine-cclib-venv/bin/python qchem_water_mp2.py
-/tmp/qcengine-cclib-venv/bin/python orca_water_ccsd.py
+  -k 'fixture' -q
 ```
 
-Expected: seven supported fixtures pass and the deferred ORCA DFT frequency fixture remains absent because ORCA is now energy-only; both demonstrations report no `FAIL` lines.
+Expected: seven supported fixtures pass; the deferred ORCA DFT frequency fixture is removed because ORCA is now energy-only.
 
 - [ ] **Step 5: Run the complete non-addon suite**
 
