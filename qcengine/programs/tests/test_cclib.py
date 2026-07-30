@@ -1,5 +1,3 @@
-import copy
-import importlib
 import json
 import os
 import subprocess
@@ -80,168 +78,6 @@ print(json.dumps(sorted(qcengine.list_all_programs())))
     assert {"qchem", "cclib-qchem", "cclib-orca"} <= programs
 
 
-@pytest.fixture
-def fake_cclib_api():
-    class FakeCCData:
-        def __init__(self, attributes=None):
-            self.attributes = attributes or {}
-
-    class FakeQCSchemaWriter:
-        calls = 0
-        mutation = None
-
-        def __init__(self, data):
-            self.data = data
-
-        def as_dict(self, validate=True):
-            type(self).calls += 1
-            assert validate is False
-            assert self.data.attributes["atomcoords"] == [[[1.0, 0.0, 0.0]]]
-            assert self.data.attributes["atomcharges"] == {"mulliken": [0.0]}
-            output = {
-                "schema_name": "qcschema_output",
-                "schema_version": 1,
-                "molecule": {
-                    "geometry": [1.8897261255, 0.0, 0.0],
-                    "molecular_charge": 0,
-                    "molecular_multiplicity": 1,
-                    "schema_name": "qcschema_molecule",
-                    "schema_version": 2,
-                    "symbols": ["He"],
-                    "validated": True,
-                },
-                "provenance": {
-                    "creator": "Synthetic",
-                    "version": "1.0",
-                    "routine": "fake.QCSchemaWriter",
-                },
-                "success": True,
-                "error": None,
-                "stdout": None,
-                "stderr": None,
-                "extras": {
-                    "atomcharges": {"mulliken": [0.0]},
-                    "atomcoords": [[[1.8897261255, 0.0, 0.0]]],
-                    "atomnos": [2],
-                    "charge": 0,
-                    "homos": [0],
-                    "mult": 1,
-                    "natom": 1,
-                    "nbasis": 1,
-                    "nmo": 1,
-                    "scfenergies": [-0.9040333652549597],
-                    "scftargets": [[[1.0e-6]]],
-                    "scfvalues": [[[1.0e-4], [1.0e-7]]],
-                },
-                "driver": "energy",
-                "keywords": {},
-                "model": {"method": "hf", "basis": "sto-3g"},
-                "properties": {
-                    "calcinfo_nalpha": 1,
-                    "calcinfo_natom": 1,
-                    "calcinfo_nbasis": 1,
-                    "calcinfo_nbeta": 1,
-                    "calcinfo_nmo": 1,
-                    "return_energy": -0.9040333652549597,
-                    "scf_iterations": 2,
-                    "scf_total_energy": -0.9040333652549597,
-                },
-                "return_result": -0.9040333652549597,
-            }
-            if type(self).mutation == "wrong_units":
-                output["molecule"]["geometry"][0] = 1.0
-                output["extras"]["atomcoords"][0][0][0] = 1.0
-            elif type(self).mutation == "missing_atomcoords":
-                output["extras"].pop("atomcoords")
-            elif type(self).mutation == "missing_atomcharges":
-                output["extras"].pop("atomcharges")
-            return output
-
-    class FakeQChem:
-        pass
-
-    class FakeORCA:
-        pass
-
-    return cclib_harness._CCLibAPI(
-        version="1.9.test",
-        ccData=FakeCCData,
-        QCSchemaWriter=FakeQCSchemaWriter,
-        ccread=lambda source: source,
-        QChem=FakeQChem,
-        ORCA=FakeORCA,
-    )
-
-
-@pytest.fixture(autouse=True)
-def clear_cclib_caches():
-    cclib_harness.CCLibHarness.version_cache.clear()
-    if hasattr(cclib_harness, "_cclib_compatibility_cache"):
-        cclib_harness._cclib_compatibility_cache = None
-    yield
-    cclib_harness.CCLibHarness.version_cache.clear()
-    if hasattr(cclib_harness, "_cclib_compatibility_cache"):
-        cclib_harness._cclib_compatibility_cache = None
-
-
-def test_cclib_missing_is_reported_by_compatibility_probe(monkeypatch):
-    def missing():
-        raise ModuleNotFoundError("No module named 'cclib'")
-
-    monkeypatch.setattr(cclib_harness, "_load_cclib_api", missing)
-    success, message = cclib_harness._check_cclib_compatibility()
-
-    assert success is False
-    assert "cclib" in message
-    assert "not importable" in message
-
-
-def test_cclib_compatibility_validates_v1_geometry_and_flat_extras(monkeypatch, fake_cclib_api):
-    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: fake_cclib_api)
-
-    success, version = cclib_harness._check_cclib_compatibility()
-    assert success is True
-    assert version == "1.9.test"
-
-    output = fake_cclib_api.QCSchemaWriter(
-        cclib_harness._synthetic_ccdata(fake_cclib_api.ccData)
-    ).as_dict(validate=False)
-    result = cclib_harness._validate_v1_atomic_result(output)
-    assert result.schema_version == 1
-    assert result.molecule.geometry[0][0] == pytest.approx(1.8897261255, abs=2.0e-9)
-    assert result.extras["atomcoords"][0][0][0] == pytest.approx(1.8897261255, abs=2.0e-9)
-    assert result.extras["atomcharges"] == {"mulliken": [0.0]}
-
-
-@pytest.mark.parametrize("mutation", ["wrong_units", "missing_atomcoords", "missing_atomcharges"])
-def test_cclib_compatibility_rejects_incomplete_writer(monkeypatch, fake_cclib_api, mutation):
-    fake_cclib_api.QCSchemaWriter.mutation = mutation
-    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: fake_cclib_api)
-
-    success, message = cclib_harness._check_cclib_compatibility()
-
-    assert success is False
-    assert mutation.replace("_", " ").split()[0] in message.lower()
-
-
-def test_cclib_compatibility_probe_is_cached_once_per_process(monkeypatch, fake_cclib_api):
-    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: fake_cclib_api)
-
-    first = cclib_harness._check_cclib_compatibility()
-    second = cclib_harness._check_cclib_compatibility()
-    assert first == second
-    assert first[0] is True
-    assert fake_cclib_api.QCSchemaWriter.calls == 1
-
-
-@pytest.mark.addon
-def test_real_cclib_compatibility_when_installed():
-    pytest.importorskip("cclib")
-
-    success, version_or_message = cclib_harness._check_cclib_compatibility()
-    assert success is True, version_or_message
-
-
 def _qchem_probe_output(version="5.1"):
     return (
         "A Quantum Leap Into The Future Of Chemistry\n"
@@ -260,111 +96,12 @@ def _orca_probe_output(version="6.0"):
 
 def test_missing_executable_is_a_resource_error(monkeypatch):
     harness = CCLibHarness(name="cclib-orca", program="orca")
-    monkeypatch.setattr(cclib_harness, "_check_cclib_compatibility", lambda: (True, "1.9"))
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: object())
     monkeypatch.setattr(cclib_harness, "which", lambda command: None, raising=False)
 
     assert harness.found() is False
     with pytest.raises(ResourceError, match="orca.*PATH"):
         harness.found(raise_error=True)
-
-
-@pytest.mark.parametrize(
-    "program,path,output,expected",
-    [
-        ("qchem", "/opt/qchem-5.1/bin/qchem", _qchem_probe_output("5.1"), "5.1"),
-        ("qchem", "/opt/qchem-6.2/bin/qchem", _qchem_probe_output("6.2.2"), "6.2.2"),
-        ("orca", "/opt/orca-6/bin/orca", _orca_probe_output("6.0"), "6.0.0"),
-        ("orca", "/opt/orca-6.1/bin/orca", _orca_probe_output("6.1"), "6.1.0"),
-    ],
-)
-def test_executable_identity_and_supported_version(monkeypatch, program, path, output, expected):
-    calls = []
-
-    def fake_execute(command, infiles=None, **kwargs):
-        calls.append((command, infiles, kwargs))
-        return True, {"stdout": output, "stderr": ""}
-
-    monkeypatch.setattr(cclib_harness, "execute", fake_execute, raising=False)
-    harness = CCLibHarness(name=f"cclib-{program}", program=program)
-
-    assert cclib_harness._probe_executable(harness, path) == expected
-    assert harness.version_cache[path] == expected
-    assert len(calls) == 1
-    if program == "qchem":
-        assert "$rem" in next(iter(calls[0][1].values()))
-    else:
-        assert "HF STO-3G" in next(iter(calls[0][1].values()))
-
-
-@pytest.mark.parametrize(
-    "program,output,match",
-    [
-        ("qchem", "Q-Chem 6.2 for Linux\n", "identity"),
-        ("qchem", _qchem_probe_output("5.0"), "requires.*5.1"),
-        ("qchem", _qchem_probe_output("not-a-version"), "version"),
-        ("orca", "Program Version 6.1.0\nORCA TERMINATED NORMALLY\n", "identity"),
-        ("orca", _orca_probe_output("5.0"), "requires.*6.0"),
-        ("orca", "O   R   C   A\nProgram Version unknown\nORCA TERMINATED NORMALLY\n", "version"),
-        ("orca", "O   R   C   A\nProgram Version 6.1.0\n", "normal termination"),
-    ],
-)
-def test_executable_identity_or_version_rejection(monkeypatch, program, output, match):
-    monkeypatch.setattr(
-        cclib_harness,
-        "execute",
-        lambda *args, **kwargs: (True, {"stdout": output, "stderr": ""}),
-        raising=False,
-    )
-    harness = CCLibHarness(name=f"cclib-{program}", program=program)
-    path = f"/opt/{program}"
-
-    with pytest.raises(ResourceError, match=match):
-        cclib_harness._probe_executable(harness, path)
-    assert path not in harness.version_cache
-
-
-def test_unrelated_orca_executable_is_rejected(monkeypatch):
-    output = "Orca is a screen reader and magnifier for the GNOME desktop.\n"
-    monkeypatch.setattr(
-        cclib_harness,
-        "execute",
-        lambda *args, **kwargs: (True, {"stdout": output, "stderr": ""}),
-        raising=False,
-    )
-    harness = CCLibHarness(name="cclib-orca", program="orca")
-
-    with pytest.raises(ResourceError, match="identity"):
-        cclib_harness._probe_executable(harness, "/usr/bin/orca")
-
-
-def test_executable_probe_cache_is_keyed_by_resolved_path(monkeypatch):
-    calls = []
-
-    def fake_execute(command, infiles=None, **kwargs):
-        calls.append(command[0])
-        version = "5.1" if "first" in command[0] else "6.2"
-        return True, {"stdout": _qchem_probe_output(version), "stderr": ""}
-
-    monkeypatch.setattr(cclib_harness, "execute", fake_execute, raising=False)
-    harness = CCLibHarness(name="cclib-qchem", program="qchem")
-
-    assert cclib_harness._probe_executable(harness, "/opt/first/qchem") == "5.1"
-    assert cclib_harness._probe_executable(harness, "/opt/first/qchem") == "5.1"
-    assert cclib_harness._probe_executable(harness, "/opt/second/qchem") == "6.2"
-    assert calls == ["/opt/first/qchem", "/opt/second/qchem"]
-
-
-def test_get_version_returns_external_program_version(monkeypatch):
-    harness = CCLibHarness(name="cclib-orca", program="orca")
-    monkeypatch.setattr(cclib_harness, "which", lambda command: "/opt/orca", raising=False)
-    monkeypatch.setattr(
-        cclib_harness,
-        "execute",
-        lambda *args, **kwargs: (True, {"stdout": _orca_probe_output("6.1"), "stderr": ""}),
-        raising=False,
-    )
-
-    assert harness.get_version() == "6.1.0"
 
 
 def _valid_qchem_environment(tmp_path):
@@ -439,15 +176,21 @@ def test_qchem_environment_preflight_builds_child_environment_without_inherited_
     assert "QCSCRATCH" not in environment
 
 
+def test_found_lazily_loads_cclib_before_resolving_executable(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: calls.append("cclib") or object())
+    monkeypatch.setattr(cclib_harness, "which", lambda command: calls.append(command) or None)
+    harness = CCLibHarness(name="cclib-orca", program="orca")
+
+    assert harness.found() is False
+    assert calls == ["cclib", "orca"]
+
+
 def test_found_checks_resources_in_required_order(monkeypatch):
     events = []
     harness = CCLibHarness(name="cclib-qchem", program="qchem")
 
-    monkeypatch.setattr(
-        cclib_harness,
-        "_check_cclib_compatibility",
-        lambda: events.append("compatibility") or (True, "1.9"),
-    )
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: events.append("cclib") or object())
     monkeypatch.setattr(cclib_harness, "which", lambda command: events.append("path") or "/opt/qchem")
     definition = replace(
         cclib_harness._PROGRAM_DEFINITIONS["qchem"],
@@ -461,13 +204,13 @@ def test_found_checks_resources_in_required_order(monkeypatch):
     )
 
     assert harness.found(raise_error=True) is True
-    assert events == ["compatibility", "path", "preflight", "identity/version"]
+    assert events == ["cclib", "path", "preflight", "identity/version"]
 
 
 @pytest.mark.parametrize(
     "stage,expected",
     [
-        ("compatibility", "writer feature unavailable"),
+        ("cclib", "cclib is unavailable"),
         ("path", "PATH"),
         ("preflight", "QCAUX"),
         ("probe", "identity"),
@@ -475,7 +218,7 @@ def test_found_checks_resources_in_required_order(monkeypatch):
 )
 def test_found_false_suppresses_resource_failures_and_found_true_preserves_detail(monkeypatch, stage, expected):
     harness = CCLibHarness(name="cclib-qchem", program="qchem")
-    monkeypatch.setattr(cclib_harness, "_check_cclib_compatibility", lambda: (True, "1.9"))
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: object())
     monkeypatch.setattr(cclib_harness, "which", lambda command: "/opt/qchem")
     definition = replace(
         cclib_harness._PROGRAM_DEFINITIONS["qchem"],
@@ -484,11 +227,11 @@ def test_found_false_suppresses_resource_failures_and_found_true_preserves_detai
     monkeypatch.setitem(cclib_harness._PROGRAM_DEFINITIONS, "qchem", definition)
     monkeypatch.setattr(cclib_harness, "_probe_executable", lambda *args: "5.1")
 
-    if stage == "compatibility":
+    if stage == "cclib":
         monkeypatch.setattr(
             cclib_harness,
-            "_check_cclib_compatibility",
-            lambda: (False, "writer feature unavailable"),
+            "_load_cclib_api",
+            lambda: (_ for _ in ()).throw(ModuleNotFoundError("cclib is unavailable")),
         )
     elif stage == "path":
         monkeypatch.setattr(cclib_harness, "which", lambda command: None)
@@ -513,8 +256,8 @@ def test_found_false_suppresses_resource_failures_and_found_true_preserves_detai
 def test_available_programs_does_not_raise_for_unavailable_cclib(monkeypatch):
     monkeypatch.setattr(
         cclib_harness,
-        "_check_cclib_compatibility",
-        lambda: (False, "cclib is not importable"),
+        "_load_cclib_api",
+        lambda: (_ for _ in ()).throw(ModuleNotFoundError("cclib is unavailable")),
     )
 
     available = qcng.list_available_programs()
@@ -1267,11 +1010,8 @@ def _fake_conversion_case(
 
     api = cclib_harness._CCLibAPI(
         version="1.9.fake",
-        ccData=object,
         QCSchemaWriter=FakeWriter,
-        ccread=ccopen,
-        QChem=FakeQChem,
-        ORCA=FakeORCA,
+        ccopen=ccopen,
     )
     execution = cclib_harness._ExecutionResult(
         process_success=True,
@@ -1283,7 +1023,8 @@ def _fake_conversion_case(
         stdout="launcher stdout",
         stderr="launcher stderr",
     )
-    return api, cclib_harness._PROGRAM_DEFINITIONS[program], execution, opened
+    definition = replace(cclib_harness._PROGRAM_DEFINITIONS[program], parser_type=lambda: parser_class)
+    return api, definition, execution, opened
 
 
 def _assert_conversion_failure(monkeypatch, match, **case):
@@ -1346,7 +1087,7 @@ def test_parser_temporary_file_is_closed_before_reopen_and_deleted_after_success
         assert source.name == state["path"]
         return original_ccopen(source)
 
-    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: replace(api, ccread=assert_closed_before_reopen))
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: replace(api, ccopen=assert_closed_before_reopen))
 
     result = cclib_harness._parse_and_convert(definition, execution, _atomic_input())
 
@@ -1593,7 +1334,6 @@ def test_public_dispatch_returns_v1_while_direct_harness_preserves_v2_request(mo
         executable=execution.executable,
     )
     monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
-    monkeypatch.setattr(cclib_harness, "_check_cclib_compatibility", lambda: (True, api.version))
     monkeypatch.setattr(cclib_harness, "which", lambda name: execution.executable)
     monkeypatch.setattr(cclib_harness, "_probe_executable", lambda *args, **kwargs: "6.2")
     monkeypatch.setattr(cclib_harness, "_execute_job", lambda actual_definition, actual_job, config: execution)
@@ -1651,405 +1391,6 @@ def test_native_files_v1_validation_incompatibility_uses_only_documented_input_f
         assert "native_input" not in result.extras["cclib_harness"]
 
 
-def _qchem_demonstration_result():
-    geometry = [
-        -0.0,
-        0.0,
-        0.22517858316070177,
-        -1.4941103633283772,
-        -0.0,
-        -0.9007143324538345,
-        1.4941103633283772,
-        -0.0,
-        -0.9007143324538345,
-    ]
-    return {
-        "schema_name": "qcschema_output",
-        "schema_version": 1,
-        "success": True,
-        "driver": "energy",
-        "model": {"method": "mp2", "basis": "sto-3g"},
-        "molecule": {
-            "symbols": ["O", "H", "H"],
-            "geometry": geometry,
-            "molecular_charge": 0,
-            "molecular_multiplicity": 1,
-        },
-        "provenance": {
-            "creator": "QChem",
-            "version": "5.1.2",
-            "routine": "cclib.io.qcschemawriter.QCSchemaWriter",
-        },
-        "properties": {
-            "calcinfo_nbasis": 7,
-            "calcinfo_nmo": 7,
-            "calcinfo_nalpha": 5,
-            "calcinfo_nbeta": 5,
-            "calcinfo_natom": 3,
-            "return_energy": -75.00228214,
-            "scf_dipole_moment": [0.0, 0.0, -0.6584056190],
-            "scf_total_energy": -74.9643287618,
-            "scf_iterations": 6,
-            "mp2_correlation_energy": -0.0379533782,
-            "mp2_total_energy": -75.00228214,
-        },
-        "return_result": -75.00228214,
-        "extras": {
-            "atomcharges": {"mulliken": [-0.339215, 0.169607, 0.169607]},
-            "atomcoords": [[geometry[index : index + 3] for index in range(0, 9, 3)]],
-            "atomnos": [8, 1, 1],
-            "homos": [4],
-            "moenergies": [[-20.244, -1.251, -0.603, -0.445, -0.388, 0.571, 0.709]],
-            "mosyms": [["A1", "A1", "B1", "A1", "B2", "A1", "B1"]],
-            "mpenergies": [[-75.00228214]],
-            "scfenergies": [-74.9643287618],
-            "scftargets": [[1.0e-5]],
-            "scfvalues": [[[0.398], [0.0668], [0.00822], [0.0016], [2.83e-5], [8.23e-6]]],
-            "cclib_harness": {
-                "selector": "cclib-qchem",
-                "cclib_version": "1.9.dev",
-                "parser": "QChem",
-                "executable": "/resolved/qchem",
-            },
-        },
-    }
-
-
-def _orca_demonstration_result(version="6.0.1"):
-    geometry = [
-        3.372998617495434,
-        2.385631834752722,
-        0.9675114303425262,
-        5.004442645304063,
-        2.027541962061342,
-        0.24874653962013937,
-        2.2358634804056874,
-        2.3750380300934055,
-        -0.45133273917372035,
-    ]
-    result = {
-        "schema_name": "qcschema_output",
-        "schema_version": 1,
-        "success": True,
-        "driver": "energy",
-        "model": {"method": "ccsd", "basis": "sto-3g"},
-        "molecule": {
-            "symbols": ["O", "H", "H"],
-            "geometry": geometry,
-            "molecular_charge": 0,
-            "molecular_multiplicity": 1,
-        },
-        "provenance": {
-            "creator": "ORCA",
-            "version": version,
-            "routine": "cclib.io.qcschemawriter.QCSchemaWriter",
-        },
-        "properties": {
-            "calcinfo_nbasis": 7,
-            "calcinfo_nmo": 7,
-            "calcinfo_nalpha": 5,
-            "calcinfo_nbeta": 5,
-            "calcinfo_natom": 3,
-            "return_energy": -75.013487814,
-            "scf_total_energy": -74.96357424008319,
-            "ccsd_correlation_energy": -0.04991357391681104,
-            "ccsd_total_energy": -75.013487814,
-            "mp2_correlation_energy": 74.9277738680832,
-            "mp2_total_energy": -0.035800372,
-        },
-        "return_result": -75.013487814,
-        "extras": {
-            "atomcharges": {
-                "mulliken": [-0.329397, 0.164693, 0.164703],
-                "lowdin": [-0.222995, 0.111495, 0.1115],
-            },
-            "atomcoords": [
-                [
-                    [3.372998615785793, 2.385631833543539, 0.9675114298521326],
-                    [5.004442642767507, 2.0275419610336605, 0.2487465394940595],
-                    [2.235863479272416, 2.375038028889592, -0.4513327389449575],
-                ]
-            ],
-            "atomnos": [8, 1, 1],
-            "ccenergies": [-75.013487814],
-            "homos": [4],
-            "moenergies": [
-                [
-                    -20.242268999999997,
-                    -1.2657839999999998,
-                    -0.615347,
-                    -0.452279,
-                    -0.39087700000000003,
-                    0.60058,
-                    0.736585,
-                ]
-            ],
-            "mosyms": [["A", "A", "A", "A", "A", "A", "A"]],
-            "mpenergies": [[-0.035800372]],
-            "scfenergies": [-74.96357424008319],
-            "scftargets": [[1.0e-6, 1.0e-5, 1.0e-6]],
-            "scfvalues": [
-                [
-                    [0.0, 0.0263, 0.0744],
-                    [-0.0179, 0.0225, 0.0624],
-                    [-0.0127, 0.0157, 0.0433],
-                    [-0.0087, 0.0367, 0.101],
-                    [-0.0199, 0.00115, 0.00458],
-                    [-8.88e-6, 0.0006, 0.00221],
-                    [-1.69e-6, 0.000344, 0.00117],
-                    [-2.64e-7, 2.42e-5, 6.93e-5],
-                    [2.6405e-7, 6.9252e-5, 2.4156e-5],
-                ]
-            ],
-            "cclib_harness": {
-                "selector": "cclib-orca",
-                "cclib_version": "1.9.dev",
-                "parser": "ORCA",
-                "executable": "/resolved/orca",
-            },
-        },
-    }
-    if str(version).startswith("6.1"):
-        result["extras"].update(
-            {
-                "atomcharges": {
-                    "mulliken": [-0.329397, 0.164693, 0.164703],
-                    "lowdin": [-0.222995, 0.111495, 0.1115],
-                    "hirshfeld": [-0.288291, 0.144144, 0.144146],
-                },
-                "moenergies": [[-20.242272, -1.265785, -0.615354, -0.452275, -0.390879, 0.600583, 0.736578]],
-                "scfenergies": [-74.96357424464694],
-                "scfvalues": [
-                    [
-                        [0.0, 0.0568, 0.0744],
-                        [-0.0179, 0.0486, 0.0624],
-                        [-0.0127, 0.0339, 0.0433],
-                        [-0.0087, 0.0793, 0.101],
-                        [-0.0199, 0.00247, 0.00458],
-                        [-8.88e-6, 0.0013, 0.00221],
-                        [-1.69e-6, 0.000744, 0.00117],
-                        [-2.64e-7, 5.22e-5, 6.93e-5],
-                        [2.6405e-7, 6.9252e-5, 5.2183e-5],
-                    ]
-                ],
-            }
-        )
-    return result
-
-
-def test_qchem_demonstration_comparison_covers_all_acceptance_criteria():
-    demonstration = importlib.import_module("qchem_water_mp2")
-    comparisons = demonstration.compare_result(_qchem_demonstration_result())
-
-    assert comparisons
-    assert all(line.startswith("PASS ") for line in comparisons), comparisons
-    labels = "\n".join(comparisons)
-    for required in (
-        "return_result",
-        "return_energy",
-        "scf_total_energy",
-        "mp2_total_energy",
-        "mp2_correlation_energy",
-        "scf_dipole_moment",
-        "calcinfo_nbasis",
-        "calcinfo_nmo",
-        "calcinfo_nalpha",
-        "calcinfo_nbeta",
-        "calcinfo_natom",
-        "scf_iterations",
-        "schema identity",
-        "model",
-        "molecule",
-        "provenance",
-        "cclib-qchem metadata",
-        "flat extras",
-        "Mulliken charges",
-        "seven MO energies",
-        "six SCF rows",
-    ):
-        assert required in labels
-
-
-@pytest.mark.parametrize(
-    "path,bad_value,failed_label",
-    [
-        (("return_result",), -1.0, "return_result"),
-        (("properties", "scf_dipole_moment"), [0.0, 0.0, 0.0], "scf_dipole_moment"),
-        (("properties", "calcinfo_nbasis"), 8, "calcinfo_nbasis"),
-        (("molecule", "symbols"), ["H", "O", "H"], "molecule"),
-        (("provenance", "routine"), "other.writer", "provenance"),
-        (("extras", "atomcharges", "mulliken"), [0.0, 0.0, 0.0], "Mulliken charges"),
-        (("extras", "moenergies"), [[0.0] * 7], "seven MO energies"),
-        (
-            ("extras", "scfvalues"),
-            [[[0.398], [0.0668], [0.00822], [0.0016], [3.03e-5], [8.23e-6]]],
-            "six SCF rows",
-        ),
-    ],
-)
-def test_qchem_demonstration_comparison_reports_failures(path, bad_value, failed_label):
-    demonstration = importlib.import_module("qchem_water_mp2")
-    result = _qchem_demonstration_result()
-    target = result
-    for key in path[:-1]:
-        target = target[key]
-    target[path[-1]] = bad_value
-
-    failures = [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
-    assert any(failed_label in line for line in failures)
-
-
-def test_orca_demonstration_comparison_checks_ccsd_scf_provenance_extras_and_anomalous_mp2():
-    demonstration = importlib.import_module("orca_water_ccsd")
-    comparisons = demonstration.compare_result(_orca_demonstration_result())
-
-    assert comparisons
-    assert all(line.startswith("PASS ") for line in comparisons), comparisons
-    labels = "\n".join(comparisons)
-    for required in (
-        "return_result",
-        "ccsd_total_energy",
-        "scf_total_energy",
-        "ccsd_correlation_energy",
-        "calcinfo_nbasis",
-        "calcinfo_nmo",
-        "calcinfo_nalpha",
-        "calcinfo_nbeta",
-        "calcinfo_natom",
-        "provenance",
-        "cclib-orca metadata",
-        "flat CCSD extras",
-        "orbital extras",
-        "SCF extras",
-        "anomalous MP2 writer fields present but not numerically endorsed",
-    ):
-        assert required in labels
-
-
-@pytest.mark.parametrize("version", ["6.0.1", "6.1.1"])
-@pytest.mark.parametrize(
-    "path,bad_value,failed_label",
-    [
-        (("extras", "moenergies", 0, 3), -0.452277, "orbital extras"),
-        (("extras", "mosyms", 0, 3), "B", "orbital extras"),
-        (("extras", "scftargets", 0, 1), 1.2e-5, "SCF extras"),
-        (("extras", "scfvalues", 0, 4, 1), 0.001152, "SCF extras"),
-        (("extras", "atomcharges", "lowdin", 1), 0.111497, "flat CCSD extras"),
-        (("extras", "atomcoords", 0, 1, 2), 0.2487485394940595, "flat CCSD extras"),
-        (("extras", "atomnos", 2), 2, "flat CCSD extras"),
-        (("extras", "ccenergies", 0), -75.013485814, "flat CCSD extras"),
-    ],
-)
-def test_orca_demonstration_comparison_reports_exact_extra_failures(version, path, bad_value, failed_label):
-    demonstration = importlib.import_module("orca_water_ccsd")
-    result = _orca_demonstration_result(version)
-    target = result
-    for key in path[:-1]:
-        target = target[key]
-    target[path[-1]] = bad_value
-
-    failures = [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
-    assert any(failed_label in line for line in failures)
-
-
-@pytest.mark.parametrize("version", ["6.0.1", "6.0.9", "6.1.1", "6.1.99"])
-def test_orca_demonstration_selects_strict_versioned_reference(version):
-    demonstration = importlib.import_module("orca_water_ccsd")
-    comparisons = demonstration.compare_result(_orca_demonstration_result(version))
-
-    assert all(line.startswith("PASS ") for line in comparisons), comparisons
-    assert any("ORCA extras reference version" in line for line in comparisons)
-
-
-@pytest.mark.parametrize(
-    "version",
-    [
-        None,
-        "",
-        "6",
-        "6.1",
-        "6.1.not-a-version",
-        "6.1.1.2",
-        " 6.1.1",
-        "6.1.1 ",
-        "v6.1.1",
-        "6.1.1dev",
-        "6.1.+1",
-        "6.2.0",
-        "not-a-version",
-    ],
-)
-def test_orca_demonstration_rejects_missing_or_unsupported_reference_version(version):
-    demonstration = importlib.import_module("orca_water_ccsd")
-    result = _orca_demonstration_result()
-    result["provenance"]["version"] = version
-
-    failures = [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
-    assert any("ORCA extras reference version" in line for line in failures)
-
-
-def test_demonstration_main_calls_compute_writes_complete_json_and_reports(monkeypatch, tmp_path, capsys):
-    cases = [
-        ("qchem_water_mp2", _qchem_demonstration_result(), "cclib-qchem", None),
-        (
-            "orca_water_ccsd",
-            _orca_demonstration_result(),
-            "cclib-orca",
-            {"ncores": 4, "memory": 2.734375},
-        ),
-    ]
-    for module_name, result, selector, task_config in cases:
-        demonstration = importlib.import_module(module_name)
-        calls = []
-
-        def fake_compute(atomic_input, program, **kwargs):
-            calls.append((atomic_input, program, kwargs))
-            return copy.deepcopy(result)
-
-        monkeypatch.setattr(demonstration.qcengine, "compute", fake_compute)
-        output_path = tmp_path / f"{module_name}.json"
-        assert demonstration.main(output_path=output_path) == 0
-        assert json.loads(output_path.read_text()) == result
-        assert len(calls) == 1
-        atomic_input, actual_selector, kwargs = calls[0]
-        assert actual_selector == selector
-        assert kwargs["raise_error"] is True
-        assert kwargs["return_version"] == 1
-        if task_config is None:
-            assert "task_config" not in kwargs
-        else:
-            assert kwargs["task_config"] == task_config
-        assert atomic_input.specification.driver.value == "energy"
-        assert atomic_input.specification.model.basis == "sto-3g"
-        assert "FAIL " not in capsys.readouterr().out
-
-
-def test_demonstration_serializes_qcschema_v1_models_without_pydantic_v2_mode():
-    demonstration = importlib.import_module("qchem_water_mp2")
-    result = _qchem_demonstration_result()
-
-    class V1Result:
-        def model_dump(self, **kwargs):
-            if "mode" in kwargs:
-                raise TypeError("dict() got an unexpected keyword argument 'mode'")
-            return result
-
-        def json(self):
-            return json.dumps(result)
-
-    assert demonstration._jsonable(V1Result()) == result
-
-
-def test_demonstration_main_returns_nonzero_when_a_comparison_fails(monkeypatch, tmp_path, capsys):
-    demonstration = importlib.import_module("qchem_water_mp2")
-    result = _qchem_demonstration_result()
-    result["return_result"] = 0.0
-    monkeypatch.setattr(demonstration.qcengine, "compute", lambda *args, **kwargs: result)
-
-    assert demonstration.main(output_path=tmp_path / "failed.json") != 0
-    assert "FAIL return_result" in capsys.readouterr().out
-
-
 @uusing("cclib-qchem")
 def test_live_cclib_qchem_water_mp2_energy():
     result = qcng.compute(
@@ -2061,44 +1402,6 @@ def test_live_cclib_qchem_water_mp2_energy():
 
     assert result.success is True
     assert result.return_result == pytest.approx(-75.00228214, abs=1.0e-6)
-
-
-@uusing("cclib-orca")
-def test_live_cclib_orca_water_mp2_energy():
-    ccsd_input = importlib.import_module("orca_water_ccsd").build_atomic_input()
-    input_model = AtomicInput(
-        molecule=ccsd_input.molecule,
-        specification={
-            "driver": "energy",
-            "model": {"method": "mp2", "basis": "sto-3g"},
-            "keywords": {},
-        },
-    )
-    result = qcng.compute(
-        input_model,
-        "cclib-orca",
-        raise_error=True,
-        task_config={"ncores": 4, "memory": 2.734375},
-        return_version=1,
-    )
-
-    assert result.success is True
-    assert float(result.return_result) == pytest.approx(-74.999371925, abs=5.0e-6)
-
-
-@uusing("cclib-orca")
-def test_live_cclib_orca_water_ccsd_demonstration():
-    demonstration = importlib.import_module("orca_water_ccsd")
-    result = qcng.compute(
-        demonstration.build_atomic_input(),
-        "cclib-orca",
-        raise_error=True,
-        task_config={"ncores": 4, "memory": 2.734375},
-        return_version=1,
-        return_dict=True,
-    )
-
-    assert not [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
 
 
 _REAL_CCLIB_FIXTURES = [
@@ -2141,7 +1444,7 @@ def test_real_cclib_fixture_parse_and_conversion(program, relative_path):
 
     api = cclib_harness._load_cclib_api()
     initial_parser = api.ccopen(fixture)
-    assert type(initial_parser) is getattr(api, cclib_harness._PROGRAM_DEFINITIONS[program].parser_name)
+    assert type(initial_parser) is cclib_harness._PROGRAM_DEFINITIONS[program].parser_type()
     try:
         parsed = initial_parser.parse()
     finally:
