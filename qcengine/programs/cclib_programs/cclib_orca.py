@@ -177,6 +177,7 @@ ORCA_DEFINITION = ProgramDefinition(
     parser_type=parser_type,
     normal_termination="ORCA TERMINATED NORMALLY",
     managed_scratch_suffix=None,
+    scratch_environment=None,
     generator=build_input,
     probe=probe,
     output_selector=select_output,

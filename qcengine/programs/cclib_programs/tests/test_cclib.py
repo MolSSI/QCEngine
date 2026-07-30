@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 import subprocess
@@ -770,6 +771,14 @@ def test_orca_execution_selection_uses_captured_stdout_and_preserves_job(monkeyp
     assert kwargs["environment"] == inherited_environment
     assert result.output_text == output
     assert result.stdout == output
+
+
+def test_shared_base_has_no_concrete_program_or_scratch_environment_syntax():
+    source = inspect.getsource(cclib_base).casefold()
+
+    assert "qcscratch" not in source
+    assert "qchem" not in source
+    assert "orca" not in source
 
 
 def test_qchem_managed_scratch_overrides_inherited_qcscratch(monkeypatch, tmp_path):

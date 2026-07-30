@@ -115,6 +115,7 @@ class ProgramDefinition:
     parser_type: Callable[[], Type[Any]]
     normal_termination: str
     managed_scratch_suffix: Optional[str]
+    scratch_environment: Optional[Callable[[Dict[str, str], str], None]]
     generator: Callable[["AtomicInput", TaskConfig, str], Job]
     probe: Callable[[str, Mapping[str, str]], str]
     output_selector: Callable[[Mapping[str, Any]], str]
@@ -250,9 +251,10 @@ def _execute_job(definition: ProgramDefinition, job: Job, config: TaskConfig) ->
             parent=config.scratch_directory,
             suffix=definition.managed_scratch_suffix,
             messy=config.scratch_messy,
-        ) as qcscratch:
-            environment["QCSCRATCH"] = str(qcscratch)
-            return run(str(qcscratch))
+        ) as managed_scratch:
+            if definition.scratch_environment is not None:
+                definition.scratch_environment(environment, str(managed_scratch))
+            return run(str(managed_scratch))
     return run(config.scratch_directory)
 
 

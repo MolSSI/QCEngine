@@ -164,6 +164,12 @@ def preflight(executable: str, environment: Mapping[str, str]) -> Dict[str, str]
     return child_environment
 
 
+def apply_scratch_environment(environment: Dict[str, str], scratch_directory: str) -> None:
+    """Bind Q-Chem's native scratch variable to managed scratch."""
+
+    environment["QCSCRATCH"] = scratch_directory
+
+
 def probe(executable: str, environment: Mapping[str, str]) -> str:
     """Verify Q-Chem identity and return its normalized version."""
 
@@ -203,6 +209,7 @@ QCHEM_DEFINITION = ProgramDefinition(
     parser_type=parser_type,
     normal_termination="Thank you very much for using Q-Chem",
     managed_scratch_suffix="_cclib_qchem_scratch",
+    scratch_environment=apply_scratch_environment,
     generator=build_input,
     probe=probe,
     output_selector=select_output,
