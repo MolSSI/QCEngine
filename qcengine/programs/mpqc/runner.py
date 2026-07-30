@@ -3,16 +3,21 @@
 import json
 import os
 import pprint
-from typing import Any, ClassVar, Dict, Optional
+from decimal import Decimal
+from typing import Any, ClassVar, Dict, Optional, Tuple
 
-from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet
+from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
 
 from ...config import TaskConfig
 from ...exceptions import InputError, UnknownError
 from ...util import create_mpi_invocation, execute
 from ..model import ProgramHarness
+from ..qcvar_identities_resources import build_atomicproperties, build_out
+from ..util import error_stamp
+from .errors import mpqc_exception_for
 from .germinate import EXCITATION_ENERGY, muster_modelchem
+from .harvester import harvest
 from .keywords import deep_merge, extract_reserved, format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
@@ -184,7 +189,93 @@ class MPQCHarness(ProgramHarness):
         return self.version_cache[which_prog]
 
     def compute(self, input_model: AtomicInput, config: TaskConfig) -> AtomicResult:
-        raise NotImplementedError("The MPQC harness cannot yet run calculations.")
+        self.found(raise_error=True)
+
+        # build_input raises InputError for bad methods, derivative drivers,
+        # BasisSet objects, ghost atoms, and dangling density-fitting bases,
+        # all before a subprocess starts.
+        job_inputs = self.build_input(input_model, config)
+        success, dexe = self.execute(job_inputs)
+
+        stdin = job_inputs["infiles"]["mpqc.json"]
+        if not success:
+            exc_class, message = mpqc_exception_for(dexe["stderr"])
+            raise exc_class(error_stamp(stdin, dexe["stdout"], dexe["stderr"]) + "\n" + message)
+
+        dexe["outfiles"]["stdout"] = dexe["stdout"]
+        dexe["outfiles"]["stderr"] = dexe["stderr"]
+        dexe["outfiles"]["input"] = stdin
+        return self.parse_output(dexe["outfiles"], input_model)
+
+    def execute(
+        self, inputs: Dict[str, Any], *, extra_outfiles=None, extra_commands=None, scratch_name=None, timeout=None
+    ) -> Tuple[bool, Dict]:
+        # No -o flag, so MPQC writes everything to stdout and no auxiliary
+        # output files need collecting.
+        success, dexe = execute(
+            inputs["command"],
+            inputs["infiles"],
+            [],
+            environment=inputs["environment"],
+            scratch_messy=inputs["scratch_messy"],
+            scratch_directory=inputs["scratch_directory"],
+            timeout=timeout,
+        )
+        return success, dexe
+
+    def parse_output(self, outfiles: Dict[str, str], input_model: AtomicInput) -> AtomicResult:
+        stdout = outfiles.pop("stdout")
+        stderr = outfiles.pop("stderr")
+
+        method = input_model.specification.model.method.lower()
+        if method.startswith("mpqc-"):
+            method = method[len("mpqc-") :]
+
+        try:
+            qcvars, property_type, value = harvest(input_model.molecule, method, stdout)
+        except UnknownError:
+            raise
+        except Exception:
+            raise UnknownError(error_stamp(outfiles.get("input", ""), stdout, stderr))
+
+        if property_type == "Energy":
+            retres = value
+        else:
+            # Excitation energies: return root 0 with the full array preserved in extras["qcvars"].
+            retres = value[0] if value else None
+            if retres is None:
+                raise UnknownError(error_stamp(outfiles.get("input", ""), stdout, stderr))
+
+        build_out(qcvars)
+        atprop = build_atomicproperties(qcvars)
+
+        output_data = {
+            "schema_version": 2,
+            "input_data": input_model,
+            # MPQC prints no machine-readable output geometry and sort_input is
+            # pinned False, so the input molecule passes through unchanged.
+            "molecule": input_model.molecule,
+            "extras": {},
+            "native_files": {},
+            "properties": atprop,
+            # get_version shells out to `mpqc -v`, so it needs the binary.
+            # parse_output is also exercised on captured stdout with no binary
+            # present, where the version is genuinely unknown rather than "".
+            "provenance": Provenance(
+                creator="MPQC", version=self.get_version() if self.found() else "", routine="mpqc"
+            ).model_dump(),
+            "return_result": retres,
+            "stderr": stderr,
+            "stdout": stdout,
+            "success": True,
+        }
+
+        # Decimal -> str preserves precision through serialization.
+        output_data["extras"]["qcvars"] = {
+            k.upper(): (str(v) if isinstance(v, Decimal) else v) for k, v in qcvars.items()
+        }
+
+        return AtomicResult(**output_data)
 
     def build_input(
         self, input_model: AtomicInput, config: TaskConfig, template: Optional[str] = None

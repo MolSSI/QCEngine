@@ -14,7 +14,7 @@ from qcengine.programs.mpqc.germinate import muster_modelchem
 from qcengine.programs.mpqc.harvester import extract_output_keyval, harvest, harvest_property_value, harvest_qcvars
 from qcengine.programs.mpqc.keywords import deep_merge, extract_reserved, format_keywords
 from qcengine.programs.mpqc.runner import _build_environment, _madness_threads
-from qcengine.testing import uusing
+from qcengine.testing import checkver_and_convert, from_v2, schema_versions, using, uusing
 
 
 def test_mpqc_registration():
@@ -655,3 +655,124 @@ def test_mpqc_exception_for_real_stderr():
     _, message = mpqc_exception_for(INPUT_ERROR_STDERR)
     assert "mpqcbacktrace" not in message
     assert "not registered" in message
+
+
+# geometry from MPQC4 tests/validation/reference/inputs/h2o.xyz, so the
+# reference energies below are MPQC's own validation values
+@pytest.fixture
+def h2o_data():
+    return """
+        O   -0.702196054  -0.056060256   0.009942262
+        H   -1.022193224   0.846775782  -0.011488714
+        H    0.257521062   0.042121496   0.005218999
+    """
+
+
+@pytest.mark.parametrize(
+    "stdout, method, ref_result, ref_qcvar",
+    [
+        pytest.param(MP2_STDOUT, "mp2", -76.111754789676354, "MP2 TOTAL ENERGY", id="energy"),
+        # return_result is root 0 with the full array preserved in extras["qcvars"]
+        pytest.param(
+            EXCITATION_STDOUT, "eom-ccsd", 0.30676532737163403, "MPQC EXCITATION ENERGIES", id="excitation"
+        ),
+    ],
+)
+def test_parse_output(stdout, method, ref_result, ref_qcvar):
+    inp = _atomic_input(method=method)
+    ret = qcng.get_program("mpqc", check=False).parse_output({"stdout": stdout, "stderr": "", "input": "{}"}, inp)
+
+    assert ret.success is True
+    assert isinstance(ret.return_result, float)
+    assert ret.return_result == pytest.approx(ref_result)
+    assert ret.provenance.creator == "MPQC"
+    assert ret.molecule == inp.molecule  # passed through, never reoriented
+    assert ref_qcvar in ret.extras["qcvars"]
+    # populated only because harvest uses the "N ATOMS" qcvar spelling
+    assert ret.properties.calcinfo_natom == 2
+    # return_energy is populated for Energy and None for ExcitationEnergy
+    assert ret.properties.return_energy == (pytest.approx(ref_result) if method == "mp2" else None)
+
+
+def _compute_input(models, tnm, molecule, method, driver="energy", keywords=None):
+    """AtomicInput in whichever shape the schema_versions param wants. v2
+    requires the nested `specification`; the flat form is v1-only."""
+    model = {"method": method, "basis": "6-31G"}
+    if from_v2(tnm):
+        return models.AtomicInput(
+            molecule=molecule,
+            specification=models.AtomicSpecification(driver=driver, model=model, keywords=keywords or {}),
+        )
+    return models.AtomicInput(molecule=molecule, driver=driver, model=model, keywords=keywords or {})
+
+
+# MPQC's own validation values from tests/validation/reference/, computed on
+# the same h2o.xyz geometry the h2o_data fixture carries. The harness tree is
+# not byte-identical to those inputs -- the references use `type: RHF` where
+# the harness emits `SD`, and the CCSD one adds tile-size keywords -- so each
+# value lands within ~1e-9 rather than exactly.
+@pytest.mark.parametrize(
+    "method, ref_energy",
+    [
+        # h2o-rhf-631g.out
+        pytest.param("hf", -75.983550302402591, marks=using("mpqc")),
+        # h2o-mp2-631g.out
+        pytest.param("mp2", -76.111754787252565, marks=using("mpqc")),
+        # h2o-ccsd-631g.out
+        pytest.param("ccsd", -76.118426834971189, marks=using("mpqc")),
+    ],
+)
+def test_mpqc_energy(method, ref_energy, h2o_data, schema_versions, request):
+    models, retver, _ = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+    resi = _compute_input(models, request.node.name, h2o, method)
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    res = qcng.compute(resi, "mpqc", raise_error=True, return_version=retver)
+    res = checkver_and_convert(res, request.node.name, "post")
+
+    assert res.success is True
+    assert isinstance(res.return_result, float)
+    assert res.return_result == pytest.approx(ref_energy, rel=1.0e-8)
+    assert res.return_result == res.properties.return_energy
+    assert "DEPRECATED INPUT" not in res.stdout
+
+
+@uusing("mpqc")
+def test_mpqc_excitation_energy(h2o_data, schema_versions, request):
+    """EOM-CCSD roots land in extras["qcvars"]; return_result is root 0."""
+    models, retver, _ = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+    resi = _compute_input(models, request.node.name, h2o, "eom-ccsd", keywords={"property__n_roots": 4})
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    res = qcng.compute(resi, "mpqc", raise_error=True, return_version=retver)
+    res = checkver_and_convert(res, request.node.name, "post")
+
+    roots = res.extras["qcvars"]["MPQC EXCITATION ENERGIES"]
+    assert len(roots) == 4
+    # MPQC's own validation value from h2o-eom-ccsd-direct-631g.out
+    assert roots[0] == pytest.approx(0.30676532821572683, rel=1.0e-8)
+    assert res.return_result == pytest.approx(roots[0])
+
+
+@uusing("mpqc")
+@pytest.mark.parametrize(
+    "method, driver, match",
+    [
+        pytest.param("bad", "energy", "not available", id="bad-method"),
+        pytest.param("hf", "gradient", "gradient not implemented", id="gradient"),
+        pytest.param("hf", "hessian", "hessian not implemented", id="hessian"),
+        pytest.param("ccsd-so", "energy", "not available", id="spin-orbital-cc"),
+    ],
+)
+def test_mpqc_input_errors(method, driver, match, h2o_data, schema_versions, request):
+    """All four raise from build_input, before any subprocess starts. The mark is
+    still needed because compute() calls found(raise_error=True) first."""
+    models, retver, _ = schema_versions
+    h2o = models.Molecule.from_data(h2o_data)
+    resi = _compute_input(models, request.node.name, h2o, method, driver=driver)
+
+    resi = checkver_and_convert(resi, request.node.name, "pre")
+    with pytest.raises(InputError, match=match):
+        qcng.compute(resi, "mpqc", raise_error=True, return_version=retver)
