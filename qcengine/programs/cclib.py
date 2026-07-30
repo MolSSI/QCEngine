@@ -672,7 +672,11 @@ def _parse_and_convert(
                 )
 
             try:
-                expected_parser = definition.parser_type()
+                try:
+                    expected_parser = definition.parser_type()
+                except Exception as exc:
+                    _raise_conversion_failure(definition, execution, "parser type loading", exc)
+
                 if type(parser) is not expected_parser:
                     _raise_conversion_failure(
                         definition,

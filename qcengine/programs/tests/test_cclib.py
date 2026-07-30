@@ -1130,6 +1130,25 @@ def test_parser_auto_detection_failure_is_bounded_stage_aware_and_chained(monkey
     assert exc_info.value.__cause__ is not None
 
 
+def test_parser_type_loading_failure_is_bounded_stage_aware_and_chained(monkeypatch):
+    api, definition, execution, _ = _fake_conversion_case()
+    execution = replace(execution, output_text="\n".join(f"line {index}" for index in range(1000)))
+    original = ImportError("cclib parser module is unavailable")
+
+    def fail_parser_type_loading():
+        raise original
+
+    definition = replace(definition, parser_type=fail_parser_type_loading)
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+
+    with pytest.raises(UnknownError, match="parser type loading") as exc_info:
+        cclib_harness._parse_and_convert(definition, execution, _atomic_input())
+
+    assert "line 0" not in str(exc_info.value)
+    assert "line 999" in str(exc_info.value)
+    assert exc_info.value.__cause__ is original
+
+
 def test_parser_class_mismatch_is_rejected(monkeypatch):
     error = _assert_conversion_failure(monkeypatch, "parser identity", mismatch=True)
     assert "QChem" in str(error)
