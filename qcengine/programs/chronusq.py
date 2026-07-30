@@ -10,6 +10,7 @@ from qcelemental.util import safe_version, which
 from ..exceptions import InputError
 from ..util import execute
 from .model import ProgramHarness
+from .util import error_stamp
 
 
 class ChronusQHarness(ProgramHarness):
@@ -98,6 +99,12 @@ job = SCF
 [MISC]
 memtype = os"""
 
+        kwds = {
+            "qm__reference": "real rhf", # atomicinput.specification.model.method.lower(),
+            "misc__memtype": "os",
+            "qm__job": "SCF",
+        }
+
         # Handle conversion from schema (flat key/value) keywords into local format
         #optcmd = format_keywords(opts)
 
@@ -122,6 +129,16 @@ memtype = os"""
             scratch_messy=True,
             scratch_directory=inputs["scratch_directory"],
         )
+
+        outtext = dexe["outfiles"]["test.out"]
+
+        lines = outtext.splitlines()
+        while lines and not lines[-1].strip():
+            lines.pop()
+        if lines and lines[-1].strip().startswith("Job terminated:"):
+            reason = next((line.strip() for line in reversed(lines[:-1]) if line.strip()), "Job terminated")
+            raise InputError(error_stamp(inputs["infiles"]["test.inp"], dexe["stdout"], dexe["stderr"]) + "\n" + f"ChronusQ terminated: {reason}")
+
         return success, dexe
 
     def parse_output(
