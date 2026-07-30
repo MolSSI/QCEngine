@@ -882,6 +882,48 @@ def test_orca_input_preserves_simple_order_sorts_blocks_and_appends_output_body(
 
 
 @pytest.mark.parametrize(
+    "body",
+    [
+        "end\n* xyz 9 1\nH 0 0 0\n*",
+        "  EnD trailing text  ",
+        "\tEND # comment",
+        "%pal\nnprocs 99\nend",
+        "  %MAXCORE 9999 # comment",
+        "%coords\nctyp xyz",
+        " %scf\nMaxIter 999",
+        "$new_job",
+        "  $NEW_JOB # comment",
+        " * xyz 0 1",
+        "  * # coordinate delimiter",
+    ],
+)
+def test_orca_input_rejects_block_body_outer_syntax_before_execution(body):
+    with pytest.raises(InputError, match="block body|outer syntax"):
+        cclib_harness._build_orca_input(
+            _atomic_input(keywords={"blocks": {"output": body}}), _task_config(), "/opt/orca"
+        )
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "MaxIter 200 # weekend schedule",
+        "Print[ P_Basis ] 2 # percentage %pal is only text here",
+        "SomeValue prefix_end suffix",
+        "Label job$new_job_backup",
+        "NewGTO H \"def2-TZVP\" end",
+    ],
+)
+def test_orca_input_allows_reserved_substrings_that_are_not_first_tokens(body):
+    job = cclib_harness._build_orca_input(
+        _atomic_input(keywords={"blocks": {"scf": body}}), _task_config(), "/opt/orca"
+    )
+
+    assert body in job.input_text
+    assert job.input_text.index(body) < job.input_text.index("%pal")
+
+
+@pytest.mark.parametrize(
     "keywords",
     [
         {"unknown": []},
@@ -1254,6 +1296,86 @@ def _assert_conversion_failure(monkeypatch, match, **case):
     return exc_info.value
 
 
+def _track_parser_temporary_file(monkeypatch):
+    real_named_temporary_file = cclib_harness.tempfile.NamedTemporaryFile
+    state = {}
+
+    class TrackedTemporaryFile:
+        def __init__(self, temporary):
+            self._temporary = temporary
+            self.name = temporary.name
+
+        @property
+        def closed(self):
+            return self._temporary.closed
+
+        def write(self, value):
+            return self._temporary.write(value)
+
+        def flush(self):
+            return self._temporary.flush()
+
+        def close(self):
+            return self._temporary.close()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            self.close()
+
+    def tracked_named_temporary_file(*args, **kwargs):
+        state["kwargs"] = dict(kwargs)
+        kwargs["delete"] = False
+        temporary = TrackedTemporaryFile(real_named_temporary_file(*args, **kwargs))
+        state["temporary"] = temporary
+        state["path"] = temporary.name
+        return temporary
+
+    monkeypatch.setattr(cclib_harness.tempfile, "NamedTemporaryFile", tracked_named_temporary_file)
+    return state
+
+
+def test_parser_temporary_file_is_closed_before_reopen_and_deleted_after_success(monkeypatch):
+    api, definition, execution, _ = _fake_conversion_case()
+    state = _track_parser_temporary_file(monkeypatch)
+    original_ccopen = api.ccopen
+
+    def assert_closed_before_reopen(source):
+        assert state["temporary"].closed
+        assert source.name == state["path"]
+        return original_ccopen(source)
+
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: replace(api, ccread=assert_closed_before_reopen))
+
+    result = cclib_harness._parse_and_convert(definition, execution, _atomic_input())
+
+    assert result.success is True
+    assert state["kwargs"]["suffix"] == ".out"
+    assert state["kwargs"]["delete"] is False
+    assert not os.path.exists(state["path"])
+
+
+@pytest.mark.parametrize(
+    "case,match",
+    [
+        ({"mismatch": True}, "parser identity"),
+        ({"parser_failure": ValueError("parser exploded")}, "parser parse"),
+        ({"writer_output": RuntimeError("writer exploded")}, "QCSchema writer"),
+    ],
+)
+def test_parser_temporary_file_is_deleted_after_parse_or_conversion_failure(monkeypatch, case, match):
+    api, definition, execution, _ = _fake_conversion_case(**case)
+    state = _track_parser_temporary_file(monkeypatch)
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+
+    with pytest.raises(UnknownError, match=match):
+        cclib_harness._parse_and_convert(definition, execution, _atomic_input())
+
+    assert state["temporary"].closed
+    assert not os.path.exists(state["path"])
+
+
 def test_parser_auto_detection_failure_is_bounded_stage_aware_and_chained(monkeypatch):
     api, definition, execution, _ = _fake_conversion_case(detected=False)
     execution = replace(execution, output_text="\n".join(f"line {index}" for index in range(1000)))
@@ -1380,6 +1502,37 @@ def test_orca_conversion_preserves_writer_provenance_and_single_dispersion_value
     assert result.extras["dispersionenergies"] == [-0.001]
     assert list(result.extras).count("dispersionenergies") == 1
     assert result.extras["cclib_harness"]["parser"] == "ORCA"
+
+
+def test_basis_identity_comparison_trims_and_casefolds_without_relabeling(monkeypatch):
+    requested_basis = "  sTo-3G  "
+    parsed_basis = "\tSTo-3g "
+    output = _fake_writer_output(basis=parsed_basis)
+    api, definition, execution, _ = _fake_conversion_case(output)
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+    original_validate = cclib_harness._validate_v1_atomic_result
+    validated_output = {}
+
+    def capture_validated_output(value):
+        validated_output.update(value)
+        return original_validate(value)
+
+    monkeypatch.setattr(cclib_harness, "_validate_v1_atomic_result", capture_validated_output)
+    input_model = _atomic_input(basis=requested_basis)
+
+    result = cclib_harness._parse_and_convert(definition, execution, input_model)
+
+    assert validated_output["model"]["basis"] == parsed_basis
+    assert result.input_data.specification.model.basis == requested_basis
+
+
+def test_basis_identity_real_mismatch_after_trimming_is_rejected(monkeypatch):
+    output = _fake_writer_output(basis="  6-31G  ")
+    api, definition, execution, _ = _fake_conversion_case(output)
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+
+    with pytest.raises(UnknownError, match="basis mismatch"):
+        cclib_harness._parse_and_convert(definition, execution, _atomic_input(basis="  STO-3G  "))
 
 
 @pytest.mark.parametrize(

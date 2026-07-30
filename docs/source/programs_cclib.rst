@@ -80,9 +80,11 @@ ORCA keywords have exactly two optional top-level entries, ``simple`` and
    }
 
 ``simple`` must be a list of non-empty, single-line strings.  ``blocks`` must
-map valid ORCA block names to string bodies.  User output lines follow the
-harness defaults, and other blocks are emitted deterministically.  The
-case-insensitive block names ``pal`` and ``maxcore`` are reserved because core
+map valid ORCA block names to string bodies.  Bodies are limited to block-local
+lines: ``end`` and ``$new_job`` cannot be first tokens, and ``%`` or ``*`` cannot
+be the first non-whitespace character.  User output lines follow the harness
+defaults, and other blocks are emitted deterministically.  The case-insensitive
+block names ``pal`` and ``maxcore`` are reserved because core
 and per-process memory values come from ``TaskConfig``.  The ``coords`` block
 and all other coordinate injection are also reserved; geometry comes only from
 the QCSchema molecule.  Unknown top-level keyword entries are rejected.

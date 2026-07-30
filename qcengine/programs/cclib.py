@@ -283,6 +283,20 @@ _ORCA_OUTPUT_DEFAULTS = [
 ]
 
 
+def _validate_orca_block_body(name: str, body: str) -> None:
+    """Allow block-local value lines only, never syntax that can escape the generated block."""
+
+    for line_number, line in enumerate(body.splitlines(), start=1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        first_token = stripped.split(None, 1)[0].casefold()
+        if first_token in {"end", "$new_job"} or stripped.startswith(("%", "*")):
+            raise InputError(
+                f"ORCA block {name!r} body contains reserved outer syntax on line {line_number}: {line!r}"
+            )
+
+
 def _build_orca_input(input_model: "AtomicInput", config: TaskConfig, executable: str) -> _Job:
     driver, method, basis = _validate_input_subset(input_model)
     driver_keyword = {"energy": None, "gradient": "engrad", "hessian": "freq"}[driver.lower()]
@@ -311,6 +325,7 @@ def _build_orca_input(input_model: "AtomicInput", config: TaskConfig, executable
             raise InputError(f"ORCA block name is invalid: {name!r}")
         if not isinstance(body, str):
             raise InputError(f"ORCA block {name!r} body must be a string")
+        _validate_orca_block_body(name, body)
         normalized_name = name.lower()
         if normalized_name in {"pal", "maxcore"}:
             raise InputError(f"ORCA block {name!r} is reserved for TaskConfig resources")
@@ -695,13 +710,23 @@ def _parse_and_convert(
         _raise_conversion_failure(definition, execution, "parser setup", exc)
 
     parser = None
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".out", encoding="utf-8") as temporary:
-        temporary.write(execution.output_text)
-        temporary.flush()
-        # tempfile's wrapper is seekable but not itself an iterator, while
-        # cclib's FileWrapper requires both. Reopen its named file as a normal
-        # text stream so auto-detection sees the exact complete output.
-        with open(temporary.name, encoding="utf-8") as source:
+    temporary_path: Optional[str] = None
+    try:
+        # cclib's FileWrapper requires an iterable stream. Create the named
+        # output securely, finish writing and close it, then reopen read-only
+        # so the lifecycle is portable to Windows as well as POSIX.
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".out", encoding="utf-8", delete=False
+        ) as temporary:
+            temporary_path = temporary.name
+            temporary.write(execution.output_text)
+
+        try:
+            source = open(temporary_path, encoding="utf-8")
+        except Exception as exc:
+            _raise_conversion_failure(definition, execution, "parser auto-detection", exc)
+
+        with source:
             try:
                 parser = api.ccopen(source)
             except Exception as exc:
@@ -737,6 +762,12 @@ def _parse_and_convert(
                         parser_input.close()
                     except Exception:
                         pass
+    finally:
+        if temporary_path is not None:
+            try:
+                os.unlink(temporary_path)
+            except FileNotFoundError:
+                pass
 
     metadata = getattr(parsed, "metadata", None)
     if not isinstance(metadata, Mapping) or metadata.get("success") is not True:
@@ -810,7 +841,7 @@ def _parse_and_convert(
             _METHOD_ALIASES.get(requested_method.casefold(), requested_method.casefold()),
             _METHOD_ALIASES.get(str(parsed_method).casefold(), str(parsed_method).casefold()),
         ),
-        ("basis", requested_basis.casefold(), str(parsed_basis).casefold()),
+        ("basis", requested_basis.strip().casefold(), str(parsed_basis).strip().casefold()),
     )
     for field, requested, parsed_value in identities:
         if requested != parsed_value:
