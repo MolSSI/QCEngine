@@ -1273,6 +1273,39 @@ def test_incomplete_writer_fields_are_rejected_before_validation(monkeypatch):
     _assert_conversion_failure(monkeypatch, "writer output", writer_output=output)
 
 
+def test_writer_cclib_harness_extra_collision_is_rejected_without_overwrite(monkeypatch):
+    output = _fake_writer_output()
+    existing = {"writer_owned": "must survive"}
+    output["extras"]["cclib_harness"] = existing
+    api, definition, execution, _ = _fake_conversion_case(output)
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+
+    with pytest.raises(UnknownError, match="writer augmentation") as exc_info:
+        cclib_harness._parse_and_convert(definition, execution, _atomic_input())
+
+    assert output["extras"]["cclib_harness"] is existing
+    assert output["extras"]["cclib_harness"] == {"writer_owned": "must survive"}
+    assert isinstance(exc_info.value.__cause__, ValueError)
+    assert "cclib_harness" in str(exc_info.value.__cause__)
+    assert definition.selector in str(exc_info.value)
+
+
+def test_non_mapping_writer_extras_is_bounded_chained_augmentation_error(monkeypatch):
+    output = _fake_writer_output()
+    output["extras"] = 7
+    api, definition, execution, _ = _fake_conversion_case(output)
+    execution = replace(execution, output_text="\n".join(f"writer line {index}" for index in range(100)))
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+
+    with pytest.raises(UnknownError, match="writer augmentation") as exc_info:
+        cclib_harness._parse_and_convert(definition, execution, _atomic_input())
+
+    assert isinstance(exc_info.value.__cause__, TypeError)
+    assert "writer line 0" not in str(exc_info.value)
+    assert "writer line 99" in str(exc_info.value)
+    assert definition.selector in str(exc_info.value)
+
+
 def test_qcschema_v1_validation_failure_is_unknown_and_chained(monkeypatch):
     output = _fake_writer_output()
     output["return_result"] = "not-an-energy"

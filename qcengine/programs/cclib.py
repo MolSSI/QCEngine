@@ -773,22 +773,30 @@ def _parse_and_convert(
             ValueError(f"writer output is missing required fields: {sorted(missing_fields)!r}"),
         )
 
-    output = dict(writer_output)
-    extras = dict(output.get("extras") or {})
-    extras["cclib_harness"] = {
-        "selector": definition.selector,
-        "cclib_version": api.version,
-        "parser": definition.parser_name,
-        "executable": execution.executable,
-    }
-    output["extras"] = extras
-    output["stdout"] = execution.output_text
-    output["stderr"] = execution.stderr or None
-    native_protocol = input_model.specification.protocols.native_files
-    native_protocol_value = native_protocol.value if hasattr(native_protocol, "value") else str(native_protocol)
-    output["protocols"] = {"native_files": native_protocol_value, "stdout": True}
-    native_files = _native_files(input_model, execution)
-    output["native_files"] = native_files
+    try:
+        output = dict(writer_output)
+        writer_extras = output.get("extras")
+        if not isinstance(writer_extras, Mapping):
+            raise TypeError("QCSchema writer extras must be a mapping")
+        extras = dict(writer_extras)
+        if "cclib_harness" in extras:
+            raise ValueError("QCSchema writer extras already contain reserved key 'cclib_harness'")
+        extras["cclib_harness"] = {
+            "selector": definition.selector,
+            "cclib_version": api.version,
+            "parser": definition.parser_name,
+            "executable": execution.executable,
+        }
+        output["extras"] = extras
+        output["stdout"] = execution.output_text
+        output["stderr"] = execution.stderr or None
+        native_protocol = input_model.specification.protocols.native_files
+        native_protocol_value = native_protocol.value if hasattr(native_protocol, "value") else str(native_protocol)
+        output["protocols"] = {"native_files": native_protocol_value, "stdout": True}
+        native_files = _native_files(input_model, execution)
+        output["native_files"] = native_files
+    except Exception as exc:
+        _raise_conversion_failure(definition, execution, "QCSchema writer augmentation", exc)
 
     requested_driver, requested_method, requested_basis = _validate_input_subset(input_model)
     writer_model = output.get("model") if isinstance(output.get("model"), Mapping) else {}
