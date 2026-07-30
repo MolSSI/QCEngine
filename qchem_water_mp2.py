@@ -22,6 +22,7 @@ _GEOMETRY = [
     -0.9007143324538345,
 ]
 _MO_ENERGIES = [-20.244, -1.251, -0.603, -0.445, -0.388, 0.571, 0.709]
+_SCF_VALUES = [[[0.398], [0.0668], [0.00822], [0.0016], [2.83e-5], [8.23e-6]]]
 
 
 def build_atomic_input() -> AtomicInput:
@@ -67,6 +68,24 @@ def _close_sequence(actual: Any, expected: List[float], tolerance: float) -> boo
         )
     except TypeError:
         return False
+
+
+def _matches(actual: Any, expected: Any, tolerance: float) -> bool:
+    if isinstance(expected, dict):
+        return (
+            isinstance(actual, dict)
+            and set(actual) == set(expected)
+            and all(_matches(actual[key], value, tolerance) for key, value in expected.items())
+        )
+    if isinstance(expected, (list, tuple)):
+        return (
+            isinstance(actual, (list, tuple))
+            and len(actual) == len(expected)
+            and all(_matches(value, reference, tolerance) for value, reference in zip(actual, expected))
+        )
+    if isinstance(expected, float):
+        return _close(actual, expected, tolerance)
+    return actual == expected
 
 
 def _line(label: str, passed: bool) -> str:
@@ -170,16 +189,7 @@ def compare_result(result: Any) -> List[str]:
             and _close_sequence(moenergies[0], _MO_ENERGIES, 1.0e-3),
         )
     )
-    scfvalues = _get(extras, "scfvalues")
-    checks.append(
-        (
-            "six SCF rows",
-            isinstance(scfvalues, (list, tuple))
-            and len(scfvalues) == 1
-            and isinstance(scfvalues[0], (list, tuple))
-            and len(scfvalues[0]) == 6,
-        )
-    )
+    checks.append(("six SCF rows", _matches(_get(extras, "scfvalues"), _SCF_VALUES, 1.0e-6)))
     return [_line(label, passed) for label, passed in checks]
 
 

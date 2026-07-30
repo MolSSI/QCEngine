@@ -1606,17 +1606,48 @@ def _orca_demonstration_result():
         },
         "return_result": -75.013487814,
         "extras": {
-            "atomcharges": {"mulliken": [-0.329397, 0.164693, 0.164703]},
-            "atomcoords": [[geometry[index : index + 3] for index in range(0, 9, 3)]],
+            "atomcharges": {
+                "mulliken": [-0.329397, 0.164693, 0.164703],
+                "lowdin": [-0.222995, 0.111495, 0.1115],
+            },
+            "atomcoords": [
+                [
+                    [3.372998615785793, 2.385631833543539, 0.9675114298521326],
+                    [5.004442642767507, 2.0275419610336605, 0.2487465394940595],
+                    [2.235863479272416, 2.375038028889592, -0.4513327389449575],
+                ]
+            ],
             "atomnos": [8, 1, 1],
             "ccenergies": [-75.013487814],
             "homos": [4],
-            "moenergies": [[-20.242269, -1.265784, -0.615347, -0.452279, -0.390877, 0.60058, 0.736585]],
+            "moenergies": [
+                [
+                    -20.242268999999997,
+                    -1.2657839999999998,
+                    -0.615347,
+                    -0.452279,
+                    -0.39087700000000003,
+                    0.60058,
+                    0.736585,
+                ]
+            ],
             "mosyms": [["A", "A", "A", "A", "A", "A", "A"]],
             "mpenergies": [[-0.035800372]],
             "scfenergies": [-74.96357424008319],
             "scftargets": [[1.0e-6, 1.0e-5, 1.0e-6]],
-            "scfvalues": [[[0.0, 0.0263, 0.0744]] for _ in range(9)],
+            "scfvalues": [
+                [
+                    [0.0, 0.0263, 0.0744],
+                    [-0.0179, 0.0225, 0.0624],
+                    [-0.0127, 0.0157, 0.0433],
+                    [-0.0087, 0.0367, 0.101],
+                    [-0.0199, 0.00115, 0.00458],
+                    [-8.88e-6, 0.0006, 0.00221],
+                    [-1.69e-6, 0.000344, 0.00117],
+                    [-2.64e-7, 2.42e-5, 6.93e-5],
+                    [2.6405e-7, 6.9252e-5, 2.4156e-5],
+                ]
+            ],
             "cclib_harness": {
                 "selector": "cclib-orca",
                 "cclib_version": "1.9.dev",
@@ -1670,7 +1701,11 @@ def test_qchem_demonstration_comparison_covers_all_acceptance_criteria():
         (("provenance", "routine"), "other.writer", "provenance"),
         (("extras", "atomcharges", "mulliken"), [0.0, 0.0, 0.0], "Mulliken charges"),
         (("extras", "moenergies"), [[0.0] * 7], "seven MO energies"),
-        (("extras", "scfvalues"), [[[0.0]]], "six SCF rows"),
+        (
+            ("extras", "scfvalues"),
+            [[[0.398], [0.0668], [0.00822], [0.0016], [3.03e-5], [8.23e-6]]],
+            "six SCF rows",
+        ),
     ],
 )
 def test_qchem_demonstration_comparison_reports_failures(path, bad_value, failed_label):
@@ -1710,6 +1745,31 @@ def test_orca_demonstration_comparison_checks_ccsd_scf_provenance_extras_and_ano
         "anomalous MP2 writer fields present but not numerically endorsed",
     ):
         assert required in labels
+
+
+@pytest.mark.parametrize(
+    "path,bad_value,failed_label",
+    [
+        (("extras", "moenergies", 0, 3), -0.452277, "orbital extras"),
+        (("extras", "mosyms", 0, 3), "B", "orbital extras"),
+        (("extras", "scftargets", 0, 1), 1.2e-5, "SCF extras"),
+        (("extras", "scfvalues", 0, 4, 1), 0.001152, "SCF extras"),
+        (("extras", "atomcharges", "lowdin", 1), 0.111497, "flat CCSD extras"),
+        (("extras", "atomcoords", 0, 1, 2), 0.2487485394940595, "flat CCSD extras"),
+        (("extras", "atomnos", 2), 2, "flat CCSD extras"),
+        (("extras", "ccenergies", 0), -75.013485814, "flat CCSD extras"),
+    ],
+)
+def test_orca_demonstration_comparison_reports_exact_extra_failures(path, bad_value, failed_label):
+    demonstration = importlib.import_module("orca_water_ccsd")
+    result = _orca_demonstration_result()
+    target = result
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = bad_value
+
+    failures = [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
+    assert any(failed_label in line for line in failures)
 
 
 def test_demonstration_main_calls_compute_writes_complete_json_and_reports(monkeypatch, tmp_path, capsys):

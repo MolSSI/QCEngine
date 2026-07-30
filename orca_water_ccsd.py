@@ -22,7 +22,47 @@ _GEOMETRY_BOHR = [
     2.3750380300934055,
     -0.45133273917372035,
 ]
-_ORBITAL_ENERGIES = [-20.242269, -1.265784, -0.615347, -0.452279, -0.390877, 0.60058, 0.736585]
+_ATOMCHARGES = {
+    "mulliken": [-0.329397, 0.164693, 0.164703],
+    "lowdin": [-0.222995, 0.111495, 0.1115],
+}
+_ATOMCOORDS = [
+    [
+        [3.372998615785793, 2.385631833543539, 0.9675114298521326],
+        [5.004442642767507, 2.0275419610336605, 0.2487465394940595],
+        [2.235863479272416, 2.375038028889592, -0.4513327389449575],
+    ]
+]
+_ATOMNOS = [8, 1, 1]
+_CCENERGIES = [-75.013487814]
+_HOMOS = [4]
+_ORBITAL_ENERGIES = [
+    [
+        -20.242268999999997,
+        -1.2657839999999998,
+        -0.615347,
+        -0.452279,
+        -0.39087700000000003,
+        0.60058,
+        0.736585,
+    ]
+]
+_ORBITAL_SYMMETRIES = [["A", "A", "A", "A", "A", "A", "A"]]
+_SCFENERGIES = [-74.96357424008319]
+_SCFTARGETS = [[1.0e-6, 1.0e-5, 1.0e-6]]
+_SCFVALUES = [
+    [
+        [0.0, 0.0263, 0.0744],
+        [-0.0179, 0.0225, 0.0624],
+        [-0.0127, 0.0157, 0.0433],
+        [-0.0087, 0.0367, 0.101],
+        [-0.0199, 0.00115, 0.00458],
+        [-8.88e-6, 0.0006, 0.00221],
+        [-1.69e-6, 0.000344, 0.00117],
+        [-2.64e-7, 2.42e-5, 6.93e-5],
+        [2.6405e-7, 6.9252e-5, 2.4156e-5],
+    ]
+]
 _TASK_CONFIG = {"ncores": 4, "memory": 2.734375}
 
 
@@ -69,6 +109,24 @@ def _close_sequence(actual: Any, expected: List[float], tolerance: float) -> boo
         )
     except TypeError:
         return False
+
+
+def _matches(actual: Any, expected: Any, tolerance: float) -> bool:
+    if isinstance(expected, dict):
+        return (
+            isinstance(actual, dict)
+            and set(actual) == set(expected)
+            and all(_matches(actual[key], value, tolerance) for key, value in expected.items())
+        )
+    if isinstance(expected, (list, tuple)):
+        return (
+            isinstance(actual, (list, tuple))
+            and len(actual) == len(expected)
+            and all(_matches(value, reference, tolerance) for value, reference in zip(actual, expected))
+        )
+    if isinstance(expected, float):
+        return _close(actual, expected, tolerance)
+    return actual == expected
 
 
 def _line(label: str, passed: bool) -> str:
@@ -139,45 +197,29 @@ def compare_result(result: Any) -> List[str]:
         )
     )
 
-    ccenergies = _get(extras, "ccenergies")
     checks.append(
         (
             "representative flat CCSD extras",
-            isinstance(ccenergies, (list, tuple))
-            and len(ccenergies) >= 1
-            and _close(ccenergies[-1], -75.013487814, 1.0e-6)
-            and {"atomcharges", "atomcoords", "atomnos"} <= set(extras),
+            _matches(_get(extras, "atomcharges"), _ATOMCHARGES, 1.0e-6)
+            and _matches(_get(extras, "atomcoords"), _ATOMCOORDS, 1.0e-6)
+            and _matches(_get(extras, "atomnos"), _ATOMNOS, 1.0e-6)
+            and _matches(_get(extras, "ccenergies"), _CCENERGIES, 1.0e-6),
         )
     )
-    moenergies = _get(extras, "moenergies")
-    mosyms = _get(extras, "mosyms")
     checks.append(
         (
             "representative orbital extras",
-            _get(extras, "homos") == [4]
-            and isinstance(moenergies, (list, tuple))
-            and len(moenergies) == 1
-            and _close_sequence(moenergies[0], _ORBITAL_ENERGIES, 1.0e-3)
-            and isinstance(mosyms, (list, tuple))
-            and len(mosyms) == 1
-            and len(mosyms[0]) == 7,
+            _matches(_get(extras, "homos"), _HOMOS, 1.0e-6)
+            and _matches(_get(extras, "moenergies"), _ORBITAL_ENERGIES, 1.0e-6)
+            and _matches(_get(extras, "mosyms"), _ORBITAL_SYMMETRIES, 1.0e-6),
         )
     )
-    scfvalues = _get(extras, "scfvalues")
-    scftargets = _get(extras, "scftargets")
-    scfenergies = _get(extras, "scfenergies")
     checks.append(
         (
             "representative SCF extras",
-            isinstance(scfenergies, (list, tuple))
-            and len(scfenergies) >= 1
-            and _close(scfenergies[-1], -74.96357424008319, 1.0e-6)
-            and isinstance(scftargets, (list, tuple))
-            and bool(scftargets)
-            and isinstance(scfvalues, (list, tuple))
-            and bool(scfvalues)
-            and isinstance(scfvalues[0], (list, tuple))
-            and bool(scfvalues[0]),
+            _matches(_get(extras, "scfenergies"), _SCFENERGIES, 1.0e-6)
+            and _matches(_get(extras, "scftargets"), _SCFTARGETS, 1.0e-6)
+            and _matches(_get(extras, "scfvalues"), _SCFVALUES, 1.0e-6),
         )
     )
     checks.append(
