@@ -35,7 +35,7 @@ Changelog
 .. _`sec:cl0510`:
 
 v0.51.0 / 2026-MM-DD (Unreleased)
---------------------
+---------------------------------
 
 :docs:`v0.51.0` for current. :docs:`v0.34.1` for QCSchema v1.
 
@@ -44,6 +44,7 @@ Breaking Changes
 
 New Features
 ++++++++++++
+- cclib - add optional cclib-backed Q-Chem and ORCA program selectors.
 
 Enhancements
 ++++++++++++

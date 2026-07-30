@@ -175,6 +175,7 @@ Index
 **Programs**
 
 * :doc:`program_overview`
+* :doc:`programs_cclib`
 * :doc:`programs_molecular_mechanics`
 
 .. toctree::
@@ -183,6 +184,7 @@ Index
     :caption: Programs
 
     program_overview
+    programs_cclib
     programs_semiempirical
     programs_molecular_mechanics
 
