@@ -28,6 +28,7 @@ def test_check_program_avail(program):
 
 
 def test_program_version_check_is_targeted(monkeypatch):
+    """Ensure version checks probe only the requested program harness."""
     from qcengine.testing import is_program_new_enough
 
     class AvailableHarness:
@@ -42,7 +43,7 @@ def test_program_version_check_is_targeted(monkeypatch):
     def unexpected_full_scan():
         pytest.fail("is_program_new_enough should not scan every registered program")
 
-    monkeypatch.setattr(qcng, "list_all_procedures", lambda: set())
+    monkeypatch.setattr(qcng, "list_all_procedures", set)
     monkeypatch.setattr(qcng, "list_available_programs", unexpected_full_scan)
     monkeypatch.setattr(qcng, "get_program", lambda name, check=False: AvailableHarness())
 
