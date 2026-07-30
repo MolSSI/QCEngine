@@ -10,7 +10,7 @@ import qcengine as qcng
 from qcengine.config import get_config
 from qcengine.exceptions import InputError, UnknownError
 from qcengine.programs.mpqc.germinate import muster_modelchem
-from qcengine.programs.mpqc.harvester import extract_output_keyval, harvest_property_value
+from qcengine.programs.mpqc.harvester import extract_output_keyval, harvest, harvest_property_value, harvest_qcvars
 from qcengine.programs.mpqc.keywords import deep_merge, extract_reserved, format_keywords
 from qcengine.programs.mpqc.runner import _build_environment, _madness_threads
 from qcengine.testing import uusing
@@ -541,3 +541,66 @@ def test_harvest_property_value_edge_cases():
         {"mpqc": {"property": {"type": "ExcitationEnergy", "value": {"value": [["0.3", "0.0"], ["0.4", "0.0"]]}}}}
     )
     assert value == pytest.approx([0.3, 0.4])
+
+
+@pytest.mark.parametrize(
+    "stdout, expected",
+    [
+        pytest.param(
+            MP2_STDOUT,
+            {
+                "NUCLEAR REPULSION ENERGY": 9.1567141199574209,
+                # last iteration wins
+                "SCF TOTAL ENERGY": -75.983550302352427,
+                "HF TOTAL ENERGY": -75.983550302352427,
+                # current MPQC writes `MP2 energy = ...`
+                "MP2 CORRELATION ENERGY": -0.12820448732393372,
+            },
+            id="current-label-format",
+        ),
+        pytest.param(
+            CCSD_T_STDOUT,
+            {
+                # older MPQC writes `MP2 Energy      ...`, no equals sign, and
+                # tab-indents the SCF lines
+                "SCF TOTAL ENERGY": -76.224183098706,
+                "MP2 CORRELATION ENERGY": -0.116778998452088,
+                "CCSD CORRELATION ENERGY": -0.121474893575939,
+                "(T) CORRECTION ENERGY": -0.000868413807153793,
+            },
+            id="older-label-format",
+        ),
+        # a scraping miss must not raise - return_result comes from the JSON block
+        pytest.param("Output KeyVal (format=JSON):\n  {}\n", {}, id="bare-output"),
+    ],
+)
+def test_harvest_qcvars(stdout, expected):
+    qcvars = harvest_qcvars(stdout, "mp2")
+    for key, want in expected.items():
+        assert float(qcvars[key]) == pytest.approx(want), key
+    if not expected:
+        assert "NUCLEAR REPULSION ENERGY" not in qcvars
+
+
+def test_harvest():
+    """Energy fills the CURRENT ENERGY slot; ExcitationEnergy does not, since
+    excitation energies are not total energies."""
+    mol = Molecule(**qcng.get_molecule("water", return_dict=True))
+
+    qcvars, prop_type, value = harvest(mol, "mp2", MP2_STDOUT)
+    assert prop_type == "Energy"
+    assert value == pytest.approx(-76.111754789676354)
+    assert float(qcvars["CURRENT ENERGY"]) == pytest.approx(-76.111754789676354)
+    assert float(qcvars["MP2 TOTAL ENERGY"]) == pytest.approx(-76.111754789676354)
+    assert float(qcvars["CURRENT REFERENCE ENERGY"]) == pytest.approx(-75.983550302352427)
+    # "N ATOMS" is this repo's key; qcvars_to_atomicproperties maps it to
+    # properties.calcinfo_natom. "CALCINFO_NATOM" would map to nothing.
+    assert int(qcvars["N ATOMS"]) == 3
+
+    qcvars, prop_type, value = harvest(mol, "eom-ccsd", EXCITATION_STDOUT)
+    assert prop_type == "ExcitationEnergy"
+    assert "CURRENT ENERGY" not in qcvars
+    # harvest() returns the whole array; parse_output reduces it to
+    # root 0 for return_result.
+    assert value == pytest.approx([0.30676532737163403, 0.39017221882799757, 0.40193103617655945, 0.49146667079664907])
+    assert qcvars["MPQC EXCITATION ENERGIES"] == pytest.approx(value)

@@ -1,9 +1,11 @@
 """Extract results from MPQC stdout."""
 
 import json
+import re
 from typing import Any, Dict, Tuple
 
 from ...exceptions import UnknownError
+from ..util import PreservingDict
 
 _OUTPUT_MARKER = "Output KeyVal (format=JSON):"
 
@@ -121,3 +123,84 @@ def harvest_property_value(keyval: Dict[str, Any]) -> Tuple[str, Any]:
         return property_type, _as_real(raw)
 
     raise UnknownError("MPQC Output KeyVal contains no property block at 'mpqc:property' or 'property'.")
+
+
+#: Best-effort stdout patterns. Label formats drift between MPQC versions,
+#: e.g., older output uses `MP2 Energy   <val>`, current uses
+# `MP2 energy = <val>`, so each pattern is optional and a miss only reduces
+# qcvars.
+_NUMBER = r"(-?\d+\.\d+(?:[eE][-+]?\d+)?)"
+
+_SCALAR_PATTERNS = (
+    ("NUCLEAR REPULSION ENERGY", re.compile(r"Nuclear repulsion energy\s*=\s*" + _NUMBER)),
+    ("MP2 CORRELATION ENERGY", re.compile(r"MP2 [Ee]nergy\s*=?\s+" + _NUMBER)),
+    ("CCSD CORRELATION ENERGY", re.compile(r"CCSD [Ee]nergy\s*=?\s+" + _NUMBER)),
+    ("(T) CORRECTION ENERGY", re.compile(r"\(T\) [Ee]nergy:\s*" + _NUMBER)),
+)
+
+#: SCF iteration energies; the last one is the converged total. `\s+` rather
+#: than a literal indent because older MPQC tab-indents these lines and current
+#: MPQC uses four spaces. It deliberately does not match `(T) Energy:`, which
+#: has text between the line start and the label.
+_SCF_ITERATION = re.compile(r"^\s+Energy:\s*" + _NUMBER, re.MULTILINE)
+
+
+def harvest_qcvars(stdout: str, method: str) -> PreservingDict:
+    """Scrape optional QCVariables from MPQC stdout.
+
+    Never raises on a missing pattern. ``return_result`` comes from the Output
+    KeyVal block, so a scraping gap degrades ``qcvars`` only.
+    """
+    qcvars = PreservingDict()
+
+    for key, pattern in _SCALAR_PATTERNS:
+        match = pattern.search(stdout)
+        if match:
+            qcvars[key] = match.group(1)
+
+    scf_energies = _SCF_ITERATION.findall(stdout)
+    if scf_energies:
+        qcvars["SCF TOTAL ENERGY"] = scf_energies[-1]
+        qcvars["HF TOTAL ENERGY"] = scf_energies[-1]
+        qcvars["CURRENT REFERENCE ENERGY"] = scf_energies[-1]
+
+    return qcvars
+
+
+def harvest(molecule, method: str, stdout: str) -> Tuple[PreservingDict, str, Any]:
+    """Read an MPQC run into QCVariables plus the primary result.
+
+    Parameters
+    ----------
+    molecule
+        The input molecule; used only for ``N ATOMS``. MPQC prints no
+        machine-readable output geometry, so no coordinates are harvested.
+    method
+        Lowercase QCSchema method name, used to label method-specific qcvars.
+    stdout
+        Complete MPQC stdout.
+
+    Returns
+    -------
+    qcvars, property_type, value
+    """
+    keyval = extract_output_keyval(stdout)
+    property_type, value = harvest_property_value(keyval)
+
+    qcvars = harvest_qcvars(stdout, method)
+    # "N ATOMS", not "CALCINFO_NATOM": qcvar_identities_resources.py:383 maps
+    # "N ATOMS" -> properties.calcinfo_natom, and every other harness in the repo
+    # uses that spelling.
+    qcvars["N ATOMS"] = len(molecule.symbols)
+
+    if property_type == "Energy":
+        qcvars["CURRENT ENERGY"] = value
+        qcvars[f"{method.upper()} TOTAL ENERGY"] = value
+    else:
+        # Excitation energies are not total energies; keep them out of the
+        # CURRENT ENERGY slot and expose the raw array. sCI and EOM-* both strip
+        # the ground state, so root 0 is a real first excitation in either case
+        # and the two need no special-casing here.
+        qcvars["MPQC EXCITATION ENERGIES"] = value
+
+    return qcvars, property_type, value
