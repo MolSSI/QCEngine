@@ -8,8 +8,9 @@ from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
 from qcengine.config import get_config
-from qcengine.exceptions import InputError
+from qcengine.exceptions import InputError, UnknownError
 from qcengine.programs.mpqc.germinate import muster_modelchem
+from qcengine.programs.mpqc.harvester import extract_output_keyval, harvest_property_value
 from qcengine.programs.mpqc.keywords import deep_merge, extract_reserved, format_keywords
 from qcengine.programs.mpqc.runner import _build_environment, _madness_threads
 from qcengine.testing import uusing
@@ -392,3 +393,151 @@ def test_build_environment(monkeypatch):
     # and build_input wires them through
     job = qcng.get_program("mpqc", check=False).build_input(_atomic_input(), config)
     assert (job["environment"]["MAD_NUM_THREADS"], job["environment"]["OMP_NUM_THREADS"]) == ("8", "1")
+
+
+# Captured from MPQC 4.0.0-beta.1 running: H2O with MP2/6-31G,
+# singular property under `mpqc`. Matches MPQC validation test h2o-mp2-631g.out to ~3e-9.
+MP2_STDOUT = """\
+  Nuclear repulsion energy  = 9.1567141199574209
+  iteration: 17
+    Energy: -75.983550302352342
+  iteration: 18
+    Energy: -75.983550302352427
+  MP2 energy = -0.12820448732393372 computed in 0.029536540999999999 seconds
+  Output KeyVal (format=JSON):
+  {
+      "units": "2018CODATA",
+      "wfn": {"type": "MP2", "ref": "$:scf"},
+      "mpqc": {
+          "property": {
+              "type": "Energy",
+              "wfn": "$:wfn",
+              "precision": "1e-10",
+              "value": {"value": "-76.111754789676354"}
+          }
+      },
+      "world": "0x86a1a9080"
+  }
+
+"""
+
+# Captured from MPQC 4.0.0-beta.1 running: H2O with EOM-CCSD/6-31G, n_roots=4. Root 0 matches MPQC4 validation test
+# h2o-eom-ccsd-direct-631g.out (0.30676532821572683) to ~8e-10.
+EXCITATION_STDOUT = """\
+  CCSD Energy  -0.13487653270139507
+  Output KeyVal (format=JSON):
+  {
+      "mpqc": {
+          "property": {
+              "type": "ExcitationEnergy",
+              "n_roots": "4",
+              "value": {
+                  "value": ["0.30676532737163403", "0.39017221882799757",
+                            "0.40193103617655945", "0.49146667079664907"]
+              }
+          }
+      }
+  }
+Cleaning up global MPFR caches.
+"""
+
+# Verbatim from MPQC4 validation test h2o-ccsd_t-631g-pvdz.out.
+# An older build, which is the point of keeping it. Exercises every tolerance in the harvester.
+CCSD_T_STDOUT = """\
+iteration: 9
+\tEnergy: -76.224183098706
+MP2 Energy      -0.116778998452088
+CCSD Energy  -0.121474893575939
+(T) Energy: -0.000868413807153793 Time: 0.035749876 S
+  Output KeyVal (format=JSON):
+{
+    "property": {"type": "Energy", "wfn": "$:wfn", "value": {"value": "-76.346526406089026"}}
+}
+"""
+
+# Verbatim from MPQC4 validation test be-sci-631g-4roots.out, also a top-level
+# `property`.
+SCI_STDOUT = """\
+  Output KeyVal (format=JSON):
+  {
+      "units": "2018CODATA",
+      "property": {
+          "type": "ExcitationEnergy",
+          "precision": "1e-10",
+          "n_roots": "4",
+          "value": {
+              "value": ["7.815970093361102e-14", "1.8554048981656024e-06",
+                        "0.17666420524526139", "0.17666420524530402"]
+          }
+      }
+  }
+Cleaning up global MPFR caches.
+"""
+
+
+def test_extract_output_keyval():
+    """Parses the block, keeps stray keys, tolerates trailer lines after the
+    closing brace, and takes the last block when more than one is present."""
+    keyval = extract_output_keyval(MP2_STDOUT)
+    assert keyval["units"] == "2018CODATA"
+    assert keyval["wfn"]["type"] == "MP2"
+    assert keyval["world"] == "0x86a1a9080"
+
+    assert extract_output_keyval(CCSD_T_STDOUT)["property"]["type"] == "Energy"
+
+    doubled = MP2_STDOUT.replace("-76.111754789676354", "-9.9") + MP2_STDOUT
+    assert harvest_property_value(extract_output_keyval(doubled))[1] == pytest.approx(-76.111754789676354)
+
+
+@pytest.mark.parametrize(
+    "stdout, match",
+    [
+        pytest.param("MPQC started and then said nothing useful.\n", "Output KeyVal", id="no-block"),
+        pytest.param(MP2_STDOUT[: MP2_STDOUT.index('"world"')], "truncated", id="truncated"),
+    ],
+)
+def test_extract_output_keyval_raises(stdout, match):
+    with pytest.raises(UnknownError, match=match):
+        extract_output_keyval(stdout)
+
+
+@pytest.mark.parametrize(
+    "keyval, expected_type, expected_value",
+    [
+        pytest.param(MP2_STDOUT, "Energy", -76.111754789676354, id="energy-scalar"),
+        pytest.param(
+            EXCITATION_STDOUT,
+            "ExcitationEnergy",
+            [0.30676532737163403, 0.39017221882799757, 0.40193103617655945, 0.49146667079664907],
+            id="excitation-array",
+        ),
+        # deprecated-form input, or an mpqc_input escape-hatch tree, puts the
+        # property at the top level rather than under `mpqc`
+        pytest.param(CCSD_T_STDOUT, "Energy", -76.346526406089026, id="top-level-property-fallback"),
+        # the raw array is preserved exactly as MPQC reported it, including a
+        # near-degenerate first root that must not be mistaken for a ground state
+        pytest.param(
+            SCI_STDOUT,
+            "ExcitationEnergy",
+            [7.815970093361102e-14, 1.8554048981656024e-06, 0.17666420524526139, 0.17666420524530402],
+            id="sci-array-unnormalized",
+        ),
+    ],
+)
+def test_harvest_property_value(keyval, expected_type, expected_value):
+    prop_type, value = harvest_property_value(extract_output_keyval(keyval))
+    assert prop_type == expected_type
+    assert value == pytest.approx(expected_value)
+    assert isinstance(value, list if isinstance(expected_value, list) else float)
+
+
+def test_harvest_property_value_edge_cases():
+    with pytest.raises(UnknownError, match="no computed value"):
+        harvest_property_value({"mpqc": {"property": {"type": "Energy"}}})
+
+    # Defensive: ExcitationEnergy is declared over std::complex<double>. The
+    # observed build writes bare scalars, but a [real, imag] pair must not crash.
+    _, value = harvest_property_value(
+        {"mpqc": {"property": {"type": "ExcitationEnergy", "value": {"value": [["0.3", "0.0"], ["0.4", "0.0"]]}}}}
+    )
+    assert value == pytest.approx([0.3, 0.4])
