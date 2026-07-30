@@ -28,13 +28,15 @@ The first implementation accepts only the following atomic calculations:
 +--------------+-----------------+---------------------+
 
 Method strings pass through to the native program rather than being restricted
-by a harness-maintained allowlist.  Methods unsupported by the selected native
-program fail downstream.  ORCA gradient and Hessian calculations are disabled
-because current cclib parsing does not support the verified output path.
+by a harness-maintained allowlist.  Method and basis strings are trimmed and
+must each be one non-empty printable token without internal whitespace; ordinary
+native punctuation remains supported.  Methods unsupported by the selected
+native program fail downstream.  ORCA gradient and Hessian calculations are
+disabled because current cclib parsing does not support the verified output path.
 
-The basis must be a non-empty string.  Structured QCSchema basis objects are
-not supported.  Molecules must contain only real atoms; ghost atoms are
-rejected.  Charge, multiplicity, atom order, and Cartesian geometry come from
+Structured QCSchema basis objects are not supported.  Molecules must contain
+only real atoms; ghost atoms are rejected.  Charge, multiplicity, atom order,
+and Cartesian geometry come from
 the QCSchema molecule.  Geometry is written in bohr for Q-Chem and converted
 to Angstrom for ORCA.
 
@@ -46,9 +48,10 @@ in ``%pal``.
 Program keywords and resources
 ------------------------------
 
-Q-Chem keywords are a flat QCSchema mapping.  Keys are converted to uppercase
-``$rem`` keys and sorted; values may be strings, booleans, integers, or finite
-floats.  For example:
+Q-Chem keywords are a flat QCSchema mapping.  Keys must match the conservative
+ASCII identifier grammar ``[A-Za-z][A-Za-z0-9_]*`` before they are converted to
+uppercase ``$rem`` keys and sorted; values may be strings, booleans, integers,
+or finite floats.  For example:
 
 .. code-block:: python
 
@@ -124,11 +127,12 @@ Results and native files
 ------------------------
 
 cclib auto-detects the parser, and the harness rejects a parser that does not
-match the selected program.  It also rejects parsed driver, method, or basis
-mismatches rather than relabeling the result.  ``QCSchemaWriter`` first emits a
-QCSchema v1 dictionary, which is validated as a v1 ``AtomicResult`` and then
-converted to QCEngine's internal QCSchema v2 representation.  Public callers
-may still request a v1 result with ``return_version=1``.
+match the selected program.  It also rejects parsed driver or basis mismatches
+rather than relabeling the result.  Parsed method metadata is preserved without
+an alias-based requested-versus-parsed equality check.  ``QCSchemaWriter`` first
+emits a QCSchema v1 dictionary, which is validated as a v1 ``AtomicResult`` and
+then converted to QCEngine's internal QCSchema v2 representation.  Public
+callers may still request a v1 result with ``return_version=1``.
 
 The result keeps cclib's flat extras, such as available atom charges and
 coordinates, orbital data, SCF histories, correlated energies, and cclib unit

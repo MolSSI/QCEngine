@@ -58,16 +58,29 @@ class ExecutionResult:
     stderr: str
 
 
+def _validate_native_token(field: str, value: Any) -> str:
+    """Return one trimmed printable native token without structural whitespace."""
+
+    if not isinstance(value, str):
+        raise InputError(f"CCLibHarness {field} must be a non-empty string")
+    if any(not character.isprintable() for character in value):
+        raise InputError(f"CCLibHarness {field} must not contain control characters")
+    normalized = value.strip()
+    if not normalized:
+        raise InputError(f"CCLibHarness {field} must be a non-empty string")
+    if any(character.isspace() for character in normalized):
+        raise InputError(f"CCLibHarness {field} must be exactly one native token")
+    return normalized
+
+
 def _input_fields(input_model: "AtomicInput") -> Tuple[str, str, str]:
     """Return native driver, method, and basis after shared structural validation."""
 
     driver_value = input_model.specification.driver
     driver = driver_value.value if hasattr(driver_value, "value") else str(driver_value)
-    method = input_model.specification.model.method
-    basis = input_model.specification.model.basis
+    method = _validate_native_token("method", input_model.specification.model.method)
+    basis = _validate_native_token("basis", input_model.specification.model.basis)
 
-    if not isinstance(basis, str) or not basis.strip():
-        raise InputError("CCLibHarness basis must be a non-empty string")
     if not all(bool(real) for real in input_model.molecule.real):
         raise InputError("CCLibHarness requires all atoms to be real; ghost atoms are unsupported")
 

@@ -233,6 +233,67 @@ def test_input_fields_reject_invalid_common_structural_requests(input_model, mat
         cclib_base._input_fields(input_model)
 
 
+@pytest.mark.parametrize(
+    "builder,field,value",
+    [
+        pytest.param(cclib_qchem.build_input, "method", "", id="qchem-blank-method"),
+        pytest.param(cclib_qchem.build_input, "basis", "   ", id="qchem-blank-basis"),
+        pytest.param(
+            cclib_qchem.build_input,
+            "method",
+            "hf\n$end\n$molecule\n9 1\nH 0 0 0",
+            id="qchem-coordinate-section",
+        ),
+        pytest.param(
+            cclib_qchem.build_input,
+            "basis",
+            "sto-3g\r\nMEM_TOTAL 999999",
+            id="qchem-resource-override",
+        ),
+        pytest.param(cclib_qchem.build_input, "method", "hf\n@@@", id="qchem-multi-job"),
+        pytest.param(cclib_qchem.build_input, "method", "hf\x00evil", id="qchem-control"),
+        pytest.param(
+            cclib_orca.build_input,
+            "method",
+            "hf\n%pal\nnprocs 999\nend",
+            id="orca-resource-override",
+        ),
+        pytest.param(
+            cclib_orca.build_input,
+            "basis",
+            "sto-3g\r\n* xyz 9 1\nH 0 0 0\n*",
+            id="orca-coordinate-section",
+        ),
+        pytest.param(cclib_orca.build_input, "method", "hf\n$new_job", id="orca-multi-job"),
+        pytest.param(cclib_orca.build_input, "basis", "sto-3g\x1bevil", id="orca-control"),
+        pytest.param(cclib_orca.build_input, "basis", "sto-3g\t%pal", id="orca-whitespace"),
+    ],
+)
+def test_native_method_and_basis_tokens_reject_structure_escape(builder, field, value):
+    values = {"method": "hf", "basis": "sto-3g"}
+    values[field] = value
+
+    with pytest.raises(InputError, match=field):
+        builder(_atomic_input(**values), _task_config(), "/resolved/program")
+
+
+def test_native_method_and_basis_tokens_normalize_edges_and_preserve_punctuation():
+    qchem = cclib_qchem.build_input(
+        _atomic_input(method="  wb97x-d3(0)  ", basis="  6-31+g(d,p)  "),
+        _task_config(),
+        "/opt/qchem",
+    )
+    assert "METHOD wb97x-d3(0)\n" in qchem.input_text
+    assert "BASIS 6-31+g(d,p)\n" in qchem.input_text
+
+    orca = cclib_orca.build_input(
+        _atomic_input(method="  dlpno-ccsd(t)  ", basis="  def2-svp/c  "),
+        _task_config(),
+        "/opt/orca",
+    )
+    assert orca.input_text.startswith("! dlpno-ccsd(t) def2-svp/c\n")
+
+
 _QCHEM_RESERVED = {
     "JOBTYPE",
     "METHOD",
@@ -344,6 +405,8 @@ def test_qchem_scalar_keyword_rendering_and_malformed_reserved_rejection():
         {"bad": "line one\nline two"}, {"bad\nkey": "value"}, {"bad": None},
         {"bad": [1]}, {"bad": {"nested": 1}}, {"bad": float("nan")},
         {"": "value"}, {"ordinary key": "value"}, {"ordinary\x00key": "value"},
+        {"$end": "value"}, {"$molecule": "value"}, {"-leading": "value"},
+        {"nonascii_é": "value"},
     ]
     for candidate in malformed:
         with pytest.raises(InputError, match="keyword"):
@@ -551,7 +614,28 @@ def _assert_execution_message(error, definition, job, stage, diagnostic):
     assert definition.selector in message
     assert job.executable in message
     assert stage in message
-    assert cclib_base._diagnostic_tail(diagnostic) in message
+    if len(diagnostic) <= 4000 and len(diagnostic.splitlines()) <= 40:
+        assert diagnostic in message
+
+
+def test_diagnostic_tail_has_independent_line_and_character_boundaries():
+    definition, job = _qchem_execution_case()
+    line_diagnostic = "\n".join(f"boundary-line-{index:02d}" for index in range(42))
+
+    with pytest.raises(UnknownError) as line_error:
+        cclib_base._raise_execution_failure(definition, job, "execution", line_diagnostic)
+    line_tail = str(line_error.value).split("Diagnostic tail:\n", 1)[1]
+    assert line_tail.startswith("boundary-line-02\n")
+    assert "boundary-line-01" not in line_tail
+    assert line_tail.endswith("boundary-line-41")
+    assert line_tail.count("\n") == 39
+
+    character_diagnostic = "omitted-prefix:" + ("x" * 4000)
+    with pytest.raises(UnknownError) as character_error:
+        cclib_base._raise_execution_failure(definition, job, "execution", character_diagnostic)
+    character_tail = str(character_error.value).split("Diagnostic tail:\n", 1)[1]
+    assert character_tail == "x" * 4000
+    assert "omitted-prefix" not in character_tail
 
 
 @pytest.mark.parametrize(
@@ -601,8 +685,11 @@ def test_bounded_execution_and_resource_failure_classification(monkeypatch, tmp_
         cclib_base._execute_job(definition, job, _task_config(scratch_directory=str(tmp_path)))
 
     _assert_execution_message(exc_info.value, definition, job, stage, diagnostic)
-    assert len(cclib_base._diagnostic_tail(diagnostic)) <= 4000
-    assert len(cclib_base._diagnostic_tail(diagnostic).splitlines()) <= 40
+    if diagnostic.startswith("failure line"):
+        diagnostic_tail = str(exc_info.value).split("Diagnostic tail:\n", 1)[1]
+        assert len(diagnostic_tail) == 4000
+        assert "failure line 29" not in diagnostic_tail
+        assert diagnostic_tail.endswith("failure line 59: " + ("x" * 120))
     if case in {"missing-output", "exception"}:
         assert exc_info.value.__cause__ is not None
 
@@ -1070,19 +1157,22 @@ def test_live_qchem_hessian():
 
 
 @pytest.mark.parametrize(
-    "selector,input_model,expected",
+    "selector,input_model,expected,absolute_tolerance",
     [
         pytest.param(
-            "cclib-qchem", _water_input(), -75.00228214,
+            "cclib-qchem", _water_input(), -75.00228214, 1.0e-6,
             marks=[*using("cclib-qchem"), pytest.mark.cclib_qchem], id="qchem-water-mp2",
         ),
+        # ORCA 6.x HF/STO-3G for He; 1e-8 Eh permits only final-digit output/parser variation.
         pytest.param(
-            "cclib-orca", _atomic_input(), None,
+            "cclib-orca", _atomic_input(), -2.8077839575, 1.0e-8,
             marks=[*using("cclib-orca"), pytest.mark.cclib_orca], id="orca-he-hf",
         ),
     ],
 )
-def test_live_qchem_and_orca_energy_calculations(selector, input_model, expected):
+def test_live_qchem_and_orca_energy_calculations(
+    selector, input_model, expected, absolute_tolerance
+):
     result = qcng.compute(
         input_model,
         selector,
@@ -1093,8 +1183,7 @@ def test_live_qchem_and_orca_energy_calculations(selector, input_model, expected
 
     assert result.success is True
     assert isinstance(result.return_result, float)
-    if expected is not None:
-        assert result.return_result == pytest.approx(expected, abs=1.0e-6)
+    assert result.return_result == pytest.approx(expected, abs=absolute_tolerance)
 
 
 _REAL_CCLIB_FIXTURES = [

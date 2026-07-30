@@ -1,7 +1,7 @@
 # CCLib Harness Review Refactor Design
 
-**Date:** 2026-07-30  
-**Branch:** `cclib_harness`  
+**Date:** 2026-07-30
+**Branch:** `cclib_harness`
 **Status:** Approved for implementation planning
 
 ## Purpose
