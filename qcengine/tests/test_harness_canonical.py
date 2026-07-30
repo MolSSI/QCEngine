@@ -22,6 +22,7 @@ _canonical_methods = [
     pytest.param("molpro", {"method": "hf", "basis": "6-31G"}, {}, marks=using("molpro")),
     pytest.param("mopac", {"method": "PM6"}, {}, marks=using("mopac")),
     pytest.param("mp2d", {"method": "MP2-DMP2"}, {}, marks=using("mp2d")),
+    pytest.param("mpqc", {"method": "hf", "basis": "6-31G"}, {}, marks=using("mpqc")),
     pytest.param("nwchem", {"method": "hf", "basis": "6-31G"}, {}, marks=using("nwchem")),
     pytest.param("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}, marks=using("openmm")),
     pytest.param("psi4", {"method": "hf", "basis": "6-31G"}, {}, marks=using("psi4")),
@@ -50,6 +51,7 @@ _canonical_methods_qcsk_basis = [
     pytest.param("cfour", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("cfour")),
     pytest.param("gamess", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("gamess")),
     pytest.param("molpro", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("molpro")),
+    pytest.param("mpqc", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("mpqc")),
     pytest.param("nwchem", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("nwchem")),
     pytest.param("openmm", {"method": "openff-1.0.0", "basis": qcsk_bs}, {}, marks=using("openmm")),
     pytest.param("psi4", {"method": "hf", "basis": qcsk_bs}, {}, marks=using("psi4")),
@@ -119,7 +121,7 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
             extras={"mytag": "something"},
             keywords=keywords,
         )
-    if program in ["adcc"]:
+    if program in ["adcc", "mpqc"]:
         inp = checkver_and_convert(inp, request.node.name, "pre")
         with pytest.raises(qcng.exceptions.InputError) as e:
             qcng.compute(inp, program, raise_error=True, return_version=retver)
@@ -172,6 +174,7 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
         pytest.param("gamess", {"method": "bad"}, marks=using("gamess")),
         pytest.param("mopac", {"method": "bad"}, marks=using("mopac")),
         pytest.param("mp2d", {"method": "bad"}, marks=using("mp2d")),
+        pytest.param("mpqc", {"method": "bad"}, marks=using("mpqc")),
         pytest.param("nwchem", {"method": "bad"}, marks=using("nwchem")),
         pytest.param("openmm", {"method": "bad"}, marks=using("openmm")),
         pytest.param("psi4", {"method": "bad"}, marks=using("psi4")),

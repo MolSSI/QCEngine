@@ -44,6 +44,12 @@ Breaking Changes
 
 New Features
 ++++++++++++
+- (:pr:`NNN`) MPQC - adds a harness for MPQC4 supporting energies and excitation
+  energies for real LCAO methods (HF, MP2, CCSD, CCSD(T), CCSDT, CCk, sCI,
+  EOM-CCSD/IP/EA). Gradients raise ``InputError`` as MPQC has no analytic
+  derivatives. Not enrolled in ``test_canonical_config.py`` (see the ``needs
+  attn`` note there) as MPQC echoes neither its memory limit nor its scratch
+  path, so neither can be regex-verified.
 
 Enhancements
 ++++++++++++
