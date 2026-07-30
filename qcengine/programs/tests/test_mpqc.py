@@ -8,7 +8,8 @@ from qcelemental.tests.test_model_results import center_data
 
 import qcengine as qcng
 from qcengine.config import get_config
-from qcengine.exceptions import InputError, UnknownError
+from qcengine.exceptions import ConvergenceError, InputError, ResourceError, UnknownError
+from qcengine.programs.mpqc.errors import mpqc_exception_for, parse_mpqc_exception
 from qcengine.programs.mpqc.germinate import muster_modelchem
 from qcengine.programs.mpqc.harvester import extract_output_keyval, harvest, harvest_property_value, harvest_qcvars
 from qcengine.programs.mpqc.keywords import deep_merge, extract_reserved, format_keywords
@@ -604,3 +605,53 @@ def test_harvest():
     # root 0 for return_result.
     assert value == pytest.approx([0.30676532737163403, 0.39017221882799757, 0.40193103617655945, 0.49146667079664907])
     assert qcvars["MPQC EXCITATION ENERGIES"] == pytest.approx(value)
+
+
+# Captured from MPQC 4.0.0-beta.1 with an unregistered wfn type.
+INPUT_ERROR_STDERR = """\
+!! MPQC exception: exception:   InputError
+description: DescribedClass::type_to_keyval_ctor -- type "BOGUSMETHOD" not registered
+location:    /Users/x/mpqc4/src/mpqc/util/keyval/keyval.cpp:71
+backtrace:
+=mpqcbacktrace=: frame 2: return address = 0x1043d4460
+  symbol = mpqc::InputError::InputError(char const*, char const*, int)
+=mpqcbacktrace=: frame 3: return address = 0x1043d07a4
+"""
+
+
+@pytest.mark.parametrize(
+    "class_name, expected",
+    [
+        ("InputError", InputError),
+        ("FeatureNotImplemented", InputError),
+        ("FeatureDisabled", InputError),
+        ("MaxIterExceeded", ConvergenceError),
+        ("ToleranceExceeded", ConvergenceError),
+        ("MemAllocFailed", ResourceError),
+        ("LimitExceeded", ResourceError),
+        ("AssertionFailed", UnknownError),
+        ("ProgrammingError", UnknownError),
+        ("SomethingBrandNew", UnknownError),  # unmapped -> UnknownError
+    ],
+)
+def test_mpqc_exception_for(class_name, expected):
+    stderr = f"!! MPQC exception: exception:   {class_name}\ndescription: something went wrong\n"
+    exc_class, message = mpqc_exception_for(stderr)
+    assert exc_class is expected
+    assert "something went wrong" in message
+
+
+def test_mpqc_exception_for_real_stderr():
+    assert parse_mpqc_exception("") is None
+    assert parse_mpqc_exception(INPUT_ERROR_STDERR) == (
+        "InputError",
+        'DescribedClass::type_to_keyval_ctor -- type "BOGUSMETHOD" not registered',
+    )
+
+    # a SIGABRT or segfault carries no exception header at all
+    assert mpqc_exception_for("segmentation fault\n")[0] is UnknownError
+
+    # MPQC's backtrace is long and symbolized; keep it out of the message
+    _, message = mpqc_exception_for(INPUT_ERROR_STDERR)
+    assert "mpqcbacktrace" not in message
+    assert "not registered" in message
