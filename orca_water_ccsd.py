@@ -63,6 +63,64 @@ _SCFVALUES = [
         [2.6405e-7, 6.9252e-5, 2.4156e-5],
     ]
 ]
+_ATOMCHARGES_61 = {
+    "mulliken": [-0.329397, 0.164693, 0.164703],
+    "lowdin": [-0.222995, 0.111495, 0.1115],
+    "hirshfeld": [-0.288291, 0.144144, 0.144146],
+}
+_ORBITAL_ENERGIES_61 = [[-20.242272, -1.265785, -0.615354, -0.452275, -0.390879, 0.600583, 0.736578]]
+_SCFENERGIES_61 = [-74.96357424464694]
+_SCFVALUES_61 = [
+    [
+        [0.0, 0.0568, 0.0744],
+        [-0.0179, 0.0486, 0.0624],
+        [-0.0127, 0.0339, 0.0433],
+        [-0.0087, 0.0793, 0.101],
+        [-0.0199, 0.00247, 0.00458],
+        [-8.88e-6, 0.0013, 0.00221],
+        [-1.69e-6, 0.000744, 0.00117],
+        [-2.64e-7, 5.22e-5, 6.93e-5],
+        [2.6405e-7, 6.9252e-5, 5.2183e-5],
+    ]
+]
+_ORCA_EXTRA_REFERENCES = {
+    (6, 0): {
+        "flat": {
+            "atomcharges": _ATOMCHARGES,
+            "atomcoords": _ATOMCOORDS,
+            "atomnos": _ATOMNOS,
+            "ccenergies": _CCENERGIES,
+        },
+        "orbital": {
+            "homos": _HOMOS,
+            "moenergies": _ORBITAL_ENERGIES,
+            "mosyms": _ORBITAL_SYMMETRIES,
+        },
+        "scf": {
+            "scfenergies": _SCFENERGIES,
+            "scftargets": _SCFTARGETS,
+            "scfvalues": _SCFVALUES,
+        },
+    },
+    (6, 1): {
+        "flat": {
+            "atomcharges": _ATOMCHARGES_61,
+            "atomcoords": _ATOMCOORDS,
+            "atomnos": _ATOMNOS,
+            "ccenergies": _CCENERGIES,
+        },
+        "orbital": {
+            "homos": _HOMOS,
+            "moenergies": _ORBITAL_ENERGIES_61,
+            "mosyms": _ORBITAL_SYMMETRIES,
+        },
+        "scf": {
+            "scfenergies": _SCFENERGIES_61,
+            "scftargets": _SCFTARGETS,
+            "scfvalues": _SCFVALUES_61,
+        },
+    },
+}
 _TASK_CONFIG = {"ncores": 4, "memory": 2.734375}
 
 
@@ -127,6 +185,16 @@ def _matches(actual: Any, expected: Any, tolerance: float) -> bool:
     if isinstance(expected, float):
         return _close(actual, expected, tolerance)
     return actual == expected
+
+
+def _extra_reference(version: Any) -> Any:
+    """Select strict extras by parsed ORCA major.minor; patch releases share a reference."""
+    try:
+        major, minor = str(version).split(".", 2)[:2]
+        key = (int(major), int(minor))
+    except (TypeError, ValueError):
+        return None
+    return _ORCA_EXTRA_REFERENCES.get(key)
 
 
 def _line(label: str, passed: bool) -> str:
@@ -197,31 +265,20 @@ def compare_result(result: Any) -> List[str]:
         )
     )
 
-    checks.append(
-        (
-            "representative flat CCSD extras",
-            _matches(_get(extras, "atomcharges"), _ATOMCHARGES, 1.0e-6)
-            and _matches(_get(extras, "atomcoords"), _ATOMCOORDS, 1.0e-6)
-            and _matches(_get(extras, "atomnos"), _ATOMNOS, 1.0e-6)
-            and _matches(_get(extras, "ccenergies"), _CCENERGIES, 1.0e-6),
+    version = _get(provenance, "version")
+    reference = _extra_reference(version)
+    checks.append((f"ORCA extras reference version {version!r}", reference is not None))
+    if reference is None:
+        flat_ok = orbital_ok = scf_ok = False
+    else:
+        flat_ok = all(_matches(_get(extras, key), expected, 1.0e-6) for key, expected in reference["flat"].items())
+        orbital_ok = all(
+            _matches(_get(extras, key), expected, 1.0e-6) for key, expected in reference["orbital"].items()
         )
-    )
-    checks.append(
-        (
-            "representative orbital extras",
-            _matches(_get(extras, "homos"), _HOMOS, 1.0e-6)
-            and _matches(_get(extras, "moenergies"), _ORBITAL_ENERGIES, 1.0e-6)
-            and _matches(_get(extras, "mosyms"), _ORBITAL_SYMMETRIES, 1.0e-6),
-        )
-    )
-    checks.append(
-        (
-            "representative SCF extras",
-            _matches(_get(extras, "scfenergies"), _SCFENERGIES, 1.0e-6)
-            and _matches(_get(extras, "scftargets"), _SCFTARGETS, 1.0e-6)
-            and _matches(_get(extras, "scfvalues"), _SCFVALUES, 1.0e-6),
-        )
-    )
+        scf_ok = all(_matches(_get(extras, key), expected, 1.0e-6) for key, expected in reference["scf"].items())
+    checks.append(("representative flat CCSD extras", flat_ok))
+    checks.append(("representative orbital extras", orbital_ok))
+    checks.append(("representative SCF extras", scf_ok))
     checks.append(
         (
             "anomalous MP2 writer fields present but not numerically endorsed",

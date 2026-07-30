@@ -1562,7 +1562,7 @@ def _qchem_demonstration_result():
     }
 
 
-def _orca_demonstration_result():
+def _orca_demonstration_result(version="6.0.1"):
     geometry = [
         3.372998617495434,
         2.385631834752722,
@@ -1574,7 +1574,7 @@ def _orca_demonstration_result():
         2.3750380300934055,
         -0.45133273917372035,
     ]
-    return {
+    result = {
         "schema_name": "qcschema_output",
         "schema_version": 1,
         "success": True,
@@ -1588,7 +1588,7 @@ def _orca_demonstration_result():
         },
         "provenance": {
             "creator": "ORCA",
-            "version": "6.1.1",
+            "version": version,
             "routine": "cclib.io.qcschemawriter.QCSchemaWriter",
         },
         "properties": {
@@ -1656,6 +1656,32 @@ def _orca_demonstration_result():
             },
         },
     }
+    if str(version).startswith("6.1"):
+        result["extras"].update(
+            {
+                "atomcharges": {
+                    "mulliken": [-0.329397, 0.164693, 0.164703],
+                    "lowdin": [-0.222995, 0.111495, 0.1115],
+                    "hirshfeld": [-0.288291, 0.144144, 0.144146],
+                },
+                "moenergies": [[-20.242272, -1.265785, -0.615354, -0.452275, -0.390879, 0.600583, 0.736578]],
+                "scfenergies": [-74.96357424464694],
+                "scfvalues": [
+                    [
+                        [0.0, 0.0568, 0.0744],
+                        [-0.0179, 0.0486, 0.0624],
+                        [-0.0127, 0.0339, 0.0433],
+                        [-0.0087, 0.0793, 0.101],
+                        [-0.0199, 0.00247, 0.00458],
+                        [-8.88e-6, 0.0013, 0.00221],
+                        [-1.69e-6, 0.000744, 0.00117],
+                        [-2.64e-7, 5.22e-5, 6.93e-5],
+                        [2.6405e-7, 6.9252e-5, 5.2183e-5],
+                    ]
+                ],
+            }
+        )
+    return result
 
 
 def test_qchem_demonstration_comparison_covers_all_acceptance_criteria():
@@ -1747,6 +1773,7 @@ def test_orca_demonstration_comparison_checks_ccsd_scf_provenance_extras_and_ano
         assert required in labels
 
 
+@pytest.mark.parametrize("version", ["6.0.1", "6.1.1"])
 @pytest.mark.parametrize(
     "path,bad_value,failed_label",
     [
@@ -1760,9 +1787,9 @@ def test_orca_demonstration_comparison_checks_ccsd_scf_provenance_extras_and_ano
         (("extras", "ccenergies", 0), -75.013485814, "flat CCSD extras"),
     ],
 )
-def test_orca_demonstration_comparison_reports_exact_extra_failures(path, bad_value, failed_label):
+def test_orca_demonstration_comparison_reports_exact_extra_failures(version, path, bad_value, failed_label):
     demonstration = importlib.import_module("orca_water_ccsd")
-    result = _orca_demonstration_result()
+    result = _orca_demonstration_result(version)
     target = result
     for key in path[:-1]:
         target = target[key]
@@ -1770,6 +1797,25 @@ def test_orca_demonstration_comparison_reports_exact_extra_failures(path, bad_va
 
     failures = [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
     assert any(failed_label in line for line in failures)
+
+
+@pytest.mark.parametrize("version", ["6.0.1", "6.0.9", "6.1.1", "6.1.99"])
+def test_orca_demonstration_selects_strict_versioned_reference(version):
+    demonstration = importlib.import_module("orca_water_ccsd")
+    comparisons = demonstration.compare_result(_orca_demonstration_result(version))
+
+    assert all(line.startswith("PASS ") for line in comparisons), comparisons
+    assert any("ORCA extras reference version" in line for line in comparisons)
+
+
+@pytest.mark.parametrize("version", [None, "6.2.0", "not-a-version"])
+def test_orca_demonstration_rejects_missing_or_unsupported_reference_version(version):
+    demonstration = importlib.import_module("orca_water_ccsd")
+    result = _orca_demonstration_result()
+    result["provenance"]["version"] = version
+
+    failures = [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
+    assert any("ORCA extras reference version" in line for line in failures)
 
 
 def test_demonstration_main_calls_compute_writes_complete_json_and_reports(monkeypatch, tmp_path, capsys):
