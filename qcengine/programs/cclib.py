@@ -34,6 +34,12 @@ class _CCLibAPI:
     QChem: Type[Any]
     ORCA: Type[Any]
 
+    @property
+    def ccopen(self) -> Any:
+        """Expose the auto-detecting opener while preserving the reviewed lazy API shape."""
+
+        return self.ccread
+
 
 _cclib_compatibility_cache: Optional[Tuple[bool, str]] = None
 
@@ -85,7 +91,7 @@ def _load_cclib_api() -> _CCLibAPI:
     """Load the optional cclib interfaces only when a cclib harness is checked."""
 
     import cclib
-    from cclib.io import ccread
+    from cclib.io import ccopen
     from cclib.io.qcschemawriter import QCSchemaWriter
     from cclib.parser.data import ccData
     from cclib.parser.orcaparser import ORCA
@@ -95,7 +101,7 @@ def _load_cclib_api() -> _CCLibAPI:
         version=cclib.__version__,
         ccData=ccData,
         QCSchemaWriter=QCSchemaWriter,
-        ccread=ccread,
+        ccread=ccopen,
         QChem=QChem,
         ORCA=ORCA,
     )
@@ -470,6 +476,12 @@ class _ProgramDefinition:
     output_selector: Callable[[Mapping[str, Any]], str]
     preflight: Callable[[str, Mapping[str, str]], Dict[str, str]]
 
+    @property
+    def parser_name(self) -> str:
+        """Return the reviewed parser identity under its result-metadata name."""
+
+        return self.expected_parser
+
 
 _PROGRAM_DEFINITIONS: Mapping[str, _ProgramDefinition] = {
     "qchem": _ProgramDefinition(
@@ -634,6 +646,200 @@ def _execute_job(definition: _ProgramDefinition, job: _Job, config: TaskConfig) 
     return run(config.scratch_directory)
 
 
+_METHOD_ALIASES = {
+    "rhf": "hf",
+    "uhf": "hf",
+    "rmp2": "mp2",
+    "ump2": "mp2",
+    "rccsd": "ccsd",
+    "uccsd": "ccsd",
+}
+
+
+def _raise_conversion_failure(
+    definition: _ProgramDefinition,
+    execution: _ExecutionResult,
+    stage: str,
+    cause: BaseException,
+) -> None:
+    """Raise one bounded, stage-aware parsing/conversion failure."""
+
+    diagnostic = _diagnostic_tail(f"{execution.output_text}\n{cause}")
+    raise UnknownError(
+        f"{definition.selector} failed for resolved executable {execution.executable} "
+        f"during {stage} stage.\nDiagnostic tail:\n{diagnostic}"
+    ) from cause
+
+
+def _native_files(input_model: "AtomicInput", execution: _ExecutionResult) -> Dict[str, str]:
+    protocol = input_model.specification.protocols.native_files
+    value = protocol.value if hasattr(protocol, "value") else str(protocol)
+    if value == "none":
+        return {}
+    files = {"input": execution.input_text}
+    if value == "all":
+        files[execution.output_filename] = execution.output_text
+    return files
+
+
+def _parse_and_convert(
+    definition: _ProgramDefinition,
+    execution: _ExecutionResult,
+    input_model: "AtomicInput",
+) -> "AtomicResult":
+    """Parse complete program output, validate QCSchema v1, and convert to v2."""
+
+    try:
+        api = _load_cclib_api()
+    except Exception as exc:
+        _raise_conversion_failure(definition, execution, "parser setup", exc)
+
+    parser = None
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".out", encoding="utf-8") as temporary:
+        temporary.write(execution.output_text)
+        temporary.flush()
+        # tempfile's wrapper is seekable but not itself an iterator, while
+        # cclib's FileWrapper requires both. Reopen its named file as a normal
+        # text stream so auto-detection sees the exact complete output.
+        with open(temporary.name, encoding="utf-8") as source:
+            try:
+                parser = api.ccopen(source)
+            except Exception as exc:
+                _raise_conversion_failure(definition, execution, "parser auto-detection", exc)
+            if parser is None:
+                _raise_conversion_failure(
+                    definition,
+                    execution,
+                    "parser auto-detection",
+                    ValueError("cclib ccopen did not detect a parser"),
+                )
+
+            try:
+                expected_parser = getattr(api, definition.parser_name)
+                if type(parser) is not expected_parser:
+                    _raise_conversion_failure(
+                        definition,
+                        execution,
+                        "parser identity",
+                        ValueError(
+                            f"cclib selected {type(parser).__name__}; expected {definition.parser_name}"
+                        ),
+                    )
+
+                try:
+                    parsed = parser.parse()
+                except Exception as exc:
+                    _raise_conversion_failure(definition, execution, "parser parse", exc)
+            finally:
+                parser_input = getattr(parser, "inputfile", None)
+                if parser_input is not None:
+                    try:
+                        parser_input.close()
+                    except Exception:
+                        pass
+
+    metadata = getattr(parsed, "metadata", None)
+    if not isinstance(metadata, Mapping) or metadata.get("success") is not True:
+        _raise_conversion_failure(
+            definition,
+            execution,
+            "parser result validation",
+            ValueError("cclib parser result is incomplete: metadata['success'] is not true"),
+        )
+
+    try:
+        writer_output = api.QCSchemaWriter(parsed).as_dict(validate=False)
+    except Exception as exc:
+        _raise_conversion_failure(definition, execution, "QCSchema writer", exc)
+
+    required_fields = {
+        "schema_name",
+        "schema_version",
+        "molecule",
+        "provenance",
+        "success",
+        "extras",
+        "driver",
+        "model",
+        "properties",
+        "return_result",
+    }
+    missing_fields = required_fields - set(writer_output) if isinstance(writer_output, Mapping) else required_fields
+    if missing_fields:
+        _raise_conversion_failure(
+            definition,
+            execution,
+            "QCSchema writer output",
+            ValueError(f"writer output is missing required fields: {sorted(missing_fields)!r}"),
+        )
+
+    output = dict(writer_output)
+    extras = dict(output.get("extras") or {})
+    extras["cclib_harness"] = {
+        "selector": definition.selector,
+        "cclib_version": api.version,
+        "parser": definition.parser_name,
+        "executable": execution.executable,
+    }
+    output["extras"] = extras
+    output["stdout"] = execution.output_text
+    output["stderr"] = execution.stderr or None
+    native_protocol = input_model.specification.protocols.native_files
+    native_protocol_value = native_protocol.value if hasattr(native_protocol, "value") else str(native_protocol)
+    output["protocols"] = {"native_files": native_protocol_value, "stdout": True}
+    native_files = _native_files(input_model, execution)
+    output["native_files"] = native_files
+
+    requested_driver, requested_method, requested_basis = _validate_input_subset(input_model)
+    writer_model = output.get("model") if isinstance(output.get("model"), Mapping) else {}
+    parsed_driver = output.get("driver")
+    parsed_method = writer_model.get("method")
+    parsed_basis = writer_model.get("basis")
+    identities = (
+        ("driver", requested_driver.casefold(), str(parsed_driver).casefold()),
+        (
+            "method",
+            _METHOD_ALIASES.get(requested_method.casefold(), requested_method.casefold()),
+            _METHOD_ALIASES.get(str(parsed_method).casefold(), str(parsed_method).casefold()),
+        ),
+        ("basis", requested_basis.casefold(), str(parsed_basis).casefold()),
+    )
+    for field, requested, parsed_value in identities:
+        if requested != parsed_value:
+            _raise_conversion_failure(
+                definition,
+                execution,
+                f"parsed {field} mismatch",
+                ValueError(f"requested {field} {requested!r}, parsed {parsed_value!r}"),
+            )
+
+    native_files_in_v1 = True
+    try:
+        result_v1 = _validate_v1_atomic_result(output)
+    except Exception as exc:
+        # Some older explicit v1 models predate native_files. Only use the
+        # documented fallback when removing that field alone fixes validation.
+        without_native = dict(output)
+        without_native.pop("native_files")
+        try:
+            result_v1 = _validate_v1_atomic_result(without_native)
+        except Exception:
+            _raise_conversion_failure(definition, execution, "QCSchema v1 validation", exc)
+        native_files_in_v1 = False
+        if native_files:
+            result_v1.extras["cclib_harness"]["native_input"] = execution.input_text
+
+    try:
+        result_v2 = result_v1.convert_v(2, external_input_data=input_model)
+    except Exception as exc:
+        _raise_conversion_failure(definition, execution, "QCSchema v2 conversion", exc)
+
+    if not native_files_in_v1:
+        # The fallback is represented only in cclib_harness metadata.
+        assert result_v2.native_files is None or not result_v2.native_files
+    return result_v2
+
+
 def _probe_executable(
     harness: "CCLibHarness", executable: str, environment: Optional[Mapping[str, str]] = None
 ) -> str:
@@ -725,4 +931,13 @@ class CCLibHarness(ProgramHarness):
         }
 
     def compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
-        raise NotImplementedError
+        definition = _PROGRAM_DEFINITIONS[self.program]
+        _validate_input_subset(input_data)
+        executable = which(definition.executable)
+        if executable is None:
+            raise ResourceError(
+                f"{definition.selector} executable '{definition.executable}' was not found on PATH"
+            )
+        job = definition.generator(input_data, config, executable)
+        execution = _execute_job(definition, job, config)
+        return _parse_and_convert(definition, execution, input_data)

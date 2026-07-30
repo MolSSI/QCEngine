@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 from dataclasses import replace
+from types import SimpleNamespace
 
 import pytest
 
@@ -11,7 +12,7 @@ import qcengine.programs.cclib as cclib_harness
 from qcelemental.models.v2 import AtomicInput, BasisSet
 
 from qcengine.config import TaskConfig
-from qcengine.exceptions import InputError, ResourceError
+from qcengine.exceptions import InputError, ResourceError, UnknownError
 from qcengine.programs.cclib import CCLibHarness
 
 
@@ -499,7 +500,7 @@ def test_available_programs_does_not_raise_for_unavailable_cclib(monkeypatch):
     assert "cclib-orca" not in available
 
 
-def _atomic_input(driver="energy", method="hf", basis="sto-3g", keywords=None, molecule=None):
+def _atomic_input(driver="energy", method="hf", basis="sto-3g", keywords=None, molecule=None, protocols=None):
     if molecule is None:
         molecule = {
             "symbols": ["He"],
@@ -513,6 +514,7 @@ def _atomic_input(driver="energy", method="hf", basis="sto-3g", keywords=None, m
             "driver": driver,
             "model": {"method": method, "basis": basis},
             "keywords": {} if keywords is None else keywords,
+            "protocols": {} if protocols is None else protocols,
         },
     )
 
@@ -1111,3 +1113,425 @@ def test_execution_exception_is_unknown_and_chained(monkeypatch, tmp_path):
 
     _assert_execution_message(exc_info.value, definition, job, "execution", str(original))
     assert exc_info.value.__cause__ is original
+
+
+def _fake_writer_output(driver="energy", method="hf", basis="sto-3g"):
+    return {
+        "schema_name": "qcschema_output",
+        "schema_version": 1,
+        "molecule": {
+            "geometry": [0.0, 0.0, 0.0, 0.0, 0.0, 1.4],
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+            "schema_name": "qcschema_molecule",
+            "schema_version": 2,
+            "symbols": ["H", "H"],
+            "validated": True,
+        },
+        "provenance": {"creator": "Q-Chem", "version": "6.2", "routine": "cclib.QCSchemaWriter"},
+        "success": True,
+        "error": None,
+        "stdout": None,
+        "stderr": None,
+        "extras": {
+            "atomcoords": [[[0.0, 0.0, 0.0], [0.0, 0.0, 1.4]]],
+            "atomnos": [1, 1],
+            "charge": 0,
+            "metadata": {"package": "Q-Chem", "success": True},
+            "mult": 1,
+            "natom": 2,
+            "nbasis": 2,
+            "nmo": 2,
+            "scfenergies": [-1.0],
+        },
+        "driver": driver,
+        "keywords": {},
+        "model": {"method": method, "basis": basis},
+        "properties": {
+            "calcinfo_nalpha": 1,
+            "calcinfo_natom": 2,
+            "calcinfo_nbasis": 2,
+            "calcinfo_nbeta": 1,
+            "calcinfo_nmo": 2,
+            "return_energy": -1.0,
+            "scf_total_energy": -1.0,
+        },
+        "return_result": -1.0,
+    }
+
+
+def _fake_conversion_case(
+    writer_output=None, *, parser_failure=None, parsed=None, detected=True, mismatch=False, program="qchem"
+):
+    if parsed is None:
+        parsed = SimpleNamespace(metadata={"package": "Q-Chem", "package_version": "6.2", "success": True})
+    opened = []
+
+    class FakeQChem:
+        def __init__(self, source):
+            self.source = source
+
+        def parse(self):
+            if parser_failure is not None:
+                raise parser_failure
+            return parsed
+
+    class FakeORCA(FakeQChem):
+        pass
+
+    parser_class = FakeQChem if program == "qchem" else FakeORCA
+
+    class WrongParser(parser_class):
+        pass
+
+    def ccopen(source):
+        opened.append(source.read())
+        source.seek(0)
+        if not detected:
+            return None
+        return WrongParser(source) if mismatch else parser_class(source)
+
+    class FakeWriter:
+        def __init__(self, data):
+            assert data is parsed
+
+        def as_dict(self, validate=True):
+            assert validate is False
+            if isinstance(writer_output, BaseException):
+                raise writer_output
+            return _fake_writer_output() if writer_output is None else writer_output
+
+    api = cclib_harness._CCLibAPI(
+        version="1.9.fake",
+        ccData=object,
+        QCSchemaWriter=FakeWriter,
+        ccread=ccopen,
+        QChem=FakeQChem,
+        ORCA=FakeORCA,
+    )
+    execution = cclib_harness._ExecutionResult(
+        process_success=True,
+        executable=f"/resolved/{program}",
+        input_filename="dispatch.in" if program == "qchem" else "dispatch.inp",
+        output_filename="dispatch.out",
+        input_text="complete native input",
+        output_text="complete parsed output",
+        stdout="launcher stdout",
+        stderr="launcher stderr",
+    )
+    return api, cclib_harness._PROGRAM_DEFINITIONS[program], execution, opened
+
+
+def _assert_conversion_failure(monkeypatch, match, **case):
+    api, definition, execution, _ = _fake_conversion_case(**case)
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+    with pytest.raises(UnknownError, match=match) as exc_info:
+        cclib_harness._parse_and_convert(definition, execution, _atomic_input())
+    assert definition.selector in str(exc_info.value)
+    assert exc_info.value.__cause__ is not None
+    return exc_info.value
+
+
+def test_parser_auto_detection_failure_is_bounded_stage_aware_and_chained(monkeypatch):
+    api, definition, execution, _ = _fake_conversion_case(detected=False)
+    execution = replace(execution, output_text="\n".join(f"line {index}" for index in range(1000)))
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+
+    with pytest.raises(UnknownError, match="parser auto-detection") as exc_info:
+        cclib_harness._parse_and_convert(definition, execution, _atomic_input())
+
+    assert "line 0" not in str(exc_info.value)
+    assert "line 999" in str(exc_info.value)
+    assert exc_info.value.__cause__ is not None
+
+
+def test_parser_class_mismatch_is_rejected(monkeypatch):
+    error = _assert_conversion_failure(monkeypatch, "parser identity", mismatch=True)
+    assert "QChem" in str(error)
+
+
+def test_parser_exception_is_unknown_and_chained(monkeypatch):
+    original = ValueError("parser exploded")
+    error = _assert_conversion_failure(monkeypatch, "parser parse", parser_failure=original)
+    assert error.__cause__ is original
+
+
+@pytest.mark.parametrize("metadata", [{}, {"success": False}, {"success": None}])
+def test_parser_incomplete_result_is_rejected(monkeypatch, metadata):
+    _assert_conversion_failure(monkeypatch, "parser result validation", parsed=SimpleNamespace(metadata=metadata))
+
+
+@pytest.mark.parametrize("failure", [RuntimeError("writer exploded"), NotImplementedError("unsupported method")])
+def test_writer_failure_is_unknown_and_chained(monkeypatch, failure):
+    error = _assert_conversion_failure(monkeypatch, "writer", writer_output=failure)
+    assert error.__cause__ is failure
+
+
+def test_incomplete_writer_fields_are_rejected_before_validation(monkeypatch):
+    output = _fake_writer_output()
+    output.pop("properties")
+    _assert_conversion_failure(monkeypatch, "writer output", writer_output=output)
+
+
+def test_qcschema_v1_validation_failure_is_unknown_and_chained(monkeypatch):
+    output = _fake_writer_output()
+    output["return_result"] = "not-an-energy"
+    _assert_conversion_failure(monkeypatch, "QCSchema v1 validation", writer_output=output)
+
+
+@pytest.mark.parametrize(
+    "requested,parsed",
+    [("hf", "RHF"), ("hf", "UHF"), ("mp2", "RMP2"), ("mp2", "UMP2"), ("ccsd", "RCCSD"), ("ccsd", "UCCSD")],
+)
+def test_successful_conversion_preserves_identity_data_and_aliases(monkeypatch, requested, parsed):
+    output = _fake_writer_output(driver="energy", method=parsed, basis="STO-3G")
+    api, definition, execution, opened = _fake_conversion_case(output)
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+    input_model = _atomic_input(method=requested, basis="sto-3g")
+
+    result = cclib_harness._parse_and_convert(definition, execution, input_model)
+
+    assert result.schema_version == 2
+    assert result.input_data == input_model
+    assert list(result.molecule.symbols) == ["H", "H"]
+    assert result.stdout == execution.output_text
+    assert result.provenance.creator == "Q-Chem"
+    assert result.provenance.version == "6.2"
+    assert opened == [execution.output_text]
+    assert set(result.extras) == set(output["extras"]) | {"cclib_harness"}
+    for key, value in output["extras"].items():
+        assert result.extras[key] == value
+    assert result.extras["cclib_harness"] == {
+        "selector": definition.selector,
+        "cclib_version": "1.9.fake",
+        "parser": definition.expected_parser,
+        "executable": execution.executable,
+    }
+
+
+def test_orca_conversion_preserves_writer_provenance_and_single_dispersion_value(monkeypatch):
+    output = _fake_writer_output()
+    output["provenance"] = {"creator": "ORCA", "version": "6.0.1", "routine": "cclib.QCSchemaWriter"}
+    output["extras"]["dispersionenergies"] = [-0.001]
+    api, definition, execution, opened = _fake_conversion_case(output, program="orca")
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+
+    result = cclib_harness._parse_and_convert(definition, execution, _atomic_input())
+
+    assert opened == [execution.output_text]
+    assert result.provenance.creator == "ORCA"
+    assert result.provenance.version == "6.0.1"
+    assert result.stdout == execution.output_text
+    assert result.extras["dispersionenergies"] == [-0.001]
+    assert list(result.extras).count("dispersionenergies") == 1
+    assert result.extras["cclib_harness"]["parser"] == "ORCA"
+
+
+@pytest.mark.parametrize(
+    "field,requested,parsed",
+    [
+        ("driver", "energy", "gradient"),
+        ("method", "hf", "b3lyp"),
+        ("method", "hf", "ROHF"),
+        ("basis", "sto-3g", "6-31g"),
+    ],
+)
+def test_parsed_identity_mismatch_is_rejected_without_relabeling(monkeypatch, field, requested, parsed):
+    values = {"driver": "energy", "method": "hf", "basis": "sto-3g"}
+    values[field] = parsed
+    output = _fake_writer_output(**values)
+    api, definition, execution, _ = _fake_conversion_case(output)
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+    inputs = {"driver": "energy", "method": "hf", "basis": "sto-3g"}
+    inputs[field] = requested
+
+    with pytest.raises(UnknownError, match=f"{field} mismatch"):
+        cclib_harness._parse_and_convert(definition, execution, _atomic_input(**inputs))
+
+
+@pytest.mark.parametrize(
+    "protocol,expected",
+    [("none", set()), ("input", {"input"}), ("all", {"input", "dispatch.out"})],
+)
+def test_native_files_protocols_and_complete_stdout(monkeypatch, protocol, expected):
+    api, definition, execution, _ = _fake_conversion_case()
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+
+    result = cclib_harness._parse_and_convert(
+        definition, execution, _atomic_input(protocols={"native_files": protocol})
+    )
+
+    assert set(result.native_files) == expected
+    assert "stdout" not in result.native_files
+    assert "stderr" not in result.native_files
+    assert "outfiles" not in result.extras
+    assert result.stdout == execution.output_text
+    if protocol != "none":
+        assert result.native_files["input"] == execution.input_text
+    if protocol == "all":
+        assert result.native_files["dispatch.out"] == execution.output_text
+
+
+def test_public_dispatch_returns_v1_while_direct_harness_preserves_v2_request(monkeypatch):
+    api, definition, execution, _ = _fake_conversion_case()
+    input_model = _atomic_input(protocols={"native_files": "input"})
+    job = cclib_harness._Job(
+        command=[execution.executable],
+        infiles={execution.input_filename: execution.input_text},
+        outfiles=[execution.output_filename],
+        input_filename=execution.input_filename,
+        output_filename=execution.output_filename,
+        input_text=execution.input_text,
+        executable=execution.executable,
+    )
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+    monkeypatch.setattr(cclib_harness, "_check_cclib_compatibility", lambda: (True, api.version))
+    monkeypatch.setattr(cclib_harness, "which", lambda name: execution.executable)
+    monkeypatch.setattr(cclib_harness, "_probe_executable", lambda *args, **kwargs: "6.2")
+    monkeypatch.setattr(cclib_harness, "_execute_job", lambda actual_definition, actual_job, config: execution)
+    monkeypatch.setitem(
+        cclib_harness._PROGRAM_DEFINITIONS,
+        "qchem",
+        replace(
+            definition,
+            generator=lambda input_data, config, executable: job,
+            preflight=lambda executable, environment: dict(environment),
+        ),
+    )
+
+    direct = qcng.get_program("cclib-qchem", check=False).compute(input_model, _task_config())
+    public = qcng.compute(
+        input_model,
+        "cclib-qchem",
+        raise_error=True,
+        task_config={"ncores": 1, "memory": 1.0},
+        return_version=1,
+        return_dict=False,
+    )
+
+    assert direct.schema_version == 2
+    assert direct.input_data == input_model
+    assert public.schema_version == 1
+    assert public.driver.value == input_model.specification.driver.value
+    assert public.model.method == input_model.specification.model.method
+    assert public.model.basis == input_model.specification.model.basis
+
+
+@pytest.mark.parametrize("protocol,retains_input", [("none", False), ("all", True)])
+def test_native_files_v1_validation_incompatibility_uses_only_documented_input_fallback(
+    monkeypatch, protocol, retains_input
+):
+    api, definition, execution, _ = _fake_conversion_case()
+    monkeypatch.setattr(cclib_harness, "_load_cclib_api", lambda: api)
+    original_validate = cclib_harness._validate_v1_atomic_result
+
+    def reject_native_files(output):
+        if "native_files" in output:
+            raise ValueError("native_files is not a permitted v1 field")
+        return original_validate(output)
+
+    monkeypatch.setattr(cclib_harness, "_validate_v1_atomic_result", reject_native_files)
+
+    result = cclib_harness._parse_and_convert(
+        definition, execution, _atomic_input(protocols={"native_files": protocol})
+    )
+
+    assert not result.native_files
+    if retains_input:
+        assert result.extras["cclib_harness"]["native_input"] == execution.input_text
+    else:
+        assert "native_input" not in result.extras["cclib_harness"]
+
+
+_REAL_CCLIB_FIXTURES = [
+    pytest.param("qchem", "QChem/basicQChem5.1/water_mp2.out", id="qchem-water-mp2"),
+    pytest.param(
+        "qchem",
+        "QChem/basicQChem5.1/dvb_dispersion_bp86_d3zero.out",
+        id="qchem-bp86-energy",
+    ),
+    pytest.param("qchem", "QChem/basicQChem5.1/water_ir.out", id="qchem-water-ir"),
+    pytest.param("qchem", "QChem/basicQChem5.1/water_ccsd.out", id="qchem-water-ccsd"),
+    pytest.param("orca", "ORCA/basicORCA6.0/water_mp2.out", id="orca-water-mp2"),
+    pytest.param("orca", "ORCA/basicORCA6.0/dvb_sp_hf.out", id="orca-hf-energy"),
+    pytest.param(
+        "orca",
+        "ORCA/basicORCA6.0/dvb_ir.out",
+        id="orca-dvb-ir-deferred",
+        marks=pytest.mark.skip(
+            reason=(
+                "deferred: cclib's successful ORCA DFT parse lacks metadata.functional, "
+                "so QCSchemaWriter raises KeyError"
+            )
+        ),
+    ),
+    pytest.param("orca", "ORCA/basicORCA6.0/water_ccsd.out", id="orca-water-ccsd"),
+]
+
+
+@pytest.mark.parametrize("program,relative_path", _REAL_CCLIB_FIXTURES)
+def test_real_cclib_fixture_parse_and_conversion(program, relative_path):
+    source_root = os.environ.get("CCLIB_SOURCE_ROOT")
+    if source_root is None:
+        pytest.skip("CCLIB_SOURCE_ROOT is not set")
+    data_root = os.path.join(source_root, "data")
+    if not os.path.isdir(data_root):
+        pytest.skip(f"cclib fixture data directory is absent: {data_root}")
+    fixture = os.path.join(data_root, relative_path)
+    if not os.path.isfile(fixture):
+        pytest.skip(f"cclib fixture is absent: {fixture}")
+
+    api = cclib_harness._load_cclib_api()
+    initial_parser = api.ccopen(fixture)
+    assert type(initial_parser) is getattr(api, cclib_harness._PROGRAM_DEFINITIONS[program].parser_name)
+    try:
+        parsed = initial_parser.parse()
+    finally:
+        initial_parser.inputfile.close()
+    assert parsed.metadata["success"] is True
+    writer_output = api.QCSchemaWriter(parsed).as_dict(validate=False)
+    initial_v1 = cclib_harness._validate_v1_atomic_result(writer_output)
+
+    input_model = AtomicInput(
+        molecule=initial_v1.molecule.convert_v(2),
+        specification={
+            "driver": writer_output["driver"],
+            "model": writer_output["model"],
+            "keywords": {},
+            "protocols": {"native_files": "none"},
+        },
+    )
+    with open(fixture, encoding="utf-8", errors="replace") as handle:
+        output_text = handle.read()
+    definition = cclib_harness._PROGRAM_DEFINITIONS[program]
+    execution = cclib_harness._ExecutionResult(
+        process_success=True,
+        executable=f"/fixture/{program}",
+        input_filename=definition.input_filename,
+        output_filename=definition.output_filename,
+        input_text=f"fixture input for {relative_path}",
+        output_text=output_text,
+        stdout=output_text if program == "orca" else "",
+        stderr="",
+    )
+
+    result = cclib_harness._parse_and_convert(definition, execution, input_model)
+
+    assert result.success is True
+    assert result.schema_version == 2
+    assert result.input_data == input_model
+    assert result.molecule == initial_v1.molecule.convert_v(2)
+    assert result.stdout == output_text
+    assert result.provenance.creator == initial_v1.provenance.creator
+    assert result.provenance.version == initial_v1.provenance.version
+    assert result.input_data.specification.driver.value == writer_output["driver"].lower()
+    assert result.input_data.specification.model.method.lower() == writer_output["model"]["method"].lower()
+    assert result.input_data.specification.model.basis.lower() == writer_output["model"]["basis"].lower()
+    flat_extras = {key: value for key, value in result.extras.items() if key != "cclib_harness"}
+    assert flat_extras
+    assert result.extras["cclib_harness"] == {
+        "selector": definition.selector,
+        "cclib_version": api.version,
+        "parser": definition.parser_name,
+        "executable": execution.executable,
+    }
