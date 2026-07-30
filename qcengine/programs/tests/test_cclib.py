@@ -1808,7 +1808,24 @@ def test_orca_demonstration_selects_strict_versioned_reference(version):
     assert any("ORCA extras reference version" in line for line in comparisons)
 
 
-@pytest.mark.parametrize("version", [None, "6.2.0", "not-a-version"])
+@pytest.mark.parametrize(
+    "version",
+    [
+        None,
+        "",
+        "6",
+        "6.1",
+        "6.1.not-a-version",
+        "6.1.1.2",
+        " 6.1.1",
+        "6.1.1 ",
+        "v6.1.1",
+        "6.1.1dev",
+        "6.1.+1",
+        "6.2.0",
+        "not-a-version",
+    ],
+)
 def test_orca_demonstration_rejects_missing_or_unsupported_reference_version(version):
     demonstration = importlib.import_module("orca_water_ccsd")
     result = _orca_demonstration_result()

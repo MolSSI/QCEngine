@@ -2,6 +2,7 @@
 
 import json
 import math
+import re
 import sys
 from pathlib import Path
 from typing import Any, List
@@ -121,6 +122,7 @@ _ORCA_EXTRA_REFERENCES = {
         },
     },
 }
+_ORCA_VERSION = re.compile(r"^([0-9]+)\.([0-9]+)\.([0-9]+)$")
 _TASK_CONFIG = {"ncores": 4, "memory": 2.734375}
 
 
@@ -187,14 +189,15 @@ def _matches(actual: Any, expected: Any, tolerance: float) -> bool:
     return actual == expected
 
 
-def _extra_reference(version: Any) -> Any:
-    """Select strict extras by parsed ORCA major.minor; patch releases share a reference."""
-    try:
-        major, minor = str(version).split(".", 2)[:2]
-        key = (int(major), int(minor))
-    except (TypeError, ValueError):
+def _orca_reference(version: Any) -> Any:
+    """Validate major.minor.patch provenance, then select the strict major.minor reference."""
+    if not isinstance(version, str):
         return None
-    return _ORCA_EXTRA_REFERENCES.get(key)
+    match = _ORCA_VERSION.fullmatch(version)
+    if match is None:
+        return None
+    major, minor, _patch = (int(component) for component in match.groups())
+    return _ORCA_EXTRA_REFERENCES.get((major, minor))
 
 
 def _line(label: str, passed: bool) -> str:
@@ -266,7 +269,7 @@ def compare_result(result: Any) -> List[str]:
     )
 
     version = _get(provenance, "version")
-    reference = _extra_reference(version)
+    reference = _orca_reference(version)
     checks.append((f"ORCA extras reference version {version!r}", reference is not None))
     if reference is None:
         flat_ok = orbital_ok = scf_ok = False
