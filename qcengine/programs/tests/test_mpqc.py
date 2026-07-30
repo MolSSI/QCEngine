@@ -11,6 +11,7 @@ from qcengine.config import get_config
 from qcengine.exceptions import InputError
 from qcengine.programs.mpqc.germinate import muster_modelchem
 from qcengine.programs.mpqc.keywords import deep_merge, extract_reserved, format_keywords
+from qcengine.programs.mpqc.runner import _build_environment, _madness_threads
 from qcengine.testing import uusing
 
 
@@ -319,3 +320,75 @@ def _assert_subtree(actual, expected, tnm):
 def test_build_input_rejects(kwargs, match):
     with pytest.raises(InputError, match=match):
         _built_tree(_atomic_input(**kwargs))
+
+
+_MPI_TASK_CONFIG = {
+    "ncores": 16,
+    "memory": 4.0,
+    "use_mpiexec": True,
+    "cores_per_rank": 16,
+    # get_config rejects use_mpiexec without a template (config.py:334)
+    "mpiexec_command": "mpirun -n {total_ranks}",
+}
+
+
+@pytest.mark.parametrize(
+    "task_config, expected",
+    [
+        # serial: full subscription. MPQC creates a communication thread only
+        # when nproc > 1, so the whole core count goes to the pool - matching
+        # MADNESS's own default.
+        pytest.param({"ncores": 16, "memory": 4.0}, 16, id="serial"),
+        # MPI: two cores held back per rank - one for the MADNESS
+        # communication thread, one as margin against launcher binding the
+        # rank to fewer usable cores than cores_per_rank advertises.
+        pytest.param(_MPI_TASK_CONFIG, 14, id="mpi-reserves-comm-thread-and-margin"),
+        pytest.param({"ncores": 1, "memory": 4.0}, 1, id="serial-1-core"),
+        # small ranks must not go non-positive
+        pytest.param({**_MPI_TASK_CONFIG, "ncores": 2, "cores_per_rank": 2}, 1, id="clamp-small-rank"),
+        # TaskConfig.cores_per_rank defaults to 1, which would give -1 unclamped
+        pytest.param(
+            {"ncores": 4, "memory": 4.0, "use_mpiexec": True, "mpiexec_command": "mpirun -n {total_ranks}"},
+            1,
+            id="clamp-default-cores-per-rank",
+        ),
+    ],
+)
+def test_madness_threads(task_config, expected):
+    assert _madness_threads(get_config(task_config=task_config)) == expected
+
+
+def test_build_environment(monkeypatch):
+    # execute() assigns this dict straight to Popen(env=...), replacing the child
+    # environment, so inherited vars must be carried over.
+    # Both basis-lookup variables must survive: MPQC_BASIS_PATH dirs are
+    # searched first, libint2's own library (LIBINT_DATA_PATH) last.
+    monkeypatch.setenv("LIBINT_DATA_PATH", "/opt/libint/share")
+    monkeypatch.setenv("MPQC_BASIS_PATH", "/opt/mybases:/opt/morebases")
+    # compute.py wraps harnesses in environ_context(config=config), which sets
+    # both thread counts to config.ncores (util.py:429). The override must win.
+    monkeypatch.setenv("OMP_NUM_THREADS", "8")
+    monkeypatch.setenv("MKL_NUM_THREADS", "8")
+
+    config = get_config(task_config={"ncores": 8, "memory": 2.0})
+    env = _build_environment(config, {})
+    assert env["LIBINT_DATA_PATH"] == "/opt/libint/share"
+    assert env["MPQC_BASIS_PATH"] == "/opt/mybases:/opt/morebases"
+    assert "PATH" in env
+    assert (env["OMP_NUM_THREADS"], env["MKL_NUM_THREADS"]) == ("1", "1")
+    assert env["MAD_NUM_THREADS"] == "8"  # pool total: 7 workers + 1 main
+    assert env["MAD_SEND_BUFFERS"] == "32"
+    assert env["MAD_RECV_BUFFERS"] == "32"
+    assert env["MAD_BUFFER_SIZE"] == "10MB"
+    assert env["MAD_WAIT_TIMEOUT"] == "10000"
+    assert env["PARSEC_MCA_bind_threads"] == "0"
+    assert env["MPQC_TA_TENSOR_MEM_MAX"] == str(int(2.0 * 1024**3))
+
+    # overrides apply last and are stringified; None removes
+    env = _build_environment(config, {"MAD_BUFFER_SIZE": None, "MAD_NUM_THREADS": 30})
+    assert "MAD_BUFFER_SIZE" not in env
+    assert env["MAD_NUM_THREADS"] == "30"
+
+    # and build_input wires them through
+    job = qcng.get_program("mpqc", check=False).build_input(_atomic_input(), config)
+    assert (job["environment"]["MAD_NUM_THREADS"], job["environment"]["OMP_NUM_THREADS"]) == ("8", "1")

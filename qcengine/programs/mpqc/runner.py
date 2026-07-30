@@ -24,6 +24,85 @@ _UNITS_SYSTEM = "2018CODATA"
 #: MPQC's own ExcitationEnergy default.
 _DEFAULT_N_ROOTS = 3
 
+#: MADNESS RMI and task-backend tuning. Machine-dependent; override per site
+#: with the mpqc_env keyword rather than editing this table.
+_MADNESS_DEFAULTS = {
+    "MAD_SEND_BUFFERS": "32",  # more in-flight one-sided sends
+    "MAD_RECV_BUFFERS": "32",  # more pre-posted receives
+    "MAD_BUFFER_SIZE": "10MB",  # TA bulk tile transfers; default ~1.5 MiB
+    "MAD_WAIT_TIMEOUT": "10000",  # spin duration before yielding
+    # OpenMPI already bound cores; letting PaRSEC re-pin fights it. Harmless
+    # on non-PaRSEC MADNESS builds.
+    "PARSEC_MCA_bind_threads": "0",
+}
+
+
+def _madness_threads(config: TaskConfig) -> int:
+    """Size of the MADWorld thread pool, main thread included.
+
+    ``MAD_NUM_THREADS`` counts the whole pool, not the workers: setting it to N
+    produces N-1 worker threads plus the main thread, as the ``ThreadPool:`` line
+    MPQC prints at startup confirms. MADNESS's own default is ``ncores``.
+
+    Serial runs therefore get the full core count - MPQC spawns a communication
+    thread only when nproc > 1.
+
+    Under MPI two cores are held back per rank. The first is that communication
+    thread, which also drives MPI progress. The second is a safety margin:
+    QCEngine's TaskConfig does not describe MPI placement, so this function
+    cannot see how the launcher pinned the rank, and binding by NUMA domain or
+    L3 cache group can leave fewer cores usable than ``cores_per_rank``
+    advertises. Over-subscribing a MADWorld pool degrades throughput quietly
+    rather than erroring, so the margin is cheap insurance. Sites that pin
+    explicitly and want the core back can set MAD_NUM_THREADS through the
+    ``mpqc_env`` keyword, which is applied after this value.
+
+    NOTE: the MPI branch has not been validated on a real multi-rank run; check
+    it on a cluster before relying on the count.
+    """
+    if config.use_mpiexec:
+        return max(1, config.cores_per_rank - 2)
+    return max(1, config.ncores)
+
+
+def _build_environment(config: TaskConfig, overrides: Dict[str, Any]) -> Dict[str, str]:
+    """Assemble the child environment for an MPQC run.
+
+    Starts from ``os.environ.copy()`` because ``qcengine.util.execute`` assigns
+    this dict straight to ``subprocess.Popen(env=...)``, replacing the child
+    environment wholesale. Omitting PATH, MPQC_BASIS_PATH, LIBINT_DATA_PATH, or
+    LD_LIBRARY_PATH would break basis-set lookup and dynamic linking.
+
+    Neither basis-path variable is set here: both are site configuration, and
+    both are inherited. A caller who needs to point at a private basis
+    directory sets ``MPQC_BASIS_PATH`` through the ``mpqc_env`` keyword, which
+    is applied by the override loop below.
+    """
+    env = os.environ.copy()
+
+    # Threading: the MADNESS task pool owns parallelism, BLAS must not.
+    # qcengine/compute.py wraps harnesses in environ_context(config=config),
+    # which sets OMP/MKL_NUM_THREADS to config.ncores - so these are active
+    # overrides, not defaults.
+    env["MAD_NUM_THREADS"] = str(_madness_threads(config))
+    env["MKL_NUM_THREADS"] = "1"
+    env["OMP_NUM_THREADS"] = "1"
+
+    env.update(_MADNESS_DEFAULTS)
+
+    # Read unconditionally and passed to TiledArray. Note it only constrains
+    # allocation in a build configured with TA_TENSOR_MEM_PROFILE, and MPQC
+    # never echoes the limit to stdout, so this cannot be verified from output.
+    env["MPQC_TA_TENSOR_MEM_MAX"] = str(int(config.memory * 1024**3))
+
+    for key, value in overrides.items():
+        if value is None:
+            env.pop(key, None)
+        else:
+            env[key] = str(value)
+
+    return env
+
 
 def _molecule_block(molecule) -> Dict[str, Any]:
     """Build MPQC's ``atoms`` block from a QCSchema Molecule.
@@ -179,7 +258,7 @@ class MPQCHarness(ProgramHarness):
             "command": command,
             "scratch_directory": config.scratch_directory,
             "scratch_messy": config.scratch_messy,
-            "environment": os.environ.copy(),
+            "environment": _build_environment(config, mpqc_env),
         }
 
     @staticmethod
