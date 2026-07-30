@@ -110,6 +110,8 @@ markers = [
     "berny: tests using pyberny software; skip if unavailable",
     "cclib-qchem: tests using cclib with Q-Chem software; skip if unavailable",
     "cclib-orca: tests using cclib with ORCA software; skip if unavailable",
+    "cclib_qchem: live tests using cclib with Q-Chem software",
+    "cclib_orca: live tests using cclib with ORCA software",
     "cfour: tests using Cfour software; skip if unavailable",
     "classic-dftd3: tests using DFTD3 executable software; skip if unavailable",
     "classic-dftd3_321: tests using DFTD3 classic executable >=v3.2.1 software; skip if unavailable",
