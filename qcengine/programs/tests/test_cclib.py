@@ -1,3 +1,5 @@
+import copy
+import importlib
 import json
 import os
 import subprocess
@@ -14,6 +16,26 @@ from qcelemental.models.v2 import AtomicInput, BasisSet
 from qcengine.config import TaskConfig
 from qcengine.exceptions import InputError, ResourceError, UnknownError
 from qcengine.programs.cclib import CCLibHarness
+from qcengine.testing import uusing
+
+
+def test_cclib_testing_registration(monkeypatch):
+    from qcengine import testing
+
+    for selector in ("cclib-qchem", "cclib-orca"):
+        assert selector in testing._programs
+        monkeypatch.setitem(testing._programs, selector, True)
+        testing._using_cache.pop(selector, None)
+
+        def marked_test():
+            pass
+
+        marked_test = testing.uusing(selector)(marked_test)
+        marks = {mark.name: mark for mark in marked_test.pytestmark}
+        assert set(marks) == {"skipif", "addon", selector}
+        assert marks["skipif"].args == (False,)
+        assert testing.has_program(selector) is True
+        testing._using_cache.pop(selector, None)
 
 
 def test_registered_instances_are_frozen_and_independent():
@@ -1474,6 +1496,333 @@ def test_native_files_v1_validation_incompatibility_uses_only_documented_input_f
         assert result.extras["cclib_harness"]["native_input"] == execution.input_text
     else:
         assert "native_input" not in result.extras["cclib_harness"]
+
+
+def _qchem_demonstration_result():
+    geometry = [
+        -0.0,
+        0.0,
+        0.22517858316070177,
+        -1.4941103633283772,
+        -0.0,
+        -0.9007143324538345,
+        1.4941103633283772,
+        -0.0,
+        -0.9007143324538345,
+    ]
+    return {
+        "schema_name": "qcschema_output",
+        "schema_version": 1,
+        "success": True,
+        "driver": "energy",
+        "model": {"method": "mp2", "basis": "sto-3g"},
+        "molecule": {
+            "symbols": ["O", "H", "H"],
+            "geometry": geometry,
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        },
+        "provenance": {
+            "creator": "QChem",
+            "version": "5.1.2",
+            "routine": "cclib.io.qcschemawriter.QCSchemaWriter",
+        },
+        "properties": {
+            "calcinfo_nbasis": 7,
+            "calcinfo_nmo": 7,
+            "calcinfo_nalpha": 5,
+            "calcinfo_nbeta": 5,
+            "calcinfo_natom": 3,
+            "return_energy": -75.00228214,
+            "scf_dipole_moment": [0.0, 0.0, -0.6584056190],
+            "scf_total_energy": -74.9643287618,
+            "scf_iterations": 6,
+            "mp2_correlation_energy": -0.0379533782,
+            "mp2_total_energy": -75.00228214,
+        },
+        "return_result": -75.00228214,
+        "extras": {
+            "atomcharges": {"mulliken": [-0.339215, 0.169607, 0.169607]},
+            "atomcoords": [[geometry[index : index + 3] for index in range(0, 9, 3)]],
+            "atomnos": [8, 1, 1],
+            "homos": [4],
+            "moenergies": [[-20.244, -1.251, -0.603, -0.445, -0.388, 0.571, 0.709]],
+            "mosyms": [["A1", "A1", "B1", "A1", "B2", "A1", "B1"]],
+            "mpenergies": [[-75.00228214]],
+            "scfenergies": [-74.9643287618],
+            "scftargets": [[1.0e-5]],
+            "scfvalues": [[[0.398], [0.0668], [0.00822], [0.0016], [2.83e-5], [8.23e-6]]],
+            "cclib_harness": {
+                "selector": "cclib-qchem",
+                "cclib_version": "1.9.dev",
+                "parser": "QChem",
+                "executable": "/resolved/qchem",
+            },
+        },
+    }
+
+
+def _orca_demonstration_result():
+    geometry = [
+        3.372998617495434,
+        2.385631834752722,
+        0.9675114303425262,
+        5.004442645304063,
+        2.027541962061342,
+        0.24874653962013937,
+        2.2358634804056874,
+        2.3750380300934055,
+        -0.45133273917372035,
+    ]
+    return {
+        "schema_name": "qcschema_output",
+        "schema_version": 1,
+        "success": True,
+        "driver": "energy",
+        "model": {"method": "ccsd", "basis": "sto-3g"},
+        "molecule": {
+            "symbols": ["O", "H", "H"],
+            "geometry": geometry,
+            "molecular_charge": 0,
+            "molecular_multiplicity": 1,
+        },
+        "provenance": {
+            "creator": "ORCA",
+            "version": "6.1.1",
+            "routine": "cclib.io.qcschemawriter.QCSchemaWriter",
+        },
+        "properties": {
+            "calcinfo_nbasis": 7,
+            "calcinfo_nmo": 7,
+            "calcinfo_nalpha": 5,
+            "calcinfo_nbeta": 5,
+            "calcinfo_natom": 3,
+            "return_energy": -75.013487814,
+            "scf_total_energy": -74.96357424008319,
+            "ccsd_correlation_energy": -0.04991357391681104,
+            "ccsd_total_energy": -75.013487814,
+            "mp2_correlation_energy": 74.9277738680832,
+            "mp2_total_energy": -0.035800372,
+        },
+        "return_result": -75.013487814,
+        "extras": {
+            "atomcharges": {"mulliken": [-0.329397, 0.164693, 0.164703]},
+            "atomcoords": [[geometry[index : index + 3] for index in range(0, 9, 3)]],
+            "atomnos": [8, 1, 1],
+            "ccenergies": [-75.013487814],
+            "homos": [4],
+            "moenergies": [[-20.242269, -1.265784, -0.615347, -0.452279, -0.390877, 0.60058, 0.736585]],
+            "mosyms": [["A", "A", "A", "A", "A", "A", "A"]],
+            "mpenergies": [[-0.035800372]],
+            "scfenergies": [-74.96357424008319],
+            "scftargets": [[1.0e-6, 1.0e-5, 1.0e-6]],
+            "scfvalues": [[[0.0, 0.0263, 0.0744]] for _ in range(9)],
+            "cclib_harness": {
+                "selector": "cclib-orca",
+                "cclib_version": "1.9.dev",
+                "parser": "ORCA",
+                "executable": "/resolved/orca",
+            },
+        },
+    }
+
+
+def test_qchem_demonstration_comparison_covers_all_acceptance_criteria():
+    demonstration = importlib.import_module("qchem_water_mp2")
+    comparisons = demonstration.compare_result(_qchem_demonstration_result())
+
+    assert comparisons
+    assert all(line.startswith("PASS ") for line in comparisons), comparisons
+    labels = "\n".join(comparisons)
+    for required in (
+        "return_result",
+        "return_energy",
+        "scf_total_energy",
+        "mp2_total_energy",
+        "mp2_correlation_energy",
+        "scf_dipole_moment",
+        "calcinfo_nbasis",
+        "calcinfo_nmo",
+        "calcinfo_nalpha",
+        "calcinfo_nbeta",
+        "calcinfo_natom",
+        "scf_iterations",
+        "schema identity",
+        "model",
+        "molecule",
+        "provenance",
+        "cclib-qchem metadata",
+        "flat extras",
+        "Mulliken charges",
+        "seven MO energies",
+        "six SCF rows",
+    ):
+        assert required in labels
+
+
+@pytest.mark.parametrize(
+    "path,bad_value,failed_label",
+    [
+        (("return_result",), -1.0, "return_result"),
+        (("properties", "scf_dipole_moment"), [0.0, 0.0, 0.0], "scf_dipole_moment"),
+        (("properties", "calcinfo_nbasis"), 8, "calcinfo_nbasis"),
+        (("molecule", "symbols"), ["H", "O", "H"], "molecule"),
+        (("provenance", "routine"), "other.writer", "provenance"),
+        (("extras", "atomcharges", "mulliken"), [0.0, 0.0, 0.0], "Mulliken charges"),
+        (("extras", "moenergies"), [[0.0] * 7], "seven MO energies"),
+        (("extras", "scfvalues"), [[[0.0]]], "six SCF rows"),
+    ],
+)
+def test_qchem_demonstration_comparison_reports_failures(path, bad_value, failed_label):
+    demonstration = importlib.import_module("qchem_water_mp2")
+    result = _qchem_demonstration_result()
+    target = result
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = bad_value
+
+    failures = [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
+    assert any(failed_label in line for line in failures)
+
+
+def test_orca_demonstration_comparison_checks_ccsd_scf_provenance_extras_and_anomalous_mp2():
+    demonstration = importlib.import_module("orca_water_ccsd")
+    comparisons = demonstration.compare_result(_orca_demonstration_result())
+
+    assert comparisons
+    assert all(line.startswith("PASS ") for line in comparisons), comparisons
+    labels = "\n".join(comparisons)
+    for required in (
+        "return_result",
+        "ccsd_total_energy",
+        "scf_total_energy",
+        "ccsd_correlation_energy",
+        "calcinfo_nbasis",
+        "calcinfo_nmo",
+        "calcinfo_nalpha",
+        "calcinfo_nbeta",
+        "calcinfo_natom",
+        "provenance",
+        "cclib-orca metadata",
+        "flat CCSD extras",
+        "orbital extras",
+        "SCF extras",
+        "anomalous MP2 writer fields present but not numerically endorsed",
+    ):
+        assert required in labels
+
+
+def test_demonstration_main_calls_compute_writes_complete_json_and_reports(monkeypatch, tmp_path, capsys):
+    cases = [
+        ("qchem_water_mp2", _qchem_demonstration_result(), "cclib-qchem", None),
+        (
+            "orca_water_ccsd",
+            _orca_demonstration_result(),
+            "cclib-orca",
+            {"ncores": 4, "memory": 2.734375},
+        ),
+    ]
+    for module_name, result, selector, task_config in cases:
+        demonstration = importlib.import_module(module_name)
+        calls = []
+
+        def fake_compute(atomic_input, program, **kwargs):
+            calls.append((atomic_input, program, kwargs))
+            return copy.deepcopy(result)
+
+        monkeypatch.setattr(demonstration.qcengine, "compute", fake_compute)
+        output_path = tmp_path / f"{module_name}.json"
+        assert demonstration.main(output_path=output_path) == 0
+        assert json.loads(output_path.read_text()) == result
+        assert len(calls) == 1
+        atomic_input, actual_selector, kwargs = calls[0]
+        assert actual_selector == selector
+        assert kwargs["raise_error"] is True
+        assert kwargs["return_version"] == 1
+        if task_config is None:
+            assert "task_config" not in kwargs
+        else:
+            assert kwargs["task_config"] == task_config
+        assert atomic_input.specification.driver.value == "energy"
+        assert atomic_input.specification.model.basis == "sto-3g"
+        assert "FAIL " not in capsys.readouterr().out
+
+
+def test_demonstration_serializes_qcschema_v1_models_without_pydantic_v2_mode():
+    demonstration = importlib.import_module("qchem_water_mp2")
+    result = _qchem_demonstration_result()
+
+    class V1Result:
+        def model_dump(self, **kwargs):
+            if "mode" in kwargs:
+                raise TypeError("dict() got an unexpected keyword argument 'mode'")
+            return result
+
+        def json(self):
+            return json.dumps(result)
+
+    assert demonstration._jsonable(V1Result()) == result
+
+
+def test_demonstration_main_returns_nonzero_when_a_comparison_fails(monkeypatch, tmp_path, capsys):
+    demonstration = importlib.import_module("qchem_water_mp2")
+    result = _qchem_demonstration_result()
+    result["return_result"] = 0.0
+    monkeypatch.setattr(demonstration.qcengine, "compute", lambda *args, **kwargs: result)
+
+    assert demonstration.main(output_path=tmp_path / "failed.json") != 0
+    assert "FAIL return_result" in capsys.readouterr().out
+
+
+@uusing("cclib-qchem")
+def test_live_cclib_qchem_water_mp2_energy():
+    result = qcng.compute(
+        _water_input(),
+        "cclib-qchem",
+        raise_error=True,
+        return_version=1,
+    )
+
+    assert result.success is True
+    assert result.return_result == pytest.approx(-75.00228214, abs=1.0e-6)
+
+
+@uusing("cclib-orca")
+def test_live_cclib_orca_water_mp2_energy():
+    ccsd_input = importlib.import_module("orca_water_ccsd").build_atomic_input()
+    input_model = AtomicInput(
+        molecule=ccsd_input.molecule,
+        specification={
+            "driver": "energy",
+            "model": {"method": "mp2", "basis": "sto-3g"},
+            "keywords": {},
+        },
+    )
+    result = qcng.compute(
+        input_model,
+        "cclib-orca",
+        raise_error=True,
+        task_config={"ncores": 4, "memory": 2.734375},
+        return_version=1,
+    )
+
+    assert result.success is True
+    assert float(result.return_result) == pytest.approx(-74.999371925, abs=5.0e-6)
+
+
+@uusing("cclib-orca")
+def test_live_cclib_orca_water_ccsd_demonstration():
+    demonstration = importlib.import_module("orca_water_ccsd")
+    result = qcng.compute(
+        demonstration.build_atomic_input(),
+        "cclib-orca",
+        raise_error=True,
+        task_config={"ncores": 4, "memory": 2.734375},
+        return_version=1,
+        return_dict=True,
+    )
+
+    assert not [line for line in demonstration.compare_result(result) if line.startswith("FAIL ")]
 
 
 _REAL_CCLIB_FIXTURES = [

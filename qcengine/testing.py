@@ -181,6 +181,8 @@ _programs = {
     "gcp": which("gcp", return_bool=True),  # mark is classic-gcp
     "geometric": which_import("geometric", return_bool=True),
     "berny": which_import("berny", return_bool=True),
+    "cclib-qchem": is_program_new_enough("cclib-qchem", "5.1"),
+    "cclib-orca": is_program_new_enough("cclib-orca", "6.0"),
     "mdi": is_mdi_new_enough("1.2"),
     "molpro": is_program_new_enough("molpro", "2018.1"),
     "mopac": is_program_new_enough("mopac", "2016"),
