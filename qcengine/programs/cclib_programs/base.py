@@ -4,29 +4,26 @@ External cclib modules are intentionally imported only by the loader below so th
 cclib remains an optional dependency of QCEngine.
 """
 
-import math
 import os
 import re
-import stat
 import sys
 import tempfile
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Literal, Mapping, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, List, Mapping, Optional, Tuple, Type
 
-from qcelemental import constants
-from qcelemental.util import parse_version, safe_version, which
+from qcelemental.util import parse_version, which
 
-from ..config import TaskConfig
-from ..exceptions import InputError, ResourceError, UnknownError
-from ..util import execute, temporary_directory
-from .model import ProgramHarness
+from ...config import TaskConfig
+from ...exceptions import InputError, ResourceError, UnknownError
+from ...util import execute, temporary_directory
+from ..model import ProgramHarness
 
 if TYPE_CHECKING:
     from qcelemental.models.v2 import AtomicInput, AtomicResult
 
 
 @dataclass(frozen=True)
-class _CCLibAPI:
+class CCLibAPI:
     """Lazily imported cclib interfaces used with real parser output."""
 
     version: str
@@ -35,7 +32,9 @@ class _CCLibAPI:
 
 
 @dataclass(frozen=True)
-class _Job:
+class Job:
+    """A complete native-program execution request."""
+
     command: List[str]
     infiles: Dict[str, str]
     outfiles: List[str]
@@ -46,7 +45,9 @@ class _Job:
 
 
 @dataclass(frozen=True)
-class _ExecutionResult:
+class ExecutionResult:
+    """Native-program output retained for cclib conversion."""
+
     process_success: bool
     executable: str
     input_filename: str
@@ -77,13 +78,13 @@ def _validate_input_subset(input_model: "AtomicInput") -> Tuple[str, str, str]:
     return driver, method, basis
 
 
-def _load_cclib_api() -> _CCLibAPI:
+def _load_cclib_api() -> CCLibAPI:
     """Import the optional cclib writer and auto-detecting opener on demand."""
     import cclib
     from cclib.io import ccopen
     from cclib.io.qcschemawriter import QCSchemaWriter
 
-    return _CCLibAPI(version=cclib.__version__, QCSchemaWriter=QCSchemaWriter, ccopen=ccopen)
+    return CCLibAPI(version=cclib.__version__, QCSchemaWriter=QCSchemaWriter, ccopen=ccopen)
 
 
 def _validate_v1_atomic_result(output: Dict[str, Any]) -> Any:
@@ -101,363 +102,23 @@ def _validate_v1_atomic_result(output: Dict[str, Any]) -> Any:
         return AtomicResult(**output)
 
 
-QCHEM_RESERVED = {
-    "JOBTYPE",
-    "METHOD",
-    "BASIS",
-    "MEM_TOTAL",
-    "INPUT_BOHR",
-    "SCF_FINAL_PRINT",
-    "PRINT_GENERAL_BASIS",
-    "PRINT_ORBITALS",
-    "MOLDEN_FORMAT",
-}
-
-
-def _render_qchem_scalar(key: str, value: Any) -> str:
-    if "\n" in key or "\r" in key:
-        raise InputError(f"Q-Chem keyword contains a newline: {key!r}")
-    if isinstance(value, str):
-        if "\n" in value or "\r" in value:
-            raise InputError(f"Q-Chem keyword {key!r} contains a newline")
-        return value
-    if isinstance(value, bool):
-        return "TRUE" if value else "FALSE"
-    if isinstance(value, int):
-        return str(value)
-    if isinstance(value, float) and math.isfinite(value):
-        return str(value)
-    raise InputError(f"Q-Chem keyword {key!r} must have a string, bool, int, or finite float value")
-
-
-def _build_qchem_input(input_model: "AtomicInput", config: TaskConfig, executable: str) -> _Job:
-    driver, method, basis = _validate_input_subset(input_model)
-    jobtype = {"energy": "sp", "gradient": "force", "hessian": "freq"}[driver.lower()]
-
-    user_options: Dict[str, str] = {}
-    for key, value in input_model.specification.keywords.items():
-        if (
-            not isinstance(key, str)
-            or not key
-            or any(character.isspace() or not character.isprintable() for character in key)
-        ):
-            raise InputError(f"Q-Chem keyword name must be exactly one non-empty native token: {key!r}")
-        normalized_key = key.upper()
-        if normalized_key in QCHEM_RESERVED:
-            raise InputError(f"Q-Chem keyword {key!r} is reserved by CCLibHarness")
-        if normalized_key in user_options:
-            raise InputError(f"Q-Chem keyword collision after case normalization: {key!r}")
-        user_options[normalized_key] = _render_qchem_scalar(key, value)
-
-    molecule = input_model.molecule
-    charge = int(molecule.molecular_charge)
-    multiplicity = int(molecule.molecular_multiplicity)
-    geometry_lines = [
-        f"{symbol} {str(coordinates[0])} {str(coordinates[1])} {str(coordinates[2])}"
-        for symbol, coordinates in zip(molecule.symbols, molecule.geometry)
-    ]
-    rem_lines = [
-        f"JOBTYPE {jobtype}",
-        f"METHOD {method}",
-        f"BASIS {basis}",
-        f"MEM_TOTAL {int(config.memory * 1024)}",
-        "INPUT_BOHR TRUE",
-        "SCF_FINAL_PRINT 2",
-        "PRINT_GENERAL_BASIS TRUE",
-        "PRINT_ORBITALS TRUE",
-        "MOLDEN_FORMAT FALSE",
-    ]
-    rem_lines.extend(f"{key} {user_options[key]}" for key in sorted(user_options))
-    input_text = (
-        "$comment\n"
-        "QCEngine CCLibHarness\n"
-        "$end\n\n"
-        "$molecule\n"
-        f"{charge} {multiplicity}\n"
-        + "\n".join(geometry_lines)
-        + "\n$end\n\n"
-        "$rem\n"
-        + "\n".join(rem_lines)
-        + "\n$end\n"
-    )
-    return _Job(
-        command=[executable, "-nt", str(config.ncores), "dispatch.in", "dispatch.out"],
-        infiles={"dispatch.in": input_text},
-        outfiles=["dispatch.out"],
-        input_filename="dispatch.in",
-        output_filename="dispatch.out",
-        input_text=input_text,
-        executable=executable,
-    )
-
-
-_ORCA_OUTPUT_DEFAULTS = [
-    "PrintLevel Normal",
-    "Print[P_Basis] 2",
-    "Print[P_MOs] 1",
-    "Print[P_Overlap] 1",
-    "Print[P_Hirshfeld] 1",
-]
-
-
-def _validate_orca_block_body(name: str, body: str) -> None:
-    """Allow block-local value lines only, never syntax that can escape the generated block."""
-
-    for line_number, line in enumerate(body.splitlines(), start=1):
-        stripped = line.strip()
-        if not stripped:
-            continue
-        first_token = stripped.split(None, 1)[0].casefold()
-        if first_token in {"end", "$new_job"} or stripped.startswith(("%", "*")):
-            raise InputError(
-                f"ORCA block {name!r} body contains reserved outer syntax on line {line_number}: {line!r}"
-            )
-
-
-def _build_orca_input(input_model: "AtomicInput", config: TaskConfig, executable: str) -> _Job:
-    driver, method, basis = _validate_input_subset(input_model)
-    driver_keyword = {"energy": None, "gradient": "engrad", "hessian": "freq"}[driver.lower()]
-
-    keywords = input_model.specification.keywords
-    if not isinstance(keywords, Mapping):
-        raise InputError("ORCA keywords must be a mapping")
-    unknown = set(keywords) - {"simple", "blocks"}
-    if unknown:
-        raise InputError(f"ORCA keywords contain unknown top-level keys: {sorted(unknown)!r}")
-
-    simple = keywords.get("simple", [])
-    if not isinstance(simple, list):
-        raise InputError("ORCA simple keywords must be a list")
-    for value in simple:
-        if not isinstance(value, str) or not value.strip() or "\n" in value or "\r" in value:
-            raise InputError("ORCA simple keywords must be non-empty strings without newlines")
-
-    blocks = keywords.get("blocks", {})
-    if not isinstance(blocks, Mapping):
-        raise InputError("ORCA blocks must be a mapping")
-    output_body: Optional[str] = None
-    user_blocks: Dict[str, str] = {}
-    for name, body in blocks.items():
-        if not isinstance(name, str) or re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", name) is None:
-            raise InputError(f"ORCA block name is invalid: {name!r}")
-        if not isinstance(body, str):
-            raise InputError(f"ORCA block {name!r} body must be a string")
-        _validate_orca_block_body(name, body)
-        normalized_name = name.lower()
-        if normalized_name in {"pal", "maxcore"}:
-            raise InputError(f"ORCA block {name!r} is reserved for TaskConfig resources")
-        if normalized_name == "coords":
-            raise InputError("ORCA coordinate block 'coords' is reserved for QCSchema geometry")
-        if normalized_name == "output":
-            output_body = body
-        else:
-            user_blocks[name] = body
-
-    simple_line = [method, basis]
-    if driver_keyword is not None:
-        simple_line.append(driver_keyword)
-    simple_line.extend(simple)
-    lines = ["! " + " ".join(simple_line), "%output", *_ORCA_OUTPUT_DEFAULTS]
-    if output_body is not None:
-        lines.extend(output_body.splitlines())
-    lines.append("end")
-
-    for name in sorted(user_blocks, key=lambda value: (value.lower(), value)):
-        lines.append(f"%{name}")
-        lines.extend(user_blocks[name].splitlines())
-        lines.append("end")
-
-    maxcore = max(1, int(config.memory * 1024 / config.ncores))
-    lines.extend(["%pal", f"nprocs {config.ncores}", "end", f"%MaxCore {maxcore}"])
-
-    molecule = input_model.molecule
-    charge = int(molecule.molecular_charge)
-    multiplicity = int(molecule.molecular_multiplicity)
-    lines.append(f"* xyz {charge} {multiplicity}")
-    for symbol, coordinates in zip(molecule.symbols, molecule.geometry):
-        converted = [float(coordinate) * constants.bohr2angstroms for coordinate in coordinates]
-        lines.append(f"{symbol} {str(converted[0])} {str(converted[1])} {str(converted[2])}")
-    lines.append("*")
-    input_text = "\n".join(lines) + "\n"
-
-    return _Job(
-        command=[executable, "dispatch.inp"],
-        infiles={"dispatch.inp": input_text},
-        outfiles=[],
-        input_filename="dispatch.inp",
-        output_filename="dispatch.out",
-        input_text=input_text,
-        executable=executable,
-    )
-
-
-def _select_qchem_output(outputs: Mapping[str, Any]) -> str:
-    try:
-        output = outputs["dispatch.out"]
-    except KeyError as exc:
-        raise UnknownError("Q-Chem did not produce dispatch.out") from exc
-    if output is None:
-        raise UnknownError("Q-Chem did not produce dispatch.out")
-    return str(output)
-
-
-def _select_orca_output(outputs: Mapping[str, Any]) -> str:
-    try:
-        output = outputs["stdout"]
-    except KeyError as exc:
-        raise UnknownError("ORCA did not produce captured stdout") from exc
-    if output is None:
-        raise UnknownError("ORCA did not produce captured stdout")
-    return str(output)
-
-
-def _path_has_mode(path: str, mode: int) -> bool:
-    try:
-        return bool(os.stat(path).st_mode & mode) and os.access(path, os.R_OK if mode == stat.S_IRUSR else os.X_OK)
-    except OSError:
-        return False
-
-
-def _preflight_none(executable: str, environment: Mapping[str, str]) -> Dict[str, str]:
-    return dict(environment)
-
-
-def _preflight_qchem(executable: str, environment: Mapping[str, str]) -> Dict[str, str]:
-    """Validate all Q-Chem resources and return an isolated child environment."""
-
-    child_environment = dict(environment)
-    invalid = []
-
-    for variable in ("QC", "QCAUX"):
-        value = child_environment.get(variable)
-        if not value or not os.path.isdir(value) or not _path_has_mode(value, stat.S_IRUSR):
-            invalid.append(f"{variable} is not set or does not identify a readable directory")
-
-    qcprog = child_environment.get("QCPROG")
-    if (
-        not qcprog
-        or not os.path.isfile(qcprog)
-        or not _path_has_mode(qcprog, stat.S_IRUSR)
-        or not _path_has_mode(qcprog, stat.S_IXUSR)
-    ):
-        invalid.append("QCPROG is not set or does not identify a readable executable program driver")
-
-    if not os.path.isfile(executable) or not _path_has_mode(executable, stat.S_IXUSR):
-        invalid.append(f"resolved qchem executable is not runnable: {executable}")
-
-    if invalid:
-        details = "; ".join(f"Q-Chem environment variable {item}" for item in invalid)
-        raise ResourceError(f"{details}. Initialize the Q-Chem environment before running cclib-qchem.")
-
-    child_environment.setdefault("QCSCRATCH", tempfile.gettempdir())
-    return child_environment
-
-
-def _probe_qchem(executable: str, environment: Mapping[str, str]) -> str:
-    success, outputs = execute(
-        [executable, "version.in"],
-        {"version.in": "$rem\n$end\n"},
-        environment=dict(environment),
-        timeout=15,
-    )
-    output = f"{outputs.get('stdout') or ''}\n{outputs.get('stderr') or ''}"
-    if not success:
-        raise ResourceError(f"Q-Chem identity/version probe failed for {executable}")
-    if "A Quantum Leap Into The Future Of Chemistry" not in output or "Q-Chem" not in output:
-        raise ResourceError(f"Executable {executable} failed Q-Chem identity verification")
-
-    match = re.search(r"Q-Chem(?:\s+version:)?\s+([0-9]+(?:\.[0-9A-Za-z]+)+)", output, re.IGNORECASE)
-    if match is None:
-        raise ResourceError(f"Could not parse the Q-Chem version from executable {executable}")
-    return safe_version(match.group(1))
-
-
-def _probe_orca(executable: str, environment: Mapping[str, str]) -> str:
-    probe_input = "! HF STO-3G\n* xyz 0 2\nH 0.0 0.0 0.0\n*\n"
-    success, outputs = execute(
-        [executable, "version.inp"],
-        {"version.inp": probe_input},
-        environment=dict(environment),
-        timeout=30,
-    )
-    output = f"{outputs.get('stdout') or ''}\n{outputs.get('stderr') or ''}"
-    if not success:
-        raise ResourceError(f"ORCA identity/version probe failed for {executable}")
-    if re.search(r"O\s+R\s+C\s+A", output) is None:
-        raise ResourceError(f"Executable {executable} failed ORCA identity verification")
-    if "ORCA TERMINATED NORMALLY" not in output:
-        raise ResourceError(f"ORCA version probe from {executable} did not reach normal termination")
-
-    match = re.search(r"Program\s+Version\s+([0-9]+(?:\.[0-9]+)+)", output, re.IGNORECASE)
-    if match is None:
-        raise ResourceError(f"Could not parse the ORCA version from executable {executable}")
-    return safe_version(match.group(1))
-
-
-def _qchem_parser_type() -> Type[Any]:
-    from cclib.parser.qchemparser import QChem
-
-    return QChem
-
-
-def _orca_parser_type() -> Type[Any]:
-    from cclib.parser.orcaparser import ORCA
-
-    return ORCA
-
-
 @dataclass(frozen=True)
-class _ProgramDefinition:
+class ProgramDefinition:
+    """Callbacks and identities required by one cclib-backed native program."""
+
     selector: str
     executable: str
     minimum_version: str
     input_filename: str
     output_filename: str
-    expected_parser: str
+    parser_name: str
     parser_type: Callable[[], Type[Any]]
     normal_termination: str
-    generator: Callable[..., Any]
+    managed_scratch_suffix: Optional[str]
+    generator: Callable[["AtomicInput", TaskConfig, str], Job]
     probe: Callable[[str, Mapping[str, str]], str]
     output_selector: Callable[[Mapping[str, Any]], str]
     preflight: Callable[[str, Mapping[str, str]], Dict[str, str]]
-
-    @property
-    def parser_name(self) -> str:
-        """Return the reviewed parser identity under its result-metadata name."""
-
-        return self.expected_parser
-
-
-_PROGRAM_DEFINITIONS: Mapping[str, _ProgramDefinition] = {
-    "qchem": _ProgramDefinition(
-        selector="cclib-qchem",
-        executable="qchem",
-        minimum_version="5.1",
-        input_filename="dispatch.in",
-        output_filename="dispatch.out",
-        expected_parser="QChem",
-        parser_type=_qchem_parser_type,
-        normal_termination="Thank you very much for using Q-Chem",
-        generator=_build_qchem_input,
-        probe=_probe_qchem,
-        output_selector=_select_qchem_output,
-        preflight=_preflight_qchem,
-    ),
-    "orca": _ProgramDefinition(
-        selector="cclib-orca",
-        executable="orca",
-        minimum_version="6.0",
-        input_filename="dispatch.inp",
-        output_filename="dispatch.out",
-        expected_parser="ORCA",
-        parser_type=_orca_parser_type,
-        normal_termination="ORCA TERMINATED NORMALLY",
-        generator=_build_orca_input,
-        probe=_probe_orca,
-        output_selector=_select_orca_output,
-        preflight=_preflight_none,
-    ),
-}
 
 
 def _diagnostic_tail(text: str, max_lines: int = 40, max_chars: int = 4000) -> str:
@@ -467,7 +128,8 @@ def _diagnostic_tail(text: str, max_lines: int = 40, max_chars: int = 4000) -> s
     return line_bounded[-max_chars:]
 
 
-def _missing_qchem_environment_variable(diagnostic: str) -> Optional[str]:
+def _missing_environment_variable(diagnostic: str) -> Optional[str]:
+    """Return a missing environment variable named by a native diagnostic."""
     patterns = (
         r"undefined\s+environment\s+variable\s*[:=]?\s*['\"`]?\$?\{?([A-Za-z_][A-Za-z0-9_]*)",
         r"['\"`]?\b([A-Za-z_][A-Za-z0-9_]*)['\"`]?\s*:\s*(?:undefined|unbound)\s+variable",
@@ -482,20 +144,17 @@ def _missing_qchem_environment_variable(diagnostic: str) -> Optional[str]:
 
 
 def _raise_execution_failure(
-    definition: _ProgramDefinition,
-    job: _Job,
+    definition: ProgramDefinition,
+    job: Job,
     stage: str,
     diagnostic: str,
     cause: Optional[BaseException] = None,
 ) -> None:
     """Raise one consistently formatted, stage-aware execution failure."""
 
-    missing_variable = (
-        _missing_qchem_environment_variable(diagnostic) if definition.selector == "cclib-qchem" else None
-    )
-    is_environment_failure = definition.selector == "cclib-qchem" and (
-        missing_variable is not None
-        or re.search(
+    missing_variable = _missing_environment_variable(diagnostic)
+    is_environment_failure = missing_variable is not None or (
+        re.search(
             r"undefined\s+(?:environment\s+)?variable|environment\s+variable.*"
             r"(?:undefined|not\s+(?:defined|set)|must\s+be\s+defined)",
             diagnostic,
@@ -511,9 +170,9 @@ def _raise_execution_failure(
 
     detail = ""
     if missing_variable is not None:
-        detail = f"; undefined Q-Chem environment variable {missing_variable}"
+        detail = f"; undefined environment variable {missing_variable}"
     elif is_environment_failure:
-        detail = "; undefined Q-Chem environment variable"
+        detail = "; undefined environment variable"
     elif is_license_failure:
         detail = "; license resource unavailable"
     message = (
@@ -526,6 +185,8 @@ def _raise_execution_failure(
 
 
 def _execution_diagnostic(outputs: Mapping[str, Any], stdout: str, stderr: str) -> str:
+    """Combine distinct native output channels for failure reporting."""
+
     parts = [str(value) for value in outputs.values() if value not in (None, "")]
     for stream in (stdout, stderr):
         if stream and stream not in parts:
@@ -533,12 +194,14 @@ def _execution_diagnostic(outputs: Mapping[str, Any], stdout: str, stderr: str) 
     return "\n".join(parts)
 
 
-def _execute_job(definition: _ProgramDefinition, job: _Job, config: TaskConfig) -> _ExecutionResult:
+def _execute_job(definition: ProgramDefinition, job: Job, config: TaskConfig) -> ExecutionResult:
     """Execute a generated job with QCEngine's managed scratch utilities."""
 
     environment = definition.preflight(job.executable, os.environ.copy())
 
-    def run(scratch_directory: Optional[str]) -> _ExecutionResult:
+    def run(scratch_directory: Optional[str]) -> ExecutionResult:
+        """Execute once within the selected scratch directory."""
+
         try:
             process_success, process = execute(
                 job.command,
@@ -571,7 +234,7 @@ def _execute_job(definition: _ProgramDefinition, job: _Job, config: TaskConfig) 
         if definition.normal_termination not in output_text:
             _raise_execution_failure(definition, job, "termination", output_text)
 
-        return _ExecutionResult(
+        return ExecutionResult(
             process_success=process_success,
             executable=job.executable,
             input_filename=job.input_filename,
@@ -582,10 +245,10 @@ def _execute_job(definition: _ProgramDefinition, job: _Job, config: TaskConfig) 
             stderr=stderr,
         )
 
-    if definition.selector == "cclib-qchem":
+    if definition.managed_scratch_suffix is not None:
         with temporary_directory(
             parent=config.scratch_directory,
-            suffix="_cclib_qchem_scratch",
+            suffix=definition.managed_scratch_suffix,
             messy=config.scratch_messy,
         ) as qcscratch:
             environment["QCSCRATCH"] = str(qcscratch)
@@ -604,8 +267,8 @@ _METHOD_ALIASES = {
 
 
 def _raise_conversion_failure(
-    definition: _ProgramDefinition,
-    execution: _ExecutionResult,
+    definition: ProgramDefinition,
+    execution: ExecutionResult,
     stage: str,
     cause: BaseException,
 ) -> None:
@@ -618,7 +281,9 @@ def _raise_conversion_failure(
     ) from cause
 
 
-def _native_files(input_model: "AtomicInput", execution: _ExecutionResult) -> Dict[str, str]:
+def _native_files(input_model: "AtomicInput", execution: ExecutionResult) -> Dict[str, str]:
+    """Select native files according to the requested protocol."""
+
     protocol = input_model.specification.protocols.native_files
     value = protocol.value if hasattr(protocol, "value") else str(protocol)
     if value == "none":
@@ -630,8 +295,8 @@ def _native_files(input_model: "AtomicInput", execution: _ExecutionResult) -> Di
 
 
 def _parse_and_convert(
-    definition: _ProgramDefinition,
-    execution: _ExecutionResult,
+    definition: ProgramDefinition,
+    execution: ExecutionResult,
     input_model: "AtomicInput",
 ) -> "AtomicResult":
     """Parse complete program output, validate QCSchema v1, and convert to v2."""
@@ -818,10 +483,12 @@ def _parse_and_convert(
 def _probe_executable(
     harness: "CCLibHarness", executable: str, environment: Optional[Mapping[str, str]] = None
 ) -> str:
+    """Validate and cache the concrete harness executable version."""
+
     if executable in harness.version_cache:
         return harness.version_cache[executable]
 
-    definition = _PROGRAM_DEFINITIONS[harness.program]
+    definition = harness.definition
     child_environment = dict(os.environ if environment is None else environment)
     try:
         version = definition.probe(executable, child_environment)
@@ -832,8 +499,8 @@ def _probe_executable(
 
     if parse_version(version) < parse_version(definition.minimum_version):
         raise ResourceError(
-            f"{definition.selector} requires {harness.program.upper()} version {definition.minimum_version} or newer; "
-            f"found {version} at {executable}"
+            f"{definition.selector} requires {definition.executable.upper()} version "
+            f"{definition.minimum_version} or newer; found {version} at {executable}"
         )
 
     harness.version_cache[executable] = version
@@ -841,10 +508,9 @@ def _probe_executable(
 
 
 class CCLibHarness(ProgramHarness):
-    """A cclib-backed harness configured for one external QC program."""
+    """Shared execution and cclib conversion for a concrete native program."""
 
-    program: Literal["qchem", "orca"]
-
+    definition: ClassVar[ProgramDefinition]
     _defaults: ClassVar[Dict[str, Any]] = {
         "scratch": True,
         "thread_safe": False,
@@ -853,12 +519,10 @@ class CCLibHarness(ProgramHarness):
     }
     version_cache: ClassVar[Dict[str, str]] = {}
 
-    def __init__(self, **kwargs: Any):
-        kwargs["node_parallel"] = kwargs.get("program") == "orca"
-        super().__init__(**kwargs)
-
     def found(self, raise_error: bool = False) -> bool:
-        definition = _PROGRAM_DEFINITIONS[self.program]
+        """Return whether cclib and the configured native program are available."""
+
+        definition = self.definition
         try:
             _load_cclib_api()
             executable = which(definition.executable)
@@ -866,7 +530,6 @@ class CCLibHarness(ProgramHarness):
                 raise ResourceError(
                     f"{definition.selector} executable '{definition.executable}' was not found on PATH"
                 )
-
             environment = definition.preflight(executable, os.environ.copy())
             _probe_executable(self, executable, environment)
             return True
@@ -880,7 +543,9 @@ class CCLibHarness(ProgramHarness):
             return False
 
     def get_version(self) -> str:
-        definition = _PROGRAM_DEFINITIONS[self.program]
+        """Return the validated native executable version."""
+
+        definition = self.definition
         executable = which(definition.executable)
         if executable is None:
             raise ResourceError(f"{definition.selector} executable '{definition.executable}' was not found on PATH")
@@ -890,7 +555,9 @@ class CCLibHarness(ProgramHarness):
     def build_input(
         self, input_model: "AtomicInput", config: TaskConfig, template: Optional[str] = None
     ) -> Dict[str, Any]:
-        definition = _PROGRAM_DEFINITIONS[self.program]
+        """Build the native command and file payload for an atomic input."""
+
+        definition = self.definition
         executable = which(definition.executable)
         if executable is None:
             raise ResourceError(f"{definition.selector} executable '{definition.executable}' was not found on PATH")
@@ -903,7 +570,9 @@ class CCLibHarness(ProgramHarness):
         }
 
     def compute(self, input_data: "AtomicInput", config: TaskConfig) -> "AtomicResult":
-        definition = _PROGRAM_DEFINITIONS[self.program]
+        """Execute the native program and convert its output through cclib."""
+
+        definition = self.definition
         _validate_input_subset(input_data)
         executable = which(definition.executable)
         if executable is None:
