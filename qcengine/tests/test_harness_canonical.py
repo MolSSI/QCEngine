@@ -1,6 +1,7 @@
 """
 Tests the DQM compute dispatch module
 """
+
 import copy
 import sys
 import warnings
@@ -26,6 +27,18 @@ _canonical_methods = [
     pytest.param("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}, marks=using("openmm")),
     pytest.param("psi4", {"method": "hf", "basis": "6-31G"}, {}, marks=using("psi4")),
     pytest.param("qchem", {"method": "hf", "basis": "6-31G"}, {}, marks=using("qchem")),
+    pytest.param(
+        "cclib-qchem",
+        {"method": "hf", "basis": "sto-3g"},
+        {},
+        marks=[*using("cclib-qchem"), pytest.mark.cclib_qchem],
+    ),
+    pytest.param(
+        "cclib-orca",
+        {"method": "hf", "basis": "sto-3g"},
+        {},
+        marks=[*using("cclib-orca"), pytest.mark.cclib_orca],
+    ),
     pytest.param("rdkit", {"method": "UFF"}, {}, marks=using("rdkit")),
     pytest.param("terachem_pbs", {"method": "b3lyp", "basis": "6-31G"}, {}, marks=using("terachem_pbs")),
     pytest.param("torchani", {"method": "ANI1x"}, {}, marks=using("torchani")),
@@ -126,6 +139,11 @@ def test_compute_gradient(program, model, keywords, schema_versions, request):
 
         assert "gradient not implemented" in str(e.value)
 
+    elif program == "cclib-orca":
+        inp = checkver_and_convert(inp, request.node.name, "pre")
+        with pytest.raises(qcng.exceptions.InputError, match="only.*energy"):
+            qcng.compute(inp, program, raise_error=True, return_version=retver)
+
     else:
         inp = checkver_and_convert(inp, request.node.name, "pre")
         ret = qcng.compute(inp, program, raise_error=True, return_version=retver)
@@ -184,7 +202,7 @@ def test_compute_energy_qcsk_basis(program, model, keywords, schema_versions, re
         pytest.param("gcp", {"method": "bad"}, marks=using("classic-gcp")),
         pytest.param("mrchem", {"method": "bad"}, marks=using("mrchem")),
         pytest.param("mctc-gcp", {"method": "bad"}, marks=using("mctc-gcp")),
-        pytest.param("mace", {"method": "bad"}, marks=using("mace"))
+        pytest.param("mace", {"method": "bad"}, marks=using("mace")),
         # add as programs available
         # ("molpro", {"method": "bad"}),
         # ("terachem", {"method": "bad"}),

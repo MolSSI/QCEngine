@@ -217,8 +217,6 @@ def prepare_stdin(
     {scf_iters}
 
     *
-    """.format(
-        **kwargs
-    )
+    """.format(**kwargs)
 
     return stdin, subs

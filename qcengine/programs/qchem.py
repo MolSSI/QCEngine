@@ -221,12 +221,10 @@ class QChemHarness(ProgramHarness):
 
         # Begin the input file
         input_file = []
-        input_file.append(
-            f"""$comment
+        input_file.append(f"""$comment
 Automatically generated Q-Chem input file by QCEngine
 $end
-            """
-        )
+            """)
 
         # Add Molecule, TODO: Add to QCElemental
         mol = input_model.molecule

@@ -290,15 +290,13 @@ def test_tricky_ghost(driver, qcprog, subject, basis, keywords, schema_versions,
 def test_atom_labels(qcprog, basis, keywords, schema_versions, request):
     models, retver, _ = schema_versions
 
-    kmol = models.Molecule.from_data(
-        """
+    kmol = models.Molecule.from_data("""
       H       0 0 0
       H5      5 0 0
       H_other 0 5 0
       H_4sq   5 5 0
       units au
-    """
-    )
+    """)
 
     assert compare(["H", "H", "H", "H"], kmol.symbols, "elem")
     assert compare(["", "5", "_other", "_4sq"], kmol.atom_labels, "elbl")

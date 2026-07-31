@@ -1,4 +1,5 @@
 """Tests for adcc functionality"""
+
 import numpy as np
 import pytest
 import qcelemental as qcel

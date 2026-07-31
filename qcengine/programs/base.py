@@ -7,6 +7,7 @@ from typing import Set
 from ..exceptions import InputError, ResourceError
 from .adcc import AdccHarness
 from .aimnet2 import AIMNET2Harness
+from .cclib_programs import ORCACCLibHarness, QChemCCLibHarness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
 from .dftd_ng import DFTD4Harness, SDFTD3Harness
@@ -107,6 +108,8 @@ def list_available_programs() -> Set[str]:
 
 # Quantum
 register_program(AdccHarness())
+register_program(QChemCCLibHarness())
+register_program(ORCACCLibHarness())
 register_program(CFOURHarness())
 register_program(EntosHarness())  # Duplicate of Qcore harness to transition the namespace, to be deprecated
 register_program(GAMESSHarness())
