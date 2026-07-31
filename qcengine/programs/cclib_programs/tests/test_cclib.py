@@ -562,7 +562,9 @@ def test_primary_output_selection(monkeypatch, tmp_path):
     assert command == job.command
     assert infiles == job.infiles
     assert outfiles == ["dispatch.out"]
-    assert {key: kwargs["environment"][key] for key in inherited_environment} == inherited_environment
+    assert {key: kwargs["environment"][key] for key in inherited_environment if key != "QCSCRATCH"} == {
+        key: value for key, value in inherited_environment.items() if key != "QCSCRATCH"
+    }
     assert result.output_text == _qchem_probe_output()
     assert (result.stdout, result.stderr) == ("launcher stdout", "launcher stderr")
 

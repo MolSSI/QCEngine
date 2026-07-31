@@ -35924,9 +35924,8 @@ def test_live_hf_single_point():
 
     result = qcng.compute(
         AtomicInput(
-            molecule={"symbols": ["He"], "geometry": [0.0, 0.0, 0.0]},
-            driver="energy",
-            model={"method": "hf", "basis": "sto-3g"},
+            molecule={"symbols": ["H", "H"], "geometry": [0.0, 0.0, -0.7, 0.0, 0.0, 0.7]},
+            specification={"driver": "energy", "model": {"method": "hf", "basis": "sto-3g"}},
         ),
         "cclib-qchem",
         raise_error=True,
