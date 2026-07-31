@@ -19,11 +19,11 @@ Each module contains exactly three public regression-test shapes:
 2. **Parsed output parametrization**: one `pytest.mark.parametrize` table whose rows contain the cclib fixture-relative output path and the saved expected parsed-result dictionary. The test reads the fixture output, passes it through the existing cclib harness conversion path, removes `extras`, and compares the remaining JSON-compatible result data to the embedded expected dictionary. It never invokes the executable.
 3. **Live smoke calculation**: one small HF/STO-3G single-point calculation, guarded by the existing program-availability marks. It exercises native input generation, executable invocation, normal-termination handling, cclib parsing, and QCSchema conversion. It is skipped when the corresponding program is not configured.
 
-The expected native text and expected output dictionary are inline arguments in their respective parametrization rows. Adding coverage means adding exactly one row to the applicable table. Output assertions deliberately exclude `extras` for this first suite because harness and parser metadata are not the behavior under test.
+The expected native text and expected output dictionary are inline arguments in their respective parametrization rows. Every row carries the native-program version derived from its cclib fixture directory (for example `5.1`, `5.4`, or `6.0` for Q-Chem; `5.0`, `6.0`, or `6.1` for ORCA), and its pytest ID includes that version. Tables are grouped by version so parser/generator behavior can be diagnosed and extended per software release. Adding coverage means adding exactly one row to the applicable version group. Output assertions deliberately exclude `extras` for this first suite because harness and parser metadata are not the behavior under test.
 
 ## Fixture Eligibility
 
-A fixture is included when it has a paired native input and normal-termination output in the cclib data tree, is detected as the expected cclib parser type, parses successfully, produces a QCSchema result accepted by the current harness, and can form a supported QCSchema request for the generator.
+A fixture is included when it has a paired native input and normal-termination output in a versioned cclib data directory, is detected as the expected cclib parser type, parses successfully, produces a QCSchema result accepted by the current harness, and can form a supported QCSchema request for the generator. Versioned fixture coverage is retained even when the live executable smoke test uses only the supported minimum version.
 
 Fixtures with `.log` rather than `.out`, absent pairs, unsupported drivers, unsupported native features, parser failures, or writer/QCSchema validation failures are recorded in the implementation plan as excluded with their concrete reason. The test suite must not silently discover files at runtime: the parametrization tables are the explicit coverage inventory.
 
@@ -36,6 +36,7 @@ The output tests are skipped with a clear message if `CCLIB_SOURCE_ROOT` is abse
 ## Acceptance Criteria
 
 - The two requested test files exist and each has the three test shapes above.
+- Every parametrized fixture row identifies and is grouped by its Q-Chem or ORCA software version.
 - All covered input rows assert byte-for-byte generated input text.
 - All covered output rows assert the saved parsed dictionary after excluding `extras`.
 - No input/output parametrized test executes Q-Chem or ORCA.
