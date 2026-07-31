@@ -30,8 +30,8 @@ class JaguarHarness(ProgramHarness):
     The current launch path temporarily changes process-wide state and is
     therefore not thread-safe. A single calculation can use multiple threads
     through Jaguar's ``-PARALLEL`` option, but the harness does not configure
-    multi-node execution. Jaguar is treated as a memory-managed quantum
-    chemistry program.
+    multi-node execution. QCEngine does not currently configure Jaguar's
+    memory limit.
     """
 
     _defaults: ClassVar[Dict[str, Any]] = {
@@ -40,7 +40,7 @@ class JaguarHarness(ProgramHarness):
         "thread_safe": False,
         "thread_parallel": True,
         "node_parallel": False,
-        "managed_memory": True,
+        "managed_memory": False,
     }
     version_cache: Dict[str, str] = {}
 

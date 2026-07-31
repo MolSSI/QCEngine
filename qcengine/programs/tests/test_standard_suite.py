@@ -93,7 +93,7 @@ def _trans_key(qc, bas, key):
             return {
                 "cfour": ("aug-pvdz", {}),
                 "gamess": ("accd", {"contrl__ispher": 1}),
-                "jaguar": (bas, {}),
+                "jaguar": ("cc-pVDZ++", {}),
                 "nwchem": ("aug-cc-pvdz", {"basis__spherical": True}),
                 "psi4": (bas, {}),
                 "qchem": ("aug-cc-pvdz", {}),

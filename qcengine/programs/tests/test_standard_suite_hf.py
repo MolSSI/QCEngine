@@ -43,6 +43,7 @@ def nh2_data():
             marks=using("qcore"),
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=using("gamess")),
+        pytest.param("jaguar", "cc-pVDZ++", {"dconv": 1.0e-8, "econv": 1.0e-9, "nops": 1}, marks=using("jaguar")),
         pytest.param("molpro", "aug-cc-pvdz", {}, marks=using("molpro")),
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=using("nwchem")),
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=using("nwchem")),
@@ -110,6 +111,7 @@ def test_sp_hf_rhf_v1v2shim(program, basis, keywords, h2o_data, schema_versions5
             marks=using("qcore"),
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1}, marks=using("gamess")),
+        pytest.param("jaguar", "cc-pVDZ++", {"dconv": 1.0e-8, "econv": 1.0e-9, "nops": 1}, marks=using("jaguar")),
         pytest.param("molpro", "aug-cc-pvdz", {}, marks=using("molpro")),
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True}, marks=using("nwchem")),
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "qc_module": "tce"}, marks=using("nwchem")),
@@ -173,6 +175,9 @@ def test_sp_hf_rhf(program, basis, keywords, h2o_data, schema_versions, request)
             marks=using("qcore"),
         ),
         pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "uhf"}, marks=using("gamess")),
+        pytest.param(
+            "jaguar", "cc-pVDZ++", {"dconv": 1.0e-8, "econv": 1.0e-9, "iuhf": 1, "nops": 1}, marks=using("jaguar")
+        ),
         pytest.param("molpro", "aug-cc-pvdz", {"reference": "unrestricted"}, marks=using("molpro")),
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__uhf": True}, marks=using("nwchem")),
         pytest.param(
@@ -230,6 +235,9 @@ def test_sp_hf_uhf(program, basis, keywords, nh2_data, schema_versions, request)
         ),
         pytest.param("cfour", "aug-pvdz", {"reference": "rohf"}, marks=using("cfour")),
         pytest.param("gamess", "accd", {"contrl__ispher": 1, "contrl__scftyp": "rohf"}, marks=using("gamess")),
+        pytest.param(
+            "jaguar", "cc-pVDZ++", {"dconv": 1.0e-8, "econv": 1.0e-9, "iuhf": 0, "nops": 1}, marks=using("jaguar")
+        ),
         pytest.param("molpro", "aug-cc-pvdz", {}, marks=using("molpro")),
         pytest.param("nwchem", "aug-cc-pvdz", {"basis__spherical": True, "scf__rohf": True}, marks=using("nwchem")),
         pytest.param(
