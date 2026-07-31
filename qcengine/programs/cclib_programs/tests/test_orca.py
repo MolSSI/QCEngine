@@ -8,7 +8,6 @@ import qcengine as qcng
 from qcelemental.models.v2 import AtomicInput
 
 from qcengine.config import TaskConfig
-from qcengine.testing import uusing
 from qcengine.programs.cclib_programs import cclib_orca
 from qcengine.programs.cclib_programs.base import ExecutionResult, _parse_and_convert
 
@@ -11747,8 +11746,10 @@ def test_parsed_outputs(version, relative_output, expected_output):
 
 
 @pytest.mark.cclib_orca
-@uusing("cclib-orca")
 def test_live_hf_single_point():
+    if not qcng.get_program("cclib-orca", check=False).found():
+        pytest.skip("cclib-orca is unavailable")
+
     result = qcng.compute(
         AtomicInput(
             molecule={"symbols": ["He"], "geometry": [0.0, 0.0, 0.0]},
