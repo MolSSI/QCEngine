@@ -15,17 +15,21 @@ Add dedicated Q-Chem and ORCA regression modules that lock down native-input gen
 
 Each module contains exactly three public regression-test shapes:
 
-1. **Native input parametrization**: one `pytest.mark.parametrize` table whose rows contain an `AtomicInput`-compatible request and the complete expected generated native input text. The test calls the program-specific input generator and asserts exact text equality. It never invokes the executable.
-2. **Parsed output parametrization**: one `pytest.mark.parametrize` table whose rows contain the cclib fixture-relative output path and the saved expected parsed-result dictionary. The test reads the fixture output, passes it through the existing cclib harness conversion path, removes `extras`, and compares the remaining JSON-compatible result data to the embedded expected dictionary. It never invokes the executable.
+1. **Native input parametrization**: one `pytest.mark.parametrize` table of small, representative `AtomicInput` requests. Each row targets one unique generator setting for a supported native-program version and stores only the required regular expressions (for driver mapping, method/basis, resources, coordinates/units, or program-specific keyword blocks). The test calls the program-specific input generator and requires every expression to match. It never invokes the executable.
+2. **Parsed output parametrization**: one `pytest.mark.parametrize` table whose rows contain the cclib fixture-relative output path, a dotted QCSchema result path, and a scalar or small numeric-array expectation. The test reads the fixture output, passes it through the existing cclib harness conversion path, retrieves the named field, and compares numerics with `numpy.allclose(atol=1e-6)`. It never invokes the executable.
 3. **Live smoke calculation**: one small HF/STO-3G single-point calculation, guarded by the existing program-availability marks. It exercises native input generation, executable invocation, normal-termination handling, cclib parsing, and QCSchema conversion. It is skipped when the corresponding program is not configured.
 
-The expected native text and expected output dictionary are inline arguments in their respective parametrization rows. Every row carries the native-program version derived from its cclib fixture directory (for example `5.1`, `5.4`, or `6.0` for Q-Chem; `5.0`, `6.0`, or `6.1` for ORCA), and its pytest ID includes that version. Tables are grouped by version so parser/generator behavior can be diagnosed and extended per software release. Adding coverage means adding exactly one row to the applicable version group. Output assertions deliberately exclude `extras` for this first suite because harness and parser metadata are not the behavior under test.
+The input regexes and output `(path, expected)` pairs are inline arguments in their respective parametrization rows. Every row carries the native-program version derived from its cclib fixture directory (for example `5.1`, `5.4`, or `6.0` for Q-Chem; `5.0`, `6.0`, or `6.1` for ORCA), and its pytest ID includes that version. Tables are grouped by version so parser/generator behavior can be diagnosed and extended per software release. Each version includes representative unique settings rather than redundant full-corpus snapshots. Output checks deliberately omit `extras` and compare only fields meaningful to the calculation class. Both deferred live smoke calculations use H2.
+
+## Representative Coverage and Exclusions
+
+Q-Chem 5.1 and 5.4 each retain HF, B3LYP SCF, MP2, and CCSD `properties.return_energy` fixtures; 6.0 retains an HF solvent energy because that is its only eligible fixture class. ORCA 5.0 and 6.0 each retain HF, MP2, and CCSD energies. ORCA DFT outputs and the only 6.1 output are excluded because the current cclib writer fails their QCSchema conversion with `KeyError: 'functional'`. Other eligible files are intentionally excluded as redundant corpus coverage. The implementation plan is the complete eligibility and exclusion inventory.
 
 ## Fixture Eligibility
 
 A fixture is included when it has a paired native input and normal-termination output in a versioned cclib data directory, is detected as the expected cclib parser type, parses successfully, produces a QCSchema result accepted by the current harness, and can form a supported QCSchema request for the generator. Versioned fixture coverage is retained even when the live executable smoke test uses only the supported minimum version.
 
-Fixtures with `.log` rather than `.out`, absent pairs, unsupported drivers, unsupported native features, parser failures, or writer/QCSchema validation failures are recorded in the implementation plan as excluded with their concrete reason. The test suite must not silently discover files at runtime: the parametrization tables are the explicit coverage inventory.
+Fixtures with `.log` rather than `.out`, absent pairs, unsupported drivers, unsupported native features, parser failures, writer/QCSchema validation failures, or redundant eligible representatives are recorded in the implementation plan as excluded with their concrete reason. The test suite must not silently discover files at runtime: the parametrization tables are the explicit compact coverage inventory.
 
 ## Snapshot Collection
 
@@ -37,9 +41,9 @@ The output tests are skipped with a clear message if `CCLIB_SOURCE_ROOT` is abse
 
 - The two requested test files exist and each has the three test shapes above.
 - Every parametrized fixture row identifies and is grouped by its Q-Chem or ORCA software version.
-- All covered input rows assert byte-for-byte generated input text.
-- All covered output rows assert the saved parsed dictionary after excluding `extras`.
+- All covered input rows assert their required native fragments with regular expressions.
+- All covered output rows assert a calculation-specific scalar or small array at its saved QCSchema path with an absolute tolerance of `1e-6`.
 - No input/output parametrized test executes Q-Chem or ORCA.
 - Each program has one availability-guarded live HF single-point smoke test.
-- The tracking plan lists every candidate fixture and its included/excluded status.
+- The tracking plan lists every candidate fixture's eligibility and the compact representative inclusion/exclusion decision.
 - Targeted tests pass with fixture data available; live tests either pass or are explicitly skipped due to missing executable/configuration.
