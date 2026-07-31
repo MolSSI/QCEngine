@@ -4,9 +4,11 @@ from pathlib import Path
 
 import pytest
 import numpy as np
+import qcengine as qcng
 from qcelemental.models.v2 import AtomicInput
 
 from qcengine.config import TaskConfig
+from qcengine.testing import uusing
 from qcengine.programs.cclib_programs import cclib_orca
 from qcengine.programs.cclib_programs.base import ExecutionResult, _parse_and_convert
 
@@ -11742,3 +11744,22 @@ def test_parsed_outputs(version, relative_output, expected_output):
         input_model,
     )
     assert json.dumps(result.dict(exclude={"extras"}), sort_keys=True, default=_json_default) == expected_output
+
+
+@pytest.mark.cclib_orca
+@uusing("cclib-orca")
+def test_live_hf_single_point():
+    result = qcng.compute(
+        AtomicInput(
+            molecule={"symbols": ["He"], "geometry": [0.0, 0.0, 0.0]},
+            driver="energy",
+            model={"method": "hf", "basis": "sto-3g"},
+        ),
+        "cclib-orca",
+        raise_error=True,
+        return_version=1,
+        task_config={"ncores": 1, "memory": 1.0},
+    )
+
+    assert result.success is True
+    assert isinstance(result.return_result, float)
