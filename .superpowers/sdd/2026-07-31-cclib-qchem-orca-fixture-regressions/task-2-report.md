@@ -82,3 +82,58 @@ The brief's complete-fixture `ExecutionResult`/`_parse_and_convert` JSON collect
 
 - `uv.lock` was already untracked before Task 2 work and remains deliberately unmodified and unstaged.
 - Fixture-specific input/output rows and complete parsed-result dictionaries remain deferred to Tasks 3 and 4 to avoid widening this scaffolding task.
+
+---
+
+## Task 2 gap fix
+
+### Status
+
+Implemented the reviewer-requested complete fixture expectation coverage. The two modules now preserve exact generated native input text and serialized parsed-result dictionaries for every Task 1 included fixture: 48 Q-Chem rows (5.1, 5.4, 6.0) and 10 ORCA rows (5.0, 6.0). The rows are statically grouped by native fixture version and do not invoke Q-Chem or ORCA.
+
+`test_parsed_outputs` reads each fixture only from `$CCLIB_SOURCE_ROOT/data`, creates an `ExecutionResult` containing the complete fixture output, replays it through `_parse_and_convert`, and compares the sorted JSON serialization of `result.dict(exclude={"extras"})`. The serialization helper converts only NumPy arrays to their JSON representation; `extras` is the sole excluded result field.
+
+### Files
+
+- `qcengine/programs/cclib_programs/tests/test_qchem.py`
+  - Adds `QCHEM_5_1`, `QCHEM_5_4`, and `QCHEM_6_0` input/output expectation groups.
+  - Adds 48 exact-input rows and 48 full `ExecutionResult` replay/output rows.
+- `qcengine/programs/cclib_programs/tests/test_orca.py`
+  - Adds `ORCA_5_0` and `ORCA_6_0` input/output expectation groups.
+  - Adds 10 exact-input rows and 10 full `ExecutionResult` replay/output rows.
+
+### Commands and results
+
+```bash
+uv run --with /home/awallace43/gits/cclib python /tmp/generate_cclib_fixture_tests.py
+```
+
+Passed. Replayed every Task 1 included fixture and generated inline `AtomicInput`, native input, and sorted serialized expected result values.
+
+```bash
+uv run --with black black qcengine/programs/cclib_programs/tests/test_qchem.py qcengine/programs/cclib_programs/tests/test_orca.py
+uv run python -m py_compile qcengine/programs/cclib_programs/tests/test_qchem.py qcengine/programs/cclib_programs/tests/test_orca.py
+```
+
+Passed. Both generated modules are formatted and compile successfully.
+
+```bash
+CCLIB_SOURCE_ROOT=/home/awallace43/gits/cclib uv run --with /home/awallace43/gits/cclib --with pytest pytest qcengine/programs/cclib_programs/tests/test_qchem.py qcengine/programs/cclib_programs/tests/test_orca.py -q
+```
+
+Passed: `116 passed in 1.59s`. The run emitted 58 expected Pydantic deprecation warnings for `result.dict`; that method is intentionally retained because the task requires serialization of `result.dict(exclude={"extras"})`.
+
+```bash
+git diff --check
+```
+
+Passed.
+
+### Commit
+
+- `038cc06e test: add cclib fixture expectations`
+
+### Concerns
+
+- The fixture tests require the local cclib checkout through `CCLIB_SOURCE_ROOT` and the same cclib writer/parser revision used by Task 1. They skip clearly when that root is unavailable.
+- The pre-existing untracked `uv.lock` remains unmodified and unstaged.
