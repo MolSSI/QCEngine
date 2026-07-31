@@ -28,31 +28,183 @@
 - Consumes: `/home/awallace43/gits/cclib/data/{QChem,ORCA}`.
 - Produces: explicit per-version inclusion/exclusion inventory used to form test rows.
 
-- [ ] **Step 1: Enumerate paired fixture candidates and parser outcomes**
+- [x] **Step 1: Enumerate paired fixture candidates and parser outcomes**
 
-Run:
-```bash
-python - <<'PY'
-from pathlib import Path
-for program in ("QChem", "ORCA"):
-    root = Path("/home/awallace43/gits/cclib/data") / program
-    for output in sorted(root.glob("**/*.out")):
-        source = output.with_suffix(".in" if program == "QChem" else ".inp")
-        print(program, output.parent.name, output.stem, "paired" if source.exists() else "missing-input")
-PY
-```
-Record every row under its version directory. Mark `.log`-only and missing-pair candidates excluded.
+  Ran the prescribed `.out` pairing inventory against the approved version directories. All 91 `.out` candidates are paired; the complete results and `.log` exclusions are recorded below.
 
-- [ ] **Step 2: Record collector failures as exclusions**
+- [x] **Step 2: Record collector failures as exclusions**
 
-For every paired `.out`, run `ccopen`, the expected parser class check, parse, `QCSchemaWriter(...).as_dict(validate=False)`, and `_parse_and_convert`. Record `included-input`, `included-output`, or the exact failed stage.
+  Ran the collector through `ccopen`, expected parser identity, parse, `QCSchemaWriter(...).as_dict(validate=False)`, native input generation, and `_parse_and_convert` for every paired `.out`. Exact per-side statuses are recorded below.
 
-- [ ] **Step 3: Commit the inventory baseline**
+- [x] **Step 3: Commit the inventory baseline**
 
-```bash
-git add -f docs/superpowers/plans/2026-07-31-cclib-qchem-orca-fixture-regressions.md
-git commit -m "docs: track cclib fixture regressions"
-```
+  Committed as `docs: track cclib fixture regressions`.
+
+## Task 1 inventory baseline
+
+**Status: complete.** The inventory is constrained to Q-Chem 5.1/5.4/6.0 and ORCA 5.0/6.0/6.1. The `.out` enumeration found 91 candidates, all paired with their required native input; therefore there are no missing-pair exclusions. The 18 `.log`-only candidates are explicitly excluded below. Collector status was obtained with cclib `1.8.1.post1235+5c3639de` from `/home/awallace43/gits/cclib`, `TaskConfig(ncores=1, nnodes=1, memory=1.0, scratch_directory=None, retries=0, mpiexec_command=None)`, and the current harness definitions.
+
+For each paired `.out`, the collector ran `ccopen`, checked the exact expected parser class, parsed the output, called `QCSchemaWriter(...).as_dict(validate=False)`, built the v2 `AtomicInput`, generated native input, and replayed the output through `_parse_and_convert`. `included-input` and `included-output` are independently recorded so a future row collector can use either side.
+
+### QChem 5.1
+
+Paired `.out` candidates: 21; included input rows: 17; included output rows: 17.
+
+| Source → output | Input status | Output status |
+| --- | --- | --- |
+| `QChem/basicQChem5.1/C_bigbasis.in` → `QChem/basicQChem5.1/C_bigbasis.out` | included-input | included-output |
+| `QChem/basicQChem5.1/MoOCl4_sp.in` → `QChem/basicQChem5.1/MoOCl4_sp.out` | excluded: parser result validation: metadata.success is not true | excluded: parser result validation: metadata.success is not true |
+| `QChem/basicQChem5.1/Trp_polar.in` → `QChem/basicQChem5.1/Trp_polar.out` | included-input | included-output |
+| `QChem/basicQChem5.1/dvb_bomd.in` → `QChem/basicQChem5.1/dvb_bomd.out` | included-input | included-output |
+| `QChem/basicQChem5.1/dvb_dispersion_bp86_d3zero.in` → `QChem/basicQChem5.1/dvb_dispersion_bp86_d3zero.out` | included-input | included-output |
+| `QChem/basicQChem5.1/dvb_gopt.in` → `QChem/basicQChem5.1/dvb_gopt.out` | included-input | included-output |
+| `QChem/basicQChem5.1/dvb_ir.in` → `QChem/basicQChem5.1/dvb_ir.out` | included-input | included-output |
+| `QChem/basicQChem5.1/dvb_raman.in` → `QChem/basicQChem5.1/dvb_raman.out` | included-input | included-output |
+| `QChem/basicQChem5.1/dvb_sp.in` → `QChem/basicQChem5.1/dvb_sp.out` | included-input | included-output |
+| `QChem/basicQChem5.1/dvb_sp_un.in` → `QChem/basicQChem5.1/dvb_sp_un.out` | included-input | included-output |
+| `QChem/basicQChem5.1/dvb_td.in` → `QChem/basicQChem5.1/dvb_td.out` | included-input | included-output |
+| `QChem/basicQChem5.1/water_ccd.in` → `QChem/basicQChem5.1/water_ccd.out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCD | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCD |
+| `QChem/basicQChem5.1/water_ccsd(t).in` → `QChem/basicQChem5.1/water_ccsd(t).out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCSD(T) | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCSD(T) |
+| `QChem/basicQChem5.1/water_ccsd.in` → `QChem/basicQChem5.1/water_ccsd.out` | included-input | included-output |
+| `QChem/basicQChem5.1/water_cis.in` → `QChem/basicQChem5.1/water_cis.out` | included-input | included-output |
+| `QChem/basicQChem5.1/water_ir.in` → `QChem/basicQChem5.1/water_ir.out` | included-input | included-output |
+| `QChem/basicQChem5.1/water_ir_anharm.in` → `QChem/basicQChem5.1/water_ir_anharm.out` | included-input | included-output |
+| `QChem/basicQChem5.1/water_mp2.in` → `QChem/basicQChem5.1/water_mp2.out` | included-input | included-output |
+| `QChem/basicQChem5.1/water_mp3.in` → `QChem/basicQChem5.1/water_mp3.out` | included-input | included-output |
+| `QChem/basicQChem5.1/water_mp4.in` → `QChem/basicQChem5.1/water_mp4.out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method MP4 | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method MP4 |
+| `QChem/basicQChem5.1/water_mp4sdq.in` → `QChem/basicQChem5.1/water_mp4sdq.out` | included-input | included-output |
+
+### QChem 5.4
+
+Paired `.out` candidates: 21; included input rows: 18; included output rows: 18.
+
+| Source → output | Input status | Output status |
+| --- | --- | --- |
+| `QChem/basicQChem5.4/C_bigbasis.in` → `QChem/basicQChem5.4/C_bigbasis.out` | included-input | included-output |
+| `QChem/basicQChem5.4/MoOCl4_sp.in` → `QChem/basicQChem5.4/MoOCl4_sp.out` | included-input | included-output |
+| `QChem/basicQChem5.4/Trp_polar.in` → `QChem/basicQChem5.4/Trp_polar.out` | included-input | included-output |
+| `QChem/basicQChem5.4/dvb_bomd.in` → `QChem/basicQChem5.4/dvb_bomd.out` | included-input | included-output |
+| `QChem/basicQChem5.4/dvb_dispersion_bp86_d3zero.in` → `QChem/basicQChem5.4/dvb_dispersion_bp86_d3zero.out` | included-input | included-output |
+| `QChem/basicQChem5.4/dvb_gopt.in` → `QChem/basicQChem5.4/dvb_gopt.out` | included-input | included-output |
+| `QChem/basicQChem5.4/dvb_ir.in` → `QChem/basicQChem5.4/dvb_ir.out` | included-input | included-output |
+| `QChem/basicQChem5.4/dvb_raman.in` → `QChem/basicQChem5.4/dvb_raman.out` | included-input | included-output |
+| `QChem/basicQChem5.4/dvb_sp.in` → `QChem/basicQChem5.4/dvb_sp.out` | included-input | included-output |
+| `QChem/basicQChem5.4/dvb_sp_un.in` → `QChem/basicQChem5.4/dvb_sp_un.out` | included-input | included-output |
+| `QChem/basicQChem5.4/dvb_td.in` → `QChem/basicQChem5.4/dvb_td.out` | included-input | included-output |
+| `QChem/basicQChem5.4/water_ccd.in` → `QChem/basicQChem5.4/water_ccd.out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCD | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCD |
+| `QChem/basicQChem5.4/water_ccsd(t).in` → `QChem/basicQChem5.4/water_ccsd(t).out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCSD(T) | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCSD(T) |
+| `QChem/basicQChem5.4/water_ccsd.in` → `QChem/basicQChem5.4/water_ccsd.out` | included-input | included-output |
+| `QChem/basicQChem5.4/water_cis.in` → `QChem/basicQChem5.4/water_cis.out` | included-input | included-output |
+| `QChem/basicQChem5.4/water_ir.in` → `QChem/basicQChem5.4/water_ir.out` | included-input | included-output |
+| `QChem/basicQChem5.4/water_ir_anharm.in` → `QChem/basicQChem5.4/water_ir_anharm.out` | included-input | included-output |
+| `QChem/basicQChem5.4/water_mp2.in` → `QChem/basicQChem5.4/water_mp2.out` | included-input | included-output |
+| `QChem/basicQChem5.4/water_mp3.in` → `QChem/basicQChem5.4/water_mp3.out` | included-input | included-output |
+| `QChem/basicQChem5.4/water_mp4.in` → `QChem/basicQChem5.4/water_mp4.out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method MP4 | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method MP4 |
+| `QChem/basicQChem5.4/water_mp4sdq.in` → `QChem/basicQChem5.4/water_mp4sdq.out` | included-input | included-output |
+
+### QChem 6.0
+
+Paired `.out` candidates: 13; included input rows: 13; included output rows: 13.
+
+| Source → output | Input status | Output status |
+| --- | --- | --- |
+| `QChem/basicQChem6.0/water_hf_solvent_cosmo.in` → `QChem/basicQChem6.0/water_hf_solvent_cosmo.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_onsager.in` → `QChem/basicQChem6.0/water_hf_solvent_onsager.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_pcm_cosmo.in` → `QChem/basicQChem6.0/water_hf_solvent_pcm_cosmo.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_pcm_cpcm.in` → `QChem/basicQChem6.0/water_hf_solvent_pcm_cpcm.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_pcm_iefpcm.in` → `QChem/basicQChem6.0/water_hf_solvent_pcm_iefpcm.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_pcm_ssvpe.in` → `QChem/basicQChem6.0/water_hf_solvent_pcm_ssvpe.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_sm12_chelpg.in` → `QChem/basicQChem6.0/water_hf_solvent_sm12_chelpg.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_sm12_cm5.in` → `QChem/basicQChem6.0/water_hf_solvent_sm12_cm5.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_sm12_mk.in` → `QChem/basicQChem6.0/water_hf_solvent_sm12_mk.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_sm8.in` → `QChem/basicQChem6.0/water_hf_solvent_sm8.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_smd.in` → `QChem/basicQChem6.0/water_hf_solvent_smd.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_smd_cpcm.in` → `QChem/basicQChem6.0/water_hf_solvent_smd_cpcm.out` | included-input | included-output |
+| `QChem/basicQChem6.0/water_hf_solvent_smd_iefpcm.in` → `QChem/basicQChem6.0/water_hf_solvent_smd_iefpcm.out` | included-input | included-output |
+
+### ORCA 5.0
+
+Paired `.out` candidates: 17; included input rows: 4; included output rows: 4.
+
+| Source → output | Input status | Output status |
+| --- | --- | --- |
+| `ORCA/basicORCA5.0/Trp_polar.inp` → `ORCA/basicORCA5.0/Trp_polar.out` | included-input | included-output |
+| `ORCA/basicORCA5.0/dvb_coupling_nmr.inp` → `ORCA/basicORCA5.0/dvb_coupling_nmr.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_dispersion_bp86_d3zero.inp` → `ORCA/basicORCA5.0/dvb_dispersion_bp86_d3zero.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_gopt.inp` → `ORCA/basicORCA5.0/dvb_gopt.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_ir.inp` → `ORCA/basicORCA5.0/dvb_ir.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_nmr.inp` → `ORCA/basicORCA5.0/dvb_nmr.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_raman.inp` → `ORCA/basicORCA5.0/dvb_raman.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_rocis.inp` → `ORCA/basicORCA5.0/dvb_rocis.out` | included-input | included-output |
+| `ORCA/basicORCA5.0/dvb_scan_relaxed.inp` → `ORCA/basicORCA5.0/dvb_scan_relaxed.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_scan_unrelaxed.inp` → `ORCA/basicORCA5.0/dvb_scan_unrelaxed.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_sp.inp` → `ORCA/basicORCA5.0/dvb_sp.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_sp_un.inp` → `ORCA/basicORCA5.0/dvb_sp_un.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/dvb_td.inp` → `ORCA/basicORCA5.0/dvb_td.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA5.0/water_ccsd.inp` → `ORCA/basicORCA5.0/water_ccsd.out` | included-input | included-output |
+| `ORCA/basicORCA5.0/water_ccsd_t.inp` → `ORCA/basicORCA5.0/water_ccsd_t.out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCSD(T) | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCSD(T) |
+| `ORCA/basicORCA5.0/water_mp2.inp` → `ORCA/basicORCA5.0/water_mp2.out` | included-input | included-output |
+| `ORCA/basicORCA5.0/water_mp3.inp` → `ORCA/basicORCA5.0/water_mp3.out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method MP3 | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method MP3 |
+| `ORCA/basicORCA5.0/dvb_adc2.inp` → `ORCA/basicORCA5.0/dvb_adc2.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA5.0/dvb_eom_ccsd.inp` → `ORCA/basicORCA5.0/dvb_eom_ccsd.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA5.0/dvb_perf.inp` → `ORCA/basicORCA5.0/dvb_perf.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA5.0/dvb_pno_eom_ccsd.inp` → `ORCA/basicORCA5.0/dvb_pno_eom_ccsd.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA5.0/dvb_steom_ccsd.inp` → `ORCA/basicORCA5.0/dvb_steom_ccsd.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA5.0/dvb_steom_dlpno_ccsd.inp` → `ORCA/basicORCA5.0/dvb_steom_dlpno_ccsd.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA5.0/water_hf_solvent_cpcm.inp` → `ORCA/basicORCA5.0/water_hf_solvent_cpcm.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA5.0/water_hf_solvent_cpcm_cosmo.inp` → `ORCA/basicORCA5.0/water_hf_solvent_cpcm_cosmo.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA5.0/water_hf_solvent_smd.inp` → `ORCA/basicORCA5.0/water_hf_solvent_smd.log` | excluded: log-only candidate | excluded: log-only candidate |
+
+### ORCA 6.0
+
+Paired `.out` candidates: 18; included input rows: 6; included output rows: 6.
+
+| Source → output | Input status | Output status |
+| --- | --- | --- |
+| `ORCA/basicORCA6.0/Trp_polar.inp` → `ORCA/basicORCA6.0/Trp_polar.out` | included-input | included-output |
+| `ORCA/basicORCA6.0/dvb_dispersion_bp86_d3zero.inp` → `ORCA/basicORCA6.0/dvb_dispersion_bp86_d3zero.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_gopt.inp` → `ORCA/basicORCA6.0/dvb_gopt.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_ir.inp` → `ORCA/basicORCA6.0/dvb_ir.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_nmr.inp` → `ORCA/basicORCA6.0/dvb_nmr.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_raman.inp` → `ORCA/basicORCA6.0/dvb_raman.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_rocis.inp` → `ORCA/basicORCA6.0/dvb_rocis.out` | included-input | included-output |
+| `ORCA/basicORCA6.0/dvb_scan_relaxed.inp` → `ORCA/basicORCA6.0/dvb_scan_relaxed.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_scan_unrelaxed.inp` → `ORCA/basicORCA6.0/dvb_scan_unrelaxed.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_sp_dft.inp` → `ORCA/basicORCA6.0/dvb_sp_dft.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_sp_hf.inp` → `ORCA/basicORCA6.0/dvb_sp_hf.out` | included-input | included-output |
+| `ORCA/basicORCA6.0/dvb_sp_un_dft.inp` → `ORCA/basicORCA6.0/dvb_sp_un_dft.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/dvb_sp_un_hf.inp` → `ORCA/basicORCA6.0/dvb_sp_un_hf.out` | included-input | included-output |
+| `ORCA/basicORCA6.0/dvb_td.inp` → `ORCA/basicORCA6.0/dvb_td.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+| `ORCA/basicORCA6.0/water_ccsd.inp` → `ORCA/basicORCA6.0/water_ccsd.out` | included-input | included-output |
+| `ORCA/basicORCA6.0/water_ccsd_t.inp` → `ORCA/basicORCA6.0/water_ccsd_t.out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCSD(T) | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method CCSD(T) |
+| `ORCA/basicORCA6.0/water_mp2.inp` → `ORCA/basicORCA6.0/water_mp2.out` | included-input | included-output |
+| `ORCA/basicORCA6.0/water_mp3.inp` → `ORCA/basicORCA6.0/water_mp3.out` | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method MP3 | excluded: QCSchemaWriter.as_dict(validate=False): RuntimeError: Don't know what to do with method MP3 |
+| `ORCA/basicORCA6.0/dvb_adc2.inp` → `ORCA/basicORCA6.0/dvb_adc2.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA6.0/dvb_eom_ccsd.inp` → `ORCA/basicORCA6.0/dvb_eom_ccsd.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA6.0/dvb_perf.inp` → `ORCA/basicORCA6.0/dvb_perf.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA6.0/dvb_pno_eom_ccsd.inp` → `ORCA/basicORCA6.0/dvb_pno_eom_ccsd.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA6.0/dvb_steom_ccsd.inp` → `ORCA/basicORCA6.0/dvb_steom_ccsd.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA6.0/dvb_steom_dlpno_ccsd.inp` → `ORCA/basicORCA6.0/dvb_steom_dlpno_ccsd.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA6.0/water_hf_solvent_cpcm.inp` → `ORCA/basicORCA6.0/water_hf_solvent_cpcm.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA6.0/water_hf_solvent_cpcm_cosmo.inp` → `ORCA/basicORCA6.0/water_hf_solvent_cpcm_cosmo.log` | excluded: log-only candidate | excluded: log-only candidate |
+| `ORCA/basicORCA6.0/water_hf_solvent_smd.inp` → `ORCA/basicORCA6.0/water_hf_solvent_smd.log` | excluded: log-only candidate | excluded: log-only candidate |
+
+### ORCA 6.1
+
+Paired `.out` candidates: 1; included input rows: 0; included output rows: 0.
+
+| Source → output | Input status | Output status |
+| --- | --- | --- |
+| `ORCA/basicORCA6.1/dvb_coupling_nmr.inp` → `ORCA/basicORCA6.1/dvb_coupling_nmr.out` | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' | excluded: QCSchemaWriter.as_dict(validate=False): KeyError: 'functional' |
+
+### Inventory totals
+
+| Program | Paired `.out` | Included inputs | Included outputs | Excluded `.out` candidates | Excluded `.log`-only candidates | Missing-pair candidates |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| QChem | 55 | 48 | 48 | 7 | 0 | 0 |
+| ORCA | 36 | 10 | 10 | 26 | 18 | 0 |
+| **Total** | **91** | **58** | **58** | **33** | **18** | **0** |
+
 
 ### Task 2: Collect inline expectations
 
