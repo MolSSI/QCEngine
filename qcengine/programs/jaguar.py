@@ -122,7 +122,7 @@ class JaguarHarness(ProgramHarness):
         ------
         InputError
             If the driver is unsupported, the basis is an explicit QCSchema
-            ``BasisSet``, a ghost dummy center is requested, or the optional
+            ``BasisSet``, or the optional
             Jaguar guess input is malformed.
         """
         driver = input_model.specification.driver
@@ -134,10 +134,6 @@ class JaguarHarness(ProgramHarness):
             raise InputError("QCSchema BasisSet for model.basis not implemented. Use a string basis name.")
 
         JaguarHarness._get_guess_input(input_model)
-
-        for symbol, real in zip(input_model.molecule.symbols, input_model.molecule.real):
-            if str(symbol).lower() == "x" and not real:
-                raise InputError("A QCSchema dummy center (symbol X) cannot also be a ghost atom.")
 
     @staticmethod
     def _get_guess_input(input_model: "AtomicInput") -> Optional[str]:
@@ -235,10 +231,9 @@ class JaguarHarness(ProgramHarness):
         -----
         QCSchema coordinates are converted from bohr to angstrom. Model and
         driver settings override conflicting values in the native keywords.
-        QCSchema dummy atoms (symbol ``X``) are represented as Schrödinger
-        ``Du`` atoms, which Jaguar serializes with its standard ``X<n>`` label.
-        Ghost atoms retain their element and are marked as counterpoise atoms,
-        which Jaguar serializes by appending ``@`` to the atom label.
+        Atoms marked non-real by QCSchema retain their element and are marked as
+        counterpoise atoms, which Jaguar serializes by appending an at sign to
+        the atom label.
         If ``specification.extras.jaguar.guess_input`` is present, only its
         ``&guess`` and optional ``&guess_basis`` sections are copied; its old
         geometry and ``&gen`` settings are intentionally ignored.
@@ -250,8 +245,7 @@ class JaguarHarness(ProgramHarness):
         geometry = np.asarray(molecule.geometry) * constants.bohr2angstroms
         jaguar_structure = structure.create_new_structure()
         for symbol, xyz in zip(molecule.symbols, geometry):
-            jaguar_symbol = "Du" if str(symbol).lower() == "x" else str(symbol)
-            jaguar_structure.addAtom(jaguar_symbol, *map(float, xyz))
+            jaguar_structure.addAtom(str(symbol), *map(float, xyz))
 
         keywords = {key.lower(): value for key, value in input_model.specification.keywords.items()}
         model = input_model.specification.model

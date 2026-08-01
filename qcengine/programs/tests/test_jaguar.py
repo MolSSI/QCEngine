@@ -197,35 +197,6 @@ H2 0.0 0.0  1.0
 
 
 @uusing("jaguar")
-def test_dummy_atom_mapping(tmp_path):
-    input_model = AtomicInput(
-        molecule={
-            "symbols": ["H", "H", "X"],
-            "geometry": [0.0, 0.0, -0.7, 0.0, 0.0, 0.7, 0.0, 1.5, 0.0],
-            "molecular_charge": 0,
-            "molecular_multiplicity": 1,
-        },
-        specification={
-            "driver": "energy",
-            "model": {"method": "hf", "basis": "sto-3g"},
-        },
-    )
-    job_base = tmp_path / "dummy"
-
-    jaguar_input = JaguarHarness._build_jaguar_input(input_model, str(job_base))
-    jaguar_atoms = list(jaguar_input.getStructure().atom)
-
-    assert [atom.atomic_number for atom in jaguar_atoms] == [1, 1, -2]
-    assert np.allclose(
-        [[atom.x, atom.y, atom.z] for atom in jaguar_atoms],
-        np.asarray(input_model.molecule.geometry) * constants.bohr2angstroms,
-    )
-
-    jaguar_input.save()
-    assert "X3" in job_base.with_suffix(".in").read_text()
-
-
-@uusing("jaguar")
 def test_ghost_atom_mapping(tmp_path):
     input_model = AtomicInput(
         molecule={
