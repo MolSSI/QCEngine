@@ -34,16 +34,10 @@ Changelog
 
 .. _`sec:cl0510`:
 
-v0.51.0 / 2026-MM-DD (Unreleased)
+v0.50.1 / 2026-08-03
 --------------------
 
-:docs:`v0.51.0` for current. :docs:`v0.34.1` for QCSchema v1.
-
-Breaking Changes
-++++++++++++++++
-
-New Features
-++++++++++++
+:docs:`v0.50.1` for current. :docs:`v0.34.1` for QCSchema v1.
 
 Enhancements
 ++++++++++++
@@ -51,6 +45,7 @@ Enhancements
 
 Bug Fixes
 +++++++++
+- (:pr:`516`) Pyberny -- v0.7 newly rejects unknown keywords, so adapt tests.
 
 Misc.
 +++++
