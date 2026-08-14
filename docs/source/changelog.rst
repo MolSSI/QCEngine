@@ -34,7 +34,7 @@ Changelog
 
 .. _`sec:cl0510`:
 
-v0.50.1 / 2026-08-03
+v0.50.1 / 2026-08-xx (Unreleased)
 --------------------
 
 :docs:`v0.50.1` for current. :docs:`v0.34.1` for QCSchema v1.
