@@ -101,7 +101,7 @@ jobs:
 
     steps:
       - name: Download the distributions
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
@@ -121,7 +121,7 @@ jobs:
 
     steps:
       - name: Download the distributions
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/

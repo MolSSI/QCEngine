@@ -32,9 +32,16 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+.. RELEASE PROCEDURE
+.. * check changelog below is up to date and that the release number and date are in place and that (Unreleased) is removed
+.. * test broadly locally. suggested edit for gamess: _global_values["ncores"] = 2 #cpu_cnt
+.. * once master is in shape for release, `git tag -a v0.50.1 -m "v0.50.1"`
+.. * `git push upstream --atomic v0.50.1 master`
+
+
 .. _`sec:cl0510`:
 
-v0.50.1 / 2026-08-xx (Unreleased)
+v0.50.1 / 2026-08-15
 --------------------
 
 :docs:`v0.50.1` for current. :docs:`v0.34.1` for QCSchema v1.
