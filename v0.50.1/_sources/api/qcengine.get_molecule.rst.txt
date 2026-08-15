@@ -1,0 +1,6 @@
+get_molecule
+============
+
+.. currentmodule:: qcengine
+
+.. autofunction:: get_molecule
