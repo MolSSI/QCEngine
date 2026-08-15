@@ -1,0 +1,6 @@
+list_all_programs
+=================
+
+.. currentmodule:: qcengine
+
+.. autofunction:: list_all_programs

@@ -1,0 +1,6 @@
+list_available_procedures
+=========================
+
+.. currentmodule:: qcengine
+
+.. autofunction:: list_available_procedures
