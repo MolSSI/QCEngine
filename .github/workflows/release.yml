@@ -1,0 +1,154 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*a[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*b[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*rc[0-9]*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Python distributions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: python -m pip install --upgrade build packaging twine
+
+      - name: Build the source distribution and wheel
+        env:
+          # Public indexes reject setuptools-scm's local +g<hash> suffix.
+          # The commit distance still makes consecutive main builds unique.
+          SETUPTOOLS_SCM_OVERRIDES_FOR_QCMANYBODY: '{local_scheme = "no-local-version"}'
+        run: python -m build
+
+      - name: Check distribution metadata and version
+        run: |
+          python -m twine check dist/*
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          from packaging.utils import parse_sdist_filename, parse_wheel_filename
+          from packaging.version import InvalidVersion, Version
+
+          versions = set()
+          for artifact in Path("dist").iterdir():
+              if artifact.suffix == ".whl":
+                  _, version, _, _ = parse_wheel_filename(artifact.name)
+              elif artifact.name.endswith(".tar.gz"):
+                  _, version = parse_sdist_filename(artifact.name)
+              else:
+                  continue
+              versions.add(version)
+
+          if len(versions) != 1:
+              raise SystemExit(f"Expected one distribution version, found: {versions}")
+
+          version = versions.pop()
+          if version.local is not None:
+              raise SystemExit(f"Public indexes reject local version {version}")
+
+          if os.environ["GITHUB_REF_TYPE"] == "tag":
+              tag = os.environ["GITHUB_REF_NAME"]
+              try:
+                  tag_version = Version(tag.removeprefix("v"))
+              except InvalidVersion as exc:
+                  raise SystemExit(f"Tag {tag!r} is not a Python package version") from exc
+              if version != tag_version:
+                  raise SystemExit(
+                      f"Distribution version {version} does not match tag {tag_version}"
+                  )
+
+          print(f"Validated distribution version {version}")
+          PY
+
+      - name: Store the distributions
+        uses: actions/upload-artifact@v5
+        with:
+          name: python-package-distributions
+          path: dist/
+          if-no-files-found: error
+
+  publish-to-pypi:
+    name: Publish Python distribution to PyPI
+    if: github.repository == 'MolSSI/QCEngine' && github.ref_type == 'tag'
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/qcengine
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download the distributions
+        uses: actions/download-artifact@v5
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Sign distributions and create a GitHub Release
+    if: github.repository == 'MolSSI/QCEngine' && github.ref_type == 'tag'
+    needs:
+      - publish-to-pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Download the distributions
+        uses: actions/download-artifact@v5
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Sign the distributions with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3.5.0
+        with:
+          inputs: >-
+            ./dist/*.tar.gz
+            ./dist/*.whl
+
+      - name: Create the GitHub Release if needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" \
+              --repo "$GITHUB_REPOSITORY" \
+              --verify-tag \
+              --generate-notes
+          fi
+
+      - name: Upload distributions and signatures to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "$GITHUB_REF_NAME" dist/** \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
+
