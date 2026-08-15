@@ -42,10 +42,12 @@ v0.50.1 / 2026-08-xx (Unreleased)
 Enhancements
 ++++++++++++
 - (:pr:`507`) Deps - require QCElemental v0.50.4 for NumPy v2.5 compatibility.
+- ??? Maint -- Add automatic publishing to PyPI and GitHub release from tag.
 
 Bug Fixes
 +++++++++
-- (:pr:`516`) Pyberny -- v0.7 newly rejects unknown keywords, so adapt tests.
+- (:pr:`516`) Pyberny, Psi4 -- v0.7 newly rejects unknown keywords, so adapt tests.
+  Also alter Psi4 test lanes for new Libxc v7.2.
 
 Misc.
 +++++
