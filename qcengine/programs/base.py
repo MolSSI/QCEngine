@@ -20,6 +20,7 @@ from .mp2d import MP2DHarness
 from .mrchem import MRChemHarness
 from .nwchem import NWChemHarness
 from .openmm import OpenMMHarness
+from .orb import ORBHarness
 from .psi4 import Psi4Harness
 from .qchem import QChemHarness
 from .qcore import EntosHarness, QcoreHarness
@@ -129,6 +130,7 @@ register_program(XTBHarness())
 register_program(TorchANIHarness())
 register_program(MACEHarness())
 register_program(AIMNET2Harness())
+register_program(ORBHarness())
 
 # Molecular Mechanics
 register_program(RDKitHarness())

@@ -39,6 +39,7 @@ _canonical_methods = [
     pytest.param("mctc-gcp", {"method": "dft/sv"}, {}, marks=using("mctc-gcp")),
     pytest.param("mace", {"method": "small"}, {}, marks=using("mace")),
     pytest.param("aimnet2", {"method": "b973c"}, {}, marks=using("aimnet2")),
+    pytest.param("orb", {"method": "orb-v3-direct-omol"}, {"device": "cpu"}, marks=using("orb")),
     pytest.param("s-dftd3", {"method": "b3lyp-d3"}, {}, marks=using("s-dftd3")),
     pytest.param("dftd4", {"method": "b3lyp-d4"}, {}, marks=using("dftd4")),
     # add as programs available
