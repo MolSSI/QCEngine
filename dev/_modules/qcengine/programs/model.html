@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.programs.model &mdash; QCEngine 0.1.dev1+ge04e381c0 documentation</title>
+  <title>qcengine.programs.model &mdash; QCEngine 0.1.dev1+gceb9378d1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=e623ff90"></script>
+      <script src="../../../_static/documentation_options.js?v=1907a53c"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../../_static/version-switcher.js?v=313414bb"></script>
@@ -125,7 +125,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="viewcode-block" id="ProgramHarness">
 <a class="viewcode-back" href="../../../api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ProgramHarness</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for analytic single-geometry capable harnesses.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Base class for analytic single-geometry capable harnesses."""</span>
 
     <span class="n">_defaults</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
@@ -138,7 +138,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span>
         <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">,</span>
+        <span class="n">extra</span><span class="o">=</span><span class="s2">"forbid"</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -147,8 +147,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="viewcode-block" id="ProgramHarness.compute">
 <a class="viewcode-back" href="../../../api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness.compute">[docs]</a>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="s2">&quot;AtomicInput&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;AtomicResult&quot;</span><span class="p">,</span> <span class="s2">&quot;FailedOperation&quot;</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Top-level compute method to be implemented for every ProgramHarness</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="s2">"AtomicInput"</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">"AtomicResult"</span><span class="p">,</span> <span class="s2">"FailedOperation"</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Top-level compute method to be implemented for every ProgramHarness</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            This method behave in any of the following ways:</span>
@@ -158,7 +158,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">                    returns them as FailedOperation objects to end users.</span>
 <span class="sd">                3. Raise an exception if a computation failed. The raised exception will be handled by the</span>
 <span class="sd">                    qcng.compute() method and either raised or packaged as a FailedOperation object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">pass</span></div>
 
 
@@ -167,7 +167,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="nd">@staticmethod</span>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">found</span><span class="p">(</span><span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Checks if the program can be found.</span>
 
 <span class="sd">        Parameters</span>
@@ -179,7 +179,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">        -------</span>
 <span class="sd">        bool</span>
 <span class="sd">            Returns True if the program was found, False otherwise.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        """</span></div>
 
 
     <span class="c1">## Utility</span>
@@ -188,10 +188,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <a class="viewcode-back" href="../../../api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness.build_input_model">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_input_model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">return_input_schema_version</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;AtomicInput&quot;</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">&quot;AtomicInput&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">"AtomicInput"</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="s2">"AtomicInput"</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Quick wrapper around util.model_wrapper for inherited classes</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Note: Someday when the multiple QCSchema versions QCEngine supports are all within the</span>
         <span class="c1">#  Pydantic v2 API base class, this can use discriminated unions instead of logic.</span>
 
@@ -203,14 +203,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v2_model</span><span class="p">):</span>
             <span class="n">mdl</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v2_model</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="c1"># remember these are user-provided dictionaries, so they&#39;ll have the mandatory fields,</span>
+            <span class="c1"># remember these are user-provided dictionaries, so they'll have the mandatory fields,</span>
             <span class="c1">#   like driver, not the helpful discriminator fields like schema_version.</span>
-            <span class="c1"># when dictionaries look the same, we can&#39;t correctly identify the user schema version</span>
+            <span class="c1"># when dictionaries look the same, we can't correctly identify the user schema version</span>
             <span class="c1">#   so have to default to one or the other. Note that can force paths for testing by</span>
             <span class="c1">#   -1 -&gt; 2 in schema_versions.</span>
             <span class="c1"># so long as versions distinguishable by a *required* field, id by dict is reliable.</span>
 
-            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;specification&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;schema_version&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"specification"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"schema_version"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">mdl</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v2_model</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -222,7 +222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                     <span class="n">mdl</span> <span class="o">=</span> <span class="n">model_wrapper</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">v1v2_model</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">InputError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported input type for build_input_model: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InputError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported input type for build_input_model: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="n">input_schema_version</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">schema_version</span>
         <span class="k">if</span> <span class="n">return_input_schema_version</span><span class="p">:</span>
@@ -234,13 +234,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="viewcode-block" id="ProgramHarness.get_version">
 <a class="viewcode-back" href="../../../api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness.get_version">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finds program, extracts version, returns normalized version string.</span>
+<span class="w">        </span><span class="sd">"""Finds program, extracts version, returns normalized version string.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
 <span class="sd">            Return a valid, safe python version string.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        """</span></div>
 
 
     <span class="c1">## Computers</span>
@@ -248,9 +248,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="viewcode-block" id="ProgramHarness.build_input">
 <a class="viewcode-back" href="../../../api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness.build_input">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build_input</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">input_model</span><span class="p">:</span> <span class="s2">&quot;AtomicInput&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">,</span> <span class="n">template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_model</span><span class="p">:</span> <span class="s2">"AtomicInput"</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">,</span> <span class="n">template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;build_input is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"build_input is not implemented for </span><span class="si">{}</span><span class="s2">."</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ProgramHarness.execute">
@@ -263,19 +263,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">scratch_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;execute is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"execute is not implemented for </span><span class="si">{}</span><span class="s2">."</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ProgramHarness.parse_output">
 <a class="viewcode-back" href="../../../api/qcengine.programs.ProgramHarness.html#qcengine.programs.ProgramHarness.parse_output">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">parse_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfiles</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">input_model</span><span class="p">:</span> <span class="s2">&quot;AtomicInput&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AtomicResult&quot;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;parse_output is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfiles</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">input_model</span><span class="p">:</span> <span class="s2">"AtomicInput"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"AtomicResult"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"parse_output is not implemented for </span><span class="si">{}</span><span class="s2">."</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span></div>
 </div>
 
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ErrorCorrectionProgramHarness</span><span class="p">(</span><span class="n">ProgramHarness</span><span class="p">,</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for Harnesses that include logic to correct common errors</span>
+<span class="w">    </span><span class="sd">"""Base class for Harnesses that include logic to correct common errors</span>
 
 <span class="sd">    Classes which implement this Harness must override the :meth:`_compute` method</span>
 <span class="sd">    rather than :meth:`compute`. The ``compute`` method from this class will make</span>
@@ -290,12 +290,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">    of each ``KnownErrorException`` for the Harness after it finishes performing the computation.</span>
 <span class="sd">    The ``detect_error`` method will raise an exception that is caught by the</span>
 <span class="sd">    ``ErrorCorrectionProgramHarness`` and used to determine if/how to re-run the computation.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="s2">&quot;AtomicInput&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AtomicResult&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="s2">"AtomicInput"</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"AtomicResult"</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="s2">&quot;AtomicInput&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AtomicResult&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">:</span> <span class="s2">"AtomicInput"</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"AtomicResult"</span><span class="p">:</span>
         <span class="c1"># Get the error correction configuration</span>
         <span class="n">error_policy</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">specification</span><span class="o">.</span><span class="n">protocols</span><span class="o">.</span><span class="n">error_correction</span>
 
@@ -309,21 +309,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute</span><span class="p">(</span><span class="n">local_input_data</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
                 <span class="k">break</span>
             <span class="k">except</span> <span class="n">KnownErrorException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Caught a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2"> error.&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Caught a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2"> error."</span><span class="p">)</span>
 
                 <span class="c1"># Determine whether this specific type of error is allowed</span>
                 <span class="n">correction_allowed</span> <span class="o">=</span> <span class="n">error_policy</span><span class="o">.</span><span class="n">allows</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">error_name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">correction_allowed</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error correction for &quot;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">error_name</span><span class="si">}</span><span class="s1">&quot; is not allowed&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Error correction for "</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">error_name</span><span class="si">}</span><span class="s1">" is not allowed'</span><span class="p">)</span>
                     <span class="k">raise</span> <span class="n">e</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error correction for &quot;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">error_name</span><span class="si">}</span><span class="s1">&quot; is allowed&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Error correction for "</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">error_name</span><span class="si">}</span><span class="s1">" is allowed'</span><span class="p">)</span>
 
                 <span class="c1"># Check if it has run before</span>
                 <span class="c1"># TODO (wardlt): Should we allow errors to be run &gt;1 time?</span>
                 <span class="n">previously_run</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">error_name</span> <span class="ow">in</span> <span class="n">observed_errors</span>
                 <span class="k">if</span> <span class="n">previously_run</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                        <span class="s2">&quot;Error has been observed before and mitigation did not fix the issue. Raising exception&quot;</span>
+                        <span class="s2">"Error has been observed before and mitigation did not fix the issue. Raising exception"</span>
                     <span class="p">)</span>
                     <span class="k">raise</span> <span class="n">e</span>
 
@@ -332,16 +332,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <span class="n">new_keywords</span> <span class="o">=</span> <span class="n">local_input_data</span><span class="o">.</span><span class="n">specification</span><span class="o">.</span><span class="n">keywords</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="n">new_keywords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">keyword_updates</span><span class="p">)</span>
                 <span class="n">local_input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
-                    <span class="o">**</span><span class="n">local_input_data</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;specification&quot;</span><span class="p">}),</span>
-                    <span class="n">specification</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">local_input_data</span><span class="o">.</span><span class="n">specification</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="s2">&quot;keywords&quot;</span><span class="p">:</span> <span class="n">new_keywords</span><span class="p">},</span>
+                    <span class="o">**</span><span class="n">local_input_data</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">"specification"</span><span class="p">}),</span>
+                    <span class="n">specification</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">local_input_data</span><span class="o">.</span><span class="n">specification</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="s2">"keywords"</span><span class="p">:</span> <span class="n">new_keywords</span><span class="p">},</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Store the error details and mitigations employed</span>
-                <span class="n">observed_errors</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">error_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;details&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">details</span><span class="p">,</span> <span class="s2">&quot;keyword_updates&quot;</span><span class="p">:</span> <span class="n">keyword_updates</span><span class="p">}</span>
+                <span class="n">observed_errors</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">error_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"details"</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">details</span><span class="p">,</span> <span class="s2">"keyword_updates"</span><span class="p">:</span> <span class="n">keyword_updates</span><span class="p">}</span>
 
         <span class="c1"># Add the errors observed and corrected for, if any</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">observed_errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">extras</span><span class="p">[</span><span class="s2">&quot;observed_errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_errors</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">extras</span><span class="p">[</span><span class="s2">"observed_errors"</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_errors</span>
         <span class="k">return</span> <span class="n">result</span>
 </pre></div>
 

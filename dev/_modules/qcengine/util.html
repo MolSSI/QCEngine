@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qcengine.util &mdash; QCEngine 0.1.dev1+ge04e381c0 documentation</title>
+  <title>qcengine.util &mdash; QCEngine 0.1.dev1+gceb9378d1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=e623ff90"></script>
+      <script src="../../_static/documentation_options.js?v=1907a53c"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/version-switcher.js?v=313414bb"></script>
@@ -105,9 +105,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            <div itemprop="articleBody">
              
   <h1>Source code for qcengine.util</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Several import utilities</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -132,7 +132,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">LOGGER</span><span class="p">,</span> <span class="n">get_provenance_augments</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputError</span><span class="p">,</span> <span class="n">QCEngineException</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;compute_wrapper&quot;</span><span class="p">,</span> <span class="s2">&quot;model_wrapper&quot;</span><span class="p">,</span> <span class="s2">&quot;handle_output_metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;create_mpi_invocation&quot;</span><span class="p">,</span> <span class="s2">&quot;execute&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"compute_wrapper"</span><span class="p">,</span> <span class="s2">"model_wrapper"</span><span class="p">,</span> <span class="s2">"handle_output_metadata"</span><span class="p">,</span> <span class="s2">"create_mpi_invocation"</span><span class="p">,</span> <span class="s2">"execute"</span><span class="p">]</span>
 
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">qcelemental.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">QCEL_V1V2_SHIM_CODE</span>
@@ -141,7 +141,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="viewcode-block" id="create_mpi_invocation">
 <a class="viewcode-back" href="../../api/qcengine.util.create_mpi_invocation.html#qcengine.util.create_mpi_invocation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_mpi_invocation</span><span class="p">(</span><span class="n">executable</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">task_config</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the launch command for an MPI-parallel task</span>
+<span class="w">    </span><span class="sd">"""Create the launch command for an MPI-parallel task</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -149,7 +149,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">           Path to executable</span>
 <span class="sd">       task_config: TaskConfig</span>
 <span class="sd">           Specification for number of nodes, cores per node, etc.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Make the mpirun invocation</span>
     <span class="n">mpirun_str</span> <span class="o">=</span> <span class="n">task_config</span><span class="o">.</span><span class="n">mpiexec_command</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -172,28 +172,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="k">def</span><span class="w"> </span><span class="nf">model_wrapper</span><span class="p">(</span>
     <span class="n">input_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Wrap input data in the given model, or return a controlled error</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">input_data</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">input_data</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">,</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">InputError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Error creating &#39;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, data could not be correctly parsed:</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"Error creating '</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">', data could not be correctly parsed:</span><span class="se">\n</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
         <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">model_copy</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">InputError</span><span class="p">(</span><span class="s2">&quot;Input type of </span><span class="si">{}</span><span class="s2"> not understood.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
+        <span class="k">raise</span> <span class="n">InputError</span><span class="p">(</span><span class="s2">"Input type of </span><span class="si">{}</span><span class="s2"> not understood."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
 
     <span class="c1"># Older QCElemental compat</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">input_data</span><span class="o">.</span><span class="n">extras</span>
     <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">input_data</span><span class="o">.</span><span class="n">schema_version</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;extras&quot;</span><span class="p">:</span> <span class="p">{}})</span>
+            <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="p">{</span><span class="s2">"extras"</span><span class="p">:</span> <span class="p">{}})</span>
 
     <span class="k">return</span> <span class="n">input_data</span></div>
 
@@ -216,9 +216,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <a class="viewcode-back" href="../../api/qcengine.util.compute_wrapper.html#qcengine.util.compute_wrapper">[docs]</a>
 <span class="nd">@contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_wrapper</span><span class="p">(</span><span class="n">capture_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wraps compute for timing, output capturing, and raise protection&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Wraps compute for timing, output capturing, and raise protection"""</span>
 
-    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;stdout&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;stderr&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;retries&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;error_extras&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"stdout"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"stderr"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"success"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"retries"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"error_extras"</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
     <span class="c1"># Start timer</span>
     <span class="n">comp_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -239,42 +239,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="k">if</span> <span class="n">raise_error</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exc</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">error_type</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">error_message</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_extras&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">extras</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_type"</span><span class="p">]</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">error_type</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_message"</span><span class="p">]</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">error_message</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_extras"</span><span class="p">]</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">extras</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Unknown QCEngine exception likely in the Python layer, show traceback</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">raise_error</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exc</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown_error&quot;</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;QCEngine Execution Error:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_extras&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_type"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"unknown_error"</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_message"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"QCEngine Execution Error:</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_extras"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Place data</span>
-    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;wall_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">comp_time</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">"wall_time"</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">comp_time</span>
     <span class="k">if</span> <span class="n">capture_output</span><span class="p">:</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">old_stdout</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">old_stderr</span>
         <span class="c1"># Pull over values</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_stdout</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;stderr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_stderr</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span></div>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"stdout"</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_stdout</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">"stderr"</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_stderr</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span></div>
 
 
 
 <div class="viewcode-block" id="handle_output_metadata">
 <a class="viewcode-back" href="../../api/qcengine.util.handle_output_metadata.html#qcengine.util.handle_output_metadata">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">handle_output_metadata</span><span class="p">(</span>
-    <span class="n">output_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">&quot;AtomicResult&quot;</span><span class="p">,</span> <span class="s2">&quot;OptimizationResult&quot;</span><span class="p">,</span> <span class="s2">&quot;FailedOperation&quot;</span><span class="p">],</span>
+    <span class="n">output_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">"AtomicResult"</span><span class="p">,</span> <span class="s2">"OptimizationResult"</span><span class="p">,</span> <span class="s2">"FailedOperation"</span><span class="p">],</span>
     <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">return_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">convert_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">&quot;AtomicResult&quot;</span><span class="p">,</span> <span class="s2">&quot;OptimizationResult&quot;</span><span class="p">,</span> <span class="s2">&quot;FailedOperation&quot;</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s2">"AtomicResult"</span><span class="p">,</span> <span class="s2">"OptimizationResult"</span><span class="p">,</span> <span class="s2">"FailedOperation"</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Fuses general metadata and output together.</span>
 
 <span class="sd">    Parameters</span>
@@ -288,13 +288,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">    return_dict</span>
 <span class="sd">        Return dictionary or object representation of data</span>
 <span class="sd">    convert_version</span>
-<span class="sd">        The schema version to convert to before return. If -1, don&#39;t convert.</span>
+<span class="sd">        The schema version to convert to before return. If -1, don't convert.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    result : AtomicResult, OptimizationResult, FailedOperation, or dict representation of any one.</span>
 <span class="sd">        Output type depends on return_dict or a dict if an error was generated in model construction</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="n">output_fusion</span> <span class="o">=</span> <span class="n">output_data</span>  <span class="c1"># Error handling</span>
@@ -302,43 +302,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">output_fusion</span> <span class="o">=</span> <span class="n">output_data</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
 
     <span class="c1"># Do not override if computer generates</span>
-    <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_fusion</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">]</span>
-    <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;stderr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_fusion</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stderr&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;stderr&quot;</span><span class="p">]</span>
+    <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"stdout"</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_fusion</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stdout"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"stdout"</span><span class="p">]</span>
+    <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"stderr"</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_fusion</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stderr"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"stderr"</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;error_type&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_type&quot;</span><span class="p">],</span> <span class="s2">&quot;error_message&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_message&quot;</span><span class="p">]}</span>
-        <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;error_extras&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">][</span><span class="s2">&quot;extras&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;error_extras&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"error"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"error_type"</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_type"</span><span class="p">],</span> <span class="s2">"error_message"</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_message"</span><span class="p">]}</span>
+        <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error_extras"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"error"</span><span class="p">][</span><span class="s2">"extras"</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"error_extras"</span><span class="p">]</span>
 
     <span class="c1"># Raise an error if one exists and a user requested a raise</span>
-    <span class="k">if</span> <span class="n">raise_error</span> <span class="ow">and</span> <span class="p">(</span><span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;stdout:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">])</span>
-        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">stderr:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;stderr&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">raise_error</span> <span class="ow">and</span> <span class="p">(</span><span class="n">output_fusion</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"stdout:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_fusion</span><span class="p">[</span><span class="s2">"stdout"</span><span class="p">])</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">stderr:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_fusion</span><span class="p">[</span><span class="s2">"stderr"</span><span class="p">])</span>
         <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">][</span><span class="s2">&quot;error_message&quot;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">output_fusion</span><span class="p">[</span><span class="s2">"error"</span><span class="p">][</span><span class="s2">"error_message"</span><span class="p">])</span>
 
     <span class="c1"># Fill out provenance datadata</span>
     <span class="n">provenance_augments</span> <span class="o">=</span> <span class="n">get_provenance_augments</span><span class="p">()</span>
-    <span class="n">provenance_augments</span><span class="p">[</span><span class="s2">&quot;wall_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;wall_time&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="s2">&quot;provenance&quot;</span> <span class="ow">in</span> <span class="n">output_fusion</span><span class="p">:</span>
-        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;provenance&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">provenance_augments</span><span class="p">)</span>
+    <span class="n">provenance_augments</span><span class="p">[</span><span class="s2">"wall_time"</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"wall_time"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">"provenance"</span> <span class="ow">in</span> <span class="n">output_fusion</span><span class="p">:</span>
+        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"provenance"</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">provenance_augments</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Add onto the augments with some missing info</span>
-        <span class="n">provenance_augments</span><span class="p">[</span><span class="s2">&quot;creator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;QCEngine&quot;</span>
-        <span class="n">provenance_augments</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">provenance_augments</span><span class="p">[</span><span class="s2">&quot;qcengine_version&quot;</span><span class="p">]</span>
-        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;provenance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">provenance_augments</span>
+        <span class="n">provenance_augments</span><span class="p">[</span><span class="s2">"creator"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"QCEngine"</span>
+        <span class="n">provenance_augments</span><span class="p">[</span><span class="s2">"version"</span><span class="p">]</span> <span class="o">=</span> <span class="n">provenance_augments</span><span class="p">[</span><span class="s2">"qcengine_version"</span><span class="p">]</span>
+        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"provenance"</span><span class="p">]</span> <span class="o">=</span> <span class="n">provenance_augments</span>
 
-    <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;retries&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;provenance&quot;</span><span class="p">][</span><span class="s2">&quot;retries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;retries&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"retries"</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"provenance"</span><span class="p">][</span><span class="s2">"retries"</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">"retries"</span><span class="p">]</span>
 
     <span class="c1"># Make sure pydantic sparsity is upheld</span>
-    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">,</span> <span class="s2">&quot;stderr&quot;</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"stdout"</span><span class="p">,</span> <span class="s2">"stderr"</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">output_fusion</span><span class="p">[</span><span class="n">val</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">output_fusion</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
     <span class="c1"># We need to return the correct objects; e.g. Results, Procedures</span>
-    <span class="k">if</span> <span class="n">output_fusion</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">output_fusion</span><span class="p">[</span><span class="s2">"success"</span><span class="p">]:</span>
         <span class="c1"># This will only execute if everything went well</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">output_data</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="o">**</span><span class="n">output_fusion</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -349,8 +349,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="kn">from</span><span class="w"> </span><span class="nn">qcelemental.models.v2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtoModel</span> <span class="k">as</span> <span class="n">PrMdl_v2</span>
 
         <span class="c1"># Should only be reachable on failures</span>
-        <span class="c1"># * might not know the v1- or v2-ness of output_data if it&#39;s a dict, so use the safest</span>
-        <span class="c1">#   unless proven otherwise. (also, FOp doesn&#39;t change layout btwn v1/v2.)</span>
+        <span class="c1"># * might not know the v1- or v2-ness of output_data if it's a dict, so use the safest</span>
+        <span class="c1">#   unless proven otherwise. (also, FOp doesn't change layout btwn v1/v2.)</span>
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">14</span><span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">FOp_v2</span> <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">output_data</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">PrMdl_v2</span><span class="p">)</span> <span class="k">else</span> <span class="n">FOp_v1</span><span class="p">,</span>
@@ -366,8 +366,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="p">}[</span><span class="n">convert_version</span><span class="p">]</span>
 
         <span class="c1"># for input_data, use object (not dict) if possible for &gt;=v2</span>
-        <span class="n">success_ret</span> <span class="o">=</span> <span class="n">output_fusion</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="n">error_ret</span> <span class="o">=</span> <span class="n">output_fusion</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">)</span>
+        <span class="n">success_ret</span> <span class="o">=</span> <span class="n">output_fusion</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"success"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">error_ret</span> <span class="o">=</span> <span class="n">output_fusion</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"error"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">convert_version</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_data</span><span class="p">,</span> <span class="p">(</span><span class="n">FOp_v1</span><span class="p">,</span> <span class="n">FOp_v2</span><span class="p">)):</span>
                 <span class="c1"># when harnesses return FailedOp object rather than raising error</span>
@@ -379,7 +379,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">success</span><span class="o">=</span><span class="n">success_ret</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error_ret</span><span class="p">,</span> <span class="n">input_data</span><span class="o">=</span><span class="n">inp_ret</span><span class="p">)</span>
 
     <span class="c1"># temp while ManyBody has no v2. empty string for FailedOp</span>
-    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="s2">&quot;schema_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;qcschema_manybodyresult&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="s2">"schema_name"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"qcschema_manybodyresult"</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">return_dict</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
@@ -404,7 +404,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="c1"># Sigint (keyboard interupt)</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;win&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"win"</span><span class="p">):</span>
             <span class="n">proc</span><span class="o">.</span><span class="n">send_signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">CTRL_BREAK_EVENT</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">proc</span><span class="o">.</span><span class="n">send_signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">)</span>
@@ -426,10 +426,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">popen_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">pass_output_forward</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Opens a background task</span>
 
-<span class="sd">    Code and idea from dask.distributed&#39;s testing suite</span>
+<span class="sd">    Code and idea from dask.distributed's testing suite</span>
 <span class="sd">    https://github.com/dask/distributed</span>
 
 <span class="sd">    Parameters</span>
@@ -441,7 +441,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">        popen_kwargs: Dict[str, Any]</span>
 <span class="sd">            Any keyword arguments to use when launching the process</span>
 <span class="sd">        pass_output_forward: bool</span>
-<span class="sd">            Whether to pass the stdout and stderr forward to the system&#39;s stdout and stderr</span>
+<span class="sd">            Whether to pass the stdout and stderr forward to the system's stdout and stderr</span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">        exe: dict</span>
@@ -451,7 +451,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">                &lt;li&gt;stdout: String value of the standard output of the task&lt;/li&gt;</span>
 <span class="sd">                &lt;li&gt;stdeer: String value of the standard error of the task&lt;/li&gt;</span>
 <span class="sd">            &lt;/ul&gt;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">popen_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">popen_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -459,32 +459,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">popen_kwargs</span> <span class="o">=</span> <span class="n">popen_kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="c1"># Bin prefix</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;win&quot;</span><span class="p">):</span>
-        <span class="n">bin_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;Scripts&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"win"</span><span class="p">):</span>
+        <span class="n">bin_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">"Scripts"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">bin_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;bin&quot;</span><span class="p">)</span>
+        <span class="n">bin_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">"bin"</span><span class="p">)</span>
 
     <span class="c1"># Do we prefix with Python?</span>
     <span class="k">if</span> <span class="n">append_prefix</span><span class="p">:</span>
         <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bin_prefix</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;win&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"win"</span><span class="p">):</span>
         <span class="c1"># Allow using CTRL_C_EVENT / CTRL_BREAK_EVENT</span>
-        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">&quot;creationflags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CREATE_NEW_PROCESS_GROUP</span>
+        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">"creationflags"</span><span class="p">]</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CREATE_NEW_PROCESS_GROUP</span>
 
     <span class="c1"># Route the standard error and output</span>
-    <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
-    <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">&quot;stderr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+    <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">"stdout"</span><span class="p">]</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+    <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">"stderr"</span><span class="p">]</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
 
     <span class="c1"># Prepare StringIO objects to store the stdout and stderr</span>
     <span class="n">stdout</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
     <span class="n">stderr</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
 
     <span class="c1"># Launch the process</span>
-    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Popen&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">popen_kwargs</span><span class="p">)</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Popen"</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">popen_kwargs</span><span class="p">)</span>
 
     <span class="c1"># Ready the output</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;proc&quot;</span><span class="p">:</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">popen_kwargs</span><span class="p">)}</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"proc"</span><span class="p">:</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">popen_kwargs</span><span class="p">)}</span>
 
     <span class="c1"># Spawn threads that will read from the stderr/stdout</span>
     <span class="c1">#  The PIPE uses a buffer with finite capacity. The underlying</span>
@@ -493,14 +493,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="c1">#  from the buffers to ensure that they do not fill.</span>
     <span class="c1">#</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_from_buffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">storage</span><span class="p">:</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">,</span> <span class="n">sysio</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">,</span> <span class="mi">1024</span><span class="p">),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">,</span> <span class="mi">1024</span><span class="p">),</span> <span class="sa">b</span><span class="s2">""</span><span class="p">):</span>
             <span class="n">storage</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">pass_output_forward</span><span class="p">:</span>
                 <span class="n">sysio</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
 
-    <span class="n">stdout_reader</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">read_from_buffer</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s2">&quot;proc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
+    <span class="n">stdout_reader</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">read_from_buffer</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s2">"proc"</span><span class="p">]</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
     <span class="n">stdout_reader</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-    <span class="n">stderr_reader</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">read_from_buffer</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s2">&quot;proc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">stderr</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">))</span>
+    <span class="n">stderr_reader</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">read_from_buffer</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s2">"proc"</span><span class="p">]</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">stderr</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">))</span>
     <span class="n">stderr_reader</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="c1"># Yield control back to the main thread</span>
@@ -512,22 +512,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="k">finally</span><span class="p">:</span>
         <span class="c1"># Executes on an exception or once the context manager closes</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">terminate_process</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s2">&quot;proc&quot;</span><span class="p">])</span>
+            <span class="n">terminate_process</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="s2">"proc"</span><span class="p">])</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="c1"># Wait for the reader threads to finish</span>
             <span class="n">stdout_reader</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
             <span class="n">stderr_reader</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
             <span class="c1"># Retrieve the standard output for the process</span>
-            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;stdout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
-            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;stderr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stderr</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
-            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;proc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="n">ret</span><span class="p">[</span><span class="s2">&quot;proc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s2">"stdout"</span><span class="p">]</span> <span class="o">=</span> <span class="n">stdout</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s2">"stderr"</span><span class="p">]</span> <span class="o">=</span> <span class="n">stderr</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s2">"proc"</span><span class="p">]</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">ret</span><span class="p">[</span><span class="s2">"proc"</span><span class="p">]</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
 <span class="nd">@contextmanager</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">environ_context</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;TaskConfig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Temporarily set environment variables inside the context manager and</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">environ_context</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">"TaskConfig"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Temporarily set environment variables inside the context manager and</span>
 <span class="sd">    fully restore previous environment afterwards.</span>
 
 <span class="sd">    Parameters</span>
@@ -541,12 +541,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">    ------</span>
 <span class="sd">    Dict[str, str]</span>
 <span class="sd">        The updated environment variables.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">temporary_env</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
-        <span class="n">temporary_env</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ncores</span><span class="p">)</span>
-        <span class="n">temporary_env</span><span class="p">[</span><span class="s2">&quot;MKL_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ncores</span><span class="p">)</span>
+        <span class="n">temporary_env</span><span class="p">[</span><span class="s2">"OMP_NUM_THREADS"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ncores</span><span class="p">)</span>
+        <span class="n">temporary_env</span><span class="p">[</span><span class="s2">"MKL_NUM_THREADS"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ncores</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">env</span><span class="p">:</span>
         <span class="n">temporary_env</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
@@ -583,7 +583,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">shell</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exit_code</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Runs a process in the background until complete.</span>
 
 <span class="sd">    Returns True if exit code &lt;= exit_code (default 0)</span>
@@ -630,10 +630,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    # execute multiple commands in same dir</span>
-<span class="sd">    &gt;&gt;&gt; success, dexe = qcng.util.execute([&#39;command_1&#39;], infiles, [], scratch_messy=True)</span>
-<span class="sd">    &gt;&gt;&gt; success, dexe = qcng.util.execute([&#39;command_2&#39;], {}, outfiles, scratch_messy=False, scratch_name=Path(dexe[&#39;scratch_directory&#39;]).name, scratch_exist_ok=True)</span>
+<span class="sd">    &gt;&gt;&gt; success, dexe = qcng.util.execute(['command_1'], infiles, [], scratch_messy=True)</span>
+<span class="sd">    &gt;&gt;&gt; success, dexe = qcng.util.execute(['command_2'], {}, outfiles, scratch_messy=False, scratch_name=Path(dexe['scratch_directory']).name, scratch_exist_ok=True)</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Format inputs</span>
     <span class="k">if</span> <span class="n">infiles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -647,12 +647,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="k">if</span> <span class="n">blocking_files</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">blocking_files</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fl</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="s2">&quot;Existing file can interfere with execute operation.&quot;</span><span class="p">,</span> <span class="n">fl</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="s2">"Existing file can interfere with execute operation."</span><span class="p">,</span> <span class="n">fl</span><span class="p">)</span>
 
     <span class="c1"># Format popen</span>
     <span class="n">popen_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">environment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">&quot;env&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">environment</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">"env"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">environment</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 
     <span class="c1"># Execute</span>
     <span class="k">with</span> <span class="n">temporary_directory</span><span class="p">(</span>
@@ -662,19 +662,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="n">exist_ok</span><span class="o">=</span><span class="n">scratch_exist_ok</span><span class="p">,</span>
         <span class="n">suffix</span><span class="o">=</span><span class="n">scratch_suffix</span><span class="p">,</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">scrdir</span><span class="p">:</span>
-        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">&quot;cwd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scrdir</span>
-        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">&quot;shell&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shell</span>
+        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">"cwd"</span><span class="p">]</span> <span class="o">=</span> <span class="n">scrdir</span>
+        <span class="n">popen_kwargs</span><span class="p">[</span><span class="s2">"shell"</span><span class="p">]</span> <span class="o">=</span> <span class="n">shell</span>
         <span class="k">with</span> <span class="n">disk_files</span><span class="p">(</span><span class="n">infiles</span><span class="p">,</span> <span class="n">outfiles</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">scrdir</span><span class="p">,</span> <span class="n">as_binary</span><span class="o">=</span><span class="n">as_binary</span><span class="p">)</span> <span class="k">as</span> <span class="n">extrafiles</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">popen_kwargs</span><span class="o">=</span><span class="n">popen_kwargs</span><span class="p">)</span> <span class="k">as</span> <span class="n">proc</span><span class="p">:</span>
                 <span class="c1"># Wait for the subprocess to complete or the timeout to expire</span>
                 <span class="k">if</span> <span class="n">interupt_after</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">proc</span><span class="p">[</span><span class="s2">&quot;proc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+                    <span class="n">proc</span><span class="p">[</span><span class="s2">"proc"</span><span class="p">]</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interupt_after</span><span class="p">)</span>
-                    <span class="n">terminate_process</span><span class="p">(</span><span class="n">proc</span><span class="p">[</span><span class="s2">&quot;proc&quot;</span><span class="p">])</span>
-            <span class="n">retcode</span> <span class="o">=</span> <span class="n">proc</span><span class="p">[</span><span class="s2">&quot;proc&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span>
-        <span class="n">proc</span><span class="p">[</span><span class="s2">&quot;outfiles&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">extrafiles</span>
-    <span class="n">proc</span><span class="p">[</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scrdir</span>
+                    <span class="n">terminate_process</span><span class="p">(</span><span class="n">proc</span><span class="p">[</span><span class="s2">"proc"</span><span class="p">])</span>
+            <span class="n">retcode</span> <span class="o">=</span> <span class="n">proc</span><span class="p">[</span><span class="s2">"proc"</span><span class="p">]</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span>
+        <span class="n">proc</span><span class="p">[</span><span class="s2">"outfiles"</span><span class="p">]</span> <span class="o">=</span> <span class="n">extrafiles</span>
+    <span class="n">proc</span><span class="p">[</span><span class="s2">"scratch_directory"</span><span class="p">]</span> <span class="o">=</span> <span class="n">scrdir</span>
 
     <span class="k">return</span> <span class="n">retcode</span> <span class="o">&lt;=</span> <span class="n">exit_code</span><span class="p">,</span> <span class="n">proc</span></div>
 
@@ -684,7 +684,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="k">def</span><span class="w"> </span><span class="nf">temporary_directory</span><span class="p">(</span>
     <span class="n">child</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">messy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">exist_ok</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create and cleanup a quarantined working directory with a parent scratch directory.</span>
+<span class="w">    </span><span class="sd">"""Create and cleanup a quarantined working directory with a parent scratch directory.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -724,7 +724,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">    /scratch/johndoe  None      None     --&gt;  /scratch/johndoe/tmpliyp1i7x/</span>
 <span class="sd">    /scratch/johndoe  myqcjob   None     --&gt;  /scratch/johndoe/myqcjob/</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">tmpdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -746,7 +746,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="k">finally</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">messy</span><span class="p">:</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
-            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;... Removing </span><span class="si">{</span><span class="n">tmpdir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"... Removing </span><span class="si">{</span><span class="n">tmpdir</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 
 <span class="nd">@contextmanager</span>
@@ -757,7 +757,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="n">cwd</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">as_binary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write and collect files.</span>
+<span class="w">    </span><span class="sd">"""Write and collect files.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -777,7 +777,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="sd">    Dict[str] = str</span>
 <span class="sd">        outfiles with RHS filled in.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">cwd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">lwd</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -788,31 +788,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fl</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">infiles</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">omode</span> <span class="o">=</span> <span class="s2">&quot;wb&quot;</span> <span class="k">if</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">as_binary</span> <span class="k">else</span> <span class="s2">&quot;w&quot;</span>
+            <span class="n">omode</span> <span class="o">=</span> <span class="s2">"wb"</span> <span class="k">if</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">as_binary</span> <span class="k">else</span> <span class="s2">"w"</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="n">lwd</span> <span class="o">/</span> <span class="n">fl</span>
             <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">lwd</span><span class="p">:</span>
                 <span class="n">filename</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">filename</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">omode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
                 <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;... Writing (</span><span class="si">{</span><span class="n">omode</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"... Writing (</span><span class="si">{</span><span class="n">omode</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="k">yield</span> <span class="n">outfiles</span>
 
     <span class="k">finally</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">outfiles</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">omode</span> <span class="o">=</span> <span class="s2">&quot;rb&quot;</span> <span class="k">if</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">as_binary</span> <span class="k">else</span> <span class="s2">&quot;r&quot;</span>
+            <span class="n">omode</span> <span class="o">=</span> <span class="s2">"rb"</span> <span class="k">if</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">as_binary</span> <span class="k">else</span> <span class="s2">"r"</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">filename</span> <span class="o">=</span> <span class="n">lwd</span> <span class="o">/</span> <span class="n">fl</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">omode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
                     <span class="n">outfiles</span><span class="p">[</span><span class="n">fl</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;... Writing (</span><span class="si">{</span><span class="n">omode</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"... Writing (</span><span class="si">{</span><span class="n">omode</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">):</span>
-                <span class="k">if</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">fl</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">"*"</span> <span class="ow">in</span> <span class="n">fl</span><span class="p">:</span>
                     <span class="n">gfls</span> <span class="o">=</span> <span class="p">{}</span>
                     <span class="k">for</span> <span class="n">gfl</span> <span class="ow">in</span> <span class="n">lwd</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">fl</span><span class="p">):</span>
                         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gfl</span><span class="p">,</span> <span class="n">omode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
                             <span class="n">gfls</span><span class="p">[</span><span class="n">gfl</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;... Writing (</span><span class="si">{</span><span class="n">omode</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">gfl</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"... Writing (</span><span class="si">{</span><span class="n">omode</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">gfl</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">gfls</span><span class="p">:</span>
                         <span class="n">gfls</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="n">outfiles</span><span class="p">[</span><span class="n">fl</span><span class="p">]</span> <span class="o">=</span> <span class="n">gfls</span>

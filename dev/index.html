@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QCEngine &mdash; QCEngine 0.1.dev1+ge04e381c0 documentation</title>
+  <title>QCEngine &mdash; QCEngine 0.1.dev1+gceb9378d1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -15,7 +15,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e623ff90"></script>
+      <script src="_static/documentation_options.js?v=1907a53c"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/version-switcher.js?v=313414bb"></script>
@@ -115,22 +115,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">qcengine</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">qcng</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">qcelemental</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">qcel</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Molecule</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="s2">"""</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="s2">    O  0.0  0.000  -0.129</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="s2">    H  0.0 -1.494  1.027</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="s2">    H  0.0  1.494  1.027</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">"""</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">qcel</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">AtomicInput</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">molecule</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;energy&quot;</span><span class="p">,</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;SCF&quot;</span><span class="p">,</span> <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="s2">&quot;sto-3g&quot;</span><span class="p">},</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scf_type&quot;</span><span class="p">:</span> <span class="s2">&quot;df&quot;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">driver</span><span class="o">=</span><span class="s2">"energy"</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span> <span class="s2">"SCF"</span><span class="p">,</span> <span class="s2">"basis"</span><span class="p">:</span> <span class="s2">"sto-3g"</span><span class="p">},</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">keywords</span><span class="o">=</span><span class="p">{</span><span class="s2">"scf_type"</span><span class="p">:</span> <span class="s2">"df"</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
 </pre></div>
 </div>
 <p>These input specifications can be executed with the <code class="docutils literal notranslate"><span class="pre">compute</span></code> syntax along with a program specifier:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span> <span class="o">=</span> <span class="n">qcng</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;psi4&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span> <span class="o">=</span> <span class="n">qcng</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">"psi4"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The results contain a complete record of the computation:</p>
@@ -204,12 +204,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
 <span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=None&gt;</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">:</span> <span class="s2">&quot;/tmp&quot;</span><span class="p">})</span>
-<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=&#39;/tmp&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="p">{</span><span class="s2">"scratch_directory"</span><span class="p">:</span> <span class="s2">"/tmp"</span><span class="p">})</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory='/tmp'&gt;</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/my_scratch&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scratch_directory&quot;</span><span class="p">:</span> <span class="s2">&quot;$SCRATCH&quot;</span><span class="p">})</span>
-<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory=&#39;/my_scratch&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"SCRATCH"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"/my_scratch"</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcng</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">task_config</span><span class="o">=</span><span class="p">{</span><span class="s2">"scratch_directory"</span><span class="p">:</span> <span class="s2">"$SCRATCH"</span><span class="p">})</span>
+<span class="go">&lt;JobConfig ncores=2 memory=2.506 scratch_directory='/my_scratch'&gt;</span>
 </pre></div>
 </div>
 </section>
