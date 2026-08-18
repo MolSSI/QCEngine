@@ -41,13 +41,10 @@ Changelog
 
 .. _`sec:cl0510`:
 
-v0.51.0 / 2026-MM-DD (Unreleased)
+v0.51.0 / 2026-08-18
 --------------------
 
 :docs:`v0.51.0` for current. :docs:`v0.34.1` for QCSchema v1.
-
-Breaking Changes
-++++++++++++++++
 
 New Features
 ++++++++++++
@@ -58,11 +55,8 @@ Enhancements
 - (:pr:`521`) MCTC-GCP -- Parse the new gradient output from gcp-correction v2.4.0
   while retaining support for older versions.
 
-Bug Fixes
-+++++++++
 
-
-.. _`sec:cl0510`:
+.. _`sec:cl0501`:
 
 v0.50.1 / 2026-08-15
 --------------------
