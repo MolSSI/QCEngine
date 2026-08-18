@@ -23,6 +23,7 @@ _canonical_methods = [
     # needs attn ("molpro", {"method": "hf", "basis": "6-31G"}, {}),
     # needs attn ("mopac", {"method": "PM6"}, {}),
     pytest.param("mp2d", {"method": "MP2-DMP2"}, {}, marks=using("mp2d")),
+    # needs attn ("mpqc", {"method": "hf", "basis": "6-31G"}, {}),  # memory/scratch not echoed; ncores is checkable
     # needs attn ("mrchem", {"method": "blyp"}, {"world_prec": 1.0e-3}),
     pytest.param("nwchem", {"method": "hf", "basis": "6-31G"}, {}, marks=using("nwchem")),
     # needs attn ("openmm", {"method": "openff-1.0.0", "basis": "smirnoff"}, {}),

@@ -18,6 +18,7 @@ from .model import ProgramHarness
 from .molpro import MolproHarness
 from .mopac import MopacHarness
 from .mp2d import MP2DHarness
+from .mpqc import MPQCHarness
 from .mrchem import MRChemHarness
 from .nwchem import NWChemHarness
 from .openmm import OpenMMHarness
@@ -114,6 +115,7 @@ register_program(GAMESSHarness())
 register_program(JaguarHarness())
 register_program(MRChemHarness())
 register_program(MolproHarness())
+register_program(MPQCHarness())
 register_program(NWChemHarness())
 register_program(Psi4Harness())
 register_program(QChemHarness())

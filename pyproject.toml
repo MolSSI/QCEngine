@@ -124,6 +124,7 @@ markers = [
     "molpro: tests using Molpro software; skip if unavailable",
     "mopac: tests using Mopac software; skip if unavailable",
     "mp2d: tests using MP2D software; skip if unavailable",
+    "mpqc: tests using MPQC software; skip if unavailable",
     "mrchem: tests using MR-Chem software; skip if unavailable",
     "nwchem: tests using NWChem Classic software; skip if unavailable",
     "openmm: tests using OpenMM software; skip if unavailable",
