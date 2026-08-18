@@ -1,0 +1,27 @@
+name: test
+channels:
+  - conda-forge
+dependencies:
+    # keep the scientific stack on the pip side: conda's llvm-openmp and the libomp
+    # bundled in the torch wheels collide at import time (fatal on macOS)
+  - python
+  - pip
+  - pip:
+    # Core
+    - pyyaml
+    - py-cpuinfo
+    - psutil
+    - qcelemental>=0.50.4,<0.70.0
+    - pydantic>=2.11
+    - pydantic-settings
+    - msgpack
+    - packaging
+
+    # orb pins dm-tree==0.1.8, whose newest wheel is cp312; python >3.12 has no
+    # binary and falls back to a bazel source build
+    - orb-models
+
+    # Testing
+    - pytest
+    - pytest-cov
+    - codecov
