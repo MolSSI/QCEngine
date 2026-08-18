@@ -41,6 +41,29 @@ Changelog
 
 .. _`sec:cl0510`:
 
+v0.51.0 / 2026-MM-DD (Unreleased)
+--------------------
+
+:docs:`v0.51.0` for current. :docs:`v0.34.1` for QCSchema v1.
+
+Breaking Changes
+++++++++++++++++
+
+New Features
+++++++++++++
+- (:pr:`513`) Jaguar -- New harness for Schrodinger Jaguar with E/G/H SCF. @TyBalduf
+
+Enhancements
+++++++++++++
+- (:pr:`521`) MCTC-GCP -- Parse the new gradient output from gcp-correction v2.4.0
+  while retaining support for older versions.
+
+Bug Fixes
++++++++++
+
+
+.. _`sec:cl0510`:
+
 v0.50.1 / 2026-08-15
 --------------------
 
