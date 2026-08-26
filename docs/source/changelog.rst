@@ -32,25 +32,46 @@ Changelog
 .. - UNSOLVED (:issue:`397`) extras failed
 
 
+.. RELEASE PROCEDURE
+.. * check changelog below is up to date and that the release number and date are in place and that (Unreleased) is removed
+.. * test broadly locally. suggested edit for gamess: _global_values["ncores"] = 2 #cpu_cnt
+.. * once master is in shape for release, `git tag -a v0.50.1 -m "v0.50.1"`
+.. * `git push upstream --atomic v0.50.1 master`
+
+
 .. _`sec:cl0510`:
 
-v0.51.0 / 2026-MM-DD (Unreleased)
+v0.51.0 / 2026-08-18
 --------------------
 
 :docs:`v0.51.0` for current. :docs:`v0.34.1` for QCSchema v1.
 
-Breaking Changes
-++++++++++++++++
-
 New Features
 ++++++++++++
+- (:pr:`513`) Jaguar -- New harness for Schrodinger Jaguar with E/G/H SCF. @TyBalduf
+
+Enhancements
+++++++++++++
+- (:pr:`521`) MCTC-GCP -- Parse the new gradient output from gcp-correction v2.4.0
+  while retaining support for older versions.
+
+
+.. _`sec:cl0501`:
+
+v0.50.1 / 2026-08-15
+--------------------
+
+:docs:`v0.50.1` for current. :docs:`v0.34.1` for QCSchema v1.
 
 Enhancements
 ++++++++++++
 - (:pr:`507`) Deps - require QCElemental v0.50.4 for NumPy v2.5 compatibility.
+- (:pr:`518`) Maint -- Add automatic publishing to PyPI and GitHub release from tag.
 
 Bug Fixes
 +++++++++
+- (:pr:`516`) Pyberny, Psi4 -- v0.7 newly rejects unknown keywords, so adapt tests.
+  Also alter Psi4 test lanes for new Libxc v7.2.
 
 Misc.
 +++++

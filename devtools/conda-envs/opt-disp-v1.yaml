@@ -5,6 +5,7 @@ channels:
 dependencies:
   - psi4=1.9.1
   - libint=2.9.0=*_4
+  - libxc=7.0.0
   - rdkit
   - mopac
   - pydantic-settings
