@@ -229,6 +229,12 @@ class MolproHarness(ProgramHarness):
             else:
                 raise InputError(f"Driver {input_model.specification.driver} not implemented for Molpro.")
 
+            # After a certain version, MolPro stopped giving the full XML output.
+            # This brings it back. The first version with the change may be different,
+            # but the first time the docs mention it seems to be in 2020.
+            if parse_version(self.get_version()) >= parse_version("2020.0"):
+                input_file.append("{put,xml}")
+
             input_file = "\n".join(input_file)
         else:
             # Some of the potential different template options
