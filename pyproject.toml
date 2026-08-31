@@ -109,6 +109,7 @@ markers = [
     "aimnet2: tests using AIMNET2 software; skip if unavailable",
     "berny: tests using pyberny software; skip if unavailable",
     "cfour: tests using Cfour software; skip if unavailable",
+    "chronusq: tests using ChronusQ software; skip if unavailable",
     "classic-dftd3: tests using DFTD3 executable software; skip if unavailable",
     "classic-dftd3_321: tests using DFTD3 classic executable >=v3.2.1 software; skip if unavailable",
     "s-dftd3: tests using modern simple-dftd3 software; skip if unavailable",

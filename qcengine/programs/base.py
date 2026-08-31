@@ -8,6 +8,7 @@ from ..exceptions import InputError, ResourceError
 from .adcc import AdccHarness
 from .aimnet2 import AIMNET2Harness
 from .cfour import CFOURHarness
+from .chronusq import ChronusQHarness
 from .dftd3 import DFTD3Harness
 from .dftd_ng import DFTD4Harness, SDFTD3Harness
 from .gamess import GAMESSHarness
@@ -109,6 +110,7 @@ def list_available_programs() -> Set[str]:
 # Quantum
 register_program(AdccHarness())
 register_program(CFOURHarness())
+register_program(ChronusQHarness())
 register_program(EntosHarness())  # Duplicate of Qcore harness to transition the namespace, to be deprecated
 register_program(GAMESSHarness())
 register_program(JaguarHarness())
