@@ -90,3 +90,76 @@ def test_popen_tee_output(capsys):
     assert proc["stdout"] == "hello\n"
     captured = capsys.readouterr()
     assert captured.out == "hello\n"
+
+
+def test_popen_non_utf8_output():
+    """Test that popen gracefully handles non-UTF-8 bytes in subprocess output.
+
+    This is a regression test for Windows encoding issues where subprocess output
+    may contain non-UTF-8 bytes (e.g., raw 0xa7 byte for section symbol instead of
+    UTF-8 encoded 0xc2 0xa7). The popen function should use errors='replace' to
+    handle these gracefully without raising UnicodeDecodeError.
+    """
+    # Create a Python script that writes non-UTF-8 bytes to stdout and stderr
+    script = r"""
+import sys
+# Write valid UTF-8
+sys.stdout.write("Valid UTF-8: ")
+# Write invalid byte (raw 0xa7, which is not valid UTF-8 on its own)
+sys.stdout.buffer.write(b"\xa7")
+sys.stdout.write(" end\n")
+
+# Also test stderr
+sys.stderr.write("Stderr with invalid: ")
+sys.stderr.buffer.write(b"\xa7")
+sys.stderr.write("\n")
+"""
+
+    # Execute the script through popen - it should NOT raise UnicodeDecodeError
+    with util.popen([sys.executable, "-c", script]) as proc:
+        proc["proc"].wait()
+
+    # Verify that the function completed successfully
+    assert proc["proc"].returncode == 0
+
+    # Verify that stdout and stderr are valid strings (not crashed with UnicodeDecodeError)
+    assert isinstance(proc["stdout"], str)
+    assert isinstance(proc["stderr"], str)
+
+    # Verify that valid UTF-8 portions are preserved
+    assert "Valid UTF-8:" in proc["stdout"]
+    assert "end" in proc["stdout"]
+    assert "Stderr with invalid:" in proc["stderr"]
+
+    # Verify that invalid bytes are replaced with the replacement character
+    # (U+FFFD appears as '?' when displayed, but in the string it's the actual replacement char)
+    assert "\ufffd" in proc["stdout"], "Non-UTF-8 byte should be replaced with U+FFFD"
+    assert "\ufffd" in proc["stderr"], "Non-UTF-8 byte in stderr should be replaced with U+FFFD"
+
+
+def test_popen_non_utf8_output_section_symbol():
+    """Test handling of section symbol (§, U+00A7) as raw byte 0xa7.
+
+    This specific test addresses the Windows issue where Psi4's n-body output
+    contains section symbols that may be written as raw bytes instead of UTF-8.
+    """
+    # Create a script that outputs the section symbol as raw byte (as Windows might do)
+    script = r"""
+import sys
+sys.stdout.write("N-Body: ")
+# Write section symbol as raw byte instead of UTF-8 (0xc2 0xa7)
+sys.stdout.buffer.write(b"\xa7")
+sys.stdout.write("A_(2)@(2) total energy\n")
+"""
+
+    # Execute - should not crash
+    with util.popen([sys.executable, "-c", script]) as proc:
+        proc["proc"].wait()
+
+    assert proc["proc"].returncode == 0
+    assert isinstance(proc["stdout"], str)
+
+    # The output should be recoverable and contain the replacement character
+    assert "N-Body:" in proc["stdout"]
+    assert "total energy" in proc["stdout"]
+    assert "\ufffd" in proc["stdout"], "Section symbol as raw byte should be replaced"
