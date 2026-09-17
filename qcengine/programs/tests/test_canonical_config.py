@@ -17,6 +17,7 @@ _canonical_methods = [
     pytest.param("cfour", {"method": "hf", "basis": "6-31G"}, {}, marks=using("cfour")),
     pytest.param("dftd3", {"method": "b3lyp-d3"}, {}, marks=using("classic-dftd3")),
     pytest.param("gamess", {"method": "hf", "basis": "n31"}, {"basis__NGAUSS": 6}, marks=using("gamess")),
+    pytest.param("jaguar", {"method": "hf", "basis": "6-31G"}, {"nops": 1}, marks=using("jaguar")),
     pytest.param("gcp", {"method": "hf3c"}, {}, marks=using("classic-gcp")),
     pytest.param("mctc-gcp", {"method": "dft/sv"}, {}, marks=using("mctc-gcp")),
     # needs attn ("molpro", {"method": "hf", "basis": "6-31G"}, {}),
@@ -195,6 +196,7 @@ def test_local_options_scratch(program, model, keywords, schema_versions, reques
         "cfour": "University of Florida",  # freebie
         "dftd3": "Grimme",  # freebie
         "gamess": "IOWA STATE UNIVERSITY",  # freebie
+        "jaguar": "Jaguar version",  # freebie
         "gcp": "Grimme",  # freebie
         "mctc-gcp": "Grimme",  # freebie
         "mp2d": "Beran",  # freebie
@@ -210,6 +212,7 @@ def test_local_options_scratch(program, model, keywords, schema_versions, reques
         "cfour": "*/NEWFOCK",
         "dftd3": "*/dftd3_geometry.xyz",  # no outfiles
         "gamess": "*/gamess.dat",
+        "jaguar": "*/dispatch.out",
         "gcp": "*/gcp_geometry.xyz",  # no outfiles
         "mctc-gcp": "*/gcp_geometry.xyz",  # no outfiles
         "mp2d": "*/mp2d_geometry",  # no outfiles
@@ -282,6 +285,7 @@ def test_local_options_ncores(program, model, keywords, ncores, schema_versions,
     stdout_ref = {
         "cfour": rf"Running with {ncores} threads/proc",
         "gamess": rf"MEMDDI DISTRIBUTED OVER\s+{ncores} PROCESSORS",
+        "jaguar": rf"Using up to\s+{ncores} threads per process",
         # "gamess": rf"PARALLEL VERSION RUNNING ON\s+{ncores} PROCESSORS IN\s+1 NODES",  # no line for serial
         # nwchem is node_parallel only
         "psi4": rf"Threads:\s+{ncores}",

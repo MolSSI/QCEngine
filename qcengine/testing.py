@@ -60,13 +60,16 @@ def is_program_new_enough(program, version_feature_introduced):
 
     """
     if program in qcng.list_all_procedures():
-        if program not in qcng.list_available_procedures():
+        try:
+            harness = qcng.get_procedure(program)
+        except qcng.exceptions.ResourceError:
             return False
-        candidate_version = qcng.get_procedure(program).get_version()
     else:
-        if program not in qcng.list_available_programs():
+        harness = qcng.get_program(program, check=False)
+        if not harness.found():
             return False
-        candidate_version = qcng.get_program(program).get_version()
+
+    candidate_version = harness.get_version()
 
     return parse(candidate_version) >= parse(version_feature_introduced)
 
@@ -177,6 +180,7 @@ _programs = {
     "s-dftd3": which_import("dftd3", return_bool=True),
     "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
+    "jaguar": which_import("schrodinger.application.jaguar.input", return_bool=True),
     "mctc-gcp": is_program_new_enough("mctc-gcp", "2.3.0"),
     "gcp": which("gcp", return_bool=True),  # mark is classic-gcp
     "geometric": which_import("geometric", return_bool=True),

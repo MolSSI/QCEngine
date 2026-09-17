@@ -83,11 +83,14 @@ def clsd_open_pmols(schema_versions):
         # yapf: disable
         pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae", "keywords": {"scf_conv": 12},                                                                     }, id="hf  rhf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "rhf",  "fcae": "ae", "keywords": {},                                                                                   }, id="hf  rhf ae: gamess",     marks=using("gamess")),
+        # nops=1 disables the pseudospectral approximation to match the analytic reference values.
+        pytest.param({"call": "jaguar", "reference": "rhf",  "fcae": "ae", "keywords": {"nops": 1},                                                                          }, id="hf  rhf ae: jaguar",     marks=using("jaguar")),
         pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {"scf__thresh": 1.e-6},                                                               }, id="hf  rhf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "keywords": {"scf_type": "pk"},                                                                   }, id="hf  rhf ae: psi4",       marks=using("psi4")),
 
         pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_conv": 12},                                                 }, id="hf  uhf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "uhf",  "fcae": "ae", "keywords": {"contrl__scftyp": "uhf"},                                                            }, id="hf  uhf ae: gamess",     marks=using("gamess")),
+        pytest.param({"call": "jaguar", "reference": "uhf",  "fcae": "ae", "keywords": {"iuhf": 1, "nops": 1},                                                               }, id="hf  uhf ae: jaguar",     marks=using("jaguar")),
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "keywords": {"scf__uhf": True, "scf__thresh": 1.e-6},                                             }, id="hf  uhf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_type": "pk"},                                               }, id="hf  uhf ae: psi4",       marks=using("psi4")),
         # yapf: enable

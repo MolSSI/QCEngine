@@ -36,7 +36,7 @@ jobs:
         env:
           # Public indexes reject setuptools-scm's local +g<hash> suffix.
           # The commit distance still makes consecutive main builds unique.
-          SETUPTOOLS_SCM_OVERRIDES_FOR_QCMANYBODY: '{local_scheme = "no-local-version"}'
+          SETUPTOOLS_SCM_OVERRIDES_FOR_QCENGINE: '{local_scheme = "no-local-version"}'
         run: python -m build
 
       - name: Check distribution metadata and version
