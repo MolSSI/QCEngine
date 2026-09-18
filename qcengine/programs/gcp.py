@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple
 import numpy as np
 import qcelemental as qcel
 from qcelemental.models.v2 import AtomicResult, FailedOperation, Provenance
-from qcelemental.util import safe_version, which
+from qcelemental.util import parse_version, safe_version, which
 
 from ..exceptions import InputError, UnknownError
 from ..util import execute
@@ -107,6 +107,7 @@ class GCPHarness(ProgramHarness):
             scratch_messy=inputs["scratch_messy"],
             scratch_directory=inputs["scratch_directory"],
             blocking_files=inputs["blocking_files"],
+            as_binary=inputs.get("as_binary"),
         )
         return success, dexe
 
@@ -192,10 +193,13 @@ class GCPHarness(ProgramHarness):
         if method == "FILE":
             infiles[".gcppar"] = input_model.extras["parameters"]
 
+        new_mctc_gradient = executable == "mctc-gcp" and parse_version(self.get_version()) >= parse_version("2.4.0")
+
         return {
             "command": command,
             "infiles": infiles,
-            "outfiles": ["gcp_gradient"],
+            "outfiles": ["gradient"] if new_mctc_gradient else ["gcp_gradient"],
+            "as_binary": ["gradient"] if new_mctc_gradient else None,
             "scratch_messy": config.scratch_messy,
             "scratch_directory": config.scratch_directory,
             "input_result": input_model.model_copy(deep=True),
@@ -225,7 +229,20 @@ class GCPHarness(ProgramHarness):
                 )
 
         # parse gradient output
-        if outfiles["gcp_gradient"] is not None:
+        new_mctc_gradient = self._defaults["name"] == "MCTC-GCP" and parse_version(self.get_version()) >= parse_version(
+            "2.4.0"
+        )
+        if new_mctc_gradient and outfiles["gradient"] is not None:
+            gradient = outfiles["gradient"].decode("ascii", errors="replace")
+            outfiles["gradient"] = gradient
+            gradient_lines = gradient.replace("D", "E").splitlines()
+            try:
+                end = next(i for i, line in reversed(list(enumerate(gradient_lines))) if line.strip() == "$end")
+                gradient_rows = gradient_lines[end - int(real_nat) : end]
+                realgrad = np.fromstring(" ".join(gradient_rows), count=3 * real_nat, sep=" ").reshape((-1, 3))
+            except (StopIteration, ValueError) as exc:
+                raise UnknownError("Unsuccessful gradient collection.") from exc
+        elif not new_mctc_gradient and outfiles["gcp_gradient"] is not None:
             srealgrad = outfiles["gcp_gradient"].replace("D", "E")
             realgrad = np.fromstring(srealgrad, count=3 * real_nat, sep=" ").reshape((-1, 3))
         elif real_nat == 1:

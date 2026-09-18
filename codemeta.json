@@ -6,7 +6,7 @@
     "codeRepository": "https://github.com/MolSSI/QCEngine",
     "issueTracker": "https://github.com/MolSSI/QCEngine/issues",
     "license": "https://opensource.org/licenses/BSD-3-Clause",
-    "version": "0.32",
+    "version": "0.50",
     "author": [
         {
             "@type": "Person",
@@ -322,6 +322,14 @@
             "affiliation": "Stanford University",
             "@id": "https://orcid.org/0000-0003-2834-318X",
             "identifier": "https://github.com/coltonbh"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Ty",
+            "familyName": "Balduf",
+            "affiliation": "Schrodinger",
+            "@id": "https://orcid.org/0000-0002-2066-2314",
+            "identifier": "https://github.com/TyBalduf"
         }
     ],
     "developmentStatus": "active",

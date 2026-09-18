@@ -2,9 +2,8 @@ name: test
 channels:
   - conda-forge
   - nodefaults
-  - conda-forge/label/qcengine_dev
 dependencies:
-  - conda-forge/label/psi4_dev::psi4 >=1.10
+  - psi4 >=1.10
   - rdkit
   # - rdkit<=2025.03.4  # Windows+psi4 error with 03.5  # sometimes fine, sometimes flaky even w/exactly same packages in env
   - mopac
@@ -36,5 +35,5 @@ dependencies:
 
   - pip
   - pip:
-    - qcmanybody==0.7.1
+    - qcmanybody>=0.7.1
 

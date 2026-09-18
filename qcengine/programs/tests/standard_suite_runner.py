@@ -29,7 +29,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
     fcae = inp["fcae"]
     sdsc = inp.get("sdsc", "") or ("sc" if reference == "rohf" else "sd")
 
-    if basis == "cfour-qz2p" and qcprog in ["gamess", "nwchem", "qchem"]:
+    if basis == "cfour-qz2p" and qcprog in ["gamess", "jaguar", "nwchem", "qchem"]:
         pytest.skip(f"basis {basis} not available in {qcprog} library")
 
     # <<<  Molecule  >>>
@@ -203,10 +203,13 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
     else:
         # this check assumes the qcprog will adjust an ugly Cartesian geometry into a pretty one (with more symmetry for computational efficiency).
         # if qcprog doesn't have that behavior, it will need to be excused from this check.
-        with np.printoptions(precision=3, suppress=True):
-            assert compare(
-                min_nonzero_coords, np.count_nonzero(np.abs(wfn.molecule.geometry) > 1.0e-10), tnm + " !0 coords wfn"
-            ), f"count !0 coords {wfn.molecule.geometry} != {min_nonzero_coords}"
+        if qcprog != "jaguar":
+            with np.printoptions(precision=3, suppress=True):
+                assert compare(
+                    min_nonzero_coords,
+                    np.count_nonzero(np.abs(wfn.molecule.geometry) > 1.0e-10),
+                    tnm + " !0 coords wfn",
+                ), f"count !0 coords {wfn.molecule.geometry} != {min_nonzero_coords}"
         assert (
             (not ref_subject.fix_com)
             and (not ref_subject.fix_orientation)
