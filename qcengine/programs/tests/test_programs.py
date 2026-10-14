@@ -775,6 +775,91 @@ def test_aimnet2_gradient(schema_versions, request):
     assert "charges" in result.extras["aimnet2"]
 
 
+@uusing("orb")
+@pytest.mark.parametrize(
+    "model, expected_energy",
+    [
+        pytest.param("orb-v3-direct-omol", -76.43103942777961, id="orb-v3-direct-omol"),
+        pytest.param("orb-v3-conservative-omol", -76.4310729627201, id="orb-v3-conservative-omol"),
+    ],
+)
+def test_orb_energy(model, expected_energy, schema_versions, request):
+    """Test computing the energies of water with the direct and conservative orb models.
+
+    The expected values are in hartree, so they also pin the eV -> hartree conversion.
+    """
+    models, retver, _ = schema_versions
+
+    water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
+    # pin the device so the reference values do not depend on the runner's hardware
+    keywords = {"device": "cpu"}
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=water,
+            specification={"driver": "energy", "model": {"method": model, "basis": None}, "keywords": keywords},
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=water, model={"method": model, "basis": None}, driver="energy", keywords=keywords
+        )
+
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    result = qcng.compute(atomic_input, "orb", return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post")
+
+    assert result.success
+    assert pytest.approx(result.return_result) == expected_energy
+    assert result.extras["orb"]["device"] == "cpu"
+
+
+@uusing("orb")
+def test_orb_gradient(schema_versions, request):
+    """Test computing the gradient of water with one orb model.
+
+    The reference array pins both the eV/angstrom -> hartree/bohr conversion and the
+    sign convention: QCSchema wants the energy gradient, which is minus the force.
+    """
+    models, retver, _ = schema_versions
+
+    water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
+    keywords = {"device": "cpu"}
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=water,
+            specification={
+                "driver": "gradient",
+                "model": {"method": "orb-v3-direct-omol", "basis": None},
+                "keywords": keywords,
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=water,
+            model={"method": "orb-v3-direct-omol", "basis": None},
+            driver="gradient",
+            keywords=keywords,
+        )
+
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    result = qcng.compute(atomic_input, "orb", return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post")
+
+    assert result.success
+    # make sure the gradient is now the return result
+    assert np.allclose(
+        result.return_result,
+        np.array(
+            [
+                [9.055670276147954e-12, 1.1031361282221042e-05, -0.038908492773771286],
+                [-9.055670276147954e-12, -0.02770164981484413, 0.01945851743221283],
+                [-3.3958764619757e-12, 0.027690617367625237, 0.019449975341558456],
+            ]
+        ),
+        atol=1e-6,
+    )
+    assert pytest.approx(result.properties.return_energy) == -76.43103942777961
+
+
 @uusing("psi4")
 def test_psi4_properties_driver(schema_versions, request):
     models, retver, _ = schema_versions

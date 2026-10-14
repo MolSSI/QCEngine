@@ -159,6 +159,13 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          # 3.12 only: orb pins dm-tree==0.1.8, which has no wheel beyond cp312
+          - conda-env: orb
+            python-version: "3.12"
+            label: ORB
+            runs-on: ubuntu-latest
+            pytest: ""
+
           #- conda-env: opt-disp-cf
           #  python-version: 3.12
           #  label: QCSk-next
