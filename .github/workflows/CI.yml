@@ -117,7 +117,7 @@ jobs:
             pytest: ""
 
           - conda-env: adcc
-            python-version: "3.15"
+            python-version: "3.13"
             label: ADCC
             runs-on: ubuntu-latest
             pytest: ""
