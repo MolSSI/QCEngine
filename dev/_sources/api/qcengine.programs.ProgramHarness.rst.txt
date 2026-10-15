@@ -3,4 +3,37 @@ ProgramHarness
 
 .. currentmodule:: qcengine.programs
 
-.. autopydantic_model:: ProgramHarness
+.. autoclass:: ProgramHarness
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~ProgramHarness.model_config
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~ProgramHarness.build_input
+      ~ProgramHarness.build_input_model
+      ~ProgramHarness.compute
+      ~ProgramHarness.execute
+      ~ProgramHarness.found
+      ~ProgramHarness.get_version
+      ~ProgramHarness.parse_output
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: model_config
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: build_input
+   .. automethod:: build_input_model
+   .. automethod:: compute
+   .. automethod:: execute
+   .. automethod:: found
+   .. automethod:: get_version
+   .. automethod:: parse_output

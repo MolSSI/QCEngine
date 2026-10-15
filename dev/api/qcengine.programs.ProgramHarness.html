@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ProgramHarness &mdash; QCEngine 0.1.dev1+gbf1b799c4 documentation</title>
+  <title>ProgramHarness &mdash; QCEngine 0.1.dev1+g74684488d documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -15,9 +15,9 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=78ec73cb"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=fbdc101d"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/version-switcher.js?v=313414bb"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -124,126 +124,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              
   <section id="programharness">
 <h1>ProgramHarness<a class="headerlink" href="#programharness" title="Link to this heading"></a></h1>
-<dl class="py class pydantic_model">
+<dl class="py class">
 <dt class="sig sig-object py" id="qcengine.programs.ProgramHarness">
-<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qcengine.programs.</span></span><span class="sig-name descname"><span class="pre">ProgramHarness</span></span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness" title="Link to this definition"></a></dt>
-<dd><p>Base class for analytic single-geometry capable harnesses.</p>
-<p><details  class="autodoc_pydantic_collapsable_json">
-<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">   </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ProgramHarness"</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Base class for analytic single-geometry capable harnesses."</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Name"</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">"scratch"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Scratch"</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"boolean"</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">"thread_safe"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Thread Safe"</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"boolean"</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">"thread_parallel"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Thread Parallel"</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"boolean"</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">"node_parallel"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Node Parallel"</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"boolean"</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">"managed_memory"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Managed Memory"</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"boolean"</span>
-<span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">"extras"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">         </span><span class="nt">"anyOf"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">            </span><span class="p">{</span>
-<span class="w">               </span><span class="nt">"additionalProperties"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
-<span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="p">{</span>
-<span class="w">               </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"null"</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">         </span><span class="p">],</span>
-<span class="w">         </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">         </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Extras"</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">   </span><span class="p">},</span>
-<span class="w">   </span><span class="nt">"additionalProperties"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">   </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">"name"</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">"scratch"</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">"thread_safe"</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">"thread_parallel"</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">"node_parallel"</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">"managed_memory"</span>
-<span class="w">   </span><span class="p">]</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</details></p><dl class="field-list simple">
-<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qcengine.programs.</span></span><span class="sig-name descname"><span class="pre">ProgramHarness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scratch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thread_safe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thread_parallel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_parallel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">managed_memory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code>, <a class="reference external" href="https://docs.python.org/3.13/library/abc.html#abc.ABC" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Base class for analytic single-geometry capable harnesses.</p>
+<p class="rubric">Attributes Summary</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.model_config" title="qcengine.programs.ProgramHarness.model_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model_config</span></code></a></p></td>
+<td><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.build_input" title="qcengine.programs.ProgramHarness.build_input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_input</span></code></a>(input_model, config[, template])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.build_input_model" title="qcengine.programs.ProgramHarness.build_input_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_input_model</span></code></a>(data, *[, ...])</p></td>
+<td><p>Quick wrapper around util.model_wrapper for inherited classes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.compute" title="qcengine.programs.ProgramHarness.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(input_data, config)</p></td>
+<td><p>Top-level compute method to be implemented for every ProgramHarness</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.execute" title="qcengine.programs.ProgramHarness.execute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute</span></code></a>(inputs[, extra_outfiles, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.found" title="qcengine.programs.ProgramHarness.found"><code class="xref py py-obj docutils literal notranslate"><span class="pre">found</span></code></a>([raise_error])</p></td>
+<td><p>Checks if the program can be found.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.get_version" title="qcengine.programs.ProgramHarness.get_version"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_version</span></code></a>()</p></td>
+<td><p>Finds program, extracts version, returns normalized version string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.parse_output" title="qcengine.programs.ProgramHarness.parse_output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_output</span></code></a>(outfiles, input_model)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.extras" title="qcengine.programs.model.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extras</span> <span class="pre">(Dict[str,</span> <span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None)</span></code></a></p></li>
-<li><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.managed_memory" title="qcengine.programs.model.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">managed_memory</span> <span class="pre">(bool)</span></code></a></p></li>
-<li><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.name" title="qcengine.programs.model.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span> <span class="pre">(str)</span></code></a></p></li>
-<li><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.node_parallel" title="qcengine.programs.model.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_parallel</span> <span class="pre">(bool)</span></code></a></p></li>
-<li><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.scratch" title="qcengine.programs.model.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scratch</span> <span class="pre">(bool)</span></code></a></p></li>
-<li><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.thread_parallel" title="qcengine.programs.model.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread_parallel</span> <span class="pre">(bool)</span></code></a></p></li>
-<li><p><a class="reference internal" href="#qcengine.programs.ProgramHarness.thread_safe" title="qcengine.programs.model.ProgramHarness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">thread_safe</span> <span class="pre">(bool)</span></code></a></p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>scratch</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+<li><p><strong>thread_safe</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+<li><p><strong>thread_parallel</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+<li><p><strong>node_parallel</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+<li><p><strong>managed_memory</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+<li><p><strong>extras</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.extras">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extras</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Optional" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a><span class="pre">]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qcengine.programs.ProgramHarness.extras" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True}</span></span><a class="headerlink" href="#qcengine.programs.ProgramHarness.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
 
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.managed_memory">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">managed_memory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#qcengine.programs.ProgramHarness.managed_memory" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.name">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#qcengine.programs.ProgramHarness.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.node_parallel">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_parallel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#qcengine.programs.ProgramHarness.node_parallel" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.scratch">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scratch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#qcengine.programs.ProgramHarness.scratch" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.thread_parallel">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thread_parallel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#qcengine.programs.ProgramHarness.thread_parallel" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.thread_safe">
-<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thread_safe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#qcengine.programs.ProgramHarness.thread_safe" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<p class="rubric">Methods Documentation</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.build_input">
 <span class="sig-name descname"><span class="pre">build_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.build_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.build_input" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>input_model</strong> (<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+g28c74b413)"><em>AtomicInput</em></a>)</p></li>
+<li><p><strong>input_model</strong> (<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+gca4939ab6)"><em>AtomicInput</em></a>)</p></li>
 <li><p><strong>config</strong> (<em>TaskConfig</em>)</p></li>
-<li><p><strong>template</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>template</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -251,16 +203,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.build_input_model">
-<span class="sig-name descname"><span class="pre">build_input_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_input_schema_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.build_input_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.build_input_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">build_input_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_input_schema_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.build_input_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.build_input_model" title="Link to this definition"></a></dt>
 <dd><p>Quick wrapper around util.model_wrapper for inherited classes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Union" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+g28c74b413)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicInput</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Tuple" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+g28c74b413)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicInput</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Union" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+gca4939ab6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicInput</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Tuple" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+gca4939ab6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicInput</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a><em>]</em>)</p></li>
-<li><p><strong>return_input_schema_version</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a><em>]</em>)</p></li>
+<li><p><strong>return_input_schema_version</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -268,9 +220,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.compute">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.compute" title="Link to this definition"></a></dt>
-<dd><p>Top-level compute method to be implemented for every ProgramHarness
-:rtype: <span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Union" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicResult.html#qcelemental.models.v2.AtomicResult" title="(in QCElemental v0.1.dev1+g28c74b413)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResult</span></code></a>, <a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.FailedOperation.html#qcelemental.models.v2.FailedOperation" title="(in QCElemental v0.1.dev1+g28c74b413)"><code class="xref py py-class docutils literal notranslate"><span class="pre">FailedOperation</span></code></a>]</span></p>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.compute" title="Link to this definition"></a></dt>
+<dd><p>Top-level compute method to be implemented for every ProgramHarness</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <dl class="simple">
@@ -292,14 +243,14 @@ returns them as FailedOperation objects to end users.</p>
 </dl>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_data</strong> (<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+g28c74b413)"><em>AtomicInput</em></a>)</p></li>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Union" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicResult.html#qcelemental.models.v2.AtomicResult" title="(in QCElemental v0.1.dev1+gca4939ab6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResult</span></code></a>, <a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.FailedOperation.html#qcelemental.models.v2.FailedOperation" title="(in QCElemental v0.1.dev1+gca4939ab6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">FailedOperation</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>input_data</strong> (<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+gca4939ab6)"><em>AtomicInput</em></a>)</p></li>
 <li><p><strong>config</strong> (<em>TaskConfig</em>)</p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicResult.html#qcelemental.models.v2.AtomicResult" title="(in QCElemental v0.1.dev1+g28c74b413)"><em>AtomicResult</em></a> | <a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.FailedOperation.html#qcelemental.models.v2.FailedOperation" title="(in QCElemental v0.1.dev1+g28c74b413)"><em>FailedOperation</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -309,15 +260,15 @@ returns them as FailedOperation objects to end users.</p>
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_outfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_commands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scratch_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.execute" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Tuple" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Tuple" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]</span></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>inputs</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a><em>]</em>)</p></li>
-<li><p><strong>extra_outfiles</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.List" title="(in Python v3.13)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
-<li><p><strong>extra_commands</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.List" title="(in Python v3.13)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
-<li><p><strong>scratch_name</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
-<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>inputs</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Any" title="(in Python v3.13)"><em>Any</em></a><em>]</em>)</p></li>
+<li><p><strong>extra_outfiles</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.List" title="(in Python v3.13)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>extra_commands</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.List" title="(in Python v3.13)"><em>List</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>scratch_name</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -325,17 +276,17 @@ returns them as FailedOperation objects to end users.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qcengine.programs.ProgramHarness.found">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">found</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raise_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.found"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.found" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">found</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raise_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.found"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.found" title="Link to this definition"></a></dt>
 <dd><p>Checks if the program can be found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>raise_error</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If True, raises an error if the program cannot be found.</p>
+<dd class="field-odd"><p><strong>raise_error</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If True, raises an error if the program cannot be found.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Returns True if the program was found, False otherwise.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.13/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/builtins/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -349,7 +300,7 @@ returns them as FailedOperation objects to end users.</p>
 <dd class="field-odd"><p>Return a valid, safe python version string.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -359,12 +310,12 @@ returns them as FailedOperation objects to end users.</p>
 <span class="sig-name descname"><span class="pre">parse_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qcengine/programs/model.html#ProgramHarness.parse_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qcengine.programs.ProgramHarness.parse_output" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicResult.html#qcelemental.models.v2.AtomicResult" title="(in QCElemental v0.1.dev1+g28c74b413)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResult</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicResult.html#qcelemental.models.v2.AtomicResult" title="(in QCElemental v0.1.dev1+gca4939ab6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomicResult</span></code></a></span></p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>outfiles</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.13/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>)</p></li>
-<li><p><strong>input_model</strong> (<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+g28c74b413)"><em>AtomicInput</em></a>)</p></li>
+<li><p><strong>outfiles</strong> (<a class="reference external" href="https://docs.python.org/3.13/library/typing.html#typing.Dict" title="(in Python v3.13)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.13/builtins/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>input_model</strong> (<a class="reference external" href="https://molssi.github.io/QCElemental/dev/api/qcelemental.models.v2.AtomicInput.html#qcelemental.models.v2.AtomicInput" title="(in QCElemental v0.1.dev1+gca4939ab6)"><em>AtomicInput</em></a>)</p></li>
 </ul>
 </dd>
 </dl>

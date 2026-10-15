@@ -3,4 +3,15 @@ NodeDescriptor
 
 .. currentmodule:: qcengine.config
 
-.. autopydantic_model:: NodeDescriptor
+.. autoclass:: NodeDescriptor
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~NodeDescriptor.model_config
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: model_config
