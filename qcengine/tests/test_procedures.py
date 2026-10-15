@@ -677,6 +677,32 @@ def test_geometric_generic(input_data, program, model, bench, schema_versions, r
     # the _secret_tags shows up in Res.extras, not in Res.input_data.extras b/c geometric running v1 internally
 
 
+@uusing("geometric")
+@uusing("rdkit")
+def test_geometric_v1_dict_to_v2():
+    # QCSchema v1 dict in, v2 model out (as QCFractal does). Not covered by schema_versions on Py >=3.14,
+    #   where the v1 dict must be built with the _v1v2 shim since pydantic.v1 is unavailable
+    input_data = {
+        "schema_name": "qcschema_optimization_input",
+        "schema_version": 1,
+        "keywords": {"coordsys": "tric", "maxiter": 100, "program": "rdkit"},
+        "input_specification": {
+            "schema_name": "qcschema_input",
+            "schema_version": 1,
+            "driver": "gradient",
+            "model": {"method": "UFF"},
+            "keywords": {},
+        },
+        "initial_molecule": qcng.get_molecule("water", return_dict=True),
+    }
+
+    ret = qcng.compute(input_data, "geometric", raise_error=True, return_version=2)
+
+    assert isinstance(ret, qcel.models.v2.OptimizationResult)
+    assert ret.success is True
+    assert ret.input_data.specification.specification.model.method == "UFF"
+
+
 @uusing("nwchem")
 @pytest.mark.parametrize("linopt", [0, 1])
 def test_nwchem_relax(linopt, schema_versions, request):

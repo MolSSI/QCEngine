@@ -77,7 +77,18 @@ class ProcedureHarness(BaseModel, abc.ABC):
             if data.get("specification", False) or data.get("schema_version") == 2:
                 mdl = model_wrapper(data, v2_model)
             else:
-                mdl = model_wrapper(data, v1_model)
+                try:
+                    mdl = model_wrapper(data, v1_model)
+                except RuntimeError:
+                    # form a QCSchema v1 layout model with Pydantic v2 API
+                    # this is for py314 and only safe b/c immediately converted to v2 next
+                    # (shims only exist for some models, e.g., Opt but not TD)
+                    module_v1v2 = importlib.import_module("qcelemental.models._v1v2")
+                    v1v2_model = getattr(module_v1v2, model, None)
+                    if v1v2_model is None:
+                        raise
+
+                    mdl = model_wrapper(data, v1v2_model)
 
         input_schema_version = mdl.schema_version
         if return_input_schema_version:
