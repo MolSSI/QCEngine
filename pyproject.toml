@@ -112,6 +112,7 @@ markers = [
     "classic-dftd3: tests using DFTD3 executable software; skip if unavailable",
     "classic-dftd3_321: tests using DFTD3 classic executable >=v3.2.1 software; skip if unavailable",
     "s-dftd3: tests using modern simple-dftd3 software; skip if unavailable",
+    "s-dftd3_160: tests using modern simple-dftd3 >=1.6.0 software; skip if unavailable",
     "dftd4: tests using DFTD4 software; skip if unavailable",
     "dftd4_350: tests using DFTD4 >=3.5.0 software; skip if unavailable",
     "gamess: tests using GAMESS-US software; skip if unavailable",

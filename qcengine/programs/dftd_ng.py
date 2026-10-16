@@ -250,8 +250,11 @@ class SDFTD3Harness(ProgramHarness):
         wrapper around the native QCSchema interface of the dftd3 Python-API.
         """
         self.found(raise_error=True)
-        if parse_version(self.get_version()) < parse_version("0.5.1"):
+        dftd3_version = parse_version(self.get_version())
+        if dftd3_version < parse_version("0.5.1"):
             raise ResourceError("QCEngine's dftd3 wrapper requires version 0.5.1 or greater.")
+        if input_model.specification.driver == "hessian" and dftd3_version < parse_version("1.6.0"):
+            raise ResourceError("Analytic DFT-D3 Hessians require dftd3-python version 1.6.0 or greater.")
 
         import dftd3
         from dftd3.qcschema import run_qcschema
@@ -350,6 +353,13 @@ class SDFTD3Harness(ProgramHarness):
             calcinfo["DISPERSION CORRECTION GRADIENT"] = gradient
             if qcvkey:
                 calcinfo[f"{qcvkey} DISPERSION CORRECTION GRADIENT"] = gradient
+
+        if output.input_data.specification.driver == "hessian":
+            hessian = output.return_result
+            calcinfo["CURRENT HESSIAN"] = hessian
+            calcinfo["DISPERSION CORRECTION HESSIAN"] = hessian
+            if qcvkey:
+                calcinfo[f"{qcvkey} DISPERSION CORRECTION HESSIAN"] = hessian
 
         if output.input_data.specification.keywords.get("pair_resolved", False):
             pw2 = output.extras["dftd3"]["additive pairwise energy"]

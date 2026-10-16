@@ -178,6 +178,7 @@ _programs = {
     "dftd4": which_import("dftd4", return_bool=True),
     "dftd4_350": is_program_new_enough("dftd4", "3.5.0"),
     "s-dftd3": which_import("dftd3", return_bool=True),
+    "s-dftd3_160": is_program_new_enough("s-dftd3", "1.6.0"),
     "qcore": is_program_new_enough("qcore", "0.8.9"),
     "gamess": which("rungms", return_bool=True),
     "jaguar": which_import("schrodinger.application.jaguar.input", return_bool=True),
