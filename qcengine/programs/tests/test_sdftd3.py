@@ -177,6 +177,131 @@ def test_dftd3_task_tpss_m02(schema_versions, request):
     assert pytest.approx(atomic_result.return_result, abs=thr) == return_result
 
 
+@uusing("s-dftd3_160")
+def test_dftd3_task_tpss_water_hessian(schema_versions, request):
+    models, retver, _ = schema_versions
+
+    molecule = models.Molecule(
+        symbols=["O", "H", "H"],
+        geometry=[
+            [0.0, 0.0, -0.73578586109551],
+            [1.44183152868459, 0.0, 0.36789293054775],
+            [-1.44183152868459, 0.0, 0.36789293054775],
+        ],
+    )
+    spec = {
+        "model": {"method": "tpss-d3(bj)"},
+        "keywords": {"level_hint": "d3bj"},
+        "driver": "hessian",
+    }
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(molecule=molecule, specification=spec)
+    else:
+        atomic_input = models.AtomicInput(molecule=molecule, **spec)
+
+    reference = np.array(
+        [
+            [
+                -2.363748080368e-05,
+                0.0,
+                0.0,
+                1.181874040184e-05,
+                0.0,
+                8.390299581562e-06,
+                1.181874040184e-05,
+                0.0,
+                -8.390299581562e-06,
+            ],
+            [0.0, -1.715525677959e-06, 0.0, 0.0, 8.577628389794e-07, 0.0, 0.0, 8.577628389794e-07, 0.0],
+            [
+                0.0,
+                0.0,
+                -1.490237264432e-05,
+                8.632320137316e-06,
+                0.0,
+                7.451186322159e-06,
+                -8.632320137316e-06,
+                0.0,
+                7.451186322159e-06,
+            ],
+            [
+                1.181874040184e-05,
+                0.0,
+                8.632320137316e-06,
+                -8.367108451820e-06,
+                0.0,
+                -8.511309859439e-06,
+                -3.451631950019e-06,
+                0.0,
+                -1.210102778769e-07,
+            ],
+            [0.0, 8.577628389794e-07, 0.0, 0.0, -2.707920306465e-07, 0.0, 0.0, -5.869708083328e-07, 0.0],
+            [
+                8.390299581562e-06,
+                0.0,
+                7.451186322159e-06,
+                -8.511309859439e-06,
+                0.0,
+                -6.778765115700e-06,
+                1.210102778769e-07,
+                0.0,
+                -6.724212064594e-07,
+            ],
+            [
+                1.181874040184e-05,
+                0.0,
+                -8.632320137316e-06,
+                -3.451631950019e-06,
+                0.0,
+                1.210102778769e-07,
+                -8.367108451820e-06,
+                0.0,
+                8.511309859439e-06,
+            ],
+            [0.0, 8.577628389794e-07, 0.0, 0.0, -5.869708083328e-07, 0.0, 0.0, -2.707920306465e-07, 0.0],
+            [
+                -8.390299581562e-06,
+                0.0,
+                7.451186322159e-06,
+                -1.210102778769e-07,
+                0.0,
+                -6.724212064594e-07,
+                8.511309859439e-06,
+                0.0,
+                -6.778765115700e-06,
+            ],
+        ]
+    )
+
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    atomic_result = qcng.compute(atomic_input, "s-dftd3", return_version=retver)
+    atomic_result = checkver_and_convert(atomic_result, request.node.name, "post")
+
+    assert atomic_result.success
+    assert pytest.approx(atomic_result.return_result, abs=1.0e-10) == reference
+    for key in [
+        "CURRENT HESSIAN",
+        "DISPERSION CORRECTION HESSIAN",
+        "TPSS-D3(BJ) DISPERSION CORRECTION HESSIAN",
+    ]:
+        assert pytest.approx(atomic_result.extras["qcvars"][key], abs=1.0e-10) == reference
+
+
+@uusing("s-dftd3")
+def test_dftd3_hessian_version_gate(monkeypatch):
+    from qcengine.programs.dftd_ng import SDFTD3Harness
+
+    atomic_input = qcel.models.v2.AtomicInput(
+        molecule={"symbols": ["He", "He"], "geometry": [0.0, 0.0, 0.0, 0.0, 0.0, 5.0]},
+        specification={"model": {"method": "pbe"}, "driver": "hessian"},
+    )
+    harness = SDFTD3Harness()
+    monkeypatch.setattr(SDFTD3Harness, "get_version", lambda self: "1.5.0")
+
+    with pytest.raises(qcng.exceptions.ResourceError, match="dftd3-python version 1.6.0 or greater"):
+        harness.compute(atomic_input, None)
+
+
 @uusing("s-dftd3")
 @pytest.mark.parametrize("atm", ["nil", True, False])
 def test_dftd3_task_r2scan_m03(schema_versions, request, atm):

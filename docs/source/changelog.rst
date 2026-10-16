@@ -39,6 +39,38 @@ Changelog
 .. * `git push upstream --atomic v0.50.1 master`
 
 
+.. _`sec:cl0520`:
+
+v0.52.0 / 2026-10-16
+--------------------
+
+:docs:`v0.52.0` for current. :docs:`v0.34.1` for QCSchema v1.
+
+New Features
+++++++++++++
+- (:pr:`520`) ORB -- Add a harness for the ``orb-models`` universal machine-learned
+  interatomic potentials. The harness supports energy and gradient calculations
+  with direct and conservative models and selectable CPU or CUDA execution.
+  @jacob-votava
+
+Enhancements
+++++++++++++
+- (:pr:`525`) s-dftd3 -- Add analytic Hessian support with ``dftd3-python>=1.6.0``, including
+  current, generic dispersion, and method-specific dispersion Hessian QCVariables.
+  Older versions produce a clear version error. @loriab
+- (:pr:`526`) testing -- Add data for an ECP case: CH2I2/CH2I to standard suite. @loriab
+
+Bug Fixes
++++++++++
+- (:pr:`523`) Procedures -- On Python 3.14, accept QCSchema v1 procedure dictionaries
+  for models with a QCElemental ``_v1v2`` shim by converting them immediately to v2.
+  This restores optimization inputs from clients such as QCFractal. @bennybp
+
+Misc.
++++++
+- (:pr:`524`) CI -- Update the ADCC test environment from Python 3.10 to 3.13.
+
+
 .. _`sec:cl0510`:
 
 v0.51.0 / 2026-08-18
