@@ -39,6 +39,16 @@ Changelog
 .. * `git push upstream --atomic v0.50.1 master`
 
 
+New Features
+++++++++++++
+- (:pr:`517`) MPQC - adds a harness for MPQC4 supporting energies and excitation
+  energies for real LCAO methods (HF, MP2, CCSD, CCSD(T), CCSDT, CCk, sCI,
+  EOM-CCSD/IP/EA). Gradients raise ``InputError`` as MPQC has no analytic
+  derivatives. Not enrolled in ``test_canonical_config.py`` (see the ``needs
+  attn`` note there) as MPQC echoes neither its memory limit nor its scratch
+  path, so neither can be regex-verified.
+  
+  
 .. _`sec:cl0510`:
 
 v0.51.0 / 2026-08-18
