@@ -41,8 +41,8 @@ Changelog
 
 .. _`sec:cl0520`:
 
-v0.52.0 / 2026-MM-DD (Unreleased)
----------------------------------
+v0.52.0 / 2026-10-16
+--------------------
 
 :docs:`v0.52.0` for current. :docs:`v0.34.1` for QCSchema v1.
 
@@ -52,9 +52,13 @@ New Features
   interatomic potentials. The harness supports energy and gradient calculations
   with direct and conservative models and selectable CPU or CUDA execution.
   @jacob-votava
-- s-dftd3 -- Add analytic Hessian support with ``dftd3-python>=1.6.0``, including
+
+Enhancements
+++++++++++++
+- (:pr:`525`) s-dftd3 -- Add analytic Hessian support with ``dftd3-python>=1.6.0``, including
   current, generic dispersion, and method-specific dispersion Hessian QCVariables.
   Older versions produce a clear version error. @loriab
+- (:pr:`526`) testing -- Add data for an ECP case: CH2I2/CH2I to standard suite. @loriab
 
 Bug Fixes
 +++++++++
