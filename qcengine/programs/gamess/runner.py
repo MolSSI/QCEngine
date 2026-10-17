@@ -7,6 +7,7 @@ from typing import Any, ClassVar, Dict, Optional, Tuple
 
 from qcelemental.models.v2 import AtomicInput, AtomicResult, BasisSet, Provenance
 from qcelemental.util import safe_version, which
+from qcelemental import periodictable
 
 from ...exceptions import InputError, UnknownError
 from ...util import execute
@@ -98,6 +99,15 @@ class GAMESSHarness(ProgramHarness):
 
         molcmd, moldata = input_model.molecule.to_string(dtype="gamess", units="Bohr", return_data=True)
         opts.update(moldata["keywords"])
+
+        # Split molecule $data for fmo/efmo
+        if opts.get("fmo__iefmo", None) is not None:
+            molcmd = molcmd.split("\n")
+            datacmd, fmoxyzcmd = molcmd[:3], molcmd[3:]
+            datacmd.extend(f" {el} {periodictable.to_atomic_number(el)}" for el in set(input_model.molecule.symbols))
+            datacmd.append(" $end")
+            fmoxyzcmd.insert(0, " $fmoxyz")
+            molcmd = "\n".join(fmoxyzcmd) + "\n".join(datacmd) + "\n"
 
         # Handle calc type and quantum chemical method
         opts.update(
