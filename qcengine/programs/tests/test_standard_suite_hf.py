@@ -104,6 +104,7 @@ def test_sp_hf_rhf_v1v2shim(program, basis, keywords, h2o_data, schema_versions5
         pytest.param("cfour", "cC-pvdZ", {"scf_conv": 12}, marks=using("cfour")),  # test basis handling, not results
         pytest.param("cfour", "aug-pvdz", {"scf_conv": 12}, marks=using("cfour")),
         pytest.param("cfour", "aug-pvdz", {}, marks=using("cfour")),
+        pytest.param("chronusq", "aug-cc-pvdz", {}, marks=using("chronusq")),
         pytest.param(
             "qcore",
             "aug-cc-pVDZ",
