@@ -122,6 +122,7 @@ markers = [
     "geometric: tests using geomeTRIC software; skip if unavailable",
     "mace: tests using MACE software; skip if unavailable",
     "orb: tests using ORB software; skip if unavailable",
+    "fairchem: tests using FairChem (UMA) software; skip if unavailable",
     "mdi: tests using MDI software; skip if unavailable",
     "molpro: tests using Molpro software; skip if unavailable",
     "mopac: tests using Mopac software; skip if unavailable",

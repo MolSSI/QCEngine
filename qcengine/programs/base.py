@@ -10,6 +10,7 @@ from .aimnet2 import AIMNET2Harness
 from .cfour import CFOURHarness
 from .dftd3 import DFTD3Harness
 from .dftd_ng import DFTD4Harness, SDFTD3Harness
+from .fairchem import FairChemHarness
 from .gamess import GAMESSHarness
 from .gcp import GCPHarness, MCTCGCPHarness
 from .jaguar import JaguarHarness
@@ -133,6 +134,7 @@ register_program(TorchANIHarness())
 register_program(MACEHarness())
 register_program(AIMNET2Harness())
 register_program(ORBHarness())
+register_program(FairChemHarness())
 
 # Molecular Mechanics
 register_program(RDKitHarness())

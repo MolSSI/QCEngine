@@ -166,6 +166,14 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          # UMA weights are gated on Hugging Face: they are pre-downloaded below when the
+          # HF_TOKEN secret is set, otherwise the fairchem tests skip (see qcengine/testing.py)
+          - conda-env: fairchem
+            python-version: "3.12"
+            label: FairChem
+            runs-on: ubuntu-latest
+            pytest: ""
+
           #- conda-env: opt-disp-cf
           #  python-version: 3.12
           #  label: QCSk-next
@@ -207,6 +215,13 @@ jobs:
       if: matrix.cfg.label == 'QCore'
       run: |
         qcore --accept-license
+
+    - name: Special Config - FairChem weights
+      if: matrix.cfg.label == 'FairChem' && env.HF_TOKEN != ''
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        python -c "from fairchem.core import pretrained_mlip; pretrained_mlip.get_predict_unit('uma-s-1p2p1', device='cpu')"
 
 
 #docker.io/mtzgroup/terachem:latest

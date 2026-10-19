@@ -1,0 +1,26 @@
+name: test
+channels:
+  - conda-forge
+dependencies:
+    # keep the scientific stack on the pip side: conda's llvm-openmp and the libomp
+    # bundled in the torch wheels collide at import time (fatal on macOS)
+  - python <3.15
+  - pip
+  - pip:
+    # Core
+    - pyyaml
+    - py-cpuinfo
+    - psutil
+    - qcelemental>=0.50.4,<0.70.0
+    - pydantic>=2.11
+    - pydantic-settings
+    - msgpack
+    - packaging
+
+    # weights are gated: accept the license at https://huggingface.co/facebook/UMA, then `hf auth login`
+    - fairchem-core>=2
+
+    # Testing
+    - pytest
+    - pytest-cov
+    - codecov

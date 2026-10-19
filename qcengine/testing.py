@@ -2,6 +2,8 @@
 Utilities for the testing suite.
 """
 
+import glob
+import os
 import sys
 from typing import List, Tuple
 
@@ -211,6 +213,16 @@ _programs = {
     "mace": is_program_new_enough("mace", "0.3.2"),
     "aimnet2": which_import("pyaimnet2", return_bool=True),
     "orb": which_import("orb_models", return_bool=True),
+    # the harness refuses to download the gated UMA weights, so also require a checkpoint in fairchem's cache
+    "fairchem": which_import("fairchem.core", return_bool=True)
+    and bool(
+        glob.glob(
+            os.path.join(
+                os.environ.get("FAIRCHEM_CACHE_DIR", os.path.expanduser("~/.cache/fairchem")),
+                "models--facebook--UMA/snapshots/*/checkpoints/uma-*.pt",
+            )
+        )
+    ),
     "optking_v2": is_program_new_enough("optking", "0.5"),
 }
 _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)

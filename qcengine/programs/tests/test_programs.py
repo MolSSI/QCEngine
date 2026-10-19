@@ -860,6 +860,121 @@ def test_orb_gradient(schema_versions, request):
     assert pytest.approx(result.properties.return_energy) == -76.43103942777961
 
 
+@uusing("fairchem")
+@pytest.mark.parametrize(
+    "model, expected_energy",
+    [
+        pytest.param("uma-s-1p2p1", -76.43107042164793, id="uma-s-1p2p1"),
+        # bare prefix resolves to the newest small checkpoint, so same model and same energy
+        pytest.param("uma", -76.43107042164793, id="uma"),
+    ],
+)
+def test_fairchem_energy(model, expected_energy, schema_versions, request):
+    """Test computing the energy of water with the UMA omol head.
+
+    The expected values are in hartree, so they also pin the eV -> hartree conversion.
+    """
+    models, retver, _ = schema_versions
+
+    water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
+    # pin the device so the reference values do not depend on the runner's hardware
+    keywords = {"task_name": "omol", "device": "cpu"}
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=water,
+            specification={"driver": "energy", "model": {"method": model, "basis": None}, "keywords": keywords},
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=water, model={"method": model, "basis": None}, driver="energy", keywords=keywords
+        )
+
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    result = qcng.compute(atomic_input, "fairchem", return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post")
+
+    assert result.success, result.error.error_message
+    assert pytest.approx(result.return_result) == expected_energy
+    assert result.extras["fairchem"]["model"] == "uma-s-1p2p1"
+    assert result.extras["fairchem"]["task_name"] == "omol"
+    assert result.extras["fairchem"]["device"] == "cpu"
+
+
+@uusing("fairchem")
+def test_fairchem_gradient(schema_versions, request):
+    """Test computing the gradient of water with the UMA omol head.
+
+    QCSchema wants the energy gradient, which is minus the force, in hartree/bohr.
+    """
+    models, retver, _ = schema_versions
+
+    water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
+    keywords = {"task_name": "omol", "device": "cpu"}
+    if from_v2(request.node.name):
+        atomic_input = models.AtomicInput(
+            molecule=water,
+            specification={
+                "driver": "gradient",
+                "model": {"method": "uma-s-1p2p1", "basis": None},
+                "keywords": keywords,
+            },
+        )
+    else:
+        atomic_input = models.AtomicInput(
+            molecule=water,
+            model={"method": "uma-s-1p2p1", "basis": None},
+            driver="gradient",
+            keywords=keywords,
+        )
+
+    atomic_input = checkver_and_convert(atomic_input, request.node.name, "pre")
+    result = qcng.compute(atomic_input, "fairchem", return_version=retver)
+    result = checkver_and_convert(result, request.node.name, "post")
+
+    assert result.success, result.error.error_message
+    # make sure the gradient is now the return result
+    assert np.allclose(
+        result.return_result,
+        np.array(
+            [
+                [3.843294293925936e-10, 9.333280814871614e-09, -0.0389343723654747],
+                [-7.13971659571655e-10, -0.02767694927752018, 0.01946718618273735],
+                [3.3116132058808034e-10, 0.027676936239004135, 0.0194671843200922],
+            ]
+        ),
+        atol=1e-6,
+    )
+    assert pytest.approx(result.properties.return_energy) == -76.43107042164793
+
+
+@uusing("fairchem")
+def test_fairchem_task_name_required(schema_versions, request):
+    """UMA has several heads, so the task must be chosen explicitly and must be one fairchem knows."""
+    models, retver, _ = schema_versions
+
+    water = models.Molecule(**qcng.get_molecule("water", return_dict=True))
+
+    def _input(keywords):
+        if from_v2(request.node.name):
+            return models.AtomicInput(
+                molecule=water,
+                specification={"driver": "energy", "model": {"method": "uma", "basis": None}, "keywords": keywords},
+            )
+        return models.AtomicInput(
+            molecule=water, model={"method": "uma", "basis": None}, driver="energy", keywords=keywords
+        )
+
+    # missing task_name is rejected before any model is loaded
+    atomic_input = checkver_and_convert(_input({"device": "cpu"}), request.node.name, "pre")
+    with pytest.raises(qcng.exceptions.InputError, match="task_name"):
+        qcng.compute(atomic_input, "fairchem", raise_error=True, return_version=retver)
+
+    # an unknown task_name is rejected with fairchem's list of valid ones
+    atomic_input = checkver_and_convert(_input({"task_name": "bad", "device": "cpu"}), request.node.name, "pre")
+    with pytest.raises(qcng.exceptions.InputError, match="omol"):
+        qcng.compute(atomic_input, "fairchem", raise_error=True, return_version=retver)
+
+
 @uusing("psi4")
 def test_psi4_properties_driver(schema_versions, request):
     models, retver, _ = schema_versions
