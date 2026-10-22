@@ -659,6 +659,10 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -100.40555231414156,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [[0.000000000000, 0.000000000000, 0.009226483078], [0.000000000000, 0.000000000000, -0.009226483078]]
+            ),
             "HF TOTAL ENERGY": _scf_hf_dz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_hf_dz_pk_rhf,
             "HF TOTAL HESSIAN": _hess_scf_hf_dz_pk_rhf,
@@ -993,6 +997,14 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -76.4127532708179,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.005732683534],
+                    [0.000000000000, 0.004383689152, -0.002866341767],
+                    [0.000000000000, -0.004383689152, -0.002866341767],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_h2o_adz_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_adz_pk_rhf,
             "HF TOTAL HESSIAN": _hess_scf_h2o_adz_pk_rhf,
@@ -1993,6 +2005,14 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -76.43443908123758,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.000561566059],
+                    [0.000000000000, 0.001388861322, -0.000280783029],
+                    [0.000000000000, -0.001388861322, -0.000280783029],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_h2o_qz2p_pk_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_qz2p_pk_rhf,
             "HF TOTAL HESSIAN": _hess_scf_h2o_qz2p_pk_rhf,
@@ -3173,6 +3193,15 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -26.072709145462433,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.003696632215],
+                    [0.000000000000, 0.000000000000, -0.006241842873],
+                    [0.000000000000, 0.017185419072, 0.001272605329],
+                    [0.000000000000, -0.017185419072, 0.001272605329],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_bh3p_dz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_pk_uhf,
             "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_pk_uhf,
@@ -4326,6 +4355,14 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -55.85827720530538,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.024489713000],
+                    [0.000000000000, 0.013238914872, -0.012244856500],
+                    [0.000000000000, -0.013238914872, -0.012244856500],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_nh2_adz_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_pk_uhf,
             "HF TOTAL HESSIAN": _hess_scf_nh2_adz_pk_uhf,
@@ -4754,6 +4791,14 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -55.87409264531853,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.017739574984],
+                    [0.000000000000, 0.008774868187, -0.008869787492],
+                    [0.000000000000, -0.008774868187, -0.008869787492],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_nh2_qz2p_pk_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_pk_uhf,
             "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_pk_uhf,
@@ -13913,6 +13958,10 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -100.40577813726811,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [[0.000000000000, 0.000000000000, 0.009303642874], [0.000000000000, 0.000000000000, -0.009303642874]]
+            ),
             "HF TOTAL ENERGY": _scf_hf_dz_df_rhf,
             "HF TOTAL GRADIENT": _grad_scf_hf_dz_df_rhf,
             "HF TOTAL HESSIAN": _hess_scf_hf_dz_df_rhf,
@@ -14065,6 +14114,14 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -76.41276746029628,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.005753444347],
+                    [0.000000000000, 0.004400108412, -0.002876722173],
+                    [0.000000000000, -0.004400108412, -0.002876722173],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_h2o_adz_df_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_adz_df_rhf,
             "HF TOTAL HESSIAN": _hess_scf_h2o_adz_df_rhf,
@@ -14332,6 +14389,14 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -76.43447791383385,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.000542131643],
+                    [0.000000000000, 0.001376067276, -0.000271065821],
+                    [0.000000000000, -0.001376067276, -0.000271065821],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_h2o_qz2p_df_rhf,
             "HF TOTAL GRADIENT": _grad_scf_h2o_qz2p_df_rhf,
             "HF TOTAL HESSIAN": _hess_scf_h2o_qz2p_df_rhf,
@@ -14599,6 +14664,15 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -26.07270477909946,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.003688334516],
+                    [0.000000000000, 0.000000000000, -0.006243365102],
+                    [0.000000000000, 0.017228420136, 0.001277515293],
+                    [0.000000000000, -0.017228420136, 0.001277515293],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_bh3p_dz_df_uhf,
             "HF TOTAL GRADIENT": _grad_scf_bh3p_dz_df_uhf,
             "HF TOTAL HESSIAN": _hess_scf_bh3p_dz_df_uhf,
@@ -15063,6 +15137,14 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -55.85829509995966,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.024496343256],
+                    [0.000000000000, 0.013248260197, -0.012248171628],
+                    [0.000000000000, -0.013248260197, -0.012248171628],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_nh2_adz_df_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_adz_df_uhf,
             "HF TOTAL HESSIAN": _hess_scf_nh2_adz_df_uhf,
@@ -15336,6 +15418,14 @@ _std_suite = [
             "sdsc": "sd",
         },
         "data": {
+            "WB97M-V TOTAL ENERGY": -55.874120244167415,  # psi 99,590, findif-5
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi 99,590, findif-5
+                [
+                    [0.000000000000, 0.000000000000, 0.017733176376],
+                    [0.000000000000, 0.008754163546, -0.008866588188],
+                    [0.000000000000, -0.008754163546, -0.008866588188],
+                ]
+            ),
             "HF TOTAL ENERGY": _scf_nh2_qz2p_df_uhf,
             "HF TOTAL GRADIENT": _grad_scf_nh2_qz2p_df_uhf,
             "HF TOTAL HESSIAN": _hess_scf_nh2_qz2p_df_uhf,
@@ -17948,6 +18038,220 @@ _std_suite = [
             ).reshape(
                 (-1, 3)
             ),  # dfmp2 findif-5 of energies (cartesian steps)
+        },
+    },
+    # <<<  CUEST_DF-AE-DF  >>>
+    {
+        "meta": {
+            "system": "hf",
+            "basis": "cc-pvdz",
+            "scf_type": "cuest_df",
+            "reference": "rhf",
+            "fcae": "ae",
+            "corl_type": "df",
+            "sdsc": "sd",
+        },
+        "data": {
+            "PBE TOTAL ENERGY": -100.33521024113986,  # psi cuest 99,590 stratmann fp64
+            "PBE TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [[0.000000000000, -0.000000000000, 0.020127781873], [0.000000000000, 0.000000000000, -0.020127781873]]
+            ),
+            "B3LYP TOTAL ENERGY": -100.43547351869726,  # psi cuest 99,590 stratmann fp64
+            "B3LYP TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [[0.000000000000, -0.000000000000, 0.011389760694], [0.000000000000, 0.000000000000, -0.011389760694]]
+            ),
+            "WB97M-V TOTAL ENERGY": -100.40597489863391,  # psi cuest 99,590 stratmann fp64
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [[-0.000000000000, 0.000000000000, 0.009360395011], [0.000000000000, 0.000000000000, -0.009360395011]]
+            ),
+        },
+    },
+    {
+        "meta": {
+            "system": "bh3p",
+            "basis": "cc-pvdz",
+            "scf_type": "cuest_df",
+            "reference": "uhf",
+            "fcae": "ae",
+            "corl_type": "df",
+            "sdsc": "sd",
+        },
+        "data": {
+            "PBE TOTAL ENERGY": -26.046829611066705,  # psi cuest 99,590 stratmann fp64
+            "PBE TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, -0.002925521759],
+                    [0.000000000000, 0.000000000000, -0.000170380106],
+                    [-0.000000000000, 0.026134182508, 0.001547950933],
+                    [0.000000000000, -0.026134182508, 0.001547950933],
+                ]
+            ),
+            "B3LYP TOTAL ENERGY": -26.114015251574852,  # psi cuest 99,590 stratmann fp64
+            "B3LYP TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.003314710166],
+                    [0.000000000000, 0.000000000000, -0.005824084246],
+                    [-0.000000000000, 0.019173771318, 0.001254687040],
+                    [0.000000000000, -0.019173771318, 0.001254687040],
+                ]
+            ),
+            "WB97M-V TOTAL ENERGY": -26.072690591472348,  # psi cuest 99,590 stratmann fp64
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [0.000000000000, 0.000000000000, 0.003693517817],
+                    [0.000000000000, -0.000000000000, -0.006255525120],
+                    [-0.000000000000, 0.017274106048, 0.001281003651],
+                    [0.000000000000, -0.017274106048, 0.001281003651],
+                ]
+            ),
+        },
+    },
+    {
+        "meta": {
+            "system": "h2o",
+            "basis": "aug-cc-pvdz",
+            "scf_type": "cuest_df",
+            "reference": "rhf",
+            "fcae": "ae",
+            "corl_type": "df",
+            "sdsc": "sd",
+        },
+        "data": {
+            "PBE TOTAL ENERGY": -76.35898910845162,  # psi cuest 99,590 stratmann fp64
+            "PBE TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [0.000000000000, 0.000000000000, 0.018100638111],
+                    [-0.000000000000, 0.011588788391, -0.009050319055],
+                    [0.000000000000, -0.011588788391, -0.009050319055],
+                ]
+            ),
+            "B3LYP TOTAL ENERGY": -76.44456453889273,  # psi cuest 99,590 stratmann fp64
+            "B3LYP TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.007478738263],
+                    [-0.000000000000, 0.006140594688, -0.003739369132],
+                    [0.000000000000, -0.006140594688, -0.003739369132],
+                ]
+            ),
+            "WB97M-V TOTAL ENERGY": -76.41276403325969,  # psi cuest 99,590 stratmann fp64
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.005754396667],
+                    [-0.000000000000, 0.004403916173, -0.002877198334],
+                    [0.000000000000, -0.004403916173, -0.002877198334],
+                ]
+            ),
+        },
+    },
+    {
+        "meta": {
+            "system": "nh2",
+            "basis": "aug-cc-pvdz",
+            "scf_type": "cuest_df",
+            "reference": "uhf",
+            "fcae": "ae",
+            "corl_type": "df",
+            "sdsc": "sd",
+        },
+        "data": {
+            "PBE TOTAL ENERGY": -55.81475293805275,  # psi cuest 99,590 stratmann fp64
+            "PBE TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.035841580145],
+                    [-0.000000000000, 0.019756843604, -0.017920790072],
+                    [0.000000000000, -0.019756843604, -0.017920790072],
+                ]
+            ),
+            "B3LYP TOTAL ENERGY": -55.89010334209814,  # psi cuest 99,590 stratmann fp64
+            "B3LYP TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [0.000000000000, 0.000000000000, 0.026816368485],
+                    [-0.000000000000, 0.014944899863, -0.013408184242],
+                    [0.000000000000, -0.014944899863, -0.013408184242],
+                ]
+            ),
+            "WB97M-V TOTAL ENERGY": -55.85829711376816,  # psi cuest 99,590 stratmann fp64
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.024496057115],
+                    [-0.000000000000, 0.013252209128, -0.012248028557],
+                    [0.000000000000, -0.013252209128, -0.012248028557],
+                ]
+            ),
+        },
+    },
+    {
+        "meta": {
+            "system": "h2o",
+            "basis": "cfour-qz2p",
+            "scf_type": "cuest_df",
+            "reference": "rhf",
+            "fcae": "ae",
+            "corl_type": "df",
+            "sdsc": "sd",
+        },
+        "data": {
+            "PBE TOTAL ENERGY": -76.38213146953568,  # psi cuest 99,590 stratmann fp64
+            "PBE TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [0.000000000000, 0.000000000000, 0.012743409384],
+                    [-0.000000000000, 0.008588251632, -0.006371704692],
+                    [0.000000000000, -0.008588251632, -0.006371704692],
+                ]
+            ),
+            "B3LYP TOTAL ENERGY": -76.46844825773198,  # psi cuest 99,590 stratmann fp64
+            "B3LYP TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.001995282879],
+                    [-0.000000000000, 0.003029337104, -0.000997641439],
+                    [0.000000000000, -0.003029337104, -0.000997641439],
+                ]
+            ),
+            "WB97M-V TOTAL ENERGY": -76.43448691477252,  # psi cuest 99,590 stratmann fp64
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.000553997909],
+                    [-0.000000000000, 0.001381655026, -0.000276998955],
+                    [0.000000000000, -0.001381655026, -0.000276998955],
+                ]
+            ),
+        },
+    },
+    {
+        "meta": {
+            "system": "nh2",
+            "basis": "cfour-qz2p",
+            "scf_type": "cuest_df",
+            "reference": "uhf",
+            "fcae": "ae",
+            "corl_type": "df",
+            "sdsc": "sd",
+        },
+        "data": {
+            "PBE TOTAL ENERGY": -55.831005017037064,  # psi cuest 99,590 stratmann fp64
+            "PBE TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [0.000000000000, 0.000000000000, 0.029592400081],
+                    [-0.000000000000, 0.015624554847, -0.014796200041],
+                    [0.000000000000, -0.015624554847, -0.014796200041],
+                ]
+            ),
+            "B3LYP TOTAL ENERGY": -55.90728152746488,  # psi cuest 99,590 stratmann fp64
+            "B3LYP TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.019971734973],
+                    [-0.000000000000, 0.010413826223, -0.009985867487],
+                    [0.000000000000, -0.010413826223, -0.009985867487],
+                ]
+            ),
+            "WB97M-V TOTAL ENERGY": -55.8741223425471,  # psi cuest 99,590 stratmann fp64
+            "WB97M-V TOTAL GRADIENT": np.array(  # psi cuest 99,590 stratmann fp64
+                [
+                    [-0.000000000000, 0.000000000000, 0.017747616995],
+                    [-0.000000000000, 0.008752764401, -0.008873808498],
+                    [0.000000000000, -0.008752764401, -0.008873808498],
+                ]
+            ),
         },
     },
     # <<<  lopsided SCF/CORL algorithms  >>>
