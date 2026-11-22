@@ -179,6 +179,159 @@ def qcvar_identities() -> List[Dict[str, Any]]:
             )
         )
 
+    # MP2.5
+    pv0.extend(
+        _solve_in_turn(
+            args=["MP2.5 CORRELATION ENERGY", "MP2 CORRELATION ENERGY", "MP3 CORRELATION ENERGY"],
+            coeff=[-1, Dm(0.5), Dm(0.5)],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(args=["MP2.5 TOTAL ENERGY", "HF TOTAL ENERGY", "MP2.5 CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=[
+                "MP2.5 SAME-SPIN CORRELATION ENERGY",
+                "MP2 SAME-SPIN CORRELATION ENERGY",
+                "MP3 SAME-SPIN CORRELATION ENERGY",
+            ],
+            coeff=[-1, Dm(0.5), Dm(0.5)],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=[
+                "MP2.5 OPPOSITE-SPIN CORRELATION ENERGY",
+                "MP2 OPPOSITE-SPIN CORRELATION ENERGY",
+                "MP3 OPPOSITE-SPIN CORRELATION ENERGY",
+            ],
+            coeff=[-1, Dm(0.5), Dm(0.5)],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["MP2.5 SINGLES ENERGY", "MP2 SINGLES ENERGY", "MP3 SINGLES ENERGY"], coeff=[-1, Dm(0.5), Dm(0.5)]
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["MP2.5 DOUBLES ENERGY", "MP2 DOUBLES ENERGY", "MP3 DOUBLES ENERGY"], coeff=[-1, Dm(0.5), Dm(0.5)]
+        )
+    )
+
+    # MP4(SDQ) & MP4(T)
+    pv0.extend(
+        _solve_in_turn(
+            args=["MP4(SDQ) TOTAL ENERGY", "HF TOTAL ENERGY", "MP4(SDQ) CORRELATION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["MP4 CORRELATION ENERGY", "MP4(T) CORRECTION ENERGY", "MP4(SDQ) CORRELATION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+
+    # MPN (part 2)
+    # for mpn in range(3, 20):  # todo for now or forever
+    for mpn in range(4, 20):
+        pv0.extend(
+            _solve_in_turn(
+                args=[f"MP{mpn} TOTAL ENERGY", "HF TOTAL ENERGY", f"MP{mpn} CORRELATION ENERGY"], coeff=[-1, 1, 1]
+            )
+        )
+        pv0.extend(
+            _solve_in_turn(
+                args=[f"MP{mpn} CORRELATION ENERGY", f"MP{mpn} CORRECTION ENERGY", f"MP{mpn - 1} CORRELATION ENERGY"],
+                coeff=[-1, 1, 1],
+            )
+        )
+
+    # CISD
+    pv0.extend(
+        _solve_in_turn(args=["CISD TOTAL ENERGY", "HF TOTAL ENERGY", "CISD CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+
+    # QCISD
+    pv0.extend(
+        _solve_in_turn(args=["QCISD TOTAL ENERGY", "HF TOTAL ENERGY", "QCISD CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+
+    # QCISD(T)
+    pv0.extend(
+        _solve_in_turn(
+            args=["QCISD(T) CORRELATION ENERGY", "QCISD CORRELATION ENERGY", "QCISD(T) CORRECTION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["QCISD(T) TOTAL ENERGY", "HF TOTAL ENERGY", "QCISD(T) CORRELATION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["QCISD(T) CORRELATION ENERGY", "QCISD CORRELATION ENERGY", "QCISD(T) CORRECTION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )  # duplicate of first so that all minimal combinations covered
+
+    # LCCD
+    pv0.extend(
+        _solve_in_turn(args=["LCCD TOTAL ENERGY", "HF TOTAL ENERGY", "LCCD CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["LCCD DOUBLES ENERGY", "LCCD SAME-SPIN CORRELATION ENERGY", "LCCD OPPOSITE-SPIN CORRELATION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(args=["LCCD CORRELATION ENERGY", "LCCD DOUBLES ENERGY", "LCCD SINGLES ENERGY"], coeff=[-1, 1, 1])
+    )
+
+    # LCCSD
+    pv0.extend(
+        _solve_in_turn(args=["LCCSD TOTAL ENERGY", "HF TOTAL ENERGY", "LCCSD CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=[
+                "LCCSD DOUBLES ENERGY",
+                "LCCSD SAME-SPIN CORRELATION ENERGY",
+                "LCCSD OPPOSITE-SPIN CORRELATION ENERGY",
+            ],
+            coeff=[-1, 1, 1],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["LCCSD CORRELATION ENERGY", "LCCSD DOUBLES ENERGY", "LCCSD SINGLES ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+
+    # CCD
+    pv0.extend(_solve_in_turn(args=["CCD TOTAL ENERGY", "HF TOTAL ENERGY", "CCD CORRELATION ENERGY"], coeff=[-1, 1, 1]))
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCD DOUBLES ENERGY", "CCD SAME-SPIN CORRELATION ENERGY", "CCD OPPOSITE-SPIN CORRELATION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(args=["CCD CORRELATION ENERGY", "CCD DOUBLES ENERGY", "CCD SINGLES ENERGY"], coeff=[-1, 1, 1])
+    )
+
+    # BCCD
+    pv0.extend(
+        _solve_in_turn(args=["BCCD TOTAL ENERGY", "HF TOTAL ENERGY", "BCCD CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+
+    # CC2
+    pv0.extend(
+        _solve_in_turn(args=["CC2 TOTAL ENERGY", "HF TOTAL ENERGY", "CC2 CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+
     # CCSD
     pv0.extend(
         _solve_in_turn(args=["CCSD TOTAL ENERGY", "HF TOTAL ENERGY", "CCSD CORRELATION ENERGY"], coeff=[-1, 1, 1])
@@ -192,6 +345,25 @@ def qcvar_identities() -> List[Dict[str, Any]]:
     pv0.extend(
         _solve_in_turn(args=["CCSD CORRELATION ENERGY", "CCSD DOUBLES ENERGY", "CCSD SINGLES ENERGY"], coeff=[-1, 1, 1])
     )
+
+    # CCSD+T(CCSD)
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSD+T(CCSD) CORRELATION ENERGY", "CCSD CORRELATION ENERGY", "T(CCSD) CORRECTION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSD+T(CCSD) TOTAL ENERGY", "HF TOTAL ENERGY", "CCSD+T(CCSD) CORRELATION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSD+T(CCSD) CORRELATION ENERGY", "CCSD CORRELATION ENERGY", "T(CCSD) CORRECTION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )  # duplicate of first so that all minimal combinations covered
 
     # CCSD(T)
     pv0.extend(
@@ -208,6 +380,25 @@ def qcvar_identities() -> List[Dict[str, Any]]:
         )
     )  # duplicate of first so that all minimal combinations covered
 
+    # A-CCSD(T)
+    pv0.extend(
+        _solve_in_turn(
+            args=["A-CCSD(T) CORRELATION ENERGY", "CCSD CORRELATION ENERGY", "A-(T) CORRECTION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["A-CCSD(T) TOTAL ENERGY", "HF TOTAL ENERGY", "A-CCSD(T) CORRELATION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["A-CCSD(T) CORRELATION ENERGY", "CCSD CORRELATION ENERGY", "A-(T) CORRECTION ENERGY"],
+            coeff=[-1, 1, 1],
+        )
+    )  # duplicate of first so that all minimal combinations covered
+
     # CCSD[T]
     pv0.extend(
         _solve_in_turn(args=["CCSD[T] TOTAL ENERGY", "HF TOTAL ENERGY", "CCSD[T] CORRELATION ENERGY"], coeff=[-1, 1, 1])
@@ -218,6 +409,74 @@ def qcvar_identities() -> List[Dict[str, Any]]:
         )
     )
 
+    # BCCD(T)
+    pv0.extend(
+        _solve_in_turn(args=["BCCD(T) TOTAL ENERGY", "HF TOTAL ENERGY", "BCCD(T) CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["BCCD(T) CORRELATION ENERGY", "BCCD CORRELATION ENERGY", "B(T) CORRECTION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+
+    # CC3
+    pv0.extend(
+        _solve_in_turn(args=["CC3 TOTAL ENERGY", "HF TOTAL ENERGY", "CC3 CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+
+    # CCSDT
+    pv0.extend(
+        _solve_in_turn(args=["CCSDT TOTAL ENERGY", "HF TOTAL ENERGY", "CCSDT CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+
+    # CCSDT(Q)
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSDT(Q) CORRELATION ENERGY", "CCSDT CORRELATION ENERGY", "(Q) CORRECTION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSDT(Q) TOTAL ENERGY", "HF TOTAL ENERGY", "CCSDT(Q) CORRELATION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSDT(Q) CORRELATION ENERGY", "CCSDT CORRELATION ENERGY", "(Q) CORRECTION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )  # duplicate of first so that all minimal combinations covered
+
+    # CCSDT[Q]
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSDT[Q] TOTAL ENERGY", "HF TOTAL ENERGY", "CCSDT[Q] CORRELATION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSDT[Q] CORRELATION ENERGY", "CCSDT CORRELATION ENERGY", "[Q] CORRECTION ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
+
+    # CCSDTQ
+    pv0.extend(
+        _solve_in_turn(args=["CCSDTQ TOTAL ENERGY", "HF TOTAL ENERGY", "CCSDTQ CORRELATION ENERGY"], coeff=[-1, 1, 1])
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=[
+                "CCSDTQ DOUBLES ENERGY",
+                "CCSDTQ SAME-SPIN CORRELATION ENERGY",
+                "CCSDTQ OPPOSITE-SPIN CORRELATION ENERGY",
+            ],
+            coeff=[-1, 1, 1],
+        )
+    )
+    pv0.extend(
+        _solve_in_turn(
+            args=["CCSDTQ CORRELATION ENERGY", "CCSDTQ DOUBLES ENERGY", "CCSDTQ SINGLES ENERGY"], coeff=[-1, 1, 1]
+        )
+    )
     # FCI
     pv0.extend(_solve_in_turn(args=["FCI TOTAL ENERGY", "HF TOTAL ENERGY", "FCI CORRELATION ENERGY"], coeff=[-1, 1, 1]))
 

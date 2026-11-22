@@ -95,7 +95,8 @@ class CFOURHarness(ProgramHarness):
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
-        mdcopts = muster_modelchem(input_model.specification.model.method, input_model.specification.driver)
+        cc_program = {k.lower(): v for k, v in opts.items()}.get("cc_program", "")
+        mdcopts = muster_modelchem(input_model.specification.model.method, input_model.specification.driver, cc_program)
         opts.update(mdcopts)
 
         # Handle basis set

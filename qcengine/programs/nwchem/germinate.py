@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Union
 
 from qcengine.exceptions import InputError
 
@@ -88,13 +88,14 @@ xc_functionals = [
 ]
 
 
-def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict[str, Any]]:
+def muster_modelchem(method: str, derint: int, qc_module: Union[bool, str]) -> Tuple[str, Dict[str, Any]]:
     """Converts the QC method into NWChem keywords
 
     Args:
         method (str): Name of the QC method to use
         derint (str): Index of the run type
-        use_tce (bool): Whether to use the Tensor Contraction Engine
+        qc_module (bool or str): Module routing from the `qc_module` keyword. True or "tce" uses the Tensor
+            Contraction Engine. "directmp2" uses the semidirect MP2 module for MP2. False uses the default module.
     Returns:
         (str): Task command for NWChem
         (dict): Any options for NWChem
@@ -103,6 +104,9 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
     # Standardize the method name
     method = method.lower()
     opts = {}
+    qc_module = qc_module.lower() if isinstance(qc_module, str) else qc_module
+    use_tce = qc_module is True or qc_module == "tce"
+    mdccmd = None
 
     # Map the run type to
     runtyp = {
@@ -124,6 +128,8 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         if use_tce:
             mdccmd = f"task tce {runtyp}\n\n"
             opts["tce__mp2"] = True
+        elif qc_module == "directmp2":
+            mdccmd = f"task direct_mp2 {runtyp}\n\n"
         else:
             mdccmd = f"task mp2 {runtyp}\n\n"
 
@@ -170,6 +176,12 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         else:
             mdccmd = f"task ccsdt {runtyp}\n\n"
 
+    elif method in ["lccd", "lccsd", "cisd", "qcisd", "cc2", "ccsdtq"]:
+        # TCE-only methods
+        if use_tce:
+            mdccmd = f"task tce {runtyp}\n\n"
+            opts[f"tce__{method}"] = True
+
     elif method == "tddft":
         mdccmd = f"task tddft {runtyp}\n\n"
 
@@ -193,6 +205,11 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
         opts["dft__xc"] = "xpbe96 cpbe96"
         mdccmd = f"task dft {runtyp}\n\n"
 
+    elif method == "b2plyp":
+        opts["dft__xc"] = "hfexch 0.53 becke88 0.47 lyp 0.73 mp2 0.27"
+        opts["dft__dftmp2"] = True
+        mdccmd = f"task dft {runtyp}\n\n"
+
     elif method == "b3lyp5":
         opts["dft__xc"] = "hfexch 0.2 slater 0.8 becke88 nonlocal 0.72 vwn_5 0.190 lyp 0.81"
         mdccmd = f"task dft {runtyp}\n\n"
@@ -206,5 +223,8 @@ def muster_modelchem(method: str, derint: int, use_tce: bool) -> Tuple[str, Dict
 
     else:
         raise InputError(f"Method not recognized: {method}")
+
+    if mdccmd is None:
+        raise InputError(f"Method {method} not available with qc_module={qc_module}. Try qc_module=tce.")
 
     return mdccmd, opts
