@@ -106,6 +106,12 @@ pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "fc", "sdsc": "sd",
 * `"marks": {dertype: pytest.mark.xfail(...)}`: runtime marks. Selection marks (`long`, program marks) must
   go on the `pytest.param` instead, since they're needed at collection.
 * `marks=using("<program>")` on every row; rows needing two codes use `marks=[*using("psi4"), *using("mrcc")]`.
+  Rows needing a minimum program version add a versioned entry, e.g., `*using("psi4_112")` (see `_programs` in
+  `qcengine/testing.py`, where a not-yet-released version may be short-circuited to `True`).
+* `@pytest.mark.nonroutine` (on a test function, row, or param): skipped unless `--runnonroutine` is given
+  (option defined in `qcengine/conftest.py`). All method tests except HF, MP2 energy & gradient, CCSD energy, and B3LYP carry it on
+  the function, so a default run stays near its pre-qcdb-port length. Mark new method tests nonroutine unless
+  they're core.
 * Commented `# DEBUG` rows are alternate routes kept for investigation, not regular coverage.
 
 Error handling categories (also in the file header): E1 can't run -> `"error"`; E2 runs but some QCVariables
@@ -115,9 +121,11 @@ E4 runs but wrong -> `"wrong"`.
 ## 6. Running
 
 ```bash
-pytest qcengine/programs/tests/test_standard_suite.py -m "cfour or nwchem" -n 30            # ~25 min on 30 cores
-pytest qcengine/programs/tests/test_standard_suite.py -m psi4 -k "dz and not adz" -n 30     # psi4 subset; full psi4 is hours
+pytest qcengine/programs/tests/test_standard_suite.py -n 30                                # routine: HF, MP2 ene/grd, CCSD ene, B3LYP
+pytest qcengine/programs/tests/test_standard_suite.py -m "cfour or nwchem" --runnonroutine -n 30  # all methods; ~25 min on 30 cores
+pytest qcengine/programs/tests/test_standard_suite.py -m psi4 -k "dz and not adz" --runnonroutine -n 30  # psi4 subset; full psi4 is hours
 pytest qcengine/programs/tests/test_standard_suite.py -k "test_ccsd_energy and nwchem" -m "not long"
+pytest qcengine/programs/tests/test_standard_suite.py --runnonroutine -k test_fci_          # a nonroutine method
 ```
 
 * Test ids contain spaces and parentheses. To rerun a list of failures, write node ids to a file, one per

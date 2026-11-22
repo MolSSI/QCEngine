@@ -101,6 +101,7 @@ default-tag = "0.0.99" # useful for CI/shallow clones
 #]
 markers = [
     "long",
+    'nonroutine: "stdsuite tests safe to skip day-to-day (redundant or slow checks). run with --runnonroutine"',
     """slow: marks tests as slow (deselect with '-m "not slow"')""",
     "smoke",
     'addon: "tests require external non-required software"',
@@ -133,6 +134,7 @@ markers = [
     "optking: tests using OptKing software; skip if unavailable",
     "optking_v2: tests using OptKing QCSchema-v2-compatible software; skip if unavailable",
     "psi4: tests using Psi4 software; skip if unavailable",
+    "psi4_112: tests using Psi4 >=1.12 software; skip if unavailable",
     "qcdb: tests using QCDB software; skip if unavailable",
     "qchem: tests using Q-Chem software; skip if unavailable",
     "qcmanybody: tests using QCManyBody software; skip if unavailable",

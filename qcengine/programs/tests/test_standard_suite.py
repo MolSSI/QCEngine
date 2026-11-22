@@ -534,6 +534,7 @@ def test_mp2_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  MP2 Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -596,6 +597,7 @@ def test_mp2_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 #  <<<  MP3 Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -662,6 +664,7 @@ def test_mp3_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  <<<  MP3 Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -728,6 +731,7 @@ def test_mp3_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  MP4(SDQ) Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -784,6 +788,7 @@ def test_mp4_prsdq_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmo
 #  <<<  MP4 Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -847,6 +852,7 @@ def test_mp4_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  <<<  ZAPT2 Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -888,6 +894,7 @@ def test_zapt2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  CISD Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -954,6 +961,7 @@ def test_cisd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 #  <<<  QCISD Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1012,6 +1020,7 @@ def test_qcisd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  QCISD(T) Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1060,6 +1069,7 @@ def test_qcisd_prt_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmo
 #  <<<  FCI Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1080,7 +1090,7 @@ def test_qcisd_prt_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmo
 
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "fc", "keywords": {**_p4_conv, "freeze_core": True, "qc_module": "detci"},                     }, id="fci  rhf fc: psi4-detci", marks=using("psi4")),
 
-        # TOO LONG pytest.param({"call": "p4-fci",  "reference": "rohf", "fcae": "ae", "keywords": {"psi4_freeze_core": False, "psi4_reference": "rohf", "psi4_qc_module": "detci"},                                                       }, id="fci rohf ae: psi4-detci", marks=using("psi4")),
+        # TOO LONG pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {**_p4_conv, "freeze_core": False, "reference": "rohf", "qc_module": "detci"},}, id="fci rohf ae: psi4-detci", marks=using("psi4")),
 
         # pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "fc", "keywords": {**_p4_conv, "freeze_core": True, "reference": "rohf", "qc_module": "detci"},}, id="fci rohf fc: psi4-detci", marks=using("psi4")),
         # yapf: enable
@@ -1103,6 +1113,7 @@ def test_fci_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  <<<  LCCD Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1169,6 +1180,7 @@ def test_lccd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 #  <<<  LCCD Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1228,6 +1240,7 @@ def test_lccd_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, re
 #  <<<  LCCSD Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1294,6 +1307,7 @@ def test_lccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  CCD Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1365,6 +1379,7 @@ def test_ccd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  <<<  CCD Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1425,6 +1440,7 @@ def test_ccd_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  CCD Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1480,6 +1496,7 @@ def test_ccd_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 #  <<<  BCCD Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1537,6 +1554,7 @@ def test_bccd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 #  <<<  CC2 Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1601,6 +1619,7 @@ def test_cc2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  <<<  CC2 Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1807,6 +1826,7 @@ def test_ccsd_energy_default(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  CCSD Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1896,6 +1916,7 @@ def test_ccsd_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, re
 #  <<<  CCSD Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1958,6 +1979,7 @@ def test_ccsd_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  CCSD+T(CCSD) Energy aka CCSD[T] Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2021,6 +2043,7 @@ def test_ccsdpt_prccsd_pr_energy_module(inp, dertype, basis, subjects, clsd_open
 #  <<<  CCSD(T) Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2108,6 +2131,7 @@ def test_ccsd_prt_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmol
 #  <<<  CCSD(T) Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2145,7 +2169,7 @@ def test_ccsd_prt_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmol
         pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae",                        "keywords": {**_c4_tight, "reference": "uhf", "cc_program": "ecc"},                                                                                                 }, id="ccsd_t_  uhf ae: cfour-ecc",     marks=using("cfour")),
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "xptd": {"fd": True},  "keywords": {**_nwc_conv, "scf__uhf": True, "qc_module": "tce"},                                                                                                    }, id="ccsd_t_  uhf ae: nwchem-tce",    marks=using("nwchem")),
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae",                        "keywords": {**_nwc_conv, "scf__uhf": True},                                                                                                       "error": {1: _q3}}, id="ccsd_t_  uhf ae: nwchem-cc",     marks=using("nwchem")),
-        # VERY LONG pytest.param({"call": "p4-ccsd(t)",  "reference": "uhf",  "fcae": "ae",                        "keywords": {"reference": "uhf", "qc_module": "ccenergy"},                                                                                   }, id="ccsd_t_  uhf ae: psi4-cc",    marks=using("psi4")),
+        # VERY LONG pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae",                        "keywords": {**_p4_conv, "reference": "uhf", "qc_module": "ccenergy"},                                                                                   }, id="ccsd_t_  uhf ae: psi4-cc",    marks=using("psi4")),
 
         pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "fc",                        "keywords": {**_c4_tight, "reference": "uhf", "dropmo": 1, "cc_program": "vcc", "print": 2},                                                                        }, id="ccsd_t_  uhf fc: cfour-vcc",     marks=using("cfour")),
         pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "fc",                        "keywords": {**_c4_tight, "reference": "uhf", "dropmo": 1, "cc_program": "ecc"},                                                                                    }, id="ccsd_t_  uhf fc: cfour-ecc",     marks=using("cfour")),
@@ -2183,6 +2207,7 @@ def test_ccsd_prt_pr_gradient_module(inp, dertype, basis, subjects, clsd_open_pm
 #  <<<  CCSD(T) Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2246,6 +2271,7 @@ def test_ccsd_prt_pr_hessian_module(inp, dertype, basis, subjects, clsd_open_pmo
 #  <<<  a-CCSD(T) Energy aka Lambda-CCSD(T) aka CCSD(aT) aka CCSD(T)_L
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2297,6 +2323,7 @@ def test_accsd_prt_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmo
 #  <<<  a-CCSD(T) Gradient aka Lambda-CCSD(T) aka CCSD(aT) aka CCSD(T)_L
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2341,6 +2368,7 @@ def test_accsd_prt_pr_gradient_module(inp, dertype, basis, subjects, clsd_open_p
 #  <<<  BCCD(T) Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2399,6 +2427,7 @@ def test_bccd_prt_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmol
 #  <<<  CC3 Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2466,6 +2495,7 @@ def test_cc3_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  <<<  CCSDT-1a Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2520,6 +2550,7 @@ def test_ccsdt1a_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, r
 #  <<<  CCSDT-1a Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2571,6 +2602,7 @@ def test_ccsdt1a_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols,
 #  <<<  CCSDT-1a Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2620,6 +2652,7 @@ def test_ccsdt1a_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, 
 #  <<<  CCSDT-1b Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2674,6 +2707,7 @@ def test_ccsdt1b_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, r
 #  <<<  CCSDT-1b Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2725,6 +2759,7 @@ def test_ccsdt1b_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols,
 #  <<<  CCSDT-1b Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2776,6 +2811,7 @@ def test_ccsdt1b_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, 
 #  <<<  CCSDT-2 Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2829,6 +2865,7 @@ def test_ccsdt2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, re
 #  <<<  CCSDT-2 Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2879,6 +2916,7 @@ def test_ccsdt2_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, 
 #  <<<  CCSDT-2 Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2929,6 +2967,7 @@ def test_ccsdt2_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, r
 #  <<<  CCSDT-3 Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -2983,6 +3022,7 @@ def test_ccsdt3_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, re
 #  <<<  CCSDT-3 Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3035,6 +3075,7 @@ def test_ccsdt3_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, 
 #  <<<  CCSDT-3 Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3085,6 +3126,7 @@ def test_ccsdt3_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, r
 #  <<<  CCSDT Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3150,6 +3192,7 @@ def test_ccsdt_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  CCSDT Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3172,7 +3215,7 @@ def test_ccsdt_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, req
         # * vcc turns into ecc
         pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae", "keywords": {**_c4_tight, "cc_program": "ecc"},                                }, id="ccsdt  rhf ae: cfour-ecc", marks=using("cfour")),
         pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae", "keywords": {**_c4_tight, "cc_program": "ncc"},                                }, id="ccsdt  rhf ae: cfour-ncc", marks=using("cfour")),
-        # VLONG pytest.param({"call": "nwc-ccsdt", "reference": "rhf",  "fcae": "ae", "xptd": {"fd": True},  "keywords": {"basis": "<>", "qc_module": "tce"},                                                                                 }, id="ccsdt  rhf ae: nwchem-tce", marks=using("nwchem")),
+        # VLONG pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "xptd": {"fd": True},  "keywords": {**_nwc_conv, "qc_module": "tce"},                                                                                 }, id="ccsdt  rhf ae: nwchem-tce", marks=using("nwchem")),
 
         pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "fc", "keywords": {**_c4_tight, "dropmo": 1, "cc_program": "ecc"},                   }, id="ccsdt  rhf fc: cfour-ecc", marks=using("cfour")),
         pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "fc", "keywords": {**_c4_tight, "dropmo": 1, "cc_program": "ncc"},  "wrong": {1: _w7}}, id="ccsdt  rhf fc: cfour-ncc", marks=using("cfour")),
@@ -3200,6 +3243,7 @@ def test_ccsdt_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, r
 #  <<<  CCSDT Hessian
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3248,6 +3292,7 @@ def test_ccsdt_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, re
 #  <<<  CCSDT(Q) Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3288,6 +3333,7 @@ def test_ccsdt_prq_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmo
 #  <<<  CCSDT(Q) Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3330,6 +3376,7 @@ def test_ccsdt_prq_pr_gradient_module(inp, dertype, basis, subjects, clsd_open_p
 #  <<<  CCSDTQ Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3373,6 +3420,7 @@ def test_ccsdtq_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, re
 #  <<<  CCSDTQ Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3417,6 +3465,7 @@ _psi_grid = {"dft_radial_points": 99, "dft_spherical_points": 590}
 _nwc_grid = {"dft__grid__lebedev": [99, 14]}
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3467,6 +3516,7 @@ def test_pbe_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  <<<  PBE Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3568,6 +3618,7 @@ def test_b3lyp_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  B3LYP5 Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3669,6 +3720,7 @@ def test_b3lyp_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, r
 #  <<<  B3LYP5 Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3720,6 +3772,7 @@ def test_b3lyp5_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, 
 #  <<<  B2PLYP Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -3740,12 +3793,12 @@ def test_b3lyp5_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, 
         # yapf: disable
         pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae", "keywords": {**_c4_tight},                                                  "error": {0: _q35}}, id="b2plyp  rhf ae: cfour",  marks=using("cfour")),
         pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {**_nwc_conv, **_nwc_grid},                                                       }, id="b2plyp  rhf ae: nwchem", marks=using("nwchem")),
-        # ONLY DF-MP2 pytest.param({"call": "p4-b2plyp",  "reference": "rhf",  "fcae": "ae", "keywords": {**_psi_grid, "psi4_scf_type": "pk"},                                                               }, id="b2plyp  rhf ae: psi4",       marks=using("psi4")),
+        # ONLY DF-MP2 pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "keywords": {**_p4_conv, **_psi_grid, "scf_type": "pk"},                                                               }, id="b2plyp  rhf ae: psi4",       marks=using("psi4")),
 
         pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "fc", "keywords": {**_nwc_conv, **_nwc_grid, "mp2__freeze": 1},                                     }, id="b2plyp  rhf fc: nwchem", marks=using("nwchem")),
 
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "keywords": {**_nwc_conv, **_nwc_grid, "scf__uhf": True},                                     }, id="b2plyp  uhf ae: nwchem", marks=using("nwchem")),
-        # ONLY DF-MP2 pytest.param({"call": "p4-b2plyp",  "reference": "uhf",  "fcae": "ae", "keywords": {**_psi_grid, "reference": "uhf", "psi4_scf_type": "pk"},                                           }, id="b2plyp  uhf ae: psi4",       marks=using("psi4")),
+        # ONLY DF-MP2 pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "keywords": {**_p4_conv, **_psi_grid, "reference": "uhf", "scf_type": "pk"},                                           }, id="b2plyp  uhf ae: psi4",       marks=using("psi4")),
 
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "fc", "keywords": {**_nwc_conv, **_nwc_grid, "scf__uhf": True, "mp2__freeze": 1},                   }, id="b2plyp  uhf fc: nwchem", marks=using("nwchem")),
         # yapf: enable

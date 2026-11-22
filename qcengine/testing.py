@@ -194,6 +194,8 @@ _programs = {
     "nwchem": which("nwchem", return_bool=True),
     "optking": which_import("optking", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
+    # "psi4_112": is_program_new_enough("psi4", "1.12"),  # findif frame & SCF-properties fixes. restore once v1.12 released
+    "psi4_112": True,  # short-circuited: dev psi4 carries the v1.12 fixes
     # below retired as pre-2022
     # "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     # "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
