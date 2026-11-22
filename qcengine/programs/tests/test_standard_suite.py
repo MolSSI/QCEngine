@@ -38,21 +38,50 @@ import qcelemental as qcel
 
 import qcengine as qcng
 from qcengine.programs.tests.standard_suite_ref import std_molecules, std_refs
-from qcengine.testing import schema_versions, using
+from qcengine.testing import using
 
 from .standard_suite_runner import runner_asserter
 
 _basis_keywords = ["cfour_basis", "basis"]
 
 
+@pytest.fixture(params=["as_v2"])
+def schema_versions_v2(request):
+    # stdsuite runs QCSchema v2 in and out only. v1 and v1<->v2 conversion are covered by `schema_versions` tests
+    #   elsewhere (e.g., test_canonical_*.py). the param id is needed, as the runner reads schema version from the test name.
+    return qcel.models.v2, -1, qcel.models.v2
+
+
 @pytest.fixture
-def clsd_open_pmols(schema_versions):
-    models, retver, _ = schema_versions
+def clsd_open_pmols():
     return {
-        name[:-4]: models.Molecule.from_data(smol, name=name[:-4])
+        name[:-4]: qcel.models.v2.Molecule.from_data(smol, name=name[:-4])
         for name, smol in std_molecules.items()
         if name.endswith("-xyz")
     }
+
+
+# <<<  Notes
+#
+# * `"xptd": {"fd": False}` is just a note that qcprog is doing internal findif, but the results are accurate
+# * `"xptd": {"fd": True}` indicates internal findif, but probably 3-point, and results need a looser atol
+# * `"xptd"` values may be per-dertype dicts, e.g., `"xptd": {"fd": {1: True}}`
+# * `"marks"` is a per-dertype dict of marks applied at runtime, e.g., `"marks": {1: pytest.mark.xfail(reason=..., strict=True)}`.
+#   selection marks like `long` must go on the pytest.param instead, since they're needed at collection.
+#
+# >>> Notes
+
+# convergence settings for generating/matching references. qcdb applied e_convergence=10 & d_convergence=9 to all
+#   calcs and translated per-program; here they're set natively per row.
+_c4_tight = {
+    "scf_conv": 12,
+    "cc_conv": 12,
+    "lineq_conv": 10,
+    "bruck_conv": 7,  # 9 doesn't converge some dz
+}
+_p4_conv = {"e_convergence": 10, "d_convergence": 9}
+_p4_fd = {"points": 5, "fd_project": False}  # tighten fd for a psi calc that's already doing it
+_nwc_conv = {"scf__thresh": 1.0e-8}
 
 
 # yapf: disable
@@ -165,8 +194,8 @@ def _trans_key(qc, bas, key):
         # yapf: enable
     ],
 )
-def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
-    models, retver, _ = schema_versions
+def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions_v2):
+    models, retver, _ = schema_versions_v2
     runner_asserter(
         *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "energy", "hf")
     )
@@ -223,8 +252,8 @@ def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reques
         # yapf: enable
     ],
 )
-def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
-    models, retver, _ = schema_versions
+def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions_v2):
+    models, retver, _ = schema_versions_v2
     runner_asserter(
         *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "gradient", "hf")
     )
@@ -280,8 +309,8 @@ def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
         # yapf: enable
     ],
 )
-def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
-    models, retver, _ = schema_versions
+def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions_v2):
+    models, retver, _ = schema_versions_v2
     runner_asserter(
         *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "hessian", "hf")
     )
@@ -360,8 +389,8 @@ def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
         # yapf: enable
     ],
 )
-def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
-    models, retver, _ = schema_versions
+def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions_v2):
+    models, retver, _ = schema_versions_v2
     runner_asserter(
         *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "energy", "mp2")
     )
@@ -449,8 +478,8 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
         # yapf: enable
     ],
 )
-def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions):
-    models, retver, _ = schema_versions
+def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, request, schema_versions_v2):
+    models, retver, _ = schema_versions_v2
     runner_asserter(
         *_processor(inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, "energy", "ccsd")
     )
@@ -511,7 +540,7 @@ def _processor(
     suffix = "-fixed" if frame == "fixed" else ""
     subject = clsd_open_pmols[subjects[std_refs.index(inp["reference"])] + suffix]
 
-    inpcopy = {k: v for k, v in inp.items() if k not in ["error", "wrong"]}
+    inpcopy = {k: v for k, v in inp.items() if k not in ["error", "wrong", "xptd", "marks"]}
     if inp.get("error", False) and inp["error"].get(dertype, False):
         inpcopy["error"] = inp["error"][dertype]
     if inp.get("wrong", False) and inp["wrong"].get(dertype, False):
@@ -520,6 +549,20 @@ def _processor(
         inpcopy["error"] = inp["error"][basis]
     if inp.get("wrong", False) and inp["wrong"].get(basis, False):
         inpcopy["wrong"] = inp["wrong"][basis]
+    if inp.get("marks", False) and inp["marks"].get(dertype, False):
+        request.node.add_marker(inp["marks"][dertype])
+
+    # xptd values are plain (applies to all dertypes) or a per-dertype dict. keep falsy plain values, since
+    #   `"fd": False` (accurate internal findif) is meaningful to the runner
+    xptd = {}
+    for k, v in inp.get("xptd", {}).items():
+        if isinstance(v, dict):
+            if dertype in v:
+                xptd[k] = v[dertype]
+        else:
+            xptd[k] = v
+    inpcopy["xptd"] = xptd
+
     inpcopy["keywords"] = {
         k: (_trans_key(qcprog, basis, k) if v == "<>" else v) for k, v in inpcopy["keywords"].items()
     }
