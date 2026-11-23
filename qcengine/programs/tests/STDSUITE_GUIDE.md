@@ -42,7 +42,9 @@ covered by other tests that use the `schema_versions` fixture.
 
 * `std_molecules`: three-molecule sets, one per reference. Each `basis, subjects` param row lists
   `[rhf_mol, uhf_mol, rohf_mol]`: `["hf", "bh3p", "bh3p"]` for cc-pvdz, `["h2o", "nh2", "nh2"]` for
-  aug-cc-pvdz and cfour-qz2p.
+  aug-cc-pvdz and cfour-qz2p, `["ch2i2", "ch2i", "ch2i"]` for def2-svp (ECP systems; Sec. 9). Tests use the
+  `<name>-xyz` Cartesian strings (QCSchema can't carry zmats), which must be in psi4's frame, the frame of the
+  reference gradients/Hessians.
 * Blocks are keyed by `answer_hash(system, basis, scf_type, reference, fcae, corl_type, sdsc)`. The runner
   derives `corl_type` from the method and `*_type` keywords (psi4 defaults are hard-coded there) and
   `scf_type` from keywords or the natural pairing (conv <-> pk).
@@ -118,6 +120,10 @@ Error handling categories (also in the file header): E1 can't run -> `"error"`; 
 not harvestable -> excuse in the contract; E3 parameter not available (e.g., basis) -> skip in runner;
 E4 runs but wrong -> `"wrong"`.
 
+Missing reference data is never skipped or excused. A row whose method/driver has no ref fails (KeyError on the
+ref block); report it, then compute the ref (cross-checked by a second program or route where possible) and add it
+to `standard_suite_ref.py` with a provenance comment.
+
 ## 6. Running
 
 ```bash
@@ -167,3 +173,37 @@ spelling in `_trans_key`, and rows for the six rhf/uhf/rohf x ae/fc combinations
 | gradient off ~1e-5 for internal findif | 3-point findif: mark `"xptd": {"fd": True}`, or for psi4 spread `_p4_fd` |
 | `KeyError` on `std_suite[...]` | no reference block for the derived hash (check scf/corl type and sdsc) |
 | NWChem TCE `non-Abelian symmetry not permitted` on cc-pvdz | linear HF molecule; rows carry `"error": {"cc-pvdz": _q45}` |
+
+## 9. ECP systems (ch2i2 / ch2i, def2-svp)
+
+Iodine carries the 28-electron def2 ECP. Basis row `pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"],
+id="def2ecp", marks=pytest.mark.ecp)` (plus `long` for correlated gradients/Hessians). References came from psi4.
+
+* **Program setup** (`_trans_key`, `_basis_spec_extras`):
+  * psi4: library def2-svp includes the ECP.
+  * NWChem: `basis__spherical` and `ecp__I: "library def2-ecp"`. ECPs must be named per element (`*` fails for
+    elements without one). Its harvester takes the SCF module's nuclear repulsion (ECP-reduced charges), not the
+    geometry section's "Effective" one (full charges).
+  * CFOUR: its library lacks def2-SVP, so `standard_suite_cfour_basis.py` holds Basis Set Exchange GENBAS and
+    ECPDATA text, passed via `AtomicInput.specification.extras["cfour"]` (`"genbas"`, `"ecpdata"`). With native
+    `ecp: on`, the harness writes BASIS=SPECIAL and a per-atom ECP block, looking up each atom's ECP under its
+    basis label (case-sensitive; harness uses the file's casing).
+* **Nuclear repulsion:** programs report NRE with ECP-reduced charges (I: 25), e.g. ch2i2 198.0635, while qcel
+  `Molecule.nuclear_repulsion_energy()` uses full Z (633.3325). The def2-svp ref blocks carry the reduced
+  `NUCLEAR REPULSION ENERGY`, and the runner checks it against both `extras.qcvars` and
+  `properties.nuclear_repulsion_energy` for any ref block that has one. psi4 findif and CBS results took NRE from
+  the top-level molecule, which never sees the ECP basis, so they reported full Z. Fixed in psi4's
+  `driver_findif.py`, `driver_cbs.py` and `schema_wrapper.py`; older psi4 fails the NRE check on findif-derived
+  ECP rows.
+* **Frozen core:** psi4 freezes C 1s + I 4s4p (9 for ch2i2, 5 for ch2i). Rows hard-code `dropmo: [1]` /
+  `*__freeze: 1`, so `_processor` substitutes counts from `_fc_nfrzc`. Rows freezing per element skip.
+* **CFOUR analytic Hessians omit ECP second-derivative integrals** (wrong, no warning): `"wrong"` `_w31`/`_w32`
+  on def2-svp. CFOUR VIBRATION=FINDIF (findif of its correct ECP gradients) agrees with the AE MP2 Hessian refs to
+  ~1e-6, but the harness can't harvest findif output (it reads displaced geometries), so it's not a row.
+* **Findif noise:** psi4's findif steps on I are mass-weighted to 0.005/sqrt(127) bohr. psi4 Hessians by energies
+  need e/d 12/11 (3.9e-3 error at 10/9), and psi4 FC CC gradients (findif) need tight conv + Cartesian steps; see
+  `_system_keywords`. The FC MP2 Hessian refs are themselves psi4 findif-of-energies, good to ~1e-4 vs CFOUR
+  findif-of-analytic-gradients, so correlated findif Hessians on ECP systems get `atol_h = 2e-4` in the runner.
+* **Refs added here:** ch2i ROHF FC `sd` (T) energy (vcc == ecc) and ch2i ROHF `sc` AE/FC CCSD(T) gradients,
+  which the psi4 stdsuite lacked. There are no CCSD/CCSD(T) Hessian refs, so those tests carry no def2ecp row.
+

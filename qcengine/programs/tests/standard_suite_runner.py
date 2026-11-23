@@ -32,6 +32,8 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
 
     if basis == "cfour-qz2p" and qcprog in ["gamess", "jaguar", "nwchem", "qchem"]:
         pytest.skip(f"basis {basis} not available in {qcprog} library")
+    if basis == "def2-svp" and qcprog in ["gamess", "jaguar", "qchem"]:
+        pytest.skip(f"basis {basis} with ECP not yet set up for {qcprog}")
 
     # <<<  Molecule  >>>
 
@@ -120,6 +122,13 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
             atol_g = 2.0e-5
             atol_h, rtol_h = 5.0e-5, 2.0e-4
 
+    is_ecp = basis in ["def2-svp"]  # ch2i2/ch2i with def2 ECPs on I
+    if is_ecp and driver == "hessian" and using_fd and method != "hf":
+        # findif steps on I are tiny (psi4 mass-weights them to 0.005/sqrt(127) bohr), so correlated findif Hessians carry
+        #   noise, and so do the fc refs (psi4 occ findif-5 of energies): ch2i2 rhf fc mp2 ref vs cfour findif-of-analytic-
+        #   grads 1.0e-4. as in psi4's stdsuite runner
+        atol_h = 2.0e-4
+
     chash = answer_hash(
         system=subject.name,
         basis=basis,
@@ -158,6 +167,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
                         "basis": inp.get("basis", "(auto)"),
                     },
                     "keywords": inp["keywords"],
+                    "extras": inp.get("extras", {}),
                 },
             }
         )
@@ -171,6 +181,7 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
                     "basis": inp.get("basis", "(auto)"),
                 },
                 "keywords": inp["keywords"],
+                "extras": inp.get("extras", {}),
             }
         )
 
@@ -403,6 +414,25 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
 
     # primary label checks
     qcvar_assertions()
+
+    # nuclear repulsion checks. ECP systems' refs use ECP-reduced charges, as programs report, unlike qcel
+    #   Molecule.nuclear_repulsion_energy(). loose atol, since programs print NRE to varied precision
+    if "NUCLEAR REPULSION ENERGY" in ref_block:
+        for obj in asserter_args[0]:
+            store = "extras.qcvars" if isinstance(obj, dict) else "properties.nuclear_repulsion_energy"
+            label = tnm + " NUCLEAR REPULSION ENERGY"
+            assert query_qcvar(obj, "NUCLEAR REPULSION ENERGY") is not None, f"{label} expected but missing from {store}"
+            tf, errmsg = compare_values(
+                ref_block["NUCLEAR REPULSION ENERGY"],
+                query_qcvar(obj, "NUCLEAR REPULSION ENERGY"),
+                label,
+                atol=1.0e-5,
+                return_message=True,
+                quiet=True,
+            )
+            assert compare_values(
+                ref_block["NUCLEAR REPULSION ENERGY"], query_qcvar(obj, "NUCLEAR REPULSION ENERGY"), label, atol=1.0e-5
+            ), f"{store}: {errmsg}"
 
     # aliases checks
     asserter_args[0].pop()  # checks not appropriate for properties

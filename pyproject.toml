@@ -101,6 +101,7 @@ default-tag = "0.0.99" # useful for CI/shallow clones
 #]
 markers = [
     "long",
+    'ecp: "stdsuite tests on systems with effective core potentials"',
     'nonroutine: "stdsuite tests safe to skip day-to-day (redundant or slow checks). run with --runnonroutine"',
     """slow: marks tests as slow (deselect with '-m "not slow"')""",
     "smoke",

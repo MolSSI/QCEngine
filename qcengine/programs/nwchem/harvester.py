@@ -86,15 +86,21 @@ def harvest_outfile_pass(outtext):
             logger.debug("matched HF")
             psivar["HF TOTAL ENERGY"] = mobj.group(1)
 
-        # Process Effective nuclear repulsion energy (a.u.)
+        # Process nuclear repulsion energy. With ECPs, the geometry section's "Effective nuclear repulsion energy" uses
+        #   full nuclear charges, while the SCF/DFT module's "Nuclear repulsion energy =" uses ECP-reduced charges.
+        #   They're the same without ECPs. Prefer the latter. Take the first, like "Total SCF energy" above, since later
+        #   SCF blocks may be at displaced geometries (e.g., findif ROHF Hessian).
+        mobj_scf = re.search(r"^\s+" + r"Nuclear repulsion energy =" + r"\s+" + NUMBER + r"\s*$", outtext, re.MULTILINE)
         mobj = re.search(
             r"^\s+" + r"Effective nuclear repulsion energy \(a\.u\.\)" + r"\s+" + NUMBER + r"\s*$",
             outtext,
             re.MULTILINE,
         )
-        if mobj:
+        if mobj_scf:
+            logger.debug("matched NRE (scf)")
+            psivar["NUCLEAR REPULSION ENERGY"] = mobj_scf.group(1)
+        elif mobj:
             logger.debug("matched NRE")
-            # logger.debug (mobj.group(1))
             psivar["NUCLEAR REPULSION ENERGY"] = mobj.group(1)
 
         # Process DFT dispersion energy (a.u.)

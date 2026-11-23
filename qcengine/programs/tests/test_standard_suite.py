@@ -37,6 +37,7 @@ import pytest
 import qcelemental as qcel
 
 import qcengine as qcng
+from qcengine.programs.tests.standard_suite_cfour_basis import cfour_def2_svp_ecpdata, cfour_def2_svp_genbas
 from qcengine.programs.tests.standard_suite_ref import std_molecules, std_refs
 from qcengine.testing import using
 
@@ -148,7 +149,37 @@ _w25 = ("A-CCSD(T) TOTAL GRADIENT", "nonstandard answer: CFOUR ECC A-CCSD(T) AE 
 _w26 = ("MP2 TOTAL HESSIAN", "nonstandard answer: CFOUR MP2 ROHF hessian doesn't match findif. (Paper says NYI, but program does yield a value.)")
 _w27 = ("MP2 CORRELATION ENERGY", "nonstandard answer: CFOUR MP2 ROHF hessian doesn't match findif, nor FC energy. (Paper says NYI, but program does yield a value.)")
 _w28 = ("CISD CORRELATION ENERGY", "nonstandard answer: ROHF CISD vcc=tce!=guga=detci.")
+_w31 = ("HF TOTAL HESSIAN", "nonstandard answer: CFOUR analytic Hessian omits ECP second-derivative integrals.")
+_w32 = ("MP2 TOTAL HESSIAN", "nonstandard answer: CFOUR analytic Hessian omits ECP second-derivative integrals.")
 # yapf: enable
+
+
+# frozen-core orbital count where rows' hard-coded `dropmo: [1]` / `*__freeze: 1` (fine for 2nd-row systems) don't
+#   apply. ECP systems: C 1s + I 4s4p (the 28-electron def2 ECP replaces 1s-3d), matching psi4's freeze_core
+_fc_nfrzc = {
+    ("def2-svp", "ch2i2"): 9,
+    ("def2-svp", "ch2i"): 5,
+}
+
+def _system_keywords(qcprog, basis, method, driver):
+    """Keywords a system needs that depend on more than one parametrize axis (program x basis x method x driver), so
+    can't be written into a single pytest.param."""
+    kw = {}
+    if basis == "def2-svp" and qcprog == "psi4" and driver == "hessian" and method != "hf":
+        # ECP systems ch2i2/ch2i: psi4 findif steps on I are mass-weighted to 0.005/sqrt(127) bohr, so findif-of-energies
+        #   Hessians amplify energy noise. ch2i2 rhf fc mp2: e/d 10/9 3.9e-3 from cfour findif-of-analytic-grads; 12/11 5.8e-5
+        kw.update({"e_convergence": 12, "d_convergence": 11})
+    if basis == "def2-svp" and qcprog == "psi4" and driver == "gradient" and method in ["ccsd", "ccsd(t)"]:
+        # ECP systems ch2i2/ch2i: psi4 has no fc (or rohf ccsd(t)) analytic CC gradients, so does findif-of-energies. at
+        #   e/d 10/9 and default r_conv, ch2i rohf fc ccsd lands 1.2e-6 from refs. psi4 stdsuite tightens & uses Cartesian steps
+        kw.update({"e_convergence": 12, "d_convergence": 11, "r_convergence": 11, "disp_mass_weight": False})
+    return kw
+
+
+# `AtomicInput.specification.extras` needed by a program for a basis (beyond keywords)
+_basis_spec_extras = {
+    ("cfour", "def2-svp"): {"cfour": {"genbas": cfour_def2_svp_genbas, "ecpdata": cfour_def2_svp_ecpdata}},
+}
 
 
 def _trans_key(qc, bas, key):
@@ -181,6 +212,18 @@ def _trans_key(qc, bas, key):
                 "nwchem": ("aug-cc-pvdz", {"basis__spherical": True}),
                 "psi4": (bas, {}),
                 "qchem": ("aug-cc-pvdz", {}),
+            }[qc]
+    elif bas.lower() == "def2-svp":
+        # ECP systems ch2i2/ch2i: I carries the 28-electron def2 ECP. NWChem needs ECPs named per element, and I is the
+        #   only ECP element in these systems. CFOUR's library lacks def2-SVP, so it comes through `_basis_spec_extras`
+        if lkey == "qcng_basis":
+            return {
+                "cfour": ("def2-svp", {"ecp": "on"}),
+                "gamess": (None, {}),  # untested
+                "jaguar": (None, {}),  # untested
+                "nwchem": ("def2-svp", {"basis__spherical": True, "ecp__I": "library def2-ecp"}),
+                "psi4": (bas, {}),
+                "qchem": (None, {}),  # untested
             }[qc]
     elif bas.lower() == "cfour-qz2p":
         if lkey == "cfour_basis":
@@ -222,6 +265,7 @@ def _trans_key(qc, bas, key):
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz", marks=pytest.mark.long),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p", marks=pytest.mark.long),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=pytest.mark.ecp),
     ],
 )
 @pytest.mark.parametrize(
@@ -232,7 +276,7 @@ def _trans_key(qc, bas, key):
         pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae", "keywords": {"scf_conv": 12},                                                                     }, id="hf  rhf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "rhf",  "fcae": "ae", "keywords": {},                                                                                   }, id="hf  rhf ae: gamess",     marks=using("gamess")),
         pytest.param({"call": "jaguar", "reference": "rhf",  "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "nops": 1},                                                                          }, id="hf  rhf ae: jaguar",     marks=using("jaguar")),
-        pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {},                                                                                   }, id="hf  rhf ae: nwchem",     marks=using("nwchem")),
+        pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {**_nwc_conv},                                                                        }, id="hf  rhf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "keywords": {"scf_type": "pk"},                                                                   }, id="hf  rhf ae: psi4",       marks=using("psi4")),
 
         pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_conv": 12},                                                 }, id="hf  uhf ae: cfour",      marks=using("cfour")),
@@ -279,6 +323,7 @@ def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reques
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz", marks=pytest.mark.long),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p", marks=pytest.mark.long),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=pytest.mark.ecp),
     ],
 )
 @pytest.mark.parametrize(
@@ -290,19 +335,19 @@ def test_hf_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reques
         pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae", "keywords": {"scf_conv": 12},                                                                     }, id="hf  rhf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "rhf",  "fcae": "ae", "keywords": {},                                                                                   }, id="hf  rhf ae: gamess",     marks=using("gamess")),
         pytest.param({"call": "jaguar", "reference": "rhf",  "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "nops": 1},                                                                          }, id="hf  rhf ae: jaguar",     marks=using("jaguar")),
-        pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {"scf__thresh": 1.e-6},                                                               }, id="hf  rhf ae: nwchem",     marks=using("nwchem")),
+        pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {"scf__thresh": 1.e-8},                                                               }, id="hf  rhf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "keywords": {"scf_type": "pk"},                                                                   }, id="hf  rhf ae: psi4",       marks=using("psi4")),
 
         pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_conv": 12},                                                 }, id="hf  uhf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "uhf",  "fcae": "ae", "keywords": {"contrl__scftyp": "uhf"},                                                            }, id="hf  uhf ae: gamess",     marks=using("gamess")),
         pytest.param({"call": "jaguar", "reference": "uhf",  "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "iuhf": 1, "nops": 1},                                                               }, id="hf  uhf ae: jaguar",     marks=using("jaguar")),
-        pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "keywords": {"scf__uhf": True, "scf__thresh": 1.e-6},                                             }, id="hf  uhf ae: nwchem",     marks=using("nwchem")),
+        pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "keywords": {"scf__uhf": True, "scf__thresh": 1.e-8},                                             }, id="hf  uhf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_type": "pk"},                                               }, id="hf  uhf ae: psi4",       marks=using("psi4")),
 
         pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_conv": 12},                                                }, id="hf rohf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "rohf", "fcae": "ae", "keywords": {"contrl__scftyp": "rohf"},                                                           }, id="hf rohf ae: gamess",     marks=using("gamess")),
         pytest.param({"call": "jaguar", "reference": "rohf", "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "iuhf": 0, "nops": 1},                                                               }, id="hf rohf ae: jaguar",     marks=using("jaguar")),
-        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"scf__rohf": True, "scf__thresh": 1.e-6},                                            }, id="hf rohf ae: nwchem",     marks=using("nwchem")),
+        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"scf__rohf": True, "scf__thresh": 1.e-8},                                            }, id="hf rohf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_type": "pk"},                                              }, id="hf rohf ae: psi4",       marks=using("psi4")),
         # yapf: enable
     ],
@@ -338,29 +383,30 @@ def test_hf_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz", marks=pytest.mark.long),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p", marks=pytest.mark.long),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=pytest.mark.ecp),
     ],
 )
 @pytest.mark.parametrize(
     "inp",
     [
         # yapf: disable
-        pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae", "keywords": {"scf_conv": 12},                                                                                                }, id="hf  rhf ae: cfour",      marks=using("cfour")),
-        pytest.param({"call": "gamess", "reference": "rhf",  "fcae": "ae", "keywords": {},                                                                                                              }, id="hf  rhf ae: gamess",     marks=using("gamess")),
-        pytest.param({"call": "jaguar", "reference": "rhf",  "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "nops": 1},                                                                                                     }, id="hf  rhf ae: jaguar",     marks=using("jaguar")),
-        pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {},                                                                                                              }, id="hf  rhf ae: nwchem",     marks=using("nwchem")),
-        pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "keywords": {"scf_type": "pk"},                                                                                              }, id="hf  rhf ae: psi4",       marks=using("psi4")),
+        pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae", "keywords": {"scf_conv": 12},                                                                     "wrong": {"def2-svp": _w31}}, id="hf  rhf ae: cfour",  marks=using("cfour")),
+        pytest.param({"call": "gamess", "reference": "rhf",  "fcae": "ae", "keywords": {},                                                                                                              }, id="hf  rhf ae: gamess", marks=using("gamess")),
+        pytest.param({"call": "jaguar", "reference": "rhf",  "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "nops": 1},                                                                                                     }, id="hf  rhf ae: jaguar", marks=using("jaguar")),
+        pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {},                                                                                                              }, id="hf  rhf ae: nwchem", marks=using("nwchem")),
+        pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "keywords": {"scf_type": "pk"},                                                                                              }, id="hf  rhf ae: psi4",   marks=using("psi4")),
 
-        pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_conv": 12},                                                                            }, id="hf  uhf ae: cfour",      marks=using("cfour")),
-        pytest.param({"call": "gamess", "reference": "uhf",  "fcae": "ae", "keywords": {"contrl__scftyp": "uhf"},                                                                                       }, id="hf  uhf ae: gamess",     marks=using("gamess")),
-        pytest.param({"call": "jaguar", "reference": "uhf",  "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "iuhf": 1, "nops": 1},                                                                                          }, id="hf  uhf ae: jaguar",     marks=using("jaguar")),
-        pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "keywords": {"scf__uhf": True},                                                                                              }, id="hf  uhf ae: nwchem",     marks=using("nwchem")),
-        pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_type": "pk"},                                                                          }, id="hf  uhf ae: psi4",       marks=using("psi4")),
+        pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_conv": 12},                                                 "wrong": {"def2-svp": _w31}}, id="hf  uhf ae: cfour",  marks=using("cfour")),
+        pytest.param({"call": "gamess", "reference": "uhf",  "fcae": "ae", "keywords": {"contrl__scftyp": "uhf"},                                                                                       }, id="hf  uhf ae: gamess", marks=using("gamess")),
+        pytest.param({"call": "jaguar", "reference": "uhf",  "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "iuhf": 1, "nops": 1},                                                                                          }, id="hf  uhf ae: jaguar", marks=using("jaguar")),
+        pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "keywords": {"scf__uhf": True},                                                                                              }, id="hf  uhf ae: nwchem", marks=using("nwchem")),
+        pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_type": "pk"},                                                                          }, id="hf  uhf ae: psi4",   marks=using("psi4")),
 
-        pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_conv": 12},                                                                           }, id="hf rohf ae: cfour",      marks=using("cfour")),
-        pytest.param({"call": "gamess", "reference": "rohf", "fcae": "ae", "keywords": {"contrl__scftyp": "rohf", "scf__dirscf": True},                                                                 }, id="hf rohf ae: gamess",     marks=using("gamess")),
-        pytest.param({"call": "jaguar", "reference": "rohf", "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "iuhf": 0, "nops": 1},                                                                                          }, id="hf rohf ae: jaguar",     marks=using("jaguar")),
-        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"scf__rohf": True, "scf__thresh": 1.e-7},                                                                                             }, id="hf rohf ae: nwchem",     marks=using("nwchem")),
-        pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_type": "pk"},                                                       "error": {2: _q6 }}, id="hf rohf ae: psi4",       marks=using("psi4")),
+        pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_conv": 12},                                                "wrong": {"def2-svp": _w31}}, id="hf rohf ae: cfour",  marks=using("cfour")),
+        pytest.param({"call": "gamess", "reference": "rohf", "fcae": "ae", "keywords": {"contrl__scftyp": "rohf", "scf__dirscf": True},                                                                 }, id="hf rohf ae: gamess", marks=using("gamess")),
+        pytest.param({"call": "jaguar", "reference": "rohf", "fcae": "ae", "keywords": {"dconv": 1.e-8, "econv": 1.e-9, "iuhf": 0, "nops": 1},                                                                                          }, id="hf rohf ae: jaguar", marks=using("jaguar")),
+        pytest.param({"call": "nwchem", "reference": "rohf", "fcae": "ae", "keywords": {"scf__rohf": True, "scf__thresh": 1.e-8},                                                                                             }, id="hf rohf ae: nwchem", marks=using("nwchem")),
+        pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {"reference": "rohf", "scf_type": "pk"},                                                       "error": {2: _q6 }}, id="hf rohf ae: psi4",   marks=using("psi4")),
         # yapf: enable
     ],
 )
@@ -394,6 +440,7 @@ def test_hf_hessian_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz"),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p"),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=pytest.mark.ecp),
     ],
 )
 @pytest.mark.parametrize(
@@ -479,6 +526,7 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz", marks=pytest.mark.long),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p", marks=pytest.mark.long),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=[pytest.mark.ecp, pytest.mark.long]),
     ],
 )
 @pytest.mark.parametrize(
@@ -549,29 +597,30 @@ def test_mp2_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, req
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz", marks=pytest.mark.long),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p", marks=pytest.mark.long),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=[pytest.mark.ecp, pytest.mark.long]),
     ],
 )
 @pytest.mark.parametrize(
     "inp",
     [
         # yapf: disable
-        pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae",                        "keywords": {**_c4_tight},                                                                                          }, id="mp2  rhf ae: cfour",  marks=using("cfour")),
+        pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "ae",                        "keywords": {**_c4_tight},                                                               "wrong": {"def2-svp": _w32}}, id="mp2  rhf ae: cfour",  marks=using("cfour")),
         pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "xptd": {"fd": True},  "keywords": {**_nwc_conv},                                                                                          }, id="mp2  rhf ae: nwchem", marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "xptd": {"fd": False}, "keywords": {**_p4_conv, **_p4_fd, "mp2_type": "conv"},                                                             }, id="mp2  rhf ae: psi4",   marks=using("psi4")),
 
-        pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "fc",                        "keywords": {**_c4_tight, "dropmo": 1},                                                                             }, id="mp2  rhf fc: cfour",  marks=using("cfour")),
+        pytest.param({"call": "cfour",  "reference": "rhf",  "fcae": "fc",                        "keywords": {**_c4_tight, "dropmo": 1},                                                  "wrong": {"def2-svp": _w32}}, id="mp2  rhf fc: cfour",  marks=using("cfour")),
         pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "fc", "xptd": {"fd": True},  "keywords": {**_nwc_conv, "mp2__freeze": 1},                                                                        }, id="mp2  rhf fc: nwchem", marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "fc", "xptd": {"fd": False}, "keywords": {**_p4_conv, **_p4_fd, "freeze_core": True, "mp2_type": "conv"},                                        }, id="mp2  rhf fc: psi4",   marks=using("psi4")),
 
-        pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae",                        "keywords": {**_c4_tight, "reference": "uhf"},                                                                      }, id="mp2  uhf ae: cfour",  marks=using("cfour")),
+        pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae",                        "keywords": {**_c4_tight, "reference": "uhf"},                                           "wrong": {"def2-svp": _w32}}, id="mp2  uhf ae: cfour",  marks=using("cfour")),
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "xptd": {"fd": True},  "keywords": {**_nwc_conv, "scf__uhf": True},                                                                        }, id="mp2  uhf ae: nwchem", marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "xptd": {"fd": False}, "keywords": {**_p4_conv, **_p4_fd, "reference": "uhf", "mp2_type": "conv"},                                         }, id="mp2  uhf ae: psi4",   marks=using("psi4")),
 
-        pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "fc",                        "keywords": {**_c4_tight, "reference": "uhf", "dropmo": [1]},                                                       }, id="mp2  uhf fc: cfour",  marks=using("cfour")),
+        pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "fc",                        "keywords": {**_c4_tight, "reference": "uhf", "dropmo": [1]},                            "wrong": {"def2-svp": _w32}}, id="mp2  uhf fc: cfour",  marks=using("cfour")),
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "fc", "xptd": {"fd": True},  "keywords": {**_nwc_conv, "scf__uhf": True, "mp2__freeze": 1},                                                      }, id="mp2  uhf fc: nwchem", marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "fc", "xptd": {"fd": False}, "keywords": {**_p4_conv, **_p4_fd, "reference": "uhf", "freeze_core": True, "mp2_type": "conv"},                    }, id="mp2  uhf fc: psi4",   marks=using("psi4")),
 
-        pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "ae",                        "keywords": {**_c4_tight, "reference": "rohf"},                                                   "wrong": {2: _w26}}, id="mp2 rohf ae: cfour",  marks=using("cfour")),
+        pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "ae",                        "keywords": {**_c4_tight, "reference": "rohf"},                                 "wrong": {2: _w26, "def2-svp": _w32}}, id="mp2 rohf ae: cfour",  marks=using("cfour")),
         # DEBUG pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "xptd": {"fd": False}, "keywords": {**_p4_conv, **_p4_fd, "reference": "rohf", "mp2_type": "conv"},                                        }, id="mp2 rohf ae: psi4",   marks=using("psi4")),
 
         pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "fc",                        "keywords": {**_c4_tight, "reference": "rohf", "dropmo": [1]},                                    "wrong": {2: _w27}}, id="mp2 rohf fc: cfour",  marks=using("cfour")),
@@ -1685,6 +1734,7 @@ def test_cc2_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, req
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz"),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p"),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=pytest.mark.ecp),
     ],
 )
 @pytest.mark.parametrize(
@@ -1840,6 +1890,7 @@ def test_ccsd_energy_default(inp, dertype, basis, subjects, clsd_open_pmols, req
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz", marks=pytest.mark.long),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p", marks=pytest.mark.long),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=[pytest.mark.ecp, pytest.mark.long]),
     ],
 )
 @pytest.mark.parametrize(
@@ -2056,6 +2107,7 @@ def test_ccsdpt_prccsd_pr_energy_module(inp, dertype, basis, subjects, clsd_open
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz"),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p"),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=pytest.mark.ecp),
     ],
 )
 @pytest.mark.parametrize(
@@ -2145,6 +2197,7 @@ def test_ccsd_prt_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmol
         pytest.param("cc-pvdz", ["hf", "bh3p", "bh3p"], id="dz"),
         pytest.param("aug-cc-pvdz", ["h2o", "nh2", "nh2"], id="adz", marks=pytest.mark.long),
         pytest.param("cfour-qz2p", ["h2o", "nh2", "nh2"], id="qz2p", marks=pytest.mark.long),
+        pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"], id="def2ecp", marks=[pytest.mark.ecp, pytest.mark.long]),
     ],
 )
 @pytest.mark.parametrize(
@@ -3896,6 +3949,23 @@ def _processor(
     if not any([k.lower() in _basis_keywords for k in inpcopy["keywords"]]):
         inpcopy["basis"], basis_extras = _trans_key(qcprog, basis, "qcng_basis")
         inpcopy["keywords"].update(basis_extras)
+    inpcopy["keywords"].update(_system_keywords(qcprog, basis, method, driver))
+
+    if inp["fcae"] == "fc" and (basis, subject.name) in _fc_nfrzc:
+        nfrzc = _fc_nfrzc[(basis, subject.name)]
+        for k, v in inpcopy["keywords"].items():
+            lk = k.lower()
+            if lk == "dropmo":
+                inpcopy["keywords"][k] = list(range(1, nfrzc + 1))
+            elif lk.endswith("__freeze") or lk.endswith("__freeze__core"):
+                if isinstance(v, dict):
+                    pytest.skip(f"row's per-element {k} is specific to its usual systems")
+                inpcopy["keywords"][k] = nfrzc
+            elif lk.endswith("__freeze__atomic"):
+                pytest.skip(f"row's per-element {k} is specific to its usual systems")
+
+    if (qcprog, basis) in _basis_spec_extras:
+        inpcopy["extras"] = _basis_spec_extras[(qcprog, basis)]
     inpcopy["scf_type"] = "pk"
     inpcopy["corl_type"] = "conv"
     inpcopy["qc_module"] = "-".join(
