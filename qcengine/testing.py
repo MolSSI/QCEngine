@@ -254,7 +254,8 @@ _lazy_programs = {
     # ECP-bearing stdsuite systems need libecpint and psi4's ECP fixes (ECP-reduced NRE in findif/CBS results, etc.).
     #   "1.12a1.dev83" is the hrw-np2 dev build carrying them. restore the "1.12" line once v1.12 released
     # "psi4_ecp": lambda: is_program_new_enough("psi4", "1.12") and is_psi4_addon_found("ecpint"),
-    "psi4_ecp": lambda: _programs["psi4_112"] and is_psi4_addon_found("ecpint"),
+    "psi4_ecp": lambda: _programs["psi4_112"]
+    and is_psi4_addon_found("ecpint"),
 }
 
 

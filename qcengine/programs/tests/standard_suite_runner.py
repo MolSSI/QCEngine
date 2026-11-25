@@ -421,7 +421,9 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
         for obj in asserter_args[0]:
             store = "extras.qcvars" if isinstance(obj, dict) else "properties.nuclear_repulsion_energy"
             label = tnm + " NUCLEAR REPULSION ENERGY"
-            assert query_qcvar(obj, "NUCLEAR REPULSION ENERGY") is not None, f"{label} expected but missing from {store}"
+            assert (
+                query_qcvar(obj, "NUCLEAR REPULSION ENERGY") is not None
+            ), f"{label} expected but missing from {store}"
             tf, errmsg = compare_values(
                 ref_block["NUCLEAR REPULSION ENERGY"],
                 query_qcvar(obj, "NUCLEAR REPULSION ENERGY"),

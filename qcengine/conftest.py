@@ -2,9 +2,7 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption(
-        "--runnonroutine", action="store_true", default=False, help="run the nonroutine tests in stdsuite"
-    )
+    parser.addoption("--runnonroutine", action="store_true", default=False, help="run the nonroutine tests in stdsuite")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -14,7 +12,9 @@ def pytest_collection_modifyitems(config, items):
         from qcengine.testing import has_program
 
         if not has_program("psi4_ecp"):
-            skip_psi4_ecp = pytest.mark.skip(reason="psi4 lacks libecpint (psi4.addons('ecpint')) or is older than v1.12")
+            skip_psi4_ecp = pytest.mark.skip(
+                reason="psi4 lacks libecpint (psi4.addons('ecpint')) or is older than v1.12"
+            )
             for item in psi4_ecp_items:
                 item.add_marker(skip_psi4_ecp)
 

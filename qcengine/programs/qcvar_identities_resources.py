@@ -328,9 +328,7 @@ def qcvar_identities() -> List[Dict[str, Any]]:
     )
 
     # CC2
-    pv0.extend(
-        _solve_in_turn(args=["CC2 TOTAL ENERGY", "HF TOTAL ENERGY", "CC2 CORRELATION ENERGY"], coeff=[-1, 1, 1])
-    )
+    pv0.extend(_solve_in_turn(args=["CC2 TOTAL ENERGY", "HF TOTAL ENERGY", "CC2 CORRELATION ENERGY"], coeff=[-1, 1, 1]))
 
     # CCSD
     pv0.extend(
@@ -420,9 +418,7 @@ def qcvar_identities() -> List[Dict[str, Any]]:
     )
 
     # CC3
-    pv0.extend(
-        _solve_in_turn(args=["CC3 TOTAL ENERGY", "HF TOTAL ENERGY", "CC3 CORRELATION ENERGY"], coeff=[-1, 1, 1])
-    )
+    pv0.extend(_solve_in_turn(args=["CC3 TOTAL ENERGY", "HF TOTAL ENERGY", "CC3 CORRELATION ENERGY"], coeff=[-1, 1, 1]))
 
     # CCSDT
     pv0.extend(

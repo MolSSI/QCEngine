@@ -161,6 +161,7 @@ _fc_nfrzc = {
     ("def2-svp", "ch2i"): 5,
 }
 
+
 def _system_keywords(qcprog, basis, method, driver):
     """Keywords a system needs that depend on more than one parametrize axis (program x basis x method x driver), so
     can't be written into a single pytest.param."""
@@ -1138,9 +1139,7 @@ def test_qcisd_prt_pr_energy_module(inp, dertype, basis, subjects, clsd_open_pmo
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "keywords": {**_p4_conv, "qc_module": "detci"},                                          }, id="fci  rhf ae: psi4-detci", marks=using("psi4")),  # 6m
 
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "fc", "keywords": {**_p4_conv, "freeze_core": True, "qc_module": "detci"},                     }, id="fci  rhf fc: psi4-detci", marks=using("psi4")),
-
         # TOO LONG pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "keywords": {**_p4_conv, "freeze_core": False, "reference": "rohf", "qc_module": "detci"},}, id="fci rohf ae: psi4-detci", marks=using("psi4")),
-
         # pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "fc", "keywords": {**_p4_conv, "freeze_core": True, "reference": "rohf", "qc_module": "detci"},}, id="fci rohf fc: psi4-detci", marks=using("psi4")),
         # yapf: enable
     ],
@@ -1851,11 +1850,7 @@ def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "sdsc": "sd", "xptd": {"qc_module": "ccenergy"}, "keywords": {**_p4_conv},                                                          }, id="ccsd  rhf ae: psi4 dd1",   marks=using("psi4")),
         pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "sdsc": "sd", "xptd": {"qc_module": "ccenergy"}, "keywords": {**_p4_conv, "reference": "uhf"},                                      }, id="ccsd  uhf ae: psi4 dd1",   marks=using("psi4")),
         pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "ae", "sdsc": "sd", "xptd": {"qc_module": "ccenergy"}, "keywords": {**_p4_conv, "reference": "rohf"},                                     }, id="ccsd rohf ae: psi4 dd1",   marks=using("psi4")),
-
         ## translated
-
-
-
         # yapf: enable
     ],
 )
@@ -2303,7 +2298,8 @@ def test_ccsd_prt_pr_gradient_module(inp, dertype, basis, subjects, clsd_open_pm
         pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "fc",                        "keywords": {**_c4_tight, "reference": "uhf", "dropmo": 1, "cc_program": "ecc"},                                                               }, id="ccsd_t_  uhf fc: cfour-ecc",  marks=using("cfour")),
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "fc", "xptd": {"fd": True},  "keywords": {**_nwc_conv, "scf__uhf": True, "tce__freeze": 1, "qc_module": "tce"},                                                             }, id="ccsd_t_  uhf fc: nwchem-tce", marks=using("nwchem")),
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "fc",                        "keywords": {**_nwc_conv, "scf__uhf": True, "ccsd__freeze": 1},                                                               "error": {2: _q3}}, id="ccsd_t_  uhf fc: nwchem-cc",  marks=using("nwchem")),
-        pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "fc", "xptd": {"fd": False}, "keywords": {**_p4_conv, **_p4_fd, "reference": "uhf", "freeze_core": True, "function_kwargs": {"dertype": 0}},                                }, id="ccsd_t_  uhf fc: psi4",       marks=[*using("psi4"), *using("psi4_112")]),  # FD SWITCH
+        pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "fc", "xptd": {"fd": False}, "keywords": {**_p4_conv, **_p4_fd, "reference": "uhf", "freeze_core": True, "function_kwargs": {"dertype": 0}},                                }, id="ccsd_t_  uhf fc: psi4",       marks=[*using("psi4"), *using("psi4_112")]),
+        # FD SWITCH
         # yapf: enable
     ],
 )
@@ -2458,7 +2454,6 @@ def test_accsd_prt_pr_gradient_module(inp, dertype, basis, subjects, clsd_open_p
 
         # pytest.param({"call": "cfour",  "reference": "rohf", "fcae": "fc", "sdsc": "sc", "keywords": {**_c4_tight, "REFerence": "roHF", "dropmo": [1], "cc_program": "vcc", "print": 2},}, id="bccd_t_ rohf fc sc: cfour-vcc", marks=using("cfour")),
         pytest.param({"call": "psi4",   "reference": "rohf", "fcae": "fc", "sdsc": "sc", "keywords": {**_p4_conv, "reference": "rohf", "freeze_core": True},                            }, id="bccd_t_ rohf fc sc: psi4",      marks=using("psi4")),
-
         # cfour: rhf & uhf fail w/o "cfour_orbitals": 1
         # yapf: enable
     ],
