@@ -2,6 +2,7 @@
 
 import copy
 import pprint
+import re
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, ClassVar, Dict, Optional, Tuple
@@ -20,6 +21,11 @@ from .harvester import harvest
 from .keywords import format_keywords
 
 pp = pprint.PrettyPrinter(width=120, compact=True, indent=1)
+
+
+def _cased_labels(text: str) -> Dict[str, str]:
+    """Map uppercased `EL:NAME` entry labels in a CFOUR GENBAS or ECPDATA file's text to their casing in the file."""
+    return {mobj.group(0).upper(): mobj.group(0) for mobj in re.finditer(r"^[A-Za-z]{1,2}:\S+", text, re.MULTILINE)}
 
 
 class CFOURHarness(ProgramHarness):
@@ -95,7 +101,8 @@ class CFOURHarness(ProgramHarness):
         opts.update(moldata["keywords"])
 
         # Handle calc type and quantum chemical method
-        mdcopts = muster_modelchem(input_model.specification.model.method, input_model.specification.driver)
+        cc_program = {k.lower(): v for k, v in opts.items()}.get("cc_program", "")
+        mdcopts = muster_modelchem(input_model.specification.model.method, input_model.specification.driver, cc_program)
         opts.update(mdcopts)
 
         # Handle basis set
@@ -107,31 +114,50 @@ class CFOURHarness(ProgramHarness):
         # * why, yes, this is highly questionable
         #   * assuming relative file location between xcfour exe and GENBAS file
         #   * reading a multi MB file into the inputs dict
-        if all(input_model.molecule.real):
-            opts["basis"] = input_model.specification.model.basis
+        # * `specification.extras["cfour"]` may supply "genbas" and "ecpdata" text for basis sets and ECPs missing from
+        #   CFOUR's library files. it's appended to them.
+        # * with native keyword ECP=ON, each atom's ECP is looked up in ECPDATA under the same label as its basis
+        #   (e.g., I:DEF2-SVP); atoms without such an entry get NONE.
+        cfour_extras = input_model.specification.extras.get("cfour", {})
+        xcfour = which("xcfour")
+        libdir = Path(xcfour).parent.parent / "basis"
+        genbas = (libdir / "GENBAS").read_text() + cfour_extras.get("genbas", "")
+        lopts = {k.lower(): v for k, v in opts.items()}
+        use_ecp = lopts.get("ecp", False) is True or str(lopts.get("ecp", "off")).lower() in ["on", "true", "1"]
+        basis = input_model.specification.model.basis
+
+        if all(input_model.molecule.real) and not use_ecp:
+            opts["basis"] = basis
             bascmd = ""
         else:
             # * note not getting per-basis casing like if it passed through format_keywords
             opts["basis"] = "SPECIAL"
+            # CFOUR matches labels case-sensitively, so use a label's casing from the file when present
+            bas_labels = _cased_labels(genbas)
             text = [
                 (
                     f"""H:6-31G"""
-                    if (elem == "H" and input_model.specification.model.basis.upper() == "6-31G*")
-                    else f"""{elem.upper()}:{input_model.specification.model.basis.upper()}"""
+                    if (elem == "H" and basis.upper() == "6-31G*")
+                    else bas_labels.get(f"{elem}:{basis}".upper(), f"""{elem.upper()}:{basis.upper()}""")
                 )
                 for iat, elem in enumerate(input_model.molecule.symbols)
             ]
             text.append("")
+            if use_ecp:
+                ecpdata = (libdir / "ECPDATA").read_text() + cfour_extras.get("ecpdata", "")
+                ecp_labels = _cased_labels(ecpdata)
+                for elem in input_model.molecule.symbols:
+                    text.append(ecp_labels.get(f"{elem}:{basis}".upper(), f"{elem.upper()}:NONE"))
+                text.append("")
+                cfourrec["infiles"]["ECPDATA"] = ecpdata
             text.append("")
             bascmd = "\n".join(text)
 
         # Handle conversion from schema (flat key/value) keywords into local format
         optcmd = format_keywords(opts)
 
-        xcfour = which("xcfour")
-        genbas = Path(xcfour).parent.parent / "basis" / "GENBAS"
         cfourrec["infiles"]["ZMAT"] = molcmd + optcmd + bascmd
-        cfourrec["infiles"]["GENBAS"] = genbas.read_text()
+        cfourrec["infiles"]["GENBAS"] = genbas
         cfourrec["command"] = [xcfour]
 
         return cfourrec

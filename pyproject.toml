@@ -101,6 +101,8 @@ default-tag = "0.0.99" # useful for CI/shallow clones
 #]
 markers = [
     "long",
+    'ecp: "stdsuite tests on systems with effective core potentials"',
+    'nonroutine: "stdsuite tests safe to skip day-to-day (redundant or slow checks). run with --runnonroutine"',
     """slow: marks tests as slow (deselect with '-m "not slow"')""",
     "smoke",
     'addon: "tests require external non-required software"',
@@ -126,12 +128,14 @@ markers = [
     "molpro: tests using Molpro software; skip if unavailable",
     "mopac: tests using Mopac software; skip if unavailable",
     "mp2d: tests using MP2D software; skip if unavailable",
+    "mrcc: tests using MRCC software; skip if unavailable",
     "mrchem: tests using MR-Chem software; skip if unavailable",
     "nwchem: tests using NWChem Classic software; skip if unavailable",
     "openmm: tests using OpenMM software; skip if unavailable",
     "optking: tests using OptKing software; skip if unavailable",
     "optking_v2: tests using OptKing QCSchema-v2-compatible software; skip if unavailable",
     "psi4: tests using Psi4 software; skip if unavailable",
+    "psi4_112: tests using Psi4 >=1.12 software; skip if unavailable",
     "qcdb: tests using QCDB software; skip if unavailable",
     "qchem: tests using Q-Chem software; skip if unavailable",
     "qcmanybody: tests using QCManyBody software; skip if unavailable",

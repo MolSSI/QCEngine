@@ -47,6 +47,7 @@ __all__ = [
     "contractual_aoccd_prt_pr",
     "contractual_dft_current",
     "contractual_dhdft_current",
+    "contractual_nre",
     "query_qcvar",
     "query_has_qcvar",
 ]
@@ -155,6 +156,24 @@ def contractual_current(
             expected = False
 
         yield (rpv, pv, expected)
+
+
+def contractual_nre(
+    qc_module: str, driver: str, reference: str, method: str, corl_type: str, fcae: str, sdsc: str
+) -> Tuple[str, str, bool]:
+    """Of the method-independent QCVariables every calculation should produce, returns whether or not
+    each is expected, given the calculation circumstances (like QC program). Reference NRE for ECP
+    systems uses ECP-reduced charges, as programs report, unlike qcel Molecule.nuclear_repulsion_energy().
+
+    {_contractual_docstring}
+    """
+
+    contractual_qcvars = [
+        ("NUCLEAR REPULSION ENERGY", "NUCLEAR REPULSION ENERGY"),
+    ]
+
+    for rpv, pv in contractual_qcvars:
+        yield (rpv, pv, True)
 
 
 def contractual_hf(

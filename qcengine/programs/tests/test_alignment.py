@@ -6,7 +6,7 @@ from qcengine.programs.tests.standard_suite_ref import std_molecules, std_refs
 from qcengine.testing import schema_versions, using
 
 from .standard_suite_runner import runner_asserter
-from .test_standard_suite import _processor
+from .test_standard_suite import _p4_conv, _p4_fd, _processor
 
 
 @pytest.fixture
@@ -24,6 +24,12 @@ def clsd_open_pmols(schema_versions):
     }
 
     return {**frame_not_important, **frame_part_of_spec}
+
+
+# psi4 HF gradients & Hessians by internal findif of energies. psi4's findif driver differs from its analytic path in
+#   molecule handling, so check it honors fix_com/fix_orientation and returns a self-consistent frame. needs psi4
+#   v1.12 for findif not to mutate the input molecule's frame and to return SCF properties.
+_p4_fd0 = {**_p4_conv, **_p4_fd, "scf_type": "pk", "function_kwargs": {"dertype": 0}}
 
 
 #
@@ -87,12 +93,14 @@ def clsd_open_pmols(schema_versions):
         pytest.param({"call": "jaguar", "reference": "rhf",  "fcae": "ae", "keywords": {"nops": 1},                                                                          }, id="hf  rhf ae: jaguar",     marks=using("jaguar")),
         pytest.param({"call": "nwchem", "reference": "rhf",  "fcae": "ae", "keywords": {"scf__thresh": 1.e-6},                                                               }, id="hf  rhf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "keywords": {"scf_type": "pk"},                                                                   }, id="hf  rhf ae: psi4",       marks=using("psi4")),
+        pytest.param({"call": "psi4",   "reference": "rhf",  "fcae": "ae", "xptd": {"fd": False}, "keywords": {**_p4_fd0},                                                   }, id="hf  rhf ae: psi4-fd0",   marks=[*using("psi4"), *using("psi4_112")]),
 
         pytest.param({"call": "cfour",  "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_conv": 12},                                                 }, id="hf  uhf ae: cfour",      marks=using("cfour")),
         pytest.param({"call": "gamess", "reference": "uhf",  "fcae": "ae", "keywords": {"contrl__scftyp": "uhf"},                                                            }, id="hf  uhf ae: gamess",     marks=using("gamess")),
         pytest.param({"call": "jaguar", "reference": "uhf",  "fcae": "ae", "keywords": {"iuhf": 1, "nops": 1},                                                               }, id="hf  uhf ae: jaguar",     marks=using("jaguar")),
         pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "ae", "keywords": {"scf__uhf": True, "scf__thresh": 1.e-6},                                             }, id="hf  uhf ae: nwchem",     marks=using("nwchem")),
         pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "keywords": {"reference": "uhf", "scf_type": "pk"},                                               }, id="hf  uhf ae: psi4",       marks=using("psi4")),
+        pytest.param({"call": "psi4",   "reference": "uhf",  "fcae": "ae", "xptd": {"fd": False}, "keywords": {**_p4_fd0, "reference": "uhf"},                               }, id="hf  uhf ae: psi4-fd0",   marks=[*using("psi4"), *using("psi4_112")]),
         # yapf: enable
     ],
 )

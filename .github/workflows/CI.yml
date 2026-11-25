@@ -153,10 +153,11 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          # 26.04 has incomp glibc for old pyaimnet2 package
           - conda-env: aimnet2
             python-version: 3.11
             label: AIMNET2
-            runs-on: ubuntu-latest
+            runs-on: ubuntu-24.04
             pytest: ""
 
           # 3.12 only: orb pins dm-tree==0.1.8, which has no wheel beyond cp312
