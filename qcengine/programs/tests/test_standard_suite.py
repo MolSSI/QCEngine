@@ -514,6 +514,7 @@ def test_mp2_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, reque
 #  <<<  MP2 Gradient
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1721,6 +1722,7 @@ def test_cc2_gradient_module(inp, dertype, basis, subjects, clsd_open_pmols, req
 #  <<<  CCSD Energy
 
 
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [
@@ -1809,6 +1811,7 @@ def test_ccsd_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, requ
 
 
 # @pytest.mark.parametrize("mode", ["driver", "sandwich"])
+@pytest.mark.nonroutine
 @pytest.mark.parametrize(
     "dertype",
     [

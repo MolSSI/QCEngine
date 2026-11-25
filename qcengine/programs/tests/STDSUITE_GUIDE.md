@@ -109,9 +109,10 @@ pytest.param({"call": "nwchem", "reference": "uhf",  "fcae": "fc", "sdsc": "sd",
   go on the `pytest.param` instead, since they're needed at collection.
 * `marks=using("<program>")` on every row; rows needing two codes use `marks=[*using("psi4"), *using("mrcc")]`.
   Rows needing a minimum program version add a versioned entry, e.g., `*using("psi4_112")` (see `_programs` in
-  `qcengine/testing.py`, where a not-yet-released version may be short-circuited to `True`).
+  `qcengine/testing.py`). Until v1.12 is released, `psi4_112` checks for dev build `1.12a1.dev83`, which carries
+  the needed fixes.
 * `@pytest.mark.nonroutine` (on a test function, row, or param): skipped unless `--runnonroutine` is given
-  (option defined in `qcengine/conftest.py`). All method tests except HF, MP2 energy & gradient, CCSD energy, and B3LYP carry it on
+  (option defined in `qcengine/conftest.py`). All method tests except HF, MP2 energy, and B3LYP carry it on
   the function, so a default run stays near its pre-qcdb-port length. Mark new method tests nonroutine unless
   they're core.
 * Commented `# DEBUG` rows are alternate routes kept for investigation, not regular coverage.
