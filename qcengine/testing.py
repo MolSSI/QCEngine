@@ -222,8 +222,10 @@ _programs = {
     "nwchem": which("nwchem", return_bool=True),
     "optking": which_import("optking", return_bool=True),
     "psi4": is_program_new_enough("psi4", "1.2"),
-    # "psi4_112": is_program_new_enough("psi4", "1.12"),  # findif frame & SCF-properties fixes. restore once v1.12 released
-    "psi4_112": True,  # short-circuited: dev psi4 carries the v1.12 fixes
+    # findif frame & SCF-properties fixes. "1.12a1.dev83" is the hrw-np2 dev build carrying them. restore the "1.12" line
+    #   once v1.12 released
+    # "psi4_112": is_program_new_enough("psi4", "1.12"),
+    "psi4_112": is_program_new_enough("psi4", "1.12a1.dev83"),
     # below retired as pre-2022
     # "psi4_runqcsk": is_program_new_enough("psi4", "1.4a2.dev160"),
     # "psi4_mp2qcsk": is_program_new_enough("psi4", "1.4a2.dev580"),
@@ -252,7 +254,7 @@ _lazy_programs = {
     # ECP-bearing stdsuite systems need libecpint and psi4's ECP fixes (ECP-reduced NRE in findif/CBS results, etc.).
     #   "1.12a1.dev83" is the hrw-np2 dev build carrying them. restore the "1.12" line once v1.12 released
     # "psi4_ecp": lambda: is_program_new_enough("psi4", "1.12") and is_psi4_addon_found("ecpint"),
-    "psi4_ecp": lambda: is_program_new_enough("psi4", "1.12a1.dev83") and is_psi4_addon_found("ecpint"),
+    "psi4_ecp": lambda: _programs["psi4_112"] and is_psi4_addon_found("ecpint"),
 }
 
 
