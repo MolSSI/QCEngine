@@ -396,6 +396,8 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
             _asserter(asserter_args, contractual_args, contractual_ccsdtq)
         # separations here for DFT appropriate when qcvars are labeled by functional
 
+        _asserter(asserter_args, contractual_args, contractual_nre)
+
     if "wrong" in inp:
         if basis == "cc-pvdz" and contractual_args in [
             ["cfour-ecc", "gradient", "rhf", mtd, "conv", "fc", "sd"]
@@ -414,27 +416,6 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
 
     # primary label checks
     qcvar_assertions()
-
-    # nuclear repulsion checks. ECP systems' refs use ECP-reduced charges, as programs report, unlike qcel
-    #   Molecule.nuclear_repulsion_energy(). loose atol, since programs print NRE to varied precision
-    if "NUCLEAR REPULSION ENERGY" in ref_block:
-        for obj in asserter_args[0]:
-            store = "extras.qcvars" if isinstance(obj, dict) else "properties.nuclear_repulsion_energy"
-            label = tnm + " NUCLEAR REPULSION ENERGY"
-            assert (
-                query_qcvar(obj, "NUCLEAR REPULSION ENERGY") is not None
-            ), f"{label} expected but missing from {store}"
-            tf, errmsg = compare_values(
-                ref_block["NUCLEAR REPULSION ENERGY"],
-                query_qcvar(obj, "NUCLEAR REPULSION ENERGY"),
-                label,
-                atol=1.0e-5,
-                return_message=True,
-                quiet=True,
-            )
-            assert compare_values(
-                ref_block["NUCLEAR REPULSION ENERGY"], query_qcvar(obj, "NUCLEAR REPULSION ENERGY"), label, atol=1.0e-5
-            ), f"{store}: {errmsg}"
 
     # aliases checks
     asserter_args[0].pop()  # checks not appropriate for properties
@@ -560,6 +541,10 @@ def runner_asserter(inp, ref_subject, method, basis, tnm, scramble, frame, model
     # assert 0
 
 
+# loosest atol allowed for QCVariables that programs print to varied precision
+_atol_floor = {"NUCLEAR REPULSION ENERGY": 1.0e-5}
+
+
 def _asserter(asserter_args, contractual_args, contractual_fn):
     """For expectations in `contractual_fn`, check that the QCVars are present in P::e.globals and wfn and match expected ref_block."""
 
@@ -574,6 +559,7 @@ def _asserter(asserter_args, contractual_args, contractual_fn):
             label = tnm + " " + pv
             atol = atol_egh["EGH".index(rpv.split()[-1][0])]
             rtol = rtol_egh["EGH".index(rpv.split()[-1][0])]
+            atol = max(atol, _atol_floor.get(rpv, 0.0))
 
             if present:
                 store = "extras.qcvars" if isinstance(obj, dict) else f"properties.{qcvars_to_atomicproperties[pv]}"

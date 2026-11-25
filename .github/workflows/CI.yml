@@ -153,6 +153,7 @@ jobs:
             runs-on: ubuntu-latest
             pytest: ""
 
+          # 26.04 has incomp glibc for old pyaimnet2 package
           - conda-env: aimnet2
             python-version: 3.11
             label: AIMNET2
@@ -222,16 +223,6 @@ jobs:
       #       alt. is micromamba but not yet ready for setup-miniconda https://github.com/conda-incubator/setup-miniconda/issues/75
     - name: Special Config - QCEngine Dep
       run: conda remove qcengine --force || true
-
-    - name: Special Config - Diagnose PyTorch executable-stack issue
-      if: matrix.cfg.label == 'AIMNET2'
-      run: |
-        torch_lib=$(find "$CONDA_PREFIX" -name libtorch_cpu.so -print -quit)
-        echo "PyTorch library: $torch_lib"
-        readelf -W -l "$torch_lib" | grep GNU_STACK
-        ldd --version | head -1
-        uname -a
-        python -c "import torch; print(torch.__version__)"
 
     - name: Special Config - Copy in file (W)
       if: false  # "(runner.os == 'Windows')"

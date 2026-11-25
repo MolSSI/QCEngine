@@ -194,8 +194,10 @@ and is new enough for its ECP fixes (`qcengine/testing.py`; proxy `1.12a1.dev83`
     basis label (case-sensitive; harness uses the file's casing).
 * **Nuclear repulsion:** programs report NRE with ECP-reduced charges (I: 25), e.g. ch2i2 198.0635, while qcel
   `Molecule.nuclear_repulsion_energy()` uses full Z (633.3325). The def2-svp ref blocks carry the reduced
-  `NUCLEAR REPULSION ENERGY`, and the runner checks it against both `extras.qcvars` and
-  `properties.nuclear_repulsion_energy` for any ref block that has one. psi4 findif and CBS results took NRE from
+  `NUCLEAR REPULSION ENERGY` (all-electron blocks get theirs from `_nre_ae`). `contractual_nre` in
+  `standard_suite_contracts.py` expects it from every method, checked against both `extras.qcvars` and
+  `properties.nuclear_repulsion_energy` at atol 1e-5 (`_atol_floor` in the runner), since programs print NRE to
+  varied precision. psi4 findif and CBS results took NRE from
   the top-level molecule, which never sees the ECP basis, so they reported full Z. Fixed in psi4's
   `driver_findif.py`, `driver_cbs.py` and `schema_wrapper.py`; older psi4 fails the NRE check on findif-derived
   ECP rows.
