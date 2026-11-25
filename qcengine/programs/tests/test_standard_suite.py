@@ -3913,7 +3913,6 @@ def test_b2plyp_energy_module(inp, dertype, basis, subjects, clsd_open_pmols, re
 def _processor(
     inp, dertype, basis, subjects, clsd_open_pmols, request, models, retver, driver, method, *, scramble=None, frame=""
 ):
-    method = method
     qcprog = inp["call"]
     tnm = request.node.name
     suffix = "-fixed" if frame == "fixed" else ""
