@@ -179,6 +179,10 @@ spelling in `_trans_key`, and rows for the six rhf/uhf/rohf x ae/fc combinations
 Iodine carries the 28-electron def2 ECP. Basis row `pytest.param("def2-svp", ["ch2i2", "ch2i", "ch2i"],
 id="def2ecp", marks=pytest.mark.ecp)` (plus `long` for correlated gradients/Hessians). References came from psi4.
 
+psi4 rows on ECP systems (items marked both `ecp` and `psi4`) are skipped at collection (`qcengine/conftest.py`)
+unless `has_program("psi4_ecp")`: psi4 has libecpint compiled in (`psi4.addons("ecpint")`, checked in a subprocess)
+and is new enough for its ECP fixes (`qcengine/testing.py`; proxy `1.12a1.dev83` until v1.12 is released).
+
 * **Program setup** (`_trans_key`, `_basis_spec_extras`):
   * psi4: library def2-svp includes the ECP.
   * NWChem: `basis__spherical` and `ecp__I: "library def2-ecp"`. ECPs must be named per element (`*` fails for

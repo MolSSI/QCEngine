@@ -74,6 +74,34 @@ def is_program_new_enough(program, version_feature_introduced):
     return parse(candidate_version) >= parse(version_feature_introduced)
 
 
+def is_psi4_addon_found(addon: str) -> bool:
+    """Returns True if psi4 is locatable and reports `psi4.addons(addon)` as compiled in. Runs in a subprocess so that
+    psi4 isn't imported into the testing process just to answer the question.
+
+    """
+    import os
+    import subprocess
+
+    harness = qcng.get_program("psi4", check=False)
+    if not harness.found():
+        return False
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.pathsep.join(sys.path)  # `found()` may have appended psi4's module dir to sys.path
+    env["PYTHON_GIL"] = "1"
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-c", f"import psi4; print(psi4.addons('{addon}'))"],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired:
+        return False
+    return proc.returncode == 0 and proc.stdout.strip().splitlines()[-1:] == ["True"]
+
+
 def is_mdi_new_enough(version_feature_introduced):
     if which_import("mdi", return_bool=True):
         import mdi
@@ -219,8 +247,21 @@ _programs = {
 _programs["openmm"] = _programs["rdkit"] and which_import(".openmm", package="simtk", return_bool=True)
 
 
+# expensive or rarely needed checks, evaluated on first request by `has_program`
+_lazy_programs = {
+    # ECP-bearing stdsuite systems need libecpint and psi4's ECP fixes (ECP-reduced NRE in findif/CBS results, etc.).
+    #   "1.12a1.dev83" is the hrw-np2 dev build carrying them. restore the "1.12" line once v1.12 released
+    # "psi4_ecp": lambda: is_program_new_enough("psi4", "1.12") and is_psi4_addon_found("ecpint"),
+    "psi4_ecp": lambda: is_program_new_enough("psi4", "1.12a1.dev83") and is_psi4_addon_found("ecpint"),
+}
+
+
 def has_program(name):
-    if name == "classic-dftd3":
+    if name in _lazy_programs:
+        if name not in _programs:
+            _programs[name] = _lazy_programs[name]()
+        return _programs[name]
+    elif name == "classic-dftd3":
         return _programs["dftd3"]
     elif name == "classic-dftd3_321":
         return _programs["dftd3_321"]
